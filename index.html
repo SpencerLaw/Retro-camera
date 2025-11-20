@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/8/82/Camera_icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>RetroLens Instant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=VT323&family=Permanent+Marker&family=Inter:wght@400;600;800&display=swap');
+      
+      body {
+        /* Corkboard texture pattern */
+        background-color: #dfd3c3;
+        background-image: url("https://www.transparenttextures.com/patterns/cork-board.png");
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        user-select: none;
+      }
+      
+      .font-marker {
+        font-family: 'Permanent Marker', cursive;
+      }
+
+      /* Polaroid specific shadows */
+      .polaroid-shadow {
+        box-shadow: 2px 2px 15px rgba(0,0,0,0.15);
+      }
+
+      /* Developing Animation */
+      @keyframes develop {
+        0% { filter: brightness(0.1) grayscale(100%) blur(4px); }
+        40% { filter: brightness(0.4) grayscale(80%) blur(2px); }
+        70% { filter: brightness(0.8) grayscale(40%) blur(1px) sepia(30%); }
+        100% { filter: brightness(1) grayscale(0%) blur(0px); }
+      }
+
+      .developing-photo {
+        animation: develop 6s ease-out forwards;
+      }
+
+      /* Camera Plastic Texture */
+      .plastic-texture {
+         background-image: radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px);
+         background-size: 4px 4px;
+      }
+      
+      /* Rainbow Stripe */
+      .rainbow-stripe {
+        background: linear-gradient(to right, 
+          #FF355E 14.28%, 
+          #FD5B78 14.28% 28.56%, 
+          #FF6037 28.56% 42.84%, 
+          #FF9966 42.84% 57.12%, 
+          #FFCC33 57.12% 71.4%, 
+          #FFFF66 71.4% 85.68%, 
+          #CCFF00 85.68%
+        );
+      }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root" class="w-full h-full"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

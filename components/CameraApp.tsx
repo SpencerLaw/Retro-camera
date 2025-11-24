@@ -14,15 +14,22 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [topZIndex, setTopZIndex] = useState(1000); // Start with high z-index
 
-  // Load from localstorage
+  // Load from localstorage - Only keep last 10 photos, delete all history
   useEffect(() => {
     const saved = localStorage.getItem('retrolens_instant_photos');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Limit to last 20 photos to prevent storage overflow
-        const loadedPhotos = Array.isArray(parsed) ? parsed.slice(-20) : [];
+        // Only keep last 10 photos, delete all history
+        const loadedPhotos = Array.isArray(parsed) ? parsed.slice(-10) : [];
         setPhotos(loadedPhotos);
+        
+        // Immediately clean up localStorage - only keep last 10
+        if (Array.isArray(parsed) && parsed.length > 10) {
+          localStorage.setItem('retrolens_instant_photos', JSON.stringify(loadedPhotos));
+          console.log('🧹 Cleaned up old photos. Kept only last 10 photos.');
+        }
+        
         console.log('✅ Loaded photos from localStorage:', loadedPhotos.length);
       } catch (e) {
         console.error("❌ Failed to load photos", e);
@@ -40,23 +47,26 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
     if (photos.length === 0) return;
     
     try {
-      // Limit stored photos to last 20 to prevent localStorage quota exceeded
-      const photosToStore = photos.slice(-20);
+      // Only keep last 10 photos - delete all history
+      const photosToStore = photos.slice(-10);
       localStorage.setItem('retrolens_instant_photos', JSON.stringify(photosToStore));
+      
+      // If we had more than 10 photos, update state to only keep 10
+      if (photos.length > 10) {
+        setPhotos(photosToStore);
+        console.log('🧹 Removed old photos. Now keeping only last 10 photos.');
+      }
+      
       console.log('💾 Saved photos to localStorage:', photosToStore.length);
     } catch (e) {
       if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-        console.warn('⚠️ LocalStorage quota exceeded. Clearing old photos...');
-        // If still too large, keep only last 10 photos
+        console.warn('⚠️ LocalStorage quota exceeded. Clearing all photos...');
+        // Clear all photos if quota exceeded
         try {
-          const photosToStore = photos.slice(-10);
-          localStorage.setItem('retrolens_instant_photos', JSON.stringify(photosToStore));
-          setPhotos(photosToStore);
-        } catch (e2) {
-          console.error('❌ Failed to save photos even after clearing:', e2);
-          // Clear all photos if still failing
           localStorage.removeItem('retrolens_instant_photos');
           setPhotos([]);
+        } catch (e2) {
+          console.error('❌ Failed to clear photos:', e2);
         }
       } else {
         console.error("❌ Failed to save photos", e);
@@ -75,11 +85,14 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
     
     setPhotos(prev => {
       const newPhotos = [...prev, photo];
-      // Only limit if we have more than 30 photos to prevent performance issues
-      // But always keep the new photo
-      const limited = newPhotos.length > 30 ? newPhotos.slice(-30) : newPhotos;
+      // Only keep last 10 photos - delete oldest ones immediately
+      const limited = newPhotos.slice(-10);
+      
+      if (newPhotos.length > 10) {
+        console.log(`🧹 Removed ${newPhotos.length - 10} old photos. Keeping only last 10.`);
+      }
+      
       console.log('📸 New photos array length:', limited.length);
-      console.log('📸 All photo positions:', limited.map(p => ({ id: p.id, x: p.x, y: p.y })));
       return limited;
     });
     setTopZIndex(prev => prev + 1);

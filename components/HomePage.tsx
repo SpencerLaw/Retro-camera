@@ -1,8 +1,8 @@
 import React from 'react';
-import { Camera, Sparkles } from 'lucide-react';
+import { Camera, Sparkles, Heart } from 'lucide-react';
 
 interface HomePageProps {
-  onSelectProject: (project: 'camera' | 'fortune') => void;
+  onSelectProject: (project: 'camera' | 'fortune' | 'couple') => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
@@ -33,7 +33,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
         </div>
 
         {/* Project Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
           {/* Retro Camera Card */}
           <div 
             onClick={() => onSelectProject('camera')}
@@ -116,6 +116,48 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Hover Effect Glow */}
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#d4af37]/0 via-[#d4af37]/20 to-[#d4af37]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+
+          {/* Couple Game Card */}
+          <div 
+            onClick={() => onSelectProject('couple')}
+            className="group relative bg-gradient-to-br from-[#FF00C0] via-[#8000FF] to-[#00C0FF] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-white/30 shadow-xl"
+          >
+            {/* Card Background Pattern */}
+            <div 
+              className="absolute inset-0 rounded-2xl opacity-10"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              }}
+            />
+            
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-2 border-white/30">
+                <Heart size={64} className="text-white" fill="white" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">心跳契约</h2>
+              <p className="text-lg text-white/90 mb-4 opacity-90">
+                Heartbeat Pact
+              </p>
+              <p className="text-sm text-white/80 opacity-90 leading-relaxed">
+                Couple's game with fun challenges and slot machine animation
+              </p>
+              
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-2 border-dashed border-white/30 opacity-50">
+                <div className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 border border-white/30">
+                  Enter →
+                </div>
+              </div>
+            </div>
+
+            {/* Hover Effect Glow */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
         </div>
 

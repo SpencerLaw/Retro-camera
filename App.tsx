@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { HomePage } from './components/HomePage';
 import { CameraApp } from './components/CameraApp';
 import FortuneApp from './fortune-sticks/FortuneApp';
+import CoupleGameApp from './couple-game/CoupleGameApp';
 
-type View = 'home' | 'camera' | 'fortune';
+type View = 'home' | 'camera' | 'fortune' | 'couple';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('home');
 
-  const handleSelectProject = (project: 'camera' | 'fortune') => {
+  const handleSelectProject = (project: 'camera' | 'fortune' | 'couple') => {
     setCurrentView(project);
   };
 
@@ -26,6 +27,9 @@ const App: React.FC = () => {
       )}
       {currentView === 'fortune' && (
         <FortuneApp onBackHome={handleBackHome} />
+      )}
+      {currentView === 'couple' && (
+        <CoupleGameApp onBackHome={handleBackHome} />
       )}
     </>
   );

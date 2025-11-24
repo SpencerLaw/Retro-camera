@@ -1,0 +1,356 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+
+.couple-game-app {
+  font-family: 'Inter', 'Noto Sans SC', sans-serif;
+  min-height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  color: #E0E0E0;
+  overflow-x: hidden;
+  background: linear-gradient(125deg, #00C0FF, #8000FF, #FF00C0);
+  background-size: 400% 400%;
+  animation: couple-game-backgroundPan 10s linear infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes couple-game-backgroundPan {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes couple-game-floatAnimation {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes couple-game-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes couple-game-finalResultGlow {
+  0%, 100% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px #00C0FF, 0 0 40px #FF00C0;
+    text-shadow: 0 0 8px #E0E0E0, 0 0 16px #66E0FF, 0 0 32px #FF66E0;
+  }
+  50% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 30px #00C0FF, 0 0 50px #FF00C0;
+    text-shadow: 0 0 15px #E0E0E0, 0 0 25px #00C0FF, 0 0 35px #FF00C0;
+  }
+}
+
+.couple-game-top-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  z-index: 100;
+}
+
+.couple-game-back-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: rgba(30, 30, 50, 0.8);
+  color: #E0E0E0;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 192, 255, 0.3);
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.couple-game-back-btn:hover {
+  background: rgba(30, 30, 50, 0.9);
+  transform: translateY(-2px);
+}
+
+.couple-game-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.couple-game-switcher {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(30, 30, 50, 0.8);
+  padding: 0.375rem;
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 192, 255, 0.3);
+}
+
+.couple-game-switch-btn {
+  padding: 0.375rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: #A0A0A0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.couple-game-switch-btn:hover {
+  color: #E0E0E0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.couple-game-switch-btn.active {
+  background: linear-gradient(135deg, #00C0FF, #FF00C0);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 192, 255, 0.1);
+}
+
+.couple-game-main-container {
+  text-align: center;
+  background: rgba(30, 30, 50, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  border: 1px solid rgba(0, 192, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 50px rgba(0, 192, 255, 0.1);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 520px;
+  animation: couple-game-floatAnimation 6s ease-in-out infinite;
+  overflow: hidden;
+  position: relative;
+}
+
+.couple-game-main-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(transparent, rgba(139, 92, 246, 0.1), transparent 30%);
+  animation: couple-game-rotate 10s linear infinite;
+  z-index: -1;
+}
+
+.couple-game-main-container h1 {
+  font-weight: 700;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  background: linear-gradient(to right, #66E0FF, #FF66E0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 1.5rem;
+  position: relative;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.couple-game-main-container h1::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(to right, #00C0FF, #FF00C0);
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.couple-game-stage-buttons {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.couple-game-stage-btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  background: rgba(30, 30, 50, 0.8);
+  color: #A0A0A0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: clamp(1rem, 4vw, 1.125rem);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.couple-game-stage-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  color: #E0E0E0;
+}
+
+.couple-game-stage-btn.active {
+  background: linear-gradient(135deg, #00C0FF, #FF00C0);
+  color: white;
+  box-shadow: 0 5px 15px rgba(0, 192, 255, 0.1);
+}
+
+.couple-game-stage-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.couple-game-container {
+  position: relative;
+  height: auto;
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.couple-game-slot-container {
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.couple-game-slot-window {
+  width: 100%;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+#slot-reel {
+  width: 100%;
+}
+
+#slot-reel p {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1rem, 4.5vw, 1.25rem);
+  font-weight: 600;
+  color: #fff;
+  background: rgba(30, 30, 50, 0.8);
+  border-radius: 18px;
+  box-shadow: 0 0 24px 4px rgba(0, 192, 255, 0.1);
+  text-shadow: 0 0 8px #E0E0E0, 0 0 16px #66E0FF, 0 0 32px #FF66E0;
+  line-height: 1.5;
+  word-break: break-word;
+  hyphens: auto;
+  position: relative;
+}
+
+#slot-reel p.final-result {
+  font-weight: 700;
+  font-size: clamp(1.1rem, 5vw, 1.375rem);
+  animation: couple-game-finalResultGlow 3s ease-in-out infinite alternate;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px #00C0FF, 0 0 40px #FF00C0;
+  backdrop-filter: blur(12px);
+  border: 1px solid #FF00C0;
+  text-shadow: 0 0 10px #E0E0E0, 0 0 20px #00C0FF, 0 0 30px #FF00C0;
+}
+
+.couple-game-spin-btn {
+  padding: 1rem 2.5rem;
+  font-size: clamp(1.125rem, 4.5vw, 1.25rem);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(135deg, #00C0FF, #FF00C0);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 192, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 1rem;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.couple-game-spin-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 192, 255, 0.1);
+}
+
+.couple-game-spin-btn:disabled {
+  background: rgba(30, 30, 50, 0.8);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: translateY(0);
+}
+
+/* Theme variants */
+body.couple-game-theme-twilight .couple-game-app {
+  background: linear-gradient(125deg, #4682B4, #8A2BE2, #FF69B4);
+}
+
+body.couple-game-theme-cyber .couple-game-app {
+  background: linear-gradient(125deg, #FF00C0, #8000FF, #00C0FF);
+}
+
+@media (max-width: 768px) {
+  .couple-game-stage-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .couple-game-stage-btn {
+    flex-grow: 1;
+    flex-basis: 40%;
+  }
+}
+
+@media (max-width: 560px) {
+  .couple-game-app {
+    padding: 0.5rem;
+  }
+  .couple-game-main-container {
+    padding: 1.5rem 1rem;
+    padding-top: 3.5rem;
+    border-radius: 16px;
+  }
+  .couple-game-top-controls {
+    top: 0.75rem;
+    right: 0.75rem;
+    gap: 0.5rem;
+  }
+  .couple-game-switcher {
+    padding: 0.25rem;
+    gap: 0.25rem;
+  }
+  .couple-game-switch-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  .couple-game-stage-buttons {
+    flex-direction: column;
+  }
+  .couple-game-spin-btn {
+    padding: 0.9rem 2rem;
+  }
+}
+

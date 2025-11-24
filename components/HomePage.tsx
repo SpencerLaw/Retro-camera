@@ -162,8 +162,22 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
         </div>
 
         {/* Footer Note */}
-        <div className="text-center mt-12 text-[#5c4033] opacity-60 text-sm font-marker">
-          <p>Click on a card to begin your journey</p>
+        <div className="text-center mt-12 space-y-3">
+          <p className="text-[#5c4033] opacity-60 text-sm font-marker">
+            Click on a card to begin your journey
+          </p>
+          
+          {/* Version Badge with Glow Effect */}
+          <div className="flex justify-center">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-full blur opacity-75 group-hover:opacity-100 animate-pulse"></div>
+              <div className="relative px-6 py-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full">
+                <span className="text-white font-bold text-sm tracking-wider drop-shadow-lg">
+                  v1.0.0
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#dfd3c3] via-[#c9b99b] to-[#b8a082] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#dfd3c3] via-[#c9b99b] to-[#b8a082] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Background Pattern */}
       <div 
         className="absolute inset-0 opacity-20"
@@ -21,19 +21,19 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
       <div className="absolute bottom-20 right-20 w-40 h-40 border-4 border-[#8b4513] -rotate-12 opacity-30"></div>
       
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-6xl">
+      <div className="relative z-10 w-full max-w-6xl my-8">
         {/* Title */}
-        <div className="text-center mb-16">
-          <h1 className="font-marker text-7xl md:text-9xl text-[#8b4513] mb-4 drop-shadow-lg">
+        <div className="text-center mb-8 md:mb-16">
+          <h1 className="font-marker text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-[#8b4513] mb-4 drop-shadow-lg">
             My Studio
           </h1>
-          <p className="text-2xl md:text-3xl text-[#5c4033] font-marker opacity-80">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#5c4033] font-marker opacity-80 px-4">
             Choose Your Experience
           </p>
         </div>
 
         {/* Project Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12 px-4">
           {/* Retro Camera Card */}
           <div 
             onClick={() => onSelectProject('camera')}
@@ -167,12 +167,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
             Click on a card to begin your journey
           </p>
           
-          {/* Version Badge with Glow Effect */}
+          {/* Version Badge with Glass Morphism and Glow Effect */}
           <div className="flex justify-center">
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-full blur opacity-75 group-hover:opacity-100 animate-pulse"></div>
-              <div className="relative px-6 py-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full">
-                <span className="text-white font-bold text-sm tracking-wider drop-shadow-lg">
+              {/* Animated Glow Border */}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 animate-pulse"></div>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 rounded-2xl blur-md opacity-40 group-hover:opacity-80"></div>
+              
+              {/* Glass Morphism Container */}
+              <div className="relative px-8 py-3 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
+                <span className="relative text-white font-bold text-sm tracking-wider drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
                   v1.0.0
                 </span>
               </div>

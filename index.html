@@ -72,14 +72,24 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=VT323&family=Permanent+Marker&family=Inter:wght@400;600;800&family=Noto+Serif+TC:wght@400;700&display=swap');
       
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+      
       body {
         /* Corkboard texture pattern */
         background-color: #dfd3c3;
         background-image: url("https://www.transparenttextures.com/patterns/cork-board.png");
-        overflow: hidden;
-        height: 100vh;
-        width: 100vw;
         user-select: none;
+      }
+      
+      #root {
+        width: 100%;
+        height: 100%;
       }
       
       .font-marker {
@@ -159,7 +169,7 @@
     </script>
   </head>
   <body>
-    <div id="root" class="w-full h-full"></div>
+    <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

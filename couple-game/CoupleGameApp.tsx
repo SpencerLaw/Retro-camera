@@ -28,10 +28,8 @@ const daresByLang: Record<Language, any> = {
 const translations = translationsData as Record<Language, Record<string, string>>;
 
 const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    const saved = localStorage.getItem('couple-game-lang');
-    return (saved as Language) || 'en';
-  });
+  const { language: globalLanguage } = useLanguage();
+  const currentLang = mapGlobalToCoupleLang(globalLanguage);
   const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('couple-game-theme');
     return (saved as Theme) || 'default';
@@ -41,10 +39,6 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
   const [currentDare, setCurrentDare] = useState<string>('');
   const slotReelRef = useRef<HTMLDivElement>(null);
   const changeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem('couple-game-lang', currentLang);
-  }, [currentLang]);
 
   useEffect(() => {
     localStorage.setItem('couple-game-theme', currentTheme);
@@ -160,7 +154,7 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
     if (slotReelRef.current && !isSpinning && !currentDare) {
       slotReelRef.current.innerHTML = `<p>${t('initialMsg')}</p>`;
     }
-  }, [currentLang, currentStage, isSpinning, currentDare]);
+  }, [currentLang, currentStage, isSpinning, currentDare, t]);
 
   return (
     <div className="couple-game-app">
@@ -170,17 +164,6 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
           <span>{t('backHome') || 'Back Home'}</span>
         </button>
         <div className="couple-game-controls-group">
-          <div className="couple-game-switcher">
-            {(['en', 'zh', 'ja'] as Language[]).map(lang => (
-              <button
-                key={lang}
-                className={`couple-game-switch-btn ${currentLang === lang ? 'active' : ''}`}
-                onClick={() => setCurrentLang(lang)}
-              >
-                {lang === 'en' ? 'EN' : lang === 'zh' ? '中文' : '日本語'}
-              </button>
-            ))}
-          </div>
           <div className="couple-game-switcher">
             {(['default', 'twilight', 'cyber'] as Theme[]).map(theme => (
               <button

@@ -31,6 +31,13 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
   const handleCapture = (photo: Photo) => {
     setPhotos(prev => [...prev, photo]);
     setTopZIndex(prev => prev + 1);
+    
+    // Clear isDeveloping after animation completes (6 seconds)
+    setTimeout(() => {
+      setPhotos(prev => prev.map(p => 
+        p.id === photo.id ? { ...p, isDeveloping: false } : p
+      ));
+    }, 6000);
   };
 
   const handleUpdatePosition = (id: string, x: number, y: number) => {

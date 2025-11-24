@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { HomePage } from './components/HomePage';
 import { CameraApp } from './components/CameraApp';
 import FortuneApp from './fortune-sticks/FortuneApp';
@@ -18,7 +19,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
+    <LanguageProvider>
       {currentView === 'home' && (
         <HomePage onSelectProject={handleSelectProject} />
       )}
@@ -31,7 +32,7 @@ const App: React.FC = () => {
       {currentView === 'couple' && (
         <CoupleGameApp onBackHome={handleBackHome} />
       )}
-    </>
+    </LanguageProvider>
   );
 };
 

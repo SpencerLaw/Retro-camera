@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameState, FortuneData, Language } from './types';
 import { generateFortune } from './services/geminiService';
-import { RefreshCw, Loader2, Globe, Home } from 'lucide-react';
+import { RefreshCw, Loader2, Home } from 'lucide-react';
+import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 
 // --- Translations ---
 const translations = {
@@ -55,11 +56,20 @@ interface FortuneAppProps {
   onBackHome: () => void;
 }
 
+// Map global language to fortune app language
+const mapGlobalToFortuneLang = (globalLang: GlobalLanguage): Language => {
+  if (globalLang === 'zh-CN') return 'zh-CN';
+  if (globalLang === 'zh-TW') return 'zh-TW';
+  if (globalLang === 'ja') return 'ja';
+  return 'en';
+};
+
 const FortuneApp: React.FC<FortuneAppProps> = ({ onBackHome }) => {
+  const { language: globalLanguage } = useLanguage();
   const [gameState, setGameState] = useState<GameState>('idle');
   const [fortune, setFortune] = useState<FortuneData | null>(null);
-  const [language, setLanguage] = useState<Language>('zh-TW');
   
+  const language = mapGlobalToFortuneLang(globalLanguage);
   const t = translations[language];
 
   // Stick configuration with randomized animation props for independent movement
@@ -129,20 +139,6 @@ const FortuneApp: React.FC<FortuneAppProps> = ({ onBackHome }) => {
         </button>
       </div>
 
-      {/* --- Language Switcher --- */}
-      <div className="absolute top-6 right-6 z-40 flex gap-2">
-         <div className="relative group">
-            <button className="p-2 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 backdrop-blur-sm transition-all text-yellow-100/80 hover:text-yellow-100">
-               <Globe size={20} />
-            </button>
-            <div className="absolute right-0 mt-2 w-32 py-2 bg-[#1a0202] border border-yellow-900/50 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right">
-               <button onClick={() => setLanguage('zh-TW')} className={`w-full text-left px-4 py-2 text-sm hover:bg-white/10 ${language === 'zh-TW' ? 'text-yellow-400' : 'text-stone-300'}`}>繁體中文</button>
-               <button onClick={() => setLanguage('zh-CN')} className={`w-full text-left px-4 py-2 text-sm hover:bg-white/10 ${language === 'zh-CN' ? 'text-yellow-400' : 'text-stone-300'}`}>简体中文</button>
-               <button onClick={() => setLanguage('en')} className={`w-full text-left px-4 py-2 text-sm hover:bg-white/10 ${language === 'en' ? 'text-yellow-400' : 'text-stone-300'}`}>English</button>
-               <button onClick={() => setLanguage('ja')} className={`w-full text-left px-4 py-2 text-sm hover:bg-white/10 ${language === 'ja' ? 'text-yellow-400' : 'text-stone-300'}`}>日本語</button>
-            </div>
-         </div>
-      </div>
 
       {/* --- Main Content --- */}
 

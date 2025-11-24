@@ -1,11 +1,21 @@
 import React from 'react';
-import { Camera, Sparkles, Heart } from 'lucide-react';
+import { Camera, Sparkles, Heart, Globe } from 'lucide-react';
+import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 
 interface HomePageProps {
   onSelectProject: (project: 'camera' | 'fortune' | 'couple') => void;
 }
 
+const languageLabels: Record<GlobalLanguage, string> = {
+  'en': 'EN',
+  'zh-CN': '简体',
+  'zh-TW': '繁體',
+  'ja': '日本語'
+};
+
 export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
+  const { language, setLanguage } = useLanguage();
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#dfd3c3] via-[#c9b99b] to-[#b8a082] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Background Pattern */}
@@ -19,6 +29,29 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
       {/* Decorative Elements */}
       <div className="absolute top-20 left-20 w-32 h-32 border-4 border-[#8b4513] rotate-12 opacity-30"></div>
       <div className="absolute bottom-20 right-20 w-40 h-40 border-4 border-[#8b4513] -rotate-12 opacity-30"></div>
+      
+      {/* Global Language Switcher */}
+      <div className="fixed top-6 right-6 z-50">
+        <div className="relative group">
+          <button className="p-2 rounded-full bg-white/80 hover:bg-white border-2 border-[#8b4513] backdrop-blur-sm transition-all text-[#8b4513] hover:text-[#5c4033] shadow-lg flex items-center gap-2 px-4">
+            <Globe size={20} />
+            <span className="text-sm font-marker">{languageLabels[language]}</span>
+          </button>
+          <div className="absolute right-0 mt-2 w-32 py-2 bg-white/95 backdrop-blur-md border-2 border-[#8b4513] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right">
+            {(Object.keys(languageLabels) as GlobalLanguage[]).map(lang => (
+              <button
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-[#8b4513]/10 transition-colors ${
+                  language === lang ? 'text-[#8b4513] font-bold' : 'text-[#5c4033]'
+                }`}
+              >
+                {languageLabels[lang]}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
       
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-6xl my-8">

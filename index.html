@@ -4,10 +4,73 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/8/82/Camera_icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>RetroLens Instant</title>
+    <title>My Studio - Retro Camera & Fortune Sticks</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              serif: ['"Noto Serif TC"', '"Songti SC"', 'serif'],
+            },
+            colors: {
+              wood: {
+                300: '#d4a373',
+                400: '#c19a6b',
+                500: '#a9845b',
+                600: '#8c6b4a',
+                800: '#5c4033',
+              },
+              paper: '#fdf6e3',
+              ink: '#2c2c2c',
+              red: {
+                traditional: '#8B0000',
+                bright: '#D2042D'
+              }
+            },
+            animation: {
+              'shake': 'shake 0.18s infinite',
+              'drop': 'drop 1.2s cubic-bezier(0.5, 0, 0.5, 1) forwards',
+              'appear': 'appear 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'jostle': 'jostle 0.1s infinite',
+              'fadeIn': 'fadeIn 0.5s ease-out forwards',
+            },
+            keyframes: {
+              shake: {
+                '0%': { transform: 'rotate(0deg) translateY(0)' },
+                '25%': { transform: 'rotate(-15deg) translateY(5px)' },
+                '50%': { transform: 'rotate(0deg) translateY(-8px)' }, 
+                '75%': { transform: 'rotate(15deg) translateY(5px)' },
+                '100%': { transform: 'rotate(0deg) translateY(0)' },
+              },
+              jostle: {
+                '0%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-25px)' },
+                '100%': { transform: 'translateY(0)' },
+              },
+              drop: {
+                '0%': { transform: 'translate(-50%, 0) rotate(0deg) scale(0.9)', opacity: '1' },
+                '15%': { transform: 'translate(-50%, -140px) rotate(-5deg) scale(1)' },
+                '30%': { transform: 'translate(-60%, -120px) rotate(-25deg)' },
+                '100%': { transform: 'translate(-200%, 600px) rotate(-180deg)', opacity: '1' },
+              },
+              appear: {
+                '0%': { opacity: '0', transform: 'scale(0.5) translateY(50px)' },
+                '60%': { opacity: '1', transform: 'scale(1.05) translateY(-10px)' },
+                '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=VT323&family=Permanent+Marker&family=Inter:wght@400;600;800&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=VT323&family=Permanent+Marker&family=Inter:wght@400;600;800&family=Noto+Serif+TC:wght@400;700&display=swap');
       
       body {
         /* Corkboard texture pattern */
@@ -57,6 +120,30 @@
           #FFFF66 71.4% 85.68%, 
           #CCFF00 85.68%
         );
+      }
+
+      /* Custom Scrollbar for Fortune App */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(139, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(139, 0, 0, 0.4);
+      }
+
+      /* Writing modes for Fortune App */
+      .writing-vertical {
+        writing-mode: vertical-rl;
+        text-orientation: upright;
+      }
+      .writing-vertical-rl {
+        writing-mode: vertical-rl;
       }
     </style>
     <script type="importmap">

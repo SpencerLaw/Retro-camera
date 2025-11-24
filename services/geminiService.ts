@@ -1,9 +1,19 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { GEMINI_MODEL_REMIX } from "../constants";
 
-// Initialize Gemini Client
-// API Key must be set in environment variables
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy initialization to avoid errors when API key is not set
+let ai: GoogleGenAI | null = null;
+
+const getAI = (): GoogleGenAI => {
+  if (!ai) {
+    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.API_KEY || process.env.GEMINI_API_KEY) as string;
+    if (!apiKey) {
+      throw new Error("API Key is not configured. Please set VITE_GEMINI_API_KEY environment variable.");
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
 /**
  * Remixes an image using Gemini's image editing/generation capabilities.
@@ -13,12 +23,13 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
  */
 export const remixImageWithGemini = async (base64Image: string, prompt: string): Promise<string> => {
   try {
+    const aiInstance = getAI();
     // Clean base64 string if it contains metadata
     const cleanBase64 = base64Image.includes('base64,') 
       ? base64Image.split('base64,')[1] 
       : base64Image;
 
-    const response = await ai.models.generateContent({
+    const response = await aiInstance.models.generateContent({
       model: GEMINI_MODEL_REMIX,
       contents: {
         parts: [

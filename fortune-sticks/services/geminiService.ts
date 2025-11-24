@@ -2,7 +2,19 @@ import { GoogleGenAI } from "@google/genai";
 import { FortuneData, Language } from '../types';
 import { MODEL_NAME, SYSTEM_INSTRUCTION, FORTUNE_SCHEMA } from '../constants';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy initialization to avoid errors when API key is not set
+let ai: GoogleGenAI | null = null;
+
+const getAI = (): GoogleGenAI => {
+  if (!ai) {
+    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.API_KEY || process.env.GEMINI_API_KEY) as string;
+    if (!apiKey) {
+      throw new Error("API Key is not configured. Please set VITE_GEMINI_API_KEY environment variable.");
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
 const PROMPT_BY_LANG: Record<Language, string> = {
   'zh-TW': "請隨機為我抽一支靈簽。使用繁體中文生成結果。Title 格式如 '第八簽 上上'。Poem 必須是四句七言或五言絕句。",
@@ -13,7 +25,8 @@ const PROMPT_BY_LANG: Record<Language, string> = {
 
 export const generateFortune = async (language: Language): Promise<FortuneData> => {
   try {
-    const response = await ai.models.generateContent({
+    const aiInstance = getAI();
+    const response = await aiInstance.models.generateContent({
       model: MODEL_NAME,
       contents: PROMPT_BY_LANG[language],
       config: {

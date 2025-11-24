@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Camera } from './Camera';
 import { DraggablePhoto } from './DraggablePhoto';
 import { Photo } from '../types';
-import { Home } from 'lucide-react';
+import { Home, Trash2 } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface CameraAppProps {
@@ -124,10 +124,24 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
     setPhotos(prev => prev.filter(p => p.id !== id));
   };
 
+  const handleClearAll = () => {
+    if (photos.length === 0) return;
+    
+    if (window.confirm(t('camera.clearConfirm'))) {
+      setPhotos([]);
+      try {
+        localStorage.removeItem('retrolens_instant_photos');
+        console.log('🧹 All photos cleared');
+      } catch (e) {
+        console.error('❌ Failed to clear photos from localStorage:', e);
+      }
+    }
+  };
+
   return (
     <div className="relative w-screen h-screen overflow-visible" style={{ position: 'fixed', top: 0, left: 0 }}>
-      {/* Back Home Button */}
-      <div className="fixed top-4 left-4 z-[2000]">
+      {/* Back Home Button and Clear All Button */}
+      <div className="fixed top-4 left-4 z-[2000] flex gap-2">
         <button 
           onClick={onBackHome}
           className="p-2 rounded-full bg-white/80 hover:bg-white border-2 border-[#8b4513] backdrop-blur-sm transition-all text-[#8b4513] hover:text-[#5c4033] flex items-center gap-2 px-4 shadow-lg"
@@ -135,6 +149,16 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
           <Home size={18} />
           <span className="text-sm font-marker">{t('camera.backHome')}</span>
         </button>
+        
+        {photos.length > 0 && (
+          <button 
+            onClick={handleClearAll}
+            className="p-2 rounded-full bg-red-500/80 hover:bg-red-500 border-2 border-red-600 backdrop-blur-sm transition-all text-white hover:text-white flex items-center gap-2 px-4 shadow-lg"
+          >
+            <Trash2 size={18} />
+            <span className="text-sm font-marker">{t('camera.clearAll')}</span>
+          </button>
+        )}
       </div>
       
       {/* Drop Zone Hint */}

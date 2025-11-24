@@ -28,7 +28,10 @@
     },
     "photoWall": "My Photo Wall",
     "download": "Download",
-    "delete": "Delete"
+    "delete": "Delete",
+    "clearAll": "Clear All",
+    "clearConfirm": "Are you sure you want to clear all photos?",
+    "clearSuccess": "All photos cleared"
   }
 }
 

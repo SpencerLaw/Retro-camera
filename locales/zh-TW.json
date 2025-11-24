@@ -28,7 +28,10 @@
     },
     "photoWall": "我的照片牆",
     "download": "下載",
-    "delete": "刪除"
+    "delete": "刪除",
+    "clearAll": "清空全部",
+    "clearConfirm": "確定要清空所有照片嗎？",
+    "clearSuccess": "所有照片已清空"
   }
 }
 

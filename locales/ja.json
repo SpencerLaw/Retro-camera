@@ -28,7 +28,10 @@
     },
     "photoWall": "マイフォトウォール",
     "download": "ダウンロード",
-    "delete": "削除"
+    "delete": "削除",
+    "clearAll": "すべて削除",
+    "clearConfirm": "すべての写真を削除してもよろしいですか？",
+    "clearSuccess": "すべての写真を削除しました"
   }
 }
 

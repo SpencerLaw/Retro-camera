@@ -7,7 +7,9 @@ let ai: GoogleGenAI | null = null;
 
 const getAI = (): GoogleGenAI => {
   if (!ai) {
-    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.API_KEY || process.env.GEMINI_API_KEY) as string;
+    // Vite automatically replaces import.meta.env.VITE_* at build time
+    // @ts-ignore - Vite will replace this at build time
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.API_KEY || process.env.GEMINI_API_KEY || '';
     if (!apiKey) {
       throw new Error("API Key is not configured. Please set VITE_GEMINI_API_KEY environment variable.");
     }

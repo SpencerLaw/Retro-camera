@@ -1,0 +1,34 @@
+{
+  "home": {
+    "title": "我的工作室",
+    "subtitle": "选择您的体验",
+    "camera": {
+      "title": "复古相机",
+      "subtitle": "复古相机 • 即时拍照",
+      "description": "使用复古滤镜捕捉瞬间，创建您自己的照片墙"
+    },
+    "fortune": {
+      "title": "灵签",
+      "subtitle": "诚心祈求 • 指点迷津",
+      "description": "抽取灵签，获得AI驱动的未来指引"
+    },
+    "couple": {
+      "title": "心跳契约",
+      "subtitle": "心跳契约",
+      "description": "情侣游戏，有趣的挑战和老虎机动画"
+    },
+    "footer": "点击卡片开始您的旅程",
+    "backHome": "返回首页"
+  },
+  "camera": {
+    "backHome": "返回首页",
+    "instructions": {
+      "snap": "点击红色按钮拍照",
+      "drag": "拖动照片进行排列"
+    },
+    "photoWall": "我的照片墙",
+    "download": "下载",
+    "delete": "删除"
+  }
+}
+

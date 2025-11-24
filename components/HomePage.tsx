@@ -1,6 +1,7 @@
 import React from 'react';
 import { Camera, Sparkles, Heart, Globe } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface HomePageProps {
   onSelectProject: (project: 'camera' | 'fortune' | 'couple') => void;
@@ -15,6 +16,7 @@ const languageLabels: Record<GlobalLanguage, string> = {
 
 export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
   const { language, setLanguage } = useLanguage();
+  const t = useTranslations();
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#dfd3c3] via-[#c9b99b] to-[#b8a082] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
@@ -58,10 +60,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
         {/* Title */}
         <div className="text-center mb-8 md:mb-16">
           <h1 className="font-marker text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-[#8b4513] mb-4 drop-shadow-lg">
-            My Studio
+            {t('home.title')}
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#5c4033] font-marker opacity-80 px-4">
-            Choose Your Experience
+            {t('home.subtitle')}
           </p>
         </div>
 
@@ -89,12 +91,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-marker text-4xl text-[#8b4513] mb-3">Retro Camera</h2>
+              <h2 className="font-marker text-4xl text-[#8b4513] mb-3">{t('home.camera.title')}</h2>
               <p className="text-lg text-[#5c4033] mb-4 opacity-80">
-                复古相机 • 即时拍照
+                {t('home.camera.subtitle')}
               </p>
               <p className="text-sm text-[#5c4033] opacity-70 leading-relaxed">
-                Capture moments with vintage filters and create your own photo wall
+                {t('home.camera.description')}
               </p>
               
               {/* Decorative Border */}
@@ -131,12 +133,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-serif text-4xl text-[#ffd700] mb-3 font-bold">靈簽 Fortune</h2>
+              <h2 className="font-serif text-4xl text-[#ffd700] mb-3 font-bold">{t('home.fortune.title')}</h2>
               <p className="text-lg text-[#e6cca0] mb-4 opacity-90">
-                诚心祈求 • 指点迷津
+                {t('home.fortune.subtitle')}
               </p>
               <p className="text-sm text-[#e6cca0] opacity-80 leading-relaxed">
-                Draw a fortune stick and receive AI-powered guidance for your future
+                {t('home.fortune.description')}
               </p>
               
               {/* Decorative Border */}
@@ -173,12 +175,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">心跳契约</h2>
+              <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">{t('home.couple.title')}</h2>
               <p className="text-lg text-white/90 mb-4 opacity-90">
-                Heartbeat Pact
+                {t('home.couple.subtitle')}
               </p>
               <p className="text-sm text-white/80 opacity-90 leading-relaxed">
-                Couple's game with fun challenges and slot machine animation
+                {t('home.couple.description')}
               </p>
               
               {/* Decorative Border */}
@@ -197,7 +199,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
         {/* Footer Note */}
         <div className="text-center mt-12 space-y-3">
           <p className="text-[#5c4033] opacity-60 text-sm font-marker">
-            Click on a card to begin your journey
+            {t('home.footer')}
           </p>
           
           {/* Version Badge with Glass Morphism and Glow Effect */}

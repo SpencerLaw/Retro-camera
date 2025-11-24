@@ -1,0 +1,34 @@
+{
+  "home": {
+    "title": "My Studio",
+    "subtitle": "Choose Your Experience",
+    "camera": {
+      "title": "Retro Camera",
+      "subtitle": "Vintage Camera • Instant Photo",
+      "description": "Capture moments with vintage filters and create your own photo wall"
+    },
+    "fortune": {
+      "title": "Fortune Sticks",
+      "subtitle": "Sincere Prayer • Divine Guidance",
+      "description": "Draw a fortune stick and receive AI-powered guidance for your future"
+    },
+    "couple": {
+      "title": "Heartbeat Pact",
+      "subtitle": "Heartbeat Pact",
+      "description": "Couple's game with fun challenges and slot machine animation"
+    },
+    "footer": "Click on a card to begin your journey",
+    "backHome": "Back Home"
+  },
+  "camera": {
+    "backHome": "Back Home",
+    "instructions": {
+      "snap": "Click Red Button to Snap",
+      "drag": "Drag photos to arrange"
+    },
+    "photoWall": "My Photo Wall",
+    "download": "Download",
+    "delete": "Delete"
+  }
+}
+

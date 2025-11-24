@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Home } from 'lucide-react';
+import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 // Import JSON files - Vite handles these as modules
 // @ts-ignore
 import translationsData from './public/translations.json';
@@ -18,6 +19,13 @@ interface CoupleGameAppProps {
 type Language = 'en' | 'zh' | 'ja';
 type Stage = 'ambiguous' | 'advanced' | 'passionate' | null;
 type Theme = 'default' | 'twilight' | 'cyber';
+
+// Map global language to couple game language
+const mapGlobalToCoupleLang = (globalLang: GlobalLanguage): Language => {
+  if (globalLang === 'zh-CN' || globalLang === 'zh-TW') return 'zh';
+  if (globalLang === 'ja') return 'ja';
+  return 'en';
+};
 
 const daresByLang: Record<Language, any> = {
   en: daresEn,

@@ -1,0 +1,34 @@
+{
+  "home": {
+    "title": "我的工作室",
+    "subtitle": "選擇您的體驗",
+    "camera": {
+      "title": "復古相機",
+      "subtitle": "復古相機 • 即時拍照",
+      "description": "使用復古濾鏡捕捉瞬間，創建您自己的照片牆"
+    },
+    "fortune": {
+      "title": "靈簽",
+      "subtitle": "誠心祈求 • 指點迷津",
+      "description": "抽取靈簽，獲得AI驅動的未來指引"
+    },
+    "couple": {
+      "title": "心跳契約",
+      "subtitle": "心跳契約",
+      "description": "情侶遊戲，有趣的挑戰和老虎機動畫"
+    },
+    "footer": "點擊卡片開始您的旅程",
+    "backHome": "返回首頁"
+  },
+  "camera": {
+    "backHome": "返回首頁",
+    "instructions": {
+      "snap": "點擊紅色按鈕拍照",
+      "drag": "拖動照片進行排列"
+    },
+    "photoWall": "我的照片牆",
+    "download": "下載",
+    "delete": "刪除"
+  }
+}
+

@@ -3,12 +3,14 @@ import { Camera } from './Camera';
 import { DraggablePhoto } from './DraggablePhoto';
 import { Photo } from '../types';
 import { Home } from 'lucide-react';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface CameraAppProps {
   onBackHome: () => void;
 }
 
 export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
+  const t = useTranslations();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [topZIndex, setTopZIndex] = useState(10);
 
@@ -68,14 +70,14 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
           className="p-2 rounded-full bg-white/80 hover:bg-white border-2 border-[#8b4513] backdrop-blur-sm transition-all text-[#8b4513] hover:text-[#5c4033] flex items-center gap-2 px-4 shadow-lg"
         >
           <Home size={18} />
-          <span className="text-sm font-marker">返回首頁</span>
+          <span className="text-sm font-marker">{t('camera.backHome')}</span>
         </button>
       </div>
       
       {/* Drop Zone Hint */}
       {photos.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
-           <h1 className="font-marker text-6xl text-[#8b4513] rotate-[-5deg]">My Photo Wall</h1>
+           <h1 className="font-marker text-6xl text-[#8b4513] rotate-[-5deg]">{t('camera.photoWall')}</h1>
         </div>
       )}
 
@@ -96,8 +98,8 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
       
       {/* Instructions */}
       <div className="fixed bottom-4 right-4 text-[#8b4513] opacity-60 text-sm font-marker text-right">
-        <p>Click Red Button to Snap</p>
-        <p>Drag photos to arrange</p>
+        <p>{t('camera.instructions.snap')}</p>
+        <p>{t('camera.instructions.drag')}</p>
       </div>
     </div>
   );

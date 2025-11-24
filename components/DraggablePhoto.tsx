@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Photo } from '../types';
 import { X, Download } from 'lucide-react';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface DraggablePhotoProps {
   photo: Photo;
@@ -17,6 +18,7 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
   zIndex,
   onFocus
 }) => {
+  const t = useTranslations();
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const photoRef = useRef<HTMLDivElement>(null);
@@ -100,7 +102,7 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
           {/* Download Button */}
           <button 
             onClick={handleDownload}
-            title="下载原图"
+            title={t('camera.download')}
             className="bg-blue-500 text-white rounded-full p-2 shadow-md hover:bg-blue-600 transform hover:scale-110 transition-all"
           >
             <Download size={14} />
@@ -109,7 +111,7 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
           {/* Delete Button */}
           <button 
             onClick={(e) => { e.stopPropagation(); onDelete(photo.id); }}
-            title="删除"
+            title={t('camera.delete')}
             className="bg-red-500 text-white rounded-full p-2 shadow-md hover:bg-red-600 transform hover:scale-110 transition-all"
           >
             <X size={14} />

@@ -1,0 +1,34 @@
+{
+  "home": {
+    "title": "マイスタジオ",
+    "subtitle": "体験を選択",
+    "camera": {
+      "title": "レトロカメラ",
+      "subtitle": "ビンテージカメラ • インスタント写真",
+      "description": "ビンテージフィルターで瞬間を捉え、独自のフォトウォールを作成"
+    },
+    "fortune": {
+      "title": "おみくじ",
+      "subtitle": "誠心誠意 • 運命を知る",
+      "description": "おみくじを引いて、AIが提供する未来のガイダンスを受け取る"
+    },
+    "couple": {
+      "title": "ハートビートパクト",
+      "subtitle": "ハートビートパクト",
+      "description": "カップルゲーム、楽しいチャレンジとスロットマシンアニメーション"
+    },
+    "footer": "カードをクリックして旅を始めましょう",
+    "backHome": "ホームに戻る"
+  },
+  "camera": {
+    "backHome": "ホームに戻る",
+    "instructions": {
+      "snap": "赤いボタンをクリックして撮影",
+      "drag": "写真をドラッグして配置"
+    },
+    "photoWall": "マイフォトウォール",
+    "download": "ダウンロード",
+    "delete": "削除"
+  }
+}
+

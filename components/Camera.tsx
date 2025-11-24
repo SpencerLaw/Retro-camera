@@ -125,8 +125,6 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
           rotation: (Math.random() - 0.5) * 15,
           isDeveloping: true
         };
-        
-        console.log('Photo captured:', { x: safeX, y: safeY, id: photo.id }); // Debug log
         onCapture(photo);
         setIsEjecting(false);
         

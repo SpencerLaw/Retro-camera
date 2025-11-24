@@ -19,7 +19,9 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
     const saved = localStorage.getItem('retrolens_instant_photos');
     if (saved) {
       try {
-        setPhotos(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Limit to last 20 photos to prevent storage overflow
+        setPhotos(parsed.slice(-20));
       } catch (e) {
         console.error("Failed to load photos", e);
       }
@@ -27,11 +29,36 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('retrolens_instant_photos', JSON.stringify(photos));
+    try {
+      // Limit stored photos to last 20 to prevent localStorage quota exceeded
+      const photosToStore = photos.slice(-20);
+      localStorage.setItem('retrolens_instant_photos', JSON.stringify(photosToStore));
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+        console.warn('LocalStorage quota exceeded. Clearing old photos...');
+        // If still too large, keep only last 10 photos
+        try {
+          const photosToStore = photos.slice(-10);
+          localStorage.setItem('retrolens_instant_photos', JSON.stringify(photosToStore));
+          setPhotos(photosToStore);
+        } catch (e2) {
+          console.error('Failed to save photos even after clearing:', e2);
+          // Clear all photos if still failing
+          localStorage.removeItem('retrolens_instant_photos');
+          setPhotos([]);
+        }
+      } else {
+        console.error("Failed to save photos", e);
+      }
+    }
   }, [photos]);
 
   const handleCapture = (photo: Photo) => {
-    setPhotos(prev => [...prev, photo]);
+    setPhotos(prev => {
+      // Limit to 25 photos in memory to prevent performance issues
+      const newPhotos = [...prev, photo];
+      return newPhotos.slice(-25);
+    });
     setTopZIndex(prev => prev + 1);
     
     // Clear isDeveloping after animation completes (6 seconds)
@@ -82,19 +109,16 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
       )}
 
       {/* Photo Wall */}
-      {photos.map((photo, index) => {
-        console.log('Rendering photo:', photo.id, 'at position:', photo.x, photo.y); // Debug log
-        return (
-          <DraggablePhoto 
-            key={photo.id}
-            photo={photo}
-            zIndex={index + 100} // Increased z-index to ensure photos are above camera
-            onUpdatePosition={handleUpdatePosition}
-            onDelete={handleDelete}
-            onFocus={() => handleFocus(photo.id)}
-          />
-        );
-      })}
+      {photos.map((photo, index) => (
+        <DraggablePhoto 
+          key={photo.id}
+          photo={photo}
+          zIndex={index + 100} // Increased z-index to ensure photos are above camera
+          onUpdatePosition={handleUpdatePosition}
+          onDelete={handleDelete}
+          onFocus={() => handleFocus(photo.id)}
+        />
+      ))}
 
       {/* Camera Unit */}
       <Camera onCapture={handleCapture} />

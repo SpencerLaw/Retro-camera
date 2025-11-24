@@ -43,8 +43,16 @@ export const generateFortune = async (language: Language): Promise<FortuneData> 
     if (!text) throw new Error("No response text");
     
     return JSON.parse(text) as FortuneData;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Fortune generation failed:", error);
+    
+    // Check for location/region errors
+    if (error?.message?.includes('location is not supported') || 
+        error?.message?.includes('FAILED_PRECONDITION') ||
+        error?.status === 'FAILED_PRECONDITION') {
+      return getLocationErrorFortune(language);
+    }
+    
     // Fallback fortune based on language
     return getFallbackFortune(language);
   }
@@ -73,6 +81,32 @@ const getFallbackFortune = (lang: Language): FortuneData => {
     poem: ["雲深不知處", "靜心待天時", "網絡雖有礙", "心誠運自開"],
     meaning: "稍安勿躁",
     interpretation: "與神靈的連接似乎有些波動 (API Error)。請檢查網絡連接後重試。"
+  };
+};
+
+const getLocationErrorFortune = (lang: Language): FortuneData => {
+  if (lang === 'en') {
+    return {
+      title: "Regional Restriction",
+      poem: ["The oracle's voice is distant,", "Geographic bounds restrict its call.", "Yet wisdom flows from other sources,", "Your fortune waits beyond this wall."],
+      meaning: "Service unavailable in your region.",
+      interpretation: "The Gemini API is not available in your current location. The spirits suggest using a VPN or trying again from a supported region. Alternatively, you can still enjoy the other apps in this studio!"
+    };
+  } else if (lang === 'ja') {
+    return {
+      title: "地域制限",
+      poem: ["神の声は遠く", "地理的境界がその呼びかけを制限する", "しかし知恵は他の源から流れる", "あなたの運命はこの壁の向こうで待っている"],
+      meaning: "お住まいの地域ではサービスをご利用いただけません",
+      interpretation: "Gemini APIは現在の地域では利用できません。VPNを使用するか、サポートされている地域から再度お試しください。または、このスタジオの他のアプリをお楽しみください！"
+    };
+  }
+  
+  // Default Chinese
+  return {
+    title: "靈簽 (地區限制)",
+    poem: ["神靈之聲遠", "地理界限阻", "智慧仍可尋", "運勢待他途"],
+    meaning: "您的地區暫不支持此服務",
+    interpretation: "Gemini API 在您當前的地區不可用。神靈建議：可以使用 VPN 或從支持的地區重試。不過，您仍然可以享受工作室中的其他應用！"
   };
 };
 

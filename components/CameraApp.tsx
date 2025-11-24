@@ -24,6 +24,12 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
         setPhotos(parsed.slice(-20));
       } catch (e) {
         console.error("Failed to load photos", e);
+        // Clear corrupted data
+        try {
+          localStorage.removeItem('retrolens_instant_photos');
+        } catch (clearError) {
+          console.error("Failed to clear corrupted data", clearError);
+        }
       }
     }
   }, []);

@@ -346,14 +346,6 @@
   transform: translateY(0);
 }
 
-/* Theme variants */
-body.couple-game-theme-twilight .couple-game-app {
-  background: linear-gradient(125deg, #4682B4, #8A2BE2, #FF69B4);
-}
-
-body.couple-game-theme-cyber .couple-game-app {
-  background: linear-gradient(125deg, #FF00C0, #8000FF, #00C0FF);
-}
 
 @media (max-width: 768px) {
   .couple-game-stage-buttons {

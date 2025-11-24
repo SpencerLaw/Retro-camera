@@ -18,7 +18,6 @@ interface CoupleGameAppProps {
 
 type Language = 'en' | 'zh' | 'ja';
 type Stage = 'ambiguous' | 'advanced' | 'passionate' | null;
-type Theme = 'default' | 'twilight' | 'cyber';
 
 // Map global language to couple game language
 const mapGlobalToCoupleLang = (globalLang: GlobalLanguage): Language => {
@@ -38,23 +37,11 @@ const translations = translationsData as Record<Language, Record<string, string>
 const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
   const { language: globalLanguage } = useLanguage();
   const currentLang = mapGlobalToCoupleLang(globalLanguage);
-  const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('couple-game-theme');
-    return (saved as Theme) || 'default';
-  });
   const [currentStage, setCurrentStage] = useState<Stage>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentDare, setCurrentDare] = useState<string>('');
   const slotReelRef = useRef<HTMLDivElement>(null);
   const changeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem('couple-game-theme', currentTheme);
-    document.body.className = '';
-    if (currentTheme !== 'default') {
-      document.body.classList.add(`couple-game-theme-${currentTheme}`);
-    }
-  }, [currentTheme]);
 
   const t = (key: string): string => {
     return translations[currentLang]?.[key] || key;
@@ -171,20 +158,6 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
           <Home size={18} />
           <span>{t('backHome') || 'Back Home'}</span>
         </button>
-        <div className="couple-game-controls-group">
-          <div className="couple-game-switcher">
-            {(['default', 'twilight', 'cyber'] as Theme[]).map(theme => (
-              <button
-                key={theme}
-                className={`couple-game-switch-btn ${currentTheme === theme ? 'active' : ''}`}
-                onClick={() => setCurrentTheme(theme)}
-                data-i18n={`theme${theme.charAt(0).toUpperCase() + theme.slice(1)}`}
-              >
-                {t(`theme${theme.charAt(0).toUpperCase() + theme.slice(1)}`)}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       <div className="couple-game-main-container">

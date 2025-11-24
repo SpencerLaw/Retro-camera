@@ -82,16 +82,19 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
       )}
 
       {/* Photo Wall */}
-      {photos.map((photo, index) => (
-        <DraggablePhoto 
-          key={photo.id}
-          photo={photo}
-          zIndex={index + 10}
-          onUpdatePosition={handleUpdatePosition}
-          onDelete={handleDelete}
-          onFocus={() => handleFocus(photo.id)}
-        />
-      ))}
+      {photos.map((photo, index) => {
+        console.log('Rendering photo:', photo.id, 'at position:', photo.x, photo.y); // Debug log
+        return (
+          <DraggablePhoto 
+            key={photo.id}
+            photo={photo}
+            zIndex={index + 100} // Increased z-index to ensure photos are above camera
+            onUpdatePosition={handleUpdatePosition}
+            onDelete={handleDelete}
+            onFocus={() => handleFocus(photo.id)}
+          />
+        );
+      })}
 
       {/* Camera Unit */}
       <Camera onCapture={handleCapture} />

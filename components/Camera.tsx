@@ -100,18 +100,33 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
       // Wait for ejection animation to finish before "releasing" the photo to the wall
       setTimeout(() => {
         // Calculate safe initial position - ensure photo is always visible
+        const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
+        const photoWidth = 220; // Photo width
         const photoHeight = 300; // Approximate photo height
-        const safeY = Math.max(50, Math.min(viewportHeight - photoHeight - 100, viewportHeight - 500));
+        
+        // Center photo in viewport, but offset slightly for visual interest
+        const centerX = (viewportWidth - photoWidth) / 2;
+        const centerY = (viewportHeight - photoHeight) / 2;
+        
+        // Add some random offset but keep within bounds
+        const randomOffsetX = (Math.random() - 0.5) * 200; // ±100px
+        const randomOffsetY = (Math.random() - 0.5) * 150; // ±75px
+        
+        const safeX = Math.max(20, Math.min(viewportWidth - photoWidth - 20, centerX + randomOffsetX));
+        const safeY = Math.max(50, Math.min(viewportHeight - photoHeight - 100, centerY + randomOffsetY));
+        
         const photo: Photo = {
           id: Date.now().toString(),
           dataUrl: dataUrl,
           timestamp: Date.now(),
-          x: Math.max(20, Math.min(window.innerWidth - 250, 60)), // Ensure photo is within viewport
+          x: safeX,
           y: safeY,
           rotation: (Math.random() - 0.5) * 15,
           isDeveloping: true
         };
+        
+        console.log('Photo captured:', { x: safeX, y: safeY, id: photo.id }); // Debug log
         onCapture(photo);
         setIsEjecting(false);
         

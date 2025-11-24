@@ -31,7 +31,18 @@
     "delete": "刪除",
     "clearAll": "清空全部",
     "clearConfirm": "確定要清空所有照片嗎？",
-    "clearSuccess": "所有照片已清空"
+    "clearSuccess": "所有照片已清空",
+    "filters": {
+      "normal": "原圖",
+      "vivid": "鮮豔",
+      "soft": "膠片",
+      "clean": "清新",
+      "warm": "暖陽",
+      "rich": "濃郁",
+      "cyber": "賽博",
+      "candy": "糖果",
+      "retro": "復古"
+    }
   }
 }
 

@@ -31,7 +31,18 @@
     "delete": "Delete",
     "clearAll": "Clear All",
     "clearConfirm": "Are you sure you want to clear all photos?",
-    "clearSuccess": "All photos cleared"
+    "clearSuccess": "All photos cleared",
+    "filters": {
+      "normal": "Normal",
+      "vivid": "Vivid",
+      "soft": "Film",
+      "clean": "Fresh",
+      "warm": "Warm",
+      "rich": "Rich",
+      "cyber": "Cyber",
+      "candy": "Candy",
+      "retro": "Retro"
+    }
   }
 }
 

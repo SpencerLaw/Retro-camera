@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useCamera } from '../hooks/useCamera';
 import { Photo } from '../types';
 import { FILTERS } from '../constants';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface CameraProps {
   onCapture: (photo: Photo) => void;
@@ -13,8 +14,12 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
   const [isEjecting, setIsEjecting] = useState(false);
   const [filterIndex, setFilterIndex] = useState(0);
   const [flashActive, setFlashActive] = useState(false);
+  const t = useTranslations();
   
   const activeFilter = useMemo(() => FILTERS[filterIndex], [filterIndex]);
+  const filterName = useMemo(() => {
+    return t(`camera.filters.${activeFilter.id}`);
+  }, [activeFilter.id, t]);
 
   // Initialize camera once mounted
   useEffect(() => {
@@ -104,14 +109,14 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
         // Photo should appear above camera, centered horizontally on camera
         const cameraLeft = 24; // left-6 = 24px
         const cameraBottom = 24; // bottom-6 = 24px
-        const cameraHeight = 260; // Camera height
-        const cameraWidth = 300; // Camera width
+        const cameraHeight = 350; // Camera height (increased from 260)
+        const cameraWidth = 400; // Camera width (increased from 300)
         const photoWidth = 220;
         const photoHeight = 300;
         
         // Position photo above camera, centered horizontally on camera
         const photoX = cameraLeft + (cameraWidth - photoWidth) / 2; // Center on camera
-        const photoY = window.innerHeight - cameraBottom - cameraHeight - photoHeight - 20; // Above camera
+        const photoY = window.innerHeight - cameraBottom - cameraHeight - photoHeight - 30; // Above camera (adjusted for larger camera)
         
         // Ensure photo is within viewport bounds
         const safeX = Math.max(20, Math.min(window.innerWidth - photoWidth - 20, photoX));
@@ -165,7 +170,7 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
       <div className="fixed bottom-6 left-6 z-50 select-none">
         
         {/* The Ejecting Photo (Behind the front face, in front of back body) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[180px] h-[220px] bg-white transition-transform duration-1000 ease-out shadow-md flex flex-col p-2 z-0"
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[240px] h-[280px] bg-white transition-transform duration-1000 ease-out shadow-md flex flex-col p-2 z-0"
              style={{ 
                transform: isEjecting ? 'translateY(-200px)' : 'translateY(20px)',
                opacity: isEjecting ? 1 : 0 
@@ -173,11 +178,11 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
             <div className="w-full aspect-square bg-[#222] mb-8"></div> 
         </div>
 
-        {/* Camera Body */}
-        <div className="relative w-[300px] h-[260px] bg-[#f4f1ea] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center z-10 plastic-texture border-b-8 border-r-8 border-[#dcd8cf]">
+        {/* Camera Body - Increased size */}
+        <div className="relative w-[400px] h-[350px] bg-[#f4f1ea] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center z-10 plastic-texture border-b-8 border-r-8 border-[#dcd8cf]">
           
           {/* Top Slot */}
-          <div className="absolute -top-1 w-[220px] h-2 bg-[#1a1a1a] rounded-full"></div>
+          <div className="absolute -top-1 w-[300px] h-2 bg-[#1a1a1a] rounded-full"></div>
 
           {/* Rainbow Stripe */}
           <div className="w-full h-12 mt-8 rainbow-stripe relative shadow-inner"></div>
@@ -193,10 +198,10 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
           </div>
 
           {/* Viewfinder Housing */}
-          <div className="absolute top-6 w-[180px] h-[180px] bg-[#111] rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.4)] flex items-center justify-center border-4 border-[#333]">
+          <div className="absolute top-8 w-[240px] h-[240px] bg-[#111] rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.4)] flex items-center justify-center border-4 border-[#333]">
               
               {/* Lens Glass Effect */}
-              <div className="w-[160px] h-[160px] rounded-full overflow-hidden relative bg-black">
+              <div className="w-[220px] h-[220px] rounded-full overflow-hidden relative bg-black">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -219,9 +224,9 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
           <button 
             onClick={takePhoto}
             disabled={isEjecting || isLoading}
-            className="absolute bottom-6 right-6 w-16 h-16 bg-[#ff3333] rounded-full shadow-[inset_0_2px_5px_rgba(255,255,255,0.4),0_4px_0_#cc0000] active:translate-y-1 active:shadow-none transition-all border-4 border-[#dcd8cf] z-20 flex items-center justify-center hover:brightness-110"
+            className="absolute bottom-8 right-8 w-20 h-20 bg-[#ff3333] rounded-full shadow-[inset_0_2px_5px_rgba(255,255,255,0.4),0_4px_0_#cc0000] active:translate-y-1 active:shadow-none transition-all border-4 border-[#dcd8cf] z-20 flex items-center justify-center hover:brightness-110"
           >
-             <div className="w-12 h-12 rounded-full border border-white/20"></div>
+             <div className="w-16 h-16 rounded-full border border-white/20"></div>
           </button>
 
           {/* Flash / Sensor Area */}
@@ -230,25 +235,25 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
           </div>
           
           {/* LCD Display for Filters */}
-          <div className="absolute bottom-10 left-6 flex flex-col items-center gap-1">
-             <div className="w-16 h-8 bg-[#222] rounded border-2 border-gray-400 flex items-center justify-center shadow-inner overflow-hidden relative">
+          <div className="absolute bottom-12 left-8 flex flex-col items-center gap-1">
+             <div className="w-20 h-10 bg-[#222] rounded border-2 border-gray-400 flex items-center justify-center shadow-inner overflow-hidden relative">
                 {/* Scanlines */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_50%,transparent_50%)] bg-[length:100%_4px] pointer-events-none z-10"></div>
                 {/* Text */}
-                <span className="font-mono text-[#00ff00] text-lg font-bold drop-shadow-[0_0_4px_rgba(0,255,0,0.8)]">
-                  {activeFilter.name}
+                <span className="font-mono text-[#00ff00] text-base font-bold drop-shadow-[0_0_4px_rgba(0,255,0,0.8)] px-1">
+                  {filterName}
                 </span>
              </div>
              
              <button 
                onClick={cycleFilter}
-               className="w-16 h-6 bg-gray-300 rounded border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 transition-all text-[10px] font-bold text-gray-600 tracking-wider shadow-sm hover:bg-gray-200"
+               className="w-20 h-7 bg-gray-300 rounded border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 transition-all text-[11px] font-bold text-gray-600 tracking-wider shadow-sm hover:bg-gray-200"
              >
                MODE
              </button>
           </div>
 
-          <div className="absolute bottom-4 left-8 text-gray-400 font-bold text-xs font-mono tracking-widest opacity-50">
+          <div className="absolute bottom-6 left-10 text-gray-400 font-bold text-sm font-mono tracking-widest opacity-50">
             INSTANT 2000
           </div>
 

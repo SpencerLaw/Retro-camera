@@ -31,7 +31,18 @@
     "delete": "削除",
     "clearAll": "すべて削除",
     "clearConfirm": "すべての写真を削除してもよろしいですか？",
-    "clearSuccess": "すべての写真を削除しました"
+    "clearSuccess": "すべての写真を削除しました",
+    "filters": {
+      "normal": "通常",
+      "vivid": "鮮やか",
+      "soft": "フィルム",
+      "clean": "フレッシュ",
+      "warm": "暖かい",
+      "rich": "リッチ",
+      "cyber": "サイバー",
+      "candy": "キャンディ",
+      "retro": "レトロ"
+    }
   }
 }
 

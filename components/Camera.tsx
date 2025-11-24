@@ -99,16 +99,23 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
       
       // Wait for ejection animation to finish before "releasing" the photo to the wall
       setTimeout(() => {
-        // Calculate safe initial position - ensure photo is always visible
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const photoWidth = 220; // Photo width
-        const photoHeight = 300; // Approximate photo height
+        // Calculate initial position - above camera, slightly to the right
+        // Camera is at bottom-left (left: 24px, bottom: 24px)
+        // Photo should appear above camera, centered horizontally on camera
+        const cameraLeft = 24; // left-6 = 24px
+        const cameraBottom = 24; // bottom-6 = 24px
+        const cameraHeight = 260; // Camera height
+        const cameraWidth = 300; // Camera width
+        const photoWidth = 220;
+        const photoHeight = 300;
         
-        // Use original simple positioning logic that worked before
-        // Photos eject from left side relative to camera, positioned above camera
-        const safeX = 60; // Ejects from left side relative to camera
-        const safeY = Math.max(100, window.innerHeight - 500); // Initial position above camera
+        // Position photo above camera, centered horizontally on camera
+        const photoX = cameraLeft + (cameraWidth - photoWidth) / 2; // Center on camera
+        const photoY = window.innerHeight - cameraBottom - cameraHeight - photoHeight - 20; // Above camera
+        
+        // Ensure photo is within viewport bounds
+        const safeX = Math.max(20, Math.min(window.innerWidth - photoWidth - 20, photoX));
+        const safeY = Math.max(50, Math.min(window.innerHeight - photoHeight - 100, photoY));
         
         const photo: Photo = {
           id: Date.now().toString(),
@@ -119,6 +126,17 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
           rotation: (Math.random() - 0.5) * 15,
           isDeveloping: true
         };
+        
+        console.log('📸 Photo captured and positioned:', { 
+          x: safeX, 
+          y: safeY, 
+          id: photo.id,
+          viewportHeight: window.innerHeight,
+          cameraBottom,
+          cameraHeight,
+          calculatedY: photoY
+        });
+        
         onCapture(photo);
         setIsEjecting(false);
         

@@ -28,10 +28,19 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
     e.stopPropagation();
     onFocus();
     setIsDragging(true);
-    setDragOffset({
-      x: e.clientX - photo.x,
-      y: e.clientY - photo.y
-    });
+    
+    const rect = photoRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    } else {
+      setDragOffset({
+        x: e.clientX - photo.x,
+        y: e.clientY - photo.y
+      });
+    }
     
     (e.target as Element).setPointerCapture(e.pointerId);
   };
@@ -43,7 +52,13 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
     
-    onUpdatePosition(photo.id, newX, newY);
+    // Ensure photo stays within viewport bounds
+    const photoWidth = 220;
+    const photoHeight = 300;
+    const safeX = Math.max(0, Math.min(window.innerWidth - photoWidth, newX));
+    const safeY = Math.max(0, Math.min(window.innerHeight - photoHeight, newY));
+    
+    onUpdatePosition(photo.id, safeX, safeY);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -64,13 +79,14 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
   return (
     <div 
       ref={photoRef}
-      className="absolute touch-none select-none transition-transform duration-200 ease-out"
+      className="fixed touch-none select-none transition-transform duration-200 ease-out"
       style={{ 
-        left: 0, 
-        top: 0, 
-        transform: `translate3d(${photo.x}px, ${photo.y}px, 0) rotate(${photo.rotation}deg) scale(${isDragging ? 1.05 : 1})`,
+        left: `${photo.x}px`, 
+        top: `${photo.y}px`, 
+        transform: `rotate(${photo.rotation}deg) scale(${isDragging ? 1.05 : 1})`,
         zIndex: zIndex,
-        cursor: isDragging ? 'grabbing' : 'grab'
+        cursor: isDragging ? 'grabbing' : 'grab',
+        pointerEvents: 'auto'
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

@@ -105,16 +105,10 @@ export const Camera: React.FC<CameraProps> = ({ onCapture }) => {
         const photoWidth = 220; // Photo width
         const photoHeight = 300; // Approximate photo height
         
-        // Center photo in viewport, but offset slightly for visual interest
-        const centerX = (viewportWidth - photoWidth) / 2;
-        const centerY = (viewportHeight - photoHeight) / 2;
-        
-        // Add some random offset but keep within bounds
-        const randomOffsetX = (Math.random() - 0.5) * 200; // ±100px
-        const randomOffsetY = (Math.random() - 0.5) * 150; // ±75px
-        
-        const safeX = Math.max(20, Math.min(viewportWidth - photoWidth - 20, centerX + randomOffsetX));
-        const safeY = Math.max(50, Math.min(viewportHeight - photoHeight - 100, centerY + randomOffsetY));
+        // Use original simple positioning logic that worked before
+        // Photos eject from left side relative to camera, positioned above camera
+        const safeX = 60; // Ejects from left side relative to camera
+        const safeY = Math.max(100, window.innerHeight - 500); // Initial position above camera
         
         const photo: Photo = {
           id: Date.now().toString(),

@@ -61,9 +61,10 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
 
   const handleCapture = (photo: Photo) => {
     setPhotos(prev => {
-      // Limit to 25 photos in memory to prevent performance issues
       const newPhotos = [...prev, photo];
-      return newPhotos.slice(-25);
+      // Only limit if we have more than 30 photos to prevent performance issues
+      // But always keep the new photo
+      return newPhotos.length > 30 ? newPhotos.slice(-30) : newPhotos;
     });
     setTopZIndex(prev => prev + 1);
     
@@ -95,7 +96,7 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full overflow-visible">
       {/* Back Home Button */}
       <div className="fixed top-4 left-4 z-50">
         <button 

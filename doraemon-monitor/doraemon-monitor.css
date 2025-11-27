@@ -141,12 +141,12 @@
 .doraemon-info-box {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
   text-align: center;
   color: var(--text-main);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  min-width: 90px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  min-width: 140px;
 }
 
 .dark-mode .doraemon-info-box {
@@ -161,16 +161,18 @@
 
 .info-label {
   display: block;
-  font-size: 0.8rem;
-  opacity: 0.8;
+  font-size: 1.2rem;
+  opacity: 0.9;
   font-weight: bold;
+  margin-bottom: 0.3rem;
 }
 
 .info-value {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 3rem;
+  font-weight: 900;
   font-family: monospace;
-  line-height: 1.1;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .doraemon-btn-icon {

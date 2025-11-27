@@ -153,11 +153,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#d4af37]/0 via-[#d4af37]/20 to-[#d4af37]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
 
-          {/* Couple Game Card - Hidden */}
-          {/* <div
-            onClick={() => onSelectProject('couple')}
-            className="group relative bg-gradient-to-br from-[#FF00C0] via-[#8000FF] to-[#00C0FF] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-white/30 shadow-xl"
+          {/* Couple Game Card - Disabled */}
+          <div
+            className="relative bg-gradient-to-br from-[#FF00C0] via-[#8000FF] to-[#00C0FF] rounded-2xl p-8 cursor-not-allowed transform border-4 border-white/30 shadow-xl opacity-40 grayscale"
           >
+            {/* Card Background Pattern */}
             <div
               className="absolute inset-0 rounded-2xl opacity-10"
               style={{
@@ -165,12 +165,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
               }}
             />
 
+            {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-2 border-white/30">
+              <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-2 border-white/30">
                 <Heart size={64} className="text-white" fill="white" />
               </div>
             </div>
 
+            {/* Content */}
             <div className="relative z-10 text-center">
               <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">{t('home.couple.title')}</h2>
               <p className="text-lg text-white/90 mb-4 opacity-90">
@@ -180,15 +182,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                 {t('home.couple.description')}
               </p>
 
+              {/* Decorative Border */}
               <div className="mt-6 pt-6 border-t-2 border-dashed border-white/30 opacity-50">
-                <div className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 border border-white/30">
+                <div className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-bold border border-white/30">
                   Enter →
                 </div>
               </div>
             </div>
-
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-          </div> */}
+          </div>
 
           {/* Doraemon Monitor Card */}
           <div

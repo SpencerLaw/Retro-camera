@@ -1,7 +1,7 @@
 {
   "home": {
-    "title": "My Studio",
-    "subtitle": "Choose Your Experience",
+    "title": "4D Pocket",
+    "subtitle": "Explore Wonderful Worlds",
     "camera": {
       "title": "Retro Camera",
       "subtitle": "Vintage Camera • Instant Photo",
@@ -22,7 +22,6 @@
       "subtitle": "Classroom Decibel Monitor",
       "description": "Real-time noise monitoring with automatic alerts when threshold is exceeded"
     },
-    "footer": "Click on a card to begin your journey",
     "backHome": "Back Home"
   },
   "camera": {

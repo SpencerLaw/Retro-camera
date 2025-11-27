@@ -264,10 +264,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
         {/* Footer Note */}
         <div className="text-center mt-12 space-y-3">
-          <p className="text-[#5c4033] opacity-60 text-sm font-marker">
-            {t('home.footer')}
-          </p>
-          
           {/* Version Badge with Glass Morphism and Glow Effect */}
           <div className="flex justify-center">
             <div className="relative group">

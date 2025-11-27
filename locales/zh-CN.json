@@ -1,7 +1,7 @@
 {
   "home": {
-    "title": "我的工作室",
-    "subtitle": "选择您的体验",
+    "title": "四次元口袋",
+    "subtitle": "探索奇妙世界",
     "camera": {
       "title": "复古相机",
       "subtitle": "复古相机 • 即时拍照",
@@ -22,7 +22,6 @@
       "subtitle": "教室分贝监测仪",
       "description": "实时监测环境噪音，超过阈值时自动警报，帮助维持安静的学习环境"
     },
-    "footer": "点击卡片开始您的旅程",
     "backHome": "返回首页"
   },
   "camera": {

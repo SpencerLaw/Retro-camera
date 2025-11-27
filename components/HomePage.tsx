@@ -4,7 +4,7 @@ import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface HomePageProps {
-  onSelectProject: (project: 'camera' | 'fortune' | 'couple') => void;
+  onSelectProject: (project: 'camera' | 'fortune' | 'couple' | 'doraemon') => void;
 }
 
 const languageLabels: Record<GlobalLanguage, string> = {
@@ -68,7 +68,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
         </div>
 
         {/* Project Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-8 px-4">
           {/* Retro Camera Card */}
           <div 
             onClick={() => onSelectProject('camera')}
@@ -193,6 +193,72 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Hover Effect Glow */}
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+
+          {/* Doraemon Monitor Card */}
+          <div
+            onClick={() => onSelectProject('doraemon')}
+            className="group relative bg-gradient-to-br from-[#1293EE] via-[#0d7ac4] to-[#0a5f9e] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-[#FACE05] shadow-xl"
+          >
+            {/* Card Background Pattern */}
+            <div
+              className="absolute inset-0 rounded-2xl opacity-10"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+              }}
+            />
+
+            {/* Icon - Doraemon Face */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-4 border-[#FACE05] relative">
+                {/* Simple Doraemon Face */}
+                <svg viewBox="0 0 100 100" className="w-24 h-24">
+                  {/* Face */}
+                  <circle cx="50" cy="50" r="48" fill="#1293EE" stroke="#333" strokeWidth="2"/>
+                  <circle cx="50" cy="60" r="35" fill="white" stroke="#333" strokeWidth="1"/>
+
+                  {/* Eyes */}
+                  <ellipse cx="35" cy="35" rx="10" ry="12" fill="white" stroke="#333" strokeWidth="1.5"/>
+                  <ellipse cx="65" cy="35" rx="10" ry="12" fill="white" stroke="#333" strokeWidth="1.5"/>
+                  <circle cx="38" cy="37" r="3" fill="#000"/>
+                  <circle cx="62" cy="37" r="3" fill="#000"/>
+                  <circle cx="39" cy="35" r="1" fill="#FFF"/>
+                  <circle cx="63" cy="35" r="1" fill="#FFF"/>
+
+                  {/* Nose */}
+                  <circle cx="50" cy="48" r="6" fill="#DD0000" stroke="#333" strokeWidth="1.5"/>
+                  <line x1="50" y1="54" x2="50" y2="70" stroke="#333" strokeWidth="1.5"/>
+
+                  {/* Mouth */}
+                  <path d="M 30,65 Q 50,85 70,65" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round"/>
+
+                  {/* Bell */}
+                  <circle cx="50" cy="90" r="7" fill="#FACE05" stroke="#333" strokeWidth="1.5"/>
+                  <circle cx="50" cy="92" r="1.5" fill="#000"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">{t('home.doraemon.title')}</h2>
+              <p className="text-lg text-white/90 mb-4 opacity-90">
+                {t('home.doraemon.subtitle')}
+              </p>
+              <p className="text-sm text-white/80 opacity-90 leading-relaxed">
+                {t('home.doraemon.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-2 border-dashed border-[#FACE05]/50">
+                <div className="inline-block px-4 py-2 bg-[#FACE05]/90 text-[#1293EE] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 border border-white/30">
+                  Enter →
+                </div>
+              </div>
+            </div>
+
+            {/* Hover Effect Glow */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FACE05]/0 via-[#FACE05]/30 to-[#FACE05]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
         </div>
 

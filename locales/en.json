@@ -17,6 +17,11 @@
       "subtitle": "Heartbeat Pact",
       "description": "Couple's game with fun challenges and slot machine animation"
     },
+    "doraemon": {
+      "title": "Doraemon",
+      "subtitle": "Classroom Decibel Monitor",
+      "description": "Real-time noise monitoring with automatic alerts when threshold is exceeded"
+    },
     "footer": "Click on a card to begin your journey",
     "backHome": "Back Home"
   },

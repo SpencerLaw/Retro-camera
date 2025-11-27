@@ -17,6 +17,11 @@
       "subtitle": "心跳契約",
       "description": "情侶遊戲，有趣的挑戰和老虎機動畫"
     },
+    "doraemon": {
+      "title": "哆啦A夢",
+      "subtitle": "教室分貝監測儀",
+      "description": "實時監測環境噪音，超過閾值時自動警報，幫助維持安靜的學習環境"
+    },
     "footer": "點擊卡片開始您的旅程",
     "backHome": "返回首頁"
   },

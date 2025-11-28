@@ -54,26 +54,103 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
     }
   };
 
-  // Download function
+  // Enhanced download function with weather info overlay
   const handleDownload = async () => {
-    if (!state.image || state.status !== 'success') return;
+    if (!state.image || !state.weather || state.status !== 'success') return;
 
     try {
-      // Fetch the image as a blob
-      const response = await fetch(state.image.url);
-      const blob = await response.blob();
+      // Create an image element
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      // Wait for image to load
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = state.image!.url;
+      });
 
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${state.weather?.city || 'weather'}-diorama-${Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Create canvas with higher resolution
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Failed to get canvas context');
+
+      // Set canvas size to match loaded image (usually 4K if generation succeeded)
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      // Draw the original image
+      ctx.drawImage(img, 0, 0);
+
+      // Calculate responsive font sizes based on canvas width
+      const baseFontSize = canvas.width / 25; // Dynamic sizing
+      const cityFontSize = baseFontSize * 1.5;
+      const tempFontSize = baseFontSize * 1.2;
+      const conditionFontSize = baseFontSize * 0.9;
+      const padding = canvas.width * 0.04;
+      const lineHeight = baseFontSize * 1.3;
+
+      // Create gradient background for text
+      const gradientHeight = canvas.height * 0.25;
+      const gradient = ctx.createLinearGradient(0, canvas.height - gradientHeight, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, canvas.height - gradientHeight, canvas.width, gradientHeight);
+
+      // Set text styling
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = padding / 2;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+
+      let yPosition = canvas.height - padding;
+
+      // Draw temperature and condition
+      ctx.font = `bold ${tempFontSize}px Inter, system-ui, sans-serif`;
+      const tempText = `${Math.round(state.weather.temperature)}°C`;
+      ctx.fillText(tempText, padding, yPosition);
+      
+      // Measure temperature text width to position condition next to it
+      const tempWidth = ctx.measureText(tempText).width;
+      
+      ctx.font = `${conditionFontSize}px Inter, system-ui, sans-serif`;
+      ctx.fillText(` • ${state.weather.condition}`, padding + tempWidth + padding / 2, yPosition);
+
+      // Draw city and country
+      yPosition -= lineHeight * 1.3;
+      ctx.font = `bold ${cityFontSize}px Inter, system-ui, sans-serif`;
+      ctx.fillText(`${state.weather.city}, ${state.weather.country}`, padding, yPosition);
+
+      // Convert canvas to blob and download
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            console.error('Failed to create blob');
+            return;
+          }
+          
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${state.weather?.city || 'weather'}-${state.weather?.temperature}C-${Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        },
+        'image/png',
+        1.0 // Maximum quality
+      );
+
     } catch (error) {
       console.error('Download failed:', error);
+      alert('Failed to download image. Please try again.');
     }
   };
 

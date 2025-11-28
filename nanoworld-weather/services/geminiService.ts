@@ -98,7 +98,7 @@ export const generateDioramaImage = async (weatherData: WeatherData): Promise<st
       config: {
         imageConfig: {
             aspectRatio: "1:1",
-            imageSize: "1K"
+            imageSize: "4K"
         }
       }
     });

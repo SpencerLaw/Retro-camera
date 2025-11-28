@@ -57,7 +57,7 @@
     "backHome": "ホームに戻る",
     "loadingWeather": "天気予報を確認中...",
     "generatingImage": "ミニチュア世界を作成中...",
-    "searchPlaceholder": "検索して世界を作成",
+    "searchPlaceholder": "都市名を入力して天気を探索",
     "download": "画像をダウンロード"
   }
 }

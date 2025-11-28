@@ -57,7 +57,7 @@
     "backHome": "Back Home",
     "loadingWeather": "Checking the forecast...",
     "generatingImage": "Crafting miniature world...",
-    "searchPlaceholder": "Search to create a world",
+    "searchPlaceholder": "Enter a city name to explore its weather",
     "download": "Download Image"
   }
 }

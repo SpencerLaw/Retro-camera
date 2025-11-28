@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import SearchBar from './components/SearchBar';
 import WeatherCard from './components/WeatherCard';
 import { WeatherData, GeneratedImage, AppState } from './types';
 import { fetchWeatherAndContext, generateDioramaImage } from './services/geminiService';
-import { DEFAULT_CITY } from './constants';
 import { getCachedWeather, setCachedWeather } from './utils/cache';
 
 interface WeatherAppProps {
@@ -174,10 +173,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
     }
   };
 
-  // Initial load
-  useEffect(() => {
-    executeSearch(DEFAULT_CITY);
-  }, []);
+  // 不再自动加载，等待用户主动输入
 
   return (
     <div className="min-h-screen bg-[#F6F8FC] text-gray-900 flex flex-col items-center justify-center font-sans p-4 relative overflow-hidden">

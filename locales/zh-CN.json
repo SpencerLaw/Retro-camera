@@ -57,7 +57,7 @@
     "backHome": "返回首页",
     "loadingWeather": "正在查询天气预报...",
     "generatingImage": "正在生成微缩世界...",
-    "searchPlaceholder": "搜索以创建世界",
+    "searchPlaceholder": "输入城市名称探索天气",
     "download": "下载图片"
   }
 }

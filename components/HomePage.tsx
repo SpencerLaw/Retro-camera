@@ -19,35 +19,43 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
   const t = useTranslations();
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFF9F5] via-[#FFF5F0] to-[#FFF0EB] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
-      {/* Background Pattern */}
+    <div className="min-h-screen w-full flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
+      {/* Base Gradient Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-[#667eea] via-[#764ba2] to-[#f093fb]"></div>
+      
+      {/* Animated Gradient Overlay */}
+      <div className="fixed inset-0 bg-gradient-to-tr from-[#f093fb]/20 via-[#4facfe]/20 to-[#00f2fe]/20 animate-pulse"></div>
+      
+      {/* Glass Morphism Background Layer */}
+      <div className="fixed inset-0 backdrop-blur-3xl bg-white/10"></div>
+      
+      {/* Subtle Pattern Overlay */}
       <div 
-        className="absolute inset-0 opacity-5"
+        className="fixed inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: `url("https://www.transparenttextures.com/patterns/cork-board.png")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
       
-      {/* Decorative Elements */}
-      <div className="absolute top-20 left-20 w-32 h-32 border-2 border-[#FFE5D9] rotate-12 opacity-20 rounded-full"></div>
-      <div className="absolute bottom-20 right-20 w-40 h-40 border-2 border-[#FFE5D9] -rotate-12 opacity-20 rounded-full"></div>
-      <div className="absolute top-1/2 left-10 w-24 h-24 border-2 border-[#E8F5E9] rotate-45 opacity-15 rounded-full"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-28 h-28 border-2 border-[#E3F2FD] -rotate-45 opacity-15 rounded-full"></div>
+      {/* Floating Glass Orbs */}
+      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-[#667eea]/30 to-[#764ba2]/30 rounded-full blur-3xl opacity-50 animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-[#f093fb]/30 to-[#4facfe]/30 rounded-full blur-3xl opacity-50 animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-gradient-to-br from-[#00f2fe]/30 to-[#667eea]/30 rounded-full blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
       
       {/* Global Language Switcher */}
       <div className="fixed top-6 right-6 z-50">
         <div className="relative group">
-          <button className="p-2 rounded-full bg-white/90 hover:bg-white border border-[#FFD6E8]/50 backdrop-blur-sm transition-all text-[#D4A5A5] hover:text-[#C99A9A] shadow-md flex items-center gap-2 px-4">
+          <button className="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-xl border border-white/30 transition-all text-white hover:text-white shadow-lg flex items-center gap-2 px-4">
             <Globe size={20} />
-            <span className="text-sm font-marker">{languageLabels[language]}</span>
+            <span className="text-sm font-marker drop-shadow-md">{languageLabels[language]}</span>
           </button>
-          <div className="absolute right-0 mt-2 w-32 py-2 bg-white/95 backdrop-blur-md border border-[#FFD6E8]/50 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right">
+          <div className="absolute right-0 mt-2 w-32 py-2 bg-white/20 backdrop-blur-xl border border-white/30 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right">
             {(Object.keys(languageLabels) as GlobalLanguage[]).map(lang => (
               <button
                 key={lang}
                 onClick={() => setLanguage(lang)}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FFE5F1]/30 transition-colors ${
-                  language === lang ? 'text-[#D4A5A5] font-bold' : 'text-[#C99A9A]'
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-white/20 transition-colors rounded-lg ${
+                  language === lang ? 'text-white font-bold' : 'text-white/90'
                 }`}
               >
                 {languageLabels[lang]}
@@ -61,10 +69,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
       <div className="relative z-10 w-full max-w-7xl my-8">
         {/* Title */}
         <div className="text-center mb-8 md:mb-16">
-          <h1 className="font-marker text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-[#D4A5A5] mb-4 drop-shadow-md">
+          <h1 className="font-marker text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-white mb-4 drop-shadow-2xl" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(255,255,255,0.2)' }}>
             {t('home.title')}
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#C99A9A] font-marker opacity-85 px-4">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 font-marker px-4 drop-shadow-lg" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
             {t('home.subtitle')}
           </p>
         </div>

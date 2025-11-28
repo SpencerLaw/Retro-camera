@@ -20,27 +20,27 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
-      {/* Base Gradient Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-[#667eea] via-[#764ba2] to-[#f093fb]"></div>
+      {/* Base Gradient Background - Black */}
+      <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f]"></div>
       
       {/* Animated Gradient Overlay */}
-      <div className="fixed inset-0 bg-gradient-to-tr from-[#f093fb]/20 via-[#4facfe]/20 to-[#00f2fe]/20 animate-pulse"></div>
+      <div className="fixed inset-0 bg-gradient-to-tr from-[#2a2a2a]/30 via-[#1a1a1a]/20 to-[#3a3a3a]/30 animate-pulse"></div>
       
       {/* Glass Morphism Background Layer */}
-      <div className="fixed inset-0 backdrop-blur-3xl bg-white/10"></div>
+      <div className="fixed inset-0 backdrop-blur-3xl bg-white/5"></div>
       
       {/* Subtle Pattern Overlay */}
       <div 
-        className="fixed inset-0 opacity-[0.03]"
+        className="fixed inset-0 opacity-[0.02]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
       
-      {/* Floating Glass Orbs */}
-      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-[#667eea]/30 to-[#764ba2]/30 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-      <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-[#f093fb]/30 to-[#4facfe]/30 rounded-full blur-3xl opacity-50 animate-pulse" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-gradient-to-br from-[#00f2fe]/30 to-[#667eea]/30 rounded-full blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* Floating Glass Orbs - Subtle Light */}
+      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-[#ffffff]/10 to-[#2a2a2a]/20 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-[#ffffff]/8 to-[#1a1a1a]/15 rounded-full blur-3xl opacity-25 animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-gradient-to-br from-[#ffffff]/5 to-[#3a3a3a]/20 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
       
       {/* Global Language Switcher */}
       <div className="fixed top-6 right-6 z-50">

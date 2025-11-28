@@ -1,10 +1,10 @@
 import React from 'react';
-import { Camera, Sparkles, Heart, Globe } from 'lucide-react';
+import { Camera, Sparkles, Heart, Globe, Cloud } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface HomePageProps {
-  onSelectProject: (project: 'camera' | 'fortune' | 'couple' | 'doraemon') => void;
+  onSelectProject: (project: 'camera' | 'fortune' | 'couple' | 'doraemon' | 'weather') => void;
 }
 
 const languageLabels: Record<GlobalLanguage, string> = {
@@ -56,7 +56,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
       </div>
       
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-6xl my-8">
+      <div className="relative z-10 w-full max-w-7xl my-8">
         {/* Title */}
         <div className="text-center mb-8 md:mb-16">
           <h1 className="font-marker text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-[#8b4513] mb-4 drop-shadow-lg">
@@ -68,7 +68,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
         </div>
 
         {/* Project Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-8 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8 lg:gap-6 px-4">
           {/* Retro Camera Card */}
           <div 
             onClick={() => onSelectProject('camera')}
@@ -152,6 +152,49 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
             {/* Hover Effect Glow */}
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#d4af37]/0 via-[#d4af37]/20 to-[#d4af37]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
+
+          {/* Weather Card */}
+          <div
+            onClick={() => onSelectProject('weather')}
+            className="group relative bg-gradient-to-br from-[#87CEEB] via-[#4FC3F7] to-[#29B6F6] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-[#FFD700] shadow-xl"
+          >
+            {/* Card Background Pattern */}
+            <div
+              className="absolute inset-0 rounded-2xl opacity-10"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 20 Q10 15 20 20 T40 20 V40 H0 Z'/%3E%3C/g%3E%3C/svg%3E")`,
+              }}
+            />
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div className="w-32 h-32 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-4 border-white">
+                <Cloud size={64} className="text-[#4FC3F7]" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">{t('home.weather.title')}</h2>
+              <p className="text-lg text-white/90 mb-4 opacity-90">
+                {t('home.weather.subtitle')}
+              </p>
+              <p className="text-sm text-white/80 opacity-90 leading-relaxed">
+                {t('home.weather.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-2 border-dashed border-white/50">
+                <div className="inline-block px-4 py-2 bg-white/90 text-[#4FC3F7] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 border border-white">
+                  Enter →
+                </div>
+              </div>
+            </div>
+
+            {/* Hover Effect Glow */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FFD700]/0 via-[#FFD700]/30 to-[#FFD700]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+
 
           {/* Couple Game Card - Disabled */}
           <div

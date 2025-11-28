@@ -22,6 +22,11 @@
       "subtitle": "Classroom Decibel Monitor",
       "description": "Real-time noise monitoring with automatic alerts when threshold is exceeded"
     },
+    "weather": {
+      "title": "Nano Weather",
+      "subtitle": "Miniature Diorama • Weather Explorer",
+      "description": "Explore city weather through beautiful AI-generated miniature dioramas"
+    },
     "backHome": "Back Home"
   },
   "camera": {
@@ -49,4 +54,3 @@
     }
   }
 }
-

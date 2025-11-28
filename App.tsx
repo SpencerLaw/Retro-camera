@@ -5,13 +5,14 @@ import { CameraApp } from './components/CameraApp';
 import FortuneApp from './fortune-sticks/FortuneApp';
 import CoupleGameApp from './couple-game/CoupleGameApp';
 import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
+import WeatherApp from './nanoworld-weather/WeatherApp';
 
-type View = 'home' | 'camera' | 'fortune' | 'couple' | 'doraemon';
+type View = 'home' | 'camera' | 'fortune' | 'couple' | 'doraemon' | 'weather';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('home');
 
-  const handleSelectProject = (project: 'camera' | 'fortune' | 'couple' | 'doraemon') => {
+  const handleSelectProject = (project: 'camera' | 'fortune' | 'couple' | 'doraemon' | 'weather') => {
     setCurrentView(project);
   };
 
@@ -35,6 +36,9 @@ const App: React.FC = () => {
       )}
       {currentView === 'doraemon' && (
         <DoraemonMonitorApp onBackHome={handleBackHome} />
+      )}
+      {currentView === 'weather' && (
+        <WeatherApp onBackHome={handleBackHome} />
       )}
     </LanguageProvider>
   );

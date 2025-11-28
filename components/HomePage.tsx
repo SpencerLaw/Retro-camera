@@ -19,33 +19,35 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
   const t = useTranslations();
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#dfd3c3] via-[#c9b99b] to-[#b8a082] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFF9F5] via-[#FFF5F0] to-[#FFF0EB] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Background Pattern */}
       <div 
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `url("https://www.transparenttextures.com/patterns/cork-board.png")`,
         }}
       />
       
       {/* Decorative Elements */}
-      <div className="absolute top-20 left-20 w-32 h-32 border-4 border-[#8b4513] rotate-12 opacity-30"></div>
-      <div className="absolute bottom-20 right-20 w-40 h-40 border-4 border-[#8b4513] -rotate-12 opacity-30"></div>
+      <div className="absolute top-20 left-20 w-32 h-32 border-2 border-[#FFE5D9] rotate-12 opacity-20 rounded-full"></div>
+      <div className="absolute bottom-20 right-20 w-40 h-40 border-2 border-[#FFE5D9] -rotate-12 opacity-20 rounded-full"></div>
+      <div className="absolute top-1/2 left-10 w-24 h-24 border-2 border-[#E8F5E9] rotate-45 opacity-15 rounded-full"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-28 h-28 border-2 border-[#E3F2FD] -rotate-45 opacity-15 rounded-full"></div>
       
       {/* Global Language Switcher */}
       <div className="fixed top-6 right-6 z-50">
         <div className="relative group">
-          <button className="p-2 rounded-full bg-white/80 hover:bg-white border-2 border-[#8b4513] backdrop-blur-sm transition-all text-[#8b4513] hover:text-[#5c4033] shadow-lg flex items-center gap-2 px-4">
+          <button className="p-2 rounded-full bg-white/90 hover:bg-white border border-[#FFD6E8]/50 backdrop-blur-sm transition-all text-[#D4A5A5] hover:text-[#C99A9A] shadow-md flex items-center gap-2 px-4">
             <Globe size={20} />
             <span className="text-sm font-marker">{languageLabels[language]}</span>
           </button>
-          <div className="absolute right-0 mt-2 w-32 py-2 bg-white/95 backdrop-blur-md border-2 border-[#8b4513] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right">
+          <div className="absolute right-0 mt-2 w-32 py-2 bg-white/95 backdrop-blur-md border border-[#FFD6E8]/50 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right">
             {(Object.keys(languageLabels) as GlobalLanguage[]).map(lang => (
               <button
                 key={lang}
                 onClick={() => setLanguage(lang)}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-[#8b4513]/10 transition-colors ${
-                  language === lang ? 'text-[#8b4513] font-bold' : 'text-[#5c4033]'
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FFE5F1]/30 transition-colors ${
+                  language === lang ? 'text-[#D4A5A5] font-bold' : 'text-[#C99A9A]'
                 }`}
               >
                 {languageLabels[lang]}
@@ -59,10 +61,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
       <div className="relative z-10 w-full max-w-7xl my-8">
         {/* Title */}
         <div className="text-center mb-8 md:mb-16">
-          <h1 className="font-marker text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-[#8b4513] mb-4 drop-shadow-lg">
+          <h1 className="font-marker text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-[#D4A5A5] mb-4 drop-shadow-md">
             {t('home.title')}
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#5c4033] font-marker opacity-80 px-4">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#C99A9A] font-marker opacity-85 px-4">
             {t('home.subtitle')}
           </p>
         </div>

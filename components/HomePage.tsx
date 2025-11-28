@@ -72,11 +72,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
           {/* Retro Camera Card */}
           <div 
             onClick={() => onSelectProject('camera')}
-            className="group relative bg-white rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-[#8b4513] shadow-xl"
+            className="group relative bg-gradient-to-br from-[#FFF9E6] via-[#FFF5E1] to-[#FFF0DC] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#FFE5CC]/50"
           >
             {/* Card Background Pattern */}
             <div 
-              className="absolute inset-0 rounded-2xl opacity-10"
+              className="absolute inset-0 rounded-2xl opacity-5"
               style={{
                 backgroundImage: `url("https://www.transparenttextures.com/patterns/cork-board.png")`,
               }}
@@ -84,87 +84,83 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
             
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-gradient-to-br from-[#FFE0B2] via-[#FFCCBC] to-[#F8BBD0] rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
-                <Camera size={64} className="text-[#8E6A9E] drop-shadow-md" />
+              <div className="w-32 h-32 bg-gradient-to-br from-[#FFE5F1] via-[#FFD6E8] to-[#FFC8E0] rounded-full flex items-center justify-center shadow-md transform group-hover:rotate-12 transition-transform duration-300 border-2 border-[#FFE5F1]/50">
+                <Camera size={64} className="text-[#FF9EC4] drop-shadow-sm" />
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-marker text-4xl text-[#8b4513] mb-3">{t('home.camera.title')}</h2>
-              <p className="text-lg text-[#5c4033] mb-4 opacity-80">
+              <h2 className="font-marker text-4xl text-[#D4A5A5] mb-3">{t('home.camera.title')}</h2>
+              <p className="text-lg text-[#C99A9A] mb-4 opacity-90">
                 {t('home.camera.subtitle')}
               </p>
-              <p className="text-sm text-[#5c4033] opacity-70 leading-relaxed">
+              <p className="text-sm text-[#B88A8A] opacity-80 leading-relaxed">
                 {t('home.camera.description')}
               </p>
               
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-2 border-dashed border-[#8b4513] opacity-30">
-                <div className="inline-block px-4 py-2 bg-[#8b4513] text-white rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300">
+              <div className="mt-6 pt-6 border-t border-dashed border-[#FFD6E8]/40">
+                <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#FFE5F1] to-[#FFD6E8] text-[#D4A5A5] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   Enter →
                 </div>
               </div>
             </div>
 
             {/* Hover Effect Glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FFE0B2]/0 via-[#F8BBD0]/20 to-[#FFCCBC]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FFE5F1]/0 via-[#FFD6E8]/15 to-[#FFC8E0]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
 
           {/* Fortune Sticks Card */}
           <div 
             onClick={() => onSelectProject('fortune')}
-            className="group relative bg-gradient-to-br from-[#2b0a0a] to-[#1a0202] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-[#d4af37] shadow-xl"
+            className="group relative bg-gradient-to-br from-[#FFF8E1] via-[#FFF9C4] to-[#FFF59D] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#FFECB3]/50"
           >
             {/* Card Background Pattern */}
             <div 
-              className="absolute inset-0 rounded-2xl opacity-10"
+              className="absolute inset-0 rounded-2xl opacity-5"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFD54F' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
               }}
             />
             
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-gradient-to-br from-[#d4af37] to-[#bf953f] rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
-                <Sparkles size={64} className="text-[#2b0a0a]" />
+              <div className="w-32 h-32 bg-gradient-to-br from-[#FFECB3] via-[#FFE082] to-[#FFD54F] rounded-full flex items-center justify-center shadow-md transform group-hover:rotate-12 transition-transform duration-300 border-2 border-[#FFECB3]/50">
+                <Sparkles size={64} className="text-[#F57F17] drop-shadow-sm" />
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-serif text-4xl text-[#ffd700] mb-3 font-bold">{t('home.fortune.title')}</h2>
-              <p className="text-lg text-[#e6cca0] mb-4 opacity-90">
+              <h2 className="font-serif text-4xl text-[#F9A825] mb-3 font-bold">{t('home.fortune.title')}</h2>
+              <p className="text-lg text-[#FBC02D] mb-4 opacity-90">
                 {t('home.fortune.subtitle')}
               </p>
-              <p className="text-sm text-[#e6cca0] opacity-80 leading-relaxed">
+              <p className="text-sm text-[#FDD835] opacity-85 leading-relaxed">
                 {t('home.fortune.description')}
               </p>
               
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-2 border-dashed border-[#d4af37] opacity-30">
-                <div className="inline-block px-4 py-2 bg-[#d4af37] text-[#2b0a0a] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300">
+              <div className="mt-6 pt-6 border-t border-dashed border-[#FFE082]/40">
+                <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#FFECB3] to-[#FFE082] text-[#F57F17] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   Enter →
                 </div>
               </div>
             </div>
 
             {/* Hover Effect Glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#d4af37]/0 via-[#d4af37]/20 to-[#d4af37]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FFECB3]/0 via-[#FFE082]/15 to-[#FFD54F]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
 
           {/* Weather Card */}
           <div
             onClick={() => onSelectProject('weather')}
-            className="group relative rounded-2xl p-[4px] cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-xl"
-            style={{
-              background: 'linear-gradient(135deg, #B2EBF2, #E1BEE7, #C5CAE9)',
-            }}
+            className="group relative bg-gradient-to-br from-[#E8F5E9] via-[#E0F2F1] to-[#E1F5FE] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#C8E6C9]/50"
           >
-            <div className="relative bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] rounded-2xl p-8 h-full">
             {/* Card Background Pattern */}
             <div
-              className="absolute inset-0 rounded-2xl opacity-10"
+              className="absolute inset-0 rounded-2xl opacity-5"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 20 Q10 15 20 20 T40 20 V40 H0 Z'/%3E%3C/g%3E%3C/svg%3E")`,
               }}
@@ -172,32 +168,31 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-gradient-to-br from-[#E1BEE7] via-[#C5CAE9] to-[#B2EBF2] rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-4 border-white/50">
-                <Cloud size={64} className="text-white drop-shadow-md" />
+              <div className="w-32 h-32 bg-gradient-to-br from-[#B2DFDB] via-[#80CBC4] to-[#4DB6AC] rounded-full flex items-center justify-center shadow-md transform group-hover:rotate-12 transition-transform duration-300 border-2 border-[#B2DFDB]/50">
+                <Cloud size={64} className="text-white drop-shadow-sm" />
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#4A90A4] mb-3 drop-shadow-md">{t('home.weather.title')}</h2>
-              <p className="text-lg text-[#5C7A8A] mb-4 opacity-90">
+              <h2 className="font-bold text-4xl text-[#66BB6A] mb-3 drop-shadow-sm">{t('home.weather.title')}</h2>
+              <p className="text-lg text-[#81C784] mb-4 opacity-90">
                 {t('home.weather.subtitle')}
               </p>
-              <p className="text-sm text-[#6B8A9A] opacity-90 leading-relaxed">
+              <p className="text-sm text-[#A5D6A7] opacity-85 leading-relaxed">
                 {t('home.weather.description')}
               </p>
 
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-2 border-dashed border-[#B2EBF2]/50">
-                <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#E1BEE7] to-[#B2EBF2] text-white rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 shadow-md">
+              <div className="mt-6 pt-6 border-t border-dashed border-[#B2DFDB]/40">
+                <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#B2DFDB] to-[#80CBC4] text-white rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   Enter →
                 </div>
               </div>
             </div>
 
             {/* Hover Effect Glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#E1BEE7]/0 via-[#C5CAE9]/30 to-[#B2EBF2]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-            </div>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#B2DFDB]/0 via-[#80CBC4]/15 to-[#4DB6AC]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
 
 
@@ -242,11 +237,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
           {/* Doraemon Monitor Card */}
           <div
             onClick={() => onSelectProject('doraemon')}
-            className="group relative bg-gradient-to-br from-[#1293EE] via-[#0d7ac4] to-[#0a5f9e] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-[#FACE05] shadow-xl"
+            className="group relative bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#90CAF9]/50"
           >
             {/* Card Background Pattern */}
             <div
-              className="absolute inset-0 rounded-2xl opacity-10"
+              className="absolute inset-0 rounded-2xl opacity-5"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
               }}
@@ -254,55 +249,55 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Icon - Doraemon Face */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-4 border-[#FACE05] relative">
+              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-md transform group-hover:rotate-12 transition-transform duration-300 border-2 border-[#90CAF9]/50 relative">
                 {/* Simple Doraemon Face */}
                 <svg viewBox="0 0 100 100" className="w-24 h-24">
                   {/* Face */}
-                  <circle cx="50" cy="50" r="48" fill="#1293EE" stroke="#333" strokeWidth="2"/>
-                  <circle cx="50" cy="60" r="35" fill="white" stroke="#333" strokeWidth="1"/>
+                  <circle cx="50" cy="50" r="48" fill="#64B5F6" stroke="#42A5F5" strokeWidth="1.5"/>
+                  <circle cx="50" cy="60" r="35" fill="white" stroke="#90CAF9" strokeWidth="1"/>
 
                   {/* Eyes */}
-                  <ellipse cx="35" cy="35" rx="10" ry="12" fill="white" stroke="#333" strokeWidth="1.5"/>
-                  <ellipse cx="65" cy="35" rx="10" ry="12" fill="white" stroke="#333" strokeWidth="1.5"/>
-                  <circle cx="38" cy="37" r="3" fill="#000"/>
-                  <circle cx="62" cy="37" r="3" fill="#000"/>
+                  <ellipse cx="35" cy="35" rx="10" ry="12" fill="white" stroke="#42A5F5" strokeWidth="1"/>
+                  <ellipse cx="65" cy="35" rx="10" ry="12" fill="white" stroke="#42A5F5" strokeWidth="1"/>
+                  <circle cx="38" cy="37" r="3" fill="#1976D2"/>
+                  <circle cx="62" cy="37" r="3" fill="#1976D2"/>
                   <circle cx="39" cy="35" r="1" fill="#FFF"/>
                   <circle cx="63" cy="35" r="1" fill="#FFF"/>
 
                   {/* Nose */}
-                  <circle cx="50" cy="48" r="6" fill="#DD0000" stroke="#333" strokeWidth="1.5"/>
-                  <line x1="50" y1="54" x2="50" y2="70" stroke="#333" strokeWidth="1.5"/>
+                  <circle cx="50" cy="48" r="6" fill="#EF5350" stroke="#E53935" strokeWidth="1"/>
+                  <line x1="50" y1="54" x2="50" y2="70" stroke="#42A5F5" strokeWidth="1"/>
 
                   {/* Mouth */}
-                  <path d="M 30,65 Q 50,85 70,65" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M 30,65 Q 50,85 70,65" fill="none" stroke="#42A5F5" strokeWidth="1.5" strokeLinecap="round"/>
 
                   {/* Bell */}
-                  <circle cx="50" cy="90" r="7" fill="#FACE05" stroke="#333" strokeWidth="1.5"/>
-                  <circle cx="50" cy="92" r="1.5" fill="#000"/>
+                  <circle cx="50" cy="90" r="7" fill="#FFD54F" stroke="#FFC107" strokeWidth="1"/>
+                  <circle cx="50" cy="92" r="1.5" fill="#1976D2"/>
                 </svg>
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">{t('home.doraemon.title')}</h2>
-              <p className="text-lg text-white/90 mb-4 opacity-90">
+              <h2 className="font-bold text-4xl text-[#1976D2] mb-3 drop-shadow-sm">{t('home.doraemon.title')}</h2>
+              <p className="text-lg text-[#42A5F5] mb-4 opacity-90">
                 {t('home.doraemon.subtitle')}
               </p>
-              <p className="text-sm text-white/80 opacity-90 leading-relaxed">
+              <p className="text-sm text-[#64B5F6] opacity-85 leading-relaxed">
                 {t('home.doraemon.description')}
               </p>
 
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-2 border-dashed border-[#FACE05]/50">
-                <div className="inline-block px-4 py-2 bg-[#FACE05]/90 text-[#1293EE] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 border border-white/30">
+              <div className="mt-6 pt-6 border-t border-dashed border-[#90CAF9]/40">
+                <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#90CAF9] to-[#64B5F6] text-white rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   Enter →
                 </div>
               </div>
             </div>
 
             {/* Hover Effect Glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FACE05]/0 via-[#FACE05]/30 to-[#FACE05]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#90CAF9]/0 via-[#64B5F6]/15 to-[#42A5F5]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
         </div>
 

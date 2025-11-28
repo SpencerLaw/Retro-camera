@@ -71,10 +71,11 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ status, weather, image, onDow
         )}
       </div>
 
+      {/* Download Button - Always visible but disabled */}
       {canDownload && (
         <button
-          onClick={onDownload}
-          className="mt-8 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3 transform hover:scale-105"
+          disabled={true}
+          className="mt-8 px-8 py-4 bg-gray-300 text-gray-500 rounded-full font-bold text-lg shadow-lg flex items-center gap-3 cursor-not-allowed opacity-50"
         >
           <Download size={24} />
           {t('weather.download')}

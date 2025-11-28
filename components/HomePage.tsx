@@ -20,27 +20,44 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
-      {/* Base Gradient Background - Black */}
-      <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f]"></div>
+      {/* Base Gradient Background - Dark with Colors */}
+      <div className="fixed inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]"></div>
       
-      {/* Animated Gradient Overlay */}
-      <div className="fixed inset-0 bg-gradient-to-tr from-[#2a2a2a]/30 via-[#1a1a1a]/20 to-[#3a3a3a]/30 animate-pulse"></div>
+      {/* Secondary Gradient Layer */}
+      <div className="fixed inset-0 bg-gradient-to-tr from-[#533483]/40 via-[#1a1a2e]/30 to-[#0f3460]/40"></div>
       
-      {/* Glass Morphism Background Layer */}
-      <div className="fixed inset-0 backdrop-blur-3xl bg-white/5"></div>
+      {/* Frosted Glass Effect - Matte Texture */}
+      <div 
+        className="fixed inset-0 backdrop-blur-2xl"
+        style={{
+          background: `
+            linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")
+          `,
+        }}
+      ></div>
+      
+      {/* Matte Texture Overlay */}
+      <div 
+        className="fixed inset-0 opacity-30"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.3'/%3E%3C/svg%3E")`,
+          mixBlendMode: 'overlay',
+        }}
+      ></div>
       
       {/* Subtle Pattern Overlay */}
       <div 
-        className="fixed inset-0 opacity-[0.02]"
+        className="fixed inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
       
-      {/* Floating Glass Orbs - Subtle Light */}
-      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-[#ffffff]/10 to-[#2a2a2a]/20 rounded-full blur-3xl opacity-30 animate-pulse"></div>
-      <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-[#ffffff]/8 to-[#1a1a1a]/15 rounded-full blur-3xl opacity-25 animate-pulse" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-gradient-to-br from-[#ffffff]/5 to-[#3a3a3a]/20 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* Floating Glass Orbs - Colored Accents */}
+      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-[#533483]/20 to-[#1a1a2e]/30 rounded-full blur-3xl opacity-40 animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-[#0f3460]/25 to-[#16213e]/20 rounded-full blur-3xl opacity-35 animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-gradient-to-br from-[#533483]/15 to-[#0f3460]/25 rounded-full blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
       
       {/* Global Language Switcher */}
       <div className="fixed top-6 right-6 z-50">

@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
     return {
-      base: './',
+      base: '/',
       server: {
         port: 3000,
         host: '0.0.0.0',
@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => {
         react(),
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['favicon.ico', 'robots.txt', 'icons/*.png'],
+          includeAssets: ['favicon.ico', 'robots.txt', 'icons/*.png', 'icons/*.svg'],
+          injectRegister: 'auto',
           manifest: {
             name: 'Creative Studio - 创意工作室',
             short_name: '创意工作室',
@@ -33,39 +34,9 @@ export default defineConfig(({ mode }) => {
                 purpose: 'any maskable'
               },
               {
-                src: '/icons/icon-96x96.png',
-                sizes: '96x96',
-                type: 'image/png',
-                purpose: 'any maskable'
-              },
-              {
-                src: '/icons/icon-128x128.png',
-                sizes: '128x128',
-                type: 'image/png',
-                purpose: 'any maskable'
-              },
-              {
-                src: '/icons/icon-144x144.png',
-                sizes: '144x144',
-                type: 'image/png',
-                purpose: 'any maskable'
-              },
-              {
-                src: '/icons/icon-152x152.png',
-                sizes: '152x152',
-                type: 'image/png',
-                purpose: 'any maskable'
-              },
-              {
-                src: '/icons/icon-192x192.png',
+                src: '/icons/icon-192x192.svg',
                 sizes: '192x192',
-                type: 'image/png',
-                purpose: 'any maskable'
-              },
-              {
-                src: '/icons/icon-384x384.png',
-                sizes: '384x384',
-                type: 'image/png',
+                type: 'image/svg+xml',
                 purpose: 'any maskable'
               },
               {

@@ -15,10 +15,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="创意工作室" />
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
-    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.svg" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -192,30 +190,6 @@
     </script>
     <script type="module" src="/index.tsx"></script>
 
-    <!-- PWA Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('ServiceWorker registration successful:', registration.scope);
-
-              // Check for updates
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // New service worker available, show update notification
-                    console.log('New content is available; please refresh.');
-                  }
-                });
-              });
-            })
-            .catch((error) => {
-              console.log('ServiceWorker registration failed:', error);
-            });
-        });
-      }
-    </script>
+    <!-- PWA Service Worker Registration - Handled by vite-plugin-pwa -->
   </body>
 </html>

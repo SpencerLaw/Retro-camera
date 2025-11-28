@@ -1,6 +1,6 @@
 {
-  "name": "Creative Studio - 创意工作室",
-  "short_name": "创意工作室",
+  "name": "AnyPok",
+  "short_name": "AnyPok",
   "description": "趣味创意工具集合 - 复古相机、情侣游戏、求签、微观天气等",
   "start_url": "/",
   "display": "standalone",

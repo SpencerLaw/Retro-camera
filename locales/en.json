@@ -1,7 +1,7 @@
 {
   "home": {
-    "title": "4D Pocket",
-    "subtitle": "Explore Wonderful Worlds",
+    "title": "AnyPok",
+    "subtitle": "Awe",
     "camera": {
       "title": "Retro Camera",
       "subtitle": "Vintage Camera • Instant Photo",
@@ -10,7 +10,7 @@
     "fortune": {
       "title": "Fortune Sticks",
       "subtitle": "Sincere Prayer • Divine Guidance",
-      "description": "Draw a fortune stick and receive AI-powered guidance for your future"
+      "description": "Draw a fortune stick and receive divine guidance for your future"
     },
     "couple": {
       "title": "Heartbeat Pact",
@@ -25,7 +25,7 @@
     "weather": {
       "title": "Nano Weather",
       "subtitle": "Miniature Diorama • Weather Explorer",
-      "description": "Explore city weather through beautiful AI-generated miniature dioramas"
+      "description": "Explore city weather through beautiful miniature dioramas"
     },
     "backHome": "Back Home"
   },

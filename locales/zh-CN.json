@@ -1,7 +1,7 @@
 {
   "home": {
-    "title": "四次元口袋",
-    "subtitle": "探索奇妙世界",
+    "title": "AnyPok",
+    "subtitle": "Awe",
     "camera": {
       "title": "复古相机",
       "subtitle": "复古相机 • 即时拍照",
@@ -10,7 +10,7 @@
     "fortune": {
       "title": "灵签",
       "subtitle": "诚心祈求 • 指点迷津",
-      "description": "抽取灵签，获得AI驱动的未来指引"
+      "description": "抽取灵签，获得神明指引的未来方向"
     },
     "couple": {
       "title": "心跳契约",
@@ -25,7 +25,7 @@
     "weather": {
       "title": "微观天气",
       "subtitle": "微缩沙盘 • 天气探索",
-      "description": "通过AI生成的精美微缩沙盘探索城市天气"
+      "description": "通过精美微缩沙盘探索城市天气"
     },
     "backHome": "返回首页"
   },

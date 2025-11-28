@@ -1,7 +1,7 @@
 {
   "home": {
-    "title": "四次元口袋",
-    "subtitle": "探索奇妙世界",
+    "title": "AnyPok",
+    "subtitle": "Awe",
     "camera": {
       "title": "復古相機",
       "subtitle": "復古相機 • 即時拍照",
@@ -10,7 +10,7 @@
     "fortune": {
       "title": "靈簽",
       "subtitle": "誠心祈求 • 指點迷津",
-      "description": "抽取靈簽，獲得AI驅動的未來指引"
+      "description": "抽取靈簽，獲得神明指引的未來方向"
     },
     "couple": {
       "title": "心跳契約",
@@ -25,7 +25,7 @@
     "weather": {
       "title": "微觀天氣",
       "subtitle": "微縮沙盤 • 天氣探索",
-      "description": "通過AI生成的精美微縮沙盤探索城市天氣"
+      "description": "通過精美微縮沙盤探索城市天氣"
     },
     "backHome": "返回首頁"
   },

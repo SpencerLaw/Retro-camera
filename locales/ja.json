@@ -1,7 +1,7 @@
 {
   "home": {
-    "title": "四次元ポケット",
-    "subtitle": "不思議な世界を探検",
+    "title": "AnyPok",
+    "subtitle": "Awe",
     "camera": {
       "title": "レトロカメラ",
       "subtitle": "ビンテージカメラ • インスタント写真",
@@ -10,7 +10,7 @@
     "fortune": {
       "title": "おみくじ",
       "subtitle": "誠心誠意 • 運命を知る",
-      "description": "おみくじを引いて、AIが提供する未来のガイダンスを受け取る"
+      "description": "おみくじを引いて、神様からの未来のガイダンスを受け取る"
     },
     "couple": {
       "title": "ハートビートパクト",
@@ -25,7 +25,7 @@
     "weather": {
       "title": "ナノ天気",
       "subtitle": "ミニチュアジオラマ • 天気探索",
-      "description": "AIが生成する美しいミニチュアジオラマで都市の天気を探索"
+      "description": "美しいミニチュアジオラマで都市の天気を探索"
     },
     "backHome": "ホームに戻る"
   },

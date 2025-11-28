@@ -52,5 +52,12 @@
       "candy": "キャンディ",
       "retro": "レトロ"
     }
+  },
+  "weather": {
+    "backHome": "ホームに戻る",
+    "loadingWeather": "天気予報を確認中...",
+    "generatingImage": "ミニチュア世界を作成中...",
+    "searchPlaceholder": "検索して世界を作成",
+    "download": "画像をダウンロード"
   }
 }

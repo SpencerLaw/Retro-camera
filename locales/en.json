@@ -52,5 +52,12 @@
       "candy": "Candy",
       "retro": "Retro"
     }
+  },
+  "weather": {
+    "backHome": "Back Home",
+    "loadingWeather": "Checking the forecast...",
+    "generatingImage": "Crafting miniature world...",
+    "searchPlaceholder": "Search to create a world",
+    "download": "Download Image"
   }
 }

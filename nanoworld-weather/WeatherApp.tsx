@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useTranslations } from '../hooks/useTranslations';
 import SearchBar from './components/SearchBar';
 import WeatherCard from './components/WeatherCard';
 import { WeatherData, GeneratedImage, AppState } from './types';
@@ -11,6 +12,7 @@ interface WeatherAppProps {
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
+  const t = useTranslations();
   const [state, setState] = useState<AppState>({
     status: 'idle',
     weather: null,
@@ -52,10 +54,32 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
     }
   };
 
+  // Download function
+  const handleDownload = async () => {
+    if (!state.image || state.status !== 'success') return;
+
+    try {
+      // Fetch the image as a blob
+      const response = await fetch(state.image.url);
+      const blob = await response.blob();
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${state.weather?.city || 'weather'}-diorama-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     executeSearch(DEFAULT_CITY);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -82,6 +106,8 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
           status={state.status}
           weather={state.weather}
           image={state.image}
+          onDownload={handleDownload}
+          t={t}
         />
 
         {state.error && (

@@ -52,5 +52,12 @@
       "candy": "糖果",
       "retro": "復古"
     }
+  },
+  "weather": {
+    "backHome": "返回首頁",
+    "loadingWeather": "正在查詢天氣預報...",
+    "generatingImage": "正在生成微縮世界...",
+    "searchPlaceholder": "搜索以創建世界",
+    "download": "下載圖片"
   }
 }

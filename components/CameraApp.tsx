@@ -144,7 +144,7 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
       <div className="fixed top-4 left-4 z-[2000] flex gap-2">
         <button 
           onClick={onBackHome}
-          className="p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#1293EE] backdrop-blur-sm transition-all text-[#1293EE] hover:text-[#0d6ab8] shadow-lg"
+          className="p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#8b4513] backdrop-blur-sm transition-all text-[#8b4513] hover:text-[#5c4033] shadow-lg"
         >
           <ArrowLeft size={24} />
         </button>

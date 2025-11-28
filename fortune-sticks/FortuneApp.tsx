@@ -131,7 +131,7 @@ const FortuneApp: React.FC<FortuneAppProps> = ({ onBackHome }) => {
       {/* --- Back Home Button --- */}
       <button
         onClick={onBackHome}
-        className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#1293EE] backdrop-blur-sm transition-all text-[#1293EE] hover:text-[#0d6ab8] shadow-lg"
+        className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#d4af37] backdrop-blur-sm transition-all text-[#d4af37] hover:text-[#bf953f] shadow-lg"
       >
         <ArrowLeft size={24} />
       </button>

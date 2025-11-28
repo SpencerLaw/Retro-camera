@@ -19,10 +19,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
   const t = useTranslations();
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#FF6B35] via-[#FF8C42] to-[#FF7F50] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#dfd3c3] via-[#c9b99b] to-[#b8a082] flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Background Pattern */}
       <div 
-        className="absolute inset-0 opacity-10"
+        className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `url("https://www.transparenttextures.com/patterns/cork-board.png")`,
         }}

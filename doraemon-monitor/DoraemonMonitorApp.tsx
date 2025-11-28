@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useTranslations } from '../hooks/useTranslations';
 import './doraemon-monitor.css';
 
 interface DoraemonMonitorAppProps {
@@ -7,6 +8,7 @@ interface DoraemonMonitorAppProps {
 }
 
 const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) => {
+  const t = useTranslations();
   const [isStarted, setIsStarted] = useState(false);
   const [currentDb, setCurrentDb] = useState(40);
   const [limit, setLimit] = useState(60);
@@ -33,7 +35,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
 
     try {
       const AC = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AC) throw new Error('您的浏览器不支持音频功能，请升级浏览器。');
+      if (!AC) throw new Error(t('doraemon.errors.browserNotSupported'));
 
       if (!audioContextRef.current) audioContextRef.current = new AC();
       if (audioContextRef.current.state === 'suspended') {
@@ -46,7 +48,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
 
       if (stream.getAudioTracks().length > 0) {
         stream.getAudioTracks()[0].onended = () => {
-          alert('⚠️ 麦克风连接已断开！\n监测停止，请重新点击开始。');
+          alert(t('doraemon.errors.micDisconnected'));
           window.location.reload();
         };
       }
@@ -67,14 +69,14 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
         } catch (e) {}
       }
     } catch (err: any) {
-      let msg = '🔴 启动失败！';
+      let msg = t('doraemon.errors.startFailed');
 
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        msg += '\n⛔ 您刚才点击了"禁止"麦克风。\n\n✅ 解决方法：\n1. 点击浏览器地址栏左侧的"锁"或"设置"图标。\n2. 找到"麦克风"并点击"重置"或"允许"。\n3. 刷新页面或点击下方按钮重试。';
+        msg += t('doraemon.errors.permissionDenied');
       } else if (err.name === 'NotFoundError') {
-        msg += '\n🔌 未检测到麦克风设备，请检查连接。';
+        msg += t('doraemon.errors.noMicFound');
       } else {
-        msg += '\n❓ ' + err.message;
+        msg += t('doraemon.errors.unknownError') + err.message;
       }
 
       setError(msg);
@@ -207,7 +209,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
     return (
       <div className="doraemon-start-layer">
         <div className="text-8xl mb-5">🤫</div>
-        <h1 className="text-4xl mb-8 opacity-90">哆啦A梦教室分贝仪</h1>
+        <h1 className="text-4xl mb-8 opacity-90">{t('doraemon.title')}</h1>
 
         <button
           className="doraemon-btn-big"
@@ -216,11 +218,11 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
           style={{ opacity: isLoading ? 0.7 : 1 }}
         >
           {isLoading ? (
-            <span className="text-2xl">正在启动...<br/>请点击允许权限</span>
+            <span className="text-2xl">{t('doraemon.starting')}<br/>{t('doraemon.pleaseAllowPermission')}</span>
           ) : (
             <>
-              <span>开始安静</span>
-              <span>自习开始！</span>
+              <span>{t('doraemon.startQuiet')}</span>
+              <span>{t('doraemon.studyBegin')}</span>
             </>
           )}
         </button>
@@ -232,7 +234,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
         )}
 
         <div className="mt-10 text-lg opacity-70">
-          ( 点击后请务必选择"允许"麦克风 )
+          ({t('doraemon.pleaseAllowMic')})
         </div>
       </div>
     );
@@ -251,20 +253,20 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
 
       {/* 巨型警告文字 */}
       {state === 'alarm' && (
-        <div className="doraemon-giant-text">安静！！</div>
+        <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>
       )}
 
       {/* 顶部栏 */}
       <header className="doraemon-header">
         <div className="doraemon-info-box">
-          <span className="info-label">安静时长</span>
+          <span className="info-label">{t('doraemon.quietDuration')}</span>
           <span className="info-value">{formatTime(quietTime)}</span>
         </div>
         <button className="doraemon-btn-icon" onClick={() => setIsDarkMode(!isDarkMode)}>
           🌓
         </button>
         <div className="doraemon-info-box" style={{ color: 'var(--dora-red)', borderColor: 'rgba(221,0,0,0.3)' }}>
-          <span className="info-label">警告次数</span>
+          <span className="info-label">{t('doraemon.warningCount')}</span>
           <span className="info-value">{warnCount}</span>
         </div>
       </header>
@@ -345,7 +347,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
           <div className="doraemon-db-val" style={{ color: dbColor }}>
             {Math.round(currentDb)}
           </div>
-          <div className="doraemon-db-label">当前分贝 (dB)</div>
+          <div className="doraemon-db-label">{t('doraemon.currentDecibel')}</div>
           <div className="doraemon-bar-container">
             <div className="doraemon-bar-limit" style={{ left: `${limitBarPercent}%` }} />
             <div className="doraemon-bar-fill" style={{ width: `${barPercent}%`, background: dbColor }} />
@@ -358,7 +360,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
         <div className="doraemon-panel">
           <div className="doraemon-slider-box">
             <div className="doraemon-slider-top">
-              <span className="doraemon-lbl-title">报警阈值</span>
+              <span className="doraemon-lbl-title">{t('doraemon.alarmThreshold')}</span>
               <span className="doraemon-lbl-val">{limit} dB</span>
             </div>
             <input
@@ -374,7 +376,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
             className="doraemon-btn-reset"
             onClick={() => setWarnCount(0)}
           >
-            重置次数
+            {t('doraemon.resetCount')}
           </button>
         </div>
       </footer>

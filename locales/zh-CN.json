@@ -59,5 +59,28 @@
     "generatingImage": "正在生成微缩世界...",
     "searchPlaceholder": "输入城市名称探索天气",
     "download": "下载图片"
+  },
+  "doraemon": {
+    "backHome": "返回首页",
+    "title": "哆啦A梦教室分贝仪",
+    "starting": "正在启动...",
+    "pleaseAllowPermission": "请点击允许权限",
+    "startQuiet": "开始安静",
+    "studyBegin": "自习开始！",
+    "pleaseAllowMic": "点击后请务必选择\"允许\"麦克风",
+    "quietDuration": "安静时长",
+    "warningCount": "警告次数",
+    "currentDecibel": "当前分贝 (dB)",
+    "alarmThreshold": "报警阈值",
+    "resetCount": "重置次数",
+    "quiet": "安静！！",
+    "errors": {
+      "browserNotSupported": "您的浏览器不支持音频功能，请升级浏览器。",
+      "micDisconnected": "⚠️ 麦克风连接已断开！\n监测停止，请重新点击开始。",
+      "startFailed": "🔴 启动失败！",
+      "permissionDenied": "\n⛔ 您刚才点击了\"禁止\"麦克风。\n\n✅ 解决方法：\n1. 点击浏览器地址栏左侧的\"锁\"或\"设置\"图标。\n2. 找到\"麦克风\"并点击\"重置\"或\"允许\"。\n3. 刷新页面或点击下方按钮重试。",
+      "noMicFound": "\n🔌 未检测到麦克风设备，请检查连接。",
+      "unknownError": "\n❓ "
+    }
   }
 }

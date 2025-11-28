@@ -59,5 +59,28 @@
     "generatingImage": "ミニチュア世界を作成中...",
     "searchPlaceholder": "都市名を入力して天気を探索",
     "download": "画像をダウンロード"
+  },
+  "doraemon": {
+    "backHome": "ホームに戻る",
+    "title": "ドラえもん教室デシベルモニター",
+    "starting": "起動中...",
+    "pleaseAllowPermission": "マイクの許可をクリックしてください",
+    "startQuiet": "静かに始める",
+    "studyBegin": "自習開始！",
+    "pleaseAllowMic": "クリック後、必ずマイクの\"許可\"を選択してください",
+    "quietDuration": "静かな時間",
+    "warningCount": "警告回数",
+    "currentDecibel": "現在のデシベル (dB)",
+    "alarmThreshold": "アラーム閾値",
+    "resetCount": "回数をリセット",
+    "quiet": "静かに！！",
+    "errors": {
+      "browserNotSupported": "お使いのブラウザは音声機能をサポートしていません。ブラウザをアップグレードしてください。",
+      "micDisconnected": "⚠️ マイク接続が切断されました！\n監視が停止しました。もう一度開始をクリックしてください。",
+      "startFailed": "🔴 起動に失敗しました！",
+      "permissionDenied": "\n⛔ マイクを\"拒否\"しました。\n\n✅ 解決方法：\n1. ブラウザのアドレスバーの左側にある\"ロック\"または\"設定\"アイコンをクリックします。\n2. \"マイク\"を見つけて\"リセット\"または\"許可\"をクリックします。\n3. ページを更新するか、下のボタンをクリックして再試行します。",
+      "noMicFound": "\n🔌 マイクデバイスが検出されませんでした。接続を確認してください。",
+      "unknownError": "\n❓ "
+    }
   }
 }

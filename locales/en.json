@@ -59,5 +59,28 @@
     "generatingImage": "Crafting miniature world...",
     "searchPlaceholder": "Enter a city name to explore its weather",
     "download": "Download Image"
+  },
+  "doraemon": {
+    "backHome": "Back Home",
+    "title": "Doraemon Classroom Decibel Monitor",
+    "starting": "Starting...",
+    "pleaseAllowPermission": "Please allow microphone permission",
+    "startQuiet": "Start Quiet",
+    "studyBegin": "Study Begins!",
+    "pleaseAllowMic": "Please select \"Allow\" for microphone after clicking",
+    "quietDuration": "Quiet Duration",
+    "warningCount": "Warning Count",
+    "currentDecibel": "Current Decibel (dB)",
+    "alarmThreshold": "Alarm Threshold",
+    "resetCount": "Reset Count",
+    "quiet": "QUIET!!",
+    "errors": {
+      "browserNotSupported": "Your browser does not support audio features. Please upgrade your browser.",
+      "micDisconnected": "⚠️ Microphone connection disconnected!\nMonitoring stopped. Please click start again.",
+      "startFailed": "🔴 Failed to start!",
+      "permissionDenied": "\n⛔ You clicked \"Deny\" for microphone.\n\n✅ Solution:\n1. Click the \"lock\" or \"settings\" icon on the left side of the browser address bar.\n2. Find \"Microphone\" and click \"Reset\" or \"Allow\".\n3. Refresh the page or click the button below to retry.",
+      "noMicFound": "\n🔌 No microphone device detected. Please check connection.",
+      "unknownError": "\n❓ "
+    }
   }
 }

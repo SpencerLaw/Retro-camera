@@ -59,5 +59,28 @@
     "generatingImage": "正在生成微縮世界...",
     "searchPlaceholder": "輸入城市名稱探索天氣",
     "download": "下載圖片"
+  },
+  "doraemon": {
+    "backHome": "返回首頁",
+    "title": "哆啦A夢教室分貝儀",
+    "starting": "正在啟動...",
+    "pleaseAllowPermission": "請點擊允許權限",
+    "startQuiet": "開始安靜",
+    "studyBegin": "自習開始！",
+    "pleaseAllowMic": "點擊後請務必選擇\"允許\"麥克風",
+    "quietDuration": "安靜時長",
+    "warningCount": "警告次數",
+    "currentDecibel": "當前分貝 (dB)",
+    "alarmThreshold": "報警閾值",
+    "resetCount": "重置次數",
+    "quiet": "安靜！！",
+    "errors": {
+      "browserNotSupported": "您的瀏覽器不支持音頻功能，請升級瀏覽器。",
+      "micDisconnected": "⚠️ 麥克風連接已斷開！\n監測停止，請重新點擊開始。",
+      "startFailed": "🔴 啟動失敗！",
+      "permissionDenied": "\n⛔ 您剛才點擊了\"禁止\"麥克風。\n\n✅ 解決方法：\n1. 點擊瀏覽器地址欄左側的\"鎖\"或\"設置\"圖標。\n2. 找到\"麥克風\"並點擊\"重置\"或\"允許\"。\n3. 刷新頁面或點擊下方按鈕重試。",
+      "noMicFound": "\n🔌 未檢測到麥克風設備，請檢查連接。",
+      "unknownError": "\n❓ "
+    }
   }
 }

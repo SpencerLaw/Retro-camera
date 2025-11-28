@@ -1,57 +1,32 @@
-import { GoogleGenAI } from "@google/genai";
 import { FortuneData, Language } from '../types';
-import { MODEL_NAME, SYSTEM_INSTRUCTION, FORTUNE_SCHEMA } from '../constants';
-
-// Lazy initialization to avoid errors when API key is not set
-let ai: GoogleGenAI | null = null;
-
-const getAI = (): GoogleGenAI => {
-  if (!ai) {
-    // Vite automatically replaces import.meta.env.VITE_* at build time
-    // @ts-ignore - Vite will replace this at build time
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.API_KEY || process.env.GEMINI_API_KEY || '';
-    if (!apiKey) {
-      throw new Error("API Key is not configured. Please set VITE_GEMINI_API_KEY environment variable.");
-    }
-    ai = new GoogleGenAI({ apiKey });
-  }
-  return ai;
-};
-
-const PROMPT_BY_LANG: Record<Language, string> = {
-  'zh-TW': "請隨機為我抽一支靈簽。使用繁體中文生成結果。Title 格式如 '第八簽 上上'。Poem 必須是四句七言或五言絕句。",
-  'zh-CN': "请随机为我抽一支灵签。使用简体中文生成结果。Title 格式如 '第八签 上上'。Poem 必须是四句七言或五言绝句。",
-  'en': "Randomly draw a Chinese fortune stick for me. Generate the result in English. Title format should be 'Sign No. X - [Luck Level]'. The poem should be translated poetically.",
-  'ja': "私のためにおみくじを引いてください。結果を日本語で生成してください。Titleは「第八番 大吉」のような形式にしてください。Poemは漢詩、または詩的な表現にしてください。"
-};
 
 export const generateFortune = async (language: Language): Promise<FortuneData> => {
   try {
-    const aiInstance = getAI();
-    const response = await aiInstance.models.generateContent({
-      model: MODEL_NAME,
-      contents: PROMPT_BY_LANG[language],
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: FORTUNE_SCHEMA,
-        temperature: 1.1,
-      }
+    const response = await fetch('/api/gemini/fortune', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ language })
     });
 
-    const text = response.text;
-    if (!text) throw new Error("No response text");
+    if (!response.ok) {
+      throw new Error('Failed to generate fortune');
+    }
+
+    const result = await response.json();
     
-    return JSON.parse(text) as FortuneData;
-  } catch (error: any) {
-    console.error("Fortune generation failed:", error);
-    
-    // Check for location/region errors
-    if (error?.message?.includes('location is not supported') || 
-        error?.message?.includes('FAILED_PRECONDITION') ||
-        error?.status === 'FAILED_PRECONDITION') {
+    // Handle location restriction errors
+    if (result.error === 'location_restricted') {
       return getLocationErrorFortune(language);
     }
+    
+    // Handle API errors with fallback
+    if (result.error === 'api_error') {
+      return getFallbackFortune(language);
+    }
+    
+    return result.data as FortuneData;
+  } catch (error: any) {
+    console.error("Fortune generation failed:", error);
     
     // Fallback fortune based on language
     return getFallbackFortune(language);

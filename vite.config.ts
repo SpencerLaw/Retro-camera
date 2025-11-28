@@ -1,10 +1,8 @@
 import path from 'path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, '.', '');
-    const apiKey = env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || '';
     return {
       base: './',
       server: {
@@ -12,10 +10,7 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
-      define: {
-        'process.env.API_KEY': JSON.stringify(apiKey),
-        'process.env.GEMINI_API_KEY': JSON.stringify(apiKey),
-      },
+      // 移除 API 密钥注入，密钥现在保存在服务器端
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),

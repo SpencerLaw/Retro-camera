@@ -84,8 +84,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
             
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-gradient-to-br from-[#ff6b6b] to-[#ee5a6f] rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
-                <Camera size={64} className="text-white" />
+              <div className="w-32 h-32 bg-gradient-to-br from-[#FFE0B2] via-[#FFCCBC] to-[#F8BBD0] rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
+                <Camera size={64} className="text-[#8E6A9E] drop-shadow-md" />
               </div>
             </div>
 
@@ -108,7 +108,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
             </div>
 
             {/* Hover Effect Glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#ff6b6b]/0 via-[#ff6b6b]/20 to-[#ff6b6b]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FFE0B2]/0 via-[#F8BBD0]/20 to-[#FFCCBC]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
 
           {/* Fortune Sticks Card */}
@@ -156,8 +156,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
           {/* Weather Card */}
           <div
             onClick={() => onSelectProject('weather')}
-            className="group relative bg-gradient-to-br from-[#87CEEB] via-[#4FC3F7] to-[#29B6F6] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-[#FFD700] shadow-xl"
+            className="group relative rounded-2xl p-[4px] cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-xl"
+            style={{
+              background: 'linear-gradient(135deg, #B2EBF2, #E1BEE7, #C5CAE9)',
+            }}
           >
+            <div className="relative bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] rounded-2xl p-8 h-full">
             {/* Card Background Pattern */}
             <div
               className="absolute inset-0 rounded-2xl opacity-10"
@@ -168,31 +172,32 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
 
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-4 border-white">
-                <Cloud size={64} className="text-[#4FC3F7]" />
+              <div className="w-32 h-32 bg-gradient-to-br from-[#E1BEE7] via-[#C5CAE9] to-[#B2EBF2] rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300 border-4 border-white/50">
+                <Cloud size={64} className="text-white drop-shadow-md" />
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-white mb-3 drop-shadow-lg">{t('home.weather.title')}</h2>
-              <p className="text-lg text-white/90 mb-4 opacity-90">
+              <h2 className="font-bold text-4xl text-[#4A90A4] mb-3 drop-shadow-md">{t('home.weather.title')}</h2>
+              <p className="text-lg text-[#5C7A8A] mb-4 opacity-90">
                 {t('home.weather.subtitle')}
               </p>
-              <p className="text-sm text-white/80 opacity-90 leading-relaxed">
+              <p className="text-sm text-[#6B8A9A] opacity-90 leading-relaxed">
                 {t('home.weather.description')}
               </p>
 
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-2 border-dashed border-white/50">
-                <div className="inline-block px-4 py-2 bg-white/90 text-[#4FC3F7] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 border border-white">
+              <div className="mt-6 pt-6 border-t-2 border-dashed border-[#B2EBF2]/50">
+                <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#E1BEE7] to-[#B2EBF2] text-white rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 shadow-md">
                   Enter →
                 </div>
               </div>
             </div>
 
             {/* Hover Effect Glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FFD700]/0 via-[#FFD700]/30 to-[#FFD700]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#E1BEE7]/0 via-[#C5CAE9]/30 to-[#B2EBF2]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            </div>
           </div>
 
 

@@ -6,6 +6,7 @@ import WeatherCard from './components/WeatherCard';
 import { WeatherData, GeneratedImage, AppState } from './types';
 import { fetchWeatherAndContext, generateDioramaImage } from './services/geminiService';
 import { DEFAULT_CITY } from './constants';
+import { getCachedWeather, setCachedWeather } from './utils/cache';
 
 interface WeatherAppProps {
   onBackHome: () => void;
@@ -21,7 +22,22 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
   });
 
   // Function to execute the workflow
-  const executeSearch = async (city: string) => {
+  const executeSearch = async (city: string, useCache: boolean = true) => {
+    // 检查缓存
+    if (useCache) {
+      const cached = getCachedWeather(city);
+      if (cached) {
+        console.log(`Using cached data for ${city}`);
+        setState({
+          status: 'success',
+          weather: cached.weather,
+          image: cached.image,
+          error: null,
+        });
+        return;
+      }
+    }
+
     setState(prev => ({ ...prev, status: 'loading_weather', error: null }));
 
     try {
@@ -36,11 +52,15 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
 
       // 2. Generate Image
       const imageUrl = await generateDioramaImage(weatherData);
+      const image: GeneratedImage = { url: imageUrl, alt: `Miniature diorama of ${city}` };
+
+      // 保存到缓存
+      setCachedWeather(city, weatherData, image);
 
       setState({
         status: 'success',
         weather: weatherData,
-        image: { url: imageUrl, alt: `Miniature diorama of ${city}` },
+        image: image,
         error: null,
       });
 

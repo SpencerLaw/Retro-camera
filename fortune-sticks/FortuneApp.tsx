@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GameState, FortuneData, Language } from './types';
 import { generateFortune } from './services/geminiService';
-import { RefreshCw, Loader2, Home } from 'lucide-react';
+import { RefreshCw, Loader2, ArrowLeft } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 
 // --- Translations ---
@@ -129,15 +129,12 @@ const FortuneApp: React.FC<FortuneAppProps> = ({ onBackHome }) => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-yellow-600/10 rounded-full blur-[100px] z-0 pointer-events-none"></div>
 
       {/* --- Back Home Button --- */}
-      <div className="absolute top-6 left-6 z-40">
-        <button 
-          onClick={onBackHome}
-          className="p-2 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 backdrop-blur-sm transition-all text-yellow-100/80 hover:text-yellow-100 flex items-center gap-2 px-4"
-        >
-          <Home size={18} />
-          <span className="text-sm">{t.backHome}</span>
-        </button>
-      </div>
+      <button
+        onClick={onBackHome}
+        className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#1293EE] backdrop-blur-sm transition-all text-[#1293EE] hover:text-[#0d6ab8] shadow-lg"
+      >
+        <ArrowLeft size={24} />
+      </button>
 
 
       {/* --- Main Content --- */}

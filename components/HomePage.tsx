@@ -102,7 +102,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
           {/* Retro Camera Card */}
           <div 
             onClick={() => onSelectProject('camera')}
-            className="group relative bg-gradient-to-br from-[#FFF9E6] via-[#FFF5E1] to-[#FFF0DC] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#FFE5CC]/50"
+            className="group relative backdrop-blur-xl bg-white/20 rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-2xl border border-white/30"
           >
             {/* Card Background Pattern */}
             <div 
@@ -144,7 +144,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
           {/* Fortune Sticks Card */}
           <div 
             onClick={() => onSelectProject('fortune')}
-            className="group relative bg-gradient-to-br from-[#FFF8E1] via-[#FFF9C4] to-[#FFF59D] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#FFECB3]/50"
+            className="group relative backdrop-blur-xl bg-white/20 rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-2xl border border-white/30"
           >
             {/* Card Background Pattern */}
             <div 
@@ -186,7 +186,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
           {/* Weather Card */}
           <div
             onClick={() => onSelectProject('weather')}
-            className="group relative bg-gradient-to-br from-[#E8F5E9] via-[#E0F2F1] to-[#E1F5FE] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#C8E6C9]/50"
+            className="group relative backdrop-blur-xl bg-white/20 rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-2xl border border-white/30"
           >
             {/* Card Background Pattern */}
             <div
@@ -267,7 +267,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
           {/* Doraemon Monitor Card */}
           <div
             onClick={() => onSelectProject('doraemon')}
-            className="group relative bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg border border-[#90CAF9]/50"
+            className="group relative backdrop-blur-xl bg-white/20 rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-2xl border border-white/30"
           >
             {/* Card Background Pattern */}
             <div

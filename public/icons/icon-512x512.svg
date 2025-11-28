@@ -1,0 +1,53 @@
+
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f7931e;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="7.68"/>
+      <feOffset dx="0" dy="10.24" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Toolbox with shadow -->
+  <g filter="url(#shadow)">
+    <!-- Main toolbox body -->
+    <rect x="89.6" y="189.44" width="332.8" height="256" fill="#e74c3c" rx="10.24"/>
+
+    <!-- Toolbox lid -->
+    <rect x="89.6" y="128" width="332.8" height="61.44" fill="#c0392b" rx="10.24"/>
+
+    <!-- Handle -->
+    <path d="M 192 128 Q 256 61.44 320 128"
+          stroke="#2c3e50" stroke-width="20.48" fill="none" stroke-linecap="round"/>
+
+    <!-- Lock/latch -->
+    <rect x="235.52" y="158.72" width="40.96" height="24.576" fill="#f39c12" rx="5.12"/>
+
+    <!-- Wrench symbol -->
+    <line x1="179.2" y1="215.04" x2="202.24" y2="268.8"
+          stroke="#ffffff" stroke-width="10.24" stroke-linecap="round"/>
+    <circle cx="179.2" cy="215.04" r="15.36" fill="#ffffff"/>
+
+    <!-- Screwdriver symbol -->
+    <line x1="271.36" y1="215.04" x2="325.12" y2="268.8"
+          stroke="#ffffff" stroke-width="10.24" stroke-linecap="round"/>
+    <circle cx="271.36" cy="215.04" r="15.36" fill="#f39c12"/>
+
+    <!-- Compartment line -->
+    <line x1="115.2" y1="368.64" x2="396.8" y2="368.64"
+          stroke="rgba(255,255,255,0.2)" stroke-width="5.12"/>
+  </g>
+</svg>

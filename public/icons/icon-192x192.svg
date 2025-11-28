@@ -1,0 +1,53 @@
+
+<svg width="192" height="192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f7931e;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.88"/>
+      <feOffset dx="0" dy="3.84" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" fill="url(#bg)"/>
+
+  <!-- Toolbox with shadow -->
+  <g filter="url(#shadow)">
+    <!-- Main toolbox body -->
+    <rect x="33.599999999999994" y="71.03999999999999" width="124.80000000000001" height="96" fill="#e74c3c" rx="3.84"/>
+
+    <!-- Toolbox lid -->
+    <rect x="33.599999999999994" y="48" width="124.80000000000001" height="23.04" fill="#c0392b" rx="3.84"/>
+
+    <!-- Handle -->
+    <path d="M 72 48 Q 96 23.04 120 48"
+          stroke="#2c3e50" stroke-width="7.68" fill="none" stroke-linecap="round"/>
+
+    <!-- Lock/latch -->
+    <rect x="88.32000000000001" y="59.519999999999996" width="15.36" height="9.216000000000001" fill="#f39c12" rx="1.92"/>
+
+    <!-- Wrench symbol -->
+    <line x1="67.19999999999999" y1="80.64" x2="75.84" y2="100.80000000000001"
+          stroke="#ffffff" stroke-width="3.84" stroke-linecap="round"/>
+    <circle cx="67.19999999999999" cy="80.64" r="5.76" fill="#ffffff"/>
+
+    <!-- Screwdriver symbol -->
+    <line x1="101.76" y1="80.64" x2="121.92" y2="100.80000000000001"
+          stroke="#ffffff" stroke-width="3.84" stroke-linecap="round"/>
+    <circle cx="101.76" cy="80.64" r="5.76" fill="#f39c12"/>
+
+    <!-- Compartment line -->
+    <line x1="43.2" y1="138.24" x2="148.8" y2="138.24"
+          stroke="rgba(255,255,255,0.2)" stroke-width="1.92"/>
+  </g>
+</svg>

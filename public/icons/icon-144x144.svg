@@ -1,0 +1,53 @@
+
+<svg width="144" height="144" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f7931e;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.16"/>
+      <feOffset dx="0" dy="2.88" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="144" height="144" fill="url(#bg)"/>
+
+  <!-- Toolbox with shadow -->
+  <g filter="url(#shadow)">
+    <!-- Main toolbox body -->
+    <rect x="25.2" y="53.28" width="93.60000000000001" height="72" fill="#e74c3c" rx="2.88"/>
+
+    <!-- Toolbox lid -->
+    <rect x="25.2" y="36" width="93.60000000000001" height="17.28" fill="#c0392b" rx="2.88"/>
+
+    <!-- Handle -->
+    <path d="M 54 36 Q 72 17.28 90 36"
+          stroke="#2c3e50" stroke-width="5.76" fill="none" stroke-linecap="round"/>
+
+    <!-- Lock/latch -->
+    <rect x="66.24000000000001" y="44.64" width="11.52" height="6.912" fill="#f39c12" rx="1.44"/>
+
+    <!-- Wrench symbol -->
+    <line x1="50.4" y1="60.48" x2="56.88" y2="75.60000000000001"
+          stroke="#ffffff" stroke-width="2.88" stroke-linecap="round"/>
+    <circle cx="50.4" cy="60.48" r="4.32" fill="#ffffff"/>
+
+    <!-- Screwdriver symbol -->
+    <line x1="76.32000000000001" y1="60.48" x2="91.44" y2="75.60000000000001"
+          stroke="#ffffff" stroke-width="2.88" stroke-linecap="round"/>
+    <circle cx="76.32000000000001" cy="60.48" r="4.32" fill="#f39c12"/>
+
+    <!-- Compartment line -->
+    <line x1="32.4" y1="103.67999999999999" x2="111.60000000000001" y2="103.67999999999999"
+          stroke="rgba(255,255,255,0.2)" stroke-width="1.44"/>
+  </g>
+</svg>

@@ -128,25 +128,26 @@
 
 /* 顶部栏 */
 .doraemon-header {
-  height: 10vh;
-  min-height: 50px;
+  height: auto;
+  min-height: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 5%;
+  padding: 2vh 5% 1.5vh 5%;
   z-index: 20;
-  padding-top: env(safe-area-inset-top);
+  padding-top: calc(2vh + env(safe-area-inset-top));
+  margin-top: 60px;
 }
 
 .doraemon-info-box {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
-  padding: 1rem 1.5rem;
-  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  border-radius: 20px;
   text-align: center;
   color: var(--text-main);
   border: 2px solid rgba(255, 255, 255, 0.4);
-  min-width: 140px;
+  min-width: 160px;
 }
 
 .dark-mode .doraemon-info-box {
@@ -161,14 +162,14 @@
 
 .info-label {
   display: block;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   opacity: 0.9;
   font-weight: bold;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .info-value {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 900;
   font-family: monospace;
   line-height: 1;
@@ -393,6 +394,27 @@
 
 /* 竖屏适配 */
 @media (max-width: 768px) and (orientation: portrait) {
+  .doraemon-header {
+    padding: 1.5vh 4% 1vh 4%;
+    margin-top: 50px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .doraemon-info-box {
+    padding: 1rem 1.2rem;
+    min-width: 120px;
+    flex: 1;
+  }
+
+  .info-label {
+    font-size: 1.1rem;
+  }
+
+  .info-value {
+    font-size: 2.5rem;
+  }
+
   .doraemon-main-content {
     flex-direction: column;
     gap: 2vh;

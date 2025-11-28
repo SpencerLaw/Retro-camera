@@ -1,7 +1,0 @@
-{
-  "name": "RetroLens",
-  "description": "A nostalgic camera application featuring real-time vintage filters and AI-powered image remixing.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}

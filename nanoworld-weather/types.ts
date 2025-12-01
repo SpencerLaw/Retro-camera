@@ -1,3 +1,6 @@
+// Weather style type
+export type WeatherStyle = 'diorama' | 'cake';
+
 export interface WeatherData {
   city: string;
   country: string;
@@ -17,4 +20,5 @@ export interface AppState {
   weather: WeatherData | null;
   image: GeneratedImage | null;
   error: string | null;
+  style: WeatherStyle; // Current selected style
 }

@@ -1,10 +1,11 @@
-import { WeatherData, GeneratedImage } from '../types';
+import { WeatherData, GeneratedImage, WeatherStyle } from '../types';
 
 interface CachedWeatherData {
   weather: WeatherData;
   image: GeneratedImage;
   timestamp: number;
   city: string;
+  style: WeatherStyle;
 }
 
 const CACHE_PREFIX = 'weather_cache_';
@@ -13,8 +14,8 @@ const CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 分钟
 /**
  * 获取缓存键
  */
-const getCacheKey = (city: string): string => {
-  return `${CACHE_PREFIX}${city.toLowerCase().trim()}`;
+const getCacheKey = (city: string, style: WeatherStyle): string => {
+  return `${CACHE_PREFIX}${style}_${city.toLowerCase().trim()}`;
 };
 
 /**
@@ -29,28 +30,28 @@ const isCacheValid = (cached: CachedWeatherData): boolean => {
 /**
  * 获取缓存的天气数据
  */
-export const getCachedWeather = (city: string): { weather: WeatherData; image: GeneratedImage } | null => {
+export const getCachedWeather = (city: string, style: WeatherStyle): { weather: WeatherData; image: GeneratedImage } | null => {
   try {
-    const cacheKey = getCacheKey(city);
+    const cacheKey = getCacheKey(city, style);
     const cachedStr = localStorage.getItem(cacheKey);
-    
+
     if (!cachedStr) return null;
-    
+
     const cached: CachedWeatherData = JSON.parse(cachedStr);
-    
+
     // 检查缓存是否有效
     if (!isCacheValid(cached)) {
       // 缓存已过期，删除它
       localStorage.removeItem(cacheKey);
       return null;
     }
-    
-    // 验证缓存数据完整性
-    if (!cached.weather || !cached.image) {
+
+    // 验证缓存数据完整性和风格匹配
+    if (!cached.weather || !cached.image || cached.style !== style) {
       localStorage.removeItem(cacheKey);
       return null;
     }
-    
+
     return {
       weather: cached.weather,
       image: cached.image
@@ -67,17 +68,19 @@ export const getCachedWeather = (city: string): { weather: WeatherData; image: G
 export const setCachedWeather = (
   city: string,
   weather: WeatherData,
-  image: GeneratedImage
+  image: GeneratedImage,
+  style: WeatherStyle
 ): void => {
   try {
-    const cacheKey = getCacheKey(city);
+    const cacheKey = getCacheKey(city, style);
     const cached: CachedWeatherData = {
       weather,
       image,
       timestamp: Date.now(),
-      city: city.toLowerCase().trim()
+      city: city.toLowerCase().trim(),
+      style
     };
-    
+
     localStorage.setItem(cacheKey, JSON.stringify(cached));
   } catch (error) {
     console.error('Error saving cache:', error);

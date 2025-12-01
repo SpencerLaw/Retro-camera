@@ -58,7 +58,14 @@
     "loadingWeather": "Checking the forecast...",
     "generatingImage": "Crafting miniature world...",
     "searchPlaceholder": "Enter a city name to explore its weather",
-    "download": "Download Image"
+    "download": "Download Image",
+    "styleSelector": {
+      "title": "Choose Style",
+      "diorama": "Miniature Diorama",
+      "dioramaDesc": "Dreamy fairy-tale miniature scenes",
+      "cake": "Sweet Cake",
+      "cakeDesc": "A delicious world built from pastries"
+    }
   },
   "doraemon": {
     "backHome": "Back Home",

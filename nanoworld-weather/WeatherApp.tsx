@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import SearchBar from './components/SearchBar';
 import WeatherCard from './components/WeatherCard';
-import { WeatherData, GeneratedImage, AppState } from './types';
+import { WeatherData, GeneratedImage, AppState, WeatherStyle } from './types';
 import { fetchWeatherAndContext, generateDioramaImage } from './services/geminiService';
 import { getCachedWeather, setCachedWeather } from './utils/cache';
 
@@ -18,20 +18,22 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
     weather: null,
     image: null,
     error: null,
+    style: 'diorama',
   });
 
   // Function to execute the workflow
   const executeSearch = async (city: string, useCache: boolean = true) => {
     // 检查缓存
     if (useCache) {
-      const cached = getCachedWeather(city);
+      const cached = getCachedWeather(city, state.style);
       if (cached) {
-        console.log(`Using cached data for ${city}`);
+        console.log(`Using cached data for ${city} with ${state.style} style`);
         setState({
           status: 'success',
           weather: cached.weather,
           image: cached.image,
           error: null,
+          style: state.style,
         });
         return;
       }
@@ -41,7 +43,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
 
     try {
       // 1. Fetch Weather
-      const weatherData = await fetchWeatherAndContext(city);
+      const weatherData = await fetchWeatherAndContext(city, state.style);
 
       setState(prev => ({
         ...prev,
@@ -50,17 +52,18 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
       }));
 
       // 2. Generate Image
-      const imageUrl = await generateDioramaImage(weatherData);
-      const image: GeneratedImage = { url: imageUrl, alt: `Miniature diorama of ${city}` };
+      const imageUrl = await generateDioramaImage(weatherData, state.style);
+      const image: GeneratedImage = { url: imageUrl, alt: `${state.style === 'cake' ? 'Cake-style' : 'Miniature diorama'} of ${city}` };
 
       // 保存到缓存
-      setCachedWeather(city, weatherData, image);
+      setCachedWeather(city, weatherData, image, state.style);
 
       setState({
         status: 'success',
         weather: weatherData,
         image: image,
         error: null,
+        style: state.style,
       });
 
     } catch (err: any) {
@@ -175,6 +178,11 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
 
   // 不再自动加载，等待用户主动输入
 
+  // Handle style change
+  const handleStyleChange = (newStyle: WeatherStyle) => {
+    setState(prev => ({ ...prev, style: newStyle, status: 'idle', weather: null, image: null, error: null }));
+  };
+
   return (
     <div className="min-h-screen bg-[#F6F8FC] text-gray-900 flex flex-col items-center justify-center font-sans p-4 relative overflow-hidden">
       {/* Back Button */}
@@ -184,6 +192,43 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
       >
         <ArrowLeft size={24} />
       </button>
+
+      {/* Style Selector - Fixed at top right */}
+      <div className="fixed top-4 right-4 z-50">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 shadow-lg border-2 border-blue-100">
+          <p className="text-xs font-bold text-gray-600 mb-2 text-center">{t('weather.styleSelector.title')}</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleStyleChange('diorama')}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                state.style === 'diorama'
+                  ? 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white shadow-md scale-105'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              disabled={state.status === 'loading_weather' || state.status === 'generating_image'}
+            >
+              <div className="text-center">
+                <div className="text-base mb-1">🏰</div>
+                <div>{t('weather.styleSelector.diorama')}</div>
+              </div>
+            </button>
+            <button
+              onClick={() => handleStyleChange('cake')}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                state.style === 'cake'
+                  ? 'bg-gradient-to-r from-pink-400 to-rose-400 text-white shadow-md scale-105'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              disabled={state.status === 'loading_weather' || state.status === 'generating_image'}
+            >
+              <div className="text-center">
+                <div className="text-base mb-1">🍰</div>
+                <div>{t('weather.styleSelector.cake')}</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Background decoration (optional subtle shapes) */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] opacity-60 pointer-events-none"></div>

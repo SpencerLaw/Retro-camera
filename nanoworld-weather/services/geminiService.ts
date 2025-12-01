@@ -1,4 +1,4 @@
-import { WeatherData } from "../types";
+import { WeatherData, WeatherStyle } from "../types";
 
 // Fallback images (Tilt-shift / Miniature style) to use if AI generation fails
 const FALLBACK_IMAGES = [
@@ -14,12 +14,12 @@ const getFallbackImage = () => {
 /**
  * Step 1: Get Weather Data & Visual Description
  */
-export const fetchWeatherAndContext = async (city: string): Promise<WeatherData> => {
+export const fetchWeatherAndContext = async (city: string, style: WeatherStyle = 'diorama'): Promise<WeatherData> => {
   try {
     const response = await fetch('/api/gemini/weather', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'fetchWeather', city })
+      body: JSON.stringify({ action: 'fetchWeather', city, style })
     });
 
     if (!response.ok) {
@@ -38,14 +38,15 @@ export const fetchWeatherAndContext = async (city: string): Promise<WeatherData>
  * Step 2: Generate the Image
  * Includes strict fallback logic.
  */
-export const generateDioramaImage = async (weatherData: WeatherData): Promise<string> => {
+export const generateDioramaImage = async (weatherData: WeatherData, style: WeatherStyle = 'diorama'): Promise<string> => {
   try {
     const response = await fetch('/api/gemini/weather', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        action: 'generateImage', 
-        weatherData 
+      body: JSON.stringify({
+        action: 'generateImage',
+        weatherData,
+        style
       })
     });
 

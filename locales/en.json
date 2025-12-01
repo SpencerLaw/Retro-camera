@@ -59,6 +59,7 @@
     "generatingImage": "Crafting miniature world...",
     "searchPlaceholder": "Enter a city name to explore its weather",
     "download": "Download Image",
+    "generateButton": "Generate Weather Picture",
     "styleSelector": {
       "title": "Choose Style",
       "diorama": "Miniature Diorama",

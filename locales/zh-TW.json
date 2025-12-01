@@ -59,6 +59,7 @@
     "generatingImage": "正在生成微縮世界...",
     "searchPlaceholder": "輸入城市名稱探索天氣",
     "download": "下載圖片",
+    "generateButton": "生成天氣圖片",
     "styleSelector": {
       "title": "選擇風格",
       "diorama": "微縮沙盤",

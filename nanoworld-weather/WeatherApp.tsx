@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
-import SearchBar from './components/SearchBar';
 import WeatherCard from './components/WeatherCard';
 import { WeatherData, GeneratedImage, AppState, WeatherStyle } from './types';
 import { fetchWeatherAndContext, generateDioramaImage } from './services/geminiService';
@@ -20,23 +19,29 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
     error: null,
     style: 'diorama',
   });
+  const [cityInput, setCityInput] = useState('');
 
   // Function to execute the workflow
-  const executeSearch = async (city: string, useCache: boolean = true) => {
+  const executeSearch = async () => {
+    if (!cityInput.trim()) {
+      setState(prev => ({ ...prev, error: 'Please enter a city name' }));
+      return;
+    }
+
+    const city = cityInput.trim();
+
     // 检查缓存
-    if (useCache) {
-      const cached = getCachedWeather(city, state.style);
-      if (cached) {
-        console.log(`Using cached data for ${city} with ${state.style} style`);
-        setState({
-          status: 'success',
-          weather: cached.weather,
-          image: cached.image,
-          error: null,
-          style: state.style,
-        });
-        return;
-      }
+    const cached = getCachedWeather(city, state.style);
+    if (cached) {
+      console.log(`Using cached data for ${city} with ${state.style} style`);
+      setState({
+        status: 'success',
+        weather: cached.weather,
+        image: cached.image,
+        error: null,
+        style: state.style,
+      });
+      return;
     }
 
     setState(prev => ({ ...prev, status: 'loading_weather', error: null }));
@@ -219,13 +224,32 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
       </div>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto">
-        <SearchBar
-          onSearch={executeSearch}
-          isLoading={state.status === 'loading_weather' || state.status === 'generating_image'}
-        />
+        {/* City Input Section */}
+        <div className="mt-8 mb-6">
+          <h2 className="text-center text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            {t('home.weather.title')} 🌤️
+          </h2>
+
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative group">
+              <input
+                type="text"
+                value={cityInput}
+                onChange={(e) => setCityInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && executeSearch()}
+                placeholder={t('weather.searchPlaceholder')}
+                disabled={state.status === 'loading_weather' || state.status === 'generating_image'}
+                className="w-full h-16 px-8 rounded-3xl bg-white shadow-[0_12px_40px_rgba(0,0,0,0.08)] border-3 border-blue-100 text-gray-800 text-xl font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-300 transition-all disabled:opacity-50"
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-3xl pointer-events-none">
+                🔍
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Super Kawaii Style Selector */}
-        <div className="mt-8 mb-6">
+        <div className="mb-6">
           <h3 className="text-center text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse" style={{ animationDuration: '3s' }}>
             {t('weather.styleSelector.title')} 🎨
           </h3>
@@ -315,6 +339,50 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
               </div>
             </button>
           </div>
+        </div>
+
+        {/* Giant Generate Button */}
+        <div className="max-w-2xl mx-auto mb-8">
+          <button
+            onClick={executeSearch}
+            disabled={!cityInput.trim() || state.status === 'loading_weather' || state.status === 'generating_image'}
+            className={`group relative w-full py-6 px-8 rounded-[2rem] font-bold text-2xl transition-all duration-500 ${
+              !cityInput.trim() || state.status === 'loading_weather' || state.status === 'generating_image'
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : state.style === 'diorama'
+                ? 'bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 text-white shadow-[0_20px_50px_rgba(59,130,246,0.5)] hover:shadow-[0_25px_60px_rgba(59,130,246,0.6)] hover:scale-105 active:scale-95'
+                : 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white shadow-[0_20px_50px_rgba(236,72,153,0.5)] hover:shadow-[0_25px_60px_rgba(236,72,153,0.6)] hover:scale-105 active:scale-95'
+            }`}
+          >
+            {/* Glow Effect */}
+            {cityInput.trim() && state.status === 'idle' && (
+              <div className={`absolute -inset-2 rounded-[2rem] blur-xl opacity-50 transition-opacity ${
+                state.style === 'diorama' ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-pink-400 to-rose-400'
+              }`}></div>
+            )}
+
+            <div className="relative z-10 flex items-center justify-center gap-3">
+              {state.status === 'loading_weather' && (
+                <>
+                  <div className="animate-spin text-3xl">⏳</div>
+                  <span>{t('weather.loadingWeather')}</span>
+                </>
+              )}
+              {state.status === 'generating_image' && (
+                <>
+                  <div className="animate-spin text-3xl">🎨</div>
+                  <span>{t('weather.generatingImage')}</span>
+                </>
+              )}
+              {state.status !== 'loading_weather' && state.status !== 'generating_image' && (
+                <>
+                  <span>✨</span>
+                  <span>{t('weather.generateButton')}</span>
+                  <span>{state.style === 'diorama' ? '🏰' : '🍰'}</span>
+                </>
+              )}
+            </div>
+          </button>
         </div>
 
         <main className="w-full flex flex-col items-center justify-center">

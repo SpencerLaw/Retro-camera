@@ -236,17 +236,31 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
             </div>
           </div>
 
-          {/* Couple Game Card - Disabled - Purple/Pink Gradient */}
+          {/* Couple Game Card - Purple/Pink Gradient */}
           <div
-            className="relative bg-gradient-to-br from-[#C77DFF] via-[#9D4EDD] to-[#7B2CBF] rounded-3xl p-8 cursor-not-allowed transform border-4 border-white/80 shadow-[0_8px_16px_rgba(0,0,0,0.15)] opacity-60 grayscale"
+            onClick={() => onSelectProject('couple')}
+            className="group relative bg-gradient-to-br from-[#C77DFF] via-[#9D4EDD] to-[#7B2CBF] rounded-3xl p-8 cursor-pointer transform transition-all duration-500 hover:scale-110 hover:-translate-y-2 shadow-[0_12px_24px_rgba(0,0,0,0.2)] border-4 border-white/80"
             style={{
               transformStyle: 'preserve-3d',
+              transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'perspective(1000px) rotateX(-5deg) rotateY(5deg) scale(1.1) translateY(-8px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1) translateY(0px)';
             }}
           >
+            {/* 3D Shadow Effect */}
+            <div className="absolute -inset-2 bg-[#7B2CBF]/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
-              <div className="w-32 h-32 bg-white/90 rounded-full flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.2)] border-4 border-white">
-                <Heart size={64} className="text-[#7B2CBF]" fill="#7B2CBF" />
+              <div
+                className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.2)] transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 border-4 border-white"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Heart size={64} className="text-[#7B2CBF] drop-shadow-md" fill="#7B2CBF" />
               </div>
             </div>
 
@@ -261,8 +275,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
               </p>
 
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-2 border-white/60 opacity-50">
-                <div className="inline-block px-4 py-2 bg-white/70 text-[#5A1F8F] rounded-full text-sm font-bold border-2 border-white">
+              <div className="mt-6 pt-6 border-t-2 border-white/60">
+                <div className="inline-block px-4 py-2 bg-white/90 text-[#5A1F8F] rounded-full text-sm font-bold transform group-hover:scale-110 transition-transform duration-300 shadow-md border-2 border-white">
                   Enter →
                 </div>
               </div>

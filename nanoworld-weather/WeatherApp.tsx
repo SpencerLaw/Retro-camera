@@ -24,7 +24,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
   // Function to execute the workflow
   const executeSearch = async () => {
     if (!cityInput.trim()) {
-      setState(prev => ({ ...prev, error: 'Please enter a city name' }));
+      setState(prev => ({ ...prev, error: t('weather.searchPlaceholder') }));
       return;
     }
 
@@ -73,11 +73,21 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
 
     } catch (err: any) {
       console.error(err);
-      setState(prev => ({
-        ...prev,
-        status: 'error',
-        error: err.message || "Something went wrong. Please try again."
-      }));
+      
+      // Check for location restriction error
+      if (err.message === 'LOCATION_RESTRICTED') {
+        setState(prev => ({
+          ...prev,
+          status: 'error',
+          error: 'LOCATION_RESTRICTED'
+        }));
+      } else {
+        setState(prev => ({
+          ...prev,
+          status: 'error',
+          error: err.message || "Something went wrong. Please try again."
+        }));
+      }
     }
   };
 
@@ -189,13 +199,14 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#E6F3FF] via-[#FFF0F5] to-[#FFE5EC] text-gray-900 flex flex-col items-center font-sans p-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#E6F3FF] via-[#FFF0F5] to-[#FFE5EC] text-gray-900 flex flex-col items-center font-sans px-3 sm:px-4 py-6 sm:py-8 relative overflow-hidden">
       {/* Back Button */}
       <button
         onClick={onBackHome}
-        className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/90 hover:bg-white border-3 border-blue-500 backdrop-blur-sm transition-all text-blue-500 hover:text-blue-600 shadow-xl hover:scale-110"
+        className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 p-2 sm:p-3 rounded-full bg-white/90 hover:bg-white border-2 sm:border-3 border-blue-500 backdrop-blur-sm transition-all text-blue-500 hover:text-blue-600 shadow-xl hover:scale-110"
       >
-        <ArrowLeft size={24} />
+        <ArrowLeft size={20} className="sm:hidden" />
+        <ArrowLeft size={24} className="hidden sm:block" />
       </button>
 
       {/* Kawaii Background Decorations */}
@@ -225,12 +236,12 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
 
       <div className="relative z-10 w-full max-w-6xl mx-auto">
         {/* City Input Section */}
-        <div className="mt-8 mb-6">
-          <h2 className="text-center text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <div className="mt-12 sm:mt-8 mb-4 sm:mb-6">
+          <h2 className="text-center text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent px-2">
             {t('home.weather.title')} 🌤️
           </h2>
 
-          <div className="max-w-2xl mx-auto mb-8">
+          <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
             <div className="relative group">
               <input
                 type="text"
@@ -239,9 +250,9 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
                 onKeyPress={(e) => e.key === 'Enter' && executeSearch()}
                 placeholder={t('weather.searchPlaceholder')}
                 disabled={state.status === 'loading_weather' || state.status === 'generating_image'}
-                className="w-full h-16 px-8 rounded-3xl bg-white shadow-[0_12px_40px_rgba(0,0,0,0.08)] border-3 border-blue-100 text-gray-800 text-xl font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-300 transition-all disabled:opacity-50"
+                className="w-full h-12 sm:h-14 md:h-16 px-5 sm:px-6 md:px-8 pr-12 sm:pr-14 rounded-2xl sm:rounded-3xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] sm:shadow-[0_12px_40px_rgba(0,0,0,0.08)] border-2 sm:border-3 border-blue-100 text-gray-800 text-base sm:text-lg md:text-xl font-medium placeholder-gray-400 focus:outline-none focus:ring-3 sm:focus:ring-4 focus:ring-blue-200 focus:border-blue-300 transition-all disabled:opacity-50"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-3xl pointer-events-none">
+              <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-xl sm:text-2xl md:text-3xl pointer-events-none">
                 🔍
               </div>
             </div>
@@ -249,47 +260,47 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
         </div>
 
         {/* Super Kawaii Style Selector */}
-        <div className="mb-6">
-          <h3 className="text-center text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse" style={{ animationDuration: '3s' }}>
+        <div className="mb-4 sm:mb-6">
+          <h3 className="text-center text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse px-2" style={{ animationDuration: '3s' }}>
             {t('weather.styleSelector.title')} 🎨
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {/* Diorama Style Card */}
             <button
               onClick={() => handleStyleChange('diorama')}
               disabled={state.status === 'loading_weather' || state.status === 'generating_image'}
-              className={`group relative rounded-[2.5rem] p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
+              className={`group relative rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 md:p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 active:scale-95 ${
                 state.style === 'diorama'
-                  ? 'bg-gradient-to-br from-[#BBDEFB] via-[#90CAF9] to-[#64B5F6] shadow-[0_20px_60px_rgba(100,181,246,0.6)] scale-105'
-                  : 'bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] shadow-[0_12px_30px_rgba(100,181,246,0.3)] hover:shadow-[0_20px_50px_rgba(100,181,246,0.5)]'
-              } border-[5px] border-white/90 ${state.status === 'loading_weather' || state.status === 'generating_image' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  ? 'bg-gradient-to-br from-[#BBDEFB] via-[#90CAF9] to-[#64B5F6] shadow-[0_15px_45px_rgba(100,181,246,0.6)] sm:shadow-[0_20px_60px_rgba(100,181,246,0.6)] scale-105'
+                  : 'bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] shadow-[0_8px_20px_rgba(100,181,246,0.3)] sm:shadow-[0_12px_30px_rgba(100,181,246,0.3)] hover:shadow-[0_15px_40px_rgba(100,181,246,0.5)] sm:hover:shadow-[0_20px_50px_rgba(100,181,246,0.5)]'
+              } border-[3px] sm:border-[4px] md:border-[5px] border-white/90 ${state.status === 'loading_weather' || state.status === 'generating_image' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               {/* Kawaii Glow Effect */}
-              <div className={`absolute -inset-3 bg-gradient-to-r from-[#64B5F6] to-[#90CAF9] rounded-[2.5rem] blur-2xl transition-opacity duration-500 ${state.style === 'diorama' ? 'opacity-70' : 'opacity-0 group-hover:opacity-60'}`}></div>
+              <div className={`absolute -inset-2 sm:-inset-3 bg-gradient-to-r from-[#64B5F6] to-[#90CAF9] rounded-[2rem] sm:rounded-[2.5rem] blur-xl sm:blur-2xl transition-opacity duration-500 ${state.style === 'diorama' ? 'opacity-70' : 'opacity-0 group-hover:opacity-60'}`}></div>
 
               {/* Floating decoration */}
-              <div className={`absolute -top-4 -right-4 text-4xl animate-bounce transition-opacity ${state.style === 'diorama' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ animationDuration: '2s' }}>🏰</div>
+              <div className={`absolute -top-3 -right-3 sm:-top-4 sm:-right-4 text-2xl sm:text-3xl md:text-4xl animate-bounce transition-opacity ${state.style === 'diorama' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ animationDuration: '2s' }}>🏰</div>
 
               <div className="relative z-10">
                 {/* Giant Icon */}
-                <div className={`mx-auto w-32 h-32 md:w-40 md:h-40 bg-white rounded-full flex items-center justify-center mb-6 transition-all duration-500 ${state.style === 'diorama' ? 'shadow-[0_20px_40px_rgba(100,181,246,0.5)] scale-110' : 'shadow-[0_12px_24px_rgba(100,181,246,0.3)] group-hover:scale-110 group-hover:rotate-12'}`}>
-                  <div className="text-7xl md:text-8xl">🏰</div>
+                <div className={`mx-auto w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-white rounded-full flex items-center justify-center mb-4 sm:mb-5 md:mb-6 transition-all duration-500 ${state.style === 'diorama' ? 'shadow-[0_15px_30px_rgba(100,181,246,0.5)] sm:shadow-[0_20px_40px_rgba(100,181,246,0.5)] scale-110' : 'shadow-[0_8px_18px_rgba(100,181,246,0.3)] sm:shadow-[0_12px_24px_rgba(100,181,246,0.3)] group-hover:scale-110 group-hover:rotate-12'}`}>
+                  <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl">🏰</div>
                 </div>
 
                 {/* Title */}
-                <h4 className={`text-2xl md:text-3xl font-bold mb-3 transition-colors ${state.style === 'diorama' ? 'text-white' : 'text-[#0D47A1] group-hover:text-[#1565C0]'}`}>
+                <h4 className={`text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3 transition-colors ${state.style === 'diorama' ? 'text-white' : 'text-[#0D47A1] group-hover:text-[#1565C0]'}`}>
                   {t('weather.styleSelector.diorama')}
                 </h4>
 
                 {/* Description */}
-                <p className={`text-sm md:text-base leading-relaxed font-medium transition-colors ${state.style === 'diorama' ? 'text-white/90' : 'text-[#1565C0] group-hover:text-[#1976D2]'}`}>
+                <p className={`text-xs sm:text-sm md:text-base leading-relaxed font-medium transition-colors ${state.style === 'diorama' ? 'text-white/90' : 'text-[#1565C0] group-hover:text-[#1976D2]'}`}>
                   {t('weather.styleSelector.dioramaDesc')}
                 </p>
 
                 {/* Selected Badge */}
                 {state.style === 'diorama' && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded-full text-sm font-bold shadow-lg animate-pulse" style={{ animationDuration: '2s' }}>
+                  <div className="mt-3 sm:mt-4 inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-blue-600 rounded-full text-xs sm:text-sm font-bold shadow-lg animate-pulse" style={{ animationDuration: '2s' }}>
                     <span>✓</span>
                     <span>Selected</span>
                   </div>
@@ -301,37 +312,37 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
             <button
               onClick={() => handleStyleChange('cake')}
               disabled={state.status === 'loading_weather' || state.status === 'generating_image'}
-              className={`group relative rounded-[2.5rem] p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
+              className={`group relative rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 md:p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 active:scale-95 ${
                 state.style === 'cake'
-                  ? 'bg-gradient-to-br from-[#FFD6E8] via-[#FFC1E3] to-[#FFB5E8] shadow-[0_20px_60px_rgba(255,105,180,0.6)] scale-105'
-                  : 'bg-gradient-to-br from-[#FFE5F0] via-[#FFD6E8] to-[#FFC1E3] shadow-[0_12px_30px_rgba(255,105,180,0.3)] hover:shadow-[0_20px_50px_rgba(255,105,180,0.5)]'
-              } border-[5px] border-white/90 ${state.status === 'loading_weather' || state.status === 'generating_image' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  ? 'bg-gradient-to-br from-[#FFD6E8] via-[#FFC1E3] to-[#FFB5E8] shadow-[0_15px_45px_rgba(255,105,180,0.6)] sm:shadow-[0_20px_60px_rgba(255,105,180,0.6)] scale-105'
+                  : 'bg-gradient-to-br from-[#FFE5F0] via-[#FFD6E8] to-[#FFC1E3] shadow-[0_8px_20px_rgba(255,105,180,0.3)] sm:shadow-[0_12px_30px_rgba(255,105,180,0.3)] hover:shadow-[0_15px_40px_rgba(255,105,180,0.5)] sm:hover:shadow-[0_20px_50px_rgba(255,105,180,0.5)]'
+              } border-[3px] sm:border-[4px] md:border-[5px] border-white/90 ${state.status === 'loading_weather' || state.status === 'generating_image' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               {/* Kawaii Glow Effect */}
-              <div className={`absolute -inset-3 bg-gradient-to-r from-[#FFB5E8] to-[#FFC6FF] rounded-[2.5rem] blur-2xl transition-opacity duration-500 ${state.style === 'cake' ? 'opacity-70' : 'opacity-0 group-hover:opacity-60'}`}></div>
+              <div className={`absolute -inset-2 sm:-inset-3 bg-gradient-to-r from-[#FFB5E8] to-[#FFC6FF] rounded-[2rem] sm:rounded-[2.5rem] blur-xl sm:blur-2xl transition-opacity duration-500 ${state.style === 'cake' ? 'opacity-70' : 'opacity-0 group-hover:opacity-60'}`}></div>
 
               {/* Floating decoration */}
-              <div className={`absolute -top-4 -right-4 text-4xl animate-bounce transition-opacity ${state.style === 'cake' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ animationDuration: '2s' }}>🍰</div>
+              <div className={`absolute -top-3 -right-3 sm:-top-4 sm:-right-4 text-2xl sm:text-3xl md:text-4xl animate-bounce transition-opacity ${state.style === 'cake' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ animationDuration: '2s' }}>🍰</div>
 
               <div className="relative z-10">
                 {/* Giant Icon */}
-                <div className={`mx-auto w-32 h-32 md:w-40 md:h-40 bg-white rounded-full flex items-center justify-center mb-6 transition-all duration-500 ${state.style === 'cake' ? 'shadow-[0_20px_40px_rgba(255,105,180,0.5)] scale-110' : 'shadow-[0_12px_24px_rgba(255,105,180,0.3)] group-hover:scale-110 group-hover:rotate-12'}`}>
-                  <div className="text-7xl md:text-8xl">🍰</div>
+                <div className={`mx-auto w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-white rounded-full flex items-center justify-center mb-4 sm:mb-5 md:mb-6 transition-all duration-500 ${state.style === 'cake' ? 'shadow-[0_15px_30px_rgba(255,105,180,0.5)] sm:shadow-[0_20px_40px_rgba(255,105,180,0.5)] scale-110' : 'shadow-[0_8px_18px_rgba(255,105,180,0.3)] sm:shadow-[0_12px_24px_rgba(255,105,180,0.3)] group-hover:scale-110 group-hover:rotate-12'}`}>
+                  <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl">🍰</div>
                 </div>
 
                 {/* Title */}
-                <h4 className={`text-2xl md:text-3xl font-bold mb-3 transition-colors ${state.style === 'cake' ? 'text-white' : 'text-[#D5006D] group-hover:text-[#B8005C]'}`}>
+                <h4 className={`text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3 transition-colors ${state.style === 'cake' ? 'text-white' : 'text-[#D5006D] group-hover:text-[#B8005C]'}`}>
                   {t('weather.styleSelector.cake')}
                 </h4>
 
                 {/* Description */}
-                <p className={`text-sm md:text-base leading-relaxed font-medium transition-colors ${state.style === 'cake' ? 'text-white/90' : 'text-[#B8005C] group-hover:text-[#A0004D]'}`}>
+                <p className={`text-xs sm:text-sm md:text-base leading-relaxed font-medium transition-colors ${state.style === 'cake' ? 'text-white/90' : 'text-[#B8005C] group-hover:text-[#A0004D]'}`}>
                   {t('weather.styleSelector.cakeDesc')}
                 </p>
 
                 {/* Selected Badge */}
                 {state.style === 'cake' && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white text-pink-600 rounded-full text-sm font-bold shadow-lg animate-pulse" style={{ animationDuration: '2s' }}>
+                  <div className="mt-3 sm:mt-4 inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-pink-600 rounded-full text-xs sm:text-sm font-bold shadow-lg animate-pulse" style={{ animationDuration: '2s' }}>
                     <span>✓</span>
                     <span>Selected</span>
                   </div>
@@ -342,16 +353,16 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
         </div>
 
         {/* Giant Generate Button */}
-        <div className="max-w-2xl mx-auto mb-8">
+        <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
           <button
             onClick={executeSearch}
             disabled={!cityInput.trim() || state.status === 'loading_weather' || state.status === 'generating_image'}
-            className={`group relative w-full py-6 px-8 rounded-[2rem] font-bold text-2xl transition-all duration-500 ${
+            className={`group relative w-full py-4 sm:py-5 md:py-6 px-6 sm:px-8 rounded-[1.5rem] sm:rounded-[2rem] font-bold text-lg sm:text-xl md:text-2xl transition-all duration-500 ${
               !cityInput.trim() || state.status === 'loading_weather' || state.status === 'generating_image'
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 : state.style === 'diorama'
-                ? 'bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 text-white shadow-[0_20px_50px_rgba(59,130,246,0.5)] hover:shadow-[0_25px_60px_rgba(59,130,246,0.6)] hover:scale-105 active:scale-95'
-                : 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white shadow-[0_20px_50px_rgba(236,72,153,0.5)] hover:shadow-[0_25px_60px_rgba(236,72,153,0.6)] hover:scale-105 active:scale-95'
+                ? 'bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 text-white shadow-[0_15px_40px_rgba(59,130,246,0.5)] sm:shadow-[0_20px_50px_rgba(59,130,246,0.5)] hover:shadow-[0_20px_50px_rgba(59,130,246,0.6)] sm:hover:shadow-[0_25px_60px_rgba(59,130,246,0.6)] hover:scale-105 active:scale-95'
+                : 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white shadow-[0_15px_40px_rgba(236,72,153,0.5)] sm:shadow-[0_20px_50px_rgba(236,72,153,0.5)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.6)] sm:hover:shadow-[0_25px_60px_rgba(236,72,153,0.6)] hover:scale-105 active:scale-95'
             }`}
           >
             {/* Glow Effect */}
@@ -361,24 +372,26 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
               }`}></div>
             )}
 
-            <div className="relative z-10 flex items-center justify-center gap-3">
+            <div className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
               {state.status === 'loading_weather' && (
                 <>
-                  <div className="animate-spin text-3xl">⏳</div>
-                  <span>{t('weather.loadingWeather')}</span>
+                  <div className="animate-spin text-2xl sm:text-3xl">⏳</div>
+                  <span className="hidden sm:inline">{t('weather.loadingWeather')}</span>
+                  <span className="sm:hidden">查询中...</span>
                 </>
               )}
               {state.status === 'generating_image' && (
                 <>
-                  <div className="animate-spin text-3xl">🎨</div>
-                  <span>{t('weather.generatingImage')}</span>
+                  <div className="animate-spin text-2xl sm:text-3xl">🎨</div>
+                  <span className="hidden sm:inline">{t('weather.generatingImage')}</span>
+                  <span className="sm:hidden">生成中...</span>
                 </>
               )}
               {state.status !== 'loading_weather' && state.status !== 'generating_image' && (
                 <>
-                  <span>✨</span>
+                  <span className="text-xl sm:text-2xl">✨</span>
                   <span>{t('weather.generateButton')}</span>
-                  <span>{state.style === 'diorama' ? '🏰' : '🍰'}</span>
+                  <span className="text-xl sm:text-2xl">{state.style === 'diorama' ? '🏰' : '🍰'}</span>
                 </>
               )}
             </div>
@@ -395,14 +408,29 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
           />
 
           {state.error && (
-            <div className="mt-6 p-4 bg-red-50 text-red-500 rounded-2xl text-sm font-medium border border-red-100 max-w-md text-center shadow-lg">
-              {state.error}
+            <div className={`mt-6 p-6 rounded-3xl text-sm sm:text-base font-medium border max-w-2xl shadow-xl ${
+              state.error === 'LOCATION_RESTRICTED' 
+                ? 'bg-gradient-to-br from-yellow-50 to-orange-50 text-orange-800 border-orange-200' 
+                : 'bg-red-50 text-red-500 border-red-100'
+            }`}>
+              {state.error === 'LOCATION_RESTRICTED' ? (
+                <div className="space-y-4">
+                  <div className="text-2xl sm:text-3xl font-bold text-center">
+                    {t('weather.errors.locationRestricted')}
+                  </div>
+                  <div className="text-left whitespace-pre-line leading-relaxed">
+                    {t('weather.errors.locationRestrictedDesc')}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">{state.error}</div>
+              )}
             </div>
           )}
         </main>
 
         {/* Footer Info */}
-        <footer className="text-center mt-8 text-xs text-gray-400 font-medium">
+        <footer className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-gray-400 font-medium px-4">
           Powered by Gemini Pro Vision ✨
         </footer>
       </div>

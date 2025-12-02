@@ -66,6 +66,10 @@
       "dioramaDesc": "Dreamy fairy-tale miniature scenes",
       "cake": "Sweet Cake",
       "cakeDesc": "A delicious world built from pastries"
+    },
+    "errors": {
+      "locationRestricted": "🌍 Regional Restriction",
+      "locationRestrictedDesc": "Sorry, the Gemini API is not available in your current region.\n\n💡 Suggestions:\n• Use a VPN to connect from a supported region\n• Or explore other apps in the studio!"
     }
   },
   "doraemon": {

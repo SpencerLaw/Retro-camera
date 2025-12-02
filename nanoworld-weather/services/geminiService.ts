@@ -27,9 +27,21 @@ export const fetchWeatherAndContext = async (city: string, style: WeatherStyle =
     }
 
     const result = await response.json();
+    
+    // Check for location restriction error
+    if (result.error === 'location_restricted') {
+      throw new Error('LOCATION_RESTRICTED');
+    }
+    
     return result.data as WeatherData;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Weather Fetch Error:", error);
+    
+    // Re-throw location error as-is for special handling
+    if (error.message === 'LOCATION_RESTRICTED') {
+      throw error;
+    }
+    
     throw new Error("Failed to fetch weather data. Please try again.");
   }
 };

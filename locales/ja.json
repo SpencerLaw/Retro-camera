@@ -66,6 +66,10 @@
       "dioramaDesc": "夢のようなおとぎ話のミニチュアシーン",
       "cake": "スイートケーキ",
       "cakeDesc": "お菓子で作られた美味しい世界"
+    },
+    "errors": {
+      "locationRestricted": "🌍 地域制限",
+      "locationRestrictedDesc": "申し訳ございません。Gemini APIは現在の地域ではご利用いただけません。\n\n💡 提案：\n• VPNを使用してサポートされている地域から接続する\n• またはスタジオの他のアプリをお楽しみください！"
     }
   },
   "doraemon": {

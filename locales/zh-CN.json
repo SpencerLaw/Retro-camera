@@ -66,6 +66,10 @@
       "dioramaDesc": "梦幻童话风格的微缩场景",
       "cake": "甜蜜蛋糕",
       "cakeDesc": "由糕点构建的甜美世界"
+    },
+    "errors": {
+      "locationRestricted": "🌍 地区限制",
+      "locationRestrictedDesc": "很抱歉，Gemini API 在您当前的地区不可用。\n\n💡 建议：\n• 使用 VPN 连接到支持的地区\n• 或者尝试探索工作室中的其他应用！"
     }
   },
   "doraemon": {

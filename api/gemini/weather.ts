@@ -214,6 +214,17 @@ export default async function handler(
       stack: error.stack
     });
     
+    // Check for location/region errors
+    if (error?.message?.includes('location is not supported') || 
+        error?.message?.includes('FAILED_PRECONDITION') ||
+        error?.message?.includes('User location is not supported') ||
+        error?.status === 'FAILED_PRECONDITION') {
+      return res.status(200).json({ 
+        error: 'location_restricted',
+        message: 'Service unavailable in your region'
+      });
+    }
+    
     return res.status(500).json({
       error: error.message || 'API call failed',
       details: process.env.NODE_ENV === 'development' ? error.toString() : undefined

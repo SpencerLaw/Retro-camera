@@ -8,11 +8,17 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * - LICENSE_CODES: 有效授权码列表（逗号分隔）
  */
 
+interface DeviceInfo {
+  id: string;
+  name: string;
+  addedAt: string;
+}
+
 interface LicenseData {
   code: string;
   deviceLimit: number;
   validUntil?: string;
-  usedDevices: string[];
+  usedDevices: DeviceInfo[];
 }
 
 // 模拟数据库 - 实际使用时，你应该使用真实数据库（如Vercel KV、MongoDB等）
@@ -84,7 +90,7 @@ function checkVerificationRate(code: string): {
 }
 
 // 检查设备是否可以使用此授权码
-function checkDeviceLimit(code: string, deviceId: string): {
+function checkDeviceLimit(code: string, deviceId: string, deviceInfo: string): {
   allowed: boolean;
   reason?: string;
 } {
@@ -102,7 +108,8 @@ function checkDeviceLimit(code: string, deviceId: string): {
   const licenseData = licenseDatabase.get(upperCode)!;
 
   // 检查设备是否已注册
-  if (licenseData.usedDevices.includes(deviceId)) {
+  const existingDevice = licenseData.usedDevices.find(d => d.id === deviceId);
+  if (existingDevice) {
     return { allowed: true }; // 已注册的设备可以继续使用
   }
 
@@ -115,7 +122,12 @@ function checkDeviceLimit(code: string, deviceId: string): {
   }
 
   // 添加新设备
-  licenseData.usedDevices.push(deviceId);
+  licenseData.usedDevices.push({
+    id: deviceId,
+    name: deviceInfo || '未知设备',
+    addedAt: new Date().toISOString(),
+  });
+  
   return { allowed: true };
 }
 
@@ -142,9 +154,9 @@ export default async function handler(
   }
 
   try {
-    const { licenseCode, deviceId } = req.body;
+    const { licenseCode, deviceId, deviceInfo } = req.body;
 
-    console.log('收到验证请求 - licenseCode:', licenseCode, 'deviceId:', deviceId);
+    console.log('收到验证请求 - licenseCode:', licenseCode, 'deviceId:', deviceId, 'deviceInfo:', deviceInfo);
 
     // 验证参数
     if (!licenseCode || !deviceId) {
@@ -187,7 +199,7 @@ export default async function handler(
     }
 
     // 检查设备限制
-    const deviceCheck = checkDeviceLimit(cleanCode, deviceId);
+    const deviceCheck = checkDeviceLimit(cleanCode, deviceId, deviceInfo || '未知设备');
     if (!deviceCheck.allowed) {
       return res.status(403).json({
         success: false,

@@ -400,7 +400,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Footer Note - Kawaii Style */}

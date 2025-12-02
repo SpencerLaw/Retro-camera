@@ -99,7 +99,9 @@ export default async function handler(
         model: "gemini-2.5-flash",
         contents: prompt,
         config: {
-          tools: [{ googleSearch: {} }],
+          grounding: {
+            googleSearch: {}
+          }
         }
       });
 
@@ -132,16 +134,17 @@ export default async function handler(
       };
 
       try {
-        // Generate image using gemini-2.5-flash-image model
+        // Attempt 1: High quality model
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash-image",
+          model: "gemini-3-pro-image-preview",
           contents: {
             parts: [{ text: finalPrompt }]
           },
           config: {
             responseModalities: [Modality.IMAGE],
             imageConfig: {
-              aspectRatio: "1:1"
+              aspectRatio: "1:1",
+              imageSize: "4K"
             }
           }
         });
@@ -150,12 +153,37 @@ export default async function handler(
         if (img) {
           return res.status(200).json({ imageUrl: img });
         }
-
-        throw new Error("No image data in response");
+        throw new Error("No image data in Pro response");
 
       } catch (error) {
-        console.error("CRITICAL: AI image generation failed. Using static fallback.", error);
-        return res.status(200).json({ imageUrl: getFallbackImage() });
+        console.warn("Pro image generation failed, falling back to Flash Image model:", error);
+
+        try {
+          // Attempt 2: Standard model
+          const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash-image",
+            contents: {
+              parts: [{ text: finalPrompt }]
+            },
+            config: {
+              responseModalities: [Modality.IMAGE],
+              imageConfig: {
+                aspectRatio: "1:1"
+              }
+            }
+          });
+
+          const img = extractImage(response);
+          if (img) {
+            return res.status(200).json({ imageUrl: img });
+          }
+
+          throw new Error("No image data in Flash response");
+
+        } catch (fallbackError) {
+          console.error("CRITICAL: All AI image generation failed. Using static fallback.", fallbackError);
+          return res.status(200).json({ imageUrl: getFallbackImage() });
+        }
       }
     }
 

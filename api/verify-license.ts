@@ -22,13 +22,25 @@ const licenseDatabase: Map<string, LicenseData> = new Map();
 // 从环境变量加载授权码
 function loadLicenseCodes(): string[] {
   const codes = process.env.LICENSE_CODES || '';
-  return codes.split(',').map(c => c.trim()).filter(c => c.length > 0);
+  console.log('环境变量 LICENSE_CODES:', codes ? '已设置' : '未设置');
+  console.log('原始值:', codes);
+  
+  const codeList = codes.split(',').map(c => c.trim().toUpperCase()).filter(c => c.length > 0);
+  console.log('解析后的授权码列表:', codeList);
+  
+  return codeList;
 }
 
 // 验证授权码是否有效
 function isValidLicenseCode(code: string): boolean {
   const validCodes = loadLicenseCodes();
-  return validCodes.includes(code.toUpperCase());
+  const upperCode = code.toUpperCase();
+  
+  console.log('验证授权码:', upperCode);
+  console.log('有效授权码列表:', validCodes);
+  console.log('是否匹配:', validCodes.includes(upperCode));
+  
+  return validCodes.includes(upperCode);
 }
 
 // 检查设备是否可以使用此授权码
@@ -71,6 +83,16 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  // 允许CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // 处理OPTIONS请求
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   // 只允许POST请求
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -82,6 +104,8 @@ export default async function handler(
   try {
     const { licenseCode, deviceId } = req.body;
 
+    console.log('收到验证请求 - licenseCode:', licenseCode, 'deviceId:', deviceId);
+
     // 验证参数
     if (!licenseCode || !deviceId) {
       return res.status(400).json({
@@ -90,19 +114,22 @@ export default async function handler(
       });
     }
 
-    // 清理授权码格式
-    const cleanCode = licenseCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    // 清理授权码格式（移除连字符和空格）
+    const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
+
+    console.log('清理后的授权码:', cleanCode);
 
     // 验证授权码长度
     if (cleanCode.length !== 16) {
       return res.status(400).json({
         success: false,
-        message: '授权码格式不正确',
+        message: '授权码格式不正确（应为16位字符）',
       });
     }
 
     // 验证授权码是否在有效列表中
     if (!isValidLicenseCode(cleanCode)) {
+      console.log('授权码验证失败');
       return res.status(401).json({
         success: false,
         message: '授权码无效或已过期',
@@ -117,6 +144,8 @@ export default async function handler(
         message: deviceCheck.reason || '设备验证失败',
       });
     }
+
+    console.log('授权码验证成功');
 
     // 验证成功
     return res.status(200).json({
@@ -136,4 +165,3 @@ export default async function handler(
     });
   }
 }
-

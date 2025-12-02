@@ -221,11 +221,7 @@
   box-shadow: 
     0 15px 40px rgba(255, 105, 180, 0.3),
     0 0 0 4px rgba(255, 255, 255, 0.6) inset;
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.couple-game-dare-display.animating {
-  animation: couple-game-pulse 0.6s ease-in-out;
+  overflow: hidden;
 }
 
 .couple-game-dare-display::before {
@@ -236,9 +232,15 @@
   transform: translateX(-50%);
   font-size: 2.5rem;
   filter: drop-shadow(0 4px 8px rgba(255, 105, 180, 0.3));
+  z-index: 10;
 }
 
-.couple-game-dare-display p {
+#slot-reel {
+  width: 100%;
+  position: relative;
+}
+
+#slot-reel p {
   width: 100%;
   margin: 0;
   padding: 0;
@@ -251,7 +253,32 @@
   hyphens: auto;
   text-align: center;
   text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
-  animation: couple-game-fadeInScale 0.4s ease-out;
+  transition: all 0.3s ease;
+}
+
+#slot-reel p.final-result {
+  font-weight: 800;
+  font-size: clamp(1.5rem, 5.5vw, 2rem);
+  color: #FF1493;
+  text-shadow: 
+    2px 2px 0 rgba(255, 255, 255, 0.9),
+    0 0 20px rgba(255, 105, 180, 0.5);
+  animation: couple-game-finalGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes couple-game-finalGlow {
+  0%, 100% {
+    text-shadow: 
+      2px 2px 0 rgba(255, 255, 255, 0.9),
+      0 0 20px rgba(255, 105, 180, 0.5),
+      0 0 30px rgba(255, 105, 180, 0.3);
+  }
+  50% {
+    text-shadow: 
+      2px 2px 0 rgba(255, 255, 255, 0.9),
+      0 0 30px rgba(255, 105, 180, 0.7),
+      0 0 50px rgba(255, 105, 180, 0.5);
+  }
 }
 
 .couple-game-generate-btn {
@@ -327,6 +354,14 @@
     min-height: 220px;
     padding: 2rem 1.5rem;
   }
+
+  #slot-reel p {
+    font-size: clamp(1.3rem, 5vw, 1.6rem);
+  }
+
+  #slot-reel p.final-result {
+    font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+  }
 }
 
 @media (max-width: 560px) {
@@ -370,6 +405,14 @@
   .couple-game-dare-display::before {
     font-size: 2rem;
     top: -15px;
+  }
+
+  #slot-reel p {
+    font-size: clamp(1.2rem, 5vw, 1.5rem);
+  }
+
+  #slot-reel p.final-result {
+    font-size: clamp(1.3rem, 5.5vw, 1.7rem);
   }
 
   .couple-game-generate-btn {

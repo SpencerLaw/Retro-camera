@@ -25,7 +25,10 @@ function loadLicenseCodes(): string[] {
   console.log('环境变量 LICENSE_CODES:', codes ? '已设置' : '未设置');
   console.log('原始值:', codes);
   
-  const codeList = codes.split(',').map(c => c.trim().toUpperCase()).filter(c => c.length > 0);
+  // 分割、去除空格和连字符、转大写
+  const codeList = codes.split(',')
+    .map(c => c.replace(/[-\s]/g, '').toUpperCase())
+    .filter(c => c.length > 0);
   console.log('解析后的授权码列表:', codeList);
   
   return codeList;

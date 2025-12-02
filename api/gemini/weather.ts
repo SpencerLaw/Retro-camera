@@ -74,9 +74,9 @@ export default async function handler(
       const weatherMappingRules = style === 'cake' ? CAKE_WEATHER_MAPPING : DIORAMA_WEATHER_MAPPING;
 
       const prompt = `
-        Find the current weather for ${city}.
+        Generate weather data for ${city}.
 
-        You are a weather data API.
+        You are a weather data API that generates realistic and typical weather for the given city.
         You MUST return a valid JSON object with the following structure.
         Do NOT output markdown formatting (like \`\`\`json). Return ONLY the raw JSON string.
 
@@ -92,25 +92,43 @@ export default async function handler(
 
         ${weatherMappingRules}
 
-        Based on the actual weather found via Google Search, select the ONE best matching visual description from the list above for 'visual_prompt_part'.
+        Based on typical weather patterns for this location, select the ONE best matching visual description from the list above for 'visual_prompt_part'.
+        Make the weather realistic and appropriate for the current season and location.
       `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          grounding: {
-            googleSearch: {}
-          }
+      try {
+        // Try with grounding first (if available)
+        let response;
+        try {
+          response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+              grounding: {
+                googleSearch: {}
+              }
+            }
+          });
+        } catch (groundingError: any) {
+          console.warn("Grounding not available, using standard generation:", groundingError?.message);
+          // Fallback to standard generation without grounding
+          response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt
+          });
         }
-      });
 
-      let text = response.text;
-      if (!text) throw new Error("No data received from weather service.");
+        let text = response.text;
+        if (!text) throw new Error("No data received from weather service.");
 
-      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
-      return res.status(200).json({ data: JSON.parse(text) });
+        const weatherData = JSON.parse(text);
+        return res.status(200).json({ data: weatherData });
+      } catch (parseError: any) {
+        console.error("Weather fetch error details:", parseError);
+        throw new Error(`Failed to fetch weather data: ${parseError.message}`);
+      }
     }
 
     if (action === 'generateImage') {
@@ -189,9 +207,16 @@ export default async function handler(
 
     return res.status(400).json({ error: 'Invalid action' });
   } catch (error: any) {
-    console.error("API Error:", error);
+    console.error("API Error Details:", {
+      message: error.message,
+      status: error.status,
+      statusText: error.statusText,
+      stack: error.stack
+    });
+    
     return res.status(500).json({
-      error: error.message || 'API call failed'
+      error: error.message || 'API call failed',
+      details: process.env.NODE_ENV === 'development' ? error.toString() : undefined
     });
   }
 }

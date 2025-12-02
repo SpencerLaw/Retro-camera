@@ -1,4 +1,4 @@
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality, Type } from "@google/genai";
 
 // Constants (copied to avoid import issues in serverless function)
 const DIORAMA_WEATHER_MAPPING = `
@@ -38,6 +38,19 @@ interface VercelResponse {
   status: (code: number) => VercelResponse;
   json: (data: any) => void;
 }
+
+const WEATHER_RESPONSE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    city: { type: Type.STRING },
+    country: { type: Type.STRING },
+    temperature: { type: Type.NUMBER },
+    condition: { type: Type.STRING },
+    description: { type: Type.STRING },
+    visual_prompt_part: { type: Type.STRING },
+  },
+  required: ["city", "country", "temperature", "condition", "description", "visual_prompt_part"],
+};
 
 const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1515266591878-5a146e04958c?q=80&w=1000&auto=format&fit=crop",
@@ -98,13 +111,18 @@ export default async function handler(
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: prompt
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: WEATHER_RESPONSE_SCHEMA,
+          temperature: 0.8,
+        }
       });
 
-      let text = response.text;
-      if (!text) throw new Error("No data received from weather service.");
-
-      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      const text = response.text;
+      if (!text) {
+        throw new Error("No data received from weather service.");
+      }
 
       const weatherData = JSON.parse(text);
       return res.status(200).json({ data: weatherData });

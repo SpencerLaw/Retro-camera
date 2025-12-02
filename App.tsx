@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { HomePage } from './components/HomePage';
 import { CameraApp } from './components/CameraApp';
@@ -7,39 +8,19 @@ import CoupleGameApp from './couple-game/CoupleGameApp';
 import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
 import WeatherApp from './nanoworld-weather/WeatherApp';
 
-type View = 'home' | 'camera' | 'fortune' | 'couple' | 'doraemon' | 'weather';
-
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>('home');
-
-  const handleSelectProject = (project: 'camera' | 'fortune' | 'couple' | 'doraemon' | 'weather') => {
-    setCurrentView(project);
-  };
-
-  const handleBackHome = () => {
-    setCurrentView('home');
-  };
-
   return (
     <LanguageProvider>
-      {currentView === 'home' && (
-        <HomePage onSelectProject={handleSelectProject} />
-      )}
-      {currentView === 'camera' && (
-        <CameraApp onBackHome={handleBackHome} />
-      )}
-      {currentView === 'fortune' && (
-        <FortuneApp onBackHome={handleBackHome} />
-      )}
-      {currentView === 'couple' && (
-        <CoupleGameApp onBackHome={handleBackHome} />
-      )}
-      {currentView === 'doraemon' && (
-        <DoraemonMonitorApp onBackHome={handleBackHome} />
-      )}
-      {currentView === 'weather' && (
-        <WeatherApp onBackHome={handleBackHome} />
-      )}
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/camera" element={<CameraApp />} />
+          <Route path="/fortune" element={<FortuneApp />} />
+          <Route path="/couple" element={<CoupleGameApp />} />
+          <Route path="/doraemon" element={<DoraemonMonitorApp />} />
+          <Route path="/weather" element={<WeatherApp />} />
+        </Routes>
+      </BrowserRouter>
     </LanguageProvider>
   );
 };

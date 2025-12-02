@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GameState, FortuneData, Language } from './types';
 import { generateFortune } from './services/geminiService';
 import { RefreshCw, Loader2, ArrowLeft } from 'lucide-react';
@@ -52,10 +53,6 @@ const translations = {
   }
 };
 
-interface FortuneAppProps {
-  onBackHome: () => void;
-}
-
 // Map global language to fortune app language
 const mapGlobalToFortuneLang = (globalLang: GlobalLanguage): Language => {
   if (globalLang === 'zh-CN') return 'zh-CN';
@@ -64,7 +61,8 @@ const mapGlobalToFortuneLang = (globalLang: GlobalLanguage): Language => {
   return 'en';
 };
 
-const FortuneApp: React.FC<FortuneAppProps> = ({ onBackHome }) => {
+const FortuneApp: React.FC = () => {
+  const navigate = useNavigate();
   const { language: globalLanguage } = useLanguage();
   const [gameState, setGameState] = useState<GameState>('idle');
   const [fortune, setFortune] = useState<FortuneData | null>(null);
@@ -130,7 +128,7 @@ const FortuneApp: React.FC<FortuneAppProps> = ({ onBackHome }) => {
 
       {/* --- Back Home Button --- */}
       <button
-        onClick={onBackHome}
+        onClick={() => navigate('/')}
         className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#d4af37] backdrop-blur-sm transition-all text-[#d4af37] hover:text-[#bf953f] shadow-lg"
       >
         <ArrowLeft size={24} />

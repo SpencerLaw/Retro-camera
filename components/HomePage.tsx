@@ -1,11 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Camera, Sparkles, Heart, Globe, Cloud } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
-
-interface HomePageProps {
-  onSelectProject: (project: 'camera' | 'fortune' | 'couple' | 'doraemon' | 'weather') => void;
-}
 
 const languageLabels: Record<GlobalLanguage, string> = {
   'en': 'EN',
@@ -14,7 +11,7 @@ const languageLabels: Record<GlobalLanguage, string> = {
   'ja': '日本語'
 };
 
-export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
+export const HomePage: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   const t = useTranslations();
 
@@ -139,9 +136,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
         {/* Project Cards - Super Kawaii Style */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8 lg:gap-6 px-4">
           {/* Retro Camera Card - Cute Pink */}
-          <div
-            onClick={() => onSelectProject('camera')}
-            className="group relative bg-gradient-to-br from-[#FFD6E8] via-[#FFC1E3] to-[#FFB5E8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,105,180,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,105,180,0.5)] hover:rotate-2"
+          <Link
+            to="/camera"
+            className="group relative bg-gradient-to-br from-[#FFD6E8] via-[#FFC1E3] to-[#FFB5E8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,105,180,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,105,180,0.5)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -179,12 +176,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Fortune Sticks Card - Cute Golden */}
-          <div
-            onClick={() => onSelectProject('fortune')}
-            className="group relative bg-gradient-to-br from-[#FFF8DC] via-[#FFEAA7] to-[#FDCB6E] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(253,203,110,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(253,203,110,0.6)] hover:rotate-2"
+          <Link
+            to="/fortune"
+            className="group relative bg-gradient-to-br from-[#FFF8DC] via-[#FFEAA7] to-[#FDCB6E] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(253,203,110,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(253,203,110,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -222,12 +219,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Weather Card - Cute Sky Blue */}
-          <div
-            onClick={() => onSelectProject('weather')}
-            className="group relative bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(128,222,234,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(128,222,234,0.6)] hover:rotate-2"
+          <Link
+            to="/weather"
+            className="group relative bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(128,222,234,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(128,222,234,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -265,12 +262,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Couple Game Card - Cute Purple */}
-          <div
-            onClick={() => onSelectProject('couple')}
-            className="group relative bg-gradient-to-br from-[#E1BEE7] via-[#CE93D8] to-[#BA68C8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(186,104,200,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(186,104,200,0.6)] hover:rotate-2"
+          <Link
+            to="/couple"
+            className="group relative bg-gradient-to-br from-[#E1BEE7] via-[#CE93D8] to-[#BA68C8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(186,104,200,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(186,104,200,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -308,12 +305,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProject }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Doraemon Monitor Card - Cute Blue */}
-          <div
-            onClick={() => onSelectProject('doraemon')}
-            className="group relative bg-gradient-to-br from-[#BBDEFB] via-[#90CAF9] to-[#64B5F6] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(100,181,246,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(100,181,246,0.6)] hover:rotate-2"
+          <Link
+            to="/doraemon"
+            className="group relative bg-gradient-to-br from-[#BBDEFB] via-[#90CAF9] to-[#64B5F6] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(100,181,246,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(100,181,246,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
             }}

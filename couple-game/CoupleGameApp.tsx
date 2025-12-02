@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 // Import JSON files - Vite handles these as modules
@@ -11,10 +12,6 @@ import daresZh from './public/dares.zh.json';
 // @ts-ignore
 import daresJa from './public/dares.ja.json';
 import './CoupleGameStyles.css';
-
-interface CoupleGameAppProps {
-  onBackHome: () => void;
-}
 
 type Language = 'en' | 'zh' | 'ja';
 type Stage = 'ambiguous' | 'advanced' | 'passionate' | null;
@@ -34,7 +31,8 @@ const daresByLang: Record<Language, any> = {
 
 const translations = translationsData as Record<Language, Record<string, string>>;
 
-const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
+const CoupleGameApp: React.FC = () => {
+  const navigate = useNavigate();
   const { language: globalLanguage } = useLanguage();
   const currentLang = mapGlobalToCoupleLang(globalLanguage);
   const [currentStage, setCurrentStage] = useState<Stage>(null);
@@ -170,7 +168,7 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
     <div className="couple-game-app">
       {/* Back Button - Same style as other modules */}
       <button
-        onClick={onBackHome}
+        onClick={() => navigate('/')}
         className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-pink-500 backdrop-blur-sm transition-all text-pink-500 hover:text-pink-600 shadow-xl hover:scale-110"
       >
         <ArrowLeft size={20} className="sm:hidden" />

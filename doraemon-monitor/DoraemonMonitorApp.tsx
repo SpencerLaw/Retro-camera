@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
 
-interface DoraemonMonitorAppProps {
-  onBackHome: () => void;
-}
-
-const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) => {
+const DoraemonMonitorApp: React.FC = () => {
+  const navigate = useNavigate();
   const t = useTranslations();
   const [isLicensed, setIsLicensed] = useState(false); // 授权状态
   const [isStarted, setIsStarted] = useState(false);
@@ -228,7 +226,7 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
       <div className="doraemon-start-layer">
         {/* 返回按钮 */}
         <button
-          onClick={onBackHome}
+          onClick={() => navigate('/')}
           className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#1293EE] backdrop-blur-sm transition-all text-[#1293EE] hover:text-[#0d6ab8] shadow-lg"
         >
           <ArrowLeft size={24} />

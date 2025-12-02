@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Camera } from './Camera';
 import { DraggablePhoto } from './DraggablePhoto';
 import { Photo } from '../types';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
-interface CameraAppProps {
-  onBackHome: () => void;
-}
-
-export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
+export const CameraApp: React.FC = () => {
+  const navigate = useNavigate();
   const t = useTranslations();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [topZIndex, setTopZIndex] = useState(1000); // Start with high z-index
@@ -143,7 +141,7 @@ export const CameraApp: React.FC<CameraAppProps> = ({ onBackHome }) => {
       {/* Back Home Button and Clear All Button */}
       <div className="fixed top-4 left-4 z-[2000] flex gap-2">
         <button 
-          onClick={onBackHome}
+          onClick={() => navigate('/')}
           className="p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#8b4513] backdrop-blur-sm transition-all text-[#8b4513] hover:text-[#5c4033] shadow-lg"
         >
           <ArrowLeft size={24} />

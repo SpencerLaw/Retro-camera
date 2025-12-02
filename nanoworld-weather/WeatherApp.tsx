@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import WeatherCard from './components/WeatherCard';
@@ -6,11 +7,8 @@ import { WeatherData, GeneratedImage, AppState, WeatherStyle } from './types';
 import { fetchWeatherAndContext, generateDioramaImage } from './services/geminiService';
 import { getCachedWeather, setCachedWeather } from './utils/cache';
 
-interface WeatherAppProps {
-  onBackHome: () => void;
-}
-
-const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
+const WeatherApp: React.FC = () => {
+  const navigate = useNavigate();
   const t = useTranslations();
   const [state, setState] = useState<AppState>({
     status: 'idle',
@@ -202,7 +200,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ onBackHome }) => {
     <div className="min-h-screen bg-gradient-to-b from-[#E6F3FF] via-[#FFF0F5] to-[#FFE5EC] text-gray-900 flex flex-col items-center font-sans px-3 sm:px-4 py-6 sm:py-8 relative overflow-hidden">
       {/* Back Button */}
       <button
-        onClick={onBackHome}
+        onClick={() => navigate('/')}
         className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 p-2 sm:p-3 rounded-full bg-white/90 hover:bg-white border-2 sm:border-3 border-blue-500 backdrop-blur-sm transition-all text-blue-500 hover:text-blue-600 shadow-xl hover:scale-110"
       >
         <ArrowLeft size={20} className="sm:hidden" />

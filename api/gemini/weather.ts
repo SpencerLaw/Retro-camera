@@ -96,39 +96,18 @@ export default async function handler(
         Make the weather realistic and appropriate for the current season and location.
       `;
 
-      try {
-        // Try with grounding first (if available)
-        let response;
-        try {
-          response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-              grounding: {
-                googleSearch: {}
-              }
-            }
-          });
-        } catch (groundingError: any) {
-          console.warn("Grounding not available, using standard generation:", groundingError?.message);
-          // Fallback to standard generation without grounding
-          response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt
-          });
-        }
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt
+      });
 
-        let text = response.text;
-        if (!text) throw new Error("No data received from weather service.");
+      let text = response.text;
+      if (!text) throw new Error("No data received from weather service.");
 
-        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
-        const weatherData = JSON.parse(text);
-        return res.status(200).json({ data: weatherData });
-      } catch (parseError: any) {
-        console.error("Weather fetch error details:", parseError);
-        throw new Error(`Failed to fetch weather data: ${parseError.message}`);
-      }
+      const weatherData = JSON.parse(text);
+      return res.status(200).json({ data: weatherData });
     }
 
     if (action === 'generateImage') {

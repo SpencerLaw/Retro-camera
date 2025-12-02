@@ -62,6 +62,33 @@ const getFallbackImage = () => {
   return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 };
 
+const FALLBACK_CONDITIONS = [
+  { condition: "Partly Cloudy", description: "Soft clouds drift lazily across the sky" },
+  { condition: "Sunny", description: "Warm golden sunshine kisses every rooftop" },
+  { condition: "Rain", description: "Gentle raindrops add shimmer to the miniature town" },
+  { condition: "Snow", description: "Fluffy snow blankets the streets in a dreamy hush" },
+];
+
+const createFallbackWeather = (city: string) => {
+  const baseCondition = FALLBACK_CONDITIONS[Math.floor(Math.random() * FALLBACK_CONDITIONS.length)];
+  const tempVariation = Math.floor(Math.random() * 6) - 3; // +/- 3 degrees
+
+  return {
+    city,
+    country: "Dreamland",
+    temperature: 22 + tempVariation,
+    condition: baseCondition.condition,
+    description: baseCondition.description,
+    visual_prompt_part: baseCondition.condition.includes("Cloudy")
+      ? "half sun half fluffy white clouds"
+      : baseCondition.condition.includes("Rain")
+      ? "soft cute raindrops falling from cotton clouds"
+      : baseCondition.condition.includes("Snow")
+      ? "soft fluffy snowflakes + snowman elements"
+      : "cute smiling sun + thin cotton clouds",
+  };
+};
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -109,23 +136,33 @@ export default async function handler(
         Make the weather realistic and appropriate for the current season and location.
       `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: WEATHER_RESPONSE_SCHEMA,
-          temperature: 0.8,
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: WEATHER_RESPONSE_SCHEMA,
+            temperature: 0.8,
+          }
+        });
+
+        const text = response.text;
+        if (!text) {
+          throw new Error("No data received from weather service.");
         }
-      });
 
-      const text = response.text;
-      if (!text) {
-        throw new Error("No data received from weather service.");
+        const weatherData = JSON.parse(text);
+        return res.status(200).json({ data: weatherData });
+      } catch (weatherError: any) {
+        console.error("Weather fetch failed, using fallback data:", weatherError);
+        const fallbackWeather = createFallbackWeather(city);
+        return res.status(200).json({
+          data: fallbackWeather,
+          error: "api_error",
+          message: "Using fallback weather data due to API error."
+        });
       }
-
-      const weatherData = JSON.parse(text);
-      return res.status(200).json({ data: weatherData });
     }
 
     if (action === 'generateImage') {

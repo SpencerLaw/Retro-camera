@@ -3,54 +3,94 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 /**
  * Vercel Serverless Function - 授权码验证API
  * 
- * 这个API负责验证用户输入的授权码
- * 你需要在Vercel环境变量中设置：
- * - LICENSE_CODES: 有效授权码列表（逗号分隔）
+ * 授权规则：
+ * - 每个授权码有效期1年
+ * - 不限制设备数量
+ * - 根据授权码生成时间判断是否过期
+ * 
+ * 授权码格式：YYYYMMDD-XXXX-XXXX-XXXX
+ * 前8位是日期（生成日期），用于计算有效期
  */
-
-interface DeviceInfo {
-  id: string;
-  name: string;
-  addedAt: string;
-}
-
-interface LicenseData {
-  code: string;
-  deviceLimit: number;
-  validUntil?: string;
-  usedDevices: DeviceInfo[];
-}
-
-// 模拟数据库 - 实际使用时，你应该使用真实数据库（如Vercel KV、MongoDB等）
-// 这里为了演示，使用内存存储
-const licenseDatabase: Map<string, LicenseData> = new Map();
 
 // 验证频率限制（防止滥用）
 const verificationLog: Map<string, number[]> = new Map();
+
+// 从授权码中提取生成日期（前8位：YYYYMMDD）
+function extractDateFromCode(code: string): Date | null {
+  try {
+    // 移除连字符，取前8位
+    const cleanCode = code.replace(/[-\s]/g, '');
+    const dateStr = cleanCode.substring(0, 8);
+    
+    // 解析日期 YYYYMMDD
+    const year = parseInt(dateStr.substring(0, 4));
+    const month = parseInt(dateStr.substring(4, 6)) - 1; // 月份从0开始
+    const day = parseInt(dateStr.substring(6, 8));
+    
+    const date = new Date(year, month, day);
+    
+    // 验证日期有效性
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    
+    return date;
+  } catch (error) {
+    return null;
+  }
+}
+
+// 验证授权码是否过期（1年有效期）
+function isLicenseExpired(code: string): {
+  expired: boolean;
+  generatedDate?: string;
+  expiryDate?: string;
+} {
+  const generatedDate = extractDateFromCode(code);
+  
+  if (!generatedDate) {
+    return { expired: true };
+  }
+  
+  // 计算过期日期（生成日期 + 1年）
+  const expiryDate = new Date(generatedDate);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+  
+  const now = new Date();
+  const expired = now > expiryDate;
+  
+  console.log('授权码生成日期:', generatedDate.toLocaleDateString('zh-CN'));
+  console.log('过期日期:', expiryDate.toLocaleDateString('zh-CN'));
+  console.log('当前日期:', now.toLocaleDateString('zh-CN'));
+  console.log('是否过期:', expired);
+  
+  return {
+    expired,
+    generatedDate: generatedDate.toISOString(),
+    expiryDate: expiryDate.toISOString(),
+  };
+}
 
 // 从环境变量加载授权码
 function loadLicenseCodes(): string[] {
   const codes = process.env.LICENSE_CODES || '';
   console.log('环境变量 LICENSE_CODES:', codes ? '已设置' : '未设置');
-  console.log('原始值:', codes);
   
   // 分割、去除空格和连字符、转大写
   const codeList = codes.split(',')
     .map(c => c.replace(/[-\s]/g, '').toUpperCase())
     .filter(c => c.length > 0);
-  console.log('解析后的授权码列表:', codeList);
   
   return codeList;
 }
 
-// 验证授权码是否有效
+// 验证授权码是否在白名单中
 function isValidLicenseCode(code: string): boolean {
   const validCodes = loadLicenseCodes();
   const upperCode = code.toUpperCase();
   
   console.log('验证授权码:', upperCode);
-  console.log('有效授权码列表:', validCodes);
-  console.log('是否匹配:', validCodes.includes(upperCode));
+  console.log('是否在白名单中:', validCodes.includes(upperCode));
   
   return validCodes.includes(upperCode);
 }
@@ -89,48 +129,6 @@ function checkVerificationRate(code: string): {
   return { allowed: true };
 }
 
-// 检查设备是否可以使用此授权码
-function checkDeviceLimit(code: string, deviceId: string, deviceInfo: string): {
-  allowed: boolean;
-  reason?: string;
-} {
-  const upperCode = code.toUpperCase();
-  
-  // 获取或创建授权码数据
-  if (!licenseDatabase.has(upperCode)) {
-    licenseDatabase.set(upperCode, {
-      code: upperCode,
-      deviceLimit: 3, // 每个授权码最多3台设备
-      usedDevices: [],
-    });
-  }
-
-  const licenseData = licenseDatabase.get(upperCode)!;
-
-  // 检查设备是否已注册
-  const existingDevice = licenseData.usedDevices.find(d => d.id === deviceId);
-  if (existingDevice) {
-    return { allowed: true }; // 已注册的设备可以继续使用
-  }
-
-  // 检查是否达到设备限制
-  if (licenseData.usedDevices.length >= licenseData.deviceLimit) {
-    return {
-      allowed: false,
-      reason: `授权码已达到设备数量限制（${licenseData.deviceLimit}台）`,
-    };
-  }
-
-  // 添加新设备
-  licenseData.usedDevices.push({
-    id: deviceId,
-    name: deviceInfo || '未知设备',
-    addedAt: new Date().toISOString(),
-  });
-  
-  return { allowed: true };
-}
-
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -154,15 +152,15 @@ export default async function handler(
   }
 
   try {
-    const { licenseCode, deviceId, deviceInfo } = req.body;
+    const { licenseCode } = req.body;
 
-    console.log('收到验证请求 - licenseCode:', licenseCode, 'deviceId:', deviceId, 'deviceInfo:', deviceInfo);
+    console.log('收到验证请求 - licenseCode:', licenseCode);
 
     // 验证参数
-    if (!licenseCode || !deviceId) {
+    if (!licenseCode) {
       return res.status(400).json({
         success: false,
-        message: '缺少必要参数',
+        message: '缺少授权码参数',
       });
     }
 
@@ -171,20 +169,30 @@ export default async function handler(
 
     console.log('清理后的授权码:', cleanCode);
 
-    // 验证授权码长度
+    // 验证授权码长度（YYYYMMDD + 8位随机 = 16位）
     if (cleanCode.length !== 16) {
       return res.status(400).json({
         success: false,
-        message: '授权码格式不正确（应为16位字符）',
+        message: '授权码格式不正确',
       });
     }
 
-    // 验证授权码是否在有效列表中
+    // 验证授权码是否在白名单中
     if (!isValidLicenseCode(cleanCode)) {
-      console.log('授权码验证失败');
+      console.log('授权码不在白名单中');
       return res.status(401).json({
         success: false,
-        message: '授权码无效或已过期',
+        message: '授权码无效',
+      });
+    }
+
+    // 检查授权码是否过期（1年有效期）
+    const expiryCheck = isLicenseExpired(cleanCode);
+    if (expiryCheck.expired) {
+      console.log('授权码已过期');
+      return res.status(401).json({
+        success: false,
+        message: '授权码已过期，请重新购买',
       });
     }
 
@@ -198,15 +206,6 @@ export default async function handler(
       });
     }
 
-    // 检查设备限制
-    const deviceCheck = checkDeviceLimit(cleanCode, deviceId, deviceInfo || '未知设备');
-    if (!deviceCheck.allowed) {
-      return res.status(403).json({
-        success: false,
-        message: deviceCheck.reason || '设备验证失败',
-      });
-    }
-
     console.log('授权码验证成功');
 
     // 验证成功
@@ -214,8 +213,9 @@ export default async function handler(
       success: true,
       message: '授权验证成功',
       data: {
-        validUntil: '2099-12-31', // 永久有效
-        deviceLimit: 3,
+        generatedDate: expiryCheck.generatedDate,
+        expiryDate: expiryCheck.expiryDate,
+        validFor: '1年',
       },
     });
 

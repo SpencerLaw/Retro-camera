@@ -281,22 +281,37 @@
       <p>1️⃣ 生成授权码后，可以直接发给购买的用户</p>
       <p>2️⃣ 点击"下载ENV格式"，将生成的授权码添加到 Vercel 环境变量</p>
       <p>3️⃣ 在 Vercel 项目设置中，添加环境变量 <code>LICENSE_CODES</code></p>
-      <p>4️⃣ 每个授权码最多可在3台设备上使用</p>
-      <p>5️⃣ 授权码格式：XXXX-XXXX-XXXX-XXXX（16位字符）</p>
+      <p>4️⃣ 每个授权码有效期1年，从生成日期开始计算</p>
+      <p>5️⃣ 授权码格式：YYYYMMDD-XXXX-XXXX（前8位是日期，用于计算有效期）</p>
+      <p>6️⃣ 不限制设备数量，用户可在任意设备使用</p>
     </div>
   </div>
 
   <script>
     let allCodes = [];
 
-    // 生成随机授权码
+    // 生成随机授权码（格式：YYYYMMDD-XXXX-XXXX）
     function generateLicenseCode() {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去除易混淆字符 0,O,I,1
-      let code = '';
-      for (let i = 0; i < 16; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      
+      // 生成日期部分（YYYYMMDD）
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const datePart = `${year}${month}${day}`;
+      
+      // 生成8位随机码
+      let randomPart = '';
+      for (let i = 0; i < 8; i++) {
+        randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      return code.match(/.{1,4}/g).join('-');
+      
+      // 组合：YYYYMMDD + 8位随机 = 16位
+      const fullCode = datePart + randomPart;
+      
+      // 格式化为 XXXX-XXXX-XXXX-XXXX
+      return fullCode.match(/.{1,4}/g).join('-');
     }
 
     // 生成多个授权码

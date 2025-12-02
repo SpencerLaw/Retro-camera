@@ -168,7 +168,7 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
         {/* 说明 */}
         <div className="license-info">
           <p>💡 授权码为16位字符</p>
-          <p>💡 一个授权码最多可在3台设备上使用</p>
+          <p>💡 有效期1年，不限设备数量</p>
         </div>
       </div>
     </div>

@@ -19,6 +19,9 @@ interface LicenseData {
 // 这里为了演示，使用内存存储
 const licenseDatabase: Map<string, LicenseData> = new Map();
 
+// 验证频率限制（防止滥用）
+const verificationLog: Map<string, number[]> = new Map();
+
 // 从环境变量加载授权码
 function loadLicenseCodes(): string[] {
   const codes = process.env.LICENSE_CODES || '';
@@ -44,6 +47,40 @@ function isValidLicenseCode(code: string): boolean {
   console.log('是否匹配:', validCodes.includes(upperCode));
   
   return validCodes.includes(upperCode);
+}
+
+// 检查验证频率（防止滥用）
+function checkVerificationRate(code: string): {
+  allowed: boolean;
+  reason?: string;
+} {
+  const now = Date.now();
+  const key = code.toUpperCase();
+  
+  // 获取该授权码的验证记录
+  if (!verificationLog.has(key)) {
+    verificationLog.set(key, []);
+  }
+  
+  const logs = verificationLog.get(key)!;
+  
+  // 清理5分钟前的记录
+  const fiveMinutesAgo = now - 5 * 60 * 1000;
+  const recentLogs = logs.filter(time => time > fiveMinutesAgo);
+  
+  // 5分钟内验证次数不能超过10次
+  if (recentLogs.length >= 10) {
+    return {
+      allowed: false,
+      reason: '验证过于频繁，请稍后再试（5分钟内最多验证10次）',
+    };
+  }
+  
+  // 记录本次验证
+  recentLogs.push(now);
+  verificationLog.set(key, recentLogs);
+  
+  return { allowed: true };
 }
 
 // 检查设备是否可以使用此授权码
@@ -136,6 +173,16 @@ export default async function handler(
       return res.status(401).json({
         success: false,
         message: '授权码无效或已过期',
+      });
+    }
+
+    // 检查验证频率（防止滥用）
+    const rateCheck = checkVerificationRate(cleanCode);
+    if (!rateCheck.allowed) {
+      console.log('验证频率超限');
+      return res.status(429).json({
+        success: false,
+        message: rateCheck.reason || '验证过于频繁',
       });
     }
 

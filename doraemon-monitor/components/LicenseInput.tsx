@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Key, CheckCircle, XCircle, Loader } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Key, CheckCircle, XCircle, Loader, Trash2 } from 'lucide-react';
 import { 
   verifyLicenseCode, 
   formatLicenseCode, 
@@ -16,6 +16,19 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showDevTools, setShowDevTools] = useState(false);
+
+  // 检测开发者模式（连续点击标题5次）
+  const [clickCount, setClickCount] = useState(0);
+  
+  useEffect(() => {
+    if (clickCount >= 5) {
+      setShowDevTools(true);
+      setClickCount(0);
+    }
+    const timer = setTimeout(() => setClickCount(0), 2000);
+    return () => clearTimeout(timer);
+  }, [clickCount]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -59,6 +72,19 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
     setLicenseCode(formatted);
   };
 
+  // 清除本地授权数据
+  const handleClearCache = () => {
+    if (window.confirm('确定要清除本地授权缓存吗？')) {
+      localStorage.removeItem('doraemon_license_code');
+      localStorage.removeItem('doraemon_verified');
+      localStorage.removeItem('doraemon_device_id');
+      setSuccess('✅ 缓存已清除！刷新页面生效');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+  };
+
   return (
     <div className="license-container">
       <div className="license-card">
@@ -67,9 +93,28 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
           <Key size={48} />
         </div>
 
-        {/* 标题 */}
-        <h1 className="license-title">🤫 分贝检测仪</h1>
+        {/* 标题（点击5次开启开发者模式） */}
+        <h1 
+          className="license-title" 
+          onClick={() => setClickCount(c => c + 1)}
+          style={{ cursor: 'pointer', userSelect: 'none' }}
+        >
+          🤫 分贝检测仪
+        </h1>
         <p className="license-subtitle">请输入您购买的授权码</p>
+
+        {/* 开发者工具 */}
+        {showDevTools && (
+          <div className="dev-tools">
+            <button className="dev-clear-btn" onClick={handleClearCache}>
+              <Trash2 size={16} />
+              <span>清除授权缓存</span>
+            </button>
+            <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+              开发者模式已启用
+            </p>
+          </div>
+        )}
 
         {/* 输入框 */}
         <div className="license-input-group">

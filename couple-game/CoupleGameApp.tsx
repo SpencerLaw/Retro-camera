@@ -41,10 +41,23 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentDare, setCurrentDare] = useState<string>('');
   const slotReelRef = useRef<HTMLDivElement>(null);
-  const changeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const activeTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
   const t = (key: string): string => {
     return translations[currentLang]?.[key] || key;
+  };
+
+  // Clear all active timeouts to prevent memory leaks
+  const clearAllTimeouts = () => {
+    activeTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    activeTimeoutsRef.current = [];
+  };
+
+  // Helper to track and create timeouts
+  const addTimeout = (callback: () => void, delay: number): NodeJS.Timeout => {
+    const timeout = setTimeout(callback, delay);
+    activeTimeoutsRef.current.push(timeout);
+    return timeout;
   };
 
   const handleSpin = () => {
@@ -61,6 +74,9 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
       return;
     }
 
+    // Clear any existing timeouts before starting new animation
+    clearAllTimeouts();
+    
     setIsSpinning(true);
     const finalDare = dares[Math.floor(Math.random() * dares.length)];
 
@@ -81,11 +97,11 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
           p.style.transform = 'scale(0.92)';
         }
 
-        setTimeout(() => {
+        addTimeout(() => {
           if (slotReelRef.current) {
             slotReelRef.current.innerHTML = `<p style="opacity: 0.4; transform: scale(0.92); transition: all ${Math.min(currentSpeed * 0.6, 150)}ms ease-in-out;">${randomDare}</p>`;
             
-            setTimeout(() => {
+            addTimeout(() => {
               const newP = slotReelRef.current?.querySelector('p');
               if (newP) {
                 newP.style.opacity = '1';
@@ -110,10 +126,10 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
 
         if (changeCount >= totalChanges) {
           // 最终结果
-          setTimeout(() => {
+          addTimeout(() => {
             if (slotReelRef.current) {
               slotReelRef.current.innerHTML = `<p class="final-result" style="opacity: 0.4; transform: scale(0.92); transition: all 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);">${finalDare}</p>`;
-              setTimeout(() => {
+              addTimeout(() => {
                 const finalP = slotReelRef.current?.querySelector('p');
                 if (finalP) {
                   finalP.style.opacity = '1';
@@ -127,19 +143,19 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
           return;
         }
 
-        changeIntervalRef.current = setTimeout(() => changeContent(), currentSpeed);
+        addTimeout(() => changeContent(), currentSpeed);
       }
     };
 
     if (slotReelRef.current) {
       slotReelRef.current.innerHTML = `<p>${dares[Math.floor(Math.random() * dares.length)]}</p>`;
     }
-    setTimeout(() => changeContent(), 100);
+    addTimeout(() => changeContent(), 100);
   };
 
   useEffect(() => {
     return () => {
-      // Clear all active timeouts on unmount
+      // Clear all active timeouts on unmount to prevent memory leaks
       clearAllTimeouts();
     };
   }, []);

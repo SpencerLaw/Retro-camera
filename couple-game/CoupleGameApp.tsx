@@ -139,9 +139,8 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
 
   useEffect(() => {
     return () => {
-      if (changeIntervalRef.current) {
-        clearTimeout(changeIntervalRef.current);
-      }
+      // Clear all active timeouts on unmount
+      clearAllTimeouts();
     };
   }, []);
 
@@ -213,4 +212,3 @@ const CoupleGameApp: React.FC<CoupleGameAppProps> = ({ onBackHome }) => {
 };
 
 export default CoupleGameApp;
-

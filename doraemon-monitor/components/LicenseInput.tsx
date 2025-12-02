@@ -120,19 +120,10 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
           </div>
         )}
 
-        {/* 购买提示 */}
-        <div className="license-footer">
-          <p>💡 请从正规渠道购买授权码</p>
-          <p style={{ fontSize: '13px', color: '#999', marginTop: '5px' }}>
-            购买后即可获得授权码，永久有效
-          </p>
-        </div>
-
         {/* 说明 */}
         <div className="license-info">
           <p>💡 授权码为16位字符</p>
           <p>💡 一个授权码最多可在3台设备上使用</p>
-          <p>💡 购买后即时发货，永久有效</p>
         </div>
       </div>
     </div>

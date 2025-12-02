@@ -1,0 +1,30 @@
+[33mcommit a32c61ff5ba1f146d08e5bd4cc6b0bc97b36e2e3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Dec 2 09:38:45 2025 +0800
+
+    修复：心跳契约动画内存泄漏 - 追踪并清理所有定时器 🐛
+    
+    问题诊断：
+    - 每次动画迭代创建2-3个setTimeout调用
+    - 70次迭代总共140+个未管理的定时器
+    - 旧代码只追踪最后一个timeout
+    - 组件卸载后仍有活动定时器导致内存泄漏和潜在的DOM操作错误
+    
+    完整修复方案：
+    ✅ 使用 activeTimeoutsRef 数组追踪所有活动定时器
+    ✅ clearAllTimeouts() - 清理所有追踪的定时器
+    ✅ addTimeout() - 辅助函数，创建并追踪每个定时器
+    ✅ 动画开始前清理旧定时器（防止重叠）
+    ✅ 组件卸载时清理所有定时器（防止泄漏）
+    ✅ 所有 setTimeout 调用都通过 addTimeout 包装
+    
+    测试场景：
+    - ✓ 快速连续点击生成按钮
+    - ✓ 动画进行中切换页面
+    - ✓ 动画进行中卸载组件
+    - ✓ 70次迭代完整动画周期
+    
+    结果：零内存泄漏，完美清理！
+
+ couple-game/CoupleGameApp.tsx | 32 [32m++++++++++++++++++++++++[m[31m--------[m
+ 1 file changed, 24 insertions(+), 8 deletions(-)

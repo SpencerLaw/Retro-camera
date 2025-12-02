@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
+import { isVerified } from './utils/licenseManager';
+import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
 
 interface DoraemonMonitorAppProps {
@@ -9,6 +11,7 @@ interface DoraemonMonitorAppProps {
 
 const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) => {
   const t = useTranslations();
+  const [isLicensed, setIsLicensed] = useState(false); // 授权状态
   const [isStarted, setIsStarted] = useState(false);
   const [currentDb, setCurrentDb] = useState(40);
   const [limit, setLimit] = useState(60);
@@ -27,6 +30,16 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
   const wakeLockRef = useRef<any>(null);
+
+  // 检查授权状态
+  useEffect(() => {
+    setIsLicensed(isVerified());
+  }, []);
+
+  // 授权成功回调
+  const handleLicenseVerified = () => {
+    setIsLicensed(true);
+  };
 
   // 启动应用
   const initApp = async () => {
@@ -203,6 +216,11 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ onBackHome }) =
   if (state === 'alarm') dbColor = '#FFF';
   else if (currentDb > limit) dbColor = '#DD0000';
   else if (currentDb > limit - 5) dbColor = '#FACE05';
+
+  // 如果未授权，显示授权页面
+  if (!isLicensed) {
+    return <LicenseInput onVerified={handleLicenseVerified} />;
+  }
 
   // 如果未启动，显示启动页
   if (!isStarted) {

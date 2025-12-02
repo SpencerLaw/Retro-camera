@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "Bash(node generate-pwa-icons.js:*)",
+      "Bash(node save-generated-icons.js:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: 将主页升级为超可爱Kawaii风格\n\n✨ 主要改动：\n- 背景：粉蓝渐变马卡龙色系天空 + 浮动星星✨和云朵\n- 标题：渐变彩虹色文字 + 跳动爱心装饰 + 脉冲动画\n- 语言切换器：粉色圆形按钮 + 悬浮旋转效果\n- 所有卡片：\n  * 更大圆角(2.5rem)更厚边框(5px)\n  * 马卡龙色系渐变背景\n  * 更大图标(36x36)+ 更强缩放效果(1.25x)\n  * 悬浮时出现可爱emoji装饰(💕🌟☁️💝🔔)\n  * Kawaii发光效果\n  * 按钮添加emoji后缀\n- 底部版本标签：彩虹渐变边框 + 彩虹文字 + 脉冲动画\n\n💖 整体风格从皮克斯3D变为日式Kawaii可爱风\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: 重绘超可爱Kawaii风格哆啦A梦图标\n\n🤖 全新设计的哆啦A梦特点：\n- ✨ 更大更圆润的眼睛 + 双层眼神光\n- 💕 粉色腮红让表情更可爱\n- 👅 露出小舌头的甜美笑容\n- 👃 更大的红鼻子 + 高光效果\n- ⚪ 可爱的胡须点装饰\n- 🔔 更大更闪亮的铃铛\n- 🎨 柔和的颜色过渡\n\n整体从简单图标升级为超萌Kawaii风格 💖\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

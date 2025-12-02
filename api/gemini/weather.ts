@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 
 // Constants (copied to avoid import issues in serverless function)
 const DIORAMA_WEATHER_MAPPING = `
@@ -132,16 +132,16 @@ export default async function handler(
       };
 
       try {
-        // Attempt 1: High quality model
+        // Generate image using gemini-2.5-flash-image model
         const response = await ai.models.generateContent({
-          model: "gemini-3-pro-image-preview",
+          model: "gemini-2.5-flash-image",
           contents: {
             parts: [{ text: finalPrompt }]
           },
           config: {
+            responseModalities: [Modality.IMAGE],
             imageConfig: {
-              aspectRatio: "1:1",
-              imageSize: "4K"
+              aspectRatio: "1:1"
             }
           }
         });
@@ -150,36 +150,12 @@ export default async function handler(
         if (img) {
           return res.status(200).json({ imageUrl: img });
         }
-        throw new Error("No image data in Pro response");
+
+        throw new Error("No image data in response");
 
       } catch (error) {
-        console.warn("Pro image generation failed, falling back to Flash Image model:", error);
-
-        try {
-          // Attempt 2: Standard model
-          const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash-image",
-            contents: {
-              parts: [{ text: finalPrompt }]
-            },
-            config: {
-              imageConfig: {
-                aspectRatio: "1:1"
-              }
-            }
-          });
-
-          const img = extractImage(response);
-          if (img) {
-            return res.status(200).json({ imageUrl: img });
-          }
-
-          throw new Error("No image data in Flash response");
-
-        } catch (fallbackError) {
-          console.error("CRITICAL: All AI image generation failed. Using static fallback.", fallbackError);
-          return res.status(200).json({ imageUrl: getFallbackImage() });
-        }
+        console.error("CRITICAL: AI image generation failed. Using static fallback.", error);
+        return res.status(200).json({ imageUrl: getFallbackImage() });
       }
     }
 

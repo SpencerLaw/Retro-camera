@@ -246,7 +246,7 @@ const ThreeJSParticles: React.FC = () => {
               const distance = Math.sqrt(dx * dx + dy * dy);
               state.handDistance = distance;
               const targetExp = Math.max(0.5, Math.min(3.5, distance * 4));
-              state.expansion += (targetExp - state.expansion) * 0.1;
+              state.expansion += (targetExp - state.expansion) * 0.3;
             } else if (results.multiHandLandmarks.length === 1) {
               const hand = results.multiHandLandmarks[0];
               const thumb = hand[4];
@@ -257,12 +257,12 @@ const ThreeJSParticles: React.FC = () => {
               );
               state.pinchStrength = dist;
               const targetExp = 0.8 + (dist * 5);
-              state.expansion += (targetExp - state.expansion) * 0.1;
+              state.expansion += (targetExp - state.expansion) * 0.3;
             }
           } else {
             setStatusColor('yellow');
             setStatusText('Looking for hands...');
-            state.expansion += (1.0 - state.expansion) * 0.05;
+            state.expansion += (1.0 - state.expansion) * 0.15;
           }
         });
 
@@ -293,7 +293,7 @@ const ThreeJSParticles: React.FC = () => {
 
       const time = clock.getElapsedTime();
 
-      state.currentColor.lerp(state.targetColor, 0.05);
+      state.currentColor.lerp(state.targetColor, 0.15);
       material.color = state.currentColor;
 
       particles.rotation.y += state.rotationSpeed + (state.expansion * 0.001);
@@ -325,9 +325,9 @@ const ThreeJSParticles: React.FC = () => {
         tx += Math.sin(time + i) * 0.05;
         ty += Math.cos(time + i * 0.5) * 0.05;
 
-        currentPositions[ix] += (tx - currentPositions[ix]) * 0.12;
-        currentPositions[iy] += (ty - currentPositions[iy]) * 0.12;
-        currentPositions[iz] += (tz - currentPositions[iz]) * 0.12;
+        currentPositions[ix] += (tx - currentPositions[ix]) * 0.25;
+        currentPositions[iy] += (ty - currentPositions[iy]) * 0.25;
+        currentPositions[iz] += (tz - currentPositions[iz]) * 0.25;
       }
       posAttribute.needsUpdate = true;
 
@@ -441,10 +441,10 @@ const ThreeJSParticles: React.FC = () => {
       />
 
       {/* Three.js Container */}
-      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2, pointerEvents: 'none' }} />
+      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }} />
 
       {/* Main UI Container */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10 }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
         {/* Header / Status */}
         <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', pointerEvents: 'auto' }}>
           <h1 style={{

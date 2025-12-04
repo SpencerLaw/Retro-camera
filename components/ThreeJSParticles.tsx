@@ -546,28 +546,13 @@ const ThreeJSParticles: React.FC = () => {
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
         {/* Header / Status */}
         <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', pointerEvents: 'auto' }}>
-          <h1 style={{
-            color: 'transparent',
-            fontSize: '2rem',
-            fontWeight: '700',
-            letterSpacing: '0.2em',
-            marginBottom: '0.5rem',
-            background: 'linear-gradient(90deg, #00f5ff 0%, #7c4dff 50%, #ff0080 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0 0 30px rgba(0, 245, 255, 0.5)',
-            animation: 'glow 2s infinite ease-in-out'
-          }}>
-            PARTICLE<span style={{ fontWeight: '900' }}>FLOW</span>
-          </h1>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
-            fontSize: '0.85rem',
+            fontSize: '1.2rem',
             color: '#a0aec0',
-            padding: '0.5rem 1rem',
+            padding: '0.75rem 1.5rem',
             background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '2rem',
             backdropFilter: 'blur(10px)',
@@ -593,7 +578,7 @@ const ThreeJSParticles: React.FC = () => {
           style={{
             position: 'absolute',
             top: '1.5rem',
-            right: '20rem',
+            right: '28rem',
             pointerEvents: 'auto',
             display: 'flex',
             alignItems: 'center',
@@ -632,7 +617,7 @@ const ThreeJSParticles: React.FC = () => {
             position: 'fixed',
             top: '1.5rem',
             right: '1.5rem',
-            width: '18rem',
+            width: '26rem',
             maxHeight: 'calc(100vh - 3rem)',
             overflowY: 'auto',
             background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%)',

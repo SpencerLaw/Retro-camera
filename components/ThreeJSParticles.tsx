@@ -4,16 +4,16 @@ import { Home } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import * as THREE from 'three';
 
-// Preset colors
+// Preset colors with gradient themes
 const PRESET_COLORS = [
-  { color: '#00ffff', name: 'Cyan' },
-  { color: '#ff0066', name: 'Red' },
-  { color: '#00ff88', name: 'Green' },
-  { color: '#ffd700', name: 'Gold' },
-  { color: '#b388ff', name: 'Purple' },
-  { color: '#ff69b4', name: 'Pink' },
-  { color: '#ff6b35', name: 'Orange' },
-  { color: '#42a5f5', name: 'Blue' }
+  { color: '#00f5ff', name: 'Neon Cyan', gradient: 'linear-gradient(135deg, #00f5ff 0%, #0080ff 100%)' },
+  { color: '#ff0080', name: 'Neon Pink', gradient: 'linear-gradient(135deg, #ff0080 0%, #ff6b9d 100%)' },
+  { color: '#00ff88', name: 'Neon Green', gradient: 'linear-gradient(135deg, #00ff88 0%, #00d4aa 100%)' },
+  { color: '#ffd700', name: 'Golden', gradient: 'linear-gradient(135deg, #ffd700 0%, #ffaa00 100%)' },
+  { color: '#b388ff', name: 'Cosmic Purple', gradient: 'linear-gradient(135deg, #b388ff 0%, #7c4dff 100%)' },
+  { color: '#ff69b4', name: 'Hot Pink', gradient: 'linear-gradient(135deg, #ff69b4 0%, #ff1493 100%)' },
+  { color: '#ff6b35', name: 'Cyber Orange', gradient: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)' },
+  { color: '#42a5f5', name: 'Sky Blue', gradient: 'linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%)' }
 ];
 
 const ThreeJSParticles: React.FC = () => {
@@ -21,7 +21,7 @@ const ThreeJSParticles: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentShape, setCurrentShape] = useState('heart');
-  const [currentColor, setCurrentColor] = useState('#00ffff');
+  const [currentColor, setCurrentColor] = useState('#00f5ff');
   const [statusText, setStatusText] = useState('Waiting for camera...');
   const [statusColor, setStatusColor] = useState('red');
   const sceneRef = useRef<any>(null);
@@ -37,8 +37,8 @@ const ThreeJSParticles: React.FC = () => {
     // State
     const state = {
       currentShape: 'heart',
-      targetColor: new THREE.Color(0x00ffff),
-      currentColor: new THREE.Color(0x00ffff),
+      targetColor: new THREE.Color(0x00f5ff),
+      currentColor: new THREE.Color(0x00f5ff),
       handDistance: 0,
       pinchStrength: 0,
       handsDetected: 0,
@@ -48,7 +48,7 @@ const ThreeJSParticles: React.FC = () => {
 
     // Three.js Setup
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050505, 0.02);
+    scene.fog = new THREE.FogExp2(0x000000, 0.015);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = CAMERA_Z_BASE;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -73,7 +73,7 @@ const ThreeJSParticles: React.FC = () => {
       size: PARTICLE_SIZE,
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -154,8 +154,6 @@ const ThreeJSParticles: React.FC = () => {
       },
       christmasTree: (i: number) => {
         const section = Math.random();
-
-        // Star on top (5%)
         if (section < 0.05) {
           const starAngle = Math.random() * Math.PI * 2;
           const starDist = Math.random() * 1.5;
@@ -164,45 +162,33 @@ const ThreeJSParticles: React.FC = () => {
             14 + Math.sin(starAngle * 5) * 0.5,
             Math.sin(starAngle) * starDist
           ];
-        }
-        // Tree crown - multiple cone layers (75%)
-        else if (section < 0.80) {
-          // Create 5 layers of tree
+        } else if (section < 0.80) {
           const layerIndex = Math.floor(Math.random() * 5);
-          const layerHeight = 12 - layerIndex * 2.5; // Heights: 12, 9.5, 7, 4.5, 2
-          const maxRadius = 1.5 + layerIndex * 1.2; // Radii: 1.5, 2.7, 3.9, 5.1, 6.3
-
+          const layerHeight = 12 - layerIndex * 2.5;
+          const maxRadius = 1.5 + layerIndex * 1.2;
           const angle = Math.random() * Math.PI * 2;
-          const radiusRatio = Math.pow(Math.random(), 0.7); // More particles toward outside
+          const radiusRatio = Math.pow(Math.random(), 0.7);
           const radius = radiusRatio * maxRadius;
-
-          // Add some vertical variation within layer
           const yVariation = (Math.random() - 0.5) * 1.8;
-
           return [
             Math.cos(angle) * radius,
             layerHeight + yVariation,
             Math.sin(angle) * radius
           ];
-        }
-        // Trunk (15%)
-        else if (section < 0.95) {
+        } else if (section < 0.95) {
           const angle = Math.random() * Math.PI * 2;
           const radius = Math.random() * 1.2;
-          const height = -2 + Math.random() * 3; // Height from -2 to 1
+          const height = -2 + Math.random() * 3;
           return [
             Math.cos(angle) * radius,
             height,
             Math.sin(angle) * radius
           ];
-        }
-        // Ornaments - sparkling decorations (5%)
-        else {
+        } else {
           const ornamentLayer = Math.floor(Math.random() * 4) + 1;
           const ornamentHeight = 11 - ornamentLayer * 2.5;
           const ornamentRadius = 1.8 + ornamentLayer * 1.0;
           const angle = (Math.random() * Math.PI * 2);
-
           return [
             Math.cos(angle) * ornamentRadius,
             ornamentHeight,
@@ -317,7 +303,6 @@ const ThreeJSParticles: React.FC = () => {
       } else if (state.currentShape === 'heart') {
         expansionFactor *= (1 + Math.sin(time * 8) * 0.05 * (1 - Math.min(1, state.pinchStrength * 2)));
       } else if (state.currentShape === 'christmasTree') {
-        // Gentle breathing effect for Christmas tree
         expansionFactor *= (1 + Math.sin(time * 1.5) * 0.08);
       }
 
@@ -403,7 +388,50 @@ const ThreeJSParticles: React.FC = () => {
   };
 
   return (
-    <div style={{ margin: 0, overflow: 'hidden', backgroundColor: '#050505', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{
+      margin: 0,
+      overflow: 'hidden',
+      background: 'radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%)',
+      fontFamily: "'Inter', sans-serif",
+      position: 'relative'
+    }}>
+      {/* Animated Stars Background */}
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
+        {[...Array(100)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: Math.random() * 3 + 'px',
+              height: Math.random() * 3 + 'px',
+              backgroundColor: 'white',
+              borderRadius: '50%',
+              top: Math.random() * 100 + '%',
+              left: Math.random() * 100 + '%',
+              opacity: Math.random() * 0.7 + 0.3,
+              animation: `twinkle ${Math.random() * 3 + 2}s infinite ease-in-out`,
+            }}
+          />
+        ))}
+      </div>
+
+      <style>
+        {`
+          @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+          }
+          @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+            50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+          }
+          @keyframes borderGlow {
+            0%, 100% { border-color: rgba(66, 165, 245, 0.3); }
+            50% { border-color: rgba(66, 165, 245, 0.8); }
+          }
+        `}
+      </style>
+
       {/* Video Element for MediaPipe (Hidden) */}
       <video
         ref={videoRef}
@@ -411,25 +439,50 @@ const ThreeJSParticles: React.FC = () => {
       />
 
       {/* Three.js Container */}
-      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%' }} />
+      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }} />
 
       {/* Main UI Container */}
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10 }}>
         {/* Header / Status */}
-        <div style={{ position: 'absolute', top: '1rem', left: '1.5rem', pointerEvents: 'auto' }}>
-          <h1 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '300', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>
-            PARTICLE<span style={{ fontWeight: 'bold', color: '#42A5F5' }}>FLOW</span>
+        <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', pointerEvents: 'auto' }}>
+          <h1 style={{
+            color: 'transparent',
+            fontSize: '2rem',
+            fontWeight: '700',
+            letterSpacing: '0.2em',
+            marginBottom: '0.5rem',
+            background: 'linear-gradient(90deg, #00f5ff 0%, #7c4dff 50%, #ff0080 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 0 30px rgba(0, 245, 255, 0.5)',
+            animation: 'glow 2s infinite ease-in-out'
+          }}>
+            PARTICLE<span style={{ fontWeight: '900' }}>FLOW</span>
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: '#9CA3AF' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '0.85rem',
+            color: '#a0aec0',
+            padding: '0.5rem 1rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '2rem',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
             <div
               style={{
-                width: '0.5rem',
-                height: '0.5rem',
-                borderRadius: '9999px',
-                backgroundColor: statusColor === 'red' ? '#EF4444' : statusColor === 'green' ? '#10B981' : '#FBBF24'
+                width: '0.6rem',
+                height: '0.6rem',
+                borderRadius: '50%',
+                backgroundColor: statusColor === 'red' ? '#EF4444' : statusColor === 'green' ? '#10B981' : '#FBBF24',
+                boxShadow: `0 0 10px ${statusColor === 'red' ? '#EF4444' : statusColor === 'green' ? '#10B981' : '#FBBF24'}`,
+                animation: 'glow 1.5s infinite ease-in-out'
               }}
             />
-            <span>{statusText}</span>
+            <span style={{ fontWeight: '500' }}>{statusText}</span>
           </div>
         </div>
 
@@ -438,73 +491,126 @@ const ThreeJSParticles: React.FC = () => {
           to="/"
           style={{
             position: 'absolute',
-            top: '1rem',
+            top: '1.5rem',
             right: '20rem',
             pointerEvents: 'auto',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
+            gap: '0.75rem',
             padding: '0.75rem 1.5rem',
-            background: 'rgba(20, 20, 20, 0.6)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '0.75rem',
-            color: 'white',
+            background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(0, 245, 255, 0.3)',
+            borderRadius: '3rem',
+            color: '#00f5ff',
             textDecoration: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 'bold',
-            transition: 'all 0.3s',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 15px rgba(0, 245, 255, 0.2)',
+            animation: 'borderGlow 3s infinite ease-in-out'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(66, 165, 245, 0.2)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 245, 255, 0.4)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(20, 20, 20, 0.6)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 245, 255, 0.2)';
           }}
         >
           <Home size={20} />
           {t('home.backHome')}
         </Link>
 
-        {/* Control Panel */}
+        {/* Control Panel - Futuristic Design */}
         <div
           style={{
             position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            width: '16rem',
-            maxHeight: 'calc(100vh - 2rem)',
+            top: '1.5rem',
+            right: '1.5rem',
+            width: '18rem',
+            maxHeight: 'calc(100vh - 3rem)',
             overflowY: 'auto',
-            background: 'rgba(20, 20, 20, 0.6)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '0.75rem',
-            padding: '1.25rem',
+            background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(30, 30, 60, 0.6) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(30, 30, 60, 0.6) 100%), linear-gradient(135deg, #00f5ff, #7c4dff, #ff0080)',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
+            borderRadius: '1.5rem',
+            padding: '1.5rem',
             pointerEvents: 'auto',
-            transition: 'all 0.3s'
+            boxShadow: '0 8px 32px rgba(0, 245, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
         >
-          <h2 style={{ color: 'white', fontSize: '0.875rem', fontWeight: 'bold', letterSpacing: '0.1em', marginBottom: '1rem', borderBottom: '1px solid #374151', paddingBottom: '0.5rem' }}>
-            CONTROLS
+          <h2 style={{
+            color: 'transparent',
+            background: 'linear-gradient(90deg, #00f5ff 0%, #7c4dff 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontSize: '1rem',
+            fontWeight: '800',
+            letterSpacing: '0.15em',
+            marginBottom: '1.5rem',
+            borderBottom: '2px solid rgba(0, 245, 255, 0.3)',
+            paddingBottom: '0.75rem',
+            textTransform: 'uppercase'
+          }}>
+            ⚡ Controls
           </h2>
 
-          {/* Shape Selection */}
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ color: '#9CA3AF', fontSize: '0.75rem', display: 'block', marginBottom: '0.5rem' }}>SHAPE MODE</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+          {/* Shape Selection - Redesigned */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              color: '#a0aec0',
+              fontSize: '0.75rem',
+              display: 'block',
+              marginBottom: '0.75rem',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em'
+            }}>
+              🌀 Shape Mode
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               {['heart', 'flower', 'saturn', 'buddha'].map((shape) => (
                 <button
                   key={shape}
                   onClick={() => handleShapeChange(shape)}
                   style={{
-                    backgroundColor: currentShape === shape ? '#2563EB' : '#1F2937',
+                    background: currentShape === shape
+                      ? 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)'
+                      : 'rgba(255, 255, 255, 0.05)',
                     color: 'white',
-                    fontSize: '0.75rem',
-                    padding: '0.5rem',
-                    borderRadius: '0.25rem',
-                    border: `1px solid ${currentShape === shape ? '#3B82F6' : '#374151'}`,
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.75rem',
+                    borderRadius: '0.75rem',
+                    border: currentShape === shape
+                      ? '2px solid rgba(59, 130, 246, 0.5)'
+                      : '1px solid rgba(255, 255, 255, 0.1)',
                     cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.3s ease',
+                    boxShadow: currentShape === shape
+                      ? '0 4px 15px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                      : 'none',
+                    transform: currentShape === shape ? 'translateY(-2px)' : 'translateY(0)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (currentShape !== shape) {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (currentShape !== shape) {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }
                   }}
                 >
                   {shape.charAt(0).toUpperCase() + shape.slice(1)}
@@ -513,14 +619,23 @@ const ThreeJSParticles: React.FC = () => {
               <button
                 onClick={() => handleShapeChange('fireworks')}
                 style={{
-                  backgroundColor: currentShape === 'fireworks' ? '#7C3AED' : '#1F2937',
+                  background: currentShape === 'fireworks'
+                    ? 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)'
+                    : 'rgba(255, 255, 255, 0.05)',
                   color: 'white',
-                  fontSize: '0.75rem',
-                  padding: '0.5rem',
-                  borderRadius: '0.25rem',
-                  border: `1px solid ${currentShape === 'fireworks' ? '#8B5CF6' : '#374151'}`,
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  padding: '0.75rem',
+                  borderRadius: '0.75rem',
+                  border: currentShape === 'fireworks'
+                    ? '2px solid rgba(139, 92, 246, 0.5)'
+                    : '1px solid rgba(255, 255, 255, 0.1)',
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.3s ease',
+                  boxShadow: currentShape === 'fireworks'
+                    ? '0 4px 15px rgba(124, 58, 237, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    : 'none',
+                  transform: currentShape === 'fireworks' ? 'translateY(-2px)' : 'translateY(0)'
                 }}
               >
                 Fireworks
@@ -529,14 +644,23 @@ const ThreeJSParticles: React.FC = () => {
                 onClick={() => handleShapeChange('christmasTree')}
                 style={{
                   gridColumn: 'span 2',
-                  backgroundColor: currentShape === 'christmasTree' ? '#10B981' : '#1F2937',
+                  background: currentShape === 'christmasTree'
+                    ? 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'
+                    : 'rgba(255, 255, 255, 0.05)',
                   color: 'white',
-                  fontSize: '0.75rem',
-                  padding: '0.5rem',
-                  borderRadius: '0.25rem',
-                  border: `1px solid ${currentShape === 'christmasTree' ? '#34D399' : '#374151'}`,
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  padding: '0.75rem',
+                  borderRadius: '0.75rem',
+                  border: currentShape === 'christmasTree'
+                    ? '2px solid rgba(52, 211, 153, 0.5)'
+                    : '1px solid rgba(255, 255, 255, 0.1)',
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.3s ease',
+                  boxShadow: currentShape === 'christmasTree'
+                    ? '0 4px 15px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    : 'none',
+                  transform: currentShape === 'christmasTree' ? 'translateY(-2px)' : 'translateY(0)'
                 }}
               >
                 🎄 Christmas Tree
@@ -544,10 +668,20 @@ const ThreeJSParticles: React.FC = () => {
             </div>
           </div>
 
-          {/* Preset Colors */}
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ color: '#9CA3AF', fontSize: '0.75rem', display: 'block', marginBottom: '0.5rem' }}>PARTICLE COLOR</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+          {/* Preset Colors - Cosmic Theme */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              color: '#a0aec0',
+              fontSize: '0.75rem',
+              display: 'block',
+              marginBottom: '0.75rem',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em'
+            }}>
+              🎨 Particle Color
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
               {PRESET_COLORS.map((preset) => (
                 <button
                   key={preset.color}
@@ -555,14 +689,32 @@ const ThreeJSParticles: React.FC = () => {
                   title={preset.name}
                   style={{
                     width: '100%',
-                    height: '2.5rem',
-                    backgroundColor: preset.color,
-                    border: currentColor === preset.color ? '3px solid white' : '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '0.5rem',
+                    height: '3rem',
+                    background: preset.gradient,
+                    border: currentColor === preset.color
+                      ? '3px solid white'
+                      : '2px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '0.75rem',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    boxShadow: currentColor === preset.color ? '0 0 15px ' + preset.color : 'none',
-                    transform: currentColor === preset.color ? 'scale(1.1)' : 'scale(1)'
+                    transition: 'all 0.3s ease',
+                    boxShadow: currentColor === preset.color
+                      ? `0 0 20px ${preset.color}, 0 4px 15px ${preset.color}`
+                      : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                    transform: currentColor === preset.color ? 'scale(1.15)' : 'scale(1)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (currentColor !== preset.color) {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                      e.currentTarget.style.boxShadow = `0 0 15px ${preset.color}`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (currentColor !== preset.color) {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+                    }
                   }}
                 />
               ))}
@@ -570,12 +722,25 @@ const ThreeJSParticles: React.FC = () => {
           </div>
 
           {/* Info */}
-          <div style={{ marginBottom: '1.25rem', fontSize: '0.75rem', color: '#6B7280', lineHeight: '1.5' }}>
-            <p style={{ marginBottom: '0.25rem' }}>
-              <strong style={{ color: '#D1D5DB' }}>One Hand:</strong> Pinch to pulse.
+          <div style={{
+            marginBottom: '1.5rem',
+            fontSize: '0.8rem',
+            color: '#a0aec0',
+            lineHeight: '1.6',
+            padding: '1rem',
+            background: 'rgba(0, 245, 255, 0.05)',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(0, 245, 255, 0.1)'
+          }}>
+            <p style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>🖐️</span>
+              <strong style={{ color: '#00f5ff', fontWeight: '600' }}>One Hand:</strong>
+              <span>Pinch to pulse</span>
             </p>
-            <p>
-              <strong style={{ color: '#D1D5DB' }}>Two Hands:</strong> Move apart to expand & zoom.
+            <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>🙌</span>
+              <strong style={{ color: '#00f5ff', fontWeight: '600' }}>Two Hands:</strong>
+              <span>Expand & zoom</span>
             </p>
           </div>
 
@@ -584,21 +749,33 @@ const ThreeJSParticles: React.FC = () => {
             onClick={toggleFullscreen}
             style={{
               width: '100%',
-              backgroundColor: '#374151',
-              color: 'white',
-              fontSize: '0.75rem',
-              padding: '0.5rem',
-              borderRadius: '0.25rem',
-              border: 0,
+              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%)',
+              color: '#00f5ff',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              padding: '0.875rem',
+              borderRadius: '0.75rem',
+              border: '1px solid rgba(0, 245, 255, 0.3)',
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.5rem'
+              gap: '0.75rem',
+              boxShadow: '0 4px 15px rgba(0, 245, 255, 0.15)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.3) 0%, rgba(124, 77, 255, 0.3) 100%)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 245, 255, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 245, 255, 0.15)';
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
             </svg>
             Toggle Fullscreen

@@ -223,9 +223,9 @@ const ThreeJSParticles: React.FC = () => {
       christmasTree: (i: number) => {
         const section = Math.random();
         // 完全围绕y=0对称分布，与其他模型一致（总高度约12，从y=-6到y=6）
-        // 返回 [x, y, z, colorType] 其中 colorType: 0=绿色树冠, 1=棕色树干, 2=金色星星, 3=红色装饰球, 4=金色装饰球
-        if (section < 0.05) {
-          // 顶部星星 - 金色
+        // 返回 [x, y, z, colorType] 其中 colorType: 0=绿色树冠, 1=棕色树干, 2=金色星星, 3=红色装饰球, 4=金色装饰球, 5=金色铃铛
+        if (section < 0.03) {
+          // 顶部星星 - 金色（3%）
           const starAngle = Math.random() * Math.PI * 2;
           const starDist = Math.random() * 1.5;
           return [
@@ -234,8 +234,8 @@ const ThreeJSParticles: React.FC = () => {
             Math.sin(starAngle) * starDist,
             2 // 金色星星
           ];
-        } else if (section < 0.80) {
-          // 树冠层（5层，完全对称）- 绿色
+        } else if (section < 0.70) {
+          // 树冠层（67%）- 绿色
           const layerIndex = Math.floor(Math.random() * 5);
           // 从y=4.5向下到y=-4.5，完全对称
           const layerHeight = 4.5 - layerIndex * 2.25; // y: 4.5, 2.25, 0, -2.25, -4.5
@@ -250,8 +250,35 @@ const ThreeJSParticles: React.FC = () => {
             Math.sin(angle) * radius,
             0 // 绿色树冠
           ];
-        } else if (section < 0.95) {
-          // 树干（在底部，y=-6到y=-4.5）- 棕色
+        } else if (section < 0.85) {
+          // 装饰球（15%）- 红色或金色，分布在树冠层
+          const ornamentLayer = Math.floor(Math.random() * 5); // 5层
+          const ornamentHeight = 4.5 - ornamentLayer * 2.25; // y: 4.5, 2.25, 0, -2.25, -4.5
+          const ornamentRadius = 1.5 + ornamentLayer * 0.8;
+          const angle = (Math.random() * Math.PI * 2);
+          const isGold = Math.random() > 0.5; // 50%金色，50%红色
+          return [
+            Math.cos(angle) * ornamentRadius,
+            ornamentHeight,
+            Math.sin(angle) * ornamentRadius,
+            isGold ? 4 : 3 // 金色或红色装饰球
+          ];
+        } else if (section < 0.92) {
+          // 金色铃铛（7%）- 悬挂在树冠下方
+          const bellLayer = Math.floor(Math.random() * 4) + 1; // 4层铃铛
+          const bellHeight = 3.5 - bellLayer * 1.75; // y: 1.75, 0, -1.75, -3.5
+          const bellRadius = 2.0 + bellLayer * 0.6;
+          const angle = (Math.random() * Math.PI * 2);
+          // 铃铛稍微下垂
+          const zOffset = -0.3;
+          return [
+            Math.cos(angle) * bellRadius,
+            bellHeight,
+            Math.sin(angle) * bellRadius + zOffset,
+            5 // 金色铃铛
+          ];
+        } else if (section < 0.97) {
+          // 树干（5%）- 棕色
           const angle = Math.random() * Math.PI * 2;
           const radius = Math.random() * 1.0;
           const height = -6 + Math.random() * 1.5; // y=-6到y=-4.5
@@ -262,17 +289,16 @@ const ThreeJSParticles: React.FC = () => {
             1 // 棕色树干
           ];
         } else {
-          // 装饰球（分布在树冠层）- 红色或金色
-          const ornamentLayer = Math.floor(Math.random() * 4) + 1;
-          const ornamentHeight = 4 - ornamentLayer * 2; // y: 2, 0, -2, -4
-          const ornamentRadius = 1.8 + ornamentLayer * 0.8;
+          // 额外的红色装饰球（3%）- 更明显
+          const extraLayer = Math.floor(Math.random() * 3) + 1;
+          const extraHeight = 3 - extraLayer * 1.5; // y: 1.5, 0, -1.5
+          const extraRadius = 2.2 + extraLayer * 0.5;
           const angle = (Math.random() * Math.PI * 2);
-          const isGold = Math.random() > 0.5; // 50%金色，50%红色
           return [
-            Math.cos(angle) * ornamentRadius,
-            ornamentHeight,
-            Math.sin(angle) * ornamentRadius,
-            isGold ? 4 : 3 // 金色或红色装饰球
+            Math.cos(angle) * extraRadius,
+            extraHeight,
+            Math.sin(angle) * extraRadius,
+            3 // 红色装饰球
           ];
         }
       }
@@ -280,11 +306,12 @@ const ThreeJSParticles: React.FC = () => {
 
     // 圣诞树颜色定义 - 鲜艳的圣诞色调
     const christmasColors = {
-      0: new THREE.Color(0x2E8B57), // 海绿色树冠（更鲜艳的绿色）
+      0: new THREE.Color(0x228B22), // 森林绿色树冠（更明显的绿色）
       1: new THREE.Color(0x8B4513), // 棕色树干
       2: new THREE.Color(0xFFD700), // 金色星星（明亮金色）
-      3: new THREE.Color(0xFF1744), // 鲜红色装饰球（更鲜艳的红色）
-      4: new THREE.Color(0xFFC107)  // 琥珀金色装饰球（更温暖的金色）
+      3: new THREE.Color(0xFF0000), // 鲜红色装饰球（纯红色，更明显）
+      4: new THREE.Color(0xFFD700), // 金色装饰球（明亮金色）
+      5: new THREE.Color(0xFFA500)  // 金色铃铛（橙金色，更明显）
     };
 
     const generateShape = (shapeName: string) => {

@@ -91,13 +91,28 @@ const ThreeJSParticles: React.FC = () => {
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(PARTICLE_COUNT * 3);
     const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const colors = new Float32Array(PARTICLE_COUNT * 3); // RGB colors for each particle
+    const targetColors = new Float32Array(PARTICLE_COUNT * 3); // Target colors for smooth transitions
 
     // Initialize with random positions
     for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
       positions[i] = (Math.random() - 0.5) * 50;
       targetPositions[i] = positions[i];
     }
+    
+    // Initialize colors (default to current color)
+    const defaultColor = state.currentColor;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      colors[i * 3] = defaultColor.r;
+      colors[i * 3 + 1] = defaultColor.g;
+      colors[i * 3 + 2] = defaultColor.b;
+      targetColors[i * 3] = defaultColor.r;
+      targetColors[i * 3 + 1] = defaultColor.g;
+      targetColors[i * 3 + 2] = defaultColor.b;
+    }
+    
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
       color: state.currentColor,
@@ -106,7 +121,8 @@ const ThreeJSParticles: React.FC = () => {
       transparent: true,
       opacity: 0.8,
       blending: THREE.AdditiveBlending,
-      depthWrite: false
+      depthWrite: false,
+      vertexColors: true // Enable per-particle colors
     });
     const particles = new THREE.Points(geometry, material);
     scene.add(particles);
@@ -206,58 +222,99 @@ const ThreeJSParticles: React.FC = () => {
       },
       christmasTree: (i: number) => {
         const section = Math.random();
-        // 调整y坐标，让树以y=0为中心显示（树高约16，从y=-8到y=8）
+        // 完全围绕y=0对称分布，与其他模型一致（总高度约12，从y=-6到y=6）
+        // 返回 [x, y, z, colorType] 其中 colorType: 0=绿色树冠, 1=棕色树干, 2=金色星星, 3=红色装饰球, 4=金色装饰球
         if (section < 0.05) {
+          // 顶部星星 - 金色
           const starAngle = Math.random() * Math.PI * 2;
           const starDist = Math.random() * 1.5;
           return [
             Math.cos(starAngle) * starDist,
-            8 + Math.sin(starAngle * 5) * 0.5, // 顶部星星在y=8
-            Math.sin(starAngle) * starDist
+            6 + Math.sin(starAngle * 5) * 0.3, // 顶部在y=6
+            Math.sin(starAngle) * starDist,
+            2 // 金色星星
           ];
         } else if (section < 0.80) {
+          // 树冠层（5层，完全对称）- 绿色
           const layerIndex = Math.floor(Math.random() * 5);
-          const layerHeight = 6 - layerIndex * 2.5; // 从y=6向下递减到y=-4
-          const maxRadius = 1.5 + layerIndex * 1.2;
+          // 从y=4.5向下到y=-4.5，完全对称
+          const layerHeight = 4.5 - layerIndex * 2.25; // y: 4.5, 2.25, 0, -2.25, -4.5
+          const maxRadius = 1.5 + layerIndex * 1.0;
           const angle = Math.random() * Math.PI * 2;
           const radiusRatio = Math.pow(Math.random(), 0.7);
           const radius = radiusRatio * maxRadius;
-          const yVariation = (Math.random() - 0.5) * 1.8;
+          const yVariation = (Math.random() - 0.5) * 1.5;
           return [
             Math.cos(angle) * radius,
             layerHeight + yVariation,
-            Math.sin(angle) * radius
+            Math.sin(angle) * radius,
+            0 // 绿色树冠
           ];
         } else if (section < 0.95) {
+          // 树干（在底部，y=-6到y=-4.5）- 棕色
           const angle = Math.random() * Math.PI * 2;
-          const radius = Math.random() * 1.2;
-          const height = -8 + Math.random() * 3; // 树干在底部 y=-8到y=-5
+          const radius = Math.random() * 1.0;
+          const height = -6 + Math.random() * 1.5; // y=-6到y=-4.5
           return [
             Math.cos(angle) * radius,
             height,
-            Math.sin(angle) * radius
+            Math.sin(angle) * radius,
+            1 // 棕色树干
           ];
         } else {
+          // 装饰球（分布在树冠层）- 红色或金色
           const ornamentLayer = Math.floor(Math.random() * 4) + 1;
-          const ornamentHeight = 5 - ornamentLayer * 2.5; // 装饰球从y=5向下
-          const ornamentRadius = 1.8 + ornamentLayer * 1.0;
+          const ornamentHeight = 4 - ornamentLayer * 2; // y: 2, 0, -2, -4
+          const ornamentRadius = 1.8 + ornamentLayer * 0.8;
           const angle = (Math.random() * Math.PI * 2);
+          const isGold = Math.random() > 0.5; // 50%金色，50%红色
           return [
             Math.cos(angle) * ornamentRadius,
             ornamentHeight,
-            Math.sin(angle) * ornamentRadius
+            Math.sin(angle) * ornamentRadius,
+            isGold ? 4 : 3 // 金色或红色装饰球
           ];
         }
       }
     };
 
+    // 圣诞树颜色定义 - 鲜艳的圣诞色调
+    const christmasColors = {
+      0: new THREE.Color(0x2E8B57), // 海绿色树冠（更鲜艳的绿色）
+      1: new THREE.Color(0x8B4513), // 棕色树干
+      2: new THREE.Color(0xFFD700), // 金色星星（明亮金色）
+      3: new THREE.Color(0xFF1744), // 鲜红色装饰球（更鲜艳的红色）
+      4: new THREE.Color(0xFFC107)  // 琥珀金色装饰球（更温暖的金色）
+    };
+
     const generateShape = (shapeName: string) => {
       const generator = Shapes[shapeName] || Shapes.heart;
+      const isChristmasTree = shapeName === 'christmasTree';
+      
       for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const [x, y, z] = generator(i);
+        const result = generator(i);
+        // 处理返回值：可能是 [x, y, z] 或 [x, y, z, colorType]
+        const x = result[0];
+        const y = result[1];
+        const z = result[2];
         targetPositions[i * 3] = x;
         targetPositions[i * 3 + 1] = y;
         targetPositions[i * 3 + 2] = z;
+        
+        // 如果是圣诞树，根据颜色类型设置颜色
+        if (isChristmasTree && result.length > 3) {
+          const colorType = result[3];
+          const color = christmasColors[colorType as keyof typeof christmasColors] || christmasColors[0];
+          targetColors[i * 3] = color.r;
+          targetColors[i * 3 + 1] = color.g;
+          targetColors[i * 3 + 2] = color.b;
+        } else {
+          // 其他形状使用当前选择的颜色
+          const color = state.currentColor;
+          targetColors[i * 3] = color.r;
+          targetColors[i * 3 + 1] = color.g;
+          targetColors[i * 3 + 2] = color.b;
+        }
       }
     };
 
@@ -360,7 +417,9 @@ const ThreeJSParticles: React.FC = () => {
       }
 
       const posAttribute = geometry.attributes.position;
+      const colorAttribute = geometry.attributes.color;
       const currentPositions = posAttribute.array as Float32Array;
+      const currentColors = colorAttribute.array as Float32Array;
 
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const ix = i * 3;
@@ -380,8 +439,14 @@ const ThreeJSParticles: React.FC = () => {
         currentPositions[ix] += (tx - currentPositions[ix]) * 0.25;
         currentPositions[iy] += (ty - currentPositions[iy]) * 0.25;
         currentPositions[iz] += (tz - currentPositions[iz]) * 0.25;
+        
+        // 平滑过渡颜色
+        currentColors[ix] += (targetColors[ix] - currentColors[ix]) * 0.15;
+        currentColors[iy] += (targetColors[iy] - currentColors[iy]) * 0.15;
+        currentColors[iz] += (targetColors[iz] - currentColors[iz]) * 0.15;
       }
       posAttribute.needsUpdate = true;
+      colorAttribute.needsUpdate = true;
 
       renderer.render(scene, camera);
     };

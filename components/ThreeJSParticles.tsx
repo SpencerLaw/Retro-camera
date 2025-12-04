@@ -264,18 +264,127 @@ const ThreeJSParticles: React.FC = () => {
           return [x, y, z];
         }
       },
-      fireworks: (i: number) => {
-        const u = Math.random();
-        const v = Math.random();
-        const theta = 2 * Math.PI * u;
-        const phi = Math.acos(2 * v - 1);
-        const r = Math.random() * 25;
-        const x = r * Math.sin(phi) * Math.cos(theta);
-        const y = r * Math.sin(phi) * Math.sin(theta);
-        const z = r * Math.cos(phi);
-        return [x, y, z];
+      dna: (i: number) => {
+        // DNA Double Helix Algorithm
+        const section = Math.random();
+        const totalHeight = 20; // -10 to 10
+        const y = (Math.random() - 0.5) * totalHeight;
+        const angle = y * 0.5 + (Math.random() * 0.2); // Twist factor
+        const radius = 4;
+
+        if (section < 0.7) {
+          // Double Helix Strands (70%)
+          const isStrandA = Math.random() > 0.5;
+          const finalAngle = angle + (isStrandA ? 0 : Math.PI); // Offset by 180 degrees
+          return [
+            Math.cos(finalAngle) * radius,
+            y,
+            Math.sin(finalAngle) * radius
+          ];
+        } else {
+          // Base Pairs / Rungs (30%)
+          // Connecting the two strands at specific heights
+          const rungHeight = Math.floor(y); // Quantize height for rung effect? Or just random fill
+          // Actually, let's just fill between the two strands at the current height
+          const t = (Math.random() - 0.5) * 2; // -1 to 1 interpolator
+          const strandA_x = Math.cos(angle) * radius;
+          const strandA_z = Math.sin(angle) * radius;
+          // Strand B is just negation of A
+          const x = strandA_x * t;
+          const z = strandA_z * t;
+          return [x, y, z];
+        }
       },
-      christmasTree: (i: number) => {
+      galaxy: (i: number) => {
+        const section = Math.random();
+        if (section < 0.2) {
+          // Core (Nucleus) - 20%
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          const r = Math.random() * 2;
+          return [
+            r * Math.sin(phi) * Math.cos(theta),
+            r * Math.sin(phi) * Math.sin(theta) * 0.5, // Flattened core
+            r * Math.cos(phi)
+          ];
+        } else {
+          // Spiral Arms - 80%
+          const armIndex = Math.floor(Math.random() * 3); // 3 Arms
+          const offset = (Math.PI * 2 / 3) * armIndex;
+          const t = Math.random(); // Distance from center (0 to 1)
+          
+          const angle = offset + t * 5; // Spiral factor
+          const radius = 2 + t * 10;
+          
+          // Add some randomness/width to arms
+          const randomR = (Math.random() - 0.5) * (1 + t * 2);
+          const randomAngle = (Math.random() - 0.5) * 0.2;
+          
+          const finalAngle = angle + randomAngle;
+          const finalRadius = radius + randomR;
+          
+          const x = Math.cos(finalAngle) * finalRadius;
+          const z = Math.sin(finalAngle) * finalRadius;
+          const y = (Math.random() - 0.5) * (1 + t); // Thickness increases slightly but mostly flat
+          
+          return [x, y, z];
+        }
+      },
+      bear: (i: number) => {
+        const r = Math.random();
+        // Head: Large Sphere (60%)
+        // Ears: Two small spheres (20%)
+        // Muzzle: Small sphere front (20%)
+        
+        if (r < 0.6) {
+          // Head (Center 0,0,0, Radius 4)
+          const u = Math.random();
+          const v = Math.random();
+          const theta = 2 * Math.PI * u;
+          const phi = Math.acos(2 * v - 1);
+          const rad = 4.5;
+          return [
+            rad * Math.sin(phi) * Math.cos(theta),
+            rad * Math.sin(phi) * Math.sin(theta),
+            rad * Math.cos(phi)
+          ];
+        } else if (r < 0.8) {
+          // Ears (Pos: +/- 3.5, 3.5, 0, Radius 1.5)
+          const isLeft = Math.random() > 0.5;
+          const cx = isLeft ? -3.5 : 3.5;
+          const cy = 3.5;
+          const cz = 0;
+          
+          const u = Math.random();
+          const v = Math.random();
+          const theta = 2 * Math.PI * u;
+          const phi = Math.acos(2 * v - 1);
+          const rad = 1.8;
+          
+          return [
+            cx + rad * Math.sin(phi) * Math.cos(theta),
+            cy + rad * Math.sin(phi) * Math.sin(theta),
+            cz + rad * Math.cos(phi)
+          ];
+        } else {
+          // Muzzle (Pos: 0, -1, 4, Radius 1.2)
+          const cx = 0;
+          const cy = -1;
+          const cz = 3.5;
+          
+          const u = Math.random();
+          const v = Math.random();
+          const theta = 2 * Math.PI * u;
+          const phi = Math.acos(2 * v - 1);
+          const rad = 1.5;
+          
+          return [
+            cx + rad * Math.sin(phi) * Math.cos(theta),
+            cy + rad * Math.sin(phi) * Math.sin(theta),
+            cz + rad * Math.cos(phi)
+          ];
+        }
+      },
         // 炫酷螺旋圣诞树算法
         const section = Math.random();
         
@@ -1247,10 +1356,13 @@ const ThreeJSParticles: React.FC = () => {
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               {[
-                { shape: 'heart', emoji: '❤️' },
-                { shape: 'flower', emoji: '🌸' },
-                { shape: 'saturn', emoji: '🪐' },
-                { shape: 'buddha', emoji: '🧘' }
+                { shape: 'heart', emoji: '❤️', label: 'Heart' },
+                { shape: 'flower', emoji: '🌸', label: 'Flower' },
+                { shape: 'saturn', emoji: '🪐', label: 'Saturn' },
+                { shape: 'buddha', emoji: '🧘', label: 'Buddha' },
+                { shape: 'dna', emoji: '🧬', label: 'DNA' },
+                { shape: 'galaxy', emoji: '🌌', label: 'Galaxy' },
+                { shape: 'bear', emoji: '🐻', label: 'Bear' },
               ].map(({ shape, emoji }) => (
                 <button
                   key={shape}
@@ -1291,49 +1403,9 @@ const ThreeJSParticles: React.FC = () => {
                     }
                   }}
                 >
-                  {emoji} {t(`particles.shapes.${shape}`)}
+                  {emoji} {t(`particles.shapes.${shape}`) !== `particles.shapes.${shape}` ? t(`particles.shapes.${shape}`) : shape.charAt(0).toUpperCase() + shape.slice(1)}
                 </button>
               ))}
-              <button
-                onClick={() => handleShapeChange('fireworks')}
-                style={{
-                  background: currentShape === 'fireworks'
-                    ? 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)'
-                    : 'rgba(255, 255, 255, 0.15)',
-                  color: 'white',
-                  fontSize: '0.8rem',
-                  fontWeight: '600',
-                  padding: '0.75rem',
-                  borderRadius: '0.75rem',
-                  border: currentShape === 'fireworks'
-                    ? '2px solid rgba(139, 92, 246, 0.8)'
-                    : '1px solid rgba(255, 255, 255, 0.3)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: currentShape === 'fireworks'
-                    ? '0 4px 15px rgba(124, 58, 237, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                    : '0 2px 8px rgba(0, 0, 0, 0.3)',
-                  transform: currentShape === 'fireworks' ? 'translateY(-2px)' : 'translateY(0)',
-                  position: 'relative',
-                  zIndex: 1
-                }}
-                onMouseEnter={(e) => {
-                  if (currentShape !== 'fireworks') {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.2)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (currentShape !== 'fireworks') {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
-                  }
-                }}
-              >
-                🎆 {t('particles.shapes.fireworks')}
-              </button>
               <button
                 onClick={() => handleShapeChange('christmasTree')}
                 style={{

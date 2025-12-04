@@ -52,7 +52,7 @@ const ThreeJSParticles: React.FC = () => {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = CAMERA_Z_BASE;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setClearColor(0x000000, 1); // 黑色宇宙背景
+    renderer.setClearColor(0x0a0a1a, 1); // 深空蓝黑色背景
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
@@ -392,36 +392,120 @@ const ThreeJSParticles: React.FC = () => {
     <div style={{
       margin: 0,
       overflow: 'hidden',
-      background: '#000000',
+      background: 'radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1e 50%, #000000 100%)',
       fontFamily: "'Inter', sans-serif",
       position: 'relative'
     }}>
-      {/* Animated Stars Background - Optimized */}
+      {/* Deep Space Background Layers */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        width: '100%', 
+        height: '100%', 
+        pointerEvents: 'none', 
+        zIndex: 0,
+        background: `
+          radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 70%, rgba(30, 144, 255, 0.1) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, rgba(75, 0, 130, 0.08) 0%, transparent 70%)
+        `
+      }} />
+      
+      {/* Animated Stars Background - Enhanced */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              width: Math.random() * 2 + 1 + 'px',
-              height: Math.random() * 2 + 1 + 'px',
-              backgroundColor: 'white',
-              borderRadius: '50%',
-              top: Math.random() * 100 + '%',
-              left: Math.random() * 100 + '%',
-              opacity: Math.random() * 0.5 + 0.3,
-              animation: `twinkle ${Math.random() * 2 + 3}s infinite ease-in-out`,
-              willChange: 'opacity',
-            }}
-          />
-        ))}
+        {/* Large bright stars */}
+        {[...Array(50)].map((_, i) => {
+          const size = Math.random() * 3 + 1.5;
+          const delay = Math.random() * 5;
+          const duration = Math.random() * 3 + 2;
+          return (
+            <div
+              key={`bright-${i}`}
+              style={{
+                position: 'absolute',
+                width: size + 'px',
+                height: size + 'px',
+                background: `radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)`,
+                borderRadius: '50%',
+                top: Math.random() * 100 + '%',
+                left: Math.random() * 100 + '%',
+                boxShadow: `0 0 ${size * 2}px rgba(255, 255, 255, 0.8), 0 0 ${size * 4}px rgba(255, 255, 255, 0.4)`,
+                animation: `twinkle ${duration}s ${delay}s infinite ease-in-out`,
+                willChange: 'opacity, transform',
+              }}
+            />
+          );
+        })}
+        
+        {/* Medium stars */}
+        {[...Array(150)].map((_, i) => {
+          const size = Math.random() * 1.5 + 0.5;
+          const delay = Math.random() * 4;
+          const duration = Math.random() * 4 + 3;
+          return (
+            <div
+              key={`medium-${i}`}
+              style={{
+                position: 'absolute',
+                width: size + 'px',
+                height: size + 'px',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderRadius: '50%',
+                top: Math.random() * 100 + '%',
+                left: Math.random() * 100 + '%',
+                boxShadow: `0 0 ${size * 3}px rgba(255, 255, 255, 0.6)`,
+                animation: `twinkle ${duration}s ${delay}s infinite ease-in-out`,
+                willChange: 'opacity',
+              }}
+            />
+          );
+        })}
+        
+        {/* Small distant stars */}
+        {[...Array(200)].map((_, i) => {
+          const size = Math.random() * 0.8 + 0.2;
+          const delay = Math.random() * 6;
+          const duration = Math.random() * 5 + 4;
+          const opacity = Math.random() * 0.4 + 0.2;
+          return (
+            <div
+              key={`small-${i}`}
+              style={{
+                position: 'absolute',
+                width: size + 'px',
+                height: size + 'px',
+                backgroundColor: `rgba(255, 255, 255, ${opacity})`,
+                borderRadius: '50%',
+                top: Math.random() * 100 + '%',
+                left: Math.random() * 100 + '%',
+                animation: `twinkle ${duration}s ${delay}s infinite ease-in-out`,
+                willChange: 'opacity',
+              }}
+            />
+          );
+        })}
       </div>
 
       <style>
         {`
           @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
+            0%, 100% { 
+              opacity: 0.3; 
+              transform: scale(1);
+            }
+            25% {
+              opacity: 0.8;
+              transform: scale(1.1);
+            }
+            50% { 
+              opacity: 1; 
+              transform: scale(1.2);
+            }
+            75% {
+              opacity: 0.7;
+              transform: scale(1.05);
+            }
           }
           @keyframes glow {
             0%, 100% { box-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }

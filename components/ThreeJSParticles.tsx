@@ -545,7 +545,43 @@ const ThreeJSParticles: React.FC = () => {
       {/* Main UI Container */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
         {/* Header / Status */}
-        <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', pointerEvents: 'auto' }}>
+        <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', pointerEvents: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Back Home Button */}
+          <Link
+            to="/"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1.5rem',
+              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(0, 245, 255, 0.3)',
+              borderRadius: '3rem',
+              color: '#00f5ff',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(0, 245, 255, 0.2)',
+              animation: 'borderGlow 3s infinite ease-in-out',
+              width: 'fit-content'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 245, 255, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 245, 255, 0.2)';
+            }}
+          >
+            <Home size={20} />
+            {t('home.backHome')}
+          </Link>
+          
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -572,52 +608,13 @@ const ThreeJSParticles: React.FC = () => {
           </div>
         </div>
 
-        {/* Back Home Button */}
-        <Link
-          to="/"
-          style={{
-            position: 'absolute',
-            top: '1.5rem',
-            right: '28rem',
-            pointerEvents: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.75rem 1.5rem',
-            background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(0, 245, 255, 0.3)',
-            borderRadius: '3rem',
-            color: '#00f5ff',
-            textDecoration: 'none',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 15px rgba(0, 245, 255, 0.2)',
-            animation: 'borderGlow 3s infinite ease-in-out'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 245, 255, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 245, 255, 0.2)';
-          }}
-        >
-          <Home size={20} />
-          {t('home.backHome')}
-        </Link>
-
         {/* Control Panel - Futuristic Design */}
         <div
           style={{
             position: 'fixed',
             top: '1.5rem',
             right: '1.5rem',
-            width: '26rem',
+            width: '32rem',
             maxHeight: 'calc(100vh - 3rem)',
             overflowY: 'auto',
             background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%)',
@@ -664,7 +661,12 @@ const ThreeJSParticles: React.FC = () => {
               🌀 {t('particles.shapeMode')}
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              {['heart', 'flower', 'saturn', 'buddha'].map((shape) => (
+              {[
+                { shape: 'heart', emoji: '❤️' },
+                { shape: 'flower', emoji: '🌸' },
+                { shape: 'saturn', emoji: '🪐' },
+                { shape: 'buddha', emoji: '🧘' }
+              ].map(({ shape, emoji }) => (
                 <button
                   key={shape}
                   onClick={() => handleShapeChange(shape)}
@@ -704,7 +706,7 @@ const ThreeJSParticles: React.FC = () => {
                     }
                   }}
                 >
-                  {t(`particles.shapes.${shape}`)}
+                  {emoji} {t(`particles.shapes.${shape}`)}
                 </button>
               ))}
               <button
@@ -712,24 +714,40 @@ const ThreeJSParticles: React.FC = () => {
                 style={{
                   background: currentShape === 'fireworks'
                     ? 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)'
-                    : 'rgba(255, 255, 255, 0.05)',
+                    : 'rgba(255, 255, 255, 0.15)',
                   color: 'white',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   padding: '0.75rem',
                   borderRadius: '0.75rem',
                   border: currentShape === 'fireworks'
-                    ? '2px solid rgba(139, 92, 246, 0.5)'
-                    : '1px solid rgba(255, 255, 255, 0.1)',
+                    ? '2px solid rgba(139, 92, 246, 0.8)'
+                    : '1px solid rgba(255, 255, 255, 0.3)',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                   boxShadow: currentShape === 'fireworks'
-                    ? '0 4px 15px rgba(124, 58, 237, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                    : 'none',
-                  transform: currentShape === 'fireworks' ? 'translateY(-2px)' : 'translateY(0)'
+                    ? '0 4px 15px rgba(124, 58, 237, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                  transform: currentShape === 'fireworks' ? 'translateY(-2px)' : 'translateY(0)',
+                  position: 'relative',
+                  zIndex: 1
+                }}
+                onMouseEnter={(e) => {
+                  if (currentShape !== 'fireworks') {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.2)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentShape !== 'fireworks') {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+                  }
                 }}
               >
-                {t('particles.shapes.fireworks')}
+                🎆 {t('particles.shapes.fireworks')}
               </button>
               <button
                 onClick={() => handleShapeChange('christmasTree')}
@@ -737,21 +755,37 @@ const ThreeJSParticles: React.FC = () => {
                   gridColumn: 'span 2',
                   background: currentShape === 'christmasTree'
                     ? 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'
-                    : 'rgba(255, 255, 255, 0.05)',
+                    : 'rgba(255, 255, 255, 0.15)',
                   color: 'white',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   padding: '0.75rem',
                   borderRadius: '0.75rem',
                   border: currentShape === 'christmasTree'
-                    ? '2px solid rgba(52, 211, 153, 0.5)'
-                    : '1px solid rgba(255, 255, 255, 0.1)',
+                    ? '2px solid rgba(52, 211, 153, 0.8)'
+                    : '1px solid rgba(255, 255, 255, 0.3)',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                   boxShadow: currentShape === 'christmasTree'
-                    ? '0 4px 15px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                    : 'none',
-                  transform: currentShape === 'christmasTree' ? 'translateY(-2px)' : 'translateY(0)'
+                    ? '0 4px 15px rgba(16, 185, 129, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                  transform: currentShape === 'christmasTree' ? 'translateY(-2px)' : 'translateY(0)',
+                  position: 'relative',
+                  zIndex: 1
+                }}
+                onMouseEnter={(e) => {
+                  if (currentShape !== 'christmasTree') {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.2)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentShape !== 'christmasTree') {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+                  }
                 }}
               >
                 {t('particles.shapes.christmasTree')}

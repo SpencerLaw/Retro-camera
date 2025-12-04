@@ -385,94 +385,55 @@ const ThreeJSParticles: React.FC = () => {
           ];
         }
       },
-        // 炫酷螺旋圣诞树算法
-        const section = Math.random();
-        
-        // 1. 顶部璀璨之星 (Top Star) - 5% 粒子
-        if (section < 0.05) {
-          const theta = Math.random() * Math.PI * 2;
-          const phi = Math.acos(2 * Math.random() - 1);
-          const r = Math.pow(Math.random(), 3) * 1.5; // 核心密集，外部稀疏的光晕
+      judy: (i: number) => {
+        const r = Math.random();
+        if (r < 0.35) {
+          // Head
+          const u = Math.random();
+          const v = Math.random();
+          const theta = 2 * Math.PI * u;
+          const phi = Math.acos(2 * v - 1);
+          const rad = 3.2;
           return [
-            r * Math.sin(phi) * Math.cos(theta),
-            9 + r * Math.sin(phi) * Math.sin(theta), // 高度在 y=9
-            r * Math.cos(phi),
-            2 // 亮金色/白色
+            rad * Math.sin(phi) * Math.cos(theta),
+            rad * Math.sin(phi) * Math.sin(theta) + 3,
+            rad * Math.cos(phi)
           ];
-        }
-        
-        // 2. 霓虹灯带 (Neon Lights) - 15% 粒子 - 螺旋分布
-        else if (section < 0.20) {
-          const t = Math.random(); // 0 to 1 position along spiral
-          const height = 8 - t * 16; // y from 8 to -8
-          const maxRadius = 6;
-          const radius = 0.5 + (1 - height / 9) * 0.5 * maxRadius; // 锥形半径
-          const spirals = 8; // 8圈螺旋
-          const angle = t * Math.PI * 2 * spirals;
-          
-          return [
-            Math.cos(angle) * radius,
-            height,
-            Math.sin(angle) * radius,
-            Math.random() > 0.66 ? 3 : (Math.random() > 0.33 ? 4 : 5) // 随机 红/金/蓝
-          ];
-        }
-        
-        // 3. 树体 (Foliage) - 70% 粒子 - 体积螺旋
-        else if (section < 0.90) {
-          const t = Math.random();
-          const height = 8 - t * 16; // y from 8 to -8
-          const maxRadius = 5.5;
-          const baseRadius = (1 - (height + 8) / 17) * maxRadius; // 线性锥体
-          
-          // 在基础圆锥上增加螺旋扰动和随机扩散
-          const spirals = 6;
-          const angleBase = t * Math.PI * 2 * spirals;
-          const angleOffset = Math.random() * Math.PI * 2;
-          const rOffset = Math.random() * 1.5; // 树枝厚度
-          
-          const finalRadius = baseRadius + (Math.random() - 0.5) * 2;
-          
-          return [
-            Math.cos(angleBase + angleOffset * 0.2) * finalRadius,
-            height + (Math.random() - 0.5),
-            Math.sin(angleBase + angleOffset * 0.2) * finalRadius,
-            0 // 霓虹绿
-          ];
-        }
-        
-        // 4. 树干 (Trunk) - 10% 粒子
-        else {
+        } else if (r < 0.55) {
+          // Ears
+          const isLeft = Math.random() > 0.5;
+          const side = isLeft ? -1 : 1;
+          const h = Math.random() * 7;
+          const y = 5 + h;
+          const w = 0.8 * (1 - h/8);
           const angle = Math.random() * Math.PI * 2;
-          const r = Math.random() * 1.2;
-          const h = -8 - Math.random() * 3; // y from -8 to -11
+          const tiltX = side * 1.5 + (isLeft ? -0.3 : 0.3) * h;
           return [
-            Math.cos(angle) * r,
-            h,
-            Math.sin(angle) * r,
-            1 // 深色树干
+            Math.cos(angle) * w + tiltX,
+            y,
+            Math.sin(angle) * w * 0.3
           ];
+        } else {
+          // Body
+          const u = Math.random();
+          const v = Math.random();
+          const theta = 2 * Math.PI * u;
+          const phi = Math.acos(2 * v - 1);
+          const x = 2.5 * Math.sin(phi) * Math.cos(theta);
+          const y = 3.5 * Math.sin(phi) * Math.sin(theta) - 3;
+          const z = 2 * Math.cos(phi);
+          return [x, y, z];
         }
       }
     };
 
-    // 圣诞树颜色定义 - 赛博朋克/霓虹风格
-    const christmasColors = {
-      0: new THREE.Color(0x00ff9d), // Cyber Green (青绿色)
-      1: new THREE.Color(0x4a3b32), // Dark Wood
-      2: new THREE.Color(0xffffff), // Pure White Star Core
-      3: new THREE.Color(0xff0055), // Neon Red
-      4: new THREE.Color(0xffcc00), // Neon Gold
-      5: new THREE.Color(0x00f5ff)  // Neon Cyan (Blue)
-    };
-
     const generateShape = (shapeName: string) => {
+
       console.log('=== generateShape function called ===');
       console.log('shapeName:', shapeName);
       console.log('Shapes[shapeName]:', Shapes[shapeName]);
       
       const generator = Shapes[shapeName] || Shapes.heart;
-      const isChristmasTree = shapeName === 'christmasTree';
       
       // 采样几个粒子，检查生成的坐标
       const sampleIndices = [0, 100, 1000, 5000, 10000];
@@ -493,20 +454,11 @@ const ThreeJSParticles: React.FC = () => {
           samples.push({ i, x, y, z, result });
         }
         
-        // 如果是圣诞树，根据颜色类型设置颜色
-        if (isChristmasTree && result.length > 3) {
-          const colorType = result[3];
-          const color = christmasColors[colorType as keyof typeof christmasColors] || christmasColors[0];
-          targetColors[i * 3] = color.r;
-          targetColors[i * 3 + 1] = color.g;
-          targetColors[i * 3 + 2] = color.b;
-        } else {
-          // 其他形状使用当前选择的颜色
-          const color = state.currentColor;
-          targetColors[i * 3] = color.r;
-          targetColors[i * 3 + 1] = color.g;
-          targetColors[i * 3 + 2] = color.b;
-        }
+        // 其他形状使用当前选择的颜色
+        const color = state.currentColor;
+        targetColors[i * 3] = color.r;
+        targetColors[i * 3 + 1] = color.g;
+        targetColors[i * 3 + 2] = color.b;
       }
       
       // 输出采样结果
@@ -796,12 +748,8 @@ const ThreeJSParticles: React.FC = () => {
       }
 
       let expansionFactor = state.expansion;
-      if (state.currentShape === 'fireworks') {
-        expansionFactor *= (1 + Math.sin(time * 2) * 0.3);
-      } else if (state.currentShape === 'heart') {
+      if (state.currentShape === 'heart') {
         expansionFactor *= (1 + Math.sin(time * 8) * 0.05 * (1 - Math.min(1, state.pinchStrength * 2)));
-      } else if (state.currentShape === 'christmasTree') {
-        expansionFactor *= (1 + Math.sin(time * 1.5) * 0.08);
       }
 
       const posAttribute = geometry.attributes.position;
@@ -839,12 +787,8 @@ const ThreeJSParticles: React.FC = () => {
         // 但需要根据当前的 expansionFactor 调整（因为 expansionFactor 可能会变化）
         const currentExpansion = state.expansion;
         let dynamicExpansion = currentExpansion;
-        if (state.currentShape === 'fireworks') {
-          dynamicExpansion *= (1 + Math.sin(time * 2) * 0.3);
-        } else if (state.currentShape === 'heart') {
+        if (state.currentShape === 'heart') {
           dynamicExpansion *= (1 + Math.sin(time * 8) * 0.05 * (1 - Math.min(1, state.pinchStrength * 2)));
-        } else if (state.currentShape === 'christmasTree') {
-          dynamicExpansion *= (1 + Math.sin(time * 1.5) * 0.08);
         }
         
         // 如果 expansionFactor 变化了，需要重新计算位置
@@ -913,12 +857,8 @@ const ThreeJSParticles: React.FC = () => {
         // 计算 expansionFactor（与动画循环中的计算保持一致）
         let expansionFactor = state.expansion;
         const time = clock.getElapsedTime();
-        if (shapeName === 'fireworks') {
-          expansionFactor *= (1 + Math.sin(time * 2) * 0.3);
-        } else if (shapeName === 'heart') {
+        if (shapeName === 'heart') {
           expansionFactor *= (1 + Math.sin(time * 8) * 0.05 * (1 - Math.min(1, state.pinchStrength * 2)));
-        } else if (shapeName === 'christmasTree') {
-          expansionFactor *= (1 + Math.sin(time * 1.5) * 0.08);
         }
         
         console.log('Updating positions with expansionFactor:', expansionFactor, 'for shape:', shapeName);
@@ -958,9 +898,8 @@ const ThreeJSParticles: React.FC = () => {
         const colorAttribute = geometry.attributes.color;
         const currentColors = colorAttribute.array as Float32Array;
 
-        // 立即更新所有粒子的目标颜色和当前颜色（非圣诞树形状）
-        if (state.currentShape !== 'christmasTree') {
-          for (let i = 0; i < PARTICLE_COUNT; i++) {
+        // 立即更新所有粒子的目标颜色和当前颜色
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
             // Update target
             targetColors[i * 3] = state.targetColor.r;
             targetColors[i * 3 + 1] = state.targetColor.g;
@@ -970,9 +909,9 @@ const ThreeJSParticles: React.FC = () => {
             currentColors[i * 3] = state.targetColor.r;
             currentColors[i * 3 + 1] = state.targetColor.g;
             currentColors[i * 3 + 2] = state.targetColor.b;
-          }
-          colorAttribute.needsUpdate = true;
         }
+        colorAttribute.needsUpdate = true;
+        
         // 强制快速更新
         internalState.current.forceFastUpdate = true;
         internalState.current.forceUpdateFrameCount = 0;
@@ -1363,6 +1302,7 @@ const ThreeJSParticles: React.FC = () => {
                 { shape: 'dna', emoji: '🧬', label: 'DNA' },
                 { shape: 'galaxy', emoji: '🌌', label: 'Galaxy' },
                 { shape: 'bear', emoji: '🐻', label: 'Bear' },
+                { shape: 'judy', emoji: '🐰', label: 'Judy' },
               ].map(({ shape, emoji }) => (
                 <button
                   key={shape}
@@ -1406,47 +1346,6 @@ const ThreeJSParticles: React.FC = () => {
                   {emoji} {t(`particles.shapes.${shape}`) !== `particles.shapes.${shape}` ? t(`particles.shapes.${shape}`) : shape.charAt(0).toUpperCase() + shape.slice(1)}
                 </button>
               ))}
-              <button
-                onClick={() => handleShapeChange('christmasTree')}
-                style={{
-                  gridColumn: 'span 2',
-                  background: currentShape === 'christmasTree'
-                    ? 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'
-                    : 'rgba(255, 255, 255, 0.15)',
-                  color: 'white',
-                  fontSize: '0.8rem',
-                  fontWeight: '600',
-                  padding: '0.75rem',
-                  borderRadius: '0.75rem',
-                  border: currentShape === 'christmasTree'
-                    ? '2px solid rgba(52, 211, 153, 0.8)'
-                    : '1px solid rgba(255, 255, 255, 0.3)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: currentShape === 'christmasTree'
-                    ? '0 4px 15px rgba(16, 185, 129, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                    : '0 2px 8px rgba(0, 0, 0, 0.3)',
-                  transform: currentShape === 'christmasTree' ? 'translateY(-2px)' : 'translateY(0)',
-                  position: 'relative',
-                  zIndex: 1
-                }}
-                onMouseEnter={(e) => {
-                  if (currentShape !== 'christmasTree') {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.2)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (currentShape !== 'christmasTree') {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
-                  }
-                }}
-              >
-                {t('particles.shapes.christmasTree')}
-              </button>
             </div>
           </div>
 

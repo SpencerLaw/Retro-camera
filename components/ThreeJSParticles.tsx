@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
@@ -26,6 +26,36 @@ const ThreeJSParticles: React.FC = () => {
   const [statusColor, setStatusColor] = useState('red');
   const sceneRef = useRef<any>(null);
 
+  // Generate star positions once and memoize them to prevent jumping
+  const starsData = useMemo(() => {
+    const brightStars = Array.from({ length: 50 }, () => ({
+      size: Math.random() * 3 + 1.5,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: Math.random() * 3 + 2,
+    }));
+
+    const mediumStars = Array.from({ length: 150 }, () => ({
+      size: Math.random() * 1.5 + 0.5,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 4,
+      duration: Math.random() * 4 + 3,
+    }));
+
+    const smallStars = Array.from({ length: 200 }, () => ({
+      size: Math.random() * 0.8 + 0.2,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 6,
+      duration: Math.random() * 5 + 4,
+      opacity: Math.random() * 0.4 + 0.2,
+    }));
+
+    return { brightStars, mediumStars, smallStars };
+  }, []);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -51,8 +81,8 @@ const ThreeJSParticles: React.FC = () => {
     scene.fog = new THREE.FogExp2(0x000000, 0.015);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = CAMERA_Z_BASE;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setClearColor(0x0a0a1a, 1); // 深空蓝黑色背景
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setClearColor(0x000000, 0); // 透明背景，让星空透过
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
@@ -406,85 +436,70 @@ const ThreeJSParticles: React.FC = () => {
         pointerEvents: 'none', 
         zIndex: 0,
         background: `
-          radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 70%, rgba(30, 144, 255, 0.1) 0%, transparent 50%),
-          radial-gradient(ellipse at 50% 50%, rgba(75, 0, 130, 0.08) 0%, transparent 70%)
+          radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.25) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 70%, rgba(30, 144, 255, 0.2) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, rgba(75, 0, 130, 0.15) 0%, transparent 70%),
+          radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1e 40%, #000000 100%)
         `
       }} />
       
       {/* Animated Stars Background - Enhanced */}
-      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}>
         {/* Large bright stars */}
-        {[...Array(50)].map((_, i) => {
-          const size = Math.random() * 3 + 1.5;
-          const delay = Math.random() * 5;
-          const duration = Math.random() * 3 + 2;
-          return (
-            <div
-              key={`bright-${i}`}
-              style={{
-                position: 'absolute',
-                width: size + 'px',
-                height: size + 'px',
-                background: `radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)`,
-                borderRadius: '50%',
-                top: Math.random() * 100 + '%',
-                left: Math.random() * 100 + '%',
-                boxShadow: `0 0 ${size * 2}px rgba(255, 255, 255, 0.8), 0 0 ${size * 4}px rgba(255, 255, 255, 0.4)`,
-                animation: `twinkle ${duration}s ${delay}s infinite ease-in-out`,
-                willChange: 'opacity, transform',
-              }}
-            />
-          );
-        })}
+        {starsData.brightStars.map((star, i) => (
+          <div
+            key={`bright-${i}`}
+            style={{
+              position: 'absolute',
+              width: star.size + 'px',
+              height: star.size + 'px',
+              background: `radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%)`,
+              borderRadius: '50%',
+              top: star.top + '%',
+              left: star.left + '%',
+              boxShadow: `0 0 ${star.size * 3}px rgba(255, 255, 255, 0.9), 0 0 ${star.size * 6}px rgba(255, 255, 255, 0.5)`,
+              animation: `twinkle ${star.duration}s ${star.delay}s infinite ease-in-out`,
+              willChange: 'opacity, transform',
+            }}
+          />
+        ))}
         
         {/* Medium stars */}
-        {[...Array(150)].map((_, i) => {
-          const size = Math.random() * 1.5 + 0.5;
-          const delay = Math.random() * 4;
-          const duration = Math.random() * 4 + 3;
-          return (
-            <div
-              key={`medium-${i}`}
-              style={{
-                position: 'absolute',
-                width: size + 'px',
-                height: size + 'px',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                borderRadius: '50%',
-                top: Math.random() * 100 + '%',
-                left: Math.random() * 100 + '%',
-                boxShadow: `0 0 ${size * 3}px rgba(255, 255, 255, 0.6)`,
-                animation: `twinkle ${duration}s ${delay}s infinite ease-in-out`,
-                willChange: 'opacity',
-              }}
-            />
-          );
-        })}
+        {starsData.mediumStars.map((star, i) => (
+          <div
+            key={`medium-${i}`}
+            style={{
+              position: 'absolute',
+              width: star.size + 'px',
+              height: star.size + 'px',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '50%',
+              top: star.top + '%',
+              left: star.left + '%',
+              boxShadow: `0 0 ${star.size * 4}px rgba(255, 255, 255, 0.7)`,
+              animation: `twinkle ${star.duration}s ${star.delay}s infinite ease-in-out`,
+              willChange: 'opacity',
+            }}
+          />
+        ))}
         
         {/* Small distant stars */}
-        {[...Array(200)].map((_, i) => {
-          const size = Math.random() * 0.8 + 0.2;
-          const delay = Math.random() * 6;
-          const duration = Math.random() * 5 + 4;
-          const opacity = Math.random() * 0.4 + 0.2;
-          return (
-            <div
-              key={`small-${i}`}
-              style={{
-                position: 'absolute',
-                width: size + 'px',
-                height: size + 'px',
-                backgroundColor: `rgba(255, 255, 255, ${opacity})`,
-                borderRadius: '50%',
-                top: Math.random() * 100 + '%',
-                left: Math.random() * 100 + '%',
-                animation: `twinkle ${duration}s ${delay}s infinite ease-in-out`,
-                willChange: 'opacity',
-              }}
-            />
-          );
-        })}
+        {starsData.smallStars.map((star, i) => (
+          <div
+            key={`small-${i}`}
+            style={{
+              position: 'absolute',
+              width: star.size + 'px',
+              height: star.size + 'px',
+              backgroundColor: `rgba(255, 255, 255, ${star.opacity})`,
+              borderRadius: '50%',
+              top: star.top + '%',
+              left: star.left + '%',
+              animation: `twinkle ${star.duration}s ${star.delay}s infinite ease-in-out`,
+              willChange: 'opacity',
+            }}
+          />
+        ))}
       </div>
 
       <style>
@@ -525,7 +540,7 @@ const ThreeJSParticles: React.FC = () => {
       />
 
       {/* Three.js Container */}
-      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }} />
+      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2, pointerEvents: 'none' }} />
 
       {/* Main UI Container */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>

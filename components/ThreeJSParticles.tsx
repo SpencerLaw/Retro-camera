@@ -4,6 +4,18 @@ import { Home } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import * as THREE from 'three';
 
+// Preset colors
+const PRESET_COLORS = [
+  { color: '#00ffff', name: 'Cyan' },
+  { color: '#ff0066', name: 'Red' },
+  { color: '#00ff88', name: 'Green' },
+  { color: '#ffd700', name: 'Gold' },
+  { color: '#b388ff', name: 'Purple' },
+  { color: '#ff69b4', name: 'Pink' },
+  { color: '#ff6b35', name: 'Orange' },
+  { color: '#42a5f5', name: 'Blue' }
+];
+
 const ThreeJSParticles: React.FC = () => {
   const t = useTranslations();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -139,6 +151,64 @@ const ThreeJSParticles: React.FC = () => {
         const y = r * Math.sin(phi) * Math.sin(theta);
         const z = r * Math.cos(phi);
         return [x, y, z];
+      },
+      christmasTree: (i: number) => {
+        const section = Math.random();
+
+        // Star on top (5%)
+        if (section < 0.05) {
+          const starAngle = Math.random() * Math.PI * 2;
+          const starDist = Math.random() * 1.5;
+          return [
+            Math.cos(starAngle) * starDist,
+            14 + Math.sin(starAngle * 5) * 0.5,
+            Math.sin(starAngle) * starDist
+          ];
+        }
+        // Tree crown - multiple cone layers (75%)
+        else if (section < 0.80) {
+          // Create 5 layers of tree
+          const layerIndex = Math.floor(Math.random() * 5);
+          const layerHeight = 12 - layerIndex * 2.5; // Heights: 12, 9.5, 7, 4.5, 2
+          const maxRadius = 1.5 + layerIndex * 1.2; // Radii: 1.5, 2.7, 3.9, 5.1, 6.3
+
+          const angle = Math.random() * Math.PI * 2;
+          const radiusRatio = Math.pow(Math.random(), 0.7); // More particles toward outside
+          const radius = radiusRatio * maxRadius;
+
+          // Add some vertical variation within layer
+          const yVariation = (Math.random() - 0.5) * 1.8;
+
+          return [
+            Math.cos(angle) * radius,
+            layerHeight + yVariation,
+            Math.sin(angle) * radius
+          ];
+        }
+        // Trunk (15%)
+        else if (section < 0.95) {
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * 1.2;
+          const height = -2 + Math.random() * 3; // Height from -2 to 1
+          return [
+            Math.cos(angle) * radius,
+            height,
+            Math.sin(angle) * radius
+          ];
+        }
+        // Ornaments - sparkling decorations (5%)
+        else {
+          const ornamentLayer = Math.floor(Math.random() * 4) + 1;
+          const ornamentHeight = 11 - ornamentLayer * 2.5;
+          const ornamentRadius = 1.8 + ornamentLayer * 1.0;
+          const angle = (Math.random() * Math.PI * 2);
+
+          return [
+            Math.cos(angle) * ornamentRadius,
+            ornamentHeight,
+            Math.sin(angle) * ornamentRadius
+          ];
+        }
       }
     };
 
@@ -246,6 +316,9 @@ const ThreeJSParticles: React.FC = () => {
         expansionFactor *= (1 + Math.sin(time * 2) * 0.3);
       } else if (state.currentShape === 'heart') {
         expansionFactor *= (1 + Math.sin(time * 8) * 0.05 * (1 - Math.min(1, state.pinchStrength * 2)));
+      } else if (state.currentShape === 'christmasTree') {
+        // Gentle breathing effect for Christmas tree
+        expansionFactor *= (1 + Math.sin(time * 1.5) * 0.08);
       }
 
       const posAttribute = geometry.attributes.position;
@@ -312,8 +385,7 @@ const ThreeJSParticles: React.FC = () => {
     }
   };
 
-  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const color = e.target.value;
+  const handleColorClick = (color: string) => {
     setCurrentColor(color);
     if (sceneRef.current) {
       sceneRef.current.setColor(color);
@@ -401,6 +473,8 @@ const ThreeJSParticles: React.FC = () => {
             top: '1rem',
             right: '1rem',
             width: '16rem',
+            maxHeight: 'calc(100vh - 2rem)',
+            overflowY: 'auto',
             background: 'rgba(20, 20, 20, 0.6)',
             backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -439,7 +513,6 @@ const ThreeJSParticles: React.FC = () => {
               <button
                 onClick={() => handleShapeChange('fireworks')}
                 style={{
-                  gridColumn: 'span 2',
                   backgroundColor: currentShape === 'fireworks' ? '#7C3AED' : '#1F2937',
                   color: 'white',
                   fontSize: '0.75rem',
@@ -452,20 +525,47 @@ const ThreeJSParticles: React.FC = () => {
               >
                 Fireworks
               </button>
+              <button
+                onClick={() => handleShapeChange('christmasTree')}
+                style={{
+                  gridColumn: 'span 2',
+                  backgroundColor: currentShape === 'christmasTree' ? '#10B981' : '#1F2937',
+                  color: 'white',
+                  fontSize: '0.75rem',
+                  padding: '0.5rem',
+                  borderRadius: '0.25rem',
+                  border: `1px solid ${currentShape === 'christmasTree' ? '#34D399' : '#374151'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                🎄 Christmas Tree
+              </button>
             </div>
           </div>
 
-          {/* Color Picker */}
+          {/* Preset Colors */}
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ color: '#9CA3AF', fontSize: '0.75rem', display: 'block', marginBottom: '0.5rem' }}>PARTICLE COLOR</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <input
-                type="color"
-                value={currentColor}
-                onChange={handleColorChange}
-                style={{ width: '2rem', height: '2rem', padding: 0, border: 0, borderRadius: '0.25rem', cursor: 'pointer', backgroundColor: 'transparent' }}
-              />
-              <span style={{ color: '#D1D5DB', fontSize: '0.75rem', fontFamily: 'monospace' }}>{currentColor.toUpperCase()}</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+              {PRESET_COLORS.map((preset) => (
+                <button
+                  key={preset.color}
+                  onClick={() => handleColorClick(preset.color)}
+                  title={preset.name}
+                  style={{
+                    width: '100%',
+                    height: '2.5rem',
+                    backgroundColor: preset.color,
+                    border: currentColor === preset.color ? '3px solid white' : '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: currentColor === preset.color ? '0 0 15px ' + preset.color : 'none',
+                    transform: currentColor === preset.color ? 'scale(1.1)' : 'scale(1)'
+                  }}
+                />
+              ))}
             </div>
           </div>
 

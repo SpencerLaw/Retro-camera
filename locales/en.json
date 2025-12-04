@@ -99,5 +99,27 @@
       "noMicFound": "\n🔌 No microphone device detected. Please check connection.",
       "unknownError": "\n❓ "
     }
+  },
+  "particles": {
+    "waitingForCamera": "Waiting for camera...",
+    "handsTracking": "{count} Hand(s) Tracking",
+    "lookingForHands": "Looking for hands...",
+    "controls": "Controls",
+    "shapeMode": "Shape Mode",
+    "particleColor": "Particle Color",
+    "oneHand": "One Hand:",
+    "pinchToPulse": "Pinch to pulse",
+    "twoHands": "Two Hands:",
+    "expandAndZoom": "Expand & zoom",
+    "toggleFullscreen": "Toggle Fullscreen",
+    "shapes": {
+      "heart": "Heart",
+      "flower": "Flower",
+      "saturn": "Saturn",
+      "buddha": "Buddha",
+      "fireworks": "Fireworks",
+      "christmasTree": "🎄 Christmas Tree"
+    },
+    "cameraError": "Camera access denied/error"
   }
 }

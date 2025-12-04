@@ -99,5 +99,27 @@
       "noMicFound": "\n🔌 未检测到麦克风设备，请检查连接。",
       "unknownError": "\n❓ "
     }
+  },
+  "particles": {
+    "waitingForCamera": "等待摄像头...",
+    "handsTracking": "{count} 只手正在追踪",
+    "lookingForHands": "正在寻找手势...",
+    "controls": "控制面板",
+    "shapeMode": "形状模式",
+    "particleColor": "粒子颜色",
+    "oneHand": "单手：",
+    "pinchToPulse": "捏合产生脉冲",
+    "twoHands": "双手：",
+    "expandAndZoom": "展开和缩放",
+    "toggleFullscreen": "切换全屏",
+    "shapes": {
+      "heart": "爱心",
+      "flower": "花朵",
+      "saturn": "土星",
+      "buddha": "佛像",
+      "fireworks": "烟花",
+      "christmasTree": "🎄 圣诞树"
+    },
+    "cameraError": "摄像头访问被拒绝/错误"
   }
 }

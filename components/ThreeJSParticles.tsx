@@ -22,7 +22,7 @@ const ThreeJSParticles: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentShape, setCurrentShape] = useState('heart');
   const [currentColor, setCurrentColor] = useState('#00f5ff');
-  const [statusText, setStatusText] = useState('Waiting for camera...');
+  const [statusText, setStatusText] = useState(t('particles.waitingForCamera'));
   const [statusColor, setStatusColor] = useState('red');
   const sceneRef = useRef<any>(null);
 
@@ -236,7 +236,7 @@ const ThreeJSParticles: React.FC = () => {
           if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
             state.handsDetected = results.multiHandLandmarks.length;
             setStatusColor('green');
-            setStatusText(`${state.handsDetected} Hand(s) Tracking`);
+            setStatusText(t('particles.handsTracking').replace('{count}', state.handsDetected.toString()));
 
             if (results.multiHandLandmarks.length === 2) {
               const hand1 = results.multiHandLandmarks[0][0];
@@ -261,7 +261,7 @@ const ThreeJSParticles: React.FC = () => {
             }
           } else {
             setStatusColor('yellow');
-            setStatusText('Looking for hands...');
+            setStatusText(t('particles.lookingForHands'));
             state.expansion += (1.0 - state.expansion) * 0.15;
           }
         });
@@ -277,7 +277,7 @@ const ThreeJSParticles: React.FC = () => {
 
         cameraUtils.start().catch((e: any) => {
           console.error('Camera failed', e);
-          setStatusText('Camera access denied/error');
+          setStatusText(t('particles.cameraError'));
         });
       } catch (error) {
         console.error('MediaPipe setup failed', error);
@@ -563,7 +563,7 @@ const ThreeJSParticles: React.FC = () => {
             paddingBottom: '0.75rem',
             textTransform: 'uppercase'
           }}>
-            ⚡ Controls
+            ⚡ {t('particles.controls')}
           </h2>
 
           {/* Shape Selection - Redesigned */}
@@ -577,7 +577,7 @@ const ThreeJSParticles: React.FC = () => {
               textTransform: 'uppercase',
               letterSpacing: '0.1em'
             }}>
-              🌀 Shape Mode
+              🌀 {t('particles.shapeMode')}
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               {['heart', 'flower', 'saturn', 'buddha'].map((shape) => (
@@ -620,7 +620,7 @@ const ThreeJSParticles: React.FC = () => {
                     }
                   }}
                 >
-                  {shape.charAt(0).toUpperCase() + shape.slice(1)}
+                  {t(`particles.shapes.${shape}`)}
                 </button>
               ))}
               <button
@@ -645,7 +645,7 @@ const ThreeJSParticles: React.FC = () => {
                   transform: currentShape === 'fireworks' ? 'translateY(-2px)' : 'translateY(0)'
                 }}
               >
-                Fireworks
+                {t('particles.shapes.fireworks')}
               </button>
               <button
                 onClick={() => handleShapeChange('christmasTree')}
@@ -670,7 +670,7 @@ const ThreeJSParticles: React.FC = () => {
                   transform: currentShape === 'christmasTree' ? 'translateY(-2px)' : 'translateY(0)'
                 }}
               >
-                🎄 Christmas Tree
+                {t('particles.shapes.christmasTree')}
               </button>
             </div>
           </div>
@@ -686,7 +686,7 @@ const ThreeJSParticles: React.FC = () => {
               textTransform: 'uppercase',
               letterSpacing: '0.1em'
             }}>
-              🎨 Particle Color
+              🎨 {t('particles.particleColor')}
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
               {PRESET_COLORS.map((preset) => (
@@ -741,13 +741,13 @@ const ThreeJSParticles: React.FC = () => {
           }}>
             <p style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1.2rem' }}>🖐️</span>
-              <strong style={{ color: '#00f5ff', fontWeight: '600' }}>One Hand:</strong>
-              <span>Pinch to pulse</span>
+              <strong style={{ color: '#00f5ff', fontWeight: '600' }}>{t('particles.oneHand')}</strong>
+              <span>{t('particles.pinchToPulse')}</span>
             </p>
             <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1.2rem' }}>🙌</span>
-              <strong style={{ color: '#00f5ff', fontWeight: '600' }}>Two Hands:</strong>
-              <span>Expand & zoom</span>
+              <strong style={{ color: '#00f5ff', fontWeight: '600' }}>{t('particles.twoHands')}</strong>
+              <span>{t('particles.expandAndZoom')}</span>
             </p>
           </div>
 
@@ -785,7 +785,7 @@ const ThreeJSParticles: React.FC = () => {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
             </svg>
-            Toggle Fullscreen
+            {t('particles.toggleFullscreen')}
           </button>
         </div>
       </div>

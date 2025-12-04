@@ -99,5 +99,27 @@
       "noMicFound": "\n🔌 マイクデバイスが検出されませんでした。接続を確認してください。",
       "unknownError": "\n❓ "
     }
+  },
+  "particles": {
+    "waitingForCamera": "カメラを待機中...",
+    "handsTracking": "{count} 本の手を追跡中",
+    "lookingForHands": "手を探しています...",
+    "controls": "コントロール",
+    "shapeMode": "形状モード",
+    "particleColor": "パーティクルカラー",
+    "oneHand": "片手：",
+    "pinchToPulse": "ピンチでパルス",
+    "twoHands": "両手：",
+    "expandAndZoom": "展開とズーム",
+    "toggleFullscreen": "フルスクリーン切り替え",
+    "shapes": {
+      "heart": "ハート",
+      "flower": "花",
+      "saturn": "土星",
+      "buddha": "仏像",
+      "fireworks": "花火",
+      "christmasTree": "🎄 クリスマスツリー"
+    },
+    "cameraError": "カメラアクセス拒否/エラー"
   }
 }

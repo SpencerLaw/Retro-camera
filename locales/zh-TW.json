@@ -99,5 +99,27 @@
       "noMicFound": "\n🔌 未檢測到麥克風設備，請檢查連接。",
       "unknownError": "\n❓ "
     }
+  },
+  "particles": {
+    "waitingForCamera": "等待攝像頭...",
+    "handsTracking": "{count} 隻手正在追蹤",
+    "lookingForHands": "正在尋找手勢...",
+    "controls": "控制面板",
+    "shapeMode": "形狀模式",
+    "particleColor": "粒子顏色",
+    "oneHand": "單手：",
+    "pinchToPulse": "捏合產生脈衝",
+    "twoHands": "雙手：",
+    "expandAndZoom": "展開和縮放",
+    "toggleFullscreen": "切換全屏",
+    "shapes": {
+      "heart": "愛心",
+      "flower": "花朵",
+      "saturn": "土星",
+      "buddha": "佛像",
+      "fireworks": "煙花",
+      "christmasTree": "🎄 聖誕樹"
+    },
+    "cameraError": "攝像頭訪問被拒絕/錯誤"
   }
 }

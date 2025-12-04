@@ -530,22 +530,23 @@ const ThreeJSParticles: React.FC = () => {
         {/* Control Panel - Futuristic Design */}
         <div
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: '1.5rem',
             right: '1.5rem',
             width: '18rem',
             maxHeight: 'calc(100vh - 3rem)',
             overflowY: 'auto',
-            background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(30, 30, 60, 0.6) 100%)',
+            background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%)',
             backdropFilter: 'blur(20px)',
             border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(30, 30, 60, 0.6) 100%), linear-gradient(135deg, #00f5ff, #7c4dff, #ff0080)',
+            backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%), linear-gradient(135deg, #00f5ff, #7c4dff, #ff0080)',
             backgroundOrigin: 'border-box',
             backgroundClip: 'padding-box, border-box',
             borderRadius: '1.5rem',
             padding: '1.5rem',
             pointerEvents: 'auto',
-            boxShadow: '0 8px 32px rgba(0, 245, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+            zIndex: 200,
+            boxShadow: '0 8px 32px rgba(0, 245, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
         >
           <h2 style={{
@@ -586,32 +587,36 @@ const ThreeJSParticles: React.FC = () => {
                   style={{
                     background: currentShape === shape
                       ? 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)'
-                      : 'rgba(255, 255, 255, 0.05)',
+                      : 'rgba(255, 255, 255, 0.15)',
                     color: 'white',
                     fontSize: '0.8rem',
                     fontWeight: '600',
                     padding: '0.75rem',
                     borderRadius: '0.75rem',
                     border: currentShape === shape
-                      ? '2px solid rgba(59, 130, 246, 0.5)'
-                      : '1px solid rgba(255, 255, 255, 0.1)',
+                      ? '2px solid rgba(59, 130, 246, 0.8)'
+                      : '1px solid rgba(255, 255, 255, 0.3)',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     boxShadow: currentShape === shape
-                      ? '0 4px 15px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                      : 'none',
-                    transform: currentShape === shape ? 'translateY(-2px)' : 'translateY(0)'
+                      ? '0 4px 15px rgba(37, 99, 235, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                      : '0 2px 8px rgba(0, 0, 0, 0.3)',
+                    transform: currentShape === shape ? 'translateY(-2px)' : 'translateY(0)',
+                    position: 'relative',
+                    zIndex: 1
                   }}
                   onMouseEnter={(e) => {
                     if (currentShape !== shape) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
                       e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.2)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (currentShape !== shape) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
                       e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
                     }
                   }}
                 >

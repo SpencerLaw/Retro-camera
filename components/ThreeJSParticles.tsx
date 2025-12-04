@@ -20,11 +20,18 @@ const ThreeJSParticles: React.FC = () => {
   const t = useTranslations();
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentShape, setCurrentShape] = useState('heart');
   const [currentColor, setCurrentColor] = useState('#00f5ff');
   const [statusText, setStatusText] = useState(t('particles.waitingForCamera'));
   const [statusColor, setStatusColor] = useState('red');
   const sceneRef = useRef<any>(null);
+  
+  // 添加一个 ref 来存储内部状态，避免闭包问题
+  const internalState = useRef({
+    forceFastUpdate: false,
+    forceUpdateFrameCount: 0
+  });
 
   // Generate star positions once and memoize them to prevent jumping
   const starsData = useMemo(() => {
@@ -57,11 +64,24 @@ const ThreeJSParticles: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    console.log('=== useEffect started ===');
+    console.log('containerRef.current:', containerRef.current);
+    
+    if (!containerRef.current) {
+      console.error('containerRef.current is null, useEffect will not continue');
+      return;
+    }
+
+    // Defensive cleanup: Remove any existing children (stale canvases)
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
+    }
+
+    console.log('Three.js setup starting...');
 
     // Configuration
-    const PARTICLE_COUNT = 15000;
-    const PARTICLE_SIZE = 0.15;
+    const PARTICLE_COUNT = 25000; // Increased count for denser, richer look
+    const PARTICLE_SIZE = 0.25; // Smaller size for finer, HD definition
     const CAMERA_Z_BASE = 30;
 
     // State
@@ -73,7 +93,40 @@ const ThreeJSParticles: React.FC = () => {
       pinchStrength: 0,
       handsDetected: 0,
       expansion: 1.0,
-      rotationSpeed: 0.001
+      rotationSpeed: 0.001,
+      // 旋转控制
+      targetRotationY: 0,
+      currentRotationY: 0,
+      targetRotationX: 0,
+      currentRotationX: 0,
+      lastHandAngle: 0,
+      lastHandsAngle: 0
+    };
+
+    // Helper: Generate a High-Definition soft glow texture
+    const getTexture = () => {
+      const size = 128; // 128x128 Resolution for sharp scaling
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+      
+      const center = size / 2;
+      const gradient = ctx.createRadialGradient(center, center, 0, center, center, center);
+      // Multi-stop gradient for "Hot Core" effect
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');     // Pure white core
+      gradient.addColorStop(0.15, 'rgba(255, 255, 255, 0.9)'); // High intensity zone
+      gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');  // Soft falloff
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');            // Transparent edge
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter; // Smooth scaling down
+      texture.magFilter = THREE.LinearFilter; // Smooth scaling up
+      return texture;
     };
 
     // Three.js Setup
@@ -81,10 +134,11 @@ const ThreeJSParticles: React.FC = () => {
     scene.fog = new THREE.FogExp2(0x000000, 0.015);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = CAMERA_Z_BASE;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    camera.position.x = 8; // Shift camera right to move scene left (away from panel)
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     renderer.setClearColor(0x000000, 0); // 透明背景，让星空透过
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(window.devicePixelRatio); // Use full device pixel ratio for HD
     containerRef.current.appendChild(renderer.domElement);
 
     // Particle System
@@ -115,14 +169,15 @@ const ThreeJSParticles: React.FC = () => {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      color: state.currentColor,
+      color: 0xffffff, // Base color white, tinted by vertex colors
+      map: getTexture(), // Use the soft glow texture
       size: PARTICLE_SIZE,
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      vertexColors: true // Enable per-particle colors
+      vertexColors: true 
     });
     const particles = new THREE.Points(geometry, material);
     scene.add(particles);
@@ -134,11 +189,11 @@ const ThreeJSParticles: React.FC = () => {
         const layer = Math.random();
         if (layer < 0.3) {
           // 外层轮廓（30%的粒子）
-          const t = Math.random() * Math.PI * 2;
-          const x = 16 * Math.pow(Math.sin(t), 3);
-          const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        const t = Math.random() * Math.PI * 2;
+        const x = 16 * Math.pow(Math.sin(t), 3);
+        const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
           const z = (Math.random() - 0.5) * 2;
-          return [x * 0.5, y * 0.5, z];
+        return [x * 0.5, y * 0.5, z];
         } else if (layer < 0.6) {
           // 中层填充（30%的粒子）
           const t = Math.random() * Math.PI * 2;
@@ -315,8 +370,16 @@ const ThreeJSParticles: React.FC = () => {
     };
 
     const generateShape = (shapeName: string) => {
+      console.log('=== generateShape function called ===');
+      console.log('shapeName:', shapeName);
+      console.log('Shapes[shapeName]:', Shapes[shapeName]);
+      
       const generator = Shapes[shapeName] || Shapes.heart;
       const isChristmasTree = shapeName === 'christmasTree';
+      
+      // 采样几个粒子，检查生成的坐标
+      const sampleIndices = [0, 100, 1000, 5000, 10000];
+      const samples: any[] = [];
       
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const result = generator(i);
@@ -327,6 +390,11 @@ const ThreeJSParticles: React.FC = () => {
         targetPositions[i * 3] = x;
         targetPositions[i * 3 + 1] = y;
         targetPositions[i * 3 + 2] = z;
+        
+        // 采样
+        if (sampleIndices.includes(i)) {
+          samples.push({ i, x, y, z, result });
+        }
         
         // 如果是圣诞树，根据颜色类型设置颜色
         if (isChristmasTree && result.length > 3) {
@@ -343,31 +411,150 @@ const ThreeJSParticles: React.FC = () => {
           targetColors[i * 3 + 2] = color.b;
         }
       }
+      
+      // 输出采样结果
+      console.log('Sample particles for shape', shapeName, ':', samples);
+      console.log('targetPositions[0-5]:', [
+        targetPositions[0], targetPositions[1], targetPositions[2],
+        targetPositions[3], targetPositions[4], targetPositions[5]
+      ]);
+      console.log('=== generateShape function completed ===');
     };
 
     generateShape('heart');
+    console.log('Initial shape generated');
 
     // MediaPipe Hands Setup
     const setupMediaPipe = async () => {
       try {
+        console.log('Setting up MediaPipe...');
         const videoElement = videoRef.current;
-        if (!videoElement) return;
+        if (!videoElement) {
+          console.error('videoElement is null');
+          return;
+        }
 
-        // @ts-ignore
-        const hands = new window.Hands({
-          locateFile: (file: string) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-          }
-        });
+        // 检查 MediaPipe 是否已加载
+        if (typeof window.Hands === 'undefined') {
+          console.error('MediaPipe Hands is not loaded. Waiting...');
+          // 等待 MediaPipe 加载
+          let retries = 0;
+          const checkMediaPipe = setInterval(() => {
+            if (typeof window.Hands !== 'undefined') {
+              clearInterval(checkMediaPipe);
+              console.log('MediaPipe Hands loaded, initializing...');
+              initializeHands();
+            } else if (retries++ > 50) {
+              clearInterval(checkMediaPipe);
+              console.error('MediaPipe Hands failed to load after 5 seconds');
+              setStatusText('MediaPipe加载失败，请刷新页面');
+            }
+          }, 100);
+          return;
+        }
 
-        hands.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 1,
-          minDetectionConfidence: 0.5,
-          minTrackingConfidence: 0.5
-        });
+        initializeHands();
 
-        hands.onResults((results: any) => {
+        function initializeHands() {
+          // @ts-ignore
+          const hands = new window.Hands({
+            locateFile: (file: string) => {
+              return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            }
+          });
+
+          hands.setOptions({
+            maxNumHands: 2,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+          });
+
+          // 绘制手部关键点和连线
+          const drawHands = (results: any) => {
+          const canvas = canvasRef.current;
+          const video = videoRef.current;
+          if (!canvas || !video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+
+          const ctx = canvas.getContext('2d', { 
+            willReadFrequently: false,
+            alpha: true 
+          });
+          if (!ctx) return;
+
+          // 使用requestAnimationFrame确保绘制不会阻塞
+          requestAnimationFrame(() => {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制视频帧（镜像）- 只在canvas内绘制，不影响其他图层
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.translate(-canvas.width, 0);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+              // 手部关键点连接关系（MediaPipe Hands的21个关键点）
+              const connections = [
+                [0, 1], [1, 2], [2, 3], [3, 4], // 拇指
+                [0, 5], [5, 6], [6, 7], [7, 8], // 食指
+                [0, 9], [9, 10], [10, 11], [11, 12], // 中指
+                [0, 13], [13, 14], [14, 15], [15, 16], // 无名指
+                [0, 17], [17, 18], [18, 19], [19, 20], // 小指
+                [5, 9], [9, 13], [13, 17] // 手掌连接
+              ];
+
+              results.multiHandLandmarks.forEach((handLandmarks: any, handIndex: number) => {
+                // 绘制连线
+                ctx.strokeStyle = handIndex === 0 ? '#00f5ff' : '#ff0080';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                connections.forEach(([start, end]) => {
+                  const startPoint = handLandmarks[start];
+                  const endPoint = handLandmarks[end];
+                  if (startPoint && endPoint) {
+                    const x1 = (1 - startPoint.x) * canvas.width; // 镜像翻转
+                    const y1 = startPoint.y * canvas.height;
+                    const x2 = (1 - endPoint.x) * canvas.width;
+                    const y2 = endPoint.y * canvas.height;
+                    
+                    if (start === 0) {
+                      ctx.moveTo(x1, y1);
+                    }
+                    ctx.lineTo(x2, y2);
+                  }
+                });
+                ctx.stroke();
+
+                // 绘制关键点
+                handLandmarks.forEach((landmark: any, index: number) => {
+                  const x = (1 - landmark.x) * canvas.width; // 镜像翻转
+                  const y = landmark.y * canvas.height;
+                  
+                  ctx.fillStyle = handIndex === 0 ? '#00f5ff' : '#ff0080';
+                  ctx.beginPath();
+                  ctx.arc(x, y, 4, 0, Math.PI * 2);
+                  ctx.fill();
+                  
+                  // 手腕和指尖用更大的点
+                  if (index === 0 || [4, 8, 12, 16, 20].includes(index)) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                  }
+                });
+              });
+            }
+          });
+          };
+
+          hands.onResults((results: any) => {
+          // 绘制手部关键点
+          drawHands(results);
+
           state.handsDetected = 0;
           if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
             state.handsDetected = results.multiHandLandmarks.length;
@@ -375,16 +562,42 @@ const ThreeJSParticles: React.FC = () => {
             setStatusText(t('particles.handsTracking').replace('{count}', state.handsDetected.toString()));
 
             if (results.multiHandLandmarks.length === 2) {
-              const hand1 = results.multiHandLandmarks[0][0];
-              const hand2 = results.multiHandLandmarks[1][0];
-              const dx = hand1.x - hand2.x;
-              const dy = hand1.y - hand2.y;
+              // 双手模式：计算旋转和缩放
+              const hand1 = results.multiHandLandmarks[0];
+              const hand2 = results.multiHandLandmarks[1];
+              
+              // 计算双手中心点
+              const hand1Center = hand1[0]; // 手腕
+              const hand2Center = hand2[0]; // 手腕
+              
+              // 计算距离（缩放）
+              const dx = hand1Center.x - hand2Center.x;
+              const dy = hand1Center.y - hand2Center.y;
               const distance = Math.sqrt(dx * dx + dy * dy);
               state.handDistance = distance;
               const targetExp = Math.max(0.5, Math.min(3.5, distance * 4));
               state.expansion += (targetExp - state.expansion) * 0.3;
+
+              // 计算旋转角度（基于双手连线方向）
+              const angle = Math.atan2(dy, dx);
+              // 将角度映射到Y轴旋转（增强敏感度，-π到π映射到-4π到4π）
+              state.targetRotationY = angle * 4;
+              // 更快的平滑过渡
+              state.currentRotationY += (state.targetRotationY - state.currentRotationY) * 0.4;
+
+              // 计算双手高度差（X轴旋转，增强敏感度）
+              const heightDiff = hand1Center.y - hand2Center.y;
+              state.targetRotationX = heightDiff * Math.PI * 2;
+              state.currentRotationX += (state.targetRotationX - state.currentRotationX) * 0.4;
+
             } else if (results.multiHandLandmarks.length === 1) {
+              // 单手模式：计算旋转和缩放
               const hand = results.multiHandLandmarks[0];
+              const wrist = hand[0]; // 手腕
+              const middleFinger = hand[9]; // 中指根部
+              const middleFingerTip = hand[12]; // 中指指尖
+              
+              // 计算捏合距离（缩放）
               const thumb = hand[4];
               const index = hand[8];
               const dist = Math.sqrt(
@@ -394,29 +607,61 @@ const ThreeJSParticles: React.FC = () => {
               state.pinchStrength = dist;
               const targetExp = 0.8 + (dist * 5);
               state.expansion += (targetExp - state.expansion) * 0.3;
+
+              // 计算手部方向向量（从手腕到中指根部）
+              const dirX = middleFinger.x - wrist.x;
+              const dirY = middleFinger.y - wrist.y;
+              const angle = Math.atan2(dirY, dirX);
+              
+              // 将角度映射到Y轴旋转（增强敏感度）
+              state.targetRotationY = angle * 4;
+              // 更快的平滑过渡
+              state.currentRotationY += (state.targetRotationY - state.currentRotationY) * 0.4;
+
+              // 计算手部倾斜（基于中指方向，增强敏感度）
+              const tipDirX = middleFingerTip.x - middleFinger.x;
+              const tipDirY = middleFingerTip.y - middleFinger.y;
+              const tipAngle = Math.atan2(tipDirY, tipDirX);
+              // X轴旋转基于手指倾斜（增强敏感度）
+              state.targetRotationX = (tipAngle - angle) * 2;
+              state.currentRotationX += (state.targetRotationX - state.currentRotationX) * 0.4;
             }
           } else {
             setStatusColor('yellow');
             setStatusText(t('particles.lookingForHands'));
             state.expansion += (1.0 - state.expansion) * 0.15;
+            // 没有检测到手时，逐渐回到默认旋转（更快的重置）
+            state.targetRotationY = 0;
+            state.targetRotationX = 0;
+            state.currentRotationY += (state.targetRotationY - state.currentRotationY) * 0.3;
+            state.currentRotationX += (state.targetRotationX - state.currentRotationX) * 0.3;
           }
-        });
+          });
 
-        // @ts-ignore
-        const cameraUtils = new window.Camera(videoElement, {
-          onFrame: async () => {
-            await hands.send({ image: videoElement });
-          },
-          width: 640,
-          height: 480
-        });
+          // 设置canvas用于绘制手部关键点
+          const canvas = canvasRef.current;
+          if (canvas) {
+            canvas.width = 640;
+            canvas.height = 480;
+          }
 
-        cameraUtils.start().catch((e: any) => {
-          console.error('Camera failed', e);
-          setStatusText(t('particles.cameraError'));
-        });
+          // @ts-ignore
+          const cameraUtils = new window.Camera(videoElement, {
+            onFrame: async () => {
+              await hands.send({ image: videoElement });
+            },
+            width: 640,
+            height: 480
+          });
+
+          cameraUtils.start().catch((e: any) => {
+            console.error('Camera failed', e);
+            setStatusText(t('particles.cameraError'));
+          });
+        }
       } catch (error) {
         console.error('MediaPipe setup failed', error);
+        setStatusText('MediaPipe初始化失败: ' + (error as Error).message);
       }
     };
 
@@ -424,15 +669,34 @@ const ThreeJSParticles: React.FC = () => {
 
     // Animation Loop
     const clock = new THREE.Clock();
+    let animationId: number;
+    
     const animate = () => {
-      requestAnimationFrame(animate);
+      animationId = requestAnimationFrame(animate);
 
-      const time = clock.getElapsedTime();
+            const time = clock.getElapsedTime();
 
-      state.currentColor.lerp(state.targetColor, 0.15);
-      material.color = state.currentColor;
+      
 
-      particles.rotation.y += state.rotationSpeed + (state.expansion * 0.001);
+            state.currentColor.lerp(state.targetColor, 0.15);
+
+            // material.color = state.currentColor; // Removed to allow vertex colors to work with texture
+
+      
+
+            // 应用旋转控制
+      if (state.handsDetected > 0) {
+        // 检测到手时，使用手势控制的旋转
+        particles.rotation.y = state.currentRotationY;
+        particles.rotation.x = state.currentRotationX;
+      } else {
+        // 没有检测到手时，使用自动旋转（确保形状切换时能看到变化）
+        // 同时平滑过渡到自动旋转，避免突然变化
+        const autoRotationSpeed = 0.01;
+        particles.rotation.y += autoRotationSpeed;
+        // 平滑重置X轴旋转
+        particles.rotation.x = state.currentRotationX;
+      }
 
       let expansionFactor = state.expansion;
       if (state.currentShape === 'fireworks') {
@@ -448,30 +712,82 @@ const ThreeJSParticles: React.FC = () => {
       const currentPositions = posAttribute.array as Float32Array;
       const currentColors = colorAttribute.array as Float32Array;
 
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const ix = i * 3;
-        const iy = i * 3 + 1;
-        const iz = i * 3 + 2;
-        let tx = targetPositions[ix];
-        let ty = targetPositions[iy];
-        let tz = targetPositions[iz];
+      // 如果 forceFastUpdate 为 true，跳过位置更新（因为已经在 generateShape 中直接更新了）
+      if (!internalState.current.forceFastUpdate) {
+        // 正常更新模式：平滑插值
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const ix = i * 3;
+          const iy = i * 3 + 1;
+          const iz = i * 3 + 2;
+          let tx = targetPositions[ix];
+          let ty = targetPositions[iy];
+          let tz = targetPositions[iz];
 
-        tx *= expansionFactor;
-        ty *= expansionFactor;
-        tz *= expansionFactor;
+          tx *= expansionFactor;
+          ty *= expansionFactor;
+          tz *= expansionFactor;
 
-        tx += Math.sin(time + i) * 0.05;
-        ty += Math.cos(time + i * 0.5) * 0.05;
+          // 添加轻微抖动
+          tx += Math.sin(time + i) * 0.02;
+          ty += Math.cos(time + i * 0.5) * 0.02;
 
-        currentPositions[ix] += (tx - currentPositions[ix]) * 0.25;
-        currentPositions[iy] += (ty - currentPositions[iy]) * 0.25;
-        currentPositions[iz] += (tz - currentPositions[iz]) * 0.25;
+          // 平滑插值
+          const lerpSpeed = 0.5;
+          currentPositions[ix] += (tx - currentPositions[ix]) * lerpSpeed;
+          currentPositions[iy] += (ty - currentPositions[iy]) * lerpSpeed;
+          currentPositions[iz] += (tz - currentPositions[iz]) * lerpSpeed;
+        }
+      } else {
+        // 强制更新模式：只应用 expansionFactor 的变化（位置已经在 generateShape 中设置）
+        // 但需要根据当前的 expansionFactor 调整（因为 expansionFactor 可能会变化）
+        const currentExpansion = state.expansion;
+        let dynamicExpansion = currentExpansion;
+        if (state.currentShape === 'fireworks') {
+          dynamicExpansion *= (1 + Math.sin(time * 2) * 0.3);
+        } else if (state.currentShape === 'heart') {
+          dynamicExpansion *= (1 + Math.sin(time * 8) * 0.05 * (1 - Math.min(1, state.pinchStrength * 2)));
+        } else if (state.currentShape === 'christmasTree') {
+          dynamicExpansion *= (1 + Math.sin(time * 1.5) * 0.08);
+        }
         
-        // 平滑过渡颜色
-        currentColors[ix] += (targetColors[ix] - currentColors[ix]) * 0.15;
-        currentColors[iy] += (targetColors[iy] - currentColors[iy]) * 0.15;
-        currentColors[iz] += (targetColors[iz] - currentColors[iz]) * 0.15;
+        // 如果 expansionFactor 变化了，需要重新计算位置
+        if (Math.abs(dynamicExpansion - expansionFactor) > 0.01) {
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const ix = i * 3;
+            const iy = i * 3 + 1;
+            const iz = i * 3 + 2;
+            // 基于 targetPositions 和新的 expansionFactor 更新
+            currentPositions[ix] = targetPositions[ix] * dynamicExpansion;
+            currentPositions[iy] = targetPositions[iy] * dynamicExpansion;
+            currentPositions[iz] = targetPositions[iz] * dynamicExpansion;
+          }
+        }
       }
+        
+      // 颜色更新
+      if (!internalState.current.forceFastUpdate) {
+        // 正常模式：平滑插值颜色
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const ix = i * 3;
+          const iy = i * 3 + 1;
+          const iz = i * 3 + 2;
+          const colorLerpSpeed = 0.4;
+          currentColors[ix] += (targetColors[ix] - currentColors[ix]) * colorLerpSpeed;
+          currentColors[iy] += (targetColors[iy] - currentColors[iy]) * colorLerpSpeed;
+          currentColors[iz] += (targetColors[iz] - currentColors[iz]) * colorLerpSpeed;
+        }
+      }
+      
+      // 如果强制快速更新，几帧后恢复正常速度
+      if (internalState.current.forceFastUpdate) {
+        internalState.current.forceUpdateFrameCount++;
+        if (internalState.current.forceUpdateFrameCount > 5) {
+          internalState.current.forceFastUpdate = false;
+          internalState.current.forceUpdateFrameCount = 0;
+          console.log('Force update completed, returning to normal interpolation');
+        }
+      }
+      // 强制更新标志，确保 Three.js 知道几何体已更改
       posAttribute.needsUpdate = true;
       colorAttribute.needsUpdate = true;
 
@@ -486,18 +802,92 @@ const ThreeJSParticles: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
     animate();
-
+    
     sceneRef.current = {
       generateShape: (shapeName: string) => {
+        console.log('generateShape called:', shapeName, 'state:', state);
         state.currentShape = shapeName;
         generateShape(shapeName);
+        
+        // 直接更新 currentPositions，确保变化立即可见
+        const posAttribute = geometry.attributes.position;
+        const currentPositions = posAttribute.array as Float32Array;
+        
+        // 计算 expansionFactor（与动画循环中的计算保持一致）
+        let expansionFactor = state.expansion;
+        const time = clock.getElapsedTime();
+        if (shapeName === 'fireworks') {
+          expansionFactor *= (1 + Math.sin(time * 2) * 0.3);
+        } else if (shapeName === 'heart') {
+          expansionFactor *= (1 + Math.sin(time * 8) * 0.05 * (1 - Math.min(1, state.pinchStrength * 2)));
+        } else if (shapeName === 'christmasTree') {
+          expansionFactor *= (1 + Math.sin(time * 1.5) * 0.08);
+        }
+        
+        console.log('Updating positions with expansionFactor:', expansionFactor, 'for shape:', shapeName);
+        
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const ix = i * 3;
+          const iy = i * 3 + 1;
+          const iz = i * 3 + 2;
+          // 直接设置位置，应用当前的 expansionFactor
+          currentPositions[ix] = targetPositions[ix] * expansionFactor;
+          currentPositions[iy] = targetPositions[iy] * expansionFactor;
+          currentPositions[iz] = targetPositions[iz] * expansionFactor;
+        }
+        
+        // 直接更新颜色
+        const colorAttribute = geometry.attributes.color;
+        const currentColors = colorAttribute.array as Float32Array;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          currentColors[i * 3] = targetColors[i * 3];
+          currentColors[i * 3 + 1] = targetColors[i * 3 + 1];
+          currentColors[i * 3 + 2] = targetColors[i * 3 + 2];
+        }
+        
+        // 强制快速更新
+        internalState.current.forceFastUpdate = true;
+        internalState.current.forceUpdateFrameCount = 0;
+        
+        // 强制更新几何体属性
+        posAttribute.needsUpdate = true;
+        colorAttribute.needsUpdate = true;
+        console.log('Shape generated, positions and colors directly updated');
       },
       setColor: (color: string) => {
+        console.log('setColor called:', color);
         state.targetColor.set(color);
+        
+        const colorAttribute = geometry.attributes.color;
+        const currentColors = colorAttribute.array as Float32Array;
+
+        // 立即更新所有粒子的目标颜色和当前颜色（非圣诞树形状）
+        if (state.currentShape !== 'christmasTree') {
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            // Update target
+            targetColors[i * 3] = state.targetColor.r;
+            targetColors[i * 3 + 1] = state.targetColor.g;
+            targetColors[i * 3 + 2] = state.targetColor.b;
+            
+            // Update current immediately to avoid interpolation lag
+            currentColors[i * 3] = state.targetColor.r;
+            currentColors[i * 3 + 1] = state.targetColor.g;
+            currentColors[i * 3 + 2] = state.targetColor.b;
+          }
+          colorAttribute.needsUpdate = true;
+        }
+        // 强制快速更新
+        internalState.current.forceFastUpdate = true;
+        internalState.current.forceUpdateFrameCount = 0;
+        console.log('Color updated to:', color);
       }
     };
+    console.log('sceneRef.current initialized:', sceneRef.current);
+    console.log('=== useEffect completed ===');
 
     return () => {
+      console.log('useEffect cleanup');
+      cancelAnimationFrame(animationId);
       window.removeEventListener('resize', handleResize);
       if (containerRef.current && renderer.domElement) {
         containerRef.current.removeChild(renderer.domElement);
@@ -509,16 +899,54 @@ const ThreeJSParticles: React.FC = () => {
   }, []);
 
   const handleShapeChange = (shape: string) => {
+    console.log('=== handleShapeChange called ===');
+    console.log('Shape:', shape);
+    console.log('sceneRef.current:', sceneRef.current);
+    console.log('sceneRef.current?.generateShape:', sceneRef.current?.generateShape);
     setCurrentShape(shape);
     if (sceneRef.current) {
-      sceneRef.current.generateShape(shape);
+      if (sceneRef.current.generateShape) {
+        console.log('Calling generateShape...');
+        sceneRef.current.generateShape(shape);
+        console.log('generateShape called successfully');
+      } else {
+        console.error('generateShape method not found on sceneRef.current');
+      }
+    } else {
+      console.error('sceneRef.current is null!');
+      // 尝试延迟执行
+      setTimeout(() => {
+        if (sceneRef.current && sceneRef.current.generateShape) {
+          console.log('Retrying generateShape after delay...');
+          sceneRef.current.generateShape(shape);
+        }
+      }, 100);
     }
   };
 
   const handleColorClick = (color: string) => {
+    console.log('=== handleColorClick called ===');
+    console.log('Color:', color);
+    console.log('sceneRef.current:', sceneRef.current);
+    console.log('sceneRef.current?.setColor:', sceneRef.current?.setColor);
     setCurrentColor(color);
     if (sceneRef.current) {
-      sceneRef.current.setColor(color);
+      if (sceneRef.current.setColor) {
+        console.log('Calling setColor...');
+        sceneRef.current.setColor(color);
+        console.log('setColor called successfully');
+      } else {
+        console.error('setColor method not found on sceneRef.current');
+      }
+    } else {
+      console.error('sceneRef.current is null!');
+      // 尝试延迟执行
+      setTimeout(() => {
+        if (sceneRef.current && sceneRef.current.setColor) {
+          console.log('Retrying setColor after delay...');
+          sceneRef.current.setColor(color);
+        }
+      }, 100);
     }
   };
 
@@ -647,54 +1075,107 @@ const ThreeJSParticles: React.FC = () => {
         `}
       </style>
 
-      {/* Video Element for MediaPipe (Hidden) */}
+      {/* Video Element for MediaPipe (Completely Hidden) */}
       <video
         ref={videoRef}
-        style={{ transform: 'scaleX(-1)', display: 'none' }}
+        style={{ 
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          width: '1px',
+          height: '1px',
+          opacity: 0,
+          pointerEvents: 'none',
+          visibility: 'hidden'
+        }}
+        autoPlay
+        playsInline
+        muted
       />
 
+      {/* Camera Preview Window with Hand Tracking Overlay */}
+      <div style={{
+        position: 'fixed',
+        bottom: '1.5rem',
+        left: '1.5rem',
+        width: '224px',
+        height: '168px',
+        zIndex: 150,
+        pointerEvents: 'auto',
+        background: 'rgba(0, 0, 0, 0.9)',
+        borderRadius: '0.75rem',
+        border: '2px solid rgba(0, 245, 255, 0.5)',
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0, 245, 255, 0.3)',
+        isolation: 'isolate' // 创建新的层叠上下文，防止影响其他图层
+      }}>
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block',
+            imageRendering: 'auto',
+            objectFit: 'contain'
+          }}
+        />
+        <div style={{
+          position: 'absolute',
+          top: '0.5rem',
+          left: '0.5rem',
+          background: 'rgba(0, 0, 0, 0.7)',
+          color: '#00f5ff',
+          padding: '0.25rem 0.5rem',
+          borderRadius: '0.25rem',
+          fontSize: '0.7rem',
+          fontWeight: '600'
+        }}>
+          🎥 手势追踪
+        </div>
+      </div>
+
       {/* Three.js Container */}
-      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2, pointerEvents: 'none' }} />
+      <div ref={containerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10, pointerEvents: 'none' }} />
 
       {/* Main UI Container */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
         {/* Header / Status */}
         <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', pointerEvents: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Back Home Button */}
-          <Link
-            to="/"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1.5rem',
-              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(0, 245, 255, 0.3)',
-              borderRadius: '3rem',
-              color: '#00f5ff',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0, 245, 255, 0.2)',
+        {/* Back Home Button */}
+        <Link
+          to="/"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '0.75rem 1.5rem',
+            background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(0, 245, 255, 0.3)',
+            borderRadius: '3rem',
+            color: '#00f5ff',
+            textDecoration: 'none',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 15px rgba(0, 245, 255, 0.2)',
               animation: 'borderGlow 3s infinite ease-in-out',
               width: 'fit-content'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 245, 255, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 245, 255, 0.2)';
-            }}
-          >
-            <Home size={20} />
-            {t('home.backHome')}
-          </Link>
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 245, 255, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%)';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 245, 255, 0.2)';
+          }}
+        >
+          <Home size={20} />
+          {t('home.backHome')}
+        </Link>
           
           <div style={{
             display: 'flex',
@@ -728,7 +1209,7 @@ const ThreeJSParticles: React.FC = () => {
             position: 'fixed',
             top: '1.5rem',
             right: '1.5rem',
-            width: '32rem',
+            width: '22.4rem',
             maxHeight: 'calc(100vh - 3rem)',
             overflowY: 'auto',
             background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%)',
@@ -760,6 +1241,8 @@ const ThreeJSParticles: React.FC = () => {
           }}>
             ⚡ {t('particles.controls')}
           </h2>
+          
+
 
           {/* Shape Selection - Redesigned */}
           <div style={{ marginBottom: '1.5rem' }}>

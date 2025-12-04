@@ -51,8 +51,8 @@ const ThreeJSParticles: React.FC = () => {
     scene.fog = new THREE.FogExp2(0x000000, 0.015);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = CAMERA_Z_BASE;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setClearColor(0x000000, 0); // 完全透明的背景
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setClearColor(0x000000, 1); // 黑色宇宙背景
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
@@ -392,7 +392,7 @@ const ThreeJSParticles: React.FC = () => {
     <div style={{
       margin: 0,
       overflow: 'hidden',
-      background: 'radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%)',
+      background: '#000000',
       fontFamily: "'Inter', sans-serif",
       position: 'relative'
     }}>

@@ -7,6 +7,7 @@ import FortuneApp from './fortune-sticks/FortuneApp';
 import CoupleGameApp from './couple-game/CoupleGameApp';
 import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
 import WeatherApp from './nanoworld-weather/WeatherApp';
+import ThreeJSParticles from './components/ThreeJSParticles';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
           <Route path="/couple" element={<CoupleGameApp />} />
           <Route path="/doraemon" element={<DoraemonMonitorApp />} />
           <Route path="/weather" element={<WeatherApp />} />
+          <Route path="/particles" element={<ThreeJSParticles />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

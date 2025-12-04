@@ -27,6 +27,11 @@
       "subtitle": "Miniature Diorama • Weather Explorer",
       "description": "Explore city weather through beautiful miniature dioramas"
     },
+    "particles": {
+      "title": "Particle Flow",
+      "subtitle": "3D Particle System • Hand Gesture Control",
+      "description": "Interactive 3D particles controlled by hand gestures with beautiful shapes"
+    },
     "backHome": "Back Home"
   },
   "camera": {

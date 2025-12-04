@@ -73,7 +73,7 @@ const ThreeJSParticles: React.FC = () => {
       size: PARTICLE_SIZE,
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -324,9 +324,9 @@ const ThreeJSParticles: React.FC = () => {
         tx += Math.sin(time + i) * 0.05;
         ty += Math.cos(time + i * 0.5) * 0.05;
 
-        currentPositions[ix] += (tx - currentPositions[ix]) * 0.08;
-        currentPositions[iy] += (ty - currentPositions[iy]) * 0.08;
-        currentPositions[iz] += (tz - currentPositions[iz]) * 0.08;
+        currentPositions[ix] += (tx - currentPositions[ix]) * 0.12;
+        currentPositions[iy] += (ty - currentPositions[iy]) * 0.12;
+        currentPositions[iz] += (tz - currentPositions[iz]) * 0.12;
       }
       posAttribute.needsUpdate = true;
 
@@ -395,21 +395,22 @@ const ThreeJSParticles: React.FC = () => {
       fontFamily: "'Inter', sans-serif",
       position: 'relative'
     }}>
-      {/* Animated Stars Background */}
+      {/* Animated Stars Background - Optimized */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
-        {[...Array(100)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
             style={{
               position: 'absolute',
-              width: Math.random() * 3 + 'px',
-              height: Math.random() * 3 + 'px',
+              width: Math.random() * 2 + 1 + 'px',
+              height: Math.random() * 2 + 1 + 'px',
               backgroundColor: 'white',
               borderRadius: '50%',
               top: Math.random() * 100 + '%',
               left: Math.random() * 100 + '%',
-              opacity: Math.random() * 0.7 + 0.3,
-              animation: `twinkle ${Math.random() * 3 + 2}s infinite ease-in-out`,
+              opacity: Math.random() * 0.5 + 0.3,
+              animation: `twinkle ${Math.random() * 2 + 3}s infinite ease-in-out`,
+              willChange: 'opacity',
             }}
           />
         ))}

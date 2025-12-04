@@ -114,11 +114,32 @@ const ThreeJSParticles: React.FC = () => {
     // Shape Generators
     const Shapes: any = {
       heart: (i: number) => {
-        const t = Math.random() * Math.PI * 2;
-        const x = 16 * Math.pow(Math.sin(t), 3);
-        const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-        const z = (Math.random() - 0.5) * 5;
-        return [x * 0.5, y * 0.5, z];
+        // 实心爱心设计：使用分层填充
+        const layer = Math.random();
+        if (layer < 0.3) {
+          // 外层轮廓（30%的粒子）
+          const t = Math.random() * Math.PI * 2;
+          const x = 16 * Math.pow(Math.sin(t), 3);
+          const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+          const z = (Math.random() - 0.5) * 2;
+          return [x * 0.5, y * 0.5, z];
+        } else if (layer < 0.6) {
+          // 中层填充（30%的粒子）
+          const t = Math.random() * Math.PI * 2;
+          const scale = 0.6 + Math.random() * 0.2; // 0.6-0.8倍缩放
+          const x = 16 * Math.pow(Math.sin(t), 3) * scale;
+          const y = (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * scale;
+          const z = (Math.random() - 0.5) * 2;
+          return [x * 0.5, y * 0.5, z];
+        } else {
+          // 内层核心（40%的粒子）- 实心填充
+          const t = Math.random() * Math.PI * 2;
+          const scale = 0.3 + Math.random() * 0.3; // 0.3-0.6倍缩放，形成实心核心
+          const x = 16 * Math.pow(Math.sin(t), 3) * scale;
+          const y = (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * scale;
+          const z = (Math.random() - 0.5) * 1.5;
+          return [x * 0.5, y * 0.5, z];
+        }
       },
       flower: (i: number) => {
         const theta = Math.random() * Math.PI * 2;
@@ -185,17 +206,19 @@ const ThreeJSParticles: React.FC = () => {
       },
       christmasTree: (i: number) => {
         const section = Math.random();
+        // 调整y坐标偏移，让树居中显示（树高约16，中心在y=6）
+        const centerY = 6;
         if (section < 0.05) {
           const starAngle = Math.random() * Math.PI * 2;
           const starDist = Math.random() * 1.5;
           return [
             Math.cos(starAngle) * starDist,
-            14 + Math.sin(starAngle * 5) * 0.5,
+            centerY + 8 + Math.sin(starAngle * 5) * 0.5, // 顶部星星
             Math.sin(starAngle) * starDist
           ];
         } else if (section < 0.80) {
           const layerIndex = Math.floor(Math.random() * 5);
-          const layerHeight = 12 - layerIndex * 2.5;
+          const layerHeight = centerY + 6 - layerIndex * 2.5; // 从中心向上偏移
           const maxRadius = 1.5 + layerIndex * 1.2;
           const angle = Math.random() * Math.PI * 2;
           const radiusRatio = Math.pow(Math.random(), 0.7);
@@ -209,7 +232,7 @@ const ThreeJSParticles: React.FC = () => {
         } else if (section < 0.95) {
           const angle = Math.random() * Math.PI * 2;
           const radius = Math.random() * 1.2;
-          const height = -2 + Math.random() * 3;
+          const height = centerY - 8 + Math.random() * 3; // 树干在底部
           return [
             Math.cos(angle) * radius,
             height,
@@ -217,7 +240,7 @@ const ThreeJSParticles: React.FC = () => {
           ];
         } else {
           const ornamentLayer = Math.floor(Math.random() * 4) + 1;
-          const ornamentHeight = 11 - ornamentLayer * 2.5;
+          const ornamentHeight = centerY + 5 - ornamentLayer * 2.5;
           const ornamentRadius = 1.8 + ornamentLayer * 1.0;
           const angle = (Math.random() * Math.PI * 2);
           return [

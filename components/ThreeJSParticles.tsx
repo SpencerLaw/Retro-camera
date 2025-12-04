@@ -206,19 +206,18 @@ const ThreeJSParticles: React.FC = () => {
       },
       christmasTree: (i: number) => {
         const section = Math.random();
-        // 调整y坐标偏移，让树居中显示（树高约16，中心在y=6）
-        const centerY = 6;
+        // 调整y坐标，让树以y=0为中心显示（树高约16，从y=-8到y=8）
         if (section < 0.05) {
           const starAngle = Math.random() * Math.PI * 2;
           const starDist = Math.random() * 1.5;
           return [
             Math.cos(starAngle) * starDist,
-            centerY + 8 + Math.sin(starAngle * 5) * 0.5, // 顶部星星
+            8 + Math.sin(starAngle * 5) * 0.5, // 顶部星星在y=8
             Math.sin(starAngle) * starDist
           ];
         } else if (section < 0.80) {
           const layerIndex = Math.floor(Math.random() * 5);
-          const layerHeight = centerY + 6 - layerIndex * 2.5; // 从中心向上偏移
+          const layerHeight = 6 - layerIndex * 2.5; // 从y=6向下递减到y=-4
           const maxRadius = 1.5 + layerIndex * 1.2;
           const angle = Math.random() * Math.PI * 2;
           const radiusRatio = Math.pow(Math.random(), 0.7);
@@ -232,7 +231,7 @@ const ThreeJSParticles: React.FC = () => {
         } else if (section < 0.95) {
           const angle = Math.random() * Math.PI * 2;
           const radius = Math.random() * 1.2;
-          const height = centerY - 8 + Math.random() * 3; // 树干在底部
+          const height = -8 + Math.random() * 3; // 树干在底部 y=-8到y=-5
           return [
             Math.cos(angle) * radius,
             height,
@@ -240,7 +239,7 @@ const ThreeJSParticles: React.FC = () => {
           ];
         } else {
           const ornamentLayer = Math.floor(Math.random() * 4) + 1;
-          const ornamentHeight = centerY + 5 - ornamentLayer * 2.5;
+          const ornamentHeight = 5 - ornamentLayer * 2.5; // 装饰球从y=5向下
           const ornamentRadius = 1.8 + ornamentLayer * 1.0;
           const angle = (Math.random() * Math.PI * 2);
           return [

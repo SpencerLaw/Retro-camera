@@ -386,7 +386,7 @@
             <div class="details-grid">
               <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); margin-bottom:10px;">
                 <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
-                <span>首次激活: ${new Date(item.generatedDate).toLocaleString()}</span>
+                <span>首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
               </div>
               
               <table class="device-table">

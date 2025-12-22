@@ -152,9 +152,9 @@ export default async function handler(
   }
 
   try {
-    const { licenseCode } = req.body;
+    const { licenseCode, deviceId } = req.body;
 
-    console.log('收到验证请求 - licenseCode:', licenseCode);
+    console.log('收到验证请求 - licenseCode:', licenseCode, 'deviceId:', deviceId);
 
     // 验证参数
     if (!licenseCode) {

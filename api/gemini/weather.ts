@@ -139,7 +139,12 @@ export default async function handler(
       try {
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
-          contents: prompt,
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            }
+          ],
           config: {
             responseMimeType: "application/json",
             responseSchema: WEATHER_RESPONSE_SCHEMA,
@@ -177,21 +182,50 @@ export default async function handler(
       );
 
       const extractImage = (response: any) => {
-        for (const part of response.candidates?.[0]?.content?.parts || []) {
-          if (part.inlineData) {
-            return `data:image/png;base64,${part.inlineData.data}`;
+        try {
+          // Check if response has candidates
+          if (!response.candidates || response.candidates.length === 0) {
+            console.error("No candidates in response");
+            return null;
           }
+
+          const candidate = response.candidates[0];
+          if (!candidate.content || !candidate.content.parts) {
+            console.error("No content parts in candidate");
+            return null;
+          }
+
+          // Iterate through all parts to find image data
+          for (const part of candidate.content.parts) {
+            if (part.inlineData && part.inlineData.data) {
+              const base64Data = part.inlineData.data;
+              // Ensure data URI format
+              if (base64Data.startsWith('data:')) {
+                return base64Data;
+              }
+              return `data:image/png;base64,${base64Data}`;
+            }
+          }
+
+          console.error("No inlineData found in any part");
+          return null;
+        } catch (err) {
+          console.error("Error extracting image:", err);
+          return null;
         }
-        return null;
       };
 
       try {
-        // Attempt 1: High quality model
+        // Attempt 1: Use gemini-3-pro-image-preview for high quality 4K images
+        console.log("Generating image with prompt:", finalPrompt.substring(0, 100) + "...");
         const response = await ai.models.generateContent({
           model: "gemini-3-pro-image-preview",
-          contents: {
-            parts: [{ text: finalPrompt }]
-          },
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: finalPrompt }]
+            }
+          ],
           config: {
             responseModalities: [Modality.IMAGE],
             imageConfig: {
@@ -201,40 +235,73 @@ export default async function handler(
           }
         });
 
+        console.log("Response received, extracting image...");
         const img = extractImage(response);
         if (img) {
+          console.log("Image generated successfully with Pro model, length:", img.length);
           return res.status(200).json({ imageUrl: img });
         }
+
+        // Log detailed response for debugging
+        console.error("No image in Pro response. Response structure:", JSON.stringify({
+          candidates: response.candidates?.length,
+          firstCandidate: response.candidates?.[0] ? {
+            content: response.candidates[0].content ? {
+              parts: response.candidates[0].content.parts?.length,
+              partTypes: response.candidates[0].content.parts?.map((p: any) => Object.keys(p))
+            } : null
+          } : null
+        }, null, 2));
+
         throw new Error("No image data in Pro response");
 
-      } catch (error) {
-        console.warn("Pro image generation failed, falling back to Flash Image model:", error);
+      } catch (error: any) {
+        console.warn("Pro image generation failed, falling back to Flash Image model:", {
+          message: error.message,
+          status: error.status,
+          code: error.code
+        });
 
         try {
-          // Attempt 2: Standard model
+          // Attempt 2: Fallback to gemini-2.5-flash-image
+          console.log("Attempting with Flash Image model...");
           const response = await ai.models.generateContent({
             model: "gemini-2.5-flash-image",
-            contents: {
+          contents: [
+            {
+              role: "user",
               parts: [{ text: finalPrompt }]
-            },
+            }
+          ],
             config: {
               responseModalities: [Modality.IMAGE],
-              imageConfig: {
-                aspectRatio: "1:1"
-              }
             }
           });
 
+          console.log("Flash response received, extracting image...");
           const img = extractImage(response);
           if (img) {
+            console.log("Image generated successfully with Flash model, length:", img.length);
             return res.status(200).json({ imageUrl: img });
           }
 
           throw new Error("No image data in Flash response");
 
-        } catch (fallbackError) {
-          console.error("CRITICAL: All AI image generation failed. Using static fallback.", fallbackError);
-          return res.status(200).json({ imageUrl: getFallbackImage() });
+        } catch (fallbackError: any) {
+          console.error("CRITICAL: All AI image generation failed:", {
+            proError: error.message,
+            flashError: fallbackError.message,
+            flashStatus: fallbackError.status,
+            flashCode: fallbackError.code
+          });
+          
+          // Return fallback image instead of throwing
+          console.warn("Using static fallback image due to all models failing");
+          return res.status(200).json({ 
+            imageUrl: getFallbackImage(),
+            error: "generation_failed",
+            message: "All image generation models failed, using fallback"
+          });
         }
       }
     }

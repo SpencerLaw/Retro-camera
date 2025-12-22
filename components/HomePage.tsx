@@ -221,48 +221,41 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
-          {/* Weather Card - Cute Sky Blue */}
-          <Link
-            to="/weather"
-            className="group relative bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(128,222,234,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(128,222,234,0.6)] hover:rotate-2 block"
+          {/* Weather Card - Disabled/Gray */}
+          <div
+            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed opacity-90 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
           >
-            {/* Cute cloud decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>☁️</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#80DEEA] to-[#B2EBF2] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
               <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(128,222,234,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#E0F7FA]"
+                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <Cloud size={72} className="text-[#4DD0E1] drop-shadow-lg" />
+                <Cloud size={72} className="text-[#999999]" />
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#00838F] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.weather.title')}</h2>
-              <p className="text-base text-[#00695C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+              <h2 className="font-bold text-4xl text-[#666666] mb-3">{t('home.weather.title')}</h2>
+              <p className="text-base text-[#777777] mb-4 font-semibold">
                 {t('home.weather.subtitle')}
               </p>
-              <p className="text-sm text-[#004D40] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+              <p className="text-sm text-[#888888] leading-relaxed font-medium">
                 {t('home.weather.description')}
               </p>
 
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#4DD0E1] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(128,222,234,0.4)] border-[3px] border-[#E0F7FA] hover:bg-gradient-to-r hover:from-[#E0F7FA] hover:to-white">
-                  Enter → 🌤️
+              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
+                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
+                  Coming Soon 🔒
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
 
           {/* Couple Game Card - Cute Purple */}
           <Link

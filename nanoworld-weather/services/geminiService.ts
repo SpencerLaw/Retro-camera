@@ -63,14 +63,31 @@ export const generateDioramaImage = async (weatherData: WeatherData, style: Weat
     });
 
     if (!response.ok) {
-      throw new Error('Failed to generate image');
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Image generation failed:", {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      });
+      throw new Error(errorData.message || `Failed to generate image: ${response.statusText}`);
     }
 
     const result = await response.json();
+    
+    // Check if there's an error but still got a fallback image
+    if (result.error && result.error === 'generation_failed') {
+      console.warn("Image generation failed, using fallback:", result.message);
+    }
+    
+    if (!result.imageUrl) {
+      throw new Error("No image URL in response");
+    }
+    
     return result.imageUrl;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Image Generation Error:", error);
     // Return fallback image on error
+    console.warn("Using fallback image due to error");
     return getFallbackImage();
   }
 };

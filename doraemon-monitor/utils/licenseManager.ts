@@ -103,6 +103,7 @@ export const verifyLicenseCode = async (code: string): Promise<{
   };
 }> => {
   try {
+    const deviceId = getDeviceId();
     const response = await fetch('/api/verify-license', {
       method: 'POST',
       headers: {
@@ -110,6 +111,7 @@ export const verifyLicenseCode = async (code: string): Promise<{
       },
       body: JSON.stringify({
         licenseCode: code,
+        deviceId: deviceId,
       }),
     });
 

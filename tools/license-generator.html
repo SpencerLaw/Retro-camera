@@ -3,437 +3,491 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>授权码管理后台 - 分贝检测仪</title>
+  <title>超级授权管理后台</title>
   <style>
     :root {
-      --primary: #667eea;
-      --primary-dark: #5a6fd6;
-      --secondary: #764ba2;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #334155;
+      --text-light: #94a3b8;
+      --border: #e2e8f0;
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
-      --bg: #f3f4f6;
-      --card-bg: #ffffff;
-      --text: #1f2937;
-      --text-light: #6b7280;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
       padding: 20px;
     }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1000px; margin: 0 auto; }
 
-    /* Header */
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    h1 { font-size: 28px; color: var(--text); margin-bottom: 8px; }
-    .subtitle { color: var(--text-light); font-size: 14px; }
-
-    /* Auth Section */
-    .auth-box {
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
+    /* Header & Auth */
+    .header {
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
       align-items: center;
+      margin-bottom: 25px;
+      background: var(--surface);
+      padding: 15px 25px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-
-    input {
-      padding: 10px 15px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      transition: all 0.2s;
-    }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    .header h1 { font-size: 20px; color: var(--text); }
     
-    .input-full { width: 100%; }
-
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
+    .auth-input-group { display: flex; gap: 10px; }
+    .auth-input {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      font-size: 14px;
+      width: 200px;
+    }
+    .btn-primary {
       background: var(--primary);
       color: white;
-    }
-    button:hover { filter: brightness(110%); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-outline { background: white; border: 1px solid var(--primary); color: var(--primary); }
-    .btn-outline:hover { background: #f0fdfa; }
-
-    /* Main Grid */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    @media (min-width: 768px) {
-      .grid { grid-template-columns: 1fr 1.5fr; }
-    }
-
-    /* Cards */
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* List */
-    .code-list {
-      max-height: 500px;
-      overflow-y: auto;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-    }
-
-    .code-item {
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
       transition: background 0.2s;
     }
-    .code-item:last-child { border-bottom: none; }
-    .code-item:hover { background: #f9fafb; }
-    .code-item.active { background: #eff6ff; border-left: 3px solid var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary {
+      background: white;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
 
-    .code-text { font-family: 'Courier New', monospace; font-weight: 600; font-size: 14px; }
-
-    /* Detail View */
-    .detail-placeholder {
-      text-align: center;
+    /* Tabs */
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
       color: var(--text-light);
-      padding: 40px;
+      font-weight: 500;
+    }
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
     }
 
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
+    /* Content Area */
+    .view-section { display: none; }
+    .view-section.active { display: block; }
 
-    .info-item label { font-size: 12px; color: var(--text-light); display: block; margin-bottom: 4px; }
-    .info-item div { font-weight: 600; font-size: 14px; }
-
-    .progress-bar {
-      height: 8px;
-      background: #e5e7eb;
-      border-radius: 4px;
+    /* Monitor List */
+    .monitor-list {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       overflow: hidden;
-      margin-top: 5px;
     }
-    .progress-fill {
-      height: 100%;
-      background: var(--success);
-      transition: width 0.3s ease;
+    
+    .monitor-header {
+      display: grid;
+      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
+      padding: 15px 20px;
+      background: #f1f5f9;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+      border-bottom: 1px solid var(--border);
     }
-    .progress-fill.warning { background: var(--warning); }
-    .progress-fill.danger { background: var(--danger); }
 
+    .monitor-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .monitor-item:last-child { border-bottom: none; }
+
+    .item-summary {
+      display: grid;
+      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
+      padding: 15px 20px;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .item-summary:hover { background: #f8fafc; }
+
+    .toggle-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+    .monitor-item.expanded .toggle-btn { transform: rotate(90deg); color: var(--primary); }
+
+    .code-display { font-family: monospace; font-weight: 600; color: var(--text); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-good { background: #dcfce7; color: #166534; }
+    .status-warn { background: #fef3c7; color: #92400e; }
+    .status-full { background: #fee2e2; color: #991b1b; }
+
+    /* Item Details (Expanded) */
+    .item-details {
+      display: none;
+      padding: 0;
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+    }
+    .monitor-item.expanded .item-details { display: block; }
+
+    .details-grid {
+      padding: 20px;
+      display: grid;
+      gap: 20px;
+    }
+    
     .device-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
-      margin-top: 10px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
     }
     .device-table th, .device-table td {
-      padding: 8px;
+      padding: 8px 12px;
       text-align: left;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--border);
     }
-    .device-table th { color: var(--text-light); font-weight: 500; }
+    .device-table th { background: #f1f5f9; color: var(--text-light); font-weight: 500; }
     
-    .badge {
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-weight: 600;
+    /* Generator Styles */
+    .gen-card {
+      background: var(--surface);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      text-align: center;
     }
-    .badge-blue { background: #dbeafe; color: #1e40af; }
-    .badge-green { background: #d1fae5; color: #065f46; }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #1f2937;
-      color: white;
-      padding: 10px 20px;
+    .gen-list {
+      margin-top: 20px;
+      text-align: left;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
     }
-    .toast.show { opacity: 1; }
+    .gen-item {
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-family: monospace;
+    }
+
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🔐 授权码控制台</h1>
-      <p class="subtitle">生成授权码 · 监控使用情况 · 设备管理</p>
-    </header>
 
-    <!-- 登录区域 -->
-    <div class="auth-box">
-      <input type="password" id="adminKey" class="input-full" placeholder="请输入管理员密码以启用查询功能..." value="spencer">
-      <span style="font-size: 12px; color: #10b981;">✓ 已预填默认密码</span>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>🚀 Retro Camera Admin</h1>
+      <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">未连接</span>
     </div>
+    <div class="auth-input-group" id="authSection">
+      <input type="password" id="adminKey" class="auth-input" placeholder="输入管理密码" value="spencer">
+      <button onclick="login()" class="btn-primary">登录 & 加载</button>
+    </div>
+    <div id="loggedInTools" style="display: none;">
+      <button onclick="refreshData()" class="btn-secondary">🔄 刷新数据</button>
+    </div>
+  </div>
 
-    <div class="grid">
-      <!-- 左侧：生成列表 -->
-      <div class="card">
-        <div class="card-title">
-          <span>📝 授权码生成</span>
-          <div style="display: flex; gap: 5px;">
-            <input type="number" id="genCount" value="10" min="1" max="100" style="width: 60px;">
-            <button onclick="generateCodes()" style="padding: 5px 10px; font-size: 12px;">生成</button>
-          </div>
-        </div>
-        
-        <div class="code-list" id="codeList">
-          <p style="padding: 20px; text-align: center; color: #999; font-size: 12px;">点击生成按钮开始</p>
-        </div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
+    <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
+  </div>
 
-        <div style="margin-top: 15px; display: flex; gap: 10px;">
-          <button class="btn-outline" onclick="exportEnv()" style="flex: 1; font-size: 12px;">导出 ENV</button>
-          <button class="btn-outline" onclick="copyAll()" style="flex: 1; font-size: 12px;">复制全部</button>
-        </div>
+  <!-- SECTION 1: MONITOR -->
+  <div id="monitorSection" class="view-section active">
+    <div class="monitor-list">
+      <div class="monitor-header">
+        <div></div>
+        <div>授权码</div>
+        <div>设备数</div>
+        <div>最后活跃</div>
+        <div>IP归属</div>
       </div>
-
-      <!-- 右侧：详情面板 -->
-      <div class="card">
-        <div class="card-title">
-          <span>📊 详细监控信息</span>
-          <div style="display: flex; gap: 5px;">
-            <input type="text" id="queryInput" placeholder="输入授权码查询..." style="width: 180px;">
-            <button onclick="manualQuery()" style="padding: 5px 10px; font-size: 12px;">查询</button>
-          </div>
-        </div>
-
-        <div id="detailView">
-          <div class="detail-placeholder">
-            <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
-            <p>点击左侧授权码<br>或在上方输入查询</p>
-          </div>
+      <div id="monitorContent">
+        <div style="padding: 40px; text-align: center; color: var(--text-light);">
+          请登录以加载数据...
         </div>
       </div>
     </div>
   </div>
 
-  <div id="toast" class="toast">复制成功</div>
-
-  <script>
-    let generatedCodes = [];
-    const API_URL = '/api/verify-license'; // 确保这个指向你的 Vercel API 地址
-
-    // === 核心功能：生成 ===
-    function generateCodes() {
-      const count = document.getElementById('genCount').value;
-      const newCodes = [];
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  <!-- SECTION 2: GENERATOR -->
+  <div id="generateSection" class="view-section">
+    <div class="gen-card">
+      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
+      <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+        <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+        <button onclick="generateCodes()" class="btn-primary">生成</button>
+      </div>
       
-      const now = new Date();
-      const datePart = now.getFullYear() +
-                      String(now.getMonth() + 1).padStart(2, '0') +
-                      String(now.getDate()).padStart(2, '0');
+      <div class="gen-list" id="genList"></div>
+      
+      <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+        <button onclick="exportEnv()" class="btn-secondary">📥 导出 ENV 文件</button>
+        <button onclick="copyAllGenerated()" class="btn-secondary">📋 复制全部</button>
+      </div>
+    </div>
+  </div>
 
-      for (let i = 0; i < count; i++) {
-        let randomPart = '';
-        for (let j = 0; j < 8; j++) {
-          randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        const code = (datePart + randomPart).match(/.{1,4}/g).join('-');
-        newCodes.push(code);
+</div>
+
+<script>
+  // 配置
+  const API_URL = '/api/verify-license'; 
+  let currentData = [];
+  let generatedCodes = [];
+
+  // === 登录 & 加载数据 ===
+  async function login() {
+    const key = document.getElementById('adminKey').value;
+    if (!key) return alert('请输入密码');
+
+    const btn = document.querySelector('.btn-primary');
+    btn.textContent = '加载中...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'list_all',
+          adminKey: key
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.success) {
+        throw new Error(json.message);
       }
 
-      generatedCodes = [...newCodes, ...generatedCodes]; // 新的在前面
-      renderList();
+      // 登录成功
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('loggedInTools').style.display = 'block';
+      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+      document.getElementById('connectionStatus').style.color = 'var(--success)';
+
+      currentData = json.data;
+      renderMonitorList();
+
+    } catch (err) {
+      alert('加载失败: ' + err.message);
+      document.getElementById('connectionStatus').textContent = `🔴 连接失败`;
+      document.getElementById('connectionStatus').style.color = 'var(--danger)';
+    } finally {
+      btn.textContent = '登录 & 加载';
+      btn.disabled = false;
+    }
+  }
+
+  function refreshData() {
+    login();
+  }
+
+  // === 渲染监控列表 ===
+  function renderMonitorList() {
+    const container = document.getElementById('monitorContent');
+    
+    if (currentData.length === 0) {
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
+      return;
     }
 
-    function renderList() {
-      const list = document.getElementById('codeList');
-      list.innerHTML = generatedCodes.map(code => `
-        <div class="code-item" onclick="queryCode('${code}', this)">
-          <span class="code-text">${code}</span>
-          <button style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); copy('${code}')">复制</button>
-        </div>
-      `).join('');
-    }
-
-    // === 核心功能：查询 ===
-    async function queryCode(code, element) {
-      // 高亮选中状态
-      document.querySelectorAll('.code-item').forEach(el => el.classList.remove('active'));
-      if (element) element.classList.add('active');
-
-      const adminKey = document.getElementById('adminKey').value;
-      const detailView = document.getElementById('detailView');
-
-      detailView.innerHTML = '<div class="detail-placeholder">⏳正在查询数据库...</div>';
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'query',
-            licenseCode: code,
-            adminKey: adminKey
-          })
-        });
-
-        const json = await res.json();
-
-        if (!json.success) {
-          detailView.innerHTML = `
-            <div class="detail-placeholder" style="color: var(--danger)">
-              <p>❌ 查询失败</p>
-              <p style="font-size: 12px; margin-top: 5px;">${json.message}</p>
-              ${json.message.includes('未激活') ? '<p style="font-size: 12px; color: #999; margin-top: 10px;">该授权码尚未在任何设备使用</p>' : ''}
-            </div>
-          `;
-          return;
-        }
-
-        renderDetail(json.data);
-
-      } catch (err) {
-        detailView.innerHTML = `<div class="detail-placeholder" style="color: var(--danger)">网络请求错误<br>${err.message}</div>`;
+    container.innerHTML = currentData.map((item, index) => {
+      // 计算状态颜色
+      const usage = item.totalDevices;
+      const max = item.maxDevices || 10;
+      let badgeClass = 'status-good';
+      let statusText = '正常';
+      
+      if (usage >= max) {
+        badgeClass = 'status-full';
+        statusText = '已满';
+      } else if (usage > max * 0.8) {
+        badgeClass = 'status-warn';
+        statusText = '即将满';
       }
-    }
 
-    function manualQuery() {
-      const code = document.getElementById('queryInput').value.trim();
-      if(code) queryCode(code);
-    }
+      // 获取最新IP
+      const lastDevice = item.devices.sort((a,b) => new Date(b.lastSeen) - new Date(a.lastSeen))[0];
+      const lastIp = lastDevice ? lastDevice.ip : 'N/A';
 
-    // === 渲染详情 ===
-    function renderDetail(data) {
-      const usagePercent = (data.totalDevices / data.maxDevices) * 100;
-      let progressColor = 'success';
-      if (usagePercent > 50) progressColor = 'warning';
-      if (usagePercent >= 90) progressColor = 'danger';
-
-      const devicesHtml = data.devices.map((dev, i) => `
+      // 构建设备详情行
+      const deviceRows = item.devices.map((dev, i) => `
         <tr>
           <td>${i + 1}</td>
-          <td><span class="badge badge-blue">${dev.ua.split(' ')[0]}</span></td>
+          <td>${dev.ua.split(' ')[0]} <span style="color:#94a3b8; font-size:10px;">(${dev.ua.includes('iPhone') ? '📱' : '💻'})</span></td>
           <td>${dev.ip}</td>
+          <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
           <td>${new Date(dev.lastSeen).toLocaleString()}</td>
         </tr>
       `).join('');
 
-      document.getElementById('detailView').innerHTML = `
-        <div>
-          <h2 style="font-size: 20px; color: var(--primary); margin-bottom: 5px;">${data.code}</h2>
-          <span class="badge badge-green">有效期至: ${new Date(data.expiryDate).toLocaleDateString()}</span>
+      return `
+        <div class="monitor-item" id="item-${index}">
+          <div class="item-summary" onclick="toggleItem(${index})">
+            <div class="toggle-btn">▶</div>
+            <div class="code-display">${item.code}</div>
+            <div>
+              <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-light);">
+              ${timeAgo(new Date(item.lastUsedTime))}
+            </div>
+             <div style="font-size: 11px; color: var(--text-light); font-family: monospace;">
+              ${lastIp}
+            </div>
+          </div>
           
-          <div style="margin: 20px 0;">
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
-              <span>设备使用情况</span>
-              <span>${data.totalDevices} / ${data.maxDevices}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill ${progressColor}" style="width: ${usagePercent}%"></div>
-            </div>
-          </div>
-
-          <div class="info-grid">
-            <div class="info-item">
-              <label>首次激活</label>
-              <div>${new Date(data.generatedDate).toLocaleString()}</div>
-            </div>
-            <div class="info-item">
-              <label>最近活动</label>
-              <div>${new Date(data.lastUsedTime).toLocaleString()}</div>
-            </div>
-          </div>
-
-          <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
-            <h3 style="font-size: 14px; margin-bottom: 10px;">设备列表详情</h3>
-            <div style="max-height: 250px; overflow-y: auto;">
+          <div class="item-details">
+            <div class="details-grid">
+              <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); margin-bottom:10px;">
+                <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
+                <span>首次激活: ${new Date(item.generatedDate).toLocaleString()}</span>
+              </div>
+              
               <table class="device-table">
                 <thead>
                   <tr>
                     <th width="30">#</th>
-                    <th>设备</th>
+                    <th>设备型号</th>
                     <th>IP地址</th>
+                    <th>首次绑定</th>
                     <th>最后在线</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${devicesHtml}
+                  ${deviceRows}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       `;
+    }).join('');
+  }
+
+  function toggleItem(index) {
+    const el = document.getElementById(`item-${index}`);
+    const isExpanded = el.classList.contains('expanded');
+    
+    // 关闭所有其他的 (可选，如果想保持手风琴效果)
+    // document.querySelectorAll('.monitor-item').forEach(e => e.classList.remove('expanded'));
+
+    if (!isExpanded) {
+      el.classList.add('expanded');
+    } else {
+      el.classList.remove('expanded');
+    }
+  }
+
+  // === 生成器功能 ===
+  function generateCodes() {
+    const count = document.getElementById('genCount').value;
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const now = new Date();
+    const datePart = now.getFullYear() + 
+                    String(now.getMonth() + 1).padStart(2, '0') + 
+                    String(now.getDate()).padStart(2, '0');
+    
+    const newBatch = [];
+    for (let i = 0; i < count; i++) {
+      let random = '';
+      for (let j = 0; j < 8; j++) {
+        random += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      newBatch.push((datePart + random).match(/.{1,4}/g).join('-'));
     }
 
-    // === 辅助工具 ===
-    function copy(text) {
-      navigator.clipboard.writeText(text);
-      showToast(`已复制: ${text}`);
-    }
+    generatedCodes = [...newBatch, ...generatedCodes];
+    
+    const listEl = document.getElementById('genList');
+    listEl.innerHTML = generatedCodes.map(c => `
+      <div class="gen-item">
+        <span>${c}</span>
+        <span style="color:var(--text-light); font-size:12px;">未激活</span>
+      </div>
+    `).join('');
+  }
 
-    function copyAll() {
-      if(!generatedCodes.length) return;
-      navigator.clipboard.writeText(generatedCodes.join('\n'));
-      showToast(`已复制 ${generatedCodes.length} 个授权码`);
-    }
+  function exportEnv() {
+    if(!generatedCodes.length) return alert('没有生成的代码');
+    const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], {type: 'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'LICENSE_CODES.env';
+    a.click();
+  }
+  
+  function copyAllGenerated() {
+    if(!generatedCodes.length) return;
+    navigator.clipboard.writeText(generatedCodes.join('\n'));
+    alert(`已复制 ${generatedCodes.length} 个授权码`);
+  }
 
-    function exportEnv() {
-      if(!generatedCodes.length) return;
-      const content = `LICENSE_CODES=${generatedCodes.join(',')}`;
-      const blob = new Blob([content], {type: 'text/plain'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'LICENSE_CODES.env';
-      a.click();
+  // === 工具函数 ===
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    
+    if (tabName === 'monitor') {
+      document.querySelector('.tab:nth-child(1)').classList.add('active');
+      document.getElementById('monitorSection').classList.add('active');
+    } else {
+      document.querySelector('.tab:nth-child(2)').classList.add('active');
+      document.getElementById('generateSection').classList.add('active');
     }
+  }
 
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2000);
-    }
-  </script>
+  function timeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return '刚刚';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}分钟前`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}小时前`;
+    return `${Math.floor(hours / 24)}天前`;
+  }
+</script>
+
 </body>
 </html>

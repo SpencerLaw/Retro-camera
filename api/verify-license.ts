@@ -2,14 +2,12 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv } from '@vercel/kv';
 
 /**
- * Vercel Serverless Function - 授权码验证API (带 Redis 监控版)
- * 
- * 授权规则：
- * - 每个授权码有效期1年
- * - 每个授权码最多绑定 10 个设备
- * - 记录首次激活时间、最后使用时间、设备信息、用户 IP
+ * Vercel Serverless Function - 授权码验证API (带 Redis 监控版 + 数据压缩)
  */
 
+// === 数据结构定义 ===
+
+// 完整版数据结构 (用于 API 返回)
 interface DeviceInfo {
   deviceId: string;
   firstSeen: string;
@@ -26,10 +24,30 @@ interface LicenseMetadata {
   maxDevices: number;
   generatedDate: string;
   expiryDate: string;
-  firstActivatedAt?: string; // 新增：首次激活时间
+  firstActivatedAt?: string;
   lastUsedTime: string;
   devices: DeviceInfo[];
 }
+
+// 压缩版数据结构 (用于 Redis 存储)
+interface CompressedDevice {
+  i: string; // deviceId
+  f: number; // firstSeen (timestamp)
+  l: number; // lastSeen (timestamp)
+  u: string; // ua
+  p: string; // ip
+  c?: string; // country
+  t?: string; // city (town)
+}
+
+interface CompressedMetadata {
+  m: number; // maxDevices
+  f: number; // firstActivatedAt (timestamp)
+  l: number; // lastUsedTime (timestamp)
+  d: CompressedDevice[]; // devices
+}
+
+// === 辅助工具 ===
 
 // 获取用户真实 IP
 function getClientIp(req: VercelRequest): string {
@@ -50,7 +68,7 @@ function getDeviceType(ua: string): string {
   return 'Unknown';
 }
 
-// 从授权码中提取生成日期（前8位：YYYYMMDD）
+// 从授权码中提取生成日期
 function extractDateFromCode(code: string): Date | null {
   try {
     const cleanCode = code.replace(/[-\s]/g, '');
@@ -65,7 +83,7 @@ function extractDateFromCode(code: string): Date | null {
   }
 }
 
-// 检查授权码是否在白名单中
+// 检查白名单
 function isCodeInWhitelist(code: string): boolean {
   const codes = process.env.LICENSE_CODES || '';
   const validCodes = codes.split(',')
@@ -73,6 +91,59 @@ function isCodeInWhitelist(code: string): boolean {
     .filter(c => c.length > 0);
   return validCodes.includes(code.toUpperCase());
 }
+
+// === 压缩与解压逻辑 ===
+
+function compressMetadata(full: LicenseMetadata): CompressedMetadata {
+  return {
+    m: full.maxDevices,
+    f: new Date(full.firstActivatedAt || full.generatedDate).getTime(),
+    l: new Date(full.lastUsedTime).getTime(),
+    d: full.devices.map(dev => ({
+      i: dev.deviceId,
+      f: new Date(dev.firstSeen).getTime(),
+      l: new Date(dev.lastSeen).getTime(),
+      u: dev.ua,
+      p: dev.ip,
+      c: dev.country,
+      t: dev.city
+    }))
+  };
+}
+
+function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, code: string): LicenseMetadata {
+  // 兼容性检查：如果已经是完整版（旧数据），直接返回
+  if ('devices' in compressed) {
+    return compressed as LicenseMetadata;
+  }
+
+  // 解压逻辑
+  const c = compressed as CompressedMetadata;
+  const genDate = extractDateFromCode(code) || new Date();
+  const expDate = new Date(genDate);
+  expDate.setFullYear(expDate.getFullYear() + 1);
+
+  return {
+    code: code,
+    totalDevices: c.d.length,
+    maxDevices: c.m,
+    generatedDate: genDate.toISOString(),
+    expiryDate: expDate.toISOString(),
+    firstActivatedAt: new Date(c.f).toISOString(),
+    lastUsedTime: new Date(c.l).toISOString(),
+    devices: c.d.map(dev => ({
+      deviceId: dev.i,
+      firstSeen: new Date(dev.f).toISOString(),
+      lastSeen: new Date(dev.l).toISOString(),
+      ua: dev.u,
+      ip: dev.p,
+      country: dev.c,
+      city: dev.t
+    }))
+  };
+}
+
+// === 主处理函数 ===
 
 export default async function handler(
   req: VercelRequest,
@@ -90,107 +161,90 @@ export default async function handler(
     const ip = getClientIp(req);
     const ua = req.headers['user-agent'] || 'unknown';
     
-    // 获取 Vercel 提供的地理位置信息
     const city = req.headers['x-vercel-ip-city'] as string | undefined;
     const country = req.headers['x-vercel-ip-country'] as string | undefined;
     const decodedCity = city ? decodeURIComponent(city) : undefined;
 
-    // === 管理员查询模式 ===
+    // === 管理员查询 ===
     if (action === 'query') {
-      if (adminKey !== 'spencer') {
-        return res.status(401).json({ success: false, message: '管理员密码错误' });
-      }
-
-      if (!licenseCode) {
-        return res.status(400).json({ success: false, message: '请输入要查询的授权码' });
-      }
+      if (adminKey !== 'spencer') return res.status(401).json({ success: false, message: '密码错误' });
+      if (!licenseCode) return res.status(400).json({ success: false, message: '请输入授权码' });
 
       const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
       const redisKey = `license:${cleanCode}`;
-      const metadata = await kv.get<LicenseMetadata>(redisKey);
+      const data = await kv.get<CompressedMetadata | LicenseMetadata>(redisKey);
 
-      if (!metadata) {
-        return res.status(404).json({ success: false, message: '该授权码尚未激活或不存在' });
-      }
+      if (!data) return res.status(404).json({ success: false, message: '未找到记录' });
 
+      // 解压后返回，保证前端兼容
       return res.status(200).json({
         success: true,
-        data: metadata
+        data: decompressMetadata(data, cleanCode)
       });
     }
 
-    // === 管理员获取所有列表模式 ===
+    // === 管理员列表 ===
     if (action === 'list_all') {
-      if (adminKey !== 'spencer') {
-        return res.status(401).json({ success: false, message: '管理员密码错误' });
-      }
+      if (adminKey !== 'spencer') return res.status(401).json({ success: false, message: '密码错误' });
 
-      try {
-        const keys = await kv.keys('license:*');
-        
-        if (keys.length === 0) {
-          return res.status(200).json({ success: true, data: [] });
-        }
+      const keys = await kv.keys('license:*');
+      if (keys.length === 0) return res.status(200).json({ success: true, data: [] });
 
-        const values = await Promise.all(keys.map(key => kv.get<LicenseMetadata>(key)));
+      const values = await Promise.all(keys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key)));
 
-        const list = values
-          .filter(v => v !== null)
-          .map(v => v!)
-          .sort((a, b) => new Date(b.lastUsedTime).getTime() - new Date(a.lastUsedTime).getTime());
+      const list = values
+        .map((v, index) => {
+          if (!v) return null;
+          const code = keys[index].replace('license:', '');
+          return decompressMetadata(v, code);
+        })
+        .filter(Boolean)
+        .sort((a, b) => new Date(b!.lastUsedTime).getTime() - new Date(a!.lastUsedTime).getTime());
 
-        return res.status(200).json({
-          success: true,
-          data: list
-        });
-      } catch (error) {
-        console.error('获取列表失败:', error);
-        return res.status(500).json({ success: false, message: '获取数据失败' });
-      }
+      return res.status(200).json({ success: true, data: list });
     }
 
-    // === 普通用户验证模式 ===
+    // === 验证流程 ===
     if (!licenseCode || !deviceId) {
       return res.status(400).json({ success: false, message: '缺少必要参数' });
     }
 
     const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
     
-    // 1. 基础验证
+    // 1. 基础检查
     if (cleanCode.length !== 16 || !isCodeInWhitelist(cleanCode)) {
       return res.status(401).json({ success: false, message: '授权码无效' });
     }
 
-    // 2. 过期检查
     const generatedDate = extractDateFromCode(cleanCode);
-    if (!generatedDate) {
-      return res.status(401).json({ success: false, message: '授权码格式异常' });
-    }
+    if (!generatedDate) return res.status(401).json({ success: false, message: '授权码格式异常' });
+    
     const expiryDate = new Date(generatedDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-    if (new Date() > expiryDate) {
-      return res.status(401).json({ success: false, message: '授权码已过期' });
-    }
+    if (new Date() > expiryDate) return res.status(401).json({ success: false, message: '授权码已过期' });
 
-    // 3. Redis 监控与设备限制
+    // 2. 读取 Redis
     const redisKey = `license:${cleanCode}`;
-    let metadata = await kv.get<LicenseMetadata>(redisKey);
-    const now = new Date().toISOString();
+    const rawData = await kv.get<CompressedMetadata | LicenseMetadata>(redisKey);
+    const now = Date.now();
+    const nowISO = new Date(now).toISOString();
 
-    if (!metadata) {
-      // 首次激活
+    let metadata: LicenseMetadata;
+
+    if (!rawData) {
+      // 新数据
       metadata = {
         code: cleanCode,
         totalDevices: 1,
         maxDevices: 10,
         generatedDate: generatedDate.toISOString(),
         expiryDate: expiryDate.toISOString(),
-        firstActivatedAt: now, // 记录真实的首次激活时刻
-        lastUsedTime: now,
+        firstActivatedAt: nowISO,
+        lastUsedTime: nowISO,
         devices: [{
           deviceId,
-          firstSeen: now,
-          lastSeen: now,
+          firstSeen: nowISO,
+          lastSeen: nowISO,
           ua: rawDeviceInfo || getDeviceType(ua),
           ip: ip,
           city: decodedCity,
@@ -198,46 +252,47 @@ export default async function handler(
         }]
       };
     } else {
-      // 已激活过，检查设备
+      // 解压旧数据
+      metadata = decompressMetadata(rawData, cleanCode);
+      
       const deviceIndex = metadata.devices.findIndex(d => d.deviceId === deviceId);
       
       if (deviceIndex > -1) {
-        // 已绑定设备，更新最后使用时间
-        metadata.devices[deviceIndex].lastSeen = now;
-        metadata.devices[deviceIndex].ip = ip; // 更新最后登录IP
+        // 更新现有设备
+        metadata.devices[deviceIndex].lastSeen = nowISO;
+        metadata.devices[deviceIndex].ip = ip;
         if (decodedCity) metadata.devices[deviceIndex].city = decodedCity;
         if (country) metadata.devices[deviceIndex].country = country;
-        
-        metadata.lastUsedTime = now;
+        metadata.lastUsedTime = nowISO;
       } else {
-        // 新设备，检查是否超过10台
-        if (metadata.totalDevices >= (metadata.maxDevices || 10)) {
+        // 添加新设备
+        if (metadata.devices.length >= metadata.maxDevices) {
           return res.status(403).json({ 
             success: false, 
-            message: `绑定失败：该授权码已在 ${metadata.totalDevices} 台设备上激活，达到上限。`,
-            data: { totalDevices: metadata.totalDevices }
+            message: `绑定失败：设备已满 (${metadata.devices.length}/${metadata.maxDevices})`,
+            data: { totalDevices: metadata.devices.length }
           });
         }
         
-        // 允许绑定新设备
         metadata.devices.push({
           deviceId,
-          firstSeen: now,
-          lastSeen: now,
+          firstSeen: nowISO,
+          lastSeen: nowISO,
           ua: rawDeviceInfo || getDeviceType(ua),
           ip: ip,
           city: decodedCity,
           country: country
         });
         metadata.totalDevices = metadata.devices.length;
-        metadata.lastUsedTime = now;
+        metadata.lastUsedTime = nowISO;
       }
     }
 
-    // 保存回 Redis
-    await kv.set(redisKey, metadata);
+    // 3. 压缩并保存
+    const compressed = compressMetadata(metadata);
+    await kv.set(redisKey, compressed);
 
-    // 4. 返回成功，附带验证 Token (简单 Hash 防伪)
+    // 4. 返回 Token
     const token = Buffer.from(`${cleanCode}:${deviceId}:${expiryDate.getTime()}`).toString('base64');
 
     return res.status(200).json({
@@ -251,11 +306,11 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('Redis 验证出错:', error);
-    return res.status(200).json({
-      success: true,
-      message: '授权验证成功 (离线模式)',
-      data: { validFor: '1年' }
+    console.error('API Error:', error);
+    return res.status(200).json({ // 降级处理
+      success: true, 
+      message: '验证成功(离线)', 
+      data: { validFor: '1年' } 
     });
   }
 }

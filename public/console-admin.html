@@ -352,15 +352,19 @@
       const lastIp = lastDevice ? lastDevice.ip : 'N/A';
 
       // 构建设备详情行
-      const deviceRows = item.devices.map((dev, i) => `
+      const deviceRows = item.devices.map((dev, i) => {
+        const location = dev.country ? 
+          `<span style="margin-left:5px; font-size:10px; background:#f1f5f9; padding:2px 4px; border-radius:4px;">${dev.country}${dev.city ? ', ' + dev.city : ''}</span>` : '';
+          
+        return `
         <tr>
           <td>${i + 1}</td>
           <td>${dev.ua.split(' ')[0]} <span style="color:#94a3b8; font-size:10px;">(${dev.ua.includes('iPhone') ? '📱' : '💻'})</span></td>
-          <td>${dev.ip}</td>
+          <td>${dev.ip}${location}</td>
           <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
           <td>${new Date(dev.lastSeen).toLocaleString()}</td>
         </tr>
-      `).join('');
+      `}).join('');
 
       return `
         <div class="monitor-item" id="item-${index}">

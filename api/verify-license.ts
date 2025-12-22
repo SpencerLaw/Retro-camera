@@ -16,6 +16,8 @@ interface DeviceInfo {
   lastSeen: string;
   ua: string;
   ip: string;
+  city?: string;
+  country?: string;
 }
 
 interface LicenseMetadata {
@@ -86,6 +88,11 @@ export default async function handler(
     const { licenseCode, deviceId, deviceInfo: rawDeviceInfo, action, adminKey } = req.body;
     const ip = getClientIp(req);
     const ua = req.headers['user-agent'] || 'unknown';
+    
+    // 获取 Vercel 提供的地理位置信息
+    const city = req.headers['x-vercel-ip-city'] as string | undefined;
+    const country = req.headers['x-vercel-ip-country'] as string | undefined;
+    const decodedCity = city ? decodeURIComponent(city) : undefined;
 
     // === 管理员查询模式 ===
     if (action === 'query') {
@@ -202,6 +209,9 @@ export default async function handler(
         // 已绑定设备，更新最后使用时间
         metadata.devices[deviceIndex].lastSeen = now;
         metadata.devices[deviceIndex].ip = ip; // 更新最后登录IP
+        if (decodedCity) metadata.devices[deviceIndex].city = decodedCity;
+        if (country) metadata.devices[deviceIndex].country = country;
+        
         metadata.lastUsedTime = now;
       } else {
         // 新设备，检查是否超过10台
@@ -219,7 +229,9 @@ export default async function handler(
           firstSeen: now,
           lastSeen: now,
           ua: rawDeviceInfo || getDeviceType(ua),
-          ip: ip
+          ip: ip,
+          city: decodedCity,
+          country: country
         });
         metadata.totalDevices = metadata.devices.length;
         metadata.lastUsedTime = now;

@@ -70,7 +70,9 @@ export const getSavedLicenseCode = (): string | null => {
 
 // 检查是否已验证
 export const isVerified = (): boolean => {
-  return localStorage.getItem(VERIFIED_KEY) === 'true';
+  const verified = localStorage.getItem(VERIFIED_KEY) === 'true';
+  const code = localStorage.getItem(LICENSE_KEY);
+  return verified && !!code && code.length >= 16;
 };
 
 // 清除授权信息
@@ -104,6 +106,7 @@ export const verifyLicenseCode = async (code: string): Promise<{
 }> => {
   try {
     const deviceId = getDeviceId();
+    const deviceInfo = getDeviceInfo();
     const response = await fetch('/api/verify-license', {
       method: 'POST',
       headers: {
@@ -112,6 +115,7 @@ export const verifyLicenseCode = async (code: string): Promise<{
       body: JSON.stringify({
         licenseCode: code,
         deviceId: deviceId,
+        deviceInfo: deviceInfo,
       }),
     });
 

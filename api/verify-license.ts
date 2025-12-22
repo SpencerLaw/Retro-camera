@@ -191,17 +191,34 @@ export default async function handler(
       if (keys.length === 0) return res.status(200).json({ success: true, data: [] });
 
       const values = await Promise.all(keys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key)));
+        
+      // 获取当前白名单
+      const envCodes = process.env.LICENSE_CODES || '';
+      const validCodeSet = new Set(
+        envCodes.split(',')
+          .map(c => c.replace(/[-\s]/g, '').toUpperCase())
+          .filter(c => c.length > 0)
+      );
 
       const list = values
         .map((v, index) => {
           if (!v) return null;
           const code = keys[index].replace('license:', '');
-          return decompressMetadata(v, code);
+          const meta = decompressMetadata(v, code);
+            
+          // 注入状态字段：检查是否在白名单中
+          return {
+            ...meta,
+            status: validCodeSet.has(code) ? 'active' : 'revoked'
+          };
         })
         .filter(Boolean)
         .sort((a, b) => new Date(b!.lastUsedTime).getTime() - new Date(a!.lastUsedTime).getTime());
 
-      return res.status(200).json({ success: true, data: list });
+      return res.status(200).json({
+        success: true,
+        data: list
+      });
     }
 
     // === 验证流程 ===

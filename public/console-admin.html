@@ -351,13 +351,19 @@
     }
 
     container.innerHTML = currentData.map((item, index) => {
+      // 检查是否失效
+      const isRevoked = item.status === 'revoked';
+      
       // 计算状态颜色
       const usage = item.totalDevices;
-      const max = item.maxDevices || 3; // 默认改为 3
+      const max = item.maxDevices || 3;
       let badgeClass = 'status-good';
       let statusText = '正常';
       
-      if (usage >= max) {
+      if (isRevoked) {
+        badgeClass = 'status-full'; // 用红色表示失效
+        statusText = '🚫 已删除';
+      } else if (usage >= max) {
         badgeClass = 'status-full';
         statusText = '已满';
       } else if (usage > max * 0.8) {
@@ -369,14 +375,13 @@
       const lastDevice = item.devices.sort((a,b) => new Date(b.lastSeen) - new Date(a.lastSeen))[0];
       const lastIp = lastDevice ? lastDevice.ip : 'N/A';
 
-      // 构建设备详情行
+      // 构建设备详情行 (略微调整样式)
       const deviceRows = item.devices.map((dev, i) => {
         const location = dev.country ? 
           `<span style="margin-left:5px; font-size:10px; background:#f1f5f9; padding:2px 4px; border-radius:4px;">${dev.country}${dev.city ? ', ' + dev.city : ''}</span>` : '';
         
-        // 解析 UA 显示
         const deviceName = parseUA(dev.ua);
-        const fullUA = dev.ua.replace(/"/g, '&quot;'); // 防止引号破坏 HTML
+        const fullUA = dev.ua.replace(/"/g, '&quot;');
           
         return `
         <tr>
@@ -396,10 +401,12 @@
       `}).join('');
 
       return `
-        <div class="monitor-item" id="item-${index}">
+        <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
           <div class="item-summary" onclick="toggleItem(${index})">
             <div class="toggle-btn">▶</div>
-            <div class="code-display">${item.code}</div>
+            <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
+              ${item.code}
+            </div>
             <div>
               <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
             </div>

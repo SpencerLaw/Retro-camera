@@ -232,8 +232,8 @@ const DoraemonMonitorApp: React.FC = () => {
           <ArrowLeft size={24} />
         </button>
         
-        <div className="text-8xl mb-5" style={{ filter: 'drop-shadow(0 0 20px rgba(142,84,233,0.5))' }}>✨🍌</div>
-        <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-[#8E54E9] to-[#4776E6] bg-clip-text text-transparent">Gemini Nano Banana</h1>
+        <div className="text-8xl mb-5" style={{ filter: 'drop-shadow(0 0 20px rgba(18,147,238,0.4))' }}>🤖</div>
+        <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-[#1293EE] to-[#8E54E9] bg-clip-text text-transparent">Anypok Doraemon</h1>
 
         <button
           className="doraemon-btn-big"
@@ -297,102 +297,92 @@ const DoraemonMonitorApp: React.FC = () => {
 
       {/* 主内容 */}
       <main className="doraemon-main-content">
-        {/* Gemini Nano Banana Monitor - Futuristic AI Style */}
+        {/* Gemini Nano Doraemon - Futuristic 3D Style */}
         <div className="doraemon-wrapper">
           <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
             <defs>
-              {/* Gemini 核心虹彩渐变 */}
-              <linearGradient id="geminiBody" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: '#8E54E9', stopOpacity: 1 }} />
-                <stop offset="50%" style={{ stopColor: '#FFEB3B', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: '#4776E6', stopOpacity: 1 }} />
+              {/* 经典蓝到科技紫的渐变 */}
+              <linearGradient id="doraBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#1293EE', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#8E54E9', stopOpacity: 1 }} />
               </linearGradient>
               
-              {/* 玻璃质感蒙版 */}
-              <radialGradient id="glassGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" style={{ stopColor: '#FFFFFF', stopOpacity: 0.4 }} />
-                <stop offset="100%" style={{ stopColor: '#FFFFFF', stopOpacity: 0 }} />
+              {/* 肚子与脸部的珍珠白渐变 */}
+              <radialGradient id="pearlWhite" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" style={{ stopColor: '#FFFFFF', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#E3F2FD', stopOpacity: 1 }} />
               </radialGradient>
 
-              {/* 核心光环发光 */}
-              <filter id="aiGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
+              {/* 核心光环发光滤镜 */}
+              <filter id="nanoGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
             </defs>
 
             <g>
-              {/* 科技感背景光晕 */}
-              <circle cx="100" cy="100" r="80" fill="url(#geminiBody)" opacity="0.15" filter="url(#aiGlow)" />
-
-              {/* 香蕉主体 - 纳米流体造型 */}
-              <path 
-                d="M40,60 Q20,100 40,140 Q60,180 100,185 Q140,180 160,140 Q180,100 160,60 Q140,20 100,25 Q60,20 40,60" 
-                fill="url(#geminiBody)" 
-                stroke="white" 
-                strokeWidth="0.5"
-                opacity="0.9"
-              />
+              {/* 1. 蓝色身体主体 (Gemini 纳米涂层) */}
+              <circle cx="100" cy="100" r="95" fill="url(#doraBlue)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
               
-              {/* 玻璃反射面层 */}
-              <path 
-                d="M45,65 Q25,100 45,135 Q65,170 100,175 Q135,170 155,135 Q175,100 155,65 Q135,30 100,35 Q65,30 45,65" 
-                fill="url(#glassGlow)"
-              />
+              {/* 2. 肚子与面部白色区域 */}
+              <circle cx="100" cy="115" r="75" fill="url(#pearlWhite)" />
+              <ellipse cx="70" cy="75" rx="25" ry="30" fill="url(#pearlWhite)" />
+              <ellipse cx="130" cy="75" rx="25" ry="30" fill="url(#pearlWhite)" />
 
-              {/* AI 核心动态环 - 颜色随状态变化 */}
-              <circle 
-                cx="100" 
-                cy="100" 
-                r={state === 'alarm' ? "45" : "35"} 
-                fill="none" 
-                stroke={state === 'alarm' ? "#FF5252" : "#8E54E9"} 
-                strokeWidth="2" 
-                strokeDasharray="10 5"
-                opacity="0.6"
-              >
-                <animateTransform 
-                  attributeName="transform" 
-                  type="rotate" 
-                  from="0 100 100" 
-                  to="360 100 100" 
-                  dur="10s" 
-                  repeatCount="indefinite" 
-                />
-              </circle>
+              {/* 3. AI 矩阵眼睛 - 动态展示状态 */}
+              {state === 'alarm' ? (
+                /* 报警：红色危险矩阵 */
+                <g fill="#FF5252">
+                  <rect x="60" y="65" width="20" height="20" rx="4" filter="url(#nanoGlow)" />
+                  <rect x="120" y="65" width="20" height="20" rx="4" filter="url(#nanoGlow)" />
+                </g>
+              ) : state === 'warning' ? (
+                /* 警告：眯眯眼扫描模式 */
+                <g stroke="#FACE05" strokeWidth="4" strokeLinecap="round">
+                  <line x1="60" y1="75" x2="80" y2="75" filter="url(#nanoGlow)" />
+                  <line x1="120" y1="75" x2="140" y2="75" filter="url(#nanoGlow)" />
+                </g>
+              ) : (
+                /* 平时：青色呼吸感纳米眼 */
+                <g>
+                  <circle cx="70" cy="75" r="8" fill="#4DD0E1" filter="url(#nanoGlow)" />
+                  <circle cx="130" cy="75" r="8" fill="#4DD0E1" filter="url(#nanoGlow)" />
+                  <circle cx="70" cy="75" r="3" fill="white" />
+                  <circle cx="130" cy="75" r="3" fill="white" />
+                </g>
+              )}
 
-              {/* 发光矩阵眼 - 科技感十足 */}
-              <g id="eyes">
-                {state === 'alarm' ? (
-                  /* 报警：红色警示矩阵 */
-                  <g fill="#FF5252">
-                    <rect x="65" y="80" width="20" height="20" rx="4" filter="url(#aiGlow)" />
-                    <rect x="115" y="80" width="20" height="20" rx="4" filter="url(#aiGlow)" />
-                  </g>
-                ) : (
-                  /* 平时：青色/紫色纳米光点 */
-                  <g fill="#4DD0E1">
-                    <circle cx="75" cy="90" r="8" filter="url(#aiGlow)" />
-                    <circle cx="125" cy="90" r="8" filter="url(#aiGlow)" />
-                    <circle cx="75" cy="90" r="3" fill="white" />
-                    <circle cx="125" cy="90" r="3" fill="white" />
-                  </g>
-                )}
+              {/* 4. 标志性红鼻子 (带有微弱光泽) */}
+              <circle cx="100" cy="95" r="12" fill="#DD0000" filter="url(#nanoGlow)" />
+              <circle cx="96" cy="90" r="4" fill="white" opacity="0.4" />
+              <line x1="100" y1="107" x2="100" y2="140" stroke="#333" strokeWidth="2" opacity="0.5" />
+
+              {/* 5. 简约胡须 (科技线条感) */}
+              <g stroke="#333" strokeWidth="1.5" opacity="0.4">
+                <line x1="55" y1="105" x2="25" y2="100" />
+                <line x1="55" y1="115" x2="20" y2="115" />
+                <line x1="55" y1="125" x2="25" y2="130" />
+                <line x1="145" y1="105" x2="175" y2="100" />
+                <line x1="145" y1="115" x2="180" y2="115" />
+                <line x1="145" y1="125" x2="175" y2="130" />
               </g>
 
-              {/* 嘴巴 - 极简声波线 */}
+              {/* 6. 核心能量铃铛 (代替普通铃铛) */}
+              <circle cx="100" cy="180" r="18" fill="#FACE05" filter="url(#nanoGlow)" />
+              <circle cx="100" cy="180" r="14" fill="none" stroke="#FF8F00" strokeWidth="1" strokeDasharray="4 2">
+                <animateTransform attributeName="transform" type="rotate" from="0 100 180" to="360 100 180" dur="5s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="100" cy="185" r="4" fill="#333" />
+
+              {/* 7. 动态声波嘴巴 */}
               <path 
-                d={state === 'alarm' ? "M70,130 Q100,160 130,130" : "M85,130 Q100,135 115,130"} 
+                d={state === 'alarm' ? "M60,150 Q100,190 140,150" : "M70,150 Q100,165 130,150"} 
                 fill="none" 
-                stroke="white" 
+                stroke="#333" 
                 strokeWidth="3" 
                 strokeLinecap="round"
-                filter="url(#aiGlow)"
+                opacity={state === 'calm' ? 0.3 : 0.8}
               />
-
-              {/* 顶部纳米连接柄 */}
-              <rect x="95" y="5" width="10" height="20" rx="5" fill="#1A1A1A" />
-              <circle cx="100" cy="10" r="3" fill="#8E54E9" filter="url(#aiGlow)" />
             </g>
           </svg>
         </div>

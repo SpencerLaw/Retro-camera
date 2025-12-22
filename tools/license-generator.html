@@ -3,443 +3,437 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>授权码生成器 - 分贝检测仪</title>
+  <title>授权码管理后台 - 分贝检测仪</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a6fd6;
+      --secondary: #764ba2;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-light: #6b7280;
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 20px;
     }
 
     .container {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 800px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
-    h1 {
+    /* Header */
+    header {
       text-align: center;
-      color: #333;
-      margin-bottom: 10px;
-      font-size: 32px;
+      margin-bottom: 30px;
     }
 
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 30px;
-      font-size: 14px;
-    }
+    h1 { font-size: 28px; color: var(--text); margin-bottom: 8px; }
+    .subtitle { color: var(--text-light); font-size: 14px; }
 
-    .section {
-      margin-bottom: 30px;
+    /* Auth Section */
+    .auth-box {
+      background: var(--card-bg);
       padding: 20px;
-      background: #f8f9fa;
       border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
-    .section-title {
-      font-size: 18px;
+    input {
+      padding: 10px 15px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    
+    .input-full { width: 100%; }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
       font-weight: 600;
-      color: #333;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--primary);
+      color: white;
+    }
+    button:hover { filter: brightness(110%); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-outline { background: white; border: 1px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: #f0fdfa; }
+
+    /* Main Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: 1fr 1.5fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
       margin-bottom: 15px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
     }
 
-    .input-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      color: #555;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 16px;
-      outline: none;
-      transition: all 0.3s;
-    }
-
-    input[type="number"]:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .button {
-      width: 100%;
-      padding: 14px 20px;
-      font-size: 16px;
-      font-weight: 600;
-      color: white;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-    }
-
-    .button:active {
-      transform: translateY(0);
-    }
-
-    .codes-list {
-      max-height: 400px;
+    /* List */
+    .code-list {
+      max-height: 500px;
       overflow-y: auto;
-      border: 2px solid #e0e0e0;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 15px;
-      background: white;
     }
 
     .code-item {
       padding: 12px;
-      margin-bottom: 10px;
-      background: #f8f9fa;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 16px;
-      font-weight: 600;
+      border-bottom: 1px solid #e5e7eb;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: all 0.3s;
+      transition: background 0.2s;
     }
+    .code-item:last-child { border-bottom: none; }
+    .code-item:hover { background: #f9fafb; }
+    .code-item.active { background: #eff6ff; border-left: 3px solid var(--primary); }
 
-    .code-item:hover {
-      background: #e8e9ea;
-      border-color: #667eea;
-    }
+    .code-text { font-family: 'Courier New', monospace; font-weight: 600; font-size: 14px; }
 
-    .code-text {
-      color: #333;
-      letter-spacing: 2px;
-    }
-
-    .copy-btn {
-      padding: 6px 12px;
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.3s;
-    }
-
-    .copy-btn:hover {
-      background: #764ba2;
-    }
-
-    .copy-btn.copied {
-      background: #28a745;
-    }
-
-    .export-section {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .export-btn {
-      flex: 1;
-      padding: 10px;
-      background: white;
-      border: 2px solid #667eea;
-      color: #667eea;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .export-btn:hover {
-      background: #667eea;
-      color: white;
-    }
-
-    .info-box {
-      background: #e3f2fd;
-      border-left: 4px solid #2196f3;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-
-    .info-box p {
-      margin: 5px 0;
-      color: #1976d2;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .stats {
-      display: flex;
-      gap: 15px;
-      margin-top: 15px;
-    }
-
-    .stat-card {
-      flex: 1;
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
+    /* Detail View */
+    .detail-placeholder {
       text-align: center;
-      border: 2px solid #e0e0e0;
+      color: var(--text-light);
+      padding: 40px;
     }
 
-    .stat-value {
-      font-size: 32px;
-      font-weight: 700;
-      color: #667eea;
-      margin-bottom: 5px;
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
-    .stat-label {
+    .info-item label { font-size: 12px; color: var(--text-light); display: block; margin-bottom: 4px; }
+    .info-item div { font-weight: 600; font-size: 14px; }
+
+    .progress-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--success);
+      transition: width 0.3s ease;
+    }
+    .progress-fill.warning { background: var(--warning); }
+    .progress-fill.danger { background: var(--danger); }
+
+    .device-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    .device-table th, .device-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .device-table th { color: var(--text-light); font-weight: 500; }
+    
+    .badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1f2937;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
       font-size: 14px;
-      color: #666;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
     }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🔑 授权码生成器</h1>
-    <p class="subtitle">为分贝检测仪生成授权码</p>
+    <header>
+      <h1>🔐 授权码控制台</h1>
+      <p class="subtitle">生成授权码 · 监控使用情况 · 设备管理</p>
+    </header>
 
-    <!-- 生成区域 -->
-    <div class="section">
-      <div class="section-title">📝 生成授权码</div>
-      <div class="input-group">
-        <label for="quantity">生成数量</label>
-        <input type="number" id="quantity" min="1" max="1000" value="10" placeholder="输入要生成的数量">
-      </div>
-      <button class="button" onclick="generateCodes()">
-        🎯 生成授权码
-      </button>
-
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-value" id="totalCount">0</div>
-          <div class="stat-label">已生成总数</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="currentBatch">0</div>
-          <div class="stat-label">本次生成</div>
-        </div>
-      </div>
+    <!-- 登录区域 -->
+    <div class="auth-box">
+      <input type="password" id="adminKey" class="input-full" placeholder="请输入管理员密码以启用查询功能..." value="spencer">
+      <span style="font-size: 12px; color: #10b981;">✓ 已预填默认密码</span>
     </div>
 
-    <!-- 授权码列表 -->
-    <div class="section">
-      <div class="section-title">📋 生成的授权码</div>
-      <div class="codes-list" id="codesList">
-        <p style="text-align: center; color: #999; padding: 20px;">
-          点击上方按钮生成授权码
-        </p>
-      </div>
-      
-      <div class="export-section">
-        <button class="export-btn" onclick="copyAllCodes()">📋 复制全部</button>
-        <button class="export-btn" onclick="downloadCodes()">💾 下载为TXT</button>
-        <button class="export-btn" onclick="downloadEnvFormat()">🔧 下载ENV格式</button>
-        <button class="export-btn" onclick="clearCodes()">🗑️ 清空</button>
-      </div>
-    </div>
+    <div class="grid">
+      <!-- 左侧：生成列表 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📝 授权码生成</span>
+          <div style="display: flex; gap: 5px;">
+            <input type="number" id="genCount" value="10" min="1" max="100" style="width: 60px;">
+            <button onclick="generateCodes()" style="padding: 5px 10px; font-size: 12px;">生成</button>
+          </div>
+        </div>
+        
+        <div class="code-list" id="codeList">
+          <p style="padding: 20px; text-align: center; color: #999; font-size: 12px;">点击生成按钮开始</p>
+        </div>
 
-    <!-- 使用说明 -->
-    <div class="info-box">
-      <p><strong>📌 使用说明：</strong></p>
-      <p>1️⃣ 生成授权码后，可以直接发给购买的用户</p>
-      <p>2️⃣ 点击"下载ENV格式"，将生成的授权码添加到 Vercel 环境变量</p>
-      <p>3️⃣ 在 Vercel 项目设置中，添加环境变量 <code>LICENSE_CODES</code></p>
-      <p>4️⃣ 每个授权码有效期1年，从生成日期开始计算</p>
-      <p>5️⃣ 授权码格式：YYYYMMDD-XXXX-XXXX（前8位是日期，用于计算有效期）</p>
-      <p>6️⃣ 不限制设备数量，用户可在任意设备使用</p>
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+          <button class="btn-outline" onclick="exportEnv()" style="flex: 1; font-size: 12px;">导出 ENV</button>
+          <button class="btn-outline" onclick="copyAll()" style="flex: 1; font-size: 12px;">复制全部</button>
+        </div>
+      </div>
+
+      <!-- 右侧：详情面板 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📊 详细监控信息</span>
+          <div style="display: flex; gap: 5px;">
+            <input type="text" id="queryInput" placeholder="输入授权码查询..." style="width: 180px;">
+            <button onclick="manualQuery()" style="padding: 5px 10px; font-size: 12px;">查询</button>
+          </div>
+        </div>
+
+        <div id="detailView">
+          <div class="detail-placeholder">
+            <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
+            <p>点击左侧授权码<br>或在上方输入查询</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <div id="toast" class="toast">复制成功</div>
+
   <script>
-    let allCodes = [];
+    let generatedCodes = [];
+    const API_URL = '/api/verify-license'; // 确保这个指向你的 Vercel API 地址
 
-    // 生成随机授权码（格式：YYYYMMDD-XXXX-XXXX）
-    function generateLicenseCode() {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去除易混淆字符 0,O,I,1
-      
-      // 生成日期部分（YYYYMMDD）
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const datePart = `${year}${month}${day}`;
-      
-      // 生成8位随机码
-      let randomPart = '';
-      for (let i = 0; i < 8; i++) {
-        randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      
-      // 组合：YYYYMMDD + 8位随机 = 16位
-      const fullCode = datePart + randomPart;
-      
-      // 格式化为 XXXX-XXXX-XXXX-XXXX
-      return fullCode.match(/.{1,4}/g).join('-');
-    }
-
-    // 生成多个授权码
+    // === 核心功能：生成 ===
     function generateCodes() {
-      const quantity = parseInt(document.getElementById('quantity').value);
-      
-      if (quantity < 1 || quantity > 1000) {
-        alert('请输入1-1000之间的数字');
-        return;
-      }
-
+      const count = document.getElementById('genCount').value;
       const newCodes = [];
-      for (let i = 0; i < quantity; i++) {
-        newCodes.push(generateLicenseCode());
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      
+      const now = new Date();
+      const datePart = now.getFullYear() +
+                      String(now.getMonth() + 1).padStart(2, '0') +
+                      String(now.getDate()).padStart(2, '0');
+
+      for (let i = 0; i < count; i++) {
+        let randomPart = '';
+        for (let j = 0; j < 8; j++) {
+          randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const code = (datePart + randomPart).match(/.{1,4}/g).join('-');
+        newCodes.push(code);
       }
 
-      allCodes = [...allCodes, ...newCodes];
-      displayCodes();
-      updateStats(newCodes.length);
+      generatedCodes = [...newCodes, ...generatedCodes]; // 新的在前面
+      renderList();
     }
 
-    // 显示授权码列表
-    function displayCodes() {
-      const container = document.getElementById('codesList');
-      
-      if (allCodes.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无授权码</p>';
-        return;
-      }
-
-      container.innerHTML = allCodes.map((code, index) => `
-        <div class="code-item">
+    function renderList() {
+      const list = document.getElementById('codeList');
+      list.innerHTML = generatedCodes.map(code => `
+        <div class="code-item" onclick="queryCode('${code}', this)">
           <span class="code-text">${code}</span>
-          <button class="copy-btn" onclick="copyCode('${code}', this)">复制</button>
+          <button style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); copy('${code}')">复制</button>
         </div>
       `).join('');
     }
 
-    // 复制单个授权码
-    function copyCode(code, button) {
-      navigator.clipboard.writeText(code).then(() => {
-        const originalText = button.textContent;
-        button.textContent = '✓ 已复制';
-        button.classList.add('copied');
-        
-        setTimeout(() => {
-          button.textContent = originalText;
-          button.classList.remove('copied');
-        }, 2000);
-      });
-    }
+    // === 核心功能：查询 ===
+    async function queryCode(code, element) {
+      // 高亮选中状态
+      document.querySelectorAll('.code-item').forEach(el => el.classList.remove('active'));
+      if (element) element.classList.add('active');
 
-    // 复制全部授权码
-    function copyAllCodes() {
-      if (allCodes.length === 0) {
-        alert('没有可复制的授权码');
-        return;
+      const adminKey = document.getElementById('adminKey').value;
+      const detailView = document.getElementById('detailView');
+
+      detailView.innerHTML = '<div class="detail-placeholder">⏳正在查询数据库...</div>';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'query',
+            licenseCode: code,
+            adminKey: adminKey
+          })
+        });
+
+        const json = await res.json();
+
+        if (!json.success) {
+          detailView.innerHTML = `
+            <div class="detail-placeholder" style="color: var(--danger)">
+              <p>❌ 查询失败</p>
+              <p style="font-size: 12px; margin-top: 5px;">${json.message}</p>
+              ${json.message.includes('未激活') ? '<p style="font-size: 12px; color: #999; margin-top: 10px;">该授权码尚未在任何设备使用</p>' : ''}
+            </div>
+          `;
+          return;
+        }
+
+        renderDetail(json.data);
+
+      } catch (err) {
+        detailView.innerHTML = `<div class="detail-placeholder" style="color: var(--danger)">网络请求错误<br>${err.message}</div>`;
       }
-
-      const text = allCodes.join('\n');
-      navigator.clipboard.writeText(text).then(() => {
-        alert(`已复制 ${allCodes.length} 个授权码到剪贴板`);
-      });
     }
 
-    // 下载为TXT文件
-    function downloadCodes() {
-      if (allCodes.length === 0) {
-        alert('没有可下载的授权码');
-        return;
-      }
-
-      const content = `分贝检测仪授权码\n生成时间：${new Date().toLocaleString()}\n总数：${allCodes.length}\n\n` + 
-                     allCodes.map((code, i) => `${i + 1}. ${code}`).join('\n');
-      
-      downloadFile('授权码列表.txt', content);
+    function manualQuery() {
+      const code = document.getElementById('queryInput').value.trim();
+      if(code) queryCode(code);
     }
 
-    // 下载ENV格式
-    function downloadEnvFormat() {
-      if (allCodes.length === 0) {
-        alert('没有可下载的授权码');
-        return;
-      }
+    // === 渲染详情 ===
+    function renderDetail(data) {
+      const usagePercent = (data.totalDevices / data.maxDevices) * 100;
+      let progressColor = 'success';
+      if (usagePercent > 50) progressColor = 'warning';
+      if (usagePercent >= 90) progressColor = 'danger';
 
-      const content = `# 分贝检测仪授权码配置
-# 生成时间：${new Date().toLocaleString()}
-# 将此环境变量添加到 Vercel 项目设置中
+      const devicesHtml = data.devices.map((dev, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><span class="badge badge-blue">${dev.ua.split(' ')[0]}</span></td>
+          <td>${dev.ip}</td>
+          <td>${new Date(dev.lastSeen).toLocaleString()}</td>
+        </tr>
+      `).join('');
 
-LICENSE_CODES=${allCodes.join(',')}
-`;
-      
-      downloadFile('LICENSE_CODES.env', content);
-      
-      alert('ENV文件已下载！\n\n请将内容复制到 Vercel 项目的环境变量中：\n1. 打开 Vercel 项目设置\n2. 进入 Environment Variables\n3. 添加变量名：LICENSE_CODES\n4. 粘贴授权码（逗号分隔）');
+      document.getElementById('detailView').innerHTML = `
+        <div>
+          <h2 style="font-size: 20px; color: var(--primary); margin-bottom: 5px;">${data.code}</h2>
+          <span class="badge badge-green">有效期至: ${new Date(data.expiryDate).toLocaleDateString()}</span>
+          
+          <div style="margin: 20px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+              <span>设备使用情况</span>
+              <span>${data.totalDevices} / ${data.maxDevices}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill ${progressColor}" style="width: ${usagePercent}%"></div>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>首次激活</label>
+              <div>${new Date(data.generatedDate).toLocaleString()}</div>
+            </div>
+            <div class="info-item">
+              <label>最近活动</label>
+              <div>${new Date(data.lastUsedTime).toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
+            <h3 style="font-size: 14px; margin-bottom: 10px;">设备列表详情</h3>
+            <div style="max-height: 250px; overflow-y: auto;">
+              <table class="device-table">
+                <thead>
+                  <tr>
+                    <th width="30">#</th>
+                    <th>设备</th>
+                    <th>IP地址</th>
+                    <th>最后在线</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${devicesHtml}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    // 下载文件辅助函数
-    function downloadFile(filename, content) {
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
+    // === 辅助工具 ===
+    function copy(text) {
+      navigator.clipboard.writeText(text);
+      showToast(`已复制: ${text}`);
+    }
+
+    function copyAll() {
+      if(!generatedCodes.length) return;
+      navigator.clipboard.writeText(generatedCodes.join('\n'));
+      showToast(`已复制 ${generatedCodes.length} 个授权码`);
+    }
+
+    function exportEnv() {
+      if(!generatedCodes.length) return;
+      const content = `LICENSE_CODES=${generatedCodes.join(',')}`;
+      const blob = new Blob([content], {type: 'text/plain'});
       const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
+      a.href = URL.createObjectURL(blob);
+      a.download = 'LICENSE_CODES.env';
       a.click();
-      URL.revokeObjectURL(url);
     }
 
-    // 清空授权码
-    function clearCodes() {
-      if (allCodes.length === 0) return;
-      
-      if (confirm(`确定要清空所有 ${allCodes.length} 个授权码吗？`)) {
-        allCodes = [];
-        displayCodes();
-        updateStats(0);
-      }
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
     }
-
-    // 更新统计信息
-    function updateStats(newCount) {
-      document.getElementById('totalCount').textContent = allCodes.length;
-      document.getElementById('currentBatch').textContent = newCount;
-    }
-
-    // 初始化
-    updateStats(0);
   </script>
 </body>
 </html>
-

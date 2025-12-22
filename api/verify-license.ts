@@ -83,10 +83,35 @@ export default async function handler(
   if (req.method !== 'POST') return res.status(405).json({ success: false, message: '方法不允许' });
 
   try {
-    const { licenseCode, deviceId, deviceInfo: rawDeviceInfo } = req.body;
+    const { licenseCode, deviceId, deviceInfo: rawDeviceInfo, action, adminKey } = req.body;
     const ip = getClientIp(req);
     const ua = req.headers['user-agent'] || 'unknown';
 
+    // === 管理员查询模式 ===
+    if (action === 'query') {
+      if (adminKey !== 'spencer') {
+        return res.status(401).json({ success: false, message: '管理员密码错误' });
+      }
+
+      if (!licenseCode) {
+        return res.status(400).json({ success: false, message: '请输入要查询的授权码' });
+      }
+
+      const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
+      const redisKey = `license:${cleanCode}`;
+      const metadata = await kv.get<LicenseMetadata>(redisKey);
+
+      if (!metadata) {
+        return res.status(404).json({ success: false, message: '该授权码尚未激活或不存在' });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: metadata
+      });
+    }
+
+    // === 普通用户验证模式 ===
     if (!licenseCode || !deviceId) {
       return res.status(400).json({ success: false, message: '缺少必要参数' });
     }

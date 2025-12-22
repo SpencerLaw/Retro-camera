@@ -231,12 +231,12 @@ export default async function handler(
 
     let metadata: LicenseMetadata;
 
-    if (!rawData) {
-      // 新数据
+    if (!metadata) {
+      // 首次激活
       metadata = {
         code: cleanCode,
         totalDevices: 1,
-        maxDevices: 10,
+        maxDevices: 3, // 默认限制 3 台设备
         generatedDate: generatedDate.toISOString(),
         expiryDate: expiryDate.toISOString(),
         firstActivatedAt: nowISO,

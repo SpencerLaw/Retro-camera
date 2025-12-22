@@ -181,6 +181,12 @@
     }
     .device-table th { background: #f1f5f9; color: var(--text-light); font-weight: 500; }
     
+    .tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dashed #999;
+    }
+    
     /* Generator Styles */
     .gen-card {
       background: var(--surface);
@@ -323,6 +329,18 @@
     login();
   }
 
+  // === 辅助：解析 User Agent ===
+  function parseUA(ua) {
+    if (!ua) return '未知设备';
+    if (ua.includes('iPhone')) return 'iPhone (iOS)';
+    if (ua.includes('iPad')) return 'iPad (iOS)';
+    if (ua.includes('Android')) return 'Android 设备';
+    if (ua.includes('Windows')) return 'Windows PC';
+    if (ua.includes('Macintosh')) return 'Mac PC';
+    if (ua.includes('Linux')) return 'Linux PC';
+    return ua.length > 20 ? ua.substring(0, 20) + '...' : ua;
+  }
+
   // === 渲染监控列表 ===
   function renderMonitorList() {
     const container = document.getElementById('monitorContent');
@@ -335,7 +353,7 @@
     container.innerHTML = currentData.map((item, index) => {
       // 计算状态颜色
       const usage = item.totalDevices;
-      const max = item.maxDevices || 10;
+      const max = item.maxDevices || 3; // 默认改为 3
       let badgeClass = 'status-good';
       let statusText = '正常';
       
@@ -355,11 +373,22 @@
       const deviceRows = item.devices.map((dev, i) => {
         const location = dev.country ? 
           `<span style="margin-left:5px; font-size:10px; background:#f1f5f9; padding:2px 4px; border-radius:4px;">${dev.country}${dev.city ? ', ' + dev.city : ''}</span>` : '';
+        
+        // 解析 UA 显示
+        const deviceName = parseUA(dev.ua);
+        const fullUA = dev.ua.replace(/"/g, '&quot;'); // 防止引号破坏 HTML
           
         return `
         <tr>
           <td>${i + 1}</td>
-          <td>${dev.ua.split(' ')[0]} <span style="color:#94a3b8; font-size:10px;">(${dev.ua.includes('iPhone') ? '📱' : '💻'})</span></td>
+          <td>
+            <div style="font-weight:500; font-size:12px;">${deviceName}</div>
+            <div style="font-size:10px; color:#94a3b8; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${fullUA}">${dev.ua}</div>
+          </td>
+          <td>
+            <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
+            <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
+          </td>
           <td>${dev.ip}${location}</td>
           <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
           <td>${new Date(dev.lastSeen).toLocaleString()}</td>
@@ -393,7 +422,8 @@
                 <thead>
                   <tr>
                     <th width="30">#</th>
-                    <th>设备型号</th>
+                    <th>设备信息</th>
+                    <th>Device ID</th>
                     <th>IP地址</th>
                     <th>首次绑定</th>
                     <th>最后在线</th>
@@ -466,6 +496,11 @@
     if(!generatedCodes.length) return;
     navigator.clipboard.writeText(generatedCodes.join('\n'));
     alert(`已复制 ${generatedCodes.length} 个授权码`);
+  }
+  
+  function copy(text) {
+    navigator.clipboard.writeText(text);
+    alert('已复制 ID: ' + text);
   }
 
   // === 工具函数 ===

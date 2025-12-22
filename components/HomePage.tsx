@@ -314,65 +314,13 @@ export const HomePage: React.FC = () => {
             {/* Kawaii Glow Effect */}
             <div className="absolute -inset-3 bg-gradient-to-r from-[#64B5F6] to-[#90CAF9] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
 
-            {/* Icon - Doraemon Face */}
+            {/* Icon - Banana Monitor */}
             <div className="relative z-10 flex justify-center mb-6">
               <div
                 className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(100,181,246,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#BBDEFB]"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                {/* Kawaii Doraemon Face */}
-                <svg viewBox="0 0 120 120" className="w-28 h-28">
-                  {/* Head - Blue circle */}
-                  <circle cx="60" cy="55" r="52" fill="#42A5F5"/>
-
-                  {/* Face - White oval */}
-                  <ellipse cx="60" cy="70" rx="42" ry="38" fill="white"/>
-
-                  {/* Cute Whisker Dots */}
-                  <circle cx="20" cy="65" r="2.5" fill="#42A5F5" opacity="0.6"/>
-                  <circle cx="20" cy="75" r="2.5" fill="#42A5F5" opacity="0.6"/>
-                  <circle cx="20" cy="85" r="2.5" fill="#42A5F5" opacity="0.6"/>
-                  <circle cx="100" cy="65" r="2.5" fill="#42A5F5" opacity="0.6"/>
-                  <circle cx="100" cy="75" r="2.5" fill="#42A5F5" opacity="0.6"/>
-                  <circle cx="100" cy="85" r="2.5" fill="#42A5F5" opacity="0.6"/>
-
-                  {/* Eyes - Bigger and cuter */}
-                  <ellipse cx="42" cy="45" rx="13" ry="16" fill="white"/>
-                  <ellipse cx="78" cy="45" rx="13" ry="16" fill="white"/>
-
-                  {/* Pupils - Bigger for kawaii effect */}
-                  <circle cx="44" cy="48" r="6" fill="#1E1E1E"/>
-                  <circle cx="76" cy="48" r="6" fill="#1E1E1E"/>
-
-                  {/* Eye sparkles */}
-                  <circle cx="46" cy="45" r="2.5" fill="white"/>
-                  <circle cx="78" cy="45" r="2.5" fill="white"/>
-                  <circle cx="42" cy="50" r="1.5" fill="white" opacity="0.7"/>
-                  <circle cx="74" cy="50" r="1.5" fill="white" opacity="0.7"/>
-
-                  {/* Nose - Bigger red nose */}
-                  <circle cx="60" cy="62" r="9" fill="#FF6B6B"/>
-                  <ellipse cx="57" cy="60" rx="3" ry="2.5" fill="#FFB3B3" opacity="0.6"/>
-
-                  {/* Nose line */}
-                  <line x1="60" y1="71" x2="60" y2="85" stroke="#42A5F5" strokeWidth="2.5" strokeLinecap="round"/>
-
-                  {/* Mouth - Wider smile */}
-                  <path d="M 32,85 Q 60,105 88,85" fill="none" stroke="#42A5F5" strokeWidth="2.5" strokeLinecap="round"/>
-
-                  {/* Tongue - for extra cuteness */}
-                  <ellipse cx="60" cy="95" rx="8" ry="5" fill="#FF9999" opacity="0.7"/>
-
-                  {/* Bell - Bigger and shinier */}
-                  <circle cx="60" cy="108" r="9" fill="#FFD54F"/>
-                  <path d="M 54,105 Q 60,110 66,105" fill="#FFA726" opacity="0.6"/>
-                  <circle cx="60" cy="110" r="2.5" fill="#1E1E1E"/>
-                  <circle cx="57" cy="106" r="2" fill="#FFF4C3" opacity="0.8"/>
-
-                  {/* Blush marks for kawaii */}
-                  <ellipse cx="25" cy="75" rx="8" ry="5" fill="#FFB3D9" opacity="0.4"/>
-                  <ellipse cx="95" cy="75" rx="8" ry="5" fill="#FFB3D9" opacity="0.4"/>
-                </svg>
+                <span style={{ fontSize: '72px' }}>🍌</span>
               </div>
             </div>
 

@@ -297,139 +297,144 @@ const DoraemonMonitorApp: React.FC = () => {
 
       {/* 主内容 */}
       <main className="doraemon-main-content">
-        {/* Classic Doraemon - Cute & Cheerful Style */}
+        {/* Adorable Doraemon */}
         <div className="doraemon-wrapper">
           <svg viewBox="0 0 200 220" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
             <defs>
-              {/* 身体：经典天蓝色渐变 */}
-              <radialGradient id="doraBody" cx="40%" cy="40%" r="80%">
-                <stop offset="0%" style={{ stopColor: '#42A5F5', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: '#1976D2', stopOpacity: 1 }} />
+              {/* 蓝色渐变 - 明亮清新 */}
+              <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#42A5F5" />
+                <stop offset="50%" stopColor="#29B6F6" />
+                <stop offset="100%" stopColor="#1E88E5" />
+              </linearGradient>
+
+              {/* 高光 */}
+              <radialGradient id="shineGrad" cx="35%" cy="30%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
               </radialGradient>
 
-              {/* 脸/肚子：纯白色渐变 */}
-              <radialGradient id="doraWhite" cx="50%" cy="40%" r="80%">
-                <stop offset="0%" style={{ stopColor: '#FFFFFF', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: '#F5F5F5', stopOpacity: 1 }} />
-              </radialGradient>
-
-              {/* 铃铛：金属质感 */}
-              <radialGradient id="bellGold" cx="35%" cy="35%" r="70%">
-                <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: '#FFA000', stopOpacity: 1 }} />
+              {/* 铃铛金属光泽 */}
+              <radialGradient id="goldGrad" cx="30%" cy="30%">
+                <stop offset="0%" stopColor="#FFD700" />
+                <stop offset="50%" stopColor="#FFC107" />
+                <stop offset="100%" stopColor="#FF8F00" />
               </radialGradient>
 
               {/* 柔和阴影 */}
-              <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                <feOffset dx="0" dy="3" result="offsetblur" />
+              <filter id="shadow">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                <feOffset dx="0" dy="2" result="offsetblur"/>
                 <feComponentTransfer>
-                  <feFuncA type="linear" slope="0.3" />
+                  <feFuncA type="linear" slope="0.2"/>
                 </feComponentTransfer>
                 <feMerge>
-                  <feMergeNode />
-                  <feMergeNode in="SourceGraphic" />
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
                 </feMerge>
               </filter>
             </defs>
 
-            <g filter="url(#softShadow)">
-              {/* 1. 蓝色身体 */}
-              <circle cx="100" cy="95" r="85" fill="url(#doraBody)" stroke="#1565C0" strokeWidth="2" />
+            <g filter="url(#shadow)">
+              {/* 蓝色圆润身体 */}
+              <circle cx="100" cy="100" r="80" fill="url(#bodyGradient)" stroke="#1565C0" strokeWidth="2"/>
 
-              {/* 2. 白色肚皮 */}
-              <ellipse cx="100" cy="120" rx="62" ry="68" fill="url(#doraWhite)" />
+              {/* 白色大脸 - 圆润可爱 */}
+              <circle cx="100" cy="85" r="65" fill="white"/>
 
-              {/* 3. 四次元口袋 */}
-              <ellipse cx="100" cy="135" rx="32" ry="28" fill="none" stroke="#333" strokeWidth="2.5" />
+              {/* 大眼睛 - 经典椭圆形 */}
+              <ellipse cx="70" cy="65" rx="18" ry="23" fill="white" stroke="#000" strokeWidth="2.5"/>
+              <ellipse cx="130" cy="65" rx="18" ry="23" fill="white" stroke="#000" strokeWidth="2.5"/>
 
-              {/* 4. 白色脸部 */}
-              <ellipse cx="100" cy="70" rx="75" ry="55" fill="url(#doraWhite)" />
-
-              {/* 5. 眼睛 - 经典大眼 */}
-              <g>
-                {/* 左眼 */}
-                <ellipse cx="70" cy="50" rx="20" ry="24" fill="white" stroke="#333" strokeWidth="2.2" />
-                {/* 右眼 */}
-                <ellipse cx="130" cy="50" rx="20" ry="24" fill="white" stroke="#333" strokeWidth="2.2" />
-
-                {/* 眼珠 - 根据状态改变 */}
-                {state === 'alarm' ? (
-                  // 报警：惊恐的 X_X 眼
-                  <g stroke="#333" strokeWidth="5" strokeLinecap="round" fill="none">
-                    <path d="M60,43 L80,57" />
-                    <path d="M80,43 L60,57" />
-                    <path d="M120,43 L140,57" />
-                    <path d="M140,43 L120,57" />
-                  </g>
-                ) : state === 'warning' ? (
-                  // 警告：紧张的小圆眼
-                  <g fill="#000">
-                    <circle cx="70" cy="50" r="5" />
-                    <circle cx="130" cy="50" r="5" />
-                  </g>
-                ) : (
-                  // 平时：可爱的正常眼神
-                  <g>
-                    <ellipse cx="72" cy="54" rx="7" ry="9" fill="#000" />
-                    <ellipse cx="128" cy="54" rx="7" ry="9" fill="#000" />
-                    {/* 眼睛高光 */}
-                    <circle cx="75" cy="51" r="3" fill="white" />
-                    <circle cx="131" cy="51" r="3" fill="white" />
-                  </g>
-                )}
-              </g>
-
-              {/* 6. 红色鼻子 */}
-              <circle cx="100" cy="75" r="13" fill="#F44336" stroke="#C62828" strokeWidth="1.5" />
-              <circle cx="96" cy="71" r="4" fill="white" opacity="0.7" /> {/* 鼻子高光 */}
-
-              {/* 鼻子到嘴的竖线 */}
-              <line x1="100" y1="88" x2="100" y2="120" stroke="#333" strokeWidth="2.5" />
-
-              {/* 7. 胡须 - 经典三根 */}
-              <g stroke="#333" strokeWidth="2.5" strokeLinecap="round">
-                {/* 左胡须 */}
-                <line x1="25" y1="82" x2="55" y2="87" />
-                <line x1="20" y1="95" x2="55" y2="95" />
-                <line x1="25" y1="108" x2="55" y2="103" />
-                {/* 右胡须 */}
-                <line x1="175" y1="82" x2="145" y2="87" />
-                <line x1="180" y1="95" x2="145" y2="95" />
-                <line x1="175" y1="108" x2="145" y2="103" />
-              </g>
-
-              {/* 8. 嘴巴 - 根据状态改变 */}
+              {/* 眼珠 - 根据状态变化 */}
               {state === 'alarm' ? (
-                // 报警：大张口
-                <g>
-                  <path d="M60,120 Q100,185 140,120" fill="#E53935" stroke="#333" strokeWidth="3" />
-                  <ellipse cx="100" cy="150" rx="25" ry="15" fill="#C62828" />
+                // 报警：X_X 晕眩眼
+                <g stroke="#000" strokeWidth="4" strokeLinecap="round">
+                  <line x1="62" y1="60" x2="78" y2="70"/>
+                  <line x1="78" y1="60" x2="62" y2="70"/>
+                  <line x1="122" y1="60" x2="138" y2="70"/>
+                  <line x1="138" y1="60" x2="122" y2="70"/>
                 </g>
               ) : state === 'warning' ? (
-                // 警告：担心的嘴型
-                <path d="M70,135 Q85,145 100,135 Q115,145 130,135" fill="none" stroke="#333" strokeWidth="3" strokeLinecap="round" />
+                // 警告：紧张小眼
+                <g>
+                  <circle cx="70" cy="68" r="5" fill="#000"/>
+                  <circle cx="130" cy="68" r="5" fill="#000"/>
+                </g>
               ) : (
-                // 平时：经典大笑
-                <path d="M50,120 Q100,170 150,120" fill="none" stroke="#333" strokeWidth="3" strokeLinecap="round" />
+                // 平常：有神的大眼睛
+                <g>
+                  <ellipse cx="70" cy="70" rx="8" ry="10" fill="#000"/>
+                  <ellipse cx="130" cy="70" rx="8" ry="10" fill="#000"/>
+                  {/* 眼睛高光 */}
+                  <circle cx="73" cy="66" r="3.5" fill="white"/>
+                  <circle cx="133" cy="66" r="3.5" fill="white"/>
+                  <circle cx="68" cy="73" r="1.5" fill="white" opacity="0.6"/>
+                  <circle cx="128" cy="73" r="1.5" fill="white" opacity="0.6"/>
+                </g>
               )}
 
-              {/* 9. 红色项圈 */}
-              <ellipse cx="100" cy="180" rx="65" ry="12" fill="#E53935" stroke="#C62828" strokeWidth="2" />
+              {/* 红鼻子 - 圆润有光泽 */}
+              <circle cx="100" cy="95" r="12" fill="#FF5252" stroke="#D32F2F" strokeWidth="1.5"/>
+              <circle cx="96" cy="91" r="4" fill="white" opacity="0.7"/>
 
-              {/* 10. 金色铃铛 */}
-              <g transform="translate(100, 195)">
-                {/* 铃铛主体 */}
-                <circle r="15" fill="url(#bellGold)" stroke="#FF6F00" strokeWidth="2" />
-                {/* 铃铛横纹 */}
-                <line x1="-12" y1="0" x2="12" y2="0" stroke="#FF6F00" strokeWidth="1.5" />
-                <line x1="-13" y1="4" x2="13" y2="4" stroke="#FF6F00" strokeWidth="1.5" />
-                {/* 铃铛舌 */}
-                <circle cy="6" r="3" fill="#333" />
-                <rect x="-1" y="9" width="2" height="5" rx="1" fill="#333" />
-                {/* 铃铛高光 */}
-                <circle cx="-5" cy="-5" r="4" fill="white" opacity="0.6" />
+              {/* 鼻子到嘴的竖线 */}
+              <line x1="100" y1="107" x2="100" y2="125" stroke="#000" strokeWidth="3" strokeLinecap="round"/>
+
+              {/* 胡须 - 经典6根 */}
+              <g stroke="#000" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="20" y1="90" x2="50" y2="93"/>
+                <line x1="15" y1="100" x2="50" y2="100"/>
+                <line x1="20" y1="110" x2="50" y2="107"/>
+                <line x1="180" y1="90" x2="150" y2="93"/>
+                <line x1="185" y1="100" x2="150" y2="100"/>
+                <line x1="180" y1="110" x2="150" y2="107"/>
               </g>
+
+              {/* 嘴巴 - 根据状态变化 */}
+              {state === 'alarm' ? (
+                // 报警：大嘴巴大喊
+                <g>
+                  <ellipse cx="100" cy="145" rx="25" ry="30" fill="#E53935" stroke="#000" strokeWidth="3"/>
+                  <ellipse cx="100" cy="150" rx="18" ry="20" fill="#C62828"/>
+                </g>
+              ) : state === 'warning' ? (
+                // 警告：担心的波浪嘴
+                <path d="M 75 135 Q 85 145 95 135 Q 105 145 115 135 Q 125 145 125 135"
+                      stroke="#000" strokeWidth="3" fill="none" strokeLinecap="round"/>
+              ) : (
+                // 平常：经典大笑
+                <path d="M 60 125 Q 100 165 140 125"
+                      stroke="#000" strokeWidth="3" fill="none" strokeLinecap="round"/>
+              )}
+
+              {/* 白色肚皮 */}
+              <ellipse cx="100" cy="145" rx="55" ry="60" fill="white"/>
+
+              {/* 四次元口袋 */}
+              <path d="M 70 145 Q 70 170 100 170 Q 130 170 130 145"
+                    fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round"/>
+              <line x1="70" y1="145" x2="130" y2="145" stroke="#000" strokeWidth="3"/>
+
+              {/* 红色项圈 */}
+              <ellipse cx="100" cy="180" rx="60" ry="8" fill="#F44336" stroke="#D32F2F" strokeWidth="2"/>
+
+              {/* 金色铃铛 */}
+              <g transform="translate(100, 188)">
+                {/* 铃铛主体 */}
+                <circle r="12" fill="url(#goldGrad)" stroke="#E65100" strokeWidth="2"/>
+                {/* 铃铛横线 */}
+                <line x1="-9" y1="-1" x2="9" y2="-1" stroke="#E65100" strokeWidth="1.5"/>
+                <line x1="-10" y1="2" x2="10" y2="2" stroke="#E65100" strokeWidth="1.5"/>
+                {/* 铃铛舌头 */}
+                <circle cy="5" r="2.5" fill="#424242"/>
+                <line x1="0" y1="7.5" x2="0" y2="11" stroke="#424242" strokeWidth="2" strokeLinecap="round"/>
+                {/* 铃铛高光 */}
+                <circle cx="-4" cy="-4" r="3" fill="white" opacity="0.8"/>
+              </g>
+
+              {/* 整体高光效果 */}
+              <ellipse cx="70" cy="60" rx="40" ry="30" fill="url(#shineGrad)" opacity="0.6"/>
             </g>
           </svg>
         </div>

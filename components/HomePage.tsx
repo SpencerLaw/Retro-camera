@@ -320,50 +320,71 @@ export const HomePage: React.FC = () => {
                 className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(100,181,246,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#BBDEFB]"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                {/* Classic Doraemon Face */}
-                <svg viewBox="0 0 120 120" className="w-28 h-28">
+                {/* Cute Doraemon */}
+                <svg viewBox="0 0 100 100" className="w-28 h-28">
                   <defs>
-                    <radialGradient id="doraBlueSmall" cx="40%" cy="40%" r="80%">
-                      <stop offset="0%" stopColor="#42A5F5" />
-                      <stop offset="100%" stopColor="#1976D2" />
-                    </radialGradient>
-                    <radialGradient id="doraWhiteSmall" cx="50%" cy="40%" r="70%">
-                      <stop offset="0%" stopColor="#FFFFFF" />
-                      <stop offset="100%" stopColor="#F5F5F5" />
+                    {/* 蓝色身体渐变 */}
+                    <linearGradient id="bodyBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#29B6F6" />
+                      <stop offset="100%" stopColor="#1E88E5" />
+                    </linearGradient>
+                    {/* 高光 */}
+                    <radialGradient id="highlight" cx="30%" cy="30%">
+                      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
                     </radialGradient>
                   </defs>
 
-                  {/* 身体 */}
-                  <circle cx="60" cy="58" r="50" fill="url(#doraBlueSmall)" stroke="#1565C0" strokeWidth="1.5"/>
+                  {/* 蓝色圆形身体 */}
+                  <circle cx="50" cy="50" r="45" fill="url(#bodyBlue)"/>
 
                   {/* 白色脸部 */}
-                  <ellipse cx="60" cy="55" rx="42" ry="35" fill="url(#doraWhiteSmall)"/>
+                  <circle cx="50" cy="45" r="35" fill="white"/>
 
                   {/* 眼睛 */}
-                  <ellipse cx="45" cy="42" rx="11" ry="14" fill="white" stroke="#333" strokeWidth="1.2"/>
-                  <ellipse cx="75" cy="42" rx="11" ry="14" fill="white" stroke="#333" strokeWidth="1.2"/>
-                  <ellipse cx="48" cy="46" rx="4" ry="5" fill="#000"/>
-                  <ellipse cx="78" cy="46" rx="4" ry="5" fill="#000"/>
-                  <circle cx="47" cy="44" r="1.5" fill="white"/>
-                  <circle cx="77" cy="44" r="1.5" fill="white"/>
+                  <ellipse cx="38" cy="35" rx="9" ry="12" fill="white" stroke="#000" strokeWidth="1.5"/>
+                  <ellipse cx="62" cy="35" rx="9" ry="12" fill="white" stroke="#000" strokeWidth="1.5"/>
+                  <circle cx="38" cy="38" r="4" fill="#000"/>
+                  <circle cx="62" cy="38" r="4" fill="#000"/>
+                  <circle cx="39" cy="36" r="1.5" fill="white"/>
+                  <circle cx="63" cy="36" r="1.5" fill="white"/>
 
                   {/* 红鼻子 */}
-                  <circle cx="60" cy="60" r="8" fill="#F44336" stroke="#C62828" strokeWidth="1"/>
-                  <circle cx="57" cy="57" r="2.5" fill="white" opacity="0.6"/>
+                  <circle cx="50" cy="48" r="6" fill="#FF5252"/>
+                  <circle cx="48" cy="46" r="2" fill="white" opacity="0.7"/>
 
                   {/* 鼻子到嘴的线 */}
-                  <line x1="60" y1="68" x2="60" y2="85" stroke="#333" strokeWidth="1.8"/>
+                  <line x1="50" y1="54" x2="50" y2="62" stroke="#000" strokeWidth="2"/>
 
-                  {/* 嘴巴 */}
-                  <path d="M 35,82 Q 60,105 85,82" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round"/>
+                  {/* 嘴巴 - 经典微笑 */}
+                  <path d="M 30 62 Q 50 75 70 62" stroke="#000" strokeWidth="2" fill="none" strokeLinecap="round"/>
 
                   {/* 胡须 */}
-                  <line x1="18" y1="68" x2="42" y2="71" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="15" y1="75" x2="42" y2="75" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="18" y1="82" x2="42" y2="79" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="102" y1="68" x2="78" y2="71" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="105" y1="75" x2="78" y2="75" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="102" y1="82" x2="78" y2="79" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
+                  <g stroke="#000" strokeWidth="1.5" strokeLinecap="round">
+                    <line x1="10" y1="50" x2="28" y2="52"/>
+                    <line x1="8" y1="56" x2="28" y2="56"/>
+                    <line x1="10" y1="62" x2="28" y2="60"/>
+                    <line x1="90" y1="50" x2="72" y2="52"/>
+                    <line x1="92" y1="56" x2="72" y2="56"/>
+                    <line x1="90" y1="62" x2="72" y2="60"/>
+                  </g>
+
+                  {/* 白色肚皮 */}
+                  <ellipse cx="50" cy="70" rx="28" ry="25" fill="white"/>
+
+                  {/* 四次元口袋 */}
+                  <ellipse cx="50" cy="72" rx="14" ry="12" fill="none" stroke="#000" strokeWidth="2"/>
+
+                  {/* 红色项圈 */}
+                  <ellipse cx="50" cy="87" rx="30" ry="5" fill="#F44336"/>
+
+                  {/* 金色铃铛 */}
+                  <circle cx="50" cy="90" r="4.5" fill="#FFD700" stroke="#FFA000" strokeWidth="0.8"/>
+                  <line x1="48" y1="90" x2="52" y2="90" stroke="#FFA000" strokeWidth="0.5"/>
+                  <circle cx="50" cy="91.5" r="1" fill="#000"/>
+
+                  {/* 高光效果 */}
+                  <ellipse cx="35" cy="35" rx="20" ry="15" fill="url(#highlight)"/>
                 </svg>
               </div>
             </div>

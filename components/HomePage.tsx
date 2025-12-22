@@ -314,13 +314,13 @@ export const HomePage: React.FC = () => {
             {/* Kawaii Glow Effect */}
             <div className="absolute -inset-3 bg-gradient-to-r from-[#64B5F6] to-[#90CAF9] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
 
-            {/* Icon - Banana Monitor */}
+            {/* Icon - Gemini Nano Banana */}
             <div className="relative z-10 flex justify-center mb-6">
               <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(100,181,246,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#BBDEFB]"
+                className="w-36 h-36 bg-gradient-to-br from-[#8E54E9] via-[#FFEB3B] to-[#4776E6] rounded-full flex items-center justify-center shadow-[0_12px_32px_rgba(142,84,233,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-white/80"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <span style={{ fontSize: '72px' }}>🍌</span>
+                <span style={{ fontSize: '72px', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.8))' }}>🍌</span>
               </div>
             </div>
 

@@ -32,7 +32,9 @@
       "subtitle": "3D Particle System • Hand Gesture Control",
       "description": "Interactive 3D particles controlled by hand gestures with beautiful shapes"
     },
-    "backHome": "Back Home"
+    "backHome": "Back Home",
+    "restricted": "Restricted 🔒",
+    "comingSoon": "Coming Soon 🔒"
   },
   "camera": {
     "backHome": "Back Home",

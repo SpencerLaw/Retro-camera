@@ -178,52 +178,45 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
-          {/* Fortune Sticks Card - Cute Golden */}
-          <Link
-            to="/fortune"
-            className="group relative bg-gradient-to-br from-[#FFF8DC] via-[#FFEAA7] to-[#FDCB6E] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(253,203,110,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(253,203,110,0.6)] hover:rotate-2 block"
+          {/* Fortune Sticks Card - Disabled/Restricted */}
+          <div
+            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed transform transition-all duration-500 grayscale opacity-80 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
           >
-            {/* Cute star decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🌟</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#FDCB6E] to-[#FFEAA7] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
               <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(253,203,110,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFF8DC]"
+                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <Sparkles size={72} className="text-[#FDCB6E] drop-shadow-lg" />
+                <Sparkles size={72} className="text-[#999999]" />
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-serif text-4xl text-[#D4A017] mb-3 font-bold drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.fortune.title')}</h2>
-              <p className="text-base text-[#B8860B] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+              <h2 className="font-serif text-4xl text-[#666666] mb-3 font-bold">{t('home.fortune.title')}</h2>
+              <p className="text-base text-[#777777] mb-4 font-semibold">
                 {t('home.fortune.subtitle')}
               </p>
-              <p className="text-sm text-[#9A7D0A] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+              <p className="text-sm text-[#888888] leading-relaxed font-medium">
                 {t('home.fortune.description')}
               </p>
 
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#FDCB6E] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(253,203,110,0.4)] border-[3px] border-[#FFF8DC] hover:bg-gradient-to-r hover:from-[#FFF8DC] hover:to-white">
-                  Enter → ✨
+              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
+                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
+                  {t('home.restricted')}
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
 
           {/* Weather Card - Disabled/Gray */}
           <div
-            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed opacity-90 block"
+            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed grayscale opacity-80 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -251,7 +244,7 @@ export const HomePage: React.FC = () => {
               {/* Decorative Border */}
               <div className="mt-6 pt-6 border-t-[3px] border-white/50">
                 <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
-                  Coming Soon 🔒
+                  {t('home.comingSoon')}
                 </div>
               </div>
             </div>

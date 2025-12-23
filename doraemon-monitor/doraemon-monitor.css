@@ -141,7 +141,7 @@ body {
     width: 10px; /* Thicker bars */
     min-height: 8px;
     border-radius: 20px;
-    transition: height 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); /* Bouncier animation */
+    transition: height 0.08s ease-out; /* Much snappier reaction */
     box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
     will-change: height, background, box-shadow;
     position: relative;

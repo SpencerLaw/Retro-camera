@@ -16,12 +16,12 @@ export const HomePage: React.FC = () => {
   const t = useTranslations();
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start p-4 py-8 relative overflow-y-auto overflow-x-hidden">
+    <div className="w-full pb-8 relative">
       {/* Kawaii Sky Background - Pastel Gradient */}
-      <div className="fixed inset-0 bg-gradient-to-b from-[#FFE5EC] via-[#FFF0F5] to-[#E6F3FF]"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-[#FFE5EC] via-[#FFF0F5] to-[#E6F3FF] -z-50"></div>
 
       {/* Floating Cute Clouds */}
-      <div className="fixed inset-0 opacity-60 pointer-events-none">
+      <div className="fixed inset-0 opacity-60 pointer-events-none -z-40">
         <div className="absolute top-20 left-10 w-96 h-32 bg-white/80 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '6s' }}></div>
         <div className="absolute top-40 right-20 w-80 h-40 bg-white/70 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '8s', animationDelay: '1s' }}></div>
         <div className="absolute bottom-40 left-1/4 w-72 h-36 bg-white/75 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '3s' }}></div>
@@ -29,7 +29,7 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* Sparkles and Stars */}
-      <div className="fixed inset-0 pointer-events-none">
+      <div className="fixed inset-0 pointer-events-none -z-30">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -61,11 +61,11 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* Rainbow Gradient Overlay */}
-      <div className="fixed inset-0 bg-gradient-to-br from-[#FFB5E8]/10 via-[#B5DEFF]/10 to-[#FFFFD1]/10"></div>
+      <div className="fixed inset-0 bg-gradient-to-br from-[#FFB5E8]/10 via-[#B5DEFF]/10 to-[#FFFFD1]/10 -z-20"></div>
 
       {/* Soft Glow Overlay */}
       <div
-        className="fixed inset-0 opacity-20"
+        className="fixed inset-0 opacity-20 -z-10"
         style={{
           background: 'radial-gradient(circle at 30% 20%, #FFB5E8 0%, transparent 50%), radial-gradient(circle at 70% 80%, #B5DEFF 0%, transparent 50%)',
         }}
@@ -97,7 +97,7 @@ export const HomePage: React.FC = () => {
       </div>
       
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-7xl my-8">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 pt-8">
         {/* Title - Super Kawaii Style with Bouncy Effect */}
         <div className="text-center mb-8 md:mb-16">
           <div className="relative inline-block">

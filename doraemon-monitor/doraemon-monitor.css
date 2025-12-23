@@ -27,117 +27,18 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(180deg, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
   display: flex;
   flex-direction: column;
   color: var(--text-primary);
   transition: background 0.5s ease;
+  overflow-x: hidden; /* 彻底杜绝左右滑动 */
+  overflow-y: auto;   /* 仅允许垂直滚动 */
 }
 
-/* Dark Mode */
-.doraemon-app.dark-mode {
-    --bg-gradient-top: #263238;
-    --bg-gradient-bottom: #37474F;
-    --glass-bg: rgba(30, 40, 50, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-primary: #ECEFF1;
-    --text-secondary: #B0BEC5;
-}
-
-.doraemon-app.alarm-mode {
-    background: linear-gradient(180deg, #ffcdd2 0%, #ef5350 100%);
-    animation: alarm-pulse 0.5s infinite alternate;
-}
-
-@keyframes alarm-pulse {
-    from { filter: brightness(1); }
-    to { filter: brightness(0.9); }
-}
-
-/* Glassmorphism Card Utility */
-.glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    border-radius: 20px;
-    padding: 1rem;
-}
-
-/* Header */
-.doraemon-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 1rem 5%;
-    gap: 10px;
-    z-index: 100;
-    margin-top: env(safe-area-inset-top);
-}
-
-.stat-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 120px;
-    flex: 1;
-    max-width: 220px;
-    padding: 0.8rem !important;
-}
-
-.stat-label {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.stat-value {
-    font-size: 1.6rem;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.theme-toggle-btn {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-/* Main Content Layout */
-.doraemon-main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    padding: 0 5%;
-    gap: 3rem;
-    overflow: hidden; /* Prevent body scroll, use individual scrolls if needed */
-}
-
-.monitor-section-wrapper {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    height: 100%;
-    min-height: 350px;
-}
+/* ... (keep intermediate styles) ... */
 
 /* Visualizer Container - Positioned behind Head */
 .visualizer-container {
@@ -145,8 +46,8 @@ body {
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 120%;
-    max-width: 900px;
+    width: 100%; /* 从 120% 缩回 100%，防止溢出 */
+    max-width: 1000px;
     height: 400px;
     display: flex;
     align-items: center;

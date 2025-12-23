@@ -223,11 +223,12 @@
       <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">未连接</span>
     </div>
     <div class="auth-input-group" id="authSection">
-      <input type="password" id="adminKey" class="auth-input" placeholder="输入管理密码" value="spencer">
+      <input type="password" id="adminKey" class="auth-input" placeholder="输入管理密码">
       <button onclick="login()" class="btn-primary">登录 & 加载</button>
     </div>
     <div id="loggedInTools" style="display: none;">
       <button onclick="refreshData()" class="btn-secondary">🔄 刷新数据</button>
+      <button onclick="logout()" class="btn-secondary" style="color: var(--danger); border-color: var(--danger);">🚪 退出登录</button>
     </div>
   </div>
 
@@ -278,17 +279,29 @@
 <script>
   // 配置
   const API_URL = '/api/verify-license'; 
+  const SESSION_KEY = 'anypok_admin_key';
   let currentData = [];
   let generatedCodes = [];
 
+  // === 初始化：检查会话 ===
+  window.addEventListener('load', () => {
+    const savedKey = sessionStorage.getItem(SESSION_KEY);
+    if (savedKey) {
+      document.getElementById('adminKey').value = savedKey;
+      login(true); // 静默/自动登录
+    }
+  });
+
   // === 登录 & 加载数据 ===
-  async function login() {
+  async function login(isAuto = false) {
     const key = document.getElementById('adminKey').value;
     if (!key) return alert('请输入密码');
 
     const btn = document.querySelector('.btn-primary');
-    btn.textContent = '加载中...';
-    btn.disabled = true;
+    if (!isAuto) {
+      btn.textContent = '加载中...';
+      btn.disabled = true;
+    }
 
     try {
       const res = await fetch(API_URL, {
@@ -303,10 +316,15 @@
       const json = await res.json();
 
       if (!json.success) {
+        if (isAuto) {
+          // 自动登录失败（可能是密码改了），清除缓存
+          sessionStorage.removeItem(SESSION_KEY);
+        }
         throw new Error(json.message);
       }
 
       // 登录成功
+      sessionStorage.setItem(SESSION_KEY, key); // 保存会话
       document.getElementById('authSection').style.display = 'none';
       document.getElementById('loggedInTools').style.display = 'block';
       document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
@@ -316,7 +334,7 @@
       renderMonitorList();
 
     } catch (err) {
-      alert('加载失败: ' + err.message);
+      if (!isAuto) alert('加载失败: ' + err.message);
       document.getElementById('connectionStatus').textContent = `🔴 连接失败`;
       document.getElementById('connectionStatus').style.color = 'var(--danger)';
     } finally {
@@ -325,8 +343,13 @@
     }
   }
 
+  function logout() {
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  }
+
   function refreshData() {
-    login();
+    login(true);
   }
 
   // === 辅助：解析 User Agent ===

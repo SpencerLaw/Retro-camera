@@ -248,8 +248,9 @@ export default async function handler(
 
     let metadata: LicenseMetadata;
 
-    if (!metadata) {
+    if (!rawData) {
       // 首次激活
+      console.log(`[License] New Activation: ${cleanCode} Device: ${deviceId}`);
       metadata = {
         code: cleanCode,
         totalDevices: 1,
@@ -276,13 +277,21 @@ export default async function handler(
       
       if (deviceIndex > -1) {
         // 更新现有设备
+        console.log(`[License] Update Device: ${cleanCode} Device: ${deviceId}`);
         metadata.devices[deviceIndex].lastSeen = nowISO;
         metadata.devices[deviceIndex].ip = ip;
+        // 只有当有明确的地理位置信息时才更新，避免覆盖
         if (decodedCity) metadata.devices[deviceIndex].city = decodedCity;
         if (country) metadata.devices[deviceIndex].country = country;
+        
+        // 更新 UserAgent，以防用户更新了浏览器
+        metadata.devices[deviceIndex].ua = rawDeviceInfo || getDeviceType(ua);
+        
+        // 确保 License 的最后使用时间也更新
         metadata.lastUsedTime = nowISO;
       } else {
         // 添加新设备
+        console.log(`[License] New Device: ${cleanCode} Device: ${deviceId}`);
         if (metadata.devices.length >= metadata.maxDevices) {
           return res.status(403).json({ 
             success: false, 

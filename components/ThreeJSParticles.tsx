@@ -839,7 +839,19 @@ const ThreeJSParticles: React.FC = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      
+      // 响应式相机调整：屏幕越窄，相机越远，以保证内容可见
+      if (window.innerWidth < 768) {
+        camera.position.z = 40; // 手机/窄屏模式拉远
+        camera.position.x = 0;  // 居中
+      } else {
+        camera.position.z = 30; // 桌面模式
+        camera.position.x = 8;  // 偏移以避开右侧面板
+      }
     };
+    
+    // 初始化时也调用一次
+    handleResize();
 
     window.addEventListener('resize', handleResize);
     animate();
@@ -1083,22 +1095,10 @@ const ThreeJSParticles: React.FC = () => {
       <style>
         {`
           @keyframes twinkle {
-            0%, 100% { 
-              opacity: 0.3; 
-              transform: scale(1);
-            }
-            25% {
-              opacity: 0.8;
-              transform: scale(1.1);
-            }
-            50% { 
-              opacity: 1; 
-              transform: scale(1.2);
-            }
-            75% {
-              opacity: 0.7;
-              transform: scale(1.05);
-            }
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            25% { opacity: 0.8; transform: scale(1.1); }
+            50% { opacity: 1; transform: scale(1.2); }
+            75% { opacity: 0.7; transform: scale(1.05); }
           }
           @keyframes glow {
             0%, 100% { box-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
@@ -1107,6 +1107,71 @@ const ThreeJSParticles: React.FC = () => {
           @keyframes borderGlow {
             0%, 100% { border-color: rgba(66, 165, 245, 0.3); }
             50% { border-color: rgba(66, 165, 245, 0.8); }
+          }
+
+          /* Desktop Defaults */
+          .particles-ui-header {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 200;
+          }
+
+          .particles-ui-panel {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 22.4rem;
+            max-height: calc(100vh - 3rem);
+            overflow-y: auto;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%);
+            backdrop-filter: blur(20px);
+            border: 2px solid transparent;
+            background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%), linear-gradient(135deg, #00f5ff, #7c4dff, #ff0080);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            pointer-events: auto;
+            z-index: 200;
+            box-shadow: 0 8px 32px rgba(0, 245, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+          }
+
+          /* Mobile / Split Screen / Narrow View */
+          @media (max-width: 1024px) {
+            .particles-ui-panel {
+              width: 18rem;
+              padding: 1rem;
+            }
+          }
+
+          @media (max-width: 768px) {
+            /* Adjust Header */
+            .particles-ui-header {
+              top: 1rem;
+              left: 1rem;
+              flex-direction: row; /* Horizontal on mobile to save vertical space */
+              align-items: center;
+              flex-wrap: wrap;
+            }
+
+            /* Adjust Panel to be bottom sheet or compact */
+            .particles-ui-panel {
+              top: auto;
+              bottom: 1rem;
+              right: 1rem;
+              left: 1rem;
+              width: auto;
+              max-height: 40vh;
+              border-radius: 1rem;
+            }
+            
+            /* Camera Preview Adjustment (Inline style override via logic might be needed, but CSS helps) */
           }
         `}
       </style>
@@ -1143,7 +1208,10 @@ const ThreeJSParticles: React.FC = () => {
         border: '2px solid rgba(0, 245, 255, 0.5)',
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0, 245, 255, 0.3)',
-        isolation: 'isolate' // 创建新的层叠上下文，防止影响其他图层
+        isolation: 'isolate',
+        // Responsive hide on very small screens if needed, or adjust
+        transformOrigin: 'bottom left',
+        transform: 'scale(0.8)' // Slightly smaller default
       }}>
         <canvas
           ref={canvasRef}
@@ -1176,7 +1244,7 @@ const ThreeJSParticles: React.FC = () => {
       {/* Main UI Container */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
         {/* Header / Status */}
-        <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', pointerEvents: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="particles-ui-header">
         {/* Back Home Button */}
         <Link
           to="/"
@@ -1240,27 +1308,7 @@ const ThreeJSParticles: React.FC = () => {
         </div>
 
         {/* Control Panel - Futuristic Design */}
-        <div
-          style={{
-            position: 'fixed',
-            top: '1.5rem',
-            right: '1.5rem',
-            width: '22.4rem',
-            maxHeight: 'calc(100vh - 3rem)',
-            overflowY: 'auto',
-            background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%)',
-            backdropFilter: 'blur(20px)',
-            border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(30, 30, 60, 0.85) 100%), linear-gradient(135deg, #00f5ff, #7c4dff, #ff0080)',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box',
-            borderRadius: '1.5rem',
-            padding: '1.5rem',
-            pointerEvents: 'auto',
-            zIndex: 200,
-            boxShadow: '0 8px 32px rgba(0, 245, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-          }}
-        >
+        <div className="particles-ui-panel">
           <h2 style={{
             color: 'transparent',
             background: 'linear-gradient(90deg, #00f5ff 0%, #7c4dff 100%)',

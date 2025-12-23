@@ -411,7 +411,7 @@ const DoraemonMonitorApp: React.FC = () => {
       </header>
 
       {/* 主内容 */}
-      <main className="doraemon-main-content" style={{ flexDirection: 'row', gap: '4rem', padding: '0 5%' }}>
+      <main className="doraemon-main-content">
         {/* 左侧参考面板 */}
         <NoiseLevelReference />
 

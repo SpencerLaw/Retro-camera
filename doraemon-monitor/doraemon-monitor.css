@@ -33,7 +33,7 @@ body {
   transition: background 0.5s ease;
 }
 
-/* Dark Mode - Slightly darker gradient */
+/* Dark Mode */
 .doraemon-app.dark-mode {
     --bg-gradient-top: #263238;
     --bg-gradient-bottom: #37474F;
@@ -110,44 +110,46 @@ body {
     box-shadow: var(--glass-shadow);
 }
 
-/* Main Content */
+/* Main Content - Improved Responsive Layout */
 .doraemon-main-content {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     position: relative;
     width: 100%;
+    padding: 0 5%;
+    gap: 4rem;
+    overflow-y: auto;
 }
 
-/* Visualizer (Audio Wave) - Heavy Duty Cool Design */
+/* Visualizer (Audio Wave) - Positioned behind Head */
 .visualizer-container {
     position: absolute;
-    top: 50%;
+    top: 42%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
-    max-width: 800px; /* Increased width */
+    max-width: 800px;
     height: 500px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px; /* Slightly wider gap */
+    gap: 6px;
     z-index: 0;
 }
 
 .wave-bar {
-    width: 10px; /* Thicker bars */
+    width: 10px;
     min-height: 8px;
     border-radius: 20px;
-    transition: height 0.08s ease-out; /* Much snappier reaction */
+    transition: height 0.08s ease-out;
     box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
     will-change: height, background, box-shadow;
     position: relative;
 }
 
-/* Neon Cap */
 .wave-bar::after {
     content: '';
     position: absolute;
@@ -160,17 +162,15 @@ body {
     filter: blur(3px);
 }
 
-/* Mascot Wrapper */
 .doraemon-wrapper {
     position: relative;
     z-index: 2;
-    width: 250px;
-    height: 250px;
+    width: clamp(150px, 30vh, 250px);
+    height: clamp(150px, 30vh, 250px);
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Huge dB Value */
 .db-display-container {
     z-index: 2;
     text-align: center;
@@ -178,7 +178,7 @@ body {
 }
 
 .db-value-huge {
-    font-size: clamp(4rem, 20vw, 12rem);
+    font-size: clamp(3rem, 15vw, 9rem);
     font-weight: 800;
     line-height: 1;
     background: linear-gradient(135deg, #FFD700 30%, #FFCA28 100%);
@@ -187,16 +187,7 @@ body {
     filter: drop-shadow(0 4px 0 rgba(255,255,255,0.8));
     font-family: 'Fredoka', sans-serif;
     transition: font-size 0.2s ease;
-}
-
-/* Mascot Wrapper - Adaptive scaling */
-.doraemon-wrapper {
-    position: relative;
-    z-index: 2;
-    width: clamp(150px, 30vh, 250px);
-    height: clamp(150px, 30vh, 250px);
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: -2px;
 }
 
 .db-label-small {
@@ -225,25 +216,6 @@ body {
     gap: 1.5rem;
 }
 
-/* Gradient Progress Bar */
-.gradient-progress-track {
-    width: 100%;
-    height: 12px;
-    background: #E0E0E0;
-    border-radius: 6px;
-    position: relative;
-    overflow: hidden;
-}
-
-.gradient-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent-green) 0%, var(--accent-gold) 60%, var(--accent-red) 100%);
-    width: 0%;
-    border-radius: 6px;
-    transition: width 0.1s linear;
-}
-
-/* Slider Design */
 .slider-row {
     display: flex;
     align-items: center;
@@ -285,10 +257,6 @@ input[type=range].custom-slider::-webkit-slider-thumb {
     transition: transform 0.1s;
 }
 
-input[type=range].custom-slider::-webkit-slider-thumb:active {
-    transform: scale(1.2);
-}
-
 .reset-btn {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -303,176 +271,7 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     box-shadow: var(--glass-shadow);
 }
 
-.reset-btn:hover {
-    background: white;
-    transform: translateY(-2px);
-}
-
-.reset-btn:active {
-    transform: translateY(0);
-}
-
-/* Responsive Optimization */
-@media (max-width: 1024px) {
-    .doraemon-header {
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-        padding: 1vh 2%;
-    }
-    .theme-toggle-btn {
-        order: -1; /* Move back button and theme toggle to top/sides */
-    }
-    .stat-card {
-        flex: 1;
-        min-width: 120px;
-        padding: 0.5rem;
-    }
-    .stat-value {
-        font-size: 1.4rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .doraemon-wrapper {
-        width: clamp(120px, 25vh, 180px);
-        height: clamp(120px, 25vh, 180px);
-    }
-    .db-value-huge {
-        font-size: clamp(3.5rem, 18vw, 8rem);
-    }
-    .stat-card {
-        min-width: 100px;
-    }
-}
-
-@media (max-width: 480px) {
-    .doraemon-header {
-        gap: 5px;
-    }
-    .stat-card {
-        min-width: 80px;
-        padding: 0.4rem;
-    }
-    .stat-label {
-        font-size: 0.75rem;
-    }
-    .stat-value {
-        font-size: 1.1rem;
-    }
-    .db-value-huge {
-        font-size: clamp(3rem, 20vw, 6rem);
-    }
-    .slider-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
-        text-align: center;
-    }
-}
-
-/* =========================================
-   Restored Styles for Start Page & Alarm
-   ========================================= */
-
-/* Start Layer - Restored */
-.doraemon-start-layer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--dora-blue); /* Fallback if var not defined, but we defined vars differently now. Let's use specific color or map to new vars */
-  background-color: #1293EE; /* Original blue */
-  z-index: 2000; /* High z-index */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  padding: 20px;
-  text-align: center;
-}
-
-.doraemon-btn-big {
-  margin-top: 30px;
-  padding: 30px 40px;
-  font-size: 3rem;
-  font-weight: 900;
-  line-height: 1.3;
-  color: #1293EE;
-  background: white;
-  border: none;
-  border-radius: 60px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  transition: transform 0.1s;
-  max-width: 90%;
-  width: auto;
-  white-space: nowrap;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.doraemon-btn-big:active {
-  transform: scale(0.96);
-  opacity: 0.95;
-}
-
-.doraemon-btn-big span {
-  display: block;
-  text-align: center;
-  width: 100%;
-}
-
-.doraemon-error-box {
-  display: block;
-  margin-top: 25px;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid #FFEB3B;
-  color: #FFEB3B;
-  border-radius: 12px;
-  text-align: left;
-  font-size: 1rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  max-width: 90%;
-  width: 400px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Giant Alarm Text - Restored */
-.doraemon-giant-text {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  text-align: center;
-  font-size: min(35vw, 40vh);
-  font-weight: 900;
-  color: #FFF;
-  text-shadow: 0 10px 0 #000, 0 0 50px rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  pointer-events: none;
-  white-space: nowrap;
-  line-height: 1;
-  animation: pulse-text 0.5s infinite alternate;
-}
-
-@keyframes pulse-text {
-  from { transform: translate(-50%, -50%) scale(1); }
-  to { transform: translate(-50%, -50%) scale(1.1); }
-}
-
-
-/* =========================================
-   Noise Level Reference Indicator (Vertical)
-   ========================================= */
-
+/* Noise Level Reference Panel */
 .db-reference-panel {
     width: 320px;
     padding: 1.5rem;
@@ -480,7 +279,6 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     flex-direction: column;
     gap: 1rem;
     z-index: 5;
-    margin-left: 2rem;
 }
 
 .reference-title {
@@ -500,7 +298,6 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     padding: 10px 0;
 }
 
-/* ��ֱ���䱳���� */
 .meter-bar-bg {
     width: 12px;
     height: 100%;
@@ -516,17 +313,9 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     bottom: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to top, 
-        #66bb6a 0%,    /* 0-60 Green */
-        #66bb6a 50%, 
-        #ffd700 50%,   /* 60-100 Yellow */
-        #ffd700 83.3%, 
-        #ef5350 83.3%, /* 100-120 Red */
-        #ef5350 100%
-    );
+    background: linear-gradient(to top, #66bb6a 0%, #66bb6a 50%, #ffd700 50%, #ffd700 83.3%, #ef5350 83.3%, #ef5350 100%);
 }
 
-/* ʵʱλ��ָ�� */
 .current-level-pointer {
     position: absolute;
     left: -8px;
@@ -549,11 +338,10 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     border-bottom: 8px solid transparent;
 }
 
-/* �ȼ��ڵ� */
 .level-nodes {
     flex: 1;
     display: flex;
-    flex-direction: column-reverse; /* ���������� */
+    flex-direction: column-reverse;
     justify-content: space-between;
     position: relative;
 }
@@ -562,7 +350,7 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 0; /* ����Ϊê�� */
+    height: 0;
     position: relative;
 }
 
@@ -598,18 +386,109 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     margin-top: 0.5rem;
 }
 
-/* ��Ӧʽ���� */
+/* Start Page & Alarm Overlay */
+.doraemon-start-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1293EE;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.doraemon-btn-big {
+  margin-top: 30px;
+  padding: 30px 40px;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.3;
+  color: #1293EE;
+  background: white;
+  border: none;
+  border-radius: 60px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.doraemon-error-box {
+  display: block;
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #FFEB3B;
+  color: #FFEB3B;
+  border-radius: 12px;
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.5;
+  width: 400px;
+  max-width: 90%;
+}
+
+.doraemon-giant-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  font-size: min(35vw, 40vh);
+  font-weight: 900;
+  color: #FFF;
+  text-shadow: 0 10px 0 #000, 0 0 50px rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1;
+  animation: pulse-text 0.5s infinite alternate;
+}
+
+@keyframes pulse-text {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* Responsive Optimization */
+@media (max-width: 1200px) {
+    .doraemon-main-content { gap: 2rem; }
+    .db-reference-panel { width: 280px; }
+}
+
 @media (max-width: 1024px) {
     .doraemon-main-content {
         flex-direction: column;
-        overflow-y: auto;
-        padding: 2rem 0;
+        padding: 2rem 5%;
+        gap: 3rem;
     }
     .db-reference-panel {
         margin-left: 0;
-        width: 90%;
-        max-width: 400px;
-        height: auto;
+        width: 100%;
+        max-width: 500px;
+        order: 2;
+    }
+    .visualizer-container {
+        top: 30%;
     }
 }
 
+@media (max-width: 768px) {
+    .doraemon-header {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    .stat-card {
+        flex: 1;
+        min-width: 100px;
+        padding: 0.5rem;
+    }
+}

@@ -223,6 +223,47 @@ const DoraemonMonitorApp: React.FC = () => {
     return `${m}:${s}`;
   };
 
+  // 噪音等级参考组件
+  const NoiseLevelReference = () => {
+    const levels = [
+      { min: 0, max: 20, label: "0–20 dB 极度安静", desc: "几乎听不到", icon: "🤫" },
+      { min: 20, max: 40, label: "20–40 dB 非常安静", desc: "轻声细语", icon: "🍃" },
+      { min: 40, max: 60, label: "40–60 dB 正常背景音", desc: "普通交谈", icon: "💬" },
+      { min: 60, max: 80, label: "60–80 dB 中等响度", desc: "繁忙街道", icon: "🚗" },
+      { min: 80, max: 100, label: "80–100 dB 响亮（有害）", desc: "极其嘈杂", icon: "⚠️" },
+      { min: 100, max: 120, label: "100–120 dB 非常响亮", desc: "震耳欲聋", icon: "📢" },
+    ];
+
+    // 计算指针位置 (0-120 映射到 0-100%)
+    const pointerBottom = Math.min(100, Math.max(0, (currentDb / 120) * 100));
+
+    return (
+      <div className="glass-card db-reference-panel">
+        <div className="reference-title">噪音分贝级别参考</div>
+        <div className="vertical-meter-container">
+          <div className="meter-bar-bg">
+            <div className="meter-gradient-fill" />
+            <div className="current-level-pointer" style={{ bottom: `${pointerBottom}%` }} />
+          </div>
+          <div className="level-nodes">
+            {levels.map((level, idx) => (
+              <div key={idx} className="level-node">
+                <div className="node-line" />
+                <div className="node-content">
+                  <div className="node-label" style={{ color: currentDb >= level.min && currentDb < level.max ? 'var(--accent-blue)' : 'inherit' }}>
+                    {level.label} {level.icon}
+                  </div>
+                  <div className="node-desc">{level.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="reference-footer">分贝值仅供参考</div>
+      </div>
+    );
+  };
+
   const barPercent = Math.min(100, Math.max(0, (currentDb - 30) * 1.5));
   const limitBarPercent = ((limit - 30) * 1.5);
 
@@ -346,13 +387,18 @@ const DoraemonMonitorApp: React.FC = () => {
       </header>
 
       {/* 主内容 */}
-      <main className="doraemon-main-content">
-        {/* 背景可视化波纹 */}
-        {renderVisualizer()}
+      <main className="doraemon-main-content" style={{ flexDirection: 'row', gap: '4rem', padding: '0 5%' }}>
+        {/* 左侧参考面板 */}
+        <NoiseLevelReference />
 
-        {/* 哆啦A梦 (缩放动画) */}
-        <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 200})` }}>
-          <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          {/* 背景可视化波纹 */}
+          {renderVisualizer()}
+
+          {/* 哆啦A梦 (缩放动画) */}
+          <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 200})` }}>
+            <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+              {/* ... (keep existing SVG content) ... */}
             {/* 头部背景 (蓝色) */}
             <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2"/>
 

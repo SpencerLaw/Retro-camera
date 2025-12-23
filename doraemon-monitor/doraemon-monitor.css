@@ -218,3 +218,164 @@ input[type=range].custom-slider::-webkit-slider-thumb {
 .alarm-mode .stat-card, .alarm-mode .db-reference-panel, .alarm-mode .controls-card {
     background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3);
 }
+
+/* ===== 分贝参考底部提示 - 玻璃磨砂效果 ===== */
+.reference-footer {
+    margin-top: 15px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.25) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-sub);
+    box-shadow:
+        0 4px 16px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    letter-spacing: 0.5px;
+}
+
+/* ===== 启动页面样式 ===== */
+.doraemon-start-layer {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(160deg, #E3F2FD 0%, #BBDEFB 30%, #E1BEE7 70%, #F3E5F5 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 启动页背景装饰 */
+.doraemon-start-layer::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(79, 195, 247, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(186, 104, 200, 0.15) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-2%, 2%) rotate(3deg); }
+}
+
+/* 大按钮 - 玻璃磨砂风格 */
+.doraemon-btn-big {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 28px 55px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1976D2;
+    background: linear-gradient(145deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid rgba(255,255,255,0.8);
+    border-radius: 28px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 8px 32px rgba(25, 118, 210, 0.15),
+        0 2px 8px rgba(0,0,0,0.05),
+        inset 0 2px 0 rgba(255,255,255,0.9);
+    position: relative;
+    z-index: 10;
+}
+
+.doraemon-btn-big:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow:
+        0 14px 40px rgba(25, 118, 210, 0.25),
+        0 4px 12px rgba(0,0,0,0.08),
+        inset 0 2px 0 rgba(255,255,255,0.9);
+    background: linear-gradient(145deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 100%);
+}
+
+.doraemon-btn-big:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow:
+        0 4px 16px rgba(25, 118, 210, 0.2),
+        0 1px 4px rgba(0,0,0,0.05),
+        inset 0 2px 0 rgba(255,255,255,0.8);
+}
+
+.doraemon-btn-big span:first-child {
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+}
+
+.doraemon-btn-big span:last-child {
+    font-size: 1.2rem;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* 错误提示框 - 玻璃磨砂 */
+.doraemon-error-box {
+    margin-top: 25px;
+    padding: 18px 28px;
+    max-width: 400px;
+    background: linear-gradient(135deg, rgba(255,82,82,0.15) 0%, rgba(255,138,128,0.1) 100%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,82,82,0.3);
+    border-radius: 18px;
+    color: #C62828;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    box-shadow:
+        0 6px 24px rgba(255,82,82,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.4);
+    animation: shake-error 0.5s ease-in-out;
+}
+
+@keyframes shake-error {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+
+/* 深色模式适配 */
+.dark-mode .reference-footer {
+    background: linear-gradient(135deg, rgba(50,50,60,0.6) 0%, rgba(30,30,40,0.4) 100%);
+    border-color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.6);
+}
+
+.dark-mode .doraemon-error-box {
+    background: linear-gradient(135deg, rgba(255,82,82,0.2) 0%, rgba(255,138,128,0.15) 100%);
+    border-color: rgba(255,82,82,0.4);
+}
+
+/* 启动页麦克风提示 - 玻璃磨砂 */
+.doraemon-start-layer .mt-10 {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.2) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 20px;
+    color: #546E7A;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow:
+        0 4px 16px rgba(0,0,0,0.04),
+        inset 0 1px 0 rgba(255,255,255,0.7);
+}

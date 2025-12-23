@@ -121,40 +121,41 @@ body {
     width: 100%;
 }
 
-/* Visualizer (Audio Wave) */
+/* Visualizer (Audio Wave) - Upgraded Cool Design */
 .visualizer-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
-    height: 300px;
+    height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
     z-index: 0;
-    opacity: 0.4;
 }
 
 .wave-bar {
-    width: 8px;
-    height: 20px;
-    background: linear-gradient(to top, var(--accent-blue), var(--accent-green));
-    border-radius: 4px;
-    animation: wave-animation 1s infinite ease-in-out;
+    width: 6px;
+    min-height: 4px;
+    background: var(--accent-blue);
+    border-radius: 10px;
+    transition: all 0.1s ease-out; /* Smooth real-time reaction */
+    box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+    will-change: height, background-color, box-shadow;
 }
 
-/* Create a staggered wave effect via child selectors in React or JS if simpler, 
-   but here we simulate with n-child for the CSS-only parts or basic styling */
-.wave-bar:nth-child(odd) { animation-duration: 0.8s; }
-.wave-bar:nth-child(2n) { animation-duration: 1.1s; }
-.wave-bar:nth-child(3n) { animation-duration: 1.3s; }
-.wave-bar:nth-child(4n) { animation-duration: 0.9s; }
-
-@keyframes wave-animation {
-    0%, 100% { height: 20px; opacity: 0.5; }
-    50% { height: 100px; opacity: 1; }
+/* Add a neon tip effect */
+.wave-bar::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 6px;
+    background: #FFF;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.8;
 }
 
 /* Mascot Wrapper */
@@ -497,7 +498,7 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     padding: 10px 0;
 }
 
-/* ´¹Ö±½¥±ä±³¾°Ìõ */
+/* ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ä±³ï¿½ï¿½ï¿½ï¿½ */
 .meter-bar-bg {
     width: 12px;
     height: 100%;
@@ -523,7 +524,7 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     );
 }
 
-/* ÊµÊ±Î»ÖÃÖ¸Õë */
+/* ÊµÊ±Î»ï¿½ï¿½Ö¸ï¿½ï¿½ */
 .current-level-pointer {
     position: absolute;
     left: -8px;
@@ -546,11 +547,11 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     border-bottom: 8px solid transparent;
 }
 
-/* µÈ¼¶½Úµã */
+/* ï¿½È¼ï¿½ï¿½Úµï¿½ */
 .level-nodes {
     flex: 1;
     display: flex;
-    flex-direction: column-reverse; /* ´ÓÏÂÍùÉÏÅÅ */
+    flex-direction: column-reverse; /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
     justify-content: space-between;
     position: relative;
 }
@@ -559,7 +560,7 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 0; /* ½ö×÷ÎªÃªµã */
+    height: 0; /* ï¿½ï¿½ï¿½ï¿½ÎªÃªï¿½ï¿½ */
     position: relative;
 }
 
@@ -595,7 +596,7 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
     margin-top: 0.5rem;
 }
 
-/* ÏìÓ¦Ê½µ÷Õû */
+/* ï¿½ï¿½Ó¦Ê½ï¿½ï¿½ï¿½ï¿½ */
 @media (max-width: 1024px) {
     .doraemon-main-content {
         flex-direction: column;

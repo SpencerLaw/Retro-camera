@@ -272,21 +272,41 @@ const DoraemonMonitorApp: React.FC = () => {
   else if (currentDb > limit) dbColor = '#DD0000';
   else if (currentDb > limit - 5) dbColor = '#FACE05';
 
-  // 生成可视化条
+  // 生成炫酷可视化频谱条
   const renderVisualizer = () => {
-    // 生成20个条，中间高两边低
-    const bars = Array.from({ length: 20 }).map((_, i) => {
-      // 简单的动态高度缩放，基于 currentDb
-      // 让它稍微随机一点，但总体受 currentDb 控制
-      const baseHeight = 20 + Math.random() * 20;
-      const scale = Math.max(0.5, (currentDb - 30) / 40);
-      const style = {
-        height: `${baseHeight * scale}px`,
-        animationDuration: `${0.8 + Math.random() * 0.5}s`
-      };
-      return <div key={i} className="wave-bar" style={style} />;
-    });
-    return <div className="visualizer-container">{bars}</div>;
+    const BAR_COUNT = 40;
+    
+    // 动态计算颜色：安静时蓝色，吵闹时变红
+    // 映射逻辑：40dB (Blue: 200) -> 90dB (Red: 0)
+    const hue = Math.max(0, 200 - (currentDb - 40) * 4);
+    const color = `hsl(${hue}, 85%, 60%)`;
+    const glow = `0 0 15px hsla(${hue}, 85%, 60%, 0.6)`;
+
+    return (
+      <div className="visualizer-container">
+        {Array.from({ length: BAR_COUNT }).map((_, i) => {
+          // 对称逻辑：中间高，两边低
+          const distanceFromCenter = Math.abs(i - BAR_COUNT / 2);
+          const normalizedDistance = 1 - (distanceFromCenter / (BAR_COUNT / 2));
+          
+          // 实时起伏量：分贝越高，波动越剧烈
+          const dbFactor = (currentDb - 35) / 50; // 0 到 1+
+          const randomFactor = 0.7 + Math.random() * 0.6;
+          
+          // 最终高度计算
+          const height = Math.max(10, 250 * normalizedDistance * dbFactor * randomFactor);
+          
+          const style = {
+            height: `${height}px`,
+            backgroundColor: color,
+            boxShadow: glow,
+            opacity: 0.3 + (normalizedDistance * 0.7) // 边缘半透明
+          };
+          
+          return <div key={i} className="wave-bar" style={style} />;
+        })}
+      </div>
+    );
   };
 
   // 如果未授权，显示授权页面

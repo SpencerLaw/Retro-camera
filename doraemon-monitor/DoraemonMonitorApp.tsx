@@ -285,9 +285,9 @@ const DoraemonMonitorApp: React.FC = () => {
 
   // 生成极度炫酷的频谱条
   const renderVisualizer = () => {
-    const BAR_COUNT = 40; // 减少数量，增加间距，更精致
+    const BAR_COUNT = 60; // 增加数量，更长的声纹
     const time = Date.now() / 1000;
-    
+
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     const mainColor = `hsl(${hue}, 90%, 65%)`;
     const glowColor = `hsla(${hue}, 90%, 60%, 0.4)`;
@@ -297,13 +297,13 @@ const DoraemonMonitorApp: React.FC = () => {
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
           const distanceFromCenter = Math.abs(i - BAR_COUNT / 2);
           const normalizedDistance = 1 - (distanceFromCenter / (BAR_COUNT / 2));
-          
+
           const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
           const wave = Math.sin(i * 0.4 + time * 8) * 0.1;
           const totalFactor = Math.max(0.02, (dbPower + wave) * (0.8 + Math.random() * 0.2));
-          
+
           const targetHeight = 10 + (280 * normalizedDistance * totalFactor);
-          
+
           const style = {
             height: `${targetHeight}px`,
             background: `linear-gradient(to top, rgba(255,255,255,0.1) 0%, ${mainColor} 100%)`,
@@ -311,7 +311,7 @@ const DoraemonMonitorApp: React.FC = () => {
             opacity: 0.1 + (normalizedDistance * 0.7),
             transitionDelay: `${distanceFromCenter * 0.005}s`
           };
-          
+
           return <div key={i} className="wave-bar" style={style} />;
         })}
       </div>
@@ -330,13 +330,40 @@ const DoraemonMonitorApp: React.FC = () => {
         {/* 返回按钮 */}
         <button
           onClick={() => navigate('/')}
-          className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#1293EE] backdrop-blur-sm transition-all text-[#1293EE] hover:text-[#0d6ab8] shadow-lg"
+          className="fixed top-4 left-4 z-50 p-3 rounded-2xl bg-white hover:bg-gray-50 border border-gray-200 transition-all text-gray-600 hover:text-gray-800 shadow-lg"
         >
           <ArrowLeft size={24} />
         </button>
-        
-        <div className="text-8xl mb-5">🤖</div>
-        <h1 className="text-4xl font-bold mb-8 text-[#1293EE]">Anypok Doraemon</h1>
+
+        {/* 哆啦A梦 SVG */}
+        <div className="doraemon-start-icon">
+          <svg viewBox="0 0 200 200" className="w-full h-full">
+            <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2"/>
+            <circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
+            <ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
+            <ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
+            <circle cx="88" cy="70" r="4" fill="#000000"/>
+            <circle cx="112" cy="70" r="4" fill="#000000"/>
+            <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2"/>
+            <circle cx="97" cy="89" r="3" fill="#FFFFFF" opacity="0.8"/>
+            <line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2"/>
+            <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+            <line x1="30" y1="95" x2="80" y2="105" stroke="#333" strokeWidth="2"/>
+            <line x1="25" y1="115" x2="80" y2="115" stroke="#333" strokeWidth="2"/>
+            <line x1="30" y1="135" x2="80" y2="125" stroke="#333" strokeWidth="2"/>
+            <line x1="170" y1="95" x2="120" y2="105" stroke="#333" strokeWidth="2"/>
+            <line x1="175" y1="115" x2="120" y2="115" stroke="#333" strokeWidth="2"/>
+            <line x1="170" y1="135" x2="120" y2="125" stroke="#333" strokeWidth="2"/>
+            <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2"/>
+            <circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2"/>
+            <line x1="86" y1="180" x2="114" y2="180" stroke="#333" strokeWidth="2"/>
+            <line x1="85" y1="183" x2="115" y2="183" stroke="#333" strokeWidth="2"/>
+            <circle cx="100" cy="192" r="3" fill="#333"/>
+            <line x1="100" y1="192" x2="100" y2="200" stroke="#333" strokeWidth="2"/>
+          </svg>
+        </div>
+
+        <h1 className="start-title">Anypok Doraemon</h1>
 
         <button
           className="doraemon-btn-big"
@@ -360,7 +387,7 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
         )}
 
-        <div className="mt-10 text-lg opacity-70">
+        <div className="start-hint">
           ({t('doraemon.pleaseAllowMic')})
         </div>
       </div>

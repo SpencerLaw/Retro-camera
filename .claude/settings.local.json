@@ -20,7 +20,9 @@
       "Bash(findstr:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nRedesign Doraemon character with classic style: improve proportions, add iconic details\n\nReplace the previous design with a more authentic Doraemon character featuring:\n- Classic sky blue gradient body \\(#42A5F5 → #1976D2\\)\n- Proper white face and belly proportions\n- Four-dimensional pocket on the belly\n- Expressive eyes with dynamic states \\(calm/warning/alarm\\)\n- Red nose with highlight effect\n- Six whiskers \\(three on each side\\)\n- Red collar with golden bell\n- Enhanced SVG gradients and shadow filters\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git commit:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git remote:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

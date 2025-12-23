@@ -486,11 +486,6 @@ const DoraemonMonitorApp: React.FC = () => {
       {/* 底部控制 */}
       <footer className="doraemon-footer">
         <div className="glass-card controls-card">
-          {/* 进度条 */}
-          <div className="gradient-progress-track">
-             <div className="gradient-progress-fill" style={{ width: `${progressPercent}%` }} />
-          </div>
-
           <div className="slider-row">
             <span className="slider-label">{t('doraemon.alarmThreshold')}</span>
             <span className="slider-value-display">{limit} dB</span>

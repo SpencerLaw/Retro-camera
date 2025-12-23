@@ -272,35 +272,39 @@ const DoraemonMonitorApp: React.FC = () => {
   else if (currentDb > limit) dbColor = '#DD0000';
   else if (currentDb > limit - 5) dbColor = '#FACE05';
 
-  // 生成炫酷可视化频谱条
+  // 生成极度炫酷的频谱条
   const renderVisualizer = () => {
-    const BAR_COUNT = 40;
+    const BAR_COUNT = 60; // 增加到 60 个，更宽
     
-    // 动态计算颜色：安静时蓝色，吵闹时变红
-    // 映射逻辑：40dB (Blue: 200) -> 90dB (Red: 0)
+    // 基础颜色计算
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
-    const color = `hsl(${hue}, 85%, 60%)`;
-    const glow = `0 0 15px hsla(${hue}, 85%, 60%, 0.6)`;
+    const mainColor = `hsl(${hue}, 90%, 65%)`;
+    const darkColor = `hsl(${hue}, 90%, 40%)`;
+    const glowColor = `hsla(${hue}, 90%, 60%, 0.7)`;
 
     return (
       <div className="visualizer-container">
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
-          // 对称逻辑：中间高，两边低
+          // 对称中心距
           const distanceFromCenter = Math.abs(i - BAR_COUNT / 2);
           const normalizedDistance = 1 - (distanceFromCenter / (BAR_COUNT / 2));
           
-          // 实时起伏量：分贝越高，波动越剧烈
-          const dbFactor = (currentDb - 35) / 50; // 0 到 1+
-          const randomFactor = 0.7 + Math.random() * 0.6;
+          // 灵敏度强化：使用指数级缩放，声音越大起伏越夸张
+          const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
           
-          // 最终高度计算
-          const height = Math.max(10, 250 * normalizedDistance * dbFactor * randomFactor);
+          // 基础起伏 + 随机微动
+          const randomPulse = 0.8 + Math.random() * 0.4;
+          
+          // 最终高度：增加最大高度到 350px
+          const targetHeight = 15 + (350 * normalizedDistance * dbPower * randomPulse);
           
           const style = {
-            height: `${height}px`,
-            backgroundColor: color,
-            boxShadow: glow,
-            opacity: 0.3 + (normalizedDistance * 0.7) // 边缘半透明
+            height: `${targetHeight}px`,
+            background: `linear-gradient(to top, ${darkColor} 0%, ${mainColor} 100%)`,
+            boxShadow: `0 0 20px ${glowColor}`,
+            opacity: 0.2 + (normalizedDistance * 0.8), // 边缘更虚
+            // 简单的动画延迟，形成连绵不断的波浪感
+            transitionDelay: `${distanceFromCenter * 0.01}s`
           };
           
           return <div key={i} className="wave-bar" style={style} />;

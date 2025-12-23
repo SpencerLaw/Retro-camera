@@ -92,6 +92,10 @@ const DoraemonMonitorApp: React.FC = () => {
     let rawDb = rms > 0 ? (Math.log10(rms) * 20 + 100) : 30;
     rawDb = Math.max(35, Math.min(120, rawDb));
     if (rawDb < 40) rawDb += (Math.random() - 0.5);
+    
+    // Update title for background visibility
+    document.title = `${Math.round(rawDb)} dB - Anypok Doraemon`;
+    
     setCurrentDb(prev => prev + (rawDb - prev) * 0.5);
   };
 
@@ -118,6 +122,13 @@ const DoraemonMonitorApp: React.FC = () => {
       analyserRef.current.fftSize = 512;
       micRef.current = audioContextRef.current.createMediaStreamSource(stream);
       micRef.current.connect(analyserRef.current);
+      
+      // Hack: Connect to destination (muted) to keep audio context active in background
+      const muteGain = audioContextRef.current.createGain();
+      muteGain.gain.value = 0;
+      analyserRef.current.connect(muteGain);
+      muteGain.connect(audioContextRef.current.destination);
+
       setIsStarted(true);
       
       // Start the worker timer instead of setInterval
@@ -250,6 +261,7 @@ const DoraemonMonitorApp: React.FC = () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       if (workerRef.current) workerRef.current.postMessage('stop');
       if (wakeLockRef.current) wakeLockRef.current.release();
+      document.title = 'AnyPok'; // Restore title
     };
   }, []);
 

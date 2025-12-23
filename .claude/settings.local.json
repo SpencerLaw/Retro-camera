@@ -17,7 +17,10 @@
       "Bash(npm run dev:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfix: 优化粒子系统性能 - 提升手势响应速度\n\n🚀 性能优化：\n- 星星数量：100 → 30 (减少70%动画元素)\n- 粒子响应速度：0.08 → 0.12 (提高50%响应速度)\n- 添加 willChange 优化CSS动画性能\n- 减小星星尺寸节省渲染资源\n- 调整不透明度改善视觉效果\n\n🎯 效果：\n- 手势跟随更流畅迅速\n- 整体性能显著提升\n- 保持星空美观效果\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nRedesign Doraemon character with classic style: improve proportions, add iconic details\n\nReplace the previous design with a more authentic Doraemon character featuring:\n- Classic sky blue gradient body \\(#42A5F5 → #1976D2\\)\n- Proper white face and belly proportions\n- Four-dimensional pocket on the belly\n- Expressive eyes with dynamic states \\(calm/warning/alarm\\)\n- Red nose with highlight effect\n- Six whiskers \\(three on each side\\)\n- Red collar with golden bell\n- Enhanced SVG gradients and shadow filters\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

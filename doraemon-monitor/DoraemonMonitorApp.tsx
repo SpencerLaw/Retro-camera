@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
-import { isVerified } from './utils/licenseManager';
+import { isVerified, getSavedLicenseCode, verifyLicenseCode } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
 
@@ -31,7 +31,22 @@ const DoraemonMonitorApp: React.FC = () => {
 
   // 检查授权状态
   useEffect(() => {
-    setIsLicensed(isVerified());
+    const localVerified = isVerified();
+    setIsLicensed(localVerified);
+
+    // 如果本地已验证，静默发送心跳以更新活跃时间
+    if (localVerified) {
+      const code = getSavedLicenseCode();
+      if (code) {
+        verifyLicenseCode(code).then(res => {
+          if (res.success) {
+            console.log('License heartbeat success');
+          } else {
+            console.warn('License heartbeat failed:', res.message);
+          }
+        });
+      }
+    }
   }, []);
 
   // 授权成功回调

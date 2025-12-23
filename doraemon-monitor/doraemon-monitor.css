@@ -450,3 +450,41 @@
     height: 50px;
   }
 }
+
+/* 分屏/窄屏适配优化 */
+@media (max-width: 1024px) {
+  .doraemon-main-content {
+    flex-direction: column;
+    gap: 3vh;
+  }
+
+  .doraemon-wrapper {
+    width: 28vh;
+    height: 28vh;
+    max-width: 60vw;
+    max-height: 60vw;
+  }
+
+  .doraemon-meter-box {
+    width: 90%;
+    margin-top: 2vh;
+  }
+
+  .doraemon-db-val {
+    font-size: min(20vh, 25vw);
+  }
+  
+  .doraemon-header {
+    padding: 1vh 4%;
+    margin-top: 10px;
+  }
+  
+  .doraemon-info-box {
+    padding: 0.8rem 1rem;
+    min-width: 100px;
+  }
+  
+  .info-value {
+    font-size: 2rem;
+  }
+}

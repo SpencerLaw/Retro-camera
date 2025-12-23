@@ -301,6 +301,11 @@ const DoraemonMonitorApp: React.FC = () => {
   
   return (
     <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
+      {/* 巨型警告文字 */}
+      {state === 'alarm' && (
+        <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>
+      )}
+
       {/* 顶部栏 */}
       <header className="doraemon-header">
         <button

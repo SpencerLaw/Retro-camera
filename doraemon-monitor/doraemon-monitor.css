@@ -335,3 +335,101 @@ input[type=range].custom-slider::-webkit-slider-thumb:active {
         text-align: center;
     }
 }
+
+/* =========================================
+   Restored Styles for Start Page & Alarm
+   ========================================= */
+
+/* Start Layer - Restored */
+.doraemon-start-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--dora-blue); /* Fallback if var not defined, but we defined vars differently now. Let's use specific color or map to new vars */
+  background-color: #1293EE; /* Original blue */
+  z-index: 2000; /* High z-index */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.doraemon-btn-big {
+  margin-top: 30px;
+  padding: 30px 40px;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.3;
+  color: #1293EE;
+  background: white;
+  border: none;
+  border-radius: 60px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.1s;
+  max-width: 90%;
+  width: auto;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.doraemon-btn-big:active {
+  transform: scale(0.96);
+  opacity: 0.95;
+}
+
+.doraemon-btn-big span {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
+.doraemon-error-box {
+  display: block;
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #FFEB3B;
+  color: #FFEB3B;
+  border-radius: 12px;
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-width: 90%;
+  width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Giant Alarm Text - Restored */
+.doraemon-giant-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  font-size: min(35vw, 40vh);
+  font-weight: 900;
+  color: #FFF;
+  text-shadow: 0 10px 0 #000, 0 0 50px rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1;
+  animation: pulse-text 0.5s infinite alternate;
+}
+
+@keyframes pulse-text {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to { transform: translate(-50%, -50%) scale(1.1); }
+}
+

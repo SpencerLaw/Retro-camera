@@ -117,8 +117,23 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
     return compressed as LicenseMetadata;
   }
 
-  // 解压逻辑
+  // 容错检查：防止数据损坏导致后台崩溃
   const c = compressed as CompressedMetadata;
+  if (!c || !c.d) {
+    console.warn(`[Data Corruption] Key for ${code} is missing data`);
+    return {
+      code: code,
+      totalDevices: 0,
+      maxDevices: 3,
+      generatedDate: new Date().toISOString(),
+      expiryDate: new Date().toISOString(),
+      firstActivatedAt: new Date().toISOString(),
+      lastUsedTime: new Date().toISOString(),
+      devices: []
+    };
+  }
+
+  // 解压逻辑
   const genDate = extractDateFromCode(code) || new Date();
   const expDate = new Date(genDate);
   expDate.setFullYear(expDate.getFullYear() + 1);

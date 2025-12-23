@@ -26,6 +26,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const animationRef = useRef<number | null>(null);
   const quietTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const analysisTimerRef = useRef<NodeJS.Timeout | null>(null); // 新增：后台监测定时器
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
   const wakeLockRef = useRef<any>(null);
@@ -53,6 +54,30 @@ const DoraemonMonitorApp: React.FC = () => {
   // 授权成功回调
   const handleLicenseVerified = () => {
     setIsLicensed(true);
+  };
+
+  // 核心监测函数 - 独立于渲染，支持后台运行
+  const analyzeAudio = () => {
+    if (!analyserRef.current) return;
+
+    // 自动保活 AudioContext
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+
+    const data = new Uint8Array(analyserRef.current.fftSize);
+    analyserRef.current.getByteTimeDomainData(data);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+      const x = (data[i] - 128) / 128;
+      sum += x * x;
+    }
+    const rms = Math.sqrt(sum / data.length);
+    let rawDb = rms > 0 ? (Math.log10(rms) * 20 + 100) : 30;
+    rawDb = Math.max(35, Math.min(120, rawDb));
+    if (rawDb < 40) rawDb += (Math.random() - 0.5);
+
+    setCurrentDb(prev => prev + (rawDb - prev) * 0.5);
   };
 
   // 启动应用
@@ -86,6 +111,12 @@ const DoraemonMonitorApp: React.FC = () => {
       micRef.current.connect(analyserRef.current);
 
       setIsStarted(true);
+      
+      // 启动后台分析循环 (100ms 一次，足够灵敏且省电)
+      if (analysisTimerRef.current) clearInterval(analysisTimerRef.current);
+      analysisTimerRef.current = setInterval(analyzeAudio, 100);
+
+      // 启动渲染循环 (仅用于 UI 动画)
       loop();
 
       // 屏幕常亮
@@ -111,31 +142,10 @@ const DoraemonMonitorApp: React.FC = () => {
     }
   };
 
-  // 主循环
+  // 主循环 (仅负责视觉)
   const loop = () => {
-    if (!analyserRef.current) return;
-
     animationRef.current = requestAnimationFrame(loop);
-
-    // 自动保活
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
-    }
-
-    // 获取音量
-    const data = new Uint8Array(analyserRef.current.fftSize);
-    analyserRef.current.getByteTimeDomainData(data);
-    let sum = 0;
-    for (let i = 0; i < data.length; i++) {
-      const x = (data[i] - 128) / 128;
-      sum += x * x;
-    }
-    const rms = Math.sqrt(sum / data.length);
-    let rawDb = rms > 0 ? (Math.log10(rms) * 20 + 100) : 30;
-    rawDb = Math.max(35, Math.min(120, rawDb));
-    if (rawDb < 40) rawDb += (Math.random() - 0.5);
-
-    setCurrentDb(prev => prev + (rawDb - prev) * 0.5);
+    // 这里不再处理监测逻辑，只保持 UI 线程活跃
   };
 
   // 逻辑判断
@@ -213,6 +223,7 @@ const DoraemonMonitorApp: React.FC = () => {
   useEffect(() => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      if (analysisTimerRef.current) clearInterval(analysisTimerRef.current);
       if (wakeLockRef.current) wakeLockRef.current.release();
     };
   }, []);

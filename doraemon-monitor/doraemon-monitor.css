@@ -82,40 +82,40 @@ body, html {
   overflow: hidden;
 }
 
-/* ===== 分贝参考面板 - 固定宽度 ===== */
+/* ===== 分贝参考面板 - 放大50%显示 ===== */
 .db-reference-panel {
-  width: 160px;
-  min-width: 160px;
-  max-width: 160px;
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
   background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 20px;
-  padding: 20px 16px;
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  padding: 24px 20px;
   flex-shrink: 0;
   z-index: 10;
   align-self: center;
 }
 
 .reference-title {
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 800;
   text-align: center;
   color: var(--text-secondary);
-  margin-bottom: 16px;
-  letter-spacing: 1px;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
 }
 
 .vertical-meter-container {
-  height: 220px;
+  height: 380px;
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
 .meter-bar-bg {
-  width: 10px;
+  width: 16px;
   height: 100%;
   background: #e2e8f0;
-  border-radius: 5px;
+  border-radius: 8px;
   overflow: hidden;
   position: relative;
 }
@@ -132,12 +132,12 @@ body, html {
 
 .current-level-pointer {
   position: absolute;
-  left: -3px;
-  width: 16px; height: 16px;
+  left: -4px;
+  width: 24px; height: 24px;
   background: var(--accent-blue);
-  border: 3px solid white;
+  border: 4px solid white;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0,150,225,0.5);
+  box-shadow: 0 3px 12px rgba(0,150,225,0.6);
   transition: bottom 0.15s ease-out;
   z-index: 10;
   transform: translateY(50%);
@@ -150,23 +150,40 @@ body, html {
   justify-content: space-between;
 }
 
-.level-node { display: flex; align-items: center; }
+.level-node {
+  display: flex;
+  align-items: flex-start;
+}
+
+.node-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 .node-label {
-  font-size: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.node-desc {
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-secondary);
-  white-space: nowrap;
+  opacity: 0.8;
 }
 
 .reference-footer {
-  margin-top: 16px;
-  padding: 8px;
+  margin-top: 20px;
+  padding: 12px;
   background: rgba(0,0,0,0.03);
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: center;
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
@@ -368,7 +385,7 @@ body, html {
 }
 
 /* ===== 响应式 - 竖屏布局 ===== */
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .doraemon-main {
     flex-direction: column;
     gap: 16px;

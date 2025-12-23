@@ -179,6 +179,39 @@ const DoraemonMonitorApp: React.FC = () => {
     return () => { if (interval) clearInterval(interval); };
   }, [isStarted, state]);
 
+  // 处理页面可见性变化 - 确保最小化时继续监听
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (audioContextRef.current) {
+        if (document.hidden) {
+          // 页面隐藏时，确保AudioContext继续运行
+          if (audioContextRef.current.state === 'suspended') {
+            audioContextRef.current.resume();
+          }
+        } else {
+          // 页面可见时，恢复AudioContext
+          if (audioContextRef.current.state === 'suspended') {
+            audioContextRef.current.resume();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // 定期检查并恢复AudioContext（防止浏览器强制暂停）
+    const keepAliveInterval = setInterval(() => {
+      if (isStarted && audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+    }, 1000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(keepAliveInterval);
+    };
+  }, [isStarted]);
+
   useEffect(() => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
@@ -196,12 +229,12 @@ const DoraemonMonitorApp: React.FC = () => {
   // 噪音等级参考组件
   const NoiseLevelReference = () => {
     const levels = [
-      { min: 0, max: 20, label: "0-20 dB", desc: "极静", icon: "🤫" },
-      { min: 20, max: 40, label: "20-40 dB", desc: "安静", icon: "🍃" },
-      { min: 40, max: 60, label: "40-60 dB", desc: "正常", icon: "💬" },
-      { min: 60, max: 80, label: "60-80 dB", desc: "较吵", icon: "🚗" },
-      { min: 80, max: 100, label: "80-100 dB", desc: "很吵", icon: "⚠️" },
-      { min: 100, max: 120, label: "100+ dB", desc: "危险", icon: "📢" },
+      { min: 0, max: 20, label: "0–20 dB 极度安静", desc: "几乎听不到", icon: "🤫" },
+      { min: 20, max: 40, label: "20–40 dB 非常安静", desc: "轻声细语", icon: "🍃" },
+      { min: 40, max: 60, label: "40–60 dB 正常背景音", desc: "普通交谈", icon: "💬" },
+      { min: 60, max: 80, label: "60–80 dB 中等响度", desc: "繁忙街道", icon: "🚗" },
+      { min: 80, max: 100, label: "80–100 dB 响亮（有害）", desc: "极其嘈杂", icon: "⚠️" },
+      { min: 100, max: 120, label: "100–120 dB 非常响亮", desc: "震耳欲聋", icon: "📢" },
     ];
     const pointerBottom = Math.min(100, Math.max(0, (currentDb / 120) * 100));
 
@@ -216,11 +249,14 @@ const DoraemonMonitorApp: React.FC = () => {
           <div className="level-nodes">
             {levels.map((level, idx) => (
               <div key={idx} className="level-node">
-                <div className="node-label" style={{
-                  color: currentDb >= level.min && currentDb < level.max ? '#0096E1' : undefined,
-                  fontWeight: currentDb >= level.min && currentDb < level.max ? 700 : 500
-                }}>
-                  {level.icon} {level.label}
+                <div className="node-content">
+                  <div className="node-label" style={{
+                    color: currentDb >= level.min && currentDb < level.max ? '#00d4ff' : undefined,
+                    fontWeight: currentDb >= level.min && currentDb < level.max ? 800 : 600
+                  }}>
+                    {level.icon} {level.label}
+                  </div>
+                  <div className="node-desc">{level.desc}</div>
                 </div>
               </div>
             ))}

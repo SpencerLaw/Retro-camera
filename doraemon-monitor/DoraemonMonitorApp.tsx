@@ -426,7 +426,7 @@ const DoraemonMonitorApp: React.FC = () => {
            <div className="db-value-huge">
              {Math.round(currentDb)}
            </div>
-           <div className="db-label-small">{t('doraemon.currentDecibel')} (dB)</div>
+           <div className="db-label-small">{t('doraemon.currentDecibel')}</div>
         </div>
       </main>
 

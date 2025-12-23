@@ -328,6 +328,66 @@
     }
   });
 
+  // === 登录 & 加载数据 ===
+  async function login(isAuto = false) {
+    let key = document.getElementById('adminKey').value;
+    if (!key) return alert('请输入密码');
+    
+    key = key.trim(); // 自动去除空格
+    document.getElementById('adminKey').value = key;
+
+    const btn = document.querySelector('.btn-primary');
+    if (!isAuto) {
+      btn.textContent = '加载中...';
+      btn.disabled = true;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'list_all',
+          adminKey: key
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.success) {
+        if (isAuto) sessionStorage.removeItem(SESSION_KEY);
+        throw new Error(json.message || '未知错误');
+      }
+
+      // 登录成功
+      sessionStorage.setItem(SESSION_KEY, key);
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('loggedInTools').style.display = 'block';
+      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+      document.getElementById('connectionStatus').style.color = 'var(--success)';
+
+      currentData = json.data;
+      renderMonitorList();
+
+    } catch (err) {
+      if (!isAuto) alert('登录失败: ' + err.message);
+      document.getElementById('connectionStatus').textContent = `🔴 连接失败`;
+      document.getElementById('connectionStatus').style.color = 'var(--danger)';
+    } finally {
+      btn.textContent = '登录 & 加载';
+      btn.disabled = false;
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  }
+
+  function refreshData() {
+    login(true);
+  }
+
   function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme');
     if (current === 'dark') {

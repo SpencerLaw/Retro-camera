@@ -182,7 +182,10 @@ export default async function handler(
 
     // === 管理员查询 ===
     if (action === 'query') {
-      if (adminKey !== 'spencer') return res.status(401).json({ success: false, message: '密码错误' });
+      if (!adminKey || adminKey.trim() !== 'spencer') {
+        console.warn(`[Admin Query] Auth failed. Key: ${adminKey ? '***' : 'missing'}`);
+        return res.status(401).json({ success: false, message: '密码错误' });
+      }
       if (!licenseCode) return res.status(400).json({ success: false, message: '请输入授权码' });
 
       const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
@@ -200,7 +203,10 @@ export default async function handler(
 
     // === 管理员列表 ===
     if (action === 'list_all') {
-      if (adminKey !== 'spencer') return res.status(401).json({ success: false, message: '密码错误' });
+      if (!adminKey || adminKey.trim() !== 'spencer') {
+        console.warn(`[Admin List] Auth failed. Key: ${adminKey ? '***' : 'missing'}`);
+        return res.status(401).json({ success: false, message: '密码错误' });
+      }
 
       const keys = await kv.keys('license:*');
       if (keys.length === 0) return res.status(200).json({ success: true, data: [] });

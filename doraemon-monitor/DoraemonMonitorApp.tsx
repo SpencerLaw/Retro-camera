@@ -480,7 +480,8 @@ const DoraemonMonitorApp: React.FC = () => {
            </div>
            <div className="db-label-small">{t('doraemon.currentDecibel')}</div>
         </div>
-      </main>
+      </div>
+    </main>
 
       {/* 底部控制 */}
       <footer className="doraemon-footer">

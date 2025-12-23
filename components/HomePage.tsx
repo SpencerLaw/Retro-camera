@@ -16,7 +16,7 @@ export const HomePage: React.FC = () => {
   const t = useTranslations();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 py-8 relative overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start p-4 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Kawaii Sky Background - Pastel Gradient */}
       <div className="fixed inset-0 bg-gradient-to-b from-[#FFE5EC] via-[#FFF0F5] to-[#E6F3FF]"></div>
 

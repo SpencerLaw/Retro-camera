@@ -26,10 +26,39 @@ const DoraemonMonitorApp: React.FC = () => {
   const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const animationRef = useRef<number | null>(null);
   const quietTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const analysisTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // analysisTimerRef removed in favor of workerRef
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
   const wakeLockRef = useRef<any>(null);
+  const workerRef = useRef<Worker | null>(null);
+
+  useEffect(() => {
+    // Create a Web Worker to handle timing (prevents throttling in background)
+    const workerBlob = new Blob([`
+      let interval = null;
+      self.onmessage = function(e) {
+        if (e.data === 'start') {
+          if (interval) clearInterval(interval);
+          interval = setInterval(() => {
+            self.postMessage('tick');
+          }, 100);
+        } else if (e.data === 'stop') {
+          if (interval) clearInterval(interval);
+        }
+      }
+    `], { type: 'application/javascript' });
+    
+    workerRef.current = new Worker(URL.createObjectURL(workerBlob));
+    workerRef.current.onmessage = () => {
+      analyzeAudio();
+    };
+
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const localVerified = isVerified();
@@ -90,8 +119,12 @@ const DoraemonMonitorApp: React.FC = () => {
       micRef.current = audioContextRef.current.createMediaStreamSource(stream);
       micRef.current.connect(analyserRef.current);
       setIsStarted(true);
-      if (analysisTimerRef.current) clearInterval(analysisTimerRef.current);
-      analysisTimerRef.current = setInterval(analyzeAudio, 100);
+      
+      // Start the worker timer instead of setInterval
+      if (workerRef.current) {
+        workerRef.current.postMessage('start');
+      }
+      
       loop();
       if ('wakeLock' in navigator) {
         try {
@@ -215,7 +248,7 @@ const DoraemonMonitorApp: React.FC = () => {
   useEffect(() => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      if (analysisTimerRef.current) clearInterval(analysisTimerRef.current);
+      if (workerRef.current) workerRef.current.postMessage('stop');
       if (wakeLockRef.current) wakeLockRef.current.release();
     };
   }, []);

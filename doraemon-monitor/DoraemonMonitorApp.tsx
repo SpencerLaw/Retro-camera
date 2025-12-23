@@ -285,13 +285,12 @@ const DoraemonMonitorApp: React.FC = () => {
 
   // 生成极度炫酷的频谱条
   const renderVisualizer = () => {
-    const BAR_COUNT = 60;
-    const time = Date.now() / 1000; // 获取当前秒数
+    const BAR_COUNT = 40; // 减少数量，增加间距，更精致
+    const time = Date.now() / 1000;
     
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     const mainColor = `hsl(${hue}, 90%, 65%)`;
-    const darkColor = `hsl(${hue}, 90%, 40%)`;
-    const glowColor = `hsla(${hue}, 90%, 60%, 0.7)`;
+    const glowColor = `hsla(${hue}, 90%, 60%, 0.4)`;
 
     return (
       <div className="visualizer-container">
@@ -299,22 +298,17 @@ const DoraemonMonitorApp: React.FC = () => {
           const distanceFromCenter = Math.abs(i - BAR_COUNT / 2);
           const normalizedDistance = 1 - (distanceFromCenter / (BAR_COUNT / 2));
           
-          // 灵敏度强化
           const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
+          const wave = Math.sin(i * 0.4 + time * 8) * 0.1;
+          const totalFactor = Math.max(0.02, (dbPower + wave) * (0.8 + Math.random() * 0.2));
           
-          // 新增：正弦流动波逻辑，即使安静时也会轻微起伏
-          const wave = Math.sin(i * 0.3 + time * 10) * 0.15;
-          const randomPulse = 0.8 + Math.random() * 0.4;
-          
-          // 最终比例：分贝基础 + 流动波 + 随机脉冲
-          const totalFactor = Math.max(0.05, (dbPower + wave) * randomPulse);
-          const targetHeight = 15 + (350 * normalizedDistance * totalFactor);
+          const targetHeight = 10 + (280 * normalizedDistance * totalFactor);
           
           const style = {
             height: `${targetHeight}px`,
-            background: `linear-gradient(to top, ${darkColor} 0%, ${mainColor} 100%)`,
-            boxShadow: `0 0 20px ${glowColor}`,
-            opacity: 0.2 + (normalizedDistance * 0.8),
+            background: `linear-gradient(to top, rgba(255,255,255,0.1) 0%, ${mainColor} 100%)`,
+            boxShadow: `0 0 15px ${glowColor}`,
+            opacity: 0.1 + (normalizedDistance * 0.7),
             transitionDelay: `${distanceFromCenter * 0.005}s`
           };
           

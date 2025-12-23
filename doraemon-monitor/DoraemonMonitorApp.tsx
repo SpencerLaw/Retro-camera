@@ -15,6 +15,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [limit, setLimit] = useState(60);
   const [warnCount, setWarnCount] = useState(0);
   const [quietTime, setQuietTime] = useState(0);
+  const [totalTime, setTotalTime] = useState(0);
   const [state, setState] = useState<'calm' | 'warning' | 'alarm'>('calm');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [error, setError] = useState('');
@@ -85,7 +86,6 @@ const DoraemonMonitorApp: React.FC = () => {
       micRef.current.connect(analyserRef.current);
 
       setIsStarted(true);
-      startQuietTimer();
       loop();
 
       // 屏幕常亮
@@ -169,13 +169,12 @@ const DoraemonMonitorApp: React.FC = () => {
     if (isStart) {
       setState('alarm');
       setWarnCount(prev => prev + 1);
-      resetQuietTimer();
+      setQuietTime(0); // 报警时重置安静时长
       beep(600, 'square');
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     } else {
       setState('calm');
       beep(500, 'sine');
-      startQuietTimer();
     }
   };
 
@@ -194,24 +193,26 @@ const DoraemonMonitorApp: React.FC = () => {
     o.stop(audioContextRef.current.currentTime + 0.5);
   };
 
-  // 安静时长计时器
-  const startQuietTimer = () => {
-    if (quietTimerRef.current) clearInterval(quietTimerRef.current);
-    quietTimerRef.current = setInterval(() => {
-      setQuietTime(prev => prev + 1);
-    }, 1000);
-  };
-
-  const resetQuietTimer = () => {
-    if (quietTimerRef.current) clearInterval(quietTimerRef.current);
-    setQuietTime(0);
-  };
+  // 计时器逻辑
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isStarted) {
+      interval = setInterval(() => {
+        setTotalTime(prev => prev + 1);
+        if (state !== 'alarm') {
+          setQuietTime(prev => prev + 1);
+        }
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isStarted, state]);
 
   // 清理
   useEffect(() => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      if (quietTimerRef.current) clearInterval(quietTimerRef.current);
       if (wakeLockRef.current) wakeLockRef.current.release();
     };
   }, []);
@@ -319,6 +320,11 @@ const DoraemonMonitorApp: React.FC = () => {
         <div className="glass-card stat-card" style={{ marginRight: '1rem' }}>
           <span className="stat-label">{t('doraemon.quietDuration')}</span>
           <span className="stat-value">{formatTime(quietTime)}</span>
+        </div>
+
+        <div className="glass-card stat-card" style={{ marginRight: '1rem' }}>
+          <span className="stat-label">{t('doraemon.totalDuration')}</span>
+          <span className="stat-value">{formatTime(totalTime)}</span>
         </div>
         
         <div className="glass-card stat-card">

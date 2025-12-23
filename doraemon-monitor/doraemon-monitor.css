@@ -175,7 +175,7 @@ body {
 }
 
 .db-value-huge {
-    font-size: 8rem;
+    font-size: 12rem;
     font-weight: 800;
     line-height: 1;
     background: linear-gradient(135deg, #FFD700 30%, #FFCA28 100%);

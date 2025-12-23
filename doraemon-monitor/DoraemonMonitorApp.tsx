@@ -388,34 +388,35 @@ const DoraemonMonitorApp: React.FC = () => {
         <button
           onClick={() => navigate('/')}
           className="theme-toggle-btn"
-          style={{ marginRight: 'auto' }}
         >
-          <ArrowLeft size={24} color="var(--text-primary)" />
+          <ArrowLeft size={24} style={{ color: 'var(--text-primary)' }} />
         </button>
 
-        <div className="glass-card stat-card" style={{ marginRight: '1rem' }}>
-          <span className="stat-label">{t('doraemon.quietDuration')}</span>
-          <span className="stat-value">{formatTime(quietTime)}</span>
-        </div>
+        <div className="header-stats-group">
+          <div className="glass-card stat-card">
+            <span className="stat-label">{t('doraemon.quietDuration')}</span>
+            <span className="stat-value">{formatTime(quietTime)}</span>
+          </div>
 
-        <div className="glass-card stat-card" style={{ marginRight: '1rem' }}>
-          <span className="stat-label">{t('doraemon.totalDuration')}</span>
-          <span className="stat-value">{formatTime(totalTime)}</span>
-        </div>
-        
-        <div className="glass-card stat-card">
-           <span className="stat-label" style={{ color: state === 'calm' ? 'var(--text-secondary)' : 'var(--accent-red)' }}>
-             {t('doraemon.warningCount')}
-           </span>
-           <span className="stat-value" style={{ color: state === 'calm' ? 'var(--text-primary)' : 'var(--accent-red)' }}>
-             {warnCount}
-           </span>
+          <div className="glass-card stat-card">
+            <span className="stat-label">{t('doraemon.totalDuration')}</span>
+            <span className="stat-value">{formatTime(totalTime)}</span>
+          </div>
+          
+          <div className="glass-card stat-card">
+             <span className="stat-label" style={{ color: state === 'calm' ? 'var(--text-secondary)' : 'var(--accent-red)' }}>
+               {t('doraemon.warningCount')}
+             </span>
+             <span className="stat-value" style={{ color: state === 'calm' ? 'var(--text-primary)' : 'var(--accent-red)' }}>
+               {warnCount}
+             </span>
+          </div>
         </div>
 
         <button 
           className="theme-toggle-btn" 
           onClick={() => setIsDarkMode(!isDarkMode)}
-          style={{ marginLeft: '1rem' }}
+          title="Toggle Day/Night Mode"
         >
           {isDarkMode ? '🌞' : '🌙'}
         </button>

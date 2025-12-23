@@ -70,12 +70,13 @@ body {
 /* Header */
 .doraemon-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     padding: 1rem 5%;
-    gap: 15px;
+    gap: 10px;
     z-index: 100;
+    margin-top: env(safe-area-inset-top);
 }
 
 .stat-card {
@@ -371,3 +372,11 @@ body {
     }
     .visualizer-container { height: 300px; }
 }
+.header-stats-group {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+

@@ -17,7 +17,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [quietTime, setQuietTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [state, setState] = useState<'calm' | 'warning' | 'alarm'>('calm');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // 默认黑夜模式
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

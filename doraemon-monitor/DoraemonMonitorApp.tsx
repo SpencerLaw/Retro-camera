@@ -230,6 +230,23 @@ const DoraemonMonitorApp: React.FC = () => {
   else if (currentDb > limit) dbColor = '#DD0000';
   else if (currentDb > limit - 5) dbColor = '#FACE05';
 
+  // 生成可视化条
+  const renderVisualizer = () => {
+    // 生成20个条，中间高两边低
+    const bars = Array.from({ length: 20 }).map((_, i) => {
+      // 简单的动态高度缩放，基于 currentDb
+      // 让它稍微随机一点，但总体受 currentDb 控制
+      const baseHeight = 20 + Math.random() * 20;
+      const scale = Math.max(0.5, (currentDb - 30) / 40);
+      const style = {
+        height: `${baseHeight * scale}px`,
+        animationDuration: `${0.8 + Math.random() * 0.5}s`
+      };
+      return <div key={i} className="wave-bar" style={style} />;
+    });
+    return <div className="visualizer-container">{bars}</div>;
+  };
+
   // 如果未授权，显示授权页面
   if (!isLicensed) {
     return <LicenseInput onVerified={handleLicenseVerified} />;
@@ -279,41 +296,51 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   }
 
-  // 主应用
+  // 计算进度条颜色和宽度
+  const progressPercent = Math.min(100, Math.max(0, (currentDb - 30) * 1.5));
+  
   return (
     <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
-      {/* 返回按钮 */}
-      <button
-        onClick={() => navigate('/')}
-        className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#1293EE] backdrop-blur-sm transition-all text-[#1293EE] hover:text-[#0d6ab8] shadow-lg"
-      >
-        <ArrowLeft size={24} />
-      </button>
-
-      {/* 巨型警告文字 */}
-      {state === 'alarm' && (
-        <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>
-      )}
-
       {/* 顶部栏 */}
       <header className="doraemon-header">
-        <div className="doraemon-info-box">
-          <span className="info-label">{t('doraemon.quietDuration')}</span>
-          <span className="info-value">{formatTime(quietTime)}</span>
-        </div>
-        <button className="doraemon-btn-icon" onClick={() => setIsDarkMode(!isDarkMode)}>
-          🌓
+        <button
+          onClick={() => navigate('/')}
+          className="theme-toggle-btn"
+          style={{ marginRight: 'auto' }}
+        >
+          <ArrowLeft size={24} color="var(--text-primary)" />
         </button>
-        <div className="doraemon-info-box" style={{ color: 'var(--dora-red)', borderColor: 'rgba(221,0,0,0.3)' }}>
-          <span className="info-label">{t('doraemon.warningCount')}</span>
-          <span className="info-value">{warnCount}</span>
+
+        <div className="glass-card stat-card" style={{ marginRight: '1rem' }}>
+          <span className="stat-label">{t('doraemon.quietDuration')}</span>
+          <span className="stat-value">{formatTime(quietTime)}</span>
         </div>
+        
+        <div className="glass-card stat-card">
+           <span className="stat-label" style={{ color: state === 'calm' ? 'var(--text-secondary)' : 'var(--accent-red)' }}>
+             {t('doraemon.warningCount')}
+           </span>
+           <span className="stat-value" style={{ color: state === 'calm' ? 'var(--text-primary)' : 'var(--accent-red)' }}>
+             {warnCount}
+           </span>
+        </div>
+
+        <button 
+          className="theme-toggle-btn" 
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          style={{ marginLeft: '1rem' }}
+        >
+          {isDarkMode ? '🌞' : '🌙'}
+        </button>
       </header>
 
       {/* 主内容 */}
       <main className="doraemon-main-content">
-        {/* Doraemon - 经典形象 */}
-        <div className="doraemon-wrapper">
+        {/* 背景可视化波纹 */}
+        {renderVisualizer()}
+
+        {/* 哆啦A梦 (缩放动画) */}
+        <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 200})` }}>
           <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
             {/* 头部背景 (蓝色) */}
             <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2"/>
@@ -389,38 +416,39 @@ const DoraemonMonitorApp: React.FC = () => {
           </svg>
         </div>
 
-        {/* 分贝显示 */}
-        <div className="doraemon-meter-box">
-          <div className="doraemon-db-val" style={{ color: dbColor }}>
-            {Math.round(currentDb)}
-          </div>
-          <div className="doraemon-db-label">{t('doraemon.currentDecibel')}</div>
-          <div className="doraemon-bar-container">
-            <div className="doraemon-bar-limit" style={{ left: `${limitBarPercent}%` }} />
-            <div className="doraemon-bar-fill" style={{ width: `${barPercent}%`, background: dbColor }} />
-          </div>
+        {/* 巨大的分贝数字 */}
+        <div className="db-display-container">
+           <div className="db-value-huge">
+             {Math.round(currentDb)}
+           </div>
+           <div className="db-label-small">{t('doraemon.currentDecibel')} (dB)</div>
         </div>
       </main>
 
       {/* 底部控制 */}
       <footer className="doraemon-footer">
-        <div className="doraemon-panel">
-          <div className="doraemon-slider-box">
-            <div className="doraemon-slider-top">
-              <span className="doraemon-lbl-title">{t('doraemon.alarmThreshold')}</span>
-              <span className="doraemon-lbl-val">{limit} dB</span>
-            </div>
-            <input
-              type="range"
-              min="40"
-              max="90"
-              value={limit}
-              onChange={(e) => setLimit(Number(e.target.value))}
-              className="doraemon-slider"
-            />
+        <div className="glass-card controls-card">
+          {/* 进度条 */}
+          <div className="gradient-progress-track">
+             <div className="gradient-progress-fill" style={{ width: `${progressPercent}%` }} />
           </div>
+
+          <div className="slider-row">
+            <span className="slider-label">{t('doraemon.alarmThreshold')}</span>
+            <span className="slider-value-display">{limit} dB</span>
+          </div>
+          
+          <input
+            type="range"
+            min="40"
+            max="90"
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+            className="custom-slider"
+          />
+
           <button
-            className="doraemon-btn-reset"
+            className="reset-btn"
             onClick={() => setWarnCount(0)}
           >
             {t('doraemon.resetCount')}

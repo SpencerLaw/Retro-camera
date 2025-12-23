@@ -18,6 +18,14 @@
       --danger: #ef4444;
     }
 
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text: #f8fafc;
+      --text-light: #94a3b8;
+      --border: #334155;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
@@ -25,6 +33,7 @@
       background: var(--bg);
       color: var(--text);
       padding: 20px;
+      transition: background 0.3s, color 0.3s;
     }
 
     .container { max-width: 1000px; margin: 0 auto; }
@@ -50,6 +59,8 @@
       outline: none;
       font-size: 14px;
       width: 200px;
+      background: var(--surface);
+      color: var(--text);
     }
     .btn-primary {
       background: var(--primary);
@@ -64,13 +75,24 @@
     }
     .btn-primary:hover { background: var(--primary-dark); }
     .btn-secondary {
-      background: white;
+      background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
       padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+      color: var(--text);
     }
 
     /* Tabs */
@@ -103,7 +125,7 @@
       display: grid;
       grid-template-columns: 40px 2fr 1fr 1fr 1fr;
       padding: 15px 20px;
-      background: #f1f5f9;
+      background: var(--bg); /* Use bg var instead of hardcoded */
       font-size: 12px;
       font-weight: 600;
       color: var(--text-light);
@@ -123,7 +145,7 @@
       cursor: pointer;
       transition: background 0.1s;
     }
-    .item-summary:hover { background: #f8fafc; }
+    .item-summary:hover { background: var(--bg); }
 
     .toggle-btn {
       width: 24px;
@@ -155,7 +177,7 @@
     .item-details {
       display: none;
       padding: 0;
-      background: #f8fafc;
+      background: var(--bg);
       border-top: 1px solid var(--border);
     }
     .monitor-item.expanded .item-details { display: block; }
@@ -170,16 +192,17 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
-      background: white;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 6px;
+      color: var(--text);
     }
     .device-table th, .device-table td {
       padding: 8px 12px;
       text-align: left;
       border-bottom: 1px solid var(--border);
     }
-    .device-table th { background: #f1f5f9; color: var(--text-light); font-weight: 500; }
+    .device-table th { background: var(--bg); color: var(--text-light); font-weight: 500; }
     
     .tooltip {
       position: relative;
@@ -218,9 +241,12 @@
 <div class="container">
   <!-- Header -->
   <div class="header">
-    <div>
-      <h1>🚀 Anypok Admin</h1>
-      <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">未连接</span>
+    <div style="display: flex; align-items: center;">
+      <div>
+        <h1>🚀 Anypok Admin</h1>
+        <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">未连接</span>
+      </div>
+      <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
     </div>
     <div class="auth-input-group" id="authSection">
       <input type="password" id="adminKey" class="auth-input" placeholder="输入管理密码">
@@ -283,8 +309,18 @@
   let currentData = [];
   let generatedCodes = [];
 
-  // === 初始化：检查会话 ===
+  // === 初始化：检查会话与主题 ===
   window.addEventListener('load', () => {
+    // 检查主题
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('themeBtn').textContent = '🌞';
+    } else {
+      document.getElementById('themeBtn').textContent = '🌙';
+    }
+
+    // 检查会话
     const savedKey = sessionStorage.getItem(SESSION_KEY);
     if (savedKey) {
       document.getElementById('adminKey').value = savedKey;
@@ -292,64 +328,17 @@
     }
   });
 
-  // === 登录 & 加载数据 ===
-  async function login(isAuto = false) {
-    const key = document.getElementById('adminKey').value;
-    if (!key) return alert('请输入密码');
-
-    const btn = document.querySelector('.btn-primary');
-    if (!isAuto) {
-      btn.textContent = '加载中...';
-      btn.disabled = true;
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    if (current === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+      document.getElementById('themeBtn').textContent = '🌙';
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      document.getElementById('themeBtn').textContent = '🌞';
     }
-
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'list_all',
-          adminKey: key
-        })
-      });
-
-      const json = await res.json();
-
-      if (!json.success) {
-        if (isAuto) {
-          // 自动登录失败（可能是密码改了），清除缓存
-          sessionStorage.removeItem(SESSION_KEY);
-        }
-        throw new Error(json.message);
-      }
-
-      // 登录成功
-      sessionStorage.setItem(SESSION_KEY, key); // 保存会话
-      document.getElementById('authSection').style.display = 'none';
-      document.getElementById('loggedInTools').style.display = 'block';
-      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
-      document.getElementById('connectionStatus').style.color = 'var(--success)';
-
-      currentData = json.data;
-      renderMonitorList();
-
-    } catch (err) {
-      if (!isAuto) alert('加载失败: ' + err.message);
-      document.getElementById('connectionStatus').textContent = `🔴 连接失败`;
-      document.getElementById('connectionStatus').style.color = 'var(--danger)';
-    } finally {
-      btn.textContent = '登录 & 加载';
-      btn.disabled = false;
-    }
-  }
-
-  function logout() {
-    sessionStorage.removeItem(SESSION_KEY);
-    location.reload();
-  }
-
-  function refreshData() {
-    login(true);
   }
 
   // === 辅助：解析 User Agent ===

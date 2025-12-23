@@ -74,7 +74,7 @@ body, html {
 .doraemon-main {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   padding: 10px 20px 20px;
   gap: 30px;
@@ -82,15 +82,18 @@ body, html {
   overflow: hidden;
 }
 
-/* ===== 分贝参考面板 ===== */
+/* ===== 分贝参考面板 - 固定宽度 ===== */
 .db-reference-panel {
   width: 160px;
+  min-width: 160px;
+  max-width: 160px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 20px 16px;
   flex-shrink: 0;
   z-index: 10;
+  align-self: center;
 }
 
 .reference-title {
@@ -171,20 +174,25 @@ body, html {
   background: rgba(255,255,255,0.05);
 }
 
-/* ===== 中心显示区 ===== */
+/* ===== 中心显示区 - 固定尺寸容器 ===== */
 .center-display {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10;
+  flex: 1;
+  max-width: 500px;
+  min-width: 300px;
 }
 
 .doraemon-wrapper {
-  width: clamp(140px, 22vh, 180px);
-  height: clamp(140px, 22vh, 180px);
+  width: 180px;
+  height: 180px;
   filter: drop-shadow(0 10px 25px rgba(0,150,225,0.25));
   transition: transform 0.1s ease-out;
+  /* 缩放不影响布局 */
+  transform-origin: center center;
 }
 
 .db-display {
@@ -233,13 +241,17 @@ body, html {
   transition: height 0.08s ease-out;
 }
 
-/* ===== 右侧面板 ===== */
+/* ===== 右侧面板 - 固定宽度 ===== */
 .right-panel {
   display: flex;
   flex-direction: column;
   gap: 14px;
   z-index: 10;
   flex-shrink: 0;
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+  align-self: center;
 }
 
 /* ===== 统计卡片 - 超大字体 ===== */
@@ -250,8 +262,8 @@ body, html {
   background: var(--card-bg);
   border: 2px solid var(--card-border);
   border-radius: 20px;
-  padding: 18px 28px;
-  min-width: 260px;
+  padding: 18px 24px;
+  width: 100%;
   transition: all 0.3s;
 }
 

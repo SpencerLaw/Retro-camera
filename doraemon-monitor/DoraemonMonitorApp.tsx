@@ -391,7 +391,7 @@ const DoraemonMonitorApp: React.FC = () => {
         {/* 左侧参考面板 */}
         <NoiseLevelReference />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
           {/* 背景可视化波纹 */}
           {renderVisualizer()}
 

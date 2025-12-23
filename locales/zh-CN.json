@@ -93,6 +93,8 @@
     "resetCount": "重置次数",
     "quiet": "安静！！",
     "errors": {
+      "locationRestricted": "🌍 地区限制",
+      "locationRestrictedDesc": "很抱歉，灵签功能在您当前的地区不可用。\n\n💡 建议：\n• 使用 VPN 连接到支持的地区\n• 或者尝试探索工作室中的其他应用！",
       "browserNotSupported": "您的浏览器不支持音频功能，请升级浏览器。",
       "micDisconnected": "⚠️ 麦克风连接已断开！\n监测停止，请重新点击开始。",
       "startFailed": "🔴 启动失败！",

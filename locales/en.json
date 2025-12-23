@@ -93,6 +93,8 @@
     "resetCount": "Reset Count",
     "quiet": "QUIET!!",
     "errors": {
+      "locationRestricted": "🌍 Regional Restriction",
+      "locationRestrictedDesc": "Sorry, the Fortune Sticks feature is not available in your current region.\n\n💡 Suggestions:\n• Use a VPN to connect from a supported region\n• Or explore other apps in the studio!",
       "browserNotSupported": "Your browser does not support audio features. Please upgrade your browser.",
       "micDisconnected": "⚠️ Microphone connection disconnected!\nMonitoring stopped. Please click start again.",
       "startFailed": "🔴 Failed to start!",

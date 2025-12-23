@@ -66,9 +66,16 @@ const FortuneApp: React.FC = () => {
   const { language: globalLanguage } = useLanguage();
   const [gameState, setGameState] = useState<GameState>('idle');
   const [fortune, setFortune] = useState<FortuneData | null>(null);
+  const [isRestricted, setIsRestricted] = useState(false);
   
   const language = mapGlobalToFortuneLang(globalLanguage);
   const t = translations[language];
+
+  // 检查地区限制 (模拟微观天气的逻辑)
+  useEffect(() => {
+    // 强制设为受限状态
+    setIsRestricted(true);
+  }, []);
 
   // Stick configuration with randomized animation props for independent movement
   const [stickConfig] = useState(() => 
@@ -83,7 +90,7 @@ const FortuneApp: React.FC = () => {
   );
 
   const handleShake = async () => {
-    if (gameState !== 'idle') return;
+    if (gameState !== 'idle' || isRestricted) return;
 
     setGameState('shaking');
 
@@ -113,6 +120,40 @@ const FortuneApp: React.FC = () => {
     setGameState('idle');
     setFortune(null);
   };
+
+  if (isRestricted) {
+    return (
+      <div className="min-h-screen w-full bg-[#2b0a0a] flex flex-col items-center justify-center relative overflow-hidden font-serif text-[#fdf6e3] p-4">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#5e0a0a] via-[#3d0404] to-[#1a0202] z-0"></div>
+        
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="fixed top-4 left-4 z-50 p-3 rounded-full bg-white/80 hover:bg-white border-2 border-[#d4af37] backdrop-blur-sm transition-all text-[#d4af37] hover:text-[#bf953f] shadow-lg"
+        >
+          <ArrowLeft size={24} />
+        </button>
+
+        <div className="relative z-10 bg-[#fdf6e3]/10 backdrop-blur-md p-8 rounded-3xl border-2 border-[#d4af37]/30 max-w-lg w-full text-center shadow-2xl">
+          <div className="text-6xl mb-6 animate-bounce">🌍</div>
+          <h2 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-b from-[#ffd700] to-[#bf953f]">
+            {language === 'zh-CN' ? '地区限制' : 'Regional Restriction'}
+          </h2>
+          <p className="text-[#e6cca0] text-lg leading-relaxed mb-8">
+            {language === 'zh-CN' 
+              ? '很抱歉，灵签功能在您当前的地区不可用。\n\n💡 建议：\n• 使用 VPN 连接到支持的地区\n• 或者尝试探索工作室中的其他应用！' 
+              : 'Sorry, the Fortune Sticks feature is not available in your current region.\n\n💡 Suggestions:\n• Use a VPN to connect from a supported region\n• Or explore other apps in the studio!'}
+          </p>
+          <button 
+            onClick={() => navigate('/')}
+            className="px-10 py-3 bg-gradient-to-r from-[#bf953f] to-[#ffd700] text-[#3d0404] font-bold rounded-full hover:scale-105 transition-transform shadow-lg"
+          >
+            {language === 'zh-CN' ? '返回首页' : 'Back Home'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-[#2b0a0a] flex flex-col items-center justify-center relative overflow-hidden font-serif text-[#fdf6e3]">

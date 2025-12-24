@@ -161,7 +161,7 @@ function bindEvents() {
                         name: name,
                         history: [false, false, false, false, false]
                     }));
-                    startNewWeek();
+                    startNewDay();
                     if(modal) modal.classList.add('hidden');
                 }
             }
@@ -201,10 +201,10 @@ function bindEvents() {
     }
 
     // 其他按钮
-    const resetWeekBtn = document.getElementById('reset-week-btn');
-    if (resetWeekBtn) {
-        resetWeekBtn.onclick = () => {
-            if (confirm(t('resetWeekConfirm'))) startNewWeek();
+    const resetDayBtn = document.getElementById('reset-day-btn');
+    if (resetDayBtn) {
+        resetDayBtn.onclick = () => {
+            if (confirm(t('resetDayConfirm'))) startNewDay();
         };
     }
 
@@ -390,8 +390,8 @@ function applyTranslations() {
     try {
         const headerTitle = document.getElementById('app-header-title');
         if (headerTitle) headerTitle.textContent = t('headerTitle');
-        const resetBtn = document.getElementById('reset-week-btn');
-        if (resetBtn) resetBtn.textContent = t('startNewWeek');
+        const resetBtn = document.getElementById('reset-day-btn');
+        if (resetBtn) resetBtn.textContent = t('startNewDay');
         
         const isFS = !!document.fullscreenElement;
         const fsBtn = document.getElementById('fullscreen-btn');
@@ -428,14 +428,13 @@ function startDynamicClock() {
     }, 1000);
 }
 
-function startNewWeek() {
-    const d = new Date(STATE.currentDate);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day == 0 ? -6 : 1);
-    const monday = new Date(d.setDate(diff));
-    monday.setHours(0,0,0,0);
-    STATE.weekStartDate = monday.toISOString();
-    STATE.students.forEach(s => { s.history = [false, false, false, false, false]; });
+function startNewDay() {
+    const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+    STATE.students.forEach(s => {
+        if (s.history && s.history.length > day) {
+            s.history[day] = false;
+        }
+    });
     saveData();
     renderUI();
 }

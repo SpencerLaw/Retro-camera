@@ -10,7 +10,7 @@ window.TRANSLATIONS = {
         verifySuccess: "验证成功",
         verifyFail: "验证失败",
         networkError: "网络错误",
-        startNewWeek: "🔄 开始新的一周",
+        startNewDay: "🔄 开始新的一天",
         fullscreen: "全屏显示",
         exitFullscreen: "退出全屏",
         settings: "⚙️ 设置/学生管理",
@@ -40,7 +40,7 @@ window.TRANSLATIONS = {
         importResetConfirm: "导入新名单将重置本周进度，确定吗？",
         clearDataConfirm: "警告：将完全清空所有数据！",
         rulesSaved: "规则已保存",
-        resetWeekConfirm: "确定要开始新的一周吗？本周进度将重置。",
+        resetDayConfirm: "确定要开始新的一天吗？今日进度将重置。",
         days: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
     },
     'en': {
@@ -54,7 +54,7 @@ window.TRANSLATIONS = {
         verifySuccess: "Success",
         verifyFail: "Failed",
         networkError: "Network Error",
-        startNewWeek: "🔄 Start New Week",
+        startNewDay: "🔄 Start New Day",
         fullscreen: "Fullscreen",
         exitFullscreen: "Exit Fullscreen",
         settings: "⚙️ Settings",
@@ -84,7 +84,7 @@ window.TRANSLATIONS = {
         importResetConfirm: "Importing new list will reset current week. Proceed?",
         clearDataConfirm: "Warning: This will delete ALL data!",
         rulesSaved: "Rules saved",
-        resetWeekConfirm: "Start a new week? Current progress will be reset.",
+        resetDayConfirm: "Start a new day? Today's progress will be reset.",
         days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     },
     'zh-TW': {
@@ -98,7 +98,7 @@ window.TRANSLATIONS = {
         verifySuccess: "驗證成功",
         verifyFail: "驗證失敗",
         networkError: "網絡錯誤",
-        startNewWeek: "🔄 開始新的一週",
+        startNewDay: "🔄 開始新的一天",
         fullscreen: "全屏顯示",
         exitFullscreen: "退出全屏",
         settings: "⚙️ 設置/學生管理",
@@ -128,7 +128,7 @@ window.TRANSLATIONS = {
         importResetConfirm: "導入新名單將重置本週進度，確定嗎？",
         clearDataConfirm: "警告：將完全清空所有數據！",
         rulesSaved: "規則已保存",
-        resetWeekConfirm: "確定要開始新的一週嗎？本週進度將重置。",
+        resetDayConfirm: "確定要開始新的一天嗎？今日進度將重置。",
         days: ['週一', '週二', '週三', '週四', '週五', '週六', '週日']
     },
     'ja': {
@@ -142,7 +142,7 @@ window.TRANSLATIONS = {
         verifySuccess: "成功",
         verifyFail: "失敗",
         networkError: "ネットワークエラー",
-        startNewWeek: "🔄 新しい週を始める",
+        startNewDay: "🔄 新しい日を始める",
         fullscreen: "全画面表示",
         exitFullscreen: "全画面終了",
         settings: "⚙️ 設定",
@@ -172,7 +172,7 @@ window.TRANSLATIONS = {
         importResetConfirm: "新しいリストをインポートすると今週がリセットされます。続行しますか？",
         clearDataConfirm: "警告: すべてのデータが削除されます！",
         rulesSaved: "ルールが保存されました",
-        resetWeekConfirm: "新しい週を始めますか？現在の進捗はリセットされます。",
+        resetDayConfirm: "新しい日を始めますか？今日の進捗はリセットされます。",
         days: ['月', '火', '水', '木', '金', '土', '日']
     }
 };

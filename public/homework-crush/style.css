@@ -92,8 +92,8 @@ header {
 .header-left { display: flex; align-items: center; gap: 25px; padding-left: 60px; }
 .header-left h2 { font-size: 2.2rem; background: linear-gradient(45deg, var(--primary-pink), #ff758c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-/* 刷新/开始新的一周 按钮 */
-#reset-week-btn {
+/* 刷新/开始新的一天 按钮 */
+#reset-day-btn {
     background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
     color: white;
     padding: 12px 25px;
@@ -104,7 +104,7 @@ header {
     box-shadow: 0 6px 15px rgba(132, 250, 176, 0.3);
     transition: all 0.3s;
 }
-#reset-week-btn:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(132, 250, 176, 0.4); }
+#reset-day-btn:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(132, 250, 176, 0.4); }
 
 /* 全屏按钮图标容器 */
 .icon-btn {

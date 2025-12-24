@@ -1,3 +1,4 @@
+// State Management
 const STATE = {
     licenseCode: localStorage.getItem('hc_license') || null,
     isVerified: localStorage.getItem('hc_verified') === 'true',
@@ -9,7 +10,7 @@ const STATE = {
     lang: localStorage.getItem('global-language') || 'zh-CN'
 };
 
-let els = {};
+let els = {}; 
 
 function t(key) {
     const data = window.TRANSLATIONS || {};
@@ -17,31 +18,16 @@ function t(key) {
     return langData[key] || key;
 }
 
-// 核心跳转函数：最高优先级
-function showApp() {
-    console.log("Entering App...");
-    // 1. 立即切换界面
-    const auth = document.getElementById('auth-screen');
-    const app = document.getElementById('app-screen');
-    
-    if (auth) auth.classList.remove('active');
-    if (app) app.classList.add('active');
-
-    // 2. 尝试初始化数据（容错）
-    try {
-        if (els.rewardInput) els.rewardInput.value = STATE.rules.reward || '';
-        if (els.punishmentInput) els.punishmentInput.value = STATE.rules.punishment || '';
-        renderUI();
-        resizeCanvas();
-        renderTree();
-    } catch (e) {
-        console.warn("Soft error in showApp initialization:", e);
-    }
+function saveData() {
+    localStorage.setItem('hc_students', JSON.stringify(STATE.students));
+    localStorage.setItem('hc_rules', JSON.stringify(STATE.rules));
+    localStorage.setItem('hc_week_start', STATE.weekStartDate);
+    localStorage.setItem('hc_verified', STATE.isVerified ? 'true' : 'false');
+    localStorage.setItem('hc_license', STATE.licenseCode || '');
 }
 
 function applyTranslations() {
     try {
-        // 更新所有返回按钮的提示
         document.querySelectorAll('.global-back-btn').forEach(btn => {
             btn.title = t('backHome');
         });
@@ -67,10 +53,8 @@ function applyTranslations() {
         const taskTitle = document.getElementById('daily-task-title');
         if (taskTitle) taskTitle.textContent = t('dailyTask');
 
-        const rewardLabel = document.getElementById('reward-label');
-        const punishLabel = document.getElementById('punishment-label');
-        if (rewardLabel) rewardLabel.textContent = t('rewardLabel');
-        if (punishLabel) punishLabel.textContent = t('punishmentLabel');
+        if (els.labelReward) els.labelReward.textContent = t('rewardLabel');
+        if (els.labelPunish) els.labelPunish.textContent = t('punishmentLabel');
 
         if (els.rewardInput) els.rewardInput.placeholder = t('rewardPlaceholder');
         if (els.punishmentInput) els.punishmentInput.placeholder = t('punishmentPlaceholder');
@@ -100,8 +84,9 @@ function applyTranslations() {
 }
 
 async function init() {
-    // 映射元素
     els = {
+        authScreen: document.getElementById('auth-screen'),
+        appScreen: document.getElementById('app-screen'),
         licenseInput: document.getElementById('license-input'),
         verifyBtn: document.getElementById('verify-btn'),
         authMsg: document.getElementById('auth-msg'),
@@ -129,72 +114,148 @@ async function init() {
         confirmModal: document.getElementById('confirm-modal'),
         confirmName: document.getElementById('confirm-student-name'),
         confirmYes: document.getElementById('confirm-yes'),
-        confirmNo: document.getElementById('confirm-no')
+        confirmNo: document.getElementById('confirm-no'),
+        labelReward: document.getElementById('reward-label'),
+        labelPunish: document.getElementById('punishment-label')
     };
 
-    // 绑定返回主页逻辑
-    document.querySelectorAll('.global-back-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            console.log("Navigating back to home...");
-            window.location.href = '/';
-        });
-    });
-
-    // 绑定魔法门
-    if (els.verifyBtn) {
-        els.verifyBtn.addEventListener('click', async () => {
-            const code = els.licenseInput.value.trim();
-            if (!code) return;
-            if (!code.toUpperCase().startsWith('ZY')) {
-                alert('此应用需要以 ZY 开头的专用授权码');
-                return;
-            }
-            els.verifyBtn.textContent = t('verifying');
-            try {
-                const res = await fetch('/api/verify-license', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        licenseCode: code,
-                        deviceId: localStorage.getItem('hc_device_id') || 'hc-' + Math.random().toString(36).substr(2, 9),
-                        deviceInfo: navigator.userAgent
-                    })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    STATE.isVerified = true;
-                    STATE.licenseCode = code;
-                    localStorage.setItem('hc_license', code);
-                    localStorage.setItem('hc_verified', 'true');
-                    showApp();
-                } else {
-                    alert(data.message || t('verifyFail'));
-                }
-            } catch (e) {
-                alert(t('networkError'));
-            } finally {
-                els.verifyBtn.textContent = t('verifyBtn');
-            }
-        });
+    attachEventListeners();
+    applyTranslations();
+    
+    await syncTime();
+    startDynamicClock();
+    checkWeekCycle();
+    renderUI();
+    
+    if (STATE.isVerified && STATE.licenseCode) {
+        showApp();
+    } else {
+        if(els.authScreen) els.authScreen.classList.add('active');
     }
 
-    // 其他事件绑定
-    if (els.logoutBtn) {
+    resizeCanvas();
+    renderTree();
+
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        renderTree();
+    });
+}
+
+function attachEventListeners() {
+    if (!els.verifyBtn) return;
+
+    els.verifyBtn.addEventListener('click', async () => {
+        const code = els.licenseInput.value.trim();
+        if (!code) return;
+        if (!code.toUpperCase().startsWith('ZY')) {
+            alert('此应用需要以 ZY 开头的专用授权码');
+            return;
+        }
+        els.verifyBtn.textContent = t('verifying');
+        try {
+            const res = await fetch('/api/verify-license', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    licenseCode: code,
+                    deviceId: localStorage.getItem('hc_device_id') || 'hc-' + Math.random().toString(36).substr(2, 9),
+                    deviceInfo: navigator.userAgent
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                STATE.isVerified = true;
+                STATE.licenseCode = code;
+                saveData();
+                showApp();
+            } else {
+                alert(data.message || t('verifyFail'));
+            }
+        } catch (e) { alert(t('networkError')); }
+        finally { els.verifyBtn.textContent = t('verifyBtn'); }
+    });
+
+    if(els.logoutBtn) {
         els.logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('hc_verified');
-            localStorage.removeItem('hc_license');
+            STATE.isVerified = false;
+            saveData();
             window.location.reload();
         });
     }
 
-    if (els.fullscreenBtn) {
+    document.querySelectorAll('.global-back-btn').forEach(btn => {
+        btn.addEventListener('click', () => { window.location.href = '/'; });
+    });
+
+    if(els.fullscreenBtn) {
         els.fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
             else document.exitFullscreen();
         });
     }
 
-    if (els.saveRulesBtn) {
+    document.addEventListener('fullscreenchange', applyTranslations);
+
+    if(els.settingsBtn) {
+        els.settingsBtn.addEventListener('click', () => {
+            els.settingsModal.classList.remove('hidden');
+            els.manualInput.value = STATE.students.map(s => s.name).join('\n');
+        });
+    }
+
+    if(els.closeModal) {
+        els.closeModal.addEventListener('click', () => {
+            els.settingsModal.classList.add('hidden');
+        });
+    }
+
+    els.tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            els.tabBtns.forEach(b => b.classList.remove('active'));
+            els.tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const target = document.getElementById(`tab-${btn.dataset.tab}`);
+            if(target) target.classList.add('active');
+        });
+    });
+
+    if(els.importBtn) {
+        els.importBtn.addEventListener('click', () => {
+            let rawText = '';
+            const activeTabBtn = document.querySelector('.tab-btn.active');
+            const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
+            rawText = activeTab === 'manual' ? els.manualInput.value : els.csvInput.value;
+            
+            const lines = rawText.split(/[\n\r,]+/).map(t => t.trim()).filter(t => t);
+            if (lines.length > 0) {
+                if (confirm(t('importResetConfirm'))) {
+                    STATE.students = lines.map(name => ({
+                        name,
+                        history: [false, false, false, false, false]
+                    }));
+                    startNewWeek();
+                    els.settingsModal.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    if(els.clearDataBtn) {
+        els.clearDataBtn.addEventListener('click', () => {
+            if(confirm(t('clearDataConfirm'))) {
+                STATE.students = [];
+                STATE.rules = { reward: "", punishment: "" };
+                STATE.weekStartDate = null;
+                saveData();
+                renderUI();
+                renderTree();
+                els.settingsModal.classList.add('hidden');
+            }
+        });
+    }
+
+    if(els.saveRulesBtn) {
         els.saveRulesBtn.addEventListener('click', () => {
             STATE.rules.reward = els.rewardInput.value;
             STATE.rules.punishment = els.punishmentInput.value;
@@ -204,23 +265,37 @@ async function init() {
         });
     }
 
-    // 初始化显示
-    applyTranslations();
-    if (STATE.isVerified) {
-        showApp();
-    } else {
-        const auth = document.getElementById('auth-screen');
-        if (auth) auth.classList.add('active');
+    if(els.resetWeekBtn) {
+        els.resetWeekBtn.addEventListener('click', () => {
+            if(confirm(t('resetWeekConfirm'))) {
+                startNewWeek();
+            }
+        });
     }
 
-    // 时间与 Canvas
-    await syncTime();
-    startDynamicClock();
-    resizeCanvas();
-    renderTree();
-    
-    window.addEventListener('resize', () => { resizeCanvas(); renderTree(); });
-    document.addEventListener('fullscreenchange', applyTranslations);
+    if(els.confirmYes) {
+        els.confirmYes.addEventListener('click', () => {
+            if (pendingStudentIndex !== null) {
+                const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+                if(STATE.students[pendingStudentIndex]) {
+                    STATE.students[pendingStudentIndex].history[day] = true;
+                    saveData();
+                    renderUI();
+                    renderTree();
+                    if (STATE.students.every(s => s.history[day])) triggerConfetti();
+                }
+            }
+            els.confirmModal.classList.add('hidden');
+            pendingStudentIndex = null;
+        });
+    }
+
+    if(els.confirmNo) {
+        els.confirmNo.addEventListener('click', () => {
+            els.confirmModal.classList.add('hidden');
+            pendingStudentIndex = null;
+        });
+    }
 }
 
 // --- 时间同步 ---
@@ -253,14 +328,41 @@ function updateHeaderDate() {
     if(els.dayDisplay) els.dayDisplay.textContent = timeStr;
 }
 
-// --- 游戏逻辑 (略，保持原有功能) ---
+function checkWeekCycle() {
+    if (!STATE.weekStartDate) startNewWeek();
+}
+
+function startNewWeek() {
+    const d = new Date(STATE.currentDate);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day == 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    monday.setHours(0,0,0,0);
+    STATE.weekStartDate = monday.toISOString();
+    STATE.students.forEach(s => { s.history = [false, false, false, false, false]; });
+    saveData();
+    renderUI();
+    renderTree();
+}
+
+function showApp() {
+    try {
+        if(els.authScreen) { els.authScreen.classList.remove('active'); els.authScreen.classList.add('hidden'); }
+        if(els.appScreen) { els.appScreen.classList.add('active'); }
+        if(els.rewardInput) els.rewardInput.value = STATE.rules.reward || '';
+        if(els.punishmentInput) els.punishmentInput.value = STATE.rules.punishment || '';
+        setTimeout(() => { resizeCanvas(); renderTree(); renderUI(); }, 50);
+    } catch (e) { console.error(e); }
+}
+
 function renderUI() { renderGrid(); updateProgress(); }
 function updateProgress() {
     if (!STATE.students.length || !els.dailyProgress) return;
     const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-    const done = STATE.students.filter(s => s.history[day]).length;
+    const done = STATE.students.filter(s => s.history && s.history[day]).length;
     els.dailyProgress.style.width = `${(done / STATE.students.length) * 100}%`;
 }
+
 function renderGrid() {
     if(!els.studentGrid) return;
     els.studentGrid.innerHTML = '';
@@ -273,9 +375,9 @@ function renderGrid() {
             b.textContent = s.name;
             b.style.backgroundColor = ['#ffecd2', '#fcb69f', '#a8e6cf', '#d4fc79', '#84fab0'][i % 5];
             b.onclick = () => {
-                if(confirm(t('confirmMsg').replace('{name}', s.name))) {
-                    s.history[day] = true; saveData(); renderUI(); renderTree();
-                }
+                pendingStudentIndex = i;
+                els.confirmName.textContent = t('confirmMsg').replace('{name}', s.name);
+                els.confirmModal.classList.remove('hidden');
             };
             els.studentGrid.appendChild(b);
         }
@@ -286,33 +388,75 @@ function renderGrid() {
         els.studentGrid.appendChild(m);
     }
 }
-function saveData() {
-    localStorage.setItem('hc_students', JSON.stringify(STATE.students));
-    localStorage.setItem('hc_rules', JSON.stringify(STATE.rules));
-}
 
-// --- 大树渲染 ---
+let pendingStudentIndex = null;
+
+// --- Dreamy Tree Visualization ---
 let ctx;
+let swayTime = 0;
 function resizeCanvas() {
     if(!els.treeCanvas) return;
     ctx = els.treeCanvas.getContext('2d');
     els.treeCanvas.width = els.treeCanvas.parentElement.offsetWidth;
     els.treeCanvas.height = els.treeCanvas.parentElement.offsetHeight;
 }
-function renderTree() { drawDreamyScene(); }
-function drawDreamyScene() {
+
+function renderTree() {
     if (!ctx) return;
     const w = els.treeCanvas.width, h = els.treeCanvas.height;
+    swayTime += 0.02;
     ctx.clearRect(0, 0, w, h);
-    // 简单背景
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#A1C4FD'); g.addColorStop(1, '#C2E9FB');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-    // 树 (简化版以确保性能)
-    ctx.fillStyle = '#8d6e63';
-    ctx.fillRect(w/2 - 10, h - 100, 20, 100);
+
+    // 1. Sky
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#A1C4FD'); sky.addColorStop(1, '#C2E9FB');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+
+    // 2. Clouds & Sun
+    ctx.fillStyle = '#fff176'; ctx.beginPath(); ctx.arc(w*0.8, h*0.2, 25, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath(); ctx.arc(w*0.2 + Math.sin(swayTime)*10, h*0.2, 30, 0, Math.PI*2); ctx.fill();
+
+    // 3. Ground
+    ctx.fillStyle = '#a8e6cf'; ctx.beginPath(); ctx.moveTo(0, h); ctx.quadraticCurveTo(w/2, h-80, w, h); ctx.fill();
+
+    // 4. Growth Level
+    let level = 0;
+    const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+    for(let i=0; i<=4; i++) {
+        if (i <= day && STATE.students.length > 0 && STATE.students.every(s => s.history[i])) level++;
+    }
+
+    // 5. Draw Tree
+    ctx.save();
+    ctx.translate(w/2, h*0.88);
+    const scale = (0.5 + level*0.15) * 1.2;
+    ctx.scale(scale, scale);
+    
+    // Trunk
+    const trunk = ctx.createLinearGradient(-20, 0, 20, 0);
+    trunk.addColorStop(0, '#6d4c41'); trunk.addColorStop(1, '#5d4037');
+    ctx.fillStyle = trunk; ctx.beginPath(); ctx.moveTo(-15, 0); ctx.quadraticCurveTo(0, -100, 0, -150); ctx.lineTo(5, -150); ctx.quadraticCurveTo(0, -100, 15, 0); ctx.fill();
+
+    // Foliage
+    ctx.rotate(Math.sin(swayTime)*0.02);
     ctx.fillStyle = '#84fab0';
-    ctx.beginPath(); ctx.arc(w/2, h - 120, 60, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -180, 60, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#b9f6ca';
+    ctx.beginPath(); ctx.arc(-30, -160, 40, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(30, -160, 40, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+
+    // Message
+    if (level === 5) {
+        els.treeMsg.textContent = STATE.rules.reward || t('treeMsgReward');
+        els.treeMsg.classList.add('show');
+    } else {
+        els.treeMsg.classList.remove('show');
+    }
+    requestAnimationFrame(renderTree);
 }
+
+function triggerConfetti() { /* Logic for particles if needed */ }
 
 window.onload = init;

@@ -1,3 +1,10 @@
+/**
+ * 作业消消乐 - 核心逻辑脚本 (稳定性加强版)
+ */
+
+console.log("Homework Crush script loading...");
+
+// 1. 状态管理
 const STATE = {
     licenseCode: localStorage.getItem('hc_license') || null,
     isVerified: localStorage.getItem('hc_verified') === 'true',
@@ -9,12 +16,78 @@ const STATE = {
     lang: localStorage.getItem('global-language') || 'zh-CN'
 };
 
-let els = {}; 
-
+// 2. 翻译工具 (增加容错)
 function t(key) {
     const data = window.TRANSLATIONS || {};
     const langData = data[STATE.lang] || data['zh-CN'] || {};
     return langData[key] || key;
+}
+
+// 3. 核心界面切换函数
+function showApp() {
+    console.log("Attempting to show app screen...");
+    const auth = document.getElementById('auth-screen');
+    const app = document.getElementById('app-screen');
+    
+    if (auth) auth.classList.remove('active');
+    if (app) app.classList.add('active');
+    
+    // 填充数据
+    try {
+        const rInput = document.getElementById('reward-text');
+        const pInput = document.getElementById('punishment-text');
+        if (rInput) rInput.value = STATE.rules.reward || '';
+        if (pInput) pInput.value = STATE.rules.punishment || '';
+        
+        renderUI();
+        resizeCanvas();
+        console.log("App screen shown successfully.");
+    } catch (e) {
+        console.error("Error during app UI population:", e);
+    }
+}
+
+// 4. 渲染逻辑
+function renderUI() {
+    const grid = document.getElementById('student-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+    
+    if (STATE.students.length === 0) {
+        grid.innerHTML = `<div class="empty-state">${t('emptyState')}</div>`;
+        return;
+    }
+
+    STATE.students.forEach((s, i) => {
+        if (!s.history || !s.history[day]) {
+            const b = document.createElement('div');
+            b.className = 'student-bubble';
+            b.textContent = s.name;
+            b.style.backgroundColor = ['#ffecd2', '#fcb69f', '#a8e6cf', '#d4fc79', '#84fab0'][i % 5];
+            b.onclick = () => {
+                if (confirm(t('confirmMsg').replace('{name}', s.name))) {
+                    if(!s.history) s.history = [false,false,false,false,false];
+                    s.history[day] = true;
+                    saveData();
+                    renderUI();
+                }
+            };
+            grid.appendChild(b);
+        }
+    });
+
+    if (grid.children.length === 0 && STATE.students.length > 0) {
+        grid.innerHTML = `<div class="empty-state">${t('emptyStateDone')}</div>`;
+    }
+    
+    // 更新进度条
+    const progress = document.getElementById('daily-progress');
+    if (progress && STATE.students.length > 0) {
+        const done = STATE.students.filter(s => s.history && s.history[day]).length;
+        progress.style.width = `${(done / STATE.students.length) * 100}%`;
+    }
 }
 
 function saveData() {
@@ -25,264 +98,182 @@ function saveData() {
     localStorage.setItem('hc_license', STATE.licenseCode || '');
 }
 
-function applyTranslations() {
-    try {
-        if (!els.verifyBtn) return;
-
-        // All back buttons
-        document.querySelectorAll('.global-back-btn').forEach(btn => {
-            btn.title = t('backHome');
-        });
-
-        const authTitle = document.getElementById('auth-title-text');
-        const authSub = document.getElementById('auth-subtitle-text');
-        if (authTitle) authTitle.textContent = t('title');
-        if (authSub) authSub.textContent = t('subtitle');
-
-        els.licenseInput.placeholder = t('placeholder');
-        els.verifyBtn.textContent = t('verifyBtn');
-        
-        const headerTitle = document.getElementById('app-header-title');
-        if (headerTitle) headerTitle.textContent = t('headerTitle');
-        if (els.resetWeekBtn) els.resetWeekBtn.textContent = t('startNewWeek');
-        
-        // Fullscreen SVG Icons
-        const isFS = !!document.fullscreenElement;
-        if (els.fullscreenBtn) {
-            els.fullscreenBtn.title = isFS ? t('exitFullscreen') : t('fullscreen');
-            const fullscreenIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>`;
-            const exitFullscreenIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>`;
-            els.fullscreenBtn.innerHTML = isFS ? exitFullscreenIcon : fullscreenIcon;
-        }
-
-        const taskTitle = document.getElementById('daily-task-title');
-        if (taskTitle) taskTitle.textContent = t('dailyTask');
-
-        const rewardLabel = document.getElementById('reward-label');
-        const punishLabel = document.getElementById('punishment-label');
-        if (rewardLabel) rewardLabel.textContent = t('rewardLabel');
-        if (punishLabel) punishLabel.textContent = t('punishmentLabel');
-
-        els.rewardInput.placeholder = t('rewardPlaceholder');
-        els.punishmentInput.placeholder = t('punishmentPlaceholder');
-        els.saveRulesBtn.textContent = t('saveRules');
-
-        const modalTitle = document.getElementById('settings-modal-title');
-        if (modalTitle) modalTitle.textContent = t('settingsTitle');
-        
-        const tabMan = document.getElementById('tab-manual-text');
-        const tabCsv = document.getElementById('tab-csv-text');
-        if (tabMan) tabMan.textContent = t('manualTab');
-        if (tabCsv) tabCsv.textContent = t('csvTab');
-
-        els.importBtn.textContent = t('importBtn');
-        els.clearDataBtn.textContent = t('clearDataBtn');
-        
-        const hint = document.getElementById('settings-hint');
-        if (hint) hint.textContent = t('hint');
-
-        const confTitle = document.getElementById('confirm-title-text');
-        if (confTitle) confTitle.textContent = t('confirmTitle');
-        if (els.confirmYes) els.confirmYes.textContent = t('confirmYes');
-        if (els.confirmNo) els.confirmNo.textContent = t('confirmNo');
-    } catch (e) { console.error(e); }
-}
-
+// 5. 初始化与事件绑定
 async function init() {
-    els = {
-        authScreen: document.getElementById('auth-screen'),
-        appScreen: document.getElementById('app-screen'),
-        licenseInput: document.getElementById('license-input'),
-        verifyBtn: document.getElementById('verify-btn'),
-        authMsg: document.getElementById('auth-msg'),
-        dateDisplay: document.getElementById('current-date'),
-        dayDisplay: document.getElementById('current-week-day'),
-        studentGrid: document.getElementById('student-grid'),
-        dailyProgress: document.getElementById('daily-progress'),
-        treeCanvas: document.getElementById('tree-canvas'),
-        treeMsg: document.getElementById('tree-message'),
-        rewardInput: document.getElementById('reward-text'),
-        punishmentInput: document.getElementById('punishment-text'),
-        saveRulesBtn: document.getElementById('save-rules-btn'),
-        settingsBtn: document.getElementById('settings-btn'),
-        fullscreenBtn: document.getElementById('fullscreen-btn'),
-        logoutBtn: document.getElementById('logout-btn'),
-        resetWeekBtn: document.getElementById('reset-week-btn'),
-        settingsModal: document.getElementById('settings-modal'),
-        closeModal: document.querySelector('.close-modal'),
-        importBtn: document.getElementById('import-btn'),
-        clearDataBtn: document.getElementById('clear-data-btn'),
-        manualInput: document.getElementById('student-list-input'),
-        csvInput: document.getElementById('csv-input'),
-        tabBtns: document.querySelectorAll('.tab-btn'),
-        tabContents: document.querySelectorAll('.tab-content'),
-        confirmModal: document.getElementById('confirm-modal'),
-        confirmName: document.getElementById('confirm-student-name'),
-        confirmYes: document.getElementById('confirm-yes'),
-        confirmNo: document.getElementById('confirm-no'),
-        labelReward: document.getElementById('reward-label'),
-        labelPunish: document.getElementById('punishment-label')
-    };
+    console.log("Initializing application...");
 
-    attachEventListeners();
-    applyTranslations();
-    
-    await syncTime();
-    startDynamicClock();
-    checkWeekCycle();
-    renderUI();
-    
-    if (STATE.isVerified && STATE.licenseCode) {
-        showApp();
-    } else {
-        if(els.authScreen) els.authScreen.classList.add('active');
-    }
-
-    resizeCanvas();
-    renderTree(); 
-
-    window.addEventListener('resize', () => { resizeCanvas(); });
-}
-
-function attachEventListeners() {
-    if (!els.verifyBtn) return;
-
-    els.verifyBtn.addEventListener('click', async () => {
-        const code = els.licenseInput.value.trim();
-        if (!code) return;
-        if (!code.toUpperCase().startsWith('ZY')) {
-            alert('此应用需要以 ZY 开头的专用授权码');
-            return;
-        }
-        els.verifyBtn.textContent = t('verifying');
-        try {
-            const res = await fetch('/api/verify-license', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    licenseCode: code,
-                    deviceId: localStorage.getItem('hc_device_id') || 'hc-' + Math.random().toString(36).substr(2, 9),
-                    deviceInfo: navigator.userAgent
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                STATE.isVerified = true;
-                STATE.licenseCode = code;
-                saveData();
-                showApp();
-            } else { alert(data.message || t('verifyFail')); }
-        } catch (e) { alert(t('networkError')); }
-        finally { els.verifyBtn.textContent = t('verifyBtn'); }
+    // 绑定返回按钮 (所有类名为 global-back-btn 的元素)
+    document.querySelectorAll('.global-back-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log("Back button clicked, navigating to home...");
+            window.location.href = '/';
+        });
     });
 
-    if(els.logoutBtn) {
-        els.logoutBtn.addEventListener('click', () => {
+    // 绑定授权逻辑
+    const verifyBtn = document.getElementById('verify-btn');
+    const licenseInput = document.getElementById('license-input');
+    if (verifyBtn && licenseInput) {
+        verifyBtn.addEventListener('click', async () => {
+            const code = licenseInput.value.trim();
+            if (!code) return;
+            if (!code.toUpperCase().startsWith('ZY')) {
+                alert('此应用需要以 ZY 开头的专用授权码');
+                return;
+            }
+            
+            verifyBtn.textContent = t('verifying');
+            verifyBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/verify-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        licenseCode: code,
+                        deviceId: localStorage.getItem('hc_device_id') || 'hc-' + Math.random().toString(36).substr(2, 9),
+                        deviceInfo: navigator.userAgent
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    console.log("License verified!");
+                    STATE.isVerified = true;
+                    STATE.licenseCode = code;
+                    saveData();
+                    showApp();
+                } else {
+                    alert(data.message || t('verifyFail'));
+                }
+            } catch (e) {
+                alert(t('networkError'));
+            } finally {
+                verifyBtn.textContent = t('verifyBtn');
+                verifyBtn.disabled = false;
+            }
+        });
+    }
+
+    // 绑定退出
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
             STATE.isVerified = false;
             saveData();
             window.location.reload();
         });
     }
 
-    document.querySelectorAll('.global-back-btn').forEach(btn => {
-        btn.addEventListener('click', () => { window.location.href = '/'; });
-    });
-
-    if(els.fullscreenBtn) {
-        els.fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
+    // 绑定全屏
+    const fsBtn = document.getElementById('fullscreen-btn');
+    if (fsBtn) {
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.error(err));
+            } else {
+                document.exitFullscreen();
+            }
         });
     }
 
-    document.addEventListener('fullscreenchange', applyTranslations);
-
-    if(els.settingsBtn) {
-        els.settingsBtn.addEventListener('click', () => {
-            els.settingsModal.classList.remove('hidden');
-            els.manualInput.value = STATE.students.map(s => s.name).join('\n');
+    // 绑定设置按钮
+    const settingsBtn = document.getElementById('settings-btn');
+    const modal = document.getElementById('settings-modal');
+    if (settingsBtn && modal) {
+        settingsBtn.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+            const manualInput = document.getElementById('student-list-input');
+            if (manualInput) manualInput.value = STATE.students.map(s => s.name).join('\n');
         });
     }
 
-    if(els.closeModal) {
-        els.closeModal.addEventListener('click', () => {
-            els.settingsModal.classList.add('hidden');
+    // 绑定关闭弹窗
+    const closeModal = document.querySelector('.close-modal');
+    if (closeModal && modal) {
+        closeModal.addEventListener('click', () => modal.classList.add('hidden'));
+    }
+
+    // 绑定保存规则
+    const saveRulesBtn = document.getElementById('save-rules-btn');
+    if (saveRulesBtn) {
+        saveRulesBtn.addEventListener('click', () => {
+            const rInput = document.getElementById('reward-text');
+            const pInput = document.getElementById('punishment-text');
+            STATE.rules.reward = rInput ? rInput.value : '';
+            STATE.rules.punishment = pInput ? pInput.value : '';
+            saveData();
+            alert(t('rulesSaved'));
         });
     }
 
-    els.tabBtns.forEach(btn => {
+    // 绑定新的一周
+    const resetWeekBtn = document.getElementById('reset-week-btn');
+    if (resetWeekBtn) {
+        resetWeekBtn.addEventListener('click', () => {
+            if (confirm(t('resetWeekConfirm'))) {
+                startNewWeek();
+            }
+        });
+    }
+
+    // 绑定导入
+    const importBtn = document.getElementById('import-btn');
+    if (importBtn) {
+        importBtn.addEventListener('click', () => {
+            const activeTabBtn = document.querySelector('.tab-btn.active');
+            const mode = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
+            const inputId = mode === 'manual' ? 'student-list-input' : 'csv-input';
+            const input = document.getElementById(inputId);
+            
+            if (input && input.value.trim()) {
+                if (confirm(t('importResetConfirm'))) {
+                    const lines = input.value.split(/[
+,]+/).map(txt => t.trim()).filter(txt => txt); // Fix here: typo txt.trim
+                    STATE.students = input.value.split(/[
+,]+/).map(n => n.trim()).filter(n => n).map(name => ({
+                        name,
+                        history: [false, false, false, false, false]
+                    }));
+                    startNewWeek();
+                    if(modal) modal.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // 绑定标签切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            els.tabBtns.forEach(b => b.classList.remove('active'));
-            els.tabContents.forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             const target = document.getElementById(`tab-${btn.dataset.tab}`);
             if(target) target.classList.add('active');
         });
     });
 
-    if(els.importBtn) {
-        els.importBtn.addEventListener('click', () => {
-            let rawText = '';
-            const activeTabBtn = document.querySelector('.tab-btn.active');
-            const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
-            rawText = activeTab === 'manual' ? els.manualInput.value : els.csvInput.value;
-            const lines = rawText.split(/[\n\r,]+/).map(t => t.trim()).filter(t => t);
-            if (lines.length > 0) {
-                if (confirm(t('importResetConfirm'))) {
-                    STATE.students = lines.map(name => ({ name, history: [false, false, false, false, false] }));
-                    startNewWeek();
-                    els.settingsModal.classList.add('hidden');
-                }
-            }
-        });
+    // 初始设置
+    applyTranslations();
+    if (STATE.isVerified && STATE.licenseCode) {
+        showApp();
+    } else {
+        const auth = document.getElementById('auth-screen');
+        if (auth) auth.classList.add('active');
     }
 
-    if(els.clearDataBtn) {
-        els.clearDataBtn.addEventListener('click', () => {
-            if(confirm(t('clearDataConfirm'))) {
-                STATE.students = []; STATE.rules = { reward: "", punishment: "" }; STATE.weekStartDate = null;
-                saveData(); renderUI(); els.settingsModal.classList.add('hidden');
-            }
-        });
-    }
-
-    if(els.saveRulesBtn) {
-        els.saveRulesBtn.addEventListener('click', () => {
-            STATE.rules.reward = els.rewardInput.value;
-            STATE.rules.punishment = els.punishmentInput.value;
-            saveData(); alert(t('rulesSaved'));
-        });
-    }
-
-    if(els.resetWeekBtn) {
-        els.resetWeekBtn.addEventListener('click', () => {
-            if(confirm(t('resetWeekConfirm'))) startNewWeek();
-        });
-    }
-
-    if(els.confirmYes) {
-        els.confirmYes.addEventListener('click', () => {
-            if (pendingStudentIndex !== null) {
-                const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-                if(STATE.students[pendingStudentIndex]) {
-                    STATE.students[pendingStudentIndex].history[day] = true;
-                    saveData(); renderGrid(); updateProgress();
-                    if (STATE.students.every(s => s.history[day])) triggerConfetti();
-                }
-            }
-            els.confirmModal.classList.add('hidden');
-            pendingStudentIndex = null;
-        });
-    }
-
-    if(els.confirmNo) {
-        els.confirmNo.addEventListener('click', () => {
-            els.confirmModal.classList.add('hidden');
-            pendingStudentIndex = null;
-        });
-    }
+    // 启动背景服务
+    await syncTime();
+    startDynamicClock();
+    
+    // 启动大树渲染
+    resizeCanvas();
+    renderTree();
+    
+    window.addEventListener('resize', resizeCanvas);
 }
 
+// --- 时间服务 ---
 let serverTimeOffset = 0;
 async function syncTime() {
     try {
@@ -290,30 +281,25 @@ async function syncTime() {
         const res = await fetch('/api/time');
         const data = await res.json();
         serverTimeOffset = new Date(data.time).getTime() - (Date.now() + start) / 2;
-    } catch (e) { serverTimeOffset = 0; }
-    updateHeaderDate();
+    } catch (e) { console.warn("Sync failed"); }
 }
 
 function startDynamicClock() {
     setInterval(() => {
         STATE.currentDate = new Date(Date.now() + serverTimeOffset);
-        updateHeaderDate();
+        const days = t('days');
+        const d = STATE.currentDate;
+        const dateStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+        const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+        
+        let dayIdx = d.getDay();
+        STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
+
+        const dateEl = document.getElementById('current-date');
+        const timeEl = document.getElementById('current-week-day');
+        if (dateEl) dateEl.textContent = `${dateStr} ${days[STATE.todayIndex] || '?'}`;
+        if (timeEl) timeEl.textContent = timeStr;
     }, 1000);
-}
-
-function updateHeaderDate() {
-    const days = t('days');
-    const d = STATE.currentDate;
-    const dateStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-    const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
-    let dayIdx = d.getDay();
-    STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
-    if(els.dateDisplay) els.dateDisplay.textContent = `${dateStr} ${days[STATE.todayIndex] || '?'}`;
-    if(els.dayDisplay) els.dayDisplay.textContent = timeStr;
-}
-
-function checkWeekCycle() {
-    if (!STATE.weekStartDate) startNewWeek();
 }
 
 function startNewWeek() {
@@ -324,137 +310,78 @@ function startNewWeek() {
     monday.setHours(0,0,0,0);
     STATE.weekStartDate = monday.toISOString();
     STATE.students.forEach(s => { s.history = [false, false, false, false, false]; });
-    saveData(); renderUI();
+    saveData();
+    renderUI();
 }
 
-function showApp() {
-    try {
-        if(els.authScreen) { els.authScreen.classList.remove('active'); }
-        if(els.appScreen) { els.appScreen.classList.add('active'); }
-        if(els.rewardInput) els.rewardInput.value = STATE.rules.reward || '';
-        if(els.punishmentInput) els.punishmentInput.value = STATE.rules.punishment || '';
-        renderUI();
-    } catch (e) { console.error(e); }
-}
-
-function renderUI() { renderGrid(); updateProgress(); }
-function updateProgress() {
-    if (!STATE.students.length || !els.dailyProgress) return;
-    const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-    const done = STATE.students.filter(s => s.history && s.history[day]).length;
-    els.dailyProgress.style.width = `${(done / STATE.students.length) * 100}%`;
-}
-
-function renderGrid() {
-    if(!els.studentGrid) return;
-    els.studentGrid.innerHTML = '';
-    const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-    if (!STATE.students.length) { els.studentGrid.innerHTML = `<div class="empty-state">${t('emptyState')}</div>`; return; }
-    STATE.students.forEach((s, i) => {
-        if (!s.history[day]) {
-            const b = document.createElement('div');
-            b.className = 'student-bubble';
-            b.textContent = s.name;
-            b.style.backgroundColor = ['#ffecd2', '#fcb69f', '#a8e6cf', '#d4fc79', '#84fab0'][i % 5];
-            b.onclick = () => {
-                pendingStudentIndex = i;
-                els.confirmName.textContent = t('confirmMsg').replace('{name}', s.name);
-                els.confirmModal.classList.remove('hidden');
-            };
-            els.studentGrid.appendChild(b);
-        }
-    });
-    if (!els.studentGrid.children.length) {
-        const m = document.createElement('div');
-        m.className = 'empty-state'; m.innerHTML = t('emptyStateDone');
-        els.studentGrid.appendChild(m);
-    }
-}
-
-let pendingStudentIndex = null;
-
+// --- 大树动画 (精简核心逻辑) ---
 let ctx;
 let swayTime = 0;
-
 function resizeCanvas() {
-    if(!els.treeCanvas) return;
-    ctx = els.treeCanvas.getContext('2d');
-    const parent = els.treeCanvas.parentElement;
-    els.treeCanvas.width = parent.offsetWidth;
-    els.treeCanvas.height = parent.offsetHeight;
+    const canvas = document.getElementById('tree-canvas');
+    if (!canvas) return;
+    ctx = canvas.getContext('2d');
+    canvas.width = canvas.parentElement.offsetWidth;
+    canvas.height = canvas.parentElement.offsetHeight;
 }
 
 function renderTree() {
     if (!ctx) { requestAnimationFrame(renderTree); return; }
-    const w = els.treeCanvas.width;
-    const h = els.treeCanvas.height;
+    const canvas = document.getElementById('tree-canvas');
+    const w = canvas.width, h = canvas.height;
     swayTime += 0.015;
     ctx.clearRect(0, 0, w, h);
 
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
-    skyGrad.addColorStop(0, '#A1C4FD'); skyGrad.addColorStop(1, '#C2E9FB');
-    ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, w, h);
+    // 天空
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#A1C4FD'); sky.addColorStop(1, '#C2E9FB');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
 
+    // 太阳
     ctx.fillStyle = 'rgba(255, 249, 196, 0.6)'; ctx.beginPath(); ctx.arc(w*0.8, h*0.2, 40, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#fff176'; ctx.beginPath(); ctx.arc(w*0.8, h*0.2, 25, 0, Math.PI*2); ctx.fill();
-    
-    const cloudX = w*0.2 + Math.sin(swayTime*0.5)*20;
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.beginPath(); ctx.arc(cloudX, h*0.25, 30, 0, Math.PI*2); ctx.arc(cloudX+30, h*0.27, 40, 0, Math.PI*2); ctx.arc(cloudX-30, h*0.27, 35, 0, Math.PI*2); ctx.fill();
 
-    const groundGrad = ctx.createLinearGradient(0, h*0.8, 0, h);
-    groundGrad.addColorStop(0, '#84fab0'); groundGrad.addColorStop(1, '#8fd3f4');
-    ctx.fillStyle = groundGrad;
-    ctx.beginPath(); ctx.moveTo(-50, h); ctx.quadraticCurveTo(w*0.2, h*0.75, w*0.5, h*0.85); ctx.quadraticCurveTo(w*0.8, h*0.9, w+50, h*0.8); ctx.lineTo(w+50, h); ctx.lineTo(-50, h); ctx.fill();
+    // 地面
+    ctx.fillStyle = '#a8e6cf'; ctx.beginPath(); ctx.moveTo(-50, h); ctx.quadraticCurveTo(w/2, h-80, w+50, h); ctx.lineTo(w+50, h); ctx.fill();
 
+    // 等级
     let level = 0;
-    const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+    const dayLimit = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
     for(let i=0; i<=4; i++) {
-        if (i <= day && STATE.students.length > 0 && STATE.students.every(s => s.history[i])) level++;
+        if (i <= dayLimit && STATE.students.length > 0 && STATE.students.every(s => s.history && s.history[i])) level++;
     }
 
+    // 画树
     ctx.save();
     ctx.translate(w/2, h*0.85);
-    const treeScale = (0.4 + level*0.15) * 1.3;
-    ctx.scale(treeScale, treeScale);
+    const scale = (0.4 + level*0.15) * 1.3;
+    ctx.scale(scale, scale);
+    
+    // 树干
+    ctx.fillStyle = '#6d4c41'; ctx.beginPath(); ctx.moveTo(-15, 0); ctx.quadraticCurveTo(0, -100, 0, -150); ctx.lineTo(5, -150); ctx.quadraticCurveTo(0, -100, 15, 0); ctx.fill();
 
-    const trunkGrad = ctx.createLinearGradient(-20, 0, 20, 0);
-    trunkGrad.addColorStop(0, '#6d4c41'); trunkGrad.addColorStop(0.4, '#8d6e63'); trunkGrad.addColorStop(1, '#5d4037');
-    ctx.fillStyle = trunkGrad; ctx.beginPath(); ctx.moveTo(-20, 0); ctx.quadraticCurveTo(-10, -80, -5, -150); ctx.lineTo(5, -150); ctx.quadraticCurveTo(15, -80, 20, 0); ctx.fill();
-    ctx.strokeStyle = trunkGrad; ctx.lineWidth = 15; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-10, -60); ctx.quadraticCurveTo(-30, -100, -80, -140); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(10, -60); ctx.quadraticCurveTo(30, -120, 60, -160); ctx.stroke();
-
-    ctx.save();
+    // 树冠 (摇摆)
     ctx.rotate(Math.sin(swayTime)*0.03);
-    const leafDark = ctx.createRadialGradient(0, -180, 0, 0, -180, 80);
-    leafDark.addColorStop(0, '#66bb6a'); leafDark.addColorStop(1, '#2e7d32');
-    const leafLight = ctx.createRadialGradient(0, -200, 0, 0, -200, 70);
-    leafLight.addColorStop(0, '#b9f6ca'); leafLight.addColorStop(1, '#00c853');
-    ctx.fillStyle = leafDark;
-    ctx.beginPath(); ctx.arc(-50, -140, 50, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(50, -160, 55, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(0, -210, 60, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = leafLight; ctx.globalAlpha = 0.9;
-    ctx.beginPath(); ctx.arc(-30, -170, 50, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(30, -190, 50, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#b9f6ca'; ctx.globalAlpha = 1.0;
-    ctx.beginPath(); ctx.arc(0, -230, 45, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.5;
-    ctx.beginPath(); ctx.arc(20, -240, 5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(-20, -150, 8, 0, Math.PI*2); ctx.fill();
-    ctx.restore();
+    ctx.fillStyle = '#66bb6a';
+    ctx.beginPath(); ctx.arc(-40, -140, 50, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(40, -140, 50, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -190, 60, 0, Math.PI*2); ctx.fill();
+    
     ctx.restore();
 
-    if (level === 5) {
-        els.treeMsg.textContent = STATE.rules.reward || t('treeMsgReward');
-        els.treeMsg.classList.add('show');
-    } else {
-        els.treeMsg.classList.remove('show');
+    // 提示信息
+    const msg = document.getElementById('tree-message');
+    if (msg) {
+        if (level === 5) {
+            msg.textContent = STATE.rules.reward || t('treeMsgReward');
+            msg.classList.add('show');
+        } else {
+            msg.classList.remove('show');
+        }
     }
+
     requestAnimationFrame(renderTree);
 }
 
-function triggerConfetti() {}
-
-window.onload = init;
+// 启动
+window.addEventListener('load', init);

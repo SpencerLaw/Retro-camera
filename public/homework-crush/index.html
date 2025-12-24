@@ -77,9 +77,8 @@
 
             <!-- 右侧：大树 -->
             <section class="visualization-zone">
-                <div class="tree-container">
-                    <canvas id="tree-canvas"></canvas>
-                    <div id="tree-message" class="tree-message"></div>
+                <div class="tree-container" id="tree-container">
+                    <!-- SVG将由JavaScript动态生成 -->
                 </div>
             </section>
         </main>
@@ -98,7 +97,9 @@
                 <textarea id="student-list-input"></textarea>
             </div>
             <div id="tab-csv" class="tab-content">
-                <textarea id="csv-input"></textarea>
+                <label for="csv-file-input" class="file-upload-btn">📂 选择文件 (CSV/TXT)</label>
+                <input type="file" id="csv-file-input" accept=".csv,.txt" style="display: none;">
+                <textarea id="csv-input" placeholder="或直接粘贴表格内容(用逗号或换行分隔)"></textarea>
             </div>
             <div class="modal-actions">
                 <button id="import-btn" class="primary-btn">导入并重置游戏</button>

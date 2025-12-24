@@ -183,61 +183,98 @@ main {
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 20px;
-    padding: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 25px;
+    padding: 15px;
     overflow-y: auto;
+    justify-items: center;
 }
 
-/* 学生泡泡样式 */
+/* 学生泡泡样式 - 爱心形状 */
 .student-bubble {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--bubble-bg) 0%, var(--bubble-hover) 100%);
+    width: 140px;
+    height: 140px;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    position: relative;
-    border: 3px solid transparent;
+    z-index: 1;
+}
+
+.student-bubble::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 90px;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    border-radius: 50px 50px 0 0;
+    z-index: -1;
+    transition: all 0.3s;
+}
+
+.student-bubble::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    transform-origin: 0 100%;
+    z-index: -2;
+    transition: all 0.3s;
 }
 
 .student-bubble:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    border-color: var(--primary-pink);
+    transform: scale(1.15) translateY(-5px);
 }
 
-.student-bubble.completed {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+.student-bubble:hover::before,
+.student-bubble:hover::after {
+    background: linear-gradient(135deg, #fcb69f 0%, #ff9a9e 100%);
+    filter: brightness(1.1);
+}
+
+.student-bubble.completed::before,
+.student-bubble.completed::after {
+    background: linear-gradient(135deg, #84fab0 0%, #4ecdc4 100%);
     animation: celebrate 0.6s ease;
 }
 
 .student-bubble .name {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     color: var(--text-color);
     text-align: center;
-    margin-top: 8px;
+    margin-top: 10px;
+    max-width: 90%;
+    word-wrap: break-word;
+    z-index: 10;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .student-bubble .status-icon {
-    font-size: 2.5rem;
-    margin-bottom: 5px;
+    font-size: 2.2rem;
+    margin-bottom: 2px;
+    z-index: 10;
 }
 
 .student-bubble.completed .name {
     color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes celebrate {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.2) rotate(-10deg); }
-    75% { transform: scale(1.2) rotate(10deg); }
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.15) rotate(-5deg); }
+    75% { transform: scale(1.15) rotate(5deg); }
 }
 
 /* 奖惩区域样式 */
@@ -565,6 +602,25 @@ button:active {
 
 .tab-content.active {
     display: block;
+}
+
+.file-upload-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+.file-upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
 }
 
 .hint {

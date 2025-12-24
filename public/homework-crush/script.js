@@ -210,6 +210,24 @@ function bindEvents() {
             if(target) target.classList.add('active');
         };
     });
+
+    // 文件选择处理
+    const csvFileInput = document.getElementById('csv-file-input');
+    if (csvFileInput) {
+        csvFileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const csvInput = document.getElementById('csv-input');
+                    if (csvInput) {
+                        csvInput.value = event.target.result;
+                    }
+                };
+                reader.readAsText(file, 'UTF-8');
+            }
+        };
+    }
 }
 
 // 5. 渲染 UI
@@ -225,14 +243,30 @@ function renderUI() {
     }
 
     STATE.students.forEach((s, i) => {
-        if (!s.history || !s.history[day]) {
+        // 确保每个学生都有history数组
+        if (!s.history || !Array.isArray(s.history) || s.history.length < 5) {
+            s.history = [false, false, false, false, false];
+        }
+
+        // 只有当天作业明确未完成时才显示泡泡
+        if (s.history[day] !== true) {
             const b = document.createElement('div');
             b.className = 'student-bubble';
-            b.textContent = s.name;
-            b.style.backgroundColor = ['#ffecd2', '#fcb69f', '#a8e6cf', '#d4fc79', '#84fab0'][i % 5];
+
+            // 创建状态图标和名字
+            const icon = document.createElement('div');
+            icon.className = 'status-icon';
+            icon.textContent = '📝';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'name';
+            nameDiv.textContent = s.name;
+
+            b.appendChild(icon);
+            b.appendChild(nameDiv);
+
             b.onclick = () => {
                 if (confirm(t('confirmMsg').replace('{name}', s.name))) {
-                    if(!s.history) s.history = [false,false,false,false,false];
                     s.history[day] = true;
                     saveData();
                     renderUI();
@@ -272,11 +306,10 @@ async function init() {
         startDynamicClock();
         checkWeekCycle();
         renderUI();
+        renderTree();
     });
 
-    resizeCanvas();
-    renderTree();
-    window.onresize = resizeCanvas;
+    window.onresize = () => renderTree();
 }
 
 function applyTranslations() {
@@ -333,47 +366,163 @@ function startNewWeek() {
     renderUI();
 }
 
-// --- 大树渲染 ---
-let ctx;
-let swayTime = 0;
-function resizeCanvas() {
-    const canvas = document.getElementById('tree-canvas');
-    if (!canvas) return;
-    ctx = canvas.getContext('2d');
-    canvas.width = canvas.parentElement.offsetWidth;
-    canvas.height = canvas.parentElement.offsetHeight;
-}
-
+// --- 大树渲染 (使用SVG) ---
 function renderTree() {
-    if (!ctx) { requestAnimationFrame(renderTree); return; }
-    const w = ctx.canvas.width, h = ctx.canvas.height;
-    swayTime += 0.015;
-    ctx.clearRect(0, 0, w, h);
-    const sky = ctx.createLinearGradient(0, 0, 0, h);
-    sky.addColorStop(0, '#A1C4FD'); sky.addColorStop(1, '#C2E9FB');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+    const container = document.getElementById('tree-container');
+    if (!container) return;
+
+    // 计算完成等级 (0-5天)
     let level = 0;
     const dayLimit = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
     for(let i=0; i<=4; i++) {
-        if (i <= dayLimit && STATE.students.length > 0 && STATE.students.every(s => s.history && s.history[i])) level++;
+        if (i <= dayLimit && STATE.students.length > 0 && STATE.students.every(s => s.history && s.history[i])) {
+            level++;
+        }
     }
-    ctx.save();
-    ctx.translate(w/2, h*0.85);
-    const scale = (0.4 + level*0.15) * 1.3;
-    ctx.scale(scale, scale);
-    ctx.fillStyle = '#6d4c41'; ctx.beginPath(); ctx.moveTo(-15, 0); ctx.quadraticCurveTo(0, -100, 0, -150); ctx.lineTo(5, -150); ctx.quadraticCurveTo(0, -100, 15, 0); ctx.fill();
-    ctx.rotate(Math.sin(swayTime)*0.03);
-    ctx.fillStyle = '#66bb6a';
-    ctx.beginPath(); ctx.arc(-40, -140, 50, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(40, -140, 50, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(0, -190, 60, 0, Math.PI*2); ctx.fill();
-    ctx.restore();
-    const msg = document.getElementById('tree-message');
-    if (msg) {
-        if (level === 5) { msg.textContent = STATE.rules.reward || t('treeMsgReward'); msg.classList.add('show'); }
-        else msg.classList.remove('show');
-    }
-    requestAnimationFrame(renderTree);
+
+    // 根据等级调整大树大小和颜色
+    const treeScale = 0.6 + level * 0.08; // 从0.6到1.0
+    const leafOpacity = 0.3 + level * 0.14; // 从0.3到1.0
+
+    container.innerHTML = `
+        <svg width="100%" height="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+            <defs>
+                <!-- 天空渐变 -->
+                <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#A1C4FD;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#C2E9FB;stop-opacity:1" />
+                </linearGradient>
+
+                <!-- 地面渐变 -->
+                <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#84fab0;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8fd3f4;stop-opacity:1" />
+                </linearGradient>
+
+                <!-- 树干渐变：增加立体感 -->
+                <linearGradient id="trunkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#6d4c41;stop-opacity:1" />
+                    <stop offset="40%" style="stop-color:#8d6e63;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#5d4037;stop-opacity:1" />
+                </linearGradient>
+
+                <!-- 树叶渐变1 (深色阴影) -->
+                <radialGradient id="leafDark" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" style="stop-color:#66bb6a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#2e7d32;stop-opacity:1" />
+                </radialGradient>
+
+                <!-- 树叶渐变2 (亮色受光面) -->
+                <radialGradient id="leafLight" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" style="stop-color:#b9f6ca;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#00c853;stop-opacity:1" />
+                </radialGradient>
+            </defs>
+
+            <!-- 背景裁剪圆形 -->
+            <clipPath id="circleView">
+                <circle cx="250" cy="250" r="240" />
+            </clipPath>
+
+            <!-- 画布内容 -->
+            <g clip-path="url(#circleView)">
+                <!-- 天空 -->
+                <rect width="500" height="500" fill="url(#skyGradient)" />
+
+                <!-- 装饰：云朵 -->
+                <g class="float-slow" fill="#FFFFFF" opacity="0.6">
+                    <circle cx="100" cy="100" r="30" />
+                    <circle cx="130" cy="110" r="40" />
+                    <circle cx="70" cy="110" r="35" />
+                </g>
+                <g class="float-med" fill="#FFFFFF" opacity="0.4" transform="translate(300, 50)">
+                    <circle cx="0" cy="0" r="20" />
+                    <circle cx="25" cy="5" r="25" />
+                    <circle cx="-20" cy="10" r="15" />
+                </g>
+
+                <!-- 太阳/光晕 -->
+                <circle cx="400" cy="80" r="40" fill="#fff9c4" opacity="0.6" />
+                <circle cx="400" cy="80" r="25" fill="#fff176" />
+
+                <!-- 地面 (起伏的山坡) -->
+                <path d="M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z" fill="url(#groundGradient)" />
+                <path d="M-50,450 Q200,420 550,480 V550 H-50 Z" fill="#66bb6a" opacity="0.3" />
+
+                <!-- 树的主体组 -->
+                <g transform="translate(250, 420) scale(${treeScale})">
+                    <!-- 树干 -->
+                    <path d="M-15,0
+                             Q-10,-60 -30,-100
+                             Q-40,-120 -80,-140
+                             M-10,-60
+                             Q5,-120 40,-160
+                             M0,0
+                             Q15,-50 25,-100
+                             Q35,-150 80,-180
+                             L0,0 Z"
+                          fill="none" stroke="url(#trunkGradient)" stroke-width="20" stroke-linecap="round" />
+
+                    <!-- 主树干基底 (加粗填充) -->
+                    <path d="M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z" fill="url(#trunkGradient)" />
+
+                    <!-- 树冠 (分层绘制) -->
+                    <g class="sway">
+                        <!-- 后层树叶 (深色) -->
+                        <circle cx="-50" cy="-140" r="50" fill="url(#leafDark)" opacity="${leafOpacity}" />
+                        <circle cx="50" cy="-160" r="55" fill="url(#leafDark)" opacity="${leafOpacity}" />
+                        <circle cx="0" cy="-210" r="60" fill="url(#leafDark)" opacity="${leafOpacity}" />
+
+                        <!-- 中层树叶 -->
+                        <circle cx="-30" cy="-170" r="50" fill="url(#leafLight)" opacity="${Math.min(leafOpacity * 0.9, 1)}" />
+                        <circle cx="30" cy="-190" r="50" fill="url(#leafLight)" opacity="${Math.min(leafOpacity * 0.9, 1)}" />
+
+                        <!-- 顶层高光树叶 -->
+                        <circle cx="0" cy="-230" r="45" fill="url(#leafLight)" opacity="${leafOpacity}" />
+                        <circle cx="-40" cy="-190" r="35" fill="#b9f6ca" opacity="${Math.min(leafOpacity * 0.6, 1)}" />
+
+                        <!-- 装饰性小叶子/粒子 -->
+                        <circle cx="20" cy="-240" r="5" fill="#fff" opacity="${Math.min(leafOpacity * 0.6, 1)}" />
+                        <circle cx="-20" cy="-150" r="8" fill="#fff" opacity="${Math.min(leafOpacity * 0.4, 1)}" />
+                    </g>
+                </g>
+
+                <!-- 一些飘落的叶子 -->
+                <path d="M200,350 Q210,360 200,370" stroke="#4caf50" stroke-width="3" fill="none" opacity="0.8" />
+                <path d="M300,300 Q290,310 300,320" stroke="#81c784" stroke-width="3" fill="none" opacity="0.8" />
+            </g>
+
+            <!-- 外边框 -->
+            <circle cx="250" cy="250" r="240" fill="none" stroke="#fff" stroke-width="10" opacity="0.5"/>
+        </svg>
+        ${level === 5 ? `<div class="tree-message show">${STATE.rules.reward || t('treeMsgReward')}</div>` : ''}
+    `;
+
+    // 添加CSS动画
+    const style = document.createElement('style');
+    style.textContent = `
+        .float-slow { animation: float 6s ease-in-out infinite; }
+        .float-med { animation: float 5s ease-in-out infinite reverse; }
+        .sway { transform-origin: bottom center; animation: sway 4s ease-in-out infinite; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes sway {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(1deg); }
+        }
+        .tree-message.show {
+            display: block;
+        }
+    `;
+    container.appendChild(style);
+}
+
+function resizeCanvas() {
+    // SVG会自动响应，不需要手动resize
+    renderTree();
 }
 
 window.onload = init;

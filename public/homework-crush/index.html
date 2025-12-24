@@ -86,26 +86,109 @@
 
     <!-- 弹窗：设置 -->
     <div id="settings-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 id="settings-modal-title">📋 管理学生名单</h2>
-            <div class="tab-container">
-                <button class="tab-btn active" data-tab="manual" id="tab-manual-text">手动输入</button>
-                <button class="tab-btn" data-tab="csv" id="tab-csv-text">表格导入</button>
+        <div class="modal-backdrop"></div>
+        <div class="modal-content settings-modal-premium">
+            <button class="close-modal-btn">&times;</button>
+
+            <!-- 标题区域 -->
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2 id="settings-modal-title">管理学生名单</h2>
+                <p class="modal-subtitle">导入或编辑你的班级学生信息</p>
             </div>
-            <div id="tab-manual" class="tab-content active">
-                <textarea id="student-list-input"></textarea>
+
+            <!-- Tab切换 -->
+            <div class="tab-switcher">
+                <button class="tab-btn-premium active" data-tab="manual" id="tab-manual-text">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>手动输入</span>
+                </button>
+                <button class="tab-btn-premium" data-tab="csv" id="tab-csv-text">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>文件导入</span>
+                </button>
             </div>
-            <div id="tab-csv" class="tab-content">
-                <label for="csv-file-input" class="file-upload-btn">📂 选择文件 (CSV/TXT)</label>
-                <input type="file" id="csv-file-input" accept=".csv,.txt" style="display: none;">
-                <textarea id="csv-input" placeholder="或直接粘贴表格内容(用逗号或换行分隔)"></textarea>
+
+            <!-- 内容区域 -->
+            <div class="tab-content-container">
+                <div id="tab-manual" class="tab-content-premium active">
+                    <div class="input-card">
+                        <label class="input-label">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            学生名单
+                        </label>
+                        <textarea id="student-list-input" class="premium-textarea" placeholder="每行一个学生姓名&#10;例如：&#10;张三&#10;李四&#10;王五"></textarea>
+                        <div class="input-hint">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>每行输入一个学生姓名，支持批量粘贴</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-csv" class="tab-content-premium">
+                    <div class="input-card">
+                        <label class="input-label">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            上传文件
+                        </label>
+                        <label for="csv-file-input" class="file-upload-area">
+                            <div class="upload-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="upload-text">
+                                <strong>点击选择文件</strong>
+                                <span>支持 CSV 或 TXT 格式</span>
+                            </div>
+                        </label>
+                        <input type="file" id="csv-file-input" accept=".csv,.txt" style="display: none;">
+
+                        <div class="divider">
+                            <span>或</span>
+                        </div>
+
+                        <textarea id="csv-input" class="premium-textarea" placeholder="直接粘贴表格内容&#10;支持用逗号或换行分隔"></textarea>
+                    </div>
+                </div>
             </div>
-            <div class="modal-actions">
-                <button id="import-btn" class="primary-btn">导入并重置游戏</button>
-                <button id="clear-data-btn" class="danger-btn">🗑️ 清空所有数据</button>
+
+            <!-- 底部操作区 -->
+            <div class="modal-footer">
+                <button id="import-btn" class="btn-premium btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    导入名单
+                </button>
+                <button id="clear-data-btn" class="btn-premium btn-danger">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    清空数据
+                </button>
             </div>
-            <p class="hint" id="settings-hint">注意：导入新名单会重置本周进度！</p>
+
+            <div class="modal-warning">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="settings-hint">导入新名单将重置本周所有进度数据</span>
+            </div>
         </div>
     </div>
 

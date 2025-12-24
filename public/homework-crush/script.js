@@ -139,11 +139,11 @@ function bindEvents() {
     const importBtn = document.getElementById('import-btn');
     if (importBtn) {
         importBtn.onclick = () => {
-            const activeTabBtn = document.querySelector('.tab-btn.active');
+            const activeTabBtn = document.querySelector('.tab-btn-premium.active');
             const mode = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
             const inputId = mode === 'manual' ? 'student-list-input' : 'csv-input';
             const input = document.getElementById(inputId);
-            
+
             if (input && input.value.trim()) {
                 if (confirm(t('importResetConfirm'))) {
                     // 使用稳健的拆分方式，不使用可能导致报错的复杂正则
@@ -168,9 +168,36 @@ function bindEvents() {
         };
     }
 
-    const closeModal = document.querySelector('.close-modal');
-    if (closeModal && modal) {
-        closeModal.onclick = () => modal.classList.add('hidden');
+    // 清空数据按钮
+    const clearDataBtn = document.getElementById('clear-data-btn');
+    if (clearDataBtn) {
+        clearDataBtn.onclick = () => {
+            if (confirm('⚠️ 确定要清空所有数据吗？\n\n这将删除：\n• 所有学生名单\n• 本周进度记录\n• 奖惩规则\n\n此操作不可恢复！')) {
+                // 清空所有数据
+                STATE.students = [];
+                STATE.rules = { reward: '', punishment: '' };
+                STATE.weekStartDate = null;
+                saveData();
+
+                // 关闭弹窗并刷新UI
+                if (modal) modal.classList.add('hidden');
+                renderUI();
+                renderTree();
+
+                alert('✅ 所有数据已清空！');
+            }
+        };
+    }
+
+    const closeModalBtn = document.querySelector('.close-modal-btn');
+    if (closeModalBtn && modal) {
+        closeModalBtn.onclick = () => modal.classList.add('hidden');
+    }
+
+    // 点击背景关闭弹窗
+    const modalBackdrop = document.querySelector('.modal-backdrop');
+    if (modalBackdrop && modal) {
+        modalBackdrop.onclick = () => modal.classList.add('hidden');
     }
 
     // 其他按钮
@@ -201,10 +228,10 @@ function bindEvents() {
         };
     }
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.tab-btn-premium').forEach(btn => {
         btn.onclick = () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn-premium').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content-premium').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             const target = document.getElementById(`tab-${btn.dataset.tab}`);
             if(target) target.classList.add('active');

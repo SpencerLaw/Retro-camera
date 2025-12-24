@@ -11,12 +11,12 @@
 </head>
 <body>
 
-    <!-- 登录/授权界面 -->
+    <!-- 1. 授权登录界面 -->
     <div id="auth-screen" class="screen active">
-        <button class="back-to-home-btn" title="返回首页">🔙</button>
+        <button class="global-back-btn" title="返回首页">🔙</button>
         <div class="auth-box">
-            <h1>🎒 作业消消乐</h1>
-            <p class="subtitle">让每一次作业都变成一次成长！</p>
+            <h1>🎒 <span id="auth-title-text">作业消消乐</span></h1>
+            <p class="subtitle" id="auth-subtitle-text">让每一次作业都变成一次成长！</p>
             <div class="input-group">
                 <input type="text" id="license-input" placeholder="请输入老师的魔法授权码" maxlength="19">
                 <button id="verify-btn">开启魔法门</button>
@@ -25,13 +25,13 @@
         </div>
     </div>
 
-    <!-- 主界面 -->
-    <div id="app-screen" class="screen hidden">
+    <!-- 2. 核心应用界面 -->
+    <div id="app-screen" class="screen">
         <header>
             <div class="header-left">
-                <button id="back-btn" class="icon-btn" title="返回首页">🔙</button>
+                <button class="global-back-btn" title="返回首页">🔙</button>
                 <div>
-                    <h2>🏫 作业消消乐</h2>
+                    <h2 id="app-header-title">🏫 作业消消乐</h2>
                     <div class="date-display">
                         <span id="current-date">加载中...</span>
                         <span id="current-week-day">...</span>
@@ -47,7 +47,7 @@
         </header>
 
         <main>
-            <!-- 左侧：消消乐区域 (今日任务) -->
+            <!-- 左侧：消消乐区域 -->
             <section class="game-zone">
                 <div class="game-header">
                     <h3 id="daily-task-title">今日任务: 消灭未完成!</h3>
@@ -56,13 +56,11 @@
                     </div>
                 </div>
                 <div id="student-grid" class="grid-container">
-                    <div class="empty-state">
-                        点击右上角 ⚙️ 导入学生名单开始游戏！
-                    </div>
+                    <!-- 学生泡泡 -->
                 </div>
             </section>
 
-            <!-- 中间：奖惩区 (奖励设置) -->
+            <!-- 中间：奖惩区 -->
             <section class="rules-zone">
                 <div class="rules-panel">
                     <div class="rule-box reward">
@@ -77,7 +75,7 @@
                 </div>
             </section>
 
-            <!-- 右侧：大树可视化区 -->
+            <!-- 右侧：大树 -->
             <section class="visualization-zone">
                 <div class="tree-container">
                     <canvas id="tree-canvas"></canvas>
@@ -87,38 +85,33 @@
         </main>
     </div>
 
-    <!-- 弹窗：导入学生 -->
+    <!-- 弹窗：设置 -->
     <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2>📋 管理学生名单</h2>
-            
+            <h2 id="settings-modal-title">📋 管理学生名单</h2>
             <div class="tab-container">
-                <button class="tab-btn active" data-tab="manual">手动输入</button>
-                <button class="tab-btn" data-tab="csv">表格导入</button>
+                <button class="tab-btn active" data-tab="manual" id="tab-manual-text">手动输入</button>
+                <button class="tab-btn" data-tab="csv" id="tab-csv-text">表格导入</button>
             </div>
-
             <div id="tab-manual" class="tab-content active">
-                <textarea id="student-list-input" placeholder="输入学生姓名，每行一个&#10;张三&#10;李四&#10;王五"></textarea>
+                <textarea id="student-list-input"></textarea>
             </div>
-
             <div id="tab-csv" class="tab-content">
-                <textarea id="csv-input" placeholder="在此粘贴Excel列或CSV内容..."></textarea>
+                <textarea id="csv-input"></textarea>
             </div>
-
             <div class="modal-actions">
                 <button id="import-btn" class="primary-btn">导入并重置游戏</button>
                 <button id="clear-data-btn" class="danger-btn">🗑️ 清空所有数据</button>
             </div>
-            
-            <p class="hint">注意：导入新名单会重置本周进度！</p>
+            <p class="hint" id="settings-hint">注意：导入新名单会重置本周进度！</p>
         </div>
     </div>
 
-    <!-- 弹窗：确认完成 -->
+    <!-- 弹窗：确认 -->
     <div id="confirm-modal" class="modal hidden">
         <div class="modal-content confirm-box">
-            <h3>✅ 确认完成?</h3>
+            <h3 id="confirm-title-text">✅ 确认完成?</h3>
             <p id="confirm-student-name">学生姓名</p>
             <div class="modal-actions">
                 <button id="confirm-yes" class="primary-btn">是，完成了！</button>

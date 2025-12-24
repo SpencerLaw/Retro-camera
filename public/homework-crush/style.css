@@ -141,9 +141,16 @@ header {
     flex-shrink: 0;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .header-left h2 {
     color: var(--primary-pink);
     margin: 0;
+    font-size: 1.8rem; /* Scaled up */
 }
 
 .date-display {

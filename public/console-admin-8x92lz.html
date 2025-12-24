@@ -112,7 +112,7 @@
     
     .monitor-header {
       display: grid;
-      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
+      grid-template-columns: 40px 2fr 1fr 1fr;
       padding: 15px 20px;
       background: var(--bg); /* Use bg var instead of hardcoded */
       font-size: 12px;
@@ -128,7 +128,7 @@
 
     .item-summary {
       display: grid;
-      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
+      grid-template-columns: 40px 2fr 1fr 1fr;
       padding: 15px 20px;
       align-items: center;
       cursor: pointer;
@@ -265,7 +265,6 @@
         <div>授权码</div>
         <div>设备数</div>
         <div>最后活跃</div>
-        <div>IP归属</div>
       </div>
       <div id="monitorContent">
         <div style="padding: 40px; text-align: center; color: var(--text-light);">
@@ -405,15 +404,8 @@
         statusText = '即将满';
       }
 
-      // 获取最新IP
-      const lastDevice = item.devices.sort((a,b) => new Date(b.lastSeen) - new Date(a.lastSeen))[0];
-      const lastIp = lastDevice ? lastDevice.ip : 'N/A';
-
       // 构建设备详情行 (略微调整样式)
       const deviceRows = item.devices.map((dev, i) => {
-        const location = dev.country ? 
-          `<span style="margin-left:5px; font-size:10px; background:#f1f5f9; padding:2px 4px; border-radius:4px;">${dev.country}${dev.city ? ', ' + dev.city : ''}</span>` : '';
-        
         const deviceName = parseUA(dev.ua);
         const fullUA = dev.ua.replace(/"/g, '&quot;');
           
@@ -428,7 +420,6 @@
             <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
             <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
           </td>
-          <td>${dev.ip}${location}</td>
           <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
           <td>${new Date(dev.lastSeen).toLocaleString()}</td>
         </tr>
@@ -447,9 +438,6 @@
             <div style="font-size: 11px; color: var(--text-light);">
               ${timeAgo(new Date(item.lastUsedTime))}
             </div>
-             <div style="font-size: 11px; color: var(--text-light); font-family: monospace;">
-              ${lastIp}
-            </div>
           </div>
           
           <div class="item-details">
@@ -465,7 +453,6 @@
                     <th width="30">#</th>
                     <th>设备信息</th>
                     <th>Device ID</th>
-                    <th>IP地址</th>
                     <th>首次绑定</th>
                     <th>最后在线</th>
                   </tr>

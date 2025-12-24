@@ -129,6 +129,14 @@ export const verifyLicenseCode = async (code: string): Promise<{
   };
 }> => {
   try {
+    // 检查前缀：哆啦A梦不接受 ZY 开头的码
+    if (code.toUpperCase().startsWith('ZY')) {
+      return {
+        success: false,
+        message: '此授权码仅适用于作业消消乐',
+      };
+    }
+
     const deviceId = getDeviceId();
     const deviceInfo = getDeviceInfo();
     

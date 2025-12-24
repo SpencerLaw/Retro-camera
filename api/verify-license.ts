@@ -13,9 +13,6 @@ interface DeviceInfo {
   firstSeen: string;
   lastSeen: string;
   ua: string;
-  ip: string;
-  city?: string;
-  country?: string;
 }
 
 interface LicenseMetadata {
@@ -35,9 +32,6 @@ interface CompressedDevice {
   f: number; // firstSeen (timestamp)
   l: number; // lastSeen (timestamp)
   u: string; // ua
-  p: string; // ip
-  c?: string; // country
-  t?: string; // city (town)
 }
 
 interface CompressedMetadata {
@@ -48,15 +42,6 @@ interface CompressedMetadata {
 }
 
 // === 辅助工具 ===
-
-// 获取用户真实 IP
-function getClientIp(req: VercelRequest): string {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string') {
-    return forwarded.split(',')[0].trim();
-  }
-  return req.socket.remoteAddress || 'unknown';
-}
 
 // 获取设备概况
 function getDeviceType(ua: string): string {
@@ -103,10 +88,7 @@ function compressMetadata(full: LicenseMetadata): CompressedMetadata {
       i: dev.deviceId,
       f: new Date(dev.firstSeen).getTime(),
       l: new Date(dev.lastSeen).getTime(),
-      u: dev.ua,
-      p: dev.ip,
-      c: dev.country,
-      t: dev.city
+      u: dev.ua
     }))
   };
 }
@@ -150,10 +132,7 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
       deviceId: dev.i,
       firstSeen: new Date(dev.f).toISOString(),
       lastSeen: new Date(dev.l).toISOString(),
-      ua: dev.u,
-      ip: dev.p,
-      country: dev.c,
-      city: dev.t
+      ua: dev.u
     }))
   };
 }
@@ -173,13 +152,8 @@ export default async function handler(
 
   try {
     const { licenseCode, deviceId, deviceInfo: rawDeviceInfo, action, adminKey } = req.body;
-    const ip = getClientIp(req);
     const ua = req.headers['user-agent'] || 'unknown';
     
-    const city = req.headers['x-vercel-ip-city'] as string | undefined;
-    const country = req.headers['x-vercel-ip-country'] as string | undefined;
-    const decodedCity = city ? decodeURIComponent(city) : undefined;
-
     // === 管理员查询 ===
     if (action === 'query') {
       if (!adminKey || adminKey.trim() !== 'spencer') {
@@ -284,10 +258,7 @@ export default async function handler(
           deviceId,
           firstSeen: nowISO,
           lastSeen: nowISO,
-          ua: rawDeviceInfo || getDeviceType(ua),
-          ip: ip,
-          city: decodedCity,
-          country: country
+          ua: rawDeviceInfo || getDeviceType(ua)
         }]
       };
     } else {
@@ -300,10 +271,6 @@ export default async function handler(
         // 更新现有设备
         console.log(`[License] Update Device: ${cleanCode} Device: ${deviceId}`);
         metadata.devices[deviceIndex].lastSeen = nowISO;
-        metadata.devices[deviceIndex].ip = ip;
-        // 只有当有明确的地理位置信息时才更新，避免覆盖
-        if (decodedCity) metadata.devices[deviceIndex].city = decodedCity;
-        if (country) metadata.devices[deviceIndex].country = country;
         
         // 更新 UserAgent，以防用户更新了浏览器
         metadata.devices[deviceIndex].ua = rawDeviceInfo || getDeviceType(ua);
@@ -325,10 +292,7 @@ export default async function handler(
           deviceId,
           firstSeen: nowISO,
           lastSeen: nowISO,
-          ua: rawDeviceInfo || getDeviceType(ua),
-          ip: ip,
-          city: decodedCity,
-          country: country
+          ua: rawDeviceInfo || getDeviceType(ua)
         });
         metadata.totalDevices = metadata.devices.length;
         metadata.lastUsedTime = nowISO;

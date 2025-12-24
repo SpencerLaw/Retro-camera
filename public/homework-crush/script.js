@@ -5,46 +5,52 @@ const STATE = {
     students: JSON.parse(localStorage.getItem('hc_students') || '[]'),
     weekStartDate: localStorage.getItem('hc_week_start') || null,
     rules: JSON.parse(localStorage.getItem('hc_rules') || '{"reward":"","punishment":""}'),
-    currentDate: new Date(), // Will be synced with server
-    todayIndex: 0, // 0=Mon, 4=Fri, -1=Weekend
+    currentDate: new Date(),
+    todayIndex: 0,
     lang: localStorage.getItem('global-language') || 'zh-CN'
 };
 
+let els = {}; // Initialize as empty, fill in init
+
 // Helper for Translation
 function t(key) {
-    const langData = TRANSLATIONS[STATE.lang] || TRANSLATIONS['zh-CN'];
+    const data = window.TRANSLATIONS || {};
+    const langData = data[STATE.lang] || data['zh-CN'] || {};
     return langData[key] || key;
 }
 
 function applyTranslations() {
-    // Auth
-    if(els.authTitle) els.authTitle.textContent = t('title');
-    if(els.authSubtitle) els.authSubtitle.textContent = t('subtitle');
+    if (!els.verifyBtn) return; // Prevent crash if UI not ready
+
+    // Auth Screen
+    const authTitle = document.querySelector('.auth-box h1');
+    const authSub = document.querySelector('.subtitle');
+    if (authTitle) authTitle.textContent = t('title');
+    if (authSub) authSub.textContent = t('subtitle');
     els.licenseInput.placeholder = t('placeholder');
     els.verifyBtn.textContent = t('verifyBtn');
     
     // Header
     const headerTitle = document.querySelector('.header-left h2');
-    if(headerTitle) headerTitle.textContent = t('headerTitle');
-    
-    if(els.backBtn) els.backBtn.title = t('backHome');
-    
-    els.resetWeekBtn.textContent = t('startNewWeek');
+    if (headerTitle) headerTitle.textContent = t('headerTitle');
+    if (els.backBtn) els.backBtn.title = t('backHome');
     
     const isFS = !!document.fullscreenElement;
-    els.fullscreenBtn.title = isFS ? t('exitFullscreen') : t('fullscreen');
-    els.fullscreenBtn.textContent = isFS ? "📺" : "📺"; // Could swap icon if desired, using same for now
+    if (els.fullscreenBtn) {
+        els.fullscreenBtn.title = isFS ? t('exitFullscreen') : t('fullscreen');
+    }
     
+    els.resetWeekBtn.textContent = t('startNewWeek');
     els.settingsBtn.title = t('settings');
     els.logoutBtn.title = t('logout');
     
     // Game Zone
     const gameTitle = document.getElementById('daily-task-title');
-    if(gameTitle) gameTitle.textContent = t('dailyTask');
+    if (gameTitle) gameTitle.textContent = t('dailyTask');
     
     // Rules
-    if(els.labelReward) els.labelReward.textContent = t('rewardLabel');
-    if(els.labelPunish) els.labelPunish.textContent = t('punishmentLabel');
+    if (els.labelReward) els.labelReward.textContent = t('rewardLabel');
+    if (els.labelPunish) els.labelPunish.textContent = t('punishmentLabel');
     
     els.rewardInput.placeholder = t('rewardPlaceholder');
     els.punishmentInput.placeholder = t('punishmentPlaceholder');
@@ -52,13 +58,12 @@ function applyTranslations() {
     
     // Modal
     const modalH2 = document.querySelector('.modal-content h2');
-    if(modalH2) modalH2.textContent = t('settingsTitle');
+    if (modalH2) modalH2.textContent = t('settingsTitle');
     
     const tabMan = document.querySelector('[data-tab="manual"]');
-    if(tabMan) tabMan.textContent = t('manualTab');
-    
+    if (tabMan) tabMan.textContent = t('manualTab');
     const tabCsv = document.querySelector('[data-tab="csv"]');
-    if(tabCsv) tabCsv.textContent = t('csvTab');
+    if (tabCsv) tabCsv.textContent = t('csvTab');
     
     els.manualInput.placeholder = t('manualPlaceholder');
     els.csvInput.placeholder = t('csvPlaceholder');
@@ -66,76 +71,249 @@ function applyTranslations() {
     els.clearDataBtn.textContent = t('clearDataBtn');
     
     const hint = document.querySelector('.hint');
-    if(hint) hint.textContent = t('hint');
+    if (hint) hint.textContent = t('hint');
     
     // Confirm Modal
     const confirmH3 = document.querySelector('.confirm-box h3');
-    if(confirmH3) confirmH3.textContent = t('confirmTitle');
+    if (confirmH3) confirmH3.textContent = t('confirmTitle');
     els.confirmYes.textContent = t('confirmYes');
     els.confirmNo.textContent = t('confirmNo');
 }
 
-// DOM Elements
-const els = {
-    authScreen: document.getElementById('auth-screen'),
-    appScreen: document.getElementById('app-screen'),
-    licenseInput: document.getElementById('license-input'),
-    verifyBtn: document.getElementById('verify-btn'),
-    authMsg: document.getElementById('auth-msg'),
-    dateDisplay: document.getElementById('current-date'),
-    backBtn: document.getElementById('back-btn'),
-    dayDisplay: document.getElementById('current-week-day'),
-    studentGrid: document.getElementById('student-grid'),
-    dailyProgress: document.getElementById('daily-progress'),
-    treeCanvas: document.getElementById('tree-canvas'),
-    treeMsg: document.getElementById('tree-message'),
-    rewardInput: document.getElementById('reward-text'),
-    punishmentInput: document.getElementById('punishment-text'),
-    saveRulesBtn: document.getElementById('save-rules-btn'),
-    settingsBtn: document.getElementById('settings-btn'),
-    fullscreenBtn: document.getElementById('fullscreen-btn'),
-    logoutBtn: document.getElementById('logout-btn'),
-    resetWeekBtn: document.getElementById('reset-week-btn'),
-    settingsModal: document.getElementById('settings-modal'),
-    closeModal: document.querySelector('.close-modal'),
-    importBtn: document.getElementById('import-btn'),
-    clearDataBtn: document.getElementById('clear-data-btn'),
-    manualInput: document.getElementById('student-list-input'),
-    csvInput: document.getElementById('csv-input'),
-    tabBtns: document.querySelectorAll('.tab-btn'),
-    tabContents: document.querySelectorAll('.tab-content'),
-    confirmModal: document.getElementById('confirm-modal'),
-    confirmName: document.getElementById('confirm-student-name'),
-    confirmYes: document.getElementById('confirm-yes'),
-    confirmNo: document.getElementById('confirm-no'),
-    // New labels for 3-column layout
-    labelReward: document.getElementById('reward-label'),
-    labelPunish: document.getElementById('punishment-label'),
-    // Auth titles
-    authTitle: document.querySelector('.auth-box h1'),
-    authSubtitle: document.querySelector('.subtitle')
-};
-
 // --- Initialization ---
 
 async function init() {
+    // 1. Map DOM Elements
+    els = {
+        authScreen: document.getElementById('auth-screen'),
+        appScreen: document.getElementById('app-screen'),
+        licenseInput: document.getElementById('license-input'),
+        verifyBtn: document.getElementById('verify-btn'),
+        authMsg: document.getElementById('auth-msg'),
+        dateDisplay: document.getElementById('current-date'),
+        backBtn: document.getElementById('back-btn'),
+        dayDisplay: document.getElementById('current-week-day'),
+        studentGrid: document.getElementById('student-grid'),
+        dailyProgress: document.getElementById('daily-progress'),
+        treeCanvas: document.getElementById('tree-canvas'),
+        treeMsg: document.getElementById('tree-message'),
+        rewardInput: document.getElementById('reward-text'),
+        punishmentInput: document.getElementById('punishment-text'),
+        saveRulesBtn: document.getElementById('save-rules-btn'),
+        settingsBtn: document.getElementById('settings-btn'),
+        fullscreenBtn: document.getElementById('fullscreen-btn'),
+        logoutBtn: document.getElementById('logout-btn'),
+        resetWeekBtn: document.getElementById('reset-week-btn'),
+        settingsModal: document.getElementById('settings-modal'),
+        closeModal: document.querySelector('.close-modal'),
+        importBtn: document.getElementById('import-btn'),
+        clearDataBtn: document.getElementById('clear-data-btn'),
+        manualInput: document.getElementById('student-list-input'),
+        csvInput: document.getElementById('csv-input'),
+        tabBtns: document.querySelectorAll('.tab-btn'),
+        tabContents: document.querySelectorAll('.tab-content'),
+        confirmModal: document.getElementById('confirm-modal'),
+        confirmName: document.getElementById('confirm-student-name'),
+        confirmYes: document.getElementById('confirm-yes'),
+        confirmNo: document.getElementById('confirm-no'),
+        labelReward: document.getElementById('reward-label'),
+        labelPunish: document.getElementById('punishment-label')
+    };
+
+    // 2. Attach Events
+    attachEventListeners();
+
+    // 3. Setup
     applyTranslations();
     await syncTime();
     startDynamicClock();
     checkWeekCycle();
     renderUI();
     
-    // Auth Check
+    // 4. Initial Screen
     if (STATE.isVerified && STATE.licenseCode) {
         showApp();
     } else {
-        els.authScreen.classList.remove('hidden');
+        if(els.authScreen) els.authScreen.classList.remove('hidden');
     }
 
-    // Canvas Resize
-    window.addEventListener('resize', resizeCanvas);
+    // 5. Canvas
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        renderTree();
+    });
     resizeCanvas();
-    renderTree(); // Initial tree render
+    renderTree();
+}
+
+function attachEventListeners() {
+    if (!els.verifyBtn) return;
+
+    els.verifyBtn.addEventListener('click', async () => {
+        const code = els.licenseInput.value.trim();
+        if (!code) return;
+
+        if (!code.toUpperCase().startsWith('ZY')) {
+            alert('此应用需要以 ZY 开头的专用授权码');
+            return;
+        }
+
+        els.verifyBtn.textContent = t('verifying');
+        els.verifyBtn.disabled = true;
+        els.authMsg.textContent = '';
+
+        try {
+            let deviceId = localStorage.getItem('hc_device_id');
+            if (!deviceId) {
+                deviceId = 'hc-' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('hc_device_id', deviceId);
+            }
+
+            const res = await fetch('/api/verify-license', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    licenseCode: code,
+                    deviceId: deviceId,
+                    deviceInfo: navigator.userAgent
+                })
+            });
+            
+            const data = await res.json();
+
+            if (data.success) {
+                STATE.licenseCode = code;
+                STATE.isVerified = true;
+                localStorage.setItem('hc_license', code);
+                localStorage.setItem('hc_verified', 'true');
+                showApp();
+            } else {
+                els.authMsg.textContent = data.message || t('verifyFail');
+            }
+        } catch (e) {
+            els.authMsg.textContent = t('networkError');
+        } finally {
+            els.verifyBtn.textContent = t('verifyBtn');
+            els.verifyBtn.disabled = false;
+        }
+    });
+
+    els.logoutBtn.addEventListener('click', () => {
+        STATE.isVerified = false;
+        localStorage.removeItem('hc_verified');
+        location.reload();
+    });
+
+    if(els.backBtn) {
+        els.backBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    }
+
+    els.fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        applyTranslations();
+    });
+
+    els.settingsBtn.addEventListener('click', () => {
+        els.settingsModal.classList.remove('hidden');
+        const names = STATE.students.map(s => s.name).join('\n');
+        els.manualInput.value = names;
+    });
+
+    els.closeModal.addEventListener('click', () => {
+        els.settingsModal.classList.add('hidden');
+    });
+
+    els.tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            els.tabBtns.forEach(b => b.classList.remove('active'));
+            els.tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const target = document.getElementById(`tab-${btn.dataset.tab}`);
+            if(target) target.classList.add('active');
+        });
+    });
+
+    els.importBtn.addEventListener('click', () => {
+        let rawText = '';
+        const activeTabBtn = document.querySelector('.tab-btn.active');
+        const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
+        
+        if (activeTab === 'manual') rawText = els.manualInput.value;
+        else rawText = els.csvInput.value;
+        
+        const lines = rawText.split(/[\n\r,]+/).map(t => t.trim()).filter(t => t);
+        if (lines.length > 0) {
+            if (confirm(t('importResetConfirm'))) {
+                STATE.students = lines.map(name => ({
+                    name,
+                    history: [false, false, false, false, false]
+                }));
+                startNewWeek();
+                els.settingsModal.classList.add('hidden');
+            }
+        }
+    });
+
+    els.clearDataBtn.addEventListener('click', () => {
+        if(confirm(t('clearDataConfirm'))) {
+            localStorage.removeItem('hc_students');
+            localStorage.removeItem('hc_week_start');
+            localStorage.removeItem('hc_rules');
+            STATE.students = [];
+            STATE.rules = { reward: "", punishment: "" };
+            renderUI();
+            renderTree();
+            els.settingsModal.classList.add('hidden');
+        }
+    });
+
+    els.saveRulesBtn.addEventListener('click', () => {
+        STATE.rules.reward = els.rewardInput.value;
+        STATE.rules.punishment = els.punishmentInput.value;
+        saveData();
+        renderTree();
+        alert(t('rulesSaved'));
+    });
+
+    els.resetWeekBtn.addEventListener('click', () => {
+        if(confirm(t('resetWeekConfirm'))) {
+            startNewWeek();
+        }
+    });
+
+    els.confirmYes.addEventListener('click', () => {
+        if (pendingStudentIndex !== null) {
+            const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+            STATE.students[pendingStudentIndex].history[dayIndex] = true;
+            saveData();
+            renderGrid();
+            updateProgress();
+            renderTree();
+            
+            const allDoneToday = STATE.students.every(s => s.history[dayIndex]);
+            if (allDoneToday) {
+                triggerConfetti();
+            }
+        }
+        els.confirmModal.classList.add('hidden');
+        pendingStudentIndex = null;
+    });
+
+    els.confirmNo.addEventListener('click', () => {
+        els.confirmModal.classList.add('hidden');
+        pendingStudentIndex = null;
+    });
 }
 
 let serverTimeOffset = 0;
@@ -154,7 +332,6 @@ async function syncTime() {
         STATE.currentDate = new Date();
         serverTimeOffset = 0;
     }
-    
     updateHeaderDate();
 }
 
@@ -168,21 +345,19 @@ function startDynamicClock() {
 function updateHeaderDate() {
     const days = t('days');
     const d = STATE.currentDate;
-    
     const dateStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
     const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
     
     let dayIdx = d.getDay();
     STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
 
-    els.dateDisplay.textContent = `${dateStr} ${days[STATE.todayIndex] || '?'}`;
-    els.dayDisplay.textContent = timeStr;
+    if(els.dateDisplay) els.dateDisplay.textContent = `${dateStr} ${days[STATE.todayIndex] || '?'}`;
+    if(els.dayDisplay) els.dayDisplay.textContent = timeStr;
 }
 
 function checkWeekCycle() {
     if (!STATE.weekStartDate) {
         startNewWeek();
-        return;
     }
 }
 
@@ -203,100 +378,18 @@ function startNewWeek() {
     renderTree();
 }
 
-// --- Auth Logic ---
-
-els.verifyBtn.addEventListener('click', async () => {
-    const code = els.licenseInput.value.trim();
-    if (!code) return;
-
-    // 强制消消乐专属前缀校验
-    if (!code.toUpperCase().startsWith('ZY')) {
-        alert('此应用需要以 ZY 开头的专用授权码');
-        return;
-    }
-
-    els.verifyBtn.textContent = t('verifying');
-    els.verifyBtn.disabled = true;
-    els.authMsg.textContent = '';
-
-    try {
-        let deviceId = localStorage.getItem('hc_device_id');
-        if (!deviceId) {
-            deviceId = 'hc-' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('hc_device_id', deviceId);
-        }
-
-        const res = await fetch('/api/verify-license', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                licenseCode: code,
-                deviceId: deviceId,
-                deviceInfo: navigator.userAgent
-            })
-        });
-        
-        const data = await res.json();
-
-        if (data.success) {
-            STATE.licenseCode = code;
-            STATE.isVerified = true;
-            localStorage.setItem('hc_license', code);
-            localStorage.setItem('hc_verified', 'true');
-            showApp();
-        } else {
-            els.authMsg.textContent = data.message || t('verifyFail');
-        }
-    } catch (e) {
-        els.authMsg.textContent = t('networkError');
-    } finally {
-        els.verifyBtn.textContent = t('verifyBtn');
-        els.verifyBtn.disabled = false;
-    }
-});
-
-els.logoutBtn.addEventListener('click', () => {
-    STATE.isVerified = false;
-    localStorage.removeItem('hc_verified');
-    location.reload();
-});
-
-if(els.backBtn) {
-    els.backBtn.addEventListener('click', () => {
-        window.location.href = '/';
-    });
-}
-
-els.fullscreenBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.error(`Error: ${err.message}`);
-        });
-    } else {
-        document.exitFullscreen();
-    }
-});
-
-document.addEventListener('fullscreenchange', () => {
-    applyTranslations(); // Refresh titles/icons
-});
-
 function showApp() {
-    els.authScreen.classList.remove('active');
+    if(!els.authScreen) return;
+    els.authScreen.classList.add('hidden');
+    els.appScreen.classList.remove('hidden');
     setTimeout(() => {
-        els.authScreen.classList.add('hidden');
-        els.appScreen.classList.remove('hidden');
-        setTimeout(() => {
-            resizeCanvas();
-            renderTree();
-        }, 100); 
-    }, 500);
+        resizeCanvas();
+        renderTree();
+    }, 100); 
     
     els.rewardInput.value = STATE.rules.reward;
     els.punishmentInput.value = STATE.rules.punishment;
 }
-
-// --- Main UI Logic ---
 
 function renderUI() {
     renderGrid();
@@ -304,6 +397,7 @@ function renderUI() {
 }
 
 function renderGrid() {
+    if(!els.studentGrid) return;
     els.studentGrid.innerHTML = '';
     
     if (STATE.students.length === 0) {
@@ -339,35 +433,12 @@ let pendingStudentIndex = null;
 function confirmComplete(index) {
     pendingStudentIndex = index;
     const student = STATE.students[index];
-    els.confirmName.textContent = t('confirmMsg').replace('{name}', student.name);
-    els.confirmModal.classList.remove('hidden');
+    if(els.confirmName) els.confirmName.textContent = t('confirmMsg').replace('{name}', student.name);
+    if(els.confirmModal) els.confirmModal.classList.remove('hidden');
 }
 
-els.confirmYes.addEventListener('click', () => {
-    if (pendingStudentIndex !== null) {
-        const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-        STATE.students[pendingStudentIndex].history[dayIndex] = true;
-        saveData();
-        renderGrid();
-        updateProgress();
-        renderTree();
-        
-        const allDoneToday = STATE.students.every(s => s.history[dayIndex]);
-        if (allDoneToday) {
-            triggerConfetti();
-        }
-    }
-    els.confirmModal.classList.add('hidden');
-    pendingStudentIndex = null;
-});
-
-els.confirmNo.addEventListener('click', () => {
-    els.confirmModal.classList.add('hidden');
-    pendingStudentIndex = null;
-});
-
 function updateProgress() {
-    if (STATE.students.length === 0) return;
+    if (STATE.students.length === 0 || !els.dailyProgress) return;
     const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
     const total = STATE.students.length;
     const done = STATE.students.filter(s => s.history[dayIndex]).length;
@@ -386,18 +457,18 @@ function saveData() {
     localStorage.setItem('hc_rules', JSON.stringify(STATE.rules));
 }
 
-// --- Dreamy Tree Visualization (Canvas) ---
-
-const ctx = els.treeCanvas.getContext('2d');
+// --- Tree Visualization (Canvas) ---
+let ctx;
 let animFrameId;
 let swayTime = 0;
 
 function resizeCanvas() {
+    if(!els.treeCanvas) return;
+    ctx = els.treeCanvas.getContext('2d');
     const parent = els.treeCanvas.parentElement;
     if (!parent) return;
     els.treeCanvas.width = parent.offsetWidth;
     els.treeCanvas.height = parent.offsetHeight;
-    if (!animFrameId) renderTree(); 
 }
 
 function renderTree() {
@@ -553,9 +624,9 @@ function drawDreamyTree(ctx, level, time) {
     ctx.restore();
 }
 
-// --- Confetti ---
 function triggerConfetti() {
     const canvas = els.treeCanvas;
+    if(!canvas) return;
     const myCtx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
@@ -589,70 +660,5 @@ function triggerConfetti() {
     animateConfetti();
 }
 
-// --- Settings / Modal Logic ---
-
-els.settingsBtn.addEventListener('click', () => {
-    els.settingsModal.classList.remove('hidden');
-    const names = STATE.students.map(s => s.name).join('\n');
-    els.manualInput.value = names;
-});
-
-els.closeModal.addEventListener('click', () => {
-    els.settingsModal.classList.add('hidden');
-});
-
-els.tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        els.tabBtns.forEach(b => b.classList.remove('active'));
-        els.tabContents.forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
-    });
-});
-
-els.importBtn.addEventListener('click', () => {
-    let rawText = '';
-    const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-    if (activeTab === 'manual') rawText = els.manualInput.value;
-    else rawText = els.csvInput.value;
-    const lines = rawText.split(/[\n,]+/).map(t => t.trim()).filter(t => t);
-    if (lines.length > 0) {
-        if (confirm(t('importResetConfirm'))) {
-            STATE.students = lines.map(name => ({
-                name,
-                history: [false, false, false, false, false]
-            }));
-            startNewWeek();
-            els.settingsModal.classList.add('hidden');
-        }
-    }
-});
-
-els.clearDataBtn.addEventListener('click', () => {
-    if(confirm(t('clearDataConfirm'))) {
-        localStorage.removeItem('hc_students');
-        localStorage.removeItem('hc_week_start');
-        localStorage.removeItem('hc_rules');
-        STATE.students = [];
-        STATE.rules = { reward: "", punishment: "" };
-        renderUI();
-        renderTree();
-        els.settingsModal.classList.add('hidden');
-    }
-});
-
-els.saveRulesBtn.addEventListener('click', () => {
-    STATE.rules.reward = els.rewardInput.value;
-    STATE.rules.punishment = els.punishmentInput.value;
-    saveData();
-    renderTree();
-    alert(t('rulesSaved'));
-});
-
-els.resetWeekBtn.addEventListener('click', () => {
-    if(confirm(t('resetWeekConfirm'))) {
-        startNewWeek();
-    }
-});
-
-init();
+// Start Init
+window.addEventListener('DOMContentLoaded', init);

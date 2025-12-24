@@ -1,4 +1,4 @@
-const TRANSLATIONS = {
+window.TRANSLATIONS = {
     'zh-CN': {
         title: "🎒 作业消消乐",
         subtitle: "让每一次作业都变成一次成长！",
@@ -30,18 +30,18 @@ const TRANSLATIONS = {
         csvPlaceholder: "在此粘贴Excel列或CSV内容...",
         importBtn: "导入并重置游戏",
         clearDataBtn: "🗑️ 清空所有数据",
-        hint: "注意：导入新名单会重置本週进度！",
+        hint: "注意：导入新名单会重置本周进度！",
         confirmTitle: "✅ 确认完成?",
         confirmYes: "是，完成了！",
         confirmNo: "取消",
         confirmMsg: "确认 {name} 完成作业了吗？",
         treeMsgReward: "全班大满贯！奖励达成！",
-        treeMsgPunish: "本週未全勤，下週加油！",
-        importResetConfirm: "导入新名单将重置本週进度，确定吗？",
+        treeMsgPunish: "本周未全勤，下周加油！",
+        importResetConfirm: "导入新名单将重置本周进度，确定吗？",
         clearDataConfirm: "警告：将完全清空所有数据！",
         rulesSaved: "规则已保存",
-        resetWeekConfirm: "确定要开始新的一週吗？本週进度将重置。",
-        days: ['週一', '週二', '週三', '週四', '週五', '週六', '週日']
+        resetWeekConfirm: "确定要开始新的一周吗？本周进度将重置。",
+        days: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
     },
     'en': {
         title: "🎒 Homework Crush",

@@ -10,7 +10,7 @@ const STATE = {
     lang: localStorage.getItem('global-language') || 'zh-CN'
 };
 
-let els = {}; // Initialize as empty, fill in init
+let els = {}; 
 
 // Helper for Translation
 function t(key) {
@@ -20,70 +20,70 @@ function t(key) {
 }
 
 function applyTranslations() {
-    if (!els.verifyBtn) return; // Prevent crash if UI not ready
+    try {
+        if (!els.verifyBtn) return;
 
-    // Auth Screen
-    const authTitle = document.querySelector('.auth-box h1');
-    const authSub = document.querySelector('.subtitle');
-    if (authTitle) authTitle.textContent = t('title');
-    if (authSub) authSub.textContent = t('subtitle');
-    els.licenseInput.placeholder = t('placeholder');
-    els.verifyBtn.textContent = t('verifyBtn');
-    
-    // Header
-    const headerTitle = document.querySelector('.header-left h2');
-    if (headerTitle) headerTitle.textContent = t('headerTitle');
-    if (els.backBtn) els.backBtn.title = t('backHome');
-    
-    const isFS = !!document.fullscreenElement;
-    if (els.fullscreenBtn) {
-        els.fullscreenBtn.title = isFS ? t('exitFullscreen') : t('fullscreen');
+        const authTitle = document.querySelector('.auth-box h1');
+        const authSub = document.querySelector('.subtitle');
+        if (authTitle) authTitle.textContent = t('title');
+        if (authSub) authSub.textContent = t('subtitle');
+        if (els.licenseInput) els.licenseInput.placeholder = t('placeholder');
+        if (els.verifyBtn) els.verifyBtn.textContent = t('verifyBtn');
+        
+        const headerTitle = document.querySelector('.header-left h2');
+        if (headerTitle) headerTitle.textContent = t('headerTitle');
+        
+        document.querySelectorAll('#back-btn, .back-to-home-btn').forEach(btn => {
+            btn.title = t('backHome');
+        });
+        
+        const isFS = !!document.fullscreenElement;
+        if (els.fullscreenBtn) {
+            els.fullscreenBtn.title = isFS ? t('exitFullscreen') : t('fullscreen');
+        }
+        
+        if (els.resetWeekBtn) els.resetWeekBtn.textContent = t('startNewWeek');
+        if (els.settingsBtn) els.settingsBtn.title = t('settings');
+        if (els.logoutBtn) els.logoutBtn.title = t('logout');
+        
+        const gameTitle = document.getElementById('daily-task-title');
+        if (gameTitle) gameTitle.textContent = t('dailyTask');
+        
+        if (els.labelReward) els.labelReward.textContent = t('rewardLabel');
+        if (els.labelPunish) els.labelPunish.textContent = t('punishmentLabel');
+        
+        if (els.rewardInput) els.rewardInput.placeholder = t('rewardPlaceholder');
+        if (els.punishmentInput) els.punishmentInput.placeholder = t('punishmentPlaceholder');
+        if (els.saveRulesBtn) els.saveRulesBtn.textContent = t('saveRules');
+        
+        const modalH2 = document.querySelector('.modal-content h2');
+        if (modalH2) modalH2.textContent = t('settingsTitle');
+        
+        const tabMan = document.querySelector('[data-tab="manual"]');
+        if (tabMan) tabMan.textContent = t('manualTab');
+        const tabCsv = document.querySelector('[data-tab="csv"]');
+        if (tabCsv) tabCsv.textContent = t('csvTab');
+        
+        if (els.manualInput) els.manualInput.placeholder = t('manualPlaceholder');
+        if (els.csvInput) els.csvInput.placeholder = t('csvPlaceholder');
+        if (els.importBtn) els.importBtn.textContent = t('importBtn');
+        if (els.clearDataBtn) els.clearDataBtn.textContent = t('clearDataBtn');
+        
+        const hint = document.querySelector('.hint');
+        if (hint) hint.textContent = t('hint');
+        
+        const confirmH3 = document.querySelector('.confirm-box h3');
+        if (confirmH3) confirmH3.textContent = t('confirmTitle');
+        if (els.confirmYes) els.confirmYes.textContent = t('confirmYes');
+        if (els.confirmNo) els.confirmNo.textContent = t('confirmNo');
+    } catch (e) {
+        console.error('Translation error:', e);
     }
-    
-    els.resetWeekBtn.textContent = t('startNewWeek');
-    els.settingsBtn.title = t('settings');
-    els.logoutBtn.title = t('logout');
-    
-    // Game Zone
-    const gameTitle = document.getElementById('daily-task-title');
-    if (gameTitle) gameTitle.textContent = t('dailyTask');
-    
-    // Rules
-    if (els.labelReward) els.labelReward.textContent = t('rewardLabel');
-    if (els.labelPunish) els.labelPunish.textContent = t('punishmentLabel');
-    
-    els.rewardInput.placeholder = t('rewardPlaceholder');
-    els.punishmentInput.placeholder = t('punishmentPlaceholder');
-    els.saveRulesBtn.textContent = t('saveRules');
-    
-    // Modal
-    const modalH2 = document.querySelector('.modal-content h2');
-    if (modalH2) modalH2.textContent = t('settingsTitle');
-    
-    const tabMan = document.querySelector('[data-tab="manual"]');
-    if (tabMan) tabMan.textContent = t('manualTab');
-    const tabCsv = document.querySelector('[data-tab="csv"]');
-    if (tabCsv) tabCsv.textContent = t('csvTab');
-    
-    els.manualInput.placeholder = t('manualPlaceholder');
-    els.csvInput.placeholder = t('csvPlaceholder');
-    els.importBtn.textContent = t('importBtn');
-    els.clearDataBtn.textContent = t('clearDataBtn');
-    
-    const hint = document.querySelector('.hint');
-    if (hint) hint.textContent = t('hint');
-    
-    // Confirm Modal
-    const confirmH3 = document.querySelector('.confirm-box h3');
-    if (confirmH3) confirmH3.textContent = t('confirmTitle');
-    els.confirmYes.textContent = t('confirmYes');
-    els.confirmNo.textContent = t('confirmNo');
 }
 
 // --- Initialization ---
 
 async function init() {
-    // 1. Map DOM Elements
     els = {
         authScreen: document.getElementById('auth-screen'),
         appScreen: document.getElementById('app-screen'),
@@ -120,30 +120,30 @@ async function init() {
         labelPunish: document.getElementById('punishment-label')
     };
 
-    // 2. Attach Events
     attachEventListeners();
-
-    // 3. Setup
     applyTranslations();
-    await syncTime();
-    startDynamicClock();
-    checkWeekCycle();
-    renderUI();
     
-    // 4. Initial Screen
+    // 异步加载时间
+    syncTime().then(() => {
+        startDynamicClock();
+        checkWeekCycle();
+        renderUI();
+    });
+    
     if (STATE.isVerified && STATE.licenseCode) {
         showApp();
     } else {
+        if(els.authScreen) els.authScreen.classList.add('active');
         if(els.authScreen) els.authScreen.classList.remove('hidden');
     }
 
-    // 5. Canvas
+    resizeCanvas();
+    renderTree();
+
     window.addEventListener('resize', () => {
         resizeCanvas();
         renderTree();
     });
-    resizeCanvas();
-    renderTree();
 }
 
 function attachEventListeners() {
@@ -160,7 +160,7 @@ function attachEventListeners() {
 
         els.verifyBtn.textContent = t('verifying');
         els.verifyBtn.disabled = true;
-        els.authMsg.textContent = '';
+        if(els.authMsg) els.authMsg.textContent = '';
 
         try {
             let deviceId = localStorage.getItem('hc_device_id');
@@ -188,53 +188,62 @@ function attachEventListeners() {
                 localStorage.setItem('hc_verified', 'true');
                 showApp();
             } else {
-                els.authMsg.textContent = data.message || t('verifyFail');
+                if(els.authMsg) els.authMsg.textContent = data.message || t('verifyFail');
             }
         } catch (e) {
-            els.authMsg.textContent = t('networkError');
+            if(els.authMsg) els.authMsg.textContent = t('networkError');
         } finally {
             els.verifyBtn.textContent = t('verifyBtn');
             els.verifyBtn.disabled = false;
         }
     });
 
-    els.logoutBtn.addEventListener('click', () => {
-        STATE.isVerified = false;
-        localStorage.removeItem('hc_verified');
-        location.reload();
-    });
+    if(els.logoutBtn) {
+        els.logoutBtn.addEventListener('click', () => {
+            STATE.isVerified = false;
+            localStorage.removeItem('hc_verified');
+            localStorage.removeItem('hc_license');
+            location.reload();
+        });
+    }
 
-    // 绑定所有返回按钮
-    const allBackBtns = document.querySelectorAll('#back-btn, .back-to-home-btn');
-    allBackBtns.forEach(btn => {
+    document.querySelectorAll('#back-btn, .back-to-home-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             window.location.href = '/';
         });
     });
 
-    els.fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error: ${err.message}`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
-    });
+    if(els.fullscreenBtn) {
+        els.fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    }
 
     document.addEventListener('fullscreenchange', () => {
         applyTranslations();
     });
 
-    els.settingsBtn.addEventListener('click', () => {
-        els.settingsModal.classList.remove('hidden');
-        const names = STATE.students.map(s => s.name).join('\n');
-        els.manualInput.value = names;
-    });
+    if(els.settingsBtn) {
+        els.settingsBtn.addEventListener('click', () => {
+            if(els.settingsModal) els.settingsModal.classList.remove('hidden');
+            if(els.manualInput) {
+                const names = STATE.students.map(s => s.name).join('\n');
+                els.manualInput.value = names;
+            }
+        });
+    }
 
-    els.closeModal.addEventListener('click', () => {
-        els.settingsModal.classList.add('hidden');
-    });
+    if(els.closeModal) {
+        els.closeModal.addEventListener('click', () => {
+            if(els.settingsModal) els.settingsModal.classList.add('hidden');
+        });
+    }
 
     els.tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -246,76 +255,92 @@ function attachEventListeners() {
         });
     });
 
-    els.importBtn.addEventListener('click', () => {
-        let rawText = '';
-        const activeTabBtn = document.querySelector('.tab-btn.active');
-        const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
-        
-        if (activeTab === 'manual') rawText = els.manualInput.value;
-        else rawText = els.csvInput.value;
-        
-        const lines = rawText.split(/[\n\r,]+/).map(t => t.trim()).filter(t => t);
-        if (lines.length > 0) {
-            if (confirm(t('importResetConfirm'))) {
-                STATE.students = lines.map(name => ({
-                    name,
-                    history: [false, false, false, false, false]
-                }));
-                startNewWeek();
-                els.settingsModal.classList.add('hidden');
+    if(els.importBtn) {
+        els.importBtn.addEventListener('click', () => {
+            try {
+                let rawText = '';
+                const activeTabBtn = document.querySelector('.tab-btn.active');
+                const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
+                
+                if (activeTab === 'manual') rawText = els.manualInput.value;
+                else rawText = els.csvInput.value;
+                
+                const lines = rawText.split(/[\n\r,]+/).map(t => t.trim()).filter(t => t);
+                if (lines.length > 0) {
+                    if (confirm(t('importResetConfirm'))) {
+                        STATE.students = lines.map(name => ({
+                            name,
+                            history: [false, false, false, false, false]
+                        }));
+                        startNewWeek();
+                        if(els.settingsModal) els.settingsModal.classList.add('hidden');
+                    }
+                }
+            } catch (e) { console.error(e); }
+        });
+    }
+
+    if(els.clearDataBtn) {
+        els.clearDataBtn.addEventListener('click', () => {
+            if(confirm(t('clearDataConfirm'))) {
+                localStorage.removeItem('hc_students');
+                localStorage.removeItem('hc_week_start');
+                localStorage.removeItem('hc_rules');
+                STATE.students = [];
+                STATE.rules = { reward: "", punishment: "" };
+                renderUI();
+                renderTree();
+                if(els.settingsModal) els.settingsModal.classList.add('hidden');
             }
-        }
-    });
+        });
+    }
 
-    els.clearDataBtn.addEventListener('click', () => {
-        if(confirm(t('clearDataConfirm'))) {
-            localStorage.removeItem('hc_students');
-            localStorage.removeItem('hc_week_start');
-            localStorage.removeItem('hc_rules');
-            STATE.students = [];
-            STATE.rules = { reward: "", punishment: "" };
-            renderUI();
-            renderTree();
-            els.settingsModal.classList.add('hidden');
-        }
-    });
-
-    els.saveRulesBtn.addEventListener('click', () => {
-        STATE.rules.reward = els.rewardInput.value;
-        STATE.rules.punishment = els.punishmentInput.value;
-        saveData();
-        renderTree();
-        alert(t('rulesSaved'));
-    });
-
-    els.resetWeekBtn.addEventListener('click', () => {
-        if(confirm(t('resetWeekConfirm'))) {
-            startNewWeek();
-        }
-    });
-
-    els.confirmYes.addEventListener('click', () => {
-        if (pendingStudentIndex !== null) {
-            const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-            STATE.students[pendingStudentIndex].history[dayIndex] = true;
+    if(els.saveRulesBtn) {
+        els.saveRulesBtn.addEventListener('click', () => {
+            STATE.rules.reward = els.rewardInput.value;
+            STATE.rules.punishment = els.punishmentInput.value;
             saveData();
-            renderGrid();
-            updateProgress();
             renderTree();
-            
-            const allDoneToday = STATE.students.every(s => s.history[dayIndex]);
-            if (allDoneToday) {
-                triggerConfetti();
-            }
-        }
-        els.confirmModal.classList.add('hidden');
-        pendingStudentIndex = null;
-    });
+            alert(t('rulesSaved'));
+        });
+    }
 
-    els.confirmNo.addEventListener('click', () => {
-        els.confirmModal.classList.add('hidden');
-        pendingStudentIndex = null;
-    });
+    if(els.resetWeekBtn) {
+        els.resetWeekBtn.addEventListener('click', () => {
+            if(confirm(t('resetWeekConfirm'))) {
+                startNewWeek();
+            }
+        });
+    }
+
+    if(els.confirmYes) {
+        els.confirmYes.addEventListener('click', () => {
+            if (pendingStudentIndex !== null) {
+                const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+                if(STATE.students[pendingStudentIndex]) {
+                    STATE.students[pendingStudentIndex].history[dayIndex] = true;
+                    saveData();
+                    renderGrid();
+                    updateProgress();
+                    renderTree();
+                    
+                    const allDoneToday = STATE.students.every(s => s.history && s.history[dayIndex]);
+                    if (allDoneToday) {
+                        triggerConfetti();
+                    }
+                }
+            }
+            if(els.confirmModal) els.confirmModal.classList.add('hidden');
+            pendingStudentIndex = null;
+        });
+    }
+
+    if(els.confirmNo) {
+        els.confirmNo.addEventListener('click', () => {
+            if(els.confirmModal) els.confirmModal.classList.add('hidden');
+            pendingStudentIndex = null;
+        });
+    }
 }
 
 let serverTimeOffset = 0;
@@ -330,7 +355,6 @@ async function syncTime() {
         serverTimeOffset = serverDate.getTime() - (end + start) / 2;
         STATE.currentDate = new Date(Date.now() + serverTimeOffset);
     } catch (e) {
-        console.warn('Time sync failed, using local time');
         STATE.currentDate = new Date();
         serverTimeOffset = 0;
     }
@@ -345,16 +369,18 @@ function startDynamicClock() {
 }
 
 function updateHeaderDate() {
-    const days = t('days');
-    const d = STATE.currentDate;
-    const dateStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-    const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
-    
-    let dayIdx = d.getDay();
-    STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
+    try {
+        const days = t('days');
+        const d = STATE.currentDate;
+        const dateStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+        const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+        
+        let dayIdx = d.getDay();
+        STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
 
-    if(els.dateDisplay) els.dateDisplay.textContent = `${dateStr} ${days[STATE.todayIndex] || '?'}`;
-    if(els.dayDisplay) els.dayDisplay.textContent = timeStr;
+        if(els.dateDisplay) els.dateDisplay.textContent = `${dateStr} ${days[STATE.todayIndex] || '?'}`;
+        if(els.dayDisplay) els.dayDisplay.textContent = timeStr;
+    } catch (e) {}
 }
 
 function checkWeekCycle() {
@@ -372,7 +398,8 @@ function startNewWeek() {
     
     STATE.weekStartDate = monday.toISOString();
     STATE.students.forEach(s => {
-        s.history = [false, false, false, false, false];
+        if(!s.history) s.history = [false, false, false, false, false];
+        else s.history.fill(false);
     });
     
     saveData();
@@ -381,16 +408,33 @@ function startNewWeek() {
 }
 
 function showApp() {
-    if(!els.authScreen) return;
-    els.authScreen.classList.add('hidden');
-    els.appScreen.classList.remove('hidden');
-    setTimeout(() => {
-        resizeCanvas();
-        renderTree();
-    }, 100); 
-    
-    els.rewardInput.value = STATE.rules.reward;
-    els.punishmentInput.value = STATE.rules.punishment;
+    try {
+        // 核心动作：切换界面
+        if(els.authScreen) {
+            els.authScreen.classList.remove('active');
+            els.authScreen.classList.add('hidden');
+        }
+        if(els.appScreen) {
+            els.appScreen.classList.remove('hidden');
+            els.appScreen.classList.add('active'); // 确保可见
+        }
+
+        // 次要动作：填充数据
+        if(els.rewardInput) els.rewardInput.value = STATE.rules.reward || '';
+        if(els.punishmentInput) els.punishmentInput.value = STATE.rules.punishment || '';
+
+        // 刷新渲染
+        setTimeout(() => {
+            resizeCanvas();
+            renderTree();
+            renderUI();
+        }, 50);
+    } catch (e) {
+        console.error('Error in showApp:', e);
+        // 保底：即使报错也强行显示主界面
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'flex';
+    }
 }
 
 function renderUI() {
@@ -410,7 +454,7 @@ function renderGrid() {
     const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
 
     STATE.students.forEach((student, index) => {
-        const isDone = student.history[dayIndex];
+        const isDone = student.history ? student.history[dayIndex] : false;
         if (!isDone) {
             const bubble = document.createElement('div');
             bubble.className = 'student-bubble';
@@ -440,10 +484,10 @@ function confirmComplete(index) {
 }
 
 function updateProgress() {
-    if (STATE.students.length === 0 || !els.dailyProgress) return;
+    if (!STATE.students || STATE.students.length === 0 || !els.dailyProgress) return;
     const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
     const total = STATE.students.length;
-    const done = STATE.students.filter(s => s.history[dayIndex]).length;
+    const done = STATE.students.filter(s => s.history && s.history[dayIndex]).length;
     const pct = (done / total) * 100;
     els.dailyProgress.style.width = `${pct}%`;
 }
@@ -525,7 +569,7 @@ function drawDreamyScene() {
     let isWeekPerfect = true;
     const scanLimit = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
     for (let i = 0; i <= 4; i++) {
-        const allDone = STATE.students.length > 0 && STATE.students.every(s => s.history[i]);
+        const allDone = STATE.students.length > 0 && STATE.students.every(s => s.history && s.history[i]);
         if (i <= scanLimit) {
             if (allDone) level++;
             else if (i < scanLimit) isWeekPerfect = false;
@@ -550,7 +594,7 @@ function drawDreamyScene() {
          els.treeMsg.textContent = STATE.rules.punishment || t('treeMsgPunish');
          els.treeMsg.classList.add('show');
     } else {
-        els.treeMsg.classList.remove('show');
+        if(els.treeMsg) els.treeMsg.classList.remove('show');
     }
 }
 
@@ -627,11 +671,10 @@ function drawDreamyTree(ctx, level, time) {
 }
 
 function triggerConfetti() {
-    const canvas = els.treeCanvas;
-    if(!canvas) return;
-    const myCtx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
+    if(!els.treeCanvas) return;
+    const myCtx = els.treeCanvas.getContext('2d');
+    const w = els.treeCanvas.width;
+    const h = els.treeCanvas.height;
     const particles = [];
     const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff'];
     for(let i=0; i<100; i++) {
@@ -662,5 +705,4 @@ function triggerConfetti() {
     animateConfetti();
 }
 
-// Start Init
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('load', init);

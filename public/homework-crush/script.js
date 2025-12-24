@@ -259,15 +259,27 @@ function bindEvents() {
 
 // 5. 渲染 UI
 function renderUI() {
-    const grid = document.getElementById('student-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
+    const incompleteGrid = document.getElementById('incomplete-grid');
+    const completedGrid = document.getElementById('completed-grid');
+    const incompleteCount = document.getElementById('incomplete-count');
+    const completedCount = document.getElementById('completed-count');
+
+    if (!incompleteGrid || !completedGrid) return;
+
+    incompleteGrid.innerHTML = '';
+    completedGrid.innerHTML = '';
+
     const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-    
+
     if (STATE.students.length === 0) {
-        grid.innerHTML = `<div class="empty-state">${t('emptyState')}</div>`;
+        incompleteGrid.innerHTML = `<div class="empty-state">${t('emptyState')}</div>`;
+        if (incompleteCount) incompleteCount.textContent = '0人';
+        if (completedCount) completedCount.textContent = '0人';
         return;
     }
+
+    let incompleteStudents = [];
+    let completedStudents = [];
 
     STATE.students.forEach((s, i) => {
         // 确保每个学生都有history数组
@@ -275,41 +287,45 @@ function renderUI() {
             s.history = [false, false, false, false, false];
         }
 
-        // 只有当天作业明确未完成时才显示泡泡
-        if (s.history[day] !== true) {
-            const b = document.createElement('div');
-            b.className = 'student-bubble';
+        const b = document.createElement('div');
+        b.className = 'student-bubble';
 
-            // 创建爱心SVG
-            const heartSVG = `
-                <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <radialGradient id="strawberryPink-${i}" cx="30%" cy="30%" r="80%">
-                            <stop offset="0%" stop-color="#ffbfd3" />
-                            <stop offset="60%" stop-color="#ff6b95" />
-                            <stop offset="100%" stop-color="#ff3366" />
-                        </radialGradient>
-                        <filter id="softShadow-${i}" x="-20%" y="-20%" width="140%" height="140%">
-                            <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#ffb3c6" flood-opacity="0.5"/>
-                        </filter>
-                    </defs>
-                    <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z"
-                          fill="url(#strawberryPink-${i})"
-                          stroke="#ff3366" stroke-width="4" stroke-linejoin="round"
-                          filter="url(#softShadow-${i})" />
-                    <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="0.9"/>
-                    <circle cx="82" cy="40" r="5" fill="#ffffff" opacity="0.8"/>
-                    <path d="M150,50 q10,10 5,20" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
-                </svg>
-            `;
+        // 创建爱心SVG
+        const heartSVG = `
+            <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="strawberryPink-${i}" cx="30%" cy="30%" r="80%">
+                        <stop offset="0%" stop-color="#ffbfd3" />
+                        <stop offset="60%" stop-color="#ff6b95" />
+                        <stop offset="100%" stop-color="#ff3366" />
+                    </radialGradient>
+                    <filter id="softShadow-${i}" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#ffb3c6" flood-opacity="0.5"/>
+                    </filter>
+                </defs>
+                <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z"
+                      fill="url(#strawberryPink-${i})"
+                      stroke="#ff3366" stroke-width="4" stroke-linejoin="round"
+                      filter="url(#softShadow-${i})" />
+                <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="0.9"/>
+                <circle cx="82" cy="40" r="5" fill="#ffffff" opacity="0.8"/>
+                <path d="M150,50 q10,10 5,20" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+            </svg>
+        `;
 
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'name';
-            nameDiv.textContent = s.name;
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'name';
+        nameDiv.textContent = s.name;
 
-            b.innerHTML = heartSVG;
-            b.appendChild(nameDiv);
+        b.innerHTML = heartSVG;
+        b.appendChild(nameDiv);
 
+        // 根据完成状态分配到不同区域
+        if (s.history[day] === true) {
+            // 已完成 - 添加到已完成区域
+            completedStudents.push(b);
+        } else {
+            // 未完成 - 添加到未完成区域，并绑定点击事件
             b.onclick = () => {
                 if (confirm(t('confirmMsg').replace('{name}', s.name))) {
                     // 添加爱心散开动画
@@ -323,14 +339,25 @@ function renderUI() {
                     }, 600);
                 }
             };
-            grid.appendChild(b);
+            incompleteStudents.push(b);
         }
     });
 
-    if (grid.children.length === 0 && STATE.students.length > 0) {
-        grid.innerHTML = `<div class="empty-state">${t('emptyStateDone')}</div>`;
+    // 渲染未完成学生
+    if (incompleteStudents.length > 0) {
+        incompleteStudents.forEach(bubble => incompleteGrid.appendChild(bubble));
     }
-    
+
+    // 渲染已完成学生
+    if (completedStudents.length > 0) {
+        completedStudents.forEach(bubble => completedGrid.appendChild(bubble));
+    }
+
+    // 更新人数统计
+    if (incompleteCount) incompleteCount.textContent = `${incompleteStudents.length}人`;
+    if (completedCount) completedCount.textContent = `${completedStudents.length}人`;
+
+    // 更新总进度条
     const progress = document.getElementById('daily-progress');
     if (progress && STATE.students.length > 0) {
         const done = STATE.students.filter(s => s.history && s.history[day]).length;

@@ -181,6 +181,68 @@ main {
     border-radius: 10px;
 }
 
+/* 学生分组区域 */
+.student-section {
+    margin-bottom: 25px;
+    background: #fafafa;
+    border-radius: 20px;
+    padding: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.student-section.incomplete-section {
+    border-color: rgba(255, 154, 158, 0.3);
+    background: linear-gradient(135deg, #fff5f5 0%, #fef9fb 100%);
+}
+
+.student-section.completed-section {
+    border-color: rgba(132, 250, 176, 0.3);
+    background: linear-gradient(135deg, #f0fff4 0%, #fef9fb 100%);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.section-header h4 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.incomplete-section .section-header h4 {
+    color: var(--primary-pink-dark);
+}
+
+.completed-section .section-header h4 {
+    color: var(--primary-green-dark);
+}
+
+.student-count {
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 6px 15px;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.incomplete-section .student-count {
+    color: var(--primary-pink-dark);
+    border: 2px solid rgba(255, 154, 158, 0.3);
+}
+
+.completed-section .student-count {
+    color: var(--primary-green-dark);
+    border: 2px solid rgba(132, 250, 176, 0.3);
+}
+
 .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -188,6 +250,17 @@ main {
     padding: 15px;
     overflow-y: auto;
     justify-items: center;
+    min-height: 100px;
+}
+
+.grid-container:empty::before {
+    content: '暂无数据';
+    display: block;
+    text-align: center;
+    color: #ccc;
+    font-size: 1.1rem;
+    padding: 20px;
+    grid-column: 1 / -1;
 }
 
 /* 学生泡泡样式 - 爱心形状 */

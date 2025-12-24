@@ -49,14 +49,34 @@
         <main>
             <!-- 左侧：消消乐区域 -->
             <section class="game-zone">
+                <!-- 总进度条 -->
                 <div class="game-header">
                     <h3 id="daily-task-title">今日任务: 消灭未完成!</h3>
                     <div class="progress-bar">
                         <div id="daily-progress" style="width: 0%"></div>
                     </div>
                 </div>
-                <div id="student-grid" class="grid-container">
-                    <!-- 学生泡泡 -->
+
+                <!-- 未完成作业区域 -->
+                <div class="student-section incomplete-section">
+                    <div class="section-header">
+                        <h4>📝 未完成作业</h4>
+                        <span class="student-count" id="incomplete-count">0人</span>
+                    </div>
+                    <div id="incomplete-grid" class="grid-container">
+                        <!-- 未完成学生泡泡 -->
+                    </div>
+                </div>
+
+                <!-- 已完成作业区域 -->
+                <div class="student-section completed-section">
+                    <div class="section-header">
+                        <h4>✅ 已完成作业</h4>
+                        <span class="student-count" id="completed-count">0人</span>
+                    </div>
+                    <div id="completed-grid" class="grid-container">
+                        <!-- 已完成学生泡泡 -->
+                    </div>
                 </div>
             </section>
 

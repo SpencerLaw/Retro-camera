@@ -443,9 +443,9 @@ function drawDreamyScene() {
     }
 
     // 6. Draw Tree (Scaled and Positioned)
-    // Scale varies by level: 0.5 to 1.2
+    // Scale varies by level: 0.6 to 1.44 (20% increase from original 0.5-1.2)
     // If level 0 (just started), show a tiny sprout
-    const baseScale = 0.5 + (level * 0.15); 
+    const baseScale = (0.5 + (level * 0.15)) * 1.2; 
     const treeX = w / 2;
     const treeY = h * 0.88; // Base on the hill approx
 

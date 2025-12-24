@@ -280,23 +280,47 @@ function renderUI() {
             const b = document.createElement('div');
             b.className = 'student-bubble';
 
-            // 创建状态图标和名字
-            const icon = document.createElement('div');
-            icon.className = 'status-icon';
-            icon.textContent = '📝';
+            // 创建爱心SVG
+            const heartSVG = `
+                <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="strawberryPink-${i}" cx="30%" cy="30%" r="80%">
+                            <stop offset="0%" stop-color="#ffbfd3" />
+                            <stop offset="60%" stop-color="#ff6b95" />
+                            <stop offset="100%" stop-color="#ff3366" />
+                        </radialGradient>
+                        <filter id="softShadow-${i}" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#ffb3c6" flood-opacity="0.5"/>
+                        </filter>
+                    </defs>
+                    <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z"
+                          fill="url(#strawberryPink-${i})"
+                          stroke="#ff3366" stroke-width="4" stroke-linejoin="round"
+                          filter="url(#softShadow-${i})" />
+                    <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="0.9"/>
+                    <circle cx="82" cy="40" r="5" fill="#ffffff" opacity="0.8"/>
+                    <path d="M150,50 q10,10 5,20" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+                </svg>
+            `;
 
             const nameDiv = document.createElement('div');
             nameDiv.className = 'name';
             nameDiv.textContent = s.name;
 
-            b.appendChild(icon);
+            b.innerHTML = heartSVG;
             b.appendChild(nameDiv);
 
             b.onclick = () => {
                 if (confirm(t('confirmMsg').replace('{name}', s.name))) {
-                    s.history[day] = true;
-                    saveData();
-                    renderUI();
+                    // 添加爱心散开动画
+                    b.classList.add('heart-burst');
+
+                    setTimeout(() => {
+                        s.history[day] = true;
+                        saveData();
+                        renderUI();
+                        renderTree();
+                    }, 600);
                 }
             };
             grid.appendChild(b);
@@ -393,70 +417,74 @@ function startNewWeek() {
     renderUI();
 }
 
-// --- 大树渲染 (使用SVG) ---
+// --- 大树渲染 (使用SVG) 根据当天完成学生数量 ---
 function renderTree() {
     const container = document.getElementById('tree-container');
     if (!container) return;
 
-    // 计算完成等级 (0-5天)
-    let level = 0;
-    const dayLimit = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-    for(let i=0; i<=4; i++) {
-        if (i <= dayLimit && STATE.students.length > 0 && STATE.students.every(s => s.history && s.history[i])) {
-            level++;
-        }
+    const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+    const totalStudents = STATE.students.length;
+    let completedStudents = 0;
+
+    if (totalStudents > 0) {
+        completedStudents = STATE.students.filter(s => s.history && s.history[day] === true).length;
     }
 
-    // 根据等级调整大树大小和颜色
-    const treeScale = 0.6 + level * 0.08; // 从0.6到1.0
-    const leafOpacity = 0.3 + level * 0.14; // 从0.3到1.0
+    // 计算完成百分比
+    const completionPercent = totalStudents > 0 ? (completedStudents / totalStudents) : 0;
+
+    // 根据完成百分比确定生长阶段
+    // 0-20%: 树枝
+    // 20-50%: 树枝+小叶子
+    // 50-80%: 树枝+中等叶子
+    // 80-99%: 几乎完整的树
+    // 100%: 完整大树 + 烟花庆祝
+    let stage = 0;
+    if (completionPercent < 0.2) stage = 0; // 树枝
+    else if (completionPercent < 0.5) stage = 1; // 小叶子
+    else if (completionPercent < 0.8) stage = 2; // 中等叶子
+    else if (completionPercent < 1) stage = 3; // 大叶子
+    else stage = 4; // 完整 + 烟花
+
+    // 根据阶段调整参数
+    const treeScale = 0.5 + stage * 0.12; // 从0.5到1.0
+    const leafOpacity = Math.min(stage * 0.25, 1); // 从0到1
+    const showFireworks = stage === 4;
 
     container.innerHTML = `
         <svg width="100%" height="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="display: block;">
             <defs>
-                <!-- 天空渐变 -->
                 <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" style="stop-color:#A1C4FD;stop-opacity:1" />
                     <stop offset="100%" style="stop-color:#C2E9FB;stop-opacity:1" />
                 </linearGradient>
-
-                <!-- 地面渐变 -->
                 <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" style="stop-color:#84fab0;stop-opacity:1" />
                     <stop offset="100%" style="stop-color:#8fd3f4;stop-opacity:1" />
                 </linearGradient>
-
-                <!-- 树干渐变：增加立体感 -->
                 <linearGradient id="trunkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" style="stop-color:#6d4c41;stop-opacity:1" />
                     <stop offset="40%" style="stop-color:#8d6e63;stop-opacity:1" />
                     <stop offset="100%" style="stop-color:#5d4037;stop-opacity:1" />
                 </linearGradient>
-
-                <!-- 树叶渐变1 (深色阴影) -->
                 <radialGradient id="leafDark" cx="30%" cy="30%" r="70%">
                     <stop offset="0%" style="stop-color:#66bb6a;stop-opacity:1" />
                     <stop offset="100%" style="stop-color:#2e7d32;stop-opacity:1" />
                 </radialGradient>
-
-                <!-- 树叶渐变2 (亮色受光面) -->
                 <radialGradient id="leafLight" cx="30%" cy="30%" r="70%">
                     <stop offset="0%" style="stop-color:#b9f6ca;stop-opacity:1" />
                     <stop offset="100%" style="stop-color:#00c853;stop-opacity:1" />
                 </radialGradient>
             </defs>
 
-            <!-- 背景裁剪圆形 -->
             <clipPath id="circleView">
                 <circle cx="250" cy="250" r="240" />
             </clipPath>
 
-            <!-- 画布内容 -->
             <g clip-path="url(#circleView)">
-                <!-- 天空 -->
                 <rect width="500" height="500" fill="url(#skyGradient)" />
 
-                <!-- 装饰：云朵 -->
+                ${stage >= 1 ? `
                 <g class="float-slow" fill="#FFFFFF" opacity="0.6">
                     <circle cx="100" cy="100" r="30" />
                     <circle cx="130" cy="110" r="40" />
@@ -467,18 +495,17 @@ function renderTree() {
                     <circle cx="25" cy="5" r="25" />
                     <circle cx="-20" cy="10" r="15" />
                 </g>
+                ` : ''}
 
-                <!-- 太阳/光晕 -->
+                ${stage >= 2 ? `
                 <circle cx="400" cy="80" r="40" fill="#fff9c4" opacity="0.6" />
                 <circle cx="400" cy="80" r="25" fill="#fff176" />
+                ` : ''}
 
-                <!-- 地面 (起伏的山坡) -->
                 <path d="M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z" fill="url(#groundGradient)" />
-                <path d="M-50,450 Q200,420 550,480 V550 H-50 Z" fill="#66bb6a" opacity="0.3" />
+                ${stage >= 1 ? `<path d="M-50,450 Q200,420 550,480 V550 H-50 Z" fill="#66bb6a" opacity="0.3" />` : ''}
 
-                <!-- 树的主体组 -->
                 <g transform="translate(250, 420) scale(${treeScale})">
-                    <!-- 树干 -->
                     <path d="M-15,0
                              Q-10,-60 -30,-100
                              Q-40,-120 -80,-140
@@ -490,42 +517,45 @@ function renderTree() {
                              L0,0 Z"
                           fill="none" stroke="url(#trunkGradient)" stroke-width="20" stroke-linecap="round" />
 
-                    <!-- 主树干基底 (加粗填充) -->
                     <path d="M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z" fill="url(#trunkGradient)" />
 
-                    <!-- 树冠 (分层绘制) -->
+                    ${stage >= 1 ? `
                     <g class="sway">
-                        <!-- 后层树叶 (深色) -->
-                        <circle cx="-50" cy="-140" r="50" fill="url(#leafDark)" opacity="${leafOpacity}" />
-                        <circle cx="50" cy="-160" r="55" fill="url(#leafDark)" opacity="${leafOpacity}" />
-                        <circle cx="0" cy="-210" r="60" fill="url(#leafDark)" opacity="${leafOpacity}" />
+                        <circle cx="-50" cy="-140" r="${30 + stage * 5}" fill="url(#leafDark)" opacity="${leafOpacity}" />
+                        <circle cx="50" cy="-160" r="${35 + stage * 5}" fill="url(#leafDark)" opacity="${leafOpacity}" />
+                        <circle cx="0" cy="-210" r="${40 + stage * 5}" fill="url(#leafDark)" opacity="${leafOpacity}" />
 
-                        <!-- 中层树叶 -->
-                        <circle cx="-30" cy="-170" r="50" fill="url(#leafLight)" opacity="${Math.min(leafOpacity * 0.9, 1)}" />
-                        <circle cx="30" cy="-190" r="50" fill="url(#leafLight)" opacity="${Math.min(leafOpacity * 0.9, 1)}" />
+                        ${stage >= 2 ? `
+                        <circle cx="-30" cy="-170" r="${30 + stage * 5}" fill="url(#leafLight)" opacity="${Math.min(leafOpacity * 0.9, 1)}" />
+                        <circle cx="30" cy="-190" r="${30 + stage * 5}" fill="url(#leafLight)" opacity="${Math.min(leafOpacity * 0.9, 1)}" />
+                        ` : ''}
 
-                        <!-- 顶层高光树叶 -->
-                        <circle cx="0" cy="-230" r="45" fill="url(#leafLight)" opacity="${leafOpacity}" />
-                        <circle cx="-40" cy="-190" r="35" fill="#b9f6ca" opacity="${Math.min(leafOpacity * 0.6, 1)}" />
+                        ${stage >= 3 ? `
+                        <circle cx="0" cy="-230" r="${25 + stage * 5}" fill="url(#leafLight)" opacity="${leafOpacity}" />
+                        <circle cx="-40" cy="-190" r="${20 + stage * 5}" fill="#b9f6ca" opacity="${Math.min(leafOpacity * 0.6, 1)}" />
+                        ` : ''}
 
-                        <!-- 装饰性小叶子/粒子 -->
-                        <circle cx="20" cy="-240" r="5" fill="#fff" opacity="${Math.min(leafOpacity * 0.6, 1)}" />
-                        <circle cx="-20" cy="-150" r="8" fill="#fff" opacity="${Math.min(leafOpacity * 0.4, 1)}" />
+                        ${stage >= 4 ? `
+                        <circle cx="20" cy="-240" r="5" fill="#fff" opacity="0.6" />
+                        <circle cx="-20" cy="-150" r="8" fill="#fff" opacity="0.4" />
+                        ` : ''}
                     </g>
+                    ` : ''}
                 </g>
 
-                <!-- 一些飘落的叶子 -->
+                ${stage >= 1 ? `
                 <path d="M200,350 Q210,360 200,370" stroke="#4caf50" stroke-width="3" fill="none" opacity="0.8" />
                 <path d="M300,300 Q290,310 300,320" stroke="#81c784" stroke-width="3" fill="none" opacity="0.8" />
+                ` : ''}
+
+                ${showFireworks ? renderFireworks() : ''}
             </g>
 
-            <!-- 外边框 -->
             <circle cx="250" cy="250" r="240" fill="none" stroke="#fff" stroke-width="10" opacity="0.5"/>
         </svg>
-        ${level === 5 ? `<div class="tree-message show">${STATE.rules.reward || t('treeMsgReward')}</div>` : ''}
+        ${showFireworks ? `<div class="tree-message show celebrate">${STATE.rules.reward || '🎉 全班完成！太棒了！'}</div>` : ''}
     `;
 
-    // 添加CSS动画
     const style = document.createElement('style');
     style.textContent = `
         .float-slow { animation: float 6s ease-in-out infinite; }
@@ -543,8 +573,57 @@ function renderTree() {
         .tree-message.show {
             display: block;
         }
+        .tree-message.celebrate {
+            animation: celebratePulse 1s ease-in-out infinite;
+        }
+        @keyframes celebratePulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
     `;
     container.appendChild(style);
+}
+
+// 烟花效果 SVG
+function renderFireworks() {
+    return `
+        <!-- 烟花效果 -->
+        <g class="firework" opacity="0.9">
+            <circle cx="150" cy="100" r="3" fill="#ff6b95">
+                <animate attributeName="r" from="0" to="40" dur="1.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="350" cy="120" r="3" fill="#ffd700">
+                <animate attributeName="r" from="0" to="45" dur="1.8s" begin="0.3s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" from="1" to="0" dur="1.8s" begin="0.3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="250" cy="80" r="3" fill="#00c853">
+                <animate attributeName="r" from="0" to="50" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" from="1" to="0" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="180" cy="150" r="3" fill="#667eea">
+                <animate attributeName="r" from="0" to="35" dur="1.6s" begin="0.9s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" from="1" to="0" dur="1.6s" begin="0.9s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="320" cy="160" r="3" fill="#ff758c">
+                <animate attributeName="r" from="0" to="42" dur="1.7s" begin="1.2s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" from="1" to="0" dur="1.7s" begin="1.2s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- 星星闪烁效果 -->
+        <g class="stars">
+            <path d="M 100,140 L 102,145 L 107,145 L 103,148 L 105,153 L 100,150 L 95,153 L 97,148 L 93,145 L 98,145 Z" fill="#fff176">
+                <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path d="M 380,100 L 382,105 L 387,105 L 383,108 L 385,113 L 380,110 L 375,113 L 377,108 L 373,105 L 378,105 Z" fill="#fff176">
+                <animate attributeName="opacity" values="0;1;0" dur="2.5s" begin="0.5s" repeatCount="indefinite"/>
+            </path>
+            <path d="M 280,130 L 282,135 L 287,135 L 283,138 L 285,143 L 280,140 L 275,143 L 277,138 L 273,135 L 278,135 Z" fill="#fff176">
+                <animate attributeName="opacity" values="0;1;0" dur="2.2s" begin="1s" repeatCount="indefinite"/>
+            </path>
+        </g>
+    `;
 }
 
 function resizeCanvas() {

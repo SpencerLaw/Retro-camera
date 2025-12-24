@@ -204,48 +204,108 @@ main {
     z-index: 1;
 }
 
-.student-bubble::before {
-    content: '';
+/* 爱心SVG容器 */
+.student-bubble .heart-svg {
     position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 100px;
-    height: 90px;
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-    border-radius: 50px 50px 0 0;
     z-index: -1;
     transition: all 0.3s;
+    animation: heartbeat 1.5s ease-in-out infinite;
 }
 
-.student-bubble::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%) rotate(45deg);
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-    transform-origin: 0 100%;
-    z-index: -2;
-    transition: all 0.3s;
+@keyframes heartbeat {
+    0% { transform: translateX(-50%) scale(1); }
+    14% { transform: translateX(-50%) scale(1.05); }
+    28% { transform: translateX(-50%) scale(1); }
+    42% { transform: translateX(-50%) scale(1.05); }
+    70% { transform: translateX(-50%) scale(1); }
 }
 
-.student-bubble:hover {
-    transform: scale(1.15) translateY(-5px);
-}
-
-.student-bubble:hover::before,
-.student-bubble:hover::after {
-    background: linear-gradient(135deg, #fcb69f 0%, #ff9a9e 100%);
+.student-bubble:hover .heart-svg {
+    transform: translateX(-50%) scale(1.1);
     filter: brightness(1.1);
 }
 
-.student-bubble.completed::before,
-.student-bubble.completed::after {
-    background: linear-gradient(135deg, #84fab0 0%, #4ecdc4 100%);
-    animation: celebrate 0.6s ease;
+/* 爱心散开动画 */
+.student-bubble.heart-burst {
+    pointer-events: none;
+}
+
+.student-bubble.heart-burst .heart-svg {
+    animation: burst 0.6s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+}
+
+.student-bubble.heart-burst .name {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes burst {
+    0% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-50%) scale(1.3) rotate(15deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(-50%) scale(0) rotate(45deg);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* 添加散开的粒子效果 */
+.student-bubble.heart-burst::before,
+.student-bubble.heart-burst::after {
+    content: '💗';
+    position: absolute;
+    font-size: 20px;
+    animation: particle 0.6s ease-out forwards;
+}
+
+.student-bubble.heart-burst::before {
+    animation-delay: 0.1s;
+    animation-name: particleLeft;
+}
+
+.student-bubble.heart-burst::after {
+    animation-delay: 0.15s;
+    animation-name: particleRight;
+}
+
+@keyframes particleLeft {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50px, -50px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+@keyframes particleRight {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(50px, -50px) scale(0.3);
+        opacity: 0;
+    }
 }
 
 .student-bubble .name {
@@ -258,6 +318,7 @@ main {
     word-wrap: break-word;
     z-index: 10;
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    transition: all 0.3s;
 }
 
 .student-bubble .status-icon {
@@ -269,12 +330,6 @@ main {
 .student-bubble.completed .name {
     color: white;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-@keyframes celebrate {
-    0%, 100% { transform: scale(1); }
-    25% { transform: scale(1.15) rotate(-5deg); }
-    75% { transform: scale(1.15) rotate(5deg); }
 }
 
 /* 奖惩区域样式 */

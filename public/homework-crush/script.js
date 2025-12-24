@@ -351,8 +351,9 @@ function renderUI() {
     });
 
     // 更新人数统计
-    if (incompleteCount) incompleteCount.textContent = `${incompleteNum}人`;
-    if (completedCount) completedCount.textContent = `${completedNum}人`;
+    const unit = t('studentCountUnit');
+    if (incompleteCount) incompleteCount.textContent = `${incompleteNum}${unit}`;
+    if (completedCount) completedCount.textContent = `${completedNum}${unit}`;
 
     // 更新总进度条
     const progress = document.getElementById('daily-progress');
@@ -390,9 +391,19 @@ function applyTranslations() {
     try {
         const headerTitle = document.getElementById('app-header-title');
         if (headerTitle) headerTitle.textContent = t('headerTitle');
+
+        const dailyTaskTitle = document.getElementById('daily-task-title');
+        if (dailyTaskTitle) dailyTaskTitle.textContent = t('dailyTask');
+
+        const incompleteTitle = document.getElementById('incomplete-homework-title');
+        if (incompleteTitle) incompleteTitle.textContent = t('incompleteHomework');
+
+        const completedTitle = document.getElementById('completed-homework-title');
+        if (completedTitle) completedTitle.textContent = t('completedHomework');
+
         const resetBtn = document.getElementById('reset-day-btn');
         if (resetBtn) resetBtn.textContent = t('startNewDay');
-        
+
         const isFS = !!document.fullscreenElement;
         const fsBtn = document.getElementById('fullscreen-btn');
         if (fsBtn) {

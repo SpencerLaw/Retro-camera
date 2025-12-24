@@ -2,160 +2,174 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Dreamy Tree Illustration</title>
+    <title>Permanent Tree Growth</title>
     <style>
         body {
-            background-color: #2c3e50;
+            background-color: #81d4fa;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             font-family: sans-serif;
+            overflow: hidden;
         }
-        .card {
-            background: white;
-            padding: 20px;
+
+        .container {
+            background: linear-gradient(to bottom, #4fc3f7 0%, #e1f5fe 100%);
             border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 500px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
         }
-        h2 {
-            text-align: center;
-            color: #555;
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+
+        /* === ☁️ 云朵动画 (保持循环，因为云一直在飘) === */
+        @keyframes drift {
+            from { transform: translateX(-150px); }
+            to { transform: translateX(600px); }
         }
-        /* 添加一些简单的浮动动画 */
-        .float-slow { animation: float 6s ease-in-out infinite; }
-        .float-med { animation: float 5s ease-in-out infinite reverse; }
-        .sway { transform-origin: bottom center; animation: sway 4s ease-in-out infinite; }
+
+        .cloud {
+            fill: #ffffff;
+            opacity: 0.8;
+        }
+        .cloud-1 { animation: drift 25s linear infinite; opacity: 0.6; transform: scale(0.8); }
+        .cloud-2 { animation: drift 15s linear infinite; animation-delay: -5s; }
+        .cloud-3 { animation: drift 30s linear infinite; animation-delay: -15s; opacity: 0.5; transform: scale(0.6); }
+
+        /* === 🌳 树木生长动画 (关键修改：只播放一次) === */
         
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
+        /* 1. 树枝生长：从无到有，播放完停在最后的状态 */
+        @keyframes grow-branch {
+            0% { stroke-dashoffset: 300; } 
+            100% { stroke-dashoffset: 0; }
         }
-        @keyframes sway {
+
+        /* 2. 树叶绽放：从小到大，播放完停在最后 */
+        @keyframes leaf-bloom {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 3. 摇摆：永远循环，因为风一直吹 */
+        @keyframes wind-sway {
             0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(1deg); }
+            50% { transform: rotate(2deg); }
         }
+
+        /* === 样式配置 === */
+
+        /* 树枝 */
+        .branch-path {
+            fill: none;
+            stroke: #5d4037;
+            stroke-linecap: round;
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300; /* 初始隐藏 */
+            
+            /* 关键修改：forwards 让动画结束后停留在最后一帧(显示状态)，不加 infinite */
+            animation: grow-branch 3s ease-out forwards; 
+        }
+
+        .trunk-main { animation-delay: 0.5s; stroke-width: 20; }
+        .branch-left { animation-delay: 2.0s; stroke-width: 14; }
+        .branch-right { animation-delay: 2.3s; stroke-width: 12; }
+        .branch-top { animation-delay: 2.7s; stroke-width: 10; }
+
+        /* 树叶 */
+        .leaf-group circle {
+            transform-origin: center;
+            transform: scale(0); /* 初始隐藏 */
+            /* 关键修改：只播放一次，forwards 保持显示 */
+            animation: leaf-bloom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .leaf-1 { animation-delay: 3.5s !important; fill: #66bb6a; }
+        .leaf-2 { animation-delay: 3.7s !important; fill: #81c784; }
+        .leaf-3 { animation-delay: 4.0s !important; fill: #a5d6a7; }
+        .leaf-4 { animation-delay: 4.3s !important; fill: #4caf50; }
+
+        /* 整体摇摆容器 */
+        .tree-sway-wrapper {
+            transform-origin: bottom center;
+            /* 摇摆动画依然是 infinite，因为大树长好后也会随风动 */
+            animation: wind-sway 4s ease-in-out infinite; 
+            /* 等树干开始长出来后再开始摇摆，避免画面一开始就晃动 */
+            animation-delay: 0.5s; 
+        }
+
+        /* 太阳微动 */
+        .sun {
+            animation: sun-glow 4s ease-in-out infinite alternate;
+        }
+        @keyframes sun-glow {
+            from { r: 35; opacity: 0.8; }
+            to { r: 38; opacity: 1; }
+        }
+
+        /* 为了方便重看动画，加了一个刷新提示 */
+        .refresh-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 12px;
+            color: #fff;
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Beautiful Morning</h2>
-    <svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+<div class="container" onclick="location.reload()">
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
         <defs>
-            <!-- 天空渐变 -->
-            <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#A1C4FD;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#C2E9FB;stop-opacity:1" />
+            <linearGradient id="groundGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#9ccc65"/>
+                <stop offset="100%" stop-color="#7cb342"/>
             </linearGradient>
             
-            <!-- 地面渐变 -->
-            <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#84fab0;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#8fd3f4;stop-opacity:1" />
-            </linearGradient>
-
-            <!-- 树干渐变：增加立体感 -->
-            <linearGradient id="trunkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:#6d4c41;stop-opacity:1" />
-                <stop offset="40%" style="stop-color:#8d6e63;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#5d4037;stop-opacity:1" />
-            </linearGradient>
-
-            <!-- 树叶渐变1 (深色阴影) -->
-            <radialGradient id="leafDark" cx="30%" cy="30%" r="70%">
-                <stop offset="0%" style="stop-color:#66bb6a;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#2e7d32;stop-opacity:1" />
-            </radialGradient>
-
-            <!-- 树叶渐变2 (亮色受光面) -->
-            <radialGradient id="leafLight" cx="30%" cy="30%" r="70%">
-                <stop offset="0%" style="stop-color:#b9f6ca;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#00c853;stop-opacity:1" />
-            </radialGradient>
+            <g id="cloudShape">
+                <circle cx="30" cy="30" r="20" />
+                <circle cx="55" cy="30" r="25" />
+                <circle cx="80" cy="30" r="20" />
+                <circle cx="45" cy="15" r="20" />
+                <circle cx="65" cy="15" r="18" />
+            </g>
         </defs>
 
-        <!-- 背景裁剪圆形 -->
-        <clipPath id="circleView">
-            <circle cx="250" cy="250" r="240" />
-        </clipPath>
+        <circle class="sun" cx="340" cy="60" r="35" fill="#fff176" />
 
-        <!-- 画布内容 -->
-        <g clip-path="url(#circleView)">
-            <!-- 天空 -->
-            <rect width="500" height="500" fill="url(#skyGradient)" />
-            
-            <!-- 装饰：云朵 -->
-            <g class="float-slow" fill="#FFFFFF" opacity="0.6">
-                <circle cx="100" cy="100" r="30" />
-                <circle cx="130" cy="110" r="40" />
-                <circle cx="70" cy="110" r="35" />
+        <use href="#cloudShape" class="cloud cloud-3" y="40" />
+        <use href="#cloudShape" class="cloud cloud-1" y="80" />
+        <use href="#cloudShape" class="cloud cloud-2" y="20" transform="scale(1.2)" />
+
+        <path d="M-50,360 Q200,340 450,360 L450,450 L-50,450 Z" fill="url(#groundGrad)" />
+
+        <g class="tree-sway-wrapper">
+            <!-- 树干 -->
+            <path class="branch-path trunk-main" d="M200,380 Q200,300 200,240" />
+            <path class="branch-path branch-left" d="M200,280 Q150,230 130,180" />
+            <path class="branch-path branch-right" d="M200,260 Q250,210 280,170" />
+            <path class="branch-path branch-top" d="M200,240 Q200,180 190,120" />
+
+            <!-- 树叶 -->
+            <g class="leaf-group">
+                <circle class="leaf-1" cx="120" cy="170" r="45" />
+                <circle class="leaf-2" cx="150" cy="190" r="35" />
+                <circle class="leaf-4" cx="190" cy="110" r="50" />
+                <circle class="leaf-3" cx="220" cy="130" r="40" />
+                <circle class="leaf-1" cx="290" cy="160" r="45" />
+                <circle class="leaf-4" cx="260" cy="180" r="38" />
+                <circle class="leaf-2" cx="200" cy="180" r="55" opacity="0.9"/>
             </g>
-            <g class="float-med" fill="#FFFFFF" opacity="0.4" transform="translate(300, 50)">
-                <circle cx="0" cy="0" r="20" />
-                <circle cx="25" cy="5" r="25" />
-                <circle cx="-20" cy="10" r="15" />
-            </g>
-
-            <!-- 太阳/光晕 -->
-            <circle cx="400" cy="80" r="40" fill="#fff9c4" opacity="0.6" />
-            <circle cx="400" cy="80" r="25" fill="#fff176" />
-
-            <!-- 地面 (起伏的山坡) -->
-            <path d="M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z" fill="url(#groundGradient)" />
-            <path d="M-50,450 Q200,420 550,480 V550 H-50 Z" fill="#66bb6a" opacity="0.3" />
-
-            <!-- 树的主体组 -->
-            <g transform="translate(250, 420)">
-                <!-- 树干 -->
-                <path d="M-15,0 
-                         Q-10,-60 -30,-100 
-                         Q-40,-120 -80,-140 
-                         M-10,-60 
-                         Q5,-120 40,-160 
-                         M0,0 
-                         Q15,-50 25,-100 
-                         Q35,-150 80,-180 
-                         L0,0 Z" 
-                      fill="none" stroke="url(#trunkGradient)" stroke-width="20" stroke-linecap="round" />
-                
-                <!-- 主树干基底 (加粗填充) -->
-                <path d="M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z" fill="url(#trunkGradient)" />
-
-                <!-- 树冠 (分层绘制) -->
-                <g class="sway">
-                    <!-- 后层树叶 (深色) -->
-                    <circle cx="-50" cy="-140" r="50" fill="url(#leafDark)" />
-                    <circle cx="50" cy="-160" r="55" fill="url(#leafDark)" />
-                    <circle cx="0" cy="-210" r="60" fill="url(#leafDark)" />
-                    
-                    <!-- 中层树叶 -->
-                    <circle cx="-30" cy="-170" r="50" fill="url(#leafLight)" opacity="0.9" />
-                    <circle cx="30" cy="-190" r="50" fill="url(#leafLight)" opacity="0.9" />
-                    
-                    <!-- 顶层高光树叶 -->
-                    <circle cx="0" cy="-230" r="45" fill="url(#leafLight)" />
-                    <circle cx="-40" cy="-190" r="35" fill="#b9f6ca" opacity="0.6" />
-                    
-                    <!-- 装饰性小叶子/粒子 -->
-                    <circle cx="20" cy="-240" r="5" fill="#fff" opacity="0.6" />
-                    <circle cx="-20" cy="-150" r="8" fill="#fff" opacity="0.4" />
-                </g>
-            </g>
-            
-            <!-- 一些飘落的叶子 -->
-            <path d="M200,350 Q210,360 200,370" stroke="#4caf50" stroke-width="3" fill="none" opacity="0.8" />
-            <path d="M300,300 Q290,310 300,320" stroke="#81c784" stroke-width="3" fill="none" opacity="0.8" />
         </g>
-        
-        <!-- 外边框 -->
-        <circle cx="250" cy="250" r="240" fill="none" stroke="#fff" stroke-width="10" opacity="0.5"/>
     </svg>
+    <div class="refresh-hint">点击画面重新生长 ↻</div>
 </div>
 
 </body>

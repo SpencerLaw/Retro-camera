@@ -280,7 +280,8 @@
       <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
         <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
-        <button onclick="generateCodes()" class="btn-primary">生成</button>
+        <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
+        <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
       </div>
       
       <div class="gen-list" id="genList"></div>
@@ -483,7 +484,7 @@
   }
 
   // === 生成器功能 ===
-  function generateCodes() {
+  function generateCodes(type = 'doraemon') {
     const count = document.getElementById('genCount').value;
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const now = new Date();
@@ -493,11 +494,24 @@
     
     const newBatch = [];
     for (let i = 0; i < count; i++) {
-      let random = '';
-      for (let j = 0; j < 8; j++) {
-        random += chars.charAt(Math.floor(Math.random() * chars.length));
+      let code = '';
+      if (type === 'homework') {
+        // ZY + YYYYMMDD (8) + Random (6) = 16 chars
+        let random = '';
+        for (let j = 0; j < 6; j++) {
+          random += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        code = 'ZY' + datePart + random;
+      } else {
+        // YYYYMMDD (8) + Random (8) = 16 chars
+        let random = '';
+        for (let j = 0; j < 8; j++) {
+          random += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        code = datePart + random;
       }
-      newBatch.push((datePart + random).match(/.{1,4}/g).join('-'));
+      // Format with dashes for display
+      newBatch.push(code.match(/.{1,4}/g).join('-'));
     }
 
     generatedCodes = [...newBatch, ...generatedCodes];

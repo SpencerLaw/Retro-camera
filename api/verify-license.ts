@@ -56,7 +56,13 @@ function getDeviceType(ua: string): string {
 // 从授权码中提取生成日期
 function extractDateFromCode(code: string): Date | null {
   try {
-    const cleanCode = code.replace(/[-\s]/g, '');
+    let cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
+    
+    // 如果是以 ZY 开头的码，日期从第 3 位开始 (ZY + YYYYMMDD + ...)
+    if (cleanCode.startsWith('ZY')) {
+      cleanCode = cleanCode.substring(2);
+    }
+    
     const dateStr = cleanCode.substring(0, 8);
     const year = parseInt(dateStr.substring(0, 4));
     const month = parseInt(dateStr.substring(4, 6)) - 1;

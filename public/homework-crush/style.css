@@ -41,6 +41,22 @@ body {
     background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
 }
 
+.back-to-home-btn {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 110;
+    transition: transform 0.2s;
+}
+
+.back-to-home-btn:hover {
+    transform: scale(1.2);
+}
+
 .screen.hidden {
     opacity: 0;
     pointer-events: none;

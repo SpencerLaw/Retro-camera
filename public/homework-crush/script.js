@@ -204,11 +204,13 @@ function attachEventListeners() {
         location.reload();
     });
 
-    if(els.backBtn) {
-        els.backBtn.addEventListener('click', () => {
+    // 绑定所有返回按钮
+    const allBackBtns = document.querySelectorAll('#back-btn, .back-to-home-btn');
+    allBackBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
             window.location.href = '/';
         });
-    }
+    });
 
     els.fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {

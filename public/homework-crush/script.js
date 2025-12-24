@@ -42,7 +42,6 @@ function applyTranslations() {
         
         const headerTitle = document.getElementById('app-header-title');
         if (headerTitle) headerTitle.textContent = t('headerTitle');
-        
         if (els.resetWeekBtn) els.resetWeekBtn.textContent = t('startNewWeek');
         
         const isFS = !!document.fullscreenElement;
@@ -70,7 +69,6 @@ function applyTranslations() {
 
         if (els.importBtn) els.importBtn.textContent = t('importBtn');
         if (els.clearDataBtn) els.clearDataBtn.textContent = t('clearDataBtn');
-        
         const hint = document.getElementById('settings-hint');
         if (hint) hint.textContent = t('hint');
 
@@ -78,9 +76,7 @@ function applyTranslations() {
         if (confTitle) confTitle.textContent = t('confirmTitle');
         if (els.confirmYes) els.confirmYes.textContent = t('confirmYes');
         if (els.confirmNo) els.confirmNo.textContent = t('confirmNo');
-    } catch (e) {
-        console.error("Translation apply failed:", e);
-    }
+    } catch (e) { console.error(e); }
 }
 
 async function init() {
@@ -134,11 +130,10 @@ async function init() {
     }
 
     resizeCanvas();
-    renderTree();
+    renderTree(); // Start animation loop
 
     window.addEventListener('resize', () => {
         resizeCanvas();
-        renderTree();
     });
 }
 
@@ -169,9 +164,7 @@ function attachEventListeners() {
                 STATE.licenseCode = code;
                 saveData();
                 showApp();
-            } else {
-                alert(data.message || t('verifyFail'));
-            }
+            } else { alert(data.message || t('verifyFail')); }
         } catch (e) { alert(t('networkError')); }
         finally { els.verifyBtn.textContent = t('verifyBtn'); }
     });
@@ -226,14 +219,11 @@ function attachEventListeners() {
             const activeTabBtn = document.querySelector('.tab-btn.active');
             const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'manual';
             rawText = activeTab === 'manual' ? els.manualInput.value : els.csvInput.value;
-            
-            const lines = rawText.split(/[\n\r,]+/).map(t => t.trim()).filter(t => t);
+            const lines = rawText.split(/[
+,]+/).map(t => t.trim()).filter(t => t);
             if (lines.length > 0) {
                 if (confirm(t('importResetConfirm'))) {
-                    STATE.students = lines.map(name => ({
-                        name,
-                        history: [false, false, false, false, false]
-                    }));
+                    STATE.students = lines.map(name => ({ name, history: [false, false, false, false, false] }));
                     startNewWeek();
                     els.settingsModal.classList.add('hidden');
                 }
@@ -244,13 +234,8 @@ function attachEventListeners() {
     if(els.clearDataBtn) {
         els.clearDataBtn.addEventListener('click', () => {
             if(confirm(t('clearDataConfirm'))) {
-                STATE.students = [];
-                STATE.rules = { reward: "", punishment: "" };
-                STATE.weekStartDate = null;
-                saveData();
-                renderUI();
-                renderTree();
-                els.settingsModal.classList.add('hidden');
+                STATE.students = []; STATE.rules = { reward: "", punishment: "" }; STATE.weekStartDate = null;
+                saveData(); renderUI(); els.settingsModal.classList.add('hidden');
             }
         });
     }
@@ -259,17 +244,13 @@ function attachEventListeners() {
         els.saveRulesBtn.addEventListener('click', () => {
             STATE.rules.reward = els.rewardInput.value;
             STATE.rules.punishment = els.punishmentInput.value;
-            saveData();
-            renderTree();
-            alert(t('rulesSaved'));
+            saveData(); alert(t('rulesSaved'));
         });
     }
 
     if(els.resetWeekBtn) {
         els.resetWeekBtn.addEventListener('click', () => {
-            if(confirm(t('resetWeekConfirm'))) {
-                startNewWeek();
-            }
+            if(confirm(t('resetWeekConfirm'))) startNewWeek();
         });
     }
 
@@ -279,9 +260,7 @@ function attachEventListeners() {
                 const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
                 if(STATE.students[pendingStudentIndex]) {
                     STATE.students[pendingStudentIndex].history[day] = true;
-                    saveData();
-                    renderUI();
-                    renderTree();
+                    saveData(); renderGrid(); updateProgress();
                     if (STATE.students.every(s => s.history[day])) triggerConfetti();
                 }
             }
@@ -298,7 +277,6 @@ function attachEventListeners() {
     }
 }
 
-// --- 时间同步 ---
 let serverTimeOffset = 0;
 async function syncTime() {
     try {
@@ -340,9 +318,7 @@ function startNewWeek() {
     monday.setHours(0,0,0,0);
     STATE.weekStartDate = monday.toISOString();
     STATE.students.forEach(s => { s.history = [false, false, false, false, false]; });
-    saveData();
-    renderUI();
-    renderTree();
+    saveData(); renderUI();
 }
 
 function showApp() {
@@ -351,7 +327,7 @@ function showApp() {
         if(els.appScreen) { els.appScreen.classList.add('active'); }
         if(els.rewardInput) els.rewardInput.value = STATE.rules.reward || '';
         if(els.punishmentInput) els.punishmentInput.value = STATE.rules.punishment || '';
-        setTimeout(() => { resizeCanvas(); renderTree(); renderUI(); }, 50);
+        renderUI();
     } catch (e) { console.error(e); }
 }
 
@@ -391,36 +367,48 @@ function renderGrid() {
 
 let pendingStudentIndex = null;
 
-// --- Dreamy Tree Visualization ---
+// --- Dreamy Tree Illustration (Canvas Adaptation) ---
 let ctx;
 let swayTime = 0;
+
 function resizeCanvas() {
     if(!els.treeCanvas) return;
     ctx = els.treeCanvas.getContext('2d');
-    els.treeCanvas.width = els.treeCanvas.parentElement.offsetWidth;
-    els.treeCanvas.height = els.treeCanvas.parentElement.offsetHeight;
+    const parent = els.treeCanvas.parentElement;
+    els.treeCanvas.width = parent.offsetWidth;
+    els.treeCanvas.height = parent.offsetHeight;
 }
 
 function renderTree() {
-    if (!ctx) return;
-    const w = els.treeCanvas.width, h = els.treeCanvas.height;
-    swayTime += 0.02;
+    if (!ctx) { requestAnimationFrame(renderTree); return; }
+    const w = els.treeCanvas.width;
+    const h = els.treeCanvas.height;
+    swayTime += 0.015;
     ctx.clearRect(0, 0, w, h);
 
-    // 1. Sky
-    const sky = ctx.createLinearGradient(0, 0, 0, h);
-    sky.addColorStop(0, '#A1C4FD'); sky.addColorStop(1, '#C2E9FB');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+    // 1. Sky Gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+    skyGrad.addColorStop(0, '#A1C4FD'); skyGrad.addColorStop(1, '#C2E9FB');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h);
 
-    // 2. Clouds & Sun
+    // 2. Sun & Clouds
+    ctx.fillStyle = 'rgba(255, 249, 196, 0.6)'; ctx.beginPath(); ctx.arc(w*0.8, h*0.2, 40, 0, Math.PI*2);
+    ctx.fill();
     ctx.fillStyle = '#fff176'; ctx.beginPath(); ctx.arc(w*0.8, h*0.2, 25, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.beginPath(); ctx.arc(w*0.2 + Math.sin(swayTime)*10, h*0.2, 30, 0, Math.PI*2); ctx.fill();
+    
+    // Cloud Float
+    const cloudX = w*0.2 + Math.sin(swayTime*0.5)*20;
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath(); ctx.arc(cloudX, h*0.25, 30, 0, Math.PI*2); ctx.arc(cloudX+30, h*0.27, 40, 0, Math.PI*2); ctx.arc(cloudX-30, h*0.27, 35, 0, Math.PI*2); ctx.fill();
 
-    // 3. Ground
-    ctx.fillStyle = '#a8e6cf'; ctx.beginPath(); ctx.moveTo(0, h); ctx.quadraticCurveTo(w/2, h-80, w, h); ctx.fill();
+    // 3. Ground Gradient
+    const groundGrad = ctx.createLinearGradient(0, h*0.8, 0, h);
+    groundGrad.addColorStop(0, '#84fab0'); groundGrad.addColorStop(1, '#8fd3f4');
+    ctx.fillStyle = groundGrad;
+    ctx.beginPath(); ctx.moveTo(-50, h); ctx.quadraticCurveTo(w*0.2, h*0.75, w*0.5, h*0.85); ctx.quadraticCurveTo(w*0.8, h*0.9, w+50, h*0.8); ctx.lineTo(w+50, h); ctx.lineTo(-50, h); ctx.fill();
 
-    // 4. Growth Level
+    // 4. Growth logic
     let level = 0;
     const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
     for(let i=0; i<=4; i++) {
@@ -429,22 +417,54 @@ function renderTree() {
 
     // 5. Draw Tree
     ctx.save();
-    ctx.translate(w/2, h*0.88);
-    const scale = (0.5 + level*0.15) * 1.2;
-    ctx.scale(scale, scale);
-    
-    // Trunk
-    const trunk = ctx.createLinearGradient(-20, 0, 20, 0);
-    trunk.addColorStop(0, '#6d4c41'); trunk.addColorStop(1, '#5d4037');
-    ctx.fillStyle = trunk; ctx.beginPath(); ctx.moveTo(-15, 0); ctx.quadraticCurveTo(0, -100, 0, -150); ctx.lineTo(5, -150); ctx.quadraticCurveTo(0, -100, 15, 0); ctx.fill();
+    ctx.translate(w/2, h*0.85);
+    const treeScale = (0.4 + level*0.15) * 1.3;
+    ctx.scale(treeScale, treeScale);
 
-    // Foliage
-    ctx.rotate(Math.sin(swayTime)*0.02);
-    ctx.fillStyle = '#84fab0';
-    ctx.beginPath(); ctx.arc(0, -180, 60, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#b9f6ca';
-    ctx.beginPath(); ctx.arc(-30, -160, 40, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(30, -160, 40, 0, Math.PI*2); ctx.fill();
+    // Trunk Gradient
+    const trunkGrad = ctx.createLinearGradient(-20, 0, 20, 0);
+    trunkGrad.addColorStop(0, '#6d4c41'); trunkGrad.addColorStop(0.4, '#8d6e63'); trunkGrad.addColorStop(1, '#5d4037');
+    
+    // Draw Trunk (Stylized)
+    ctx.fillStyle = trunkGrad;
+    ctx.beginPath();
+    ctx.moveTo(-20, 0); ctx.quadraticCurveTo(-10, -80, -5, -150); ctx.lineTo(5, -150); ctx.quadraticCurveTo(15, -80, 20, 0);
+    ctx.fill();
+    
+    // Branches
+    ctx.strokeStyle = trunkGrad; ctx.lineWidth = 15; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-10, -60); ctx.quadraticCurveTo(-30, -100, -80, -140); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(10, -60); ctx.quadraticCurveTo(30, -120, 60, -160); ctx.stroke();
+
+    // Swaying Foliage
+    ctx.save();
+    ctx.rotate(Math.sin(swayTime)*0.03);
+    
+    const leafDark = ctx.createRadialGradient(0, -180, 0, 0, -180, 80);
+    leafDark.addColorStop(0, '#66bb6a'); leafDark.addColorStop(1, '#2e7d32');
+    
+    const leafLight = ctx.createRadialGradient(0, -200, 0, 0, -200, 70);
+    leafLight.addColorStop(0, '#b9f6ca'); leafLight.addColorStop(1, '#00c853');
+
+    // Layers
+    ctx.fillStyle = leafDark;
+    ctx.beginPath(); ctx.arc(-50, -140, 50, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(50, -160, 55, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -210, 60, 0, Math.PI*2); ctx.fill();
+    
+    ctx.fillStyle = leafLight; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.arc(-30, -170, 50, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(30, -190, 50, 0, Math.PI*2); ctx.fill();
+    
+    ctx.fillStyle = '#b9f6ca'; ctx.globalAlpha = 1.0;
+    ctx.beginPath(); ctx.arc(0, -230, 45, 0, Math.PI*2); ctx.fill();
+    
+    // Sparkles
+    ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.arc(20, -240, 5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-20, -150, 8, 0, Math.PI*2); ctx.fill();
+    
+    ctx.restore();
     ctx.restore();
 
     // Message
@@ -454,9 +474,10 @@ function renderTree() {
     } else {
         els.treeMsg.classList.remove('show');
     }
+
     requestAnimationFrame(renderTree);
 }
 
-function triggerConfetti() { /* Logic for particles if needed */ }
+function triggerConfetti() { /* Can add particle logic later */ }
 
 window.onload = init;

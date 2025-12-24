@@ -500,12 +500,7 @@ function renderTree() {
                 </radialGradient>
             </defs>
 
-            <clipPath id="circleView">
-                <circle cx="250" cy="250" r="240" />
-            </clipPath>
-
-            <g clip-path="url(#circleView)">
-                <rect width="500" height="500" fill="url(#skyGradient)" />
+            <rect width="500" height="500" fill="url(#skyGradient)" />
 
                 ${stage >= 1 ? `
                 <g class="float-slow" fill="#FFFFFF" opacity="0.6">
@@ -572,9 +567,6 @@ function renderTree() {
                 ` : ''}
 
                 ${showFireworks ? renderFireworks() : ''}
-            </g>
-
-            <circle cx="250" cy="250" r="240" fill="none" stroke="#fff" stroke-width="10" opacity="0.5"/>
         </svg>
         ${showFireworks ? `<div class="tree-message show celebrate">${STATE.rules.reward || '🎉 全班完成！太棒了！'}</div>` : ''}
     `;

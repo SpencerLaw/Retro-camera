@@ -273,8 +273,10 @@ function renderUI() {
 
     if (STATE.students.length === 0) {
         incompleteGrid.innerHTML = `<div class="empty-state">${t('emptyState')}</div>`;
-        if (incompleteCount) incompleteCount.textContent = '0人';
-        if (completedCount) completedCount.textContent = '0人';
+        const unit = t('studentCountUnit');
+        const zeroText = unit ? `0${unit}` : '0';
+        if (incompleteCount) incompleteCount.textContent = zeroText;
+        if (completedCount) completedCount.textContent = zeroText;
         return;
     }
 
@@ -350,10 +352,14 @@ function renderUI() {
         }
     });
 
-    // 更新人数统计
+    // 更新人数统计（包含国际化单位）
     const unit = t('studentCountUnit');
-    if (incompleteCount) incompleteCount.textContent = `${incompleteNum}${unit}`;
-    if (completedCount) completedCount.textContent = `${completedNum}${unit}`;
+    if (incompleteCount) {
+        incompleteCount.textContent = unit ? `${incompleteNum}${unit}` : `${incompleteNum}`;
+    }
+    if (completedCount) {
+        completedCount.textContent = unit ? `${completedNum}${unit}` : `${completedNum}`;
+    }
 
     // 更新总进度条
     const progress = document.getElementById('daily-progress');

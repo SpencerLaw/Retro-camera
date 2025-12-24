@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
@@ -18,6 +18,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [totalTime, setTotalTime] = useState(0);
   const [state, setState] = useState<'calm' | 'warning' | 'alarm'>('calm');
   const [isDarkMode, setIsDarkMode] = useState(true); // 默认黑夜模式
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -265,6 +266,24 @@ const DoraemonMonitorApp: React.FC = () => {
     };
   }, []);
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = (seconds % 60).toString().padStart(2, '0');
@@ -438,9 +457,14 @@ const DoraemonMonitorApp: React.FC = () => {
         <button onClick={() => navigate('/')} className="icon-btn">
           <ArrowLeft size={28} />
         </button>
-        <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">
-          {isDarkMode ? '🌞' : '🌙'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={toggleFullscreen} className="icon-btn" title={isFullscreen ? "退出全屏" : "全屏显示"}>
+            {isFullscreen ? <Minimize size={28} /> : <Maximize size={28} />}
+          </button>
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">
+            {isDarkMode ? '🌞' : '🌙'}
+          </button>
+        </div>
       </header>
 
       {/* 主内容区 */}

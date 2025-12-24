@@ -28,6 +28,11 @@ function applyTranslations() {
     if(headerTitle) headerTitle.textContent = t('headerTitle');
     
     els.resetWeekBtn.textContent = t('startNewWeek');
+    
+    const isFS = !!document.fullscreenElement;
+    els.fullscreenBtn.title = isFS ? t('exitFullscreen') : t('fullscreen');
+    els.fullscreenBtn.textContent = isFS ? "📺" : "📺"; // Could swap icon if desired, using same for now
+    
     els.settingsBtn.title = t('settings');
     els.logoutBtn.title = t('logout');
     
@@ -85,6 +90,7 @@ const els = {
     punishmentInput: document.getElementById('punishment-text'),
     saveRulesBtn: document.getElementById('save-rules-btn'),
     settingsBtn: document.getElementById('settings-btn'),
+    fullscreenBtn: document.getElementById('fullscreen-btn'),
     logoutBtn: document.getElementById('logout-btn'),
     resetWeekBtn: document.getElementById('reset-week-btn'),
     settingsModal: document.getElementById('settings-modal'),
@@ -250,6 +256,20 @@ els.logoutBtn.addEventListener('click', () => {
     STATE.isVerified = false;
     localStorage.removeItem('hc_verified');
     location.reload();
+});
+
+els.fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Error: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+});
+
+document.addEventListener('fullscreenchange', () => {
+    applyTranslations(); // Refresh titles/icons
 });
 
 function showApp() {

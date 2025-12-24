@@ -117,16 +117,185 @@ header {
 .icon-btn svg { width: 30px; height: 30px; fill: var(--text-color); }
 
 /* Main Layout */
-main { flex: 1; display: flex; padding: 30px; gap: 30px; overflow: hidden; }
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    padding: 30px;
+    gap: 30px;
+    overflow: hidden;
+    min-height: 0;
+}
 
-/* 三栏 */
-.game-zone { flex: 1.8; background: white; border-radius: 35px; padding: 30px; display: flex; flex-direction: column; box-shadow: 0 15px 40px rgba(0,0,0,0.04); }
-.rules-zone { flex: 1.2; display: flex; }
-.visualization-zone { flex: 1.8; position: relative; }
+/* 三栏 - 左中右布局 */
+/* 左侧：今日任务区域 */
+.game-zone {
+    flex: 2;
+    background: white;
+    border-radius: 35px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+    overflow-y: auto;
+}
 
+/* 中间：奖惩区域 */
+.rules-zone {
+    flex: 1;
+    display: flex;
+    min-width: 300px;
+}
+
+/* 右侧：大树区域 */
+.visualization-zone {
+    flex: 1.5;
+    position: relative;
+    min-width: 0;
+}
+
+/* 游戏区域样式 */
+.game-header {
+    margin-bottom: 25px;
+}
+
+.game-header h3 {
+    font-size: 1.8rem;
+    color: var(--primary-pink);
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 15px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#daily-progress {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    transition: width 0.5s ease;
+    border-radius: 10px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 20px;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* 学生泡泡样式 */
+.student-bubble {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bubble-bg) 0%, var(--bubble-hover) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    position: relative;
+    border: 3px solid transparent;
+}
+
+.student-bubble:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    border-color: var(--primary-pink);
+}
+
+.student-bubble.completed {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    animation: celebrate 0.6s ease;
+}
+
+.student-bubble .name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+    text-align: center;
+    margin-top: 8px;
+}
+
+.student-bubble .status-icon {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.student-bubble.completed .name {
+    color: white;
+}
+
+@keyframes celebrate {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.2) rotate(-10deg); }
+    75% { transform: scale(1.2) rotate(10deg); }
+}
+
+/* 奖惩区域样式 */
 .rules-panel {
-    width: 100%; background: white; border-radius: 35px; padding: 35px;
-    display: flex; flex-direction: column; gap: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+    width: 100%;
+    background: white;
+    border-radius: 35px;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+}
+
+.rule-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rule-box label {
+    font-size: 1.3rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rule-box.reward label {
+    color: var(--primary-green-dark);
+}
+
+.rule-box.punishment label {
+    color: var(--danger-red);
+}
+
+.rule-box textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border: 2px solid #f0f0f0;
+    border-radius: 20px;
+    background: #fafafa;
+    font-family: var(--font-stack);
+    font-size: 1.1rem;
+    resize: vertical;
+    transition: all 0.3s;
+}
+
+.rule-box textarea:focus {
+    outline: none;
+    background: white;
+    border-color: var(--primary-pink);
+    box-shadow: 0 0 0 5px rgba(255, 154, 158, 0.1);
+}
+
+.rule-box textarea::placeholder {
+    color: #ccc;
 }
 
 #save-rules-btn {
@@ -225,10 +394,200 @@ main { flex: 1; display: flex; padding: 30px; gap: 30px; overflow: hidden; }
 }
 .close-modal:hover { color: var(--text-color); }
 
-.tree-container { border-radius: 35px; }
+.tree-container {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 35px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+#tree-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.tree-message {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary-pink);
+    text-align: center;
+    max-width: 90%;
+}
 
 /* 响应式 */
 @media (max-width: 1024px) {
-    main { flex-direction: column; overflow-y: auto; }
-    .screen { position: absolute; height: auto; min-height: 100%; }
+    main {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .screen {
+        position: absolute;
+        height: auto;
+        min-height: 100%;
+    }
+
+    .game-zone,
+    .rules-zone,
+    .visualization-zone {
+        flex: 1;
+        min-width: 100%;
+    }
+
+    .visualization-zone {
+        min-height: 400px;
+    }
+}
+
+/* 输入框样式 */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.input-group input {
+    padding: 20px;
+    border: 3px solid #f0f0f0;
+    border-radius: 20px;
+    font-size: 1.4rem;
+    font-family: var(--font-stack);
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-pink);
+    box-shadow: 0 0 0 5px rgba(255, 154, 158, 0.1);
+}
+
+.subtitle {
+    color: #999;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+#auth-msg {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    min-height: 30px;
+}
+
+/* 按钮通用样式 */
+button {
+    font-family: var(--font-stack);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+}
+
+.secondary-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.date-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: #888;
+    margin-top: 5px;
+}
+
+/* 模态框通用样式 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal:not(.hidden) {
+    display: flex;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.hint {
+    text-align: center;
+    color: #999;
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+.confirm-box {
+    text-align: center;
+    max-width: 500px;
+}
+
+.confirm-box h3 {
+    font-size: 2rem;
+    color: var(--primary-pink);
+    margin-bottom: 20px;
+}
+
+.confirm-box p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 25px 0;
 }

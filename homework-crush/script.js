@@ -6,8 +6,69 @@ const STATE = {
     weekStartDate: localStorage.getItem('hc_week_start') || null,
     rules: JSON.parse(localStorage.getItem('hc_rules') || '{"reward":"","punishment":""}'),
     currentDate: new Date(), // Will be synced with server
-    todayIndex: 0 // 0=Mon, 4=Fri, -1=Weekend
+    todayIndex: 0, // 0=Mon, 4=Fri, -1=Weekend
+    lang: localStorage.getItem('global-language') || 'zh-CN'
 };
+
+// Helper for Translation
+function t(key) {
+    const langData = TRANSLATIONS[STATE.lang] || TRANSLATIONS['zh-CN'];
+    return langData[key] || key;
+}
+
+function applyTranslations() {
+    // Auth
+    if(els.authTitle) els.authTitle.textContent = t('title');
+    if(els.authSubtitle) els.authSubtitle.textContent = t('subtitle');
+    els.licenseInput.placeholder = t('placeholder');
+    els.verifyBtn.textContent = t('verifyBtn');
+    
+    // Header
+    const headerTitle = document.querySelector('.header-left h2');
+    if(headerTitle) headerTitle.textContent = t('headerTitle');
+    
+    els.resetWeekBtn.textContent = t('startNewWeek');
+    els.settingsBtn.title = t('settings');
+    els.logoutBtn.title = t('logout');
+    
+    // Game Zone
+    const gameTitle = document.querySelector('.game-header h3');
+    if(gameTitle) gameTitle.textContent = t('dailyTask');
+    
+    // Rules
+    const rLabel = document.querySelector('.rule-box.reward label');
+    const pLabel = document.querySelector('.rule-box.punishment label');
+    if(rLabel) rLabel.textContent = t('rewardLabel');
+    if(pLabel) pLabel.textContent = t('punishmentLabel');
+    
+    els.rewardInput.placeholder = t('rewardPlaceholder');
+    els.punishmentInput.placeholder = t('punishmentPlaceholder');
+    els.saveRulesBtn.textContent = t('saveRules');
+    
+    // Modal
+    const modalH2 = document.querySelector('.modal-content h2');
+    if(modalH2) modalH2.textContent = t('settingsTitle');
+    
+    const tabMan = document.querySelector('[data-tab="manual"]');
+    if(tabMan) tabMan.textContent = t('manualTab');
+    
+    const tabCsv = document.querySelector('[data-tab="csv"]');
+    if(tabCsv) tabCsv.textContent = t('csvTab');
+    
+    els.manualInput.placeholder = t('manualPlaceholder');
+    els.csvInput.placeholder = t('csvPlaceholder');
+    els.importBtn.textContent = t('importBtn');
+    els.clearDataBtn.textContent = t('clearDataBtn');
+    
+    const hint = document.querySelector('.hint');
+    if(hint) hint.textContent = t('hint');
+    
+    // Confirm Modal
+    const confirmH3 = document.querySelector('.confirm-box h3');
+    if(confirmH3) confirmH3.textContent = t('confirmTitle');
+    els.confirmYes.textContent = t('confirmYes');
+    els.confirmNo.textContent = t('confirmNo');
+}
 
 // DOM Elements
 const els = {
@@ -45,6 +106,7 @@ const els = {
 // --- Initialization ---
 
 async function init() {
+    applyTranslations();
     await syncTime();
     checkWeekCycle();
     renderUI();
@@ -81,10 +143,10 @@ async function syncTime() {
 }
 
 function updateHeaderDate() {
-    const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const days = t('days');
     const d = STATE.currentDate;
     els.dateDisplay.textContent = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-    els.dayDisplay.textContent = days[STATE.todayIndex] || '未知';
+    els.dayDisplay.textContent = days[STATE.todayIndex] || '?';
 }
 
 function checkWeekCycle() {
@@ -131,7 +193,7 @@ els.verifyBtn.addEventListener('click', async () => {
     const code = els.licenseInput.value.trim();
     if (!code) return;
 
-    els.verifyBtn.textContent = '验证中...';
+    els.verifyBtn.textContent = t('verifying');
     els.verifyBtn.disabled = true;
     els.authMsg.textContent = '';
 
@@ -162,12 +224,12 @@ els.verifyBtn.addEventListener('click', async () => {
             localStorage.setItem('hc_verified', 'true');
             showApp();
         } else {
-            els.authMsg.textContent = data.message || '验证失败';
+            els.authMsg.textContent = data.message || t('verifyFail');
         }
     } catch (e) {
-        els.authMsg.textContent = '网络错误';
+        els.authMsg.textContent = t('networkError');
     } finally {
-        els.verifyBtn.textContent = '开启魔法门';
+        els.verifyBtn.textContent = t('verifyBtn');
         els.verifyBtn.disabled = false;
     }
 });
@@ -202,7 +264,7 @@ function renderGrid() {
     els.studentGrid.innerHTML = '';
     
     if (STATE.students.length === 0) {
-        els.studentGrid.innerHTML = '<div class="empty-state">点击右上角 ⚙️ 导入学生名单开始游戏！</div>';
+        els.studentGrid.innerHTML = `<div class="empty-state">${t('emptyState')}</div>`;
         return;
     }
 
@@ -231,7 +293,7 @@ function renderGrid() {
         // Everyone done!
         const msg = document.createElement('div');
         msg.className = 'empty-state';
-        msg.innerHTML = '🎉 太棒了！今天全班都完成了！<br>快看看大树长高了吗？';
+        msg.innerHTML = t('emptyStateDone');
         msg.style.color = 'var(--primary-green)';
         els.studentGrid.appendChild(msg);
     }
@@ -242,7 +304,7 @@ let pendingStudentIndex = null;
 function confirmComplete(index) {
     pendingStudentIndex = index;
     const student = STATE.students[index];
-    els.confirmName.textContent = `确认 ${student.name} 完成作业了吗？`;
+    els.confirmName.textContent = t('confirmMsg').replace('{name}', student.name);
     els.confirmModal.classList.remove('hidden');
 }
 
@@ -401,10 +463,10 @@ function drawDreamyScene() {
 
     // 7. Message
     if (level === 5 && isWeekPerfect) {
-        els.treeMsg.textContent = STATE.rules.reward || "全班大满贯！奖励达成！";
+        els.treeMsg.textContent = STATE.rules.reward || t('treeMsgReward');
         els.treeMsg.classList.add('show');
     } else if (STATE.todayIndex > 4 && !isWeekPerfect) {
-         els.treeMsg.textContent = STATE.rules.punishment || "本周未全勤，下周加油！";
+         els.treeMsg.textContent = STATE.rules.punishment || t('treeMsgPunish');
          els.treeMsg.classList.add('show');
     } else {
         els.treeMsg.classList.remove('show');
@@ -608,7 +670,7 @@ els.importBtn.addEventListener('click', () => {
     const lines = rawText.split(/[\r\n,]+/).map(t => t.trim()).filter(t => t);
     
     if (lines.length > 0) {
-        if (confirm('导入新名单将重置本周进度，确定吗？')) {
+        if (confirm(t('importResetConfirm'))) {
             STATE.students = lines.map(name => ({
                 name,
                 history: [false, false, false, false, false]
@@ -620,7 +682,7 @@ els.importBtn.addEventListener('click', () => {
 });
 
 els.clearDataBtn.addEventListener('click', () => {
-    if(confirm('警告：将完全清空所有数据！')) {
+    if(confirm(t('clearDataConfirm'))) {
         localStorage.removeItem('hc_students');
         localStorage.removeItem('hc_week_start');
         localStorage.removeItem('hc_rules');
@@ -637,11 +699,11 @@ els.saveRulesBtn.addEventListener('click', () => {
     STATE.rules.punishment = els.punishmentInput.value;
     saveData();
     renderTree(); // Update message if applicable
-    alert('规则已保存');
+    alert(t('rulesSaved'));
 });
 
 els.resetWeekBtn.addEventListener('click', () => {
-    if(confirm('确定要开始新的一周吗？本周进度将重置。')) {
+    if(confirm(t('resetWeekConfirm'))) {
         startNewWeek();
     }
 });

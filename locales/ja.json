@@ -27,6 +27,11 @@
       "subtitle": "ミニチュアジオラマ • 天気探索",
       "description": "美しいミニチュアジオラマで都市の天気を探索"
     },
+    "homeworkCrush": {
+      "title": "宿題クラッシュ",
+      "subtitle": "楽しいチャレンジ • 習慣作り",
+      "description": "宿題をゲームに変えて、みんなで大きな木を育てよう"
+    },
     "particles": {
       "title": "パーティクルフロー",
       "subtitle": "3Dパーティクルシステム • ジェスチャー制御",

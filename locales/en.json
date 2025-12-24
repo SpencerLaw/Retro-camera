@@ -27,6 +27,11 @@
       "subtitle": "Miniature Diorama • Weather Explorer",
       "description": "Explore city weather through beautiful miniature dioramas"
     },
+    "homeworkCrush": {
+      "title": "Homework Crush",
+      "subtitle": "Fun Challenge • Habit Builder",
+      "description": "Turn homework into a match game and grow a tree together"
+    },
     "particles": {
       "title": "Particle Flow",
       "subtitle": "3D Particle System • Hand Gesture Control",

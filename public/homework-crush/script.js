@@ -32,14 +32,12 @@ function applyTranslations() {
     els.logoutBtn.title = t('logout');
     
     // Game Zone
-    const gameTitle = document.querySelector('.game-header h3');
+    const gameTitle = document.getElementById('daily-task-title');
     if(gameTitle) gameTitle.textContent = t('dailyTask');
     
     // Rules
-    const rLabel = document.querySelector('.rule-box.reward label');
-    const pLabel = document.querySelector('.rule-box.punishment label');
-    if(rLabel) rLabel.textContent = t('rewardLabel');
-    if(pLabel) pLabel.textContent = t('punishmentLabel');
+    if(els.labelReward) els.labelReward.textContent = t('rewardLabel');
+    if(els.labelPunish) els.labelPunish.textContent = t('punishmentLabel');
     
     els.rewardInput.placeholder = t('rewardPlaceholder');
     els.punishmentInput.placeholder = t('punishmentPlaceholder');
@@ -100,7 +98,13 @@ const els = {
     confirmModal: document.getElementById('confirm-modal'),
     confirmName: document.getElementById('confirm-student-name'),
     confirmYes: document.getElementById('confirm-yes'),
-    confirmNo: document.getElementById('confirm-no')
+    confirmNo: document.getElementById('confirm-no'),
+    // New labels for 3-column layout
+    labelReward: document.getElementById('reward-label'),
+    labelPunish: document.getElementById('punishment-label'),
+    // Auth titles
+    authTitle: document.querySelector('.auth-box h1'),
+    authSubtitle: document.querySelector('.subtitle')
 };
 
 // --- Initialization ---
@@ -108,6 +112,7 @@ const els = {
 async function init() {
     applyTranslations();
     await syncTime();
+    startDynamicClock();
     checkWeekCycle();
     renderUI();
     
@@ -124,62 +129,64 @@ async function init() {
     renderTree(); // Initial tree render
 }
 
+let serverTimeOffset = 0;
+
 async function syncTime() {
     try {
+        const start = Date.now();
         const res = await fetch('/api/time');
         const data = await res.json();
-        STATE.currentDate = new Date(data.time);
+        const end = Date.now();
+        const serverDate = new Date(data.time);
+        serverTimeOffset = serverDate.getTime() - (end + start) / 2;
+        STATE.currentDate = new Date(Date.now() + serverTimeOffset);
     } catch (e) {
         console.warn('Time sync failed, using local time');
         STATE.currentDate = new Date();
+        serverTimeOffset = 0;
     }
     
-    // Calculate Day Index (Monday=0, Sunday=6)
-    // standard getDay(): Sun=0, Mon=1...
-    let day = STATE.currentDate.getDay();
-    STATE.todayIndex = day === 0 ? 6 : day - 1; // Convert to Mon=0...Sun=6
-    
     updateHeaderDate();
+}
+
+function startDynamicClock() {
+    setInterval(() => {
+        STATE.currentDate = new Date(Date.now() + serverTimeOffset);
+        updateHeaderDate();
+    }, 1000);
 }
 
 function updateHeaderDate() {
     const days = t('days');
     const d = STATE.currentDate;
-    els.dateDisplay.textContent = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-    els.dayDisplay.textContent = days[STATE.todayIndex] || '?';
+    
+    const dateStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+    const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+    
+    let dayIdx = d.getDay();
+    STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
+
+    els.dateDisplay.textContent = `${dateStr} ${days[STATE.todayIndex] || '?'}`;
+    els.dayDisplay.textContent = timeStr;
 }
 
 function checkWeekCycle() {
-    // If no start date, or if current date is before start date (impossible unless time travel)
-    // or if current date is > start date + 7 days
     if (!STATE.weekStartDate) {
         startNewWeek();
         return;
     }
-    
-    const start = new Date(STATE.weekStartDate);
-    const now = STATE.currentDate;
-    const diffTime = Math.abs(now - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-
-    // Simple check: if it's Monday and the saved week start is not today, prompt reset?
-    // For automation, we'll just respect the manual "New Week" button for now, 
-    // unless the gap is huge.
 }
 
 function startNewWeek() {
-    // Set week start to the most recent Monday
     const d = new Date(STATE.currentDate);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+    const diff = d.getDate() - day + (day == 0 ? -6 : 1);
     const monday = new Date(d.setDate(diff));
     monday.setHours(0,0,0,0);
     
     STATE.weekStartDate = monday.toISOString();
-    
-    // Reset student history
     STATE.students.forEach(s => {
-        s.history = [false, false, false, false, false]; // M-F
+        s.history = [false, false, false, false, false];
     });
     
     saveData();
@@ -193,12 +200,17 @@ els.verifyBtn.addEventListener('click', async () => {
     const code = els.licenseInput.value.trim();
     if (!code) return;
 
+    // 强制消消乐专属前缀校验
+    if (!code.toUpperCase().startsWith('ZY')) {
+        alert('此应用需要以 ZY 开头的专用授权码');
+        return;
+    }
+
     els.verifyBtn.textContent = t('verifying');
     els.verifyBtn.disabled = true;
     els.authMsg.textContent = '';
 
     try {
-        // Generate a pseudo-deviceID if not exists
         let deviceId = localStorage.getItem('hc_device_id');
         if (!deviceId) {
             deviceId = 'hc-' + Math.random().toString(36).substr(2, 9);
@@ -245,8 +257,10 @@ function showApp() {
     setTimeout(() => {
         els.authScreen.classList.add('hidden');
         els.appScreen.classList.remove('hidden');
-        // Trigger reflow/animation
-        setTimeout(() => renderTree(), 100); 
+        setTimeout(() => {
+            resizeCanvas();
+            renderTree();
+        }, 100); 
     }, 500);
     
     els.rewardInput.value = STATE.rules.reward;
@@ -268,29 +282,21 @@ function renderGrid() {
         return;
     }
 
-    // Only show for Mon-Fri (0-4). If Weekend, show all completed or reset?
-    // Let's allow editing for any day by "mocking" if needed, but primarily for Today.
-    // If weekend, maybe just show summary. For now, assume simple 0-4 mapping.
     const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
 
     STATE.students.forEach((student, index) => {
         const isDone = student.history[dayIndex];
-        
-        // Only show bubble if NOT done today
         if (!isDone) {
             const bubble = document.createElement('div');
             bubble.className = 'student-bubble';
             bubble.textContent = student.name;
             bubble.style.backgroundColor = getBubbleColor(index);
-            
             bubble.onclick = () => confirmComplete(index);
-            
             els.studentGrid.appendChild(bubble);
         }
     });
     
     if (els.studentGrid.children.length === 0 && STATE.students.length > 0) {
-        // Everyone done!
         const msg = document.createElement('div');
         msg.className = 'empty-state';
         msg.innerHTML = t('emptyStateDone');
@@ -310,19 +316,13 @@ function confirmComplete(index) {
 
 els.confirmYes.addEventListener('click', () => {
     if (pendingStudentIndex !== null) {
-        // Mark done
         const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
         STATE.students[pendingStudentIndex].history[dayIndex] = true;
         saveData();
-        
-        // Find the element and animate
-        // Since we re-render grid, we can't easily animate the exact element unless we map it.
-        // Simplification: Re-render immediately.
         renderGrid();
         updateProgress();
         renderTree();
         
-        // Check for celebration
         const allDoneToday = STATE.students.every(s => s.history[dayIndex]);
         if (allDoneToday) {
             triggerConfetti();
@@ -339,11 +339,9 @@ els.confirmNo.addEventListener('click', () => {
 
 function updateProgress() {
     if (STATE.students.length === 0) return;
-    
     const dayIndex = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
     const total = STATE.students.length;
     const done = STATE.students.filter(s => s.history[dayIndex]).length;
-    
     const pct = (done / total) * 100;
     els.dailyProgress.style.width = `${pct}%`;
 }
@@ -367,16 +365,14 @@ let swayTime = 0;
 
 function resizeCanvas() {
     const parent = els.treeCanvas.parentElement;
+    if (!parent) return;
     els.treeCanvas.width = parent.offsetWidth;
     els.treeCanvas.height = parent.offsetHeight;
-    // Don't call renderTree here directly to avoid double loops, 
-    // just let the animation loop handle it or restart it.
     if (!animFrameId) renderTree(); 
 }
 
 function renderTree() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
-    
     function animate() {
         swayTime += 0.02;
         drawDreamyScene();
@@ -389,20 +385,16 @@ function drawDreamyScene() {
     if (!ctx) return;
     const w = els.treeCanvas.width;
     const h = els.treeCanvas.height;
-    
-    // Clear
     ctx.clearRect(0, 0, w, h);
 
-    // 1. Sky Gradient
     const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
     skyGrad.addColorStop(0, '#A1C4FD');
     skyGrad.addColorStop(1, '#C2E9FB');
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // 2. Sun/Halo
     ctx.save();
-    ctx.fillStyle = 'rgba(255, 249, 196, 0.6)'; // #fff9c4
+    ctx.fillStyle = 'rgba(255, 249, 196, 0.6)';
     ctx.beginPath();
     ctx.arc(w * 0.8, h * 0.2, 40, 0, Math.PI * 2);
     ctx.fill();
@@ -412,15 +404,12 @@ function drawDreamyScene() {
     ctx.fill();
     ctx.restore();
 
-    // 3. Clouds (Floating)
     drawCloud(w * 0.2 + Math.sin(swayTime * 0.5) * 10, h * 0.25, 1);
     drawCloud(w * 0.6 + Math.sin(swayTime * 0.3 + 2) * 15, h * 0.15, 0.7);
 
-    // 4. Ground (Hills)
     const groundGrad = ctx.createLinearGradient(0, 0, 0, h);
     groundGrad.addColorStop(0, '#84fab0');
     groundGrad.addColorStop(1, '#8fd3f4');
-    
     ctx.fillStyle = groundGrad;
     ctx.beginPath();
     ctx.moveTo(0, h);
@@ -430,7 +419,6 @@ function drawDreamyScene() {
     ctx.lineTo(w, h);
     ctx.fill();
 
-    // 5. Determine Growth Level
     let level = 0;
     let isWeekPerfect = true;
     const scanLimit = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
@@ -442,26 +430,17 @@ function drawDreamyScene() {
         }
     }
 
-    // 6. Draw Tree (Scaled and Positioned)
-    // Scale varies by level: 0.6 to 1.44 (20% increase from original 0.5-1.2)
-    // If level 0 (just started), show a tiny sprout
     const baseScale = (0.5 + (level * 0.15)) * 1.2; 
     const treeX = w / 2;
-    const treeY = h * 0.88; // Base on the hill approx
+    const treeY = h * 0.88;
 
     ctx.save();
     ctx.translate(treeX, treeY);
     ctx.scale(baseScale, baseScale);
-
-    if (level === 0) {
-        drawSprout(ctx);
-    } else {
-        drawDreamyTree(ctx, level, swayTime);
-    }
-
+    if (level === 0) drawSprout(ctx);
+    else drawDreamyTree(ctx, level, swayTime);
     ctx.restore();
 
-    // 7. Message
     if (level === 5 && isWeekPerfect) {
         els.treeMsg.textContent = STATE.rules.reward || t('treeMsgReward');
         els.treeMsg.classList.add('show');
@@ -497,22 +476,13 @@ function drawSprout(ctx) {
 }
 
 function drawDreamyTree(ctx, level, time) {
-    // Trunk Gradient
     const trunkGrad = ctx.createLinearGradient(-30, 0, 30, 0);
     trunkGrad.addColorStop(0, '#6d4c41');
     trunkGrad.addColorStop(0.4, '#8d6e63');
     trunkGrad.addColorStop(1, '#5d4037');
-
-    // Draw Trunk (SVG Path approx)
-    // M-15,0 Q-10,-60 -30,-100 Q-40,-120 -80,-140 
-    // M-10,-60 Q5,-120 40,-160 
-    // M0,0 Q15,-50 25,-100 Q35,-150 80,-180 L0,0 Z
-    
     ctx.strokeStyle = trunkGrad;
     ctx.lineWidth = 20;
     ctx.lineCap = 'round';
-    
-    // Main Trunk Body (Fill)
     ctx.fillStyle = trunkGrad;
     ctx.beginPath();
     ctx.moveTo(-20, 0);
@@ -520,71 +490,37 @@ function drawDreamyTree(ctx, level, time) {
     ctx.lineTo(5, -150);
     ctx.quadraticCurveTo(15, -80, 20, 0);
     ctx.fill();
-
-    // Branches (Stroke)
     ctx.beginPath();
-    // Left Branch
     ctx.moveTo(-15, -40);
     ctx.quadraticCurveTo(-30, -100, -80, -140);
-    // Right Branch
     ctx.moveTo(15, -50);
     ctx.quadraticCurveTo(40, -120, 80, -160);
     ctx.stroke();
-
-    // Foliage Groups (Swaying)
     const swayAngle = Math.sin(time) * 0.02;
-    
     ctx.save();
-    ctx.rotate(swayAngle); // Sway the whole top
-
-    // Leaf Gradients
+    ctx.rotate(swayAngle);
     const leafDark = ctx.createRadialGradient(-50, -140, 0, -50, -140, 50);
     leafDark.addColorStop(0, '#66bb6a');
     leafDark.addColorStop(1, '#2e7d32');
-
     const leafLight = ctx.createRadialGradient(30, -190, 0, 30, -190, 50);
     leafLight.addColorStop(0, '#b9f6ca');
     leafLight.addColorStop(1, '#00c853');
-
-    // Draw Foliage Clumps based on Level
-    // Level 1: Just main top
-    // Level 5: Full lushness
-    
-    // Back Layer (Dark)
     ctx.fillStyle = leafDark;
-    if (level >= 1) {
-        ctx.beginPath(); ctx.arc(0, -180, 60, 0, Math.PI*2); ctx.fill(); // Top Center Back
-    }
-    if (level >= 2) {
-        ctx.beginPath(); ctx.arc(-50, -140, 50, 0, Math.PI*2); ctx.fill(); // Left Back
-    }
-    if (level >= 3) {
-        ctx.beginPath(); ctx.arc(50, -160, 55, 0, Math.PI*2); ctx.fill(); // Right Back
-    }
-
-    // Front Layer (Light/Highlight)
+    if (level >= 1) { ctx.beginPath(); ctx.arc(0, -180, 60, 0, Math.PI*2); ctx.fill(); }
+    if (level >= 2) { ctx.beginPath(); ctx.arc(-50, -140, 50, 0, Math.PI*2); ctx.fill(); }
+    if (level >= 3) { ctx.beginPath(); ctx.arc(50, -160, 55, 0, Math.PI*2); ctx.fill(); }
     ctx.fillStyle = leafLight;
     ctx.globalAlpha = 0.9;
-    
-    if (level >= 2) {
-        ctx.beginPath(); ctx.arc(-30, -170, 50, 0, Math.PI*2); ctx.fill(); 
-    }
-    if (level >= 3) {
-        ctx.beginPath(); ctx.arc(30, -190, 50, 0, Math.PI*2); ctx.fill();
-    }
-    
+    if (level >= 2) { ctx.beginPath(); ctx.arc(-30, -170, 50, 0, Math.PI*2); ctx.fill(); }
+    if (level >= 3) { ctx.beginPath(); ctx.arc(30, -190, 50, 0, Math.PI*2); ctx.fill(); }
     if (level >= 1) {
-        // Top High Highlight
         ctx.fillStyle = '#b9f6ca';
         ctx.globalAlpha = 1.0;
         ctx.beginPath(); ctx.arc(0, -210, 45, 0, Math.PI*2); ctx.fill();
-        
-        // Extra shine
         ctx.fillStyle = '#fff';
         ctx.globalAlpha = 0.3;
         ctx.beginPath(); ctx.arc(-20, -220, 10, 0, Math.PI*2); ctx.fill();
     }
-    
     ctx.restore();
 }
 
@@ -594,10 +530,8 @@ function triggerConfetti() {
     const myCtx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
-    
     const particles = [];
     const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff'];
-    
     for(let i=0; i<100; i++) {
         particles.push({
             x: w/2,
@@ -608,38 +542,28 @@ function triggerConfetti() {
             size: Math.random() * 5 + 2
         });
     }
-    
     function animateConfetti() {
-        // We need to redraw tree every frame or use an overlay canvas. 
-        // For simplicity, we just draw over the tree.
-        renderTree(); 
-        
+        drawDreamyScene(); 
         let active = false;
         particles.forEach(p => {
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.2; // Gravity
-            
+            p.vy += 0.2;
             myCtx.fillStyle = p.color;
             myCtx.beginPath();
             myCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
             myCtx.fill();
-            
             if (p.y < h) active = true;
         });
-        
         if (active) requestAnimationFrame(animateConfetti);
     }
-    
     animateConfetti();
 }
-
 
 // --- Settings / Modal Logic ---
 
 els.settingsBtn.addEventListener('click', () => {
     els.settingsModal.classList.remove('hidden');
-    // Pre-fill manual list
     const names = STATE.students.map(s => s.name).join('\n');
     els.manualInput.value = names;
 });
@@ -660,22 +584,16 @@ els.tabBtns.forEach(btn => {
 els.importBtn.addEventListener('click', () => {
     let rawText = '';
     const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-    
-    if (activeTab === 'manual') {
-        rawText = els.manualInput.value;
-    } else {
-        rawText = els.csvInput.value;
-    }
-    
-    const lines = rawText.split(/[\r\n,]+/).map(t => t.trim()).filter(t => t);
-    
+    if (activeTab === 'manual') rawText = els.manualInput.value;
+    else rawText = els.csvInput.value;
+    const lines = rawText.split(/[\n,]+/).map(t => t.trim()).filter(t => t);
     if (lines.length > 0) {
         if (confirm(t('importResetConfirm'))) {
             STATE.students = lines.map(name => ({
                 name,
                 history: [false, false, false, false, false]
             }));
-            startNewWeek(); // Resets progress and saves
+            startNewWeek();
             els.settingsModal.classList.add('hidden');
         }
     }
@@ -698,7 +616,7 @@ els.saveRulesBtn.addEventListener('click', () => {
     STATE.rules.reward = els.rewardInput.value;
     STATE.rules.punishment = els.punishmentInput.value;
     saveData();
-    renderTree(); // Update message if applicable
+    renderTree();
     alert(t('rulesSaved'));
 });
 
@@ -708,5 +626,4 @@ els.resetWeekBtn.addEventListener('click', () => {
     }
 });
 
-// Run Init
 init();

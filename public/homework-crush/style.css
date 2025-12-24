@@ -178,7 +178,7 @@ main {
 
 /* Game Zone */
 .game-zone {
-    flex: 1; /* 50% widthish */
+    flex: 1.5; /* Give more space to student grid */
     background: var(--white);
     border-radius: 24px;
     padding: 24px;
@@ -188,127 +188,10 @@ main {
     overflow-y: auto;
 }
 
-.game-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.progress-bar {
-    width: 240px; /* 200 * 1.2 */
-    height: 24px; /* 20 * 1.2 */
-    background: #eee;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-#daily-progress {
-    height: 100%;
-    background: linear-gradient(to right, var(--primary-green), var(--success-green));
-    transition: width 0.5s ease;
-}
-
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* 100 * 1.2 */
-    gap: 12px;
-    padding: 12px;
-}
-
-.student-bubble {
-    width: 120px; /* 100 * 1.2 */
-    height: 120px; /* 100 * 1.2 */
-    background-color: var(--bubble-bg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    user-select: none;
-    position: relative;
-    font-weight: bold;
-    color: #555; /* Text color for better contrast inside bubbles */
-    font-size: 1.1rem; /* 0.9 * 1.2 approx */
-    padding: 18px 12px 0 12px; /* Push text down slightly to center in heart */
-    
-    /* Heart Shape Magic */
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z'/%3E%3C/svg%3E");
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.student-bubble:hover {
-    transform: scale(1.15) rotate(-5deg);
-    background: var(--bubble-hover);
-    color: white;
-    z-index: 2;
-}
-
-.student-bubble.done {
-    opacity: 0;
-    transform: scale(0);
-    pointer-events: none;
-    transition: opacity 0.5s, transform 0.5s;
-}
-
-.empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 50px;
-    color: #bbb;
-    font-size: 1.2rem;
-}
-
-/* Visualization Zone */
-.visualization-zone {
+/* Rules Zone (Middle) */
+.rules-zone {
     flex: 1;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.tree-container {
-    flex: 2;
-    background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
-    border-radius: 20px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-}
-
-#tree-canvas {
-    width: 100%;
-    height: 100%;
-}
-
-.tree-message {
-    position: absolute;
-    top: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255,255,255,0.8);
-    padding: 12px 24px;
-    border-radius: 24px;
-    font-weight: bold;
-    color: var(--primary-pink);
-    font-size: 1.4rem; /* Scaled */
-    opacity: 0;
-    transition: opacity 0.5s;
-    pointer-events: none;
-}
-
-.tree-message.show {
-    opacity: 1;
 }
 
 .rules-panel {
@@ -321,6 +204,33 @@ main {
     gap: 12px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.05);
 }
+
+/* Visualization Zone (Right) */
+.visualization-zone {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+}
+
+.tree-container {
+    flex: 1;
+    background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+/* Placeholder Styling */
+textarea::placeholder, input::placeholder {
+    color: #ccc !important;
+    font-weight: normal;
+}
+
+
 
 .rule-box {
     display: flex;

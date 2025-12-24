@@ -42,39 +42,41 @@
         </header>
 
         <main>
-            <!-- 左侧：消消乐区域 -->
+            <!-- 左侧：消消乐区域 (今日任务) -->
             <section class="game-zone">
                 <div class="game-header">
-                    <h3>今日任务: 消灭未完成!</h3>
+                    <h3 id="daily-task-title">今日任务: 消灭未完成!</h3>
                     <div class="progress-bar">
                         <div id="daily-progress" style="width: 0%"></div>
                     </div>
                 </div>
                 <div id="student-grid" class="grid-container">
-                    <!-- 学生泡泡将在这里生成 -->
                     <div class="empty-state">
                         点击右上角 ⚙️ 导入学生名单开始游戏！
                     </div>
                 </div>
             </section>
 
-            <!-- 右侧：大树可视化与奖惩 -->
+            <!-- 中间：奖惩区 (奖励设置) -->
+            <section class="rules-zone">
+                <div class="rules-panel">
+                    <div class="rule-box reward">
+                        <label id="reward-label">🏆 全班作业完成奖励:</label>
+                        <textarea id="reward-text" placeholder="例如: 全班奖励冰激凌🍦"></textarea>
+                    </div>
+                    <div class="rule-box punishment">
+                        <label id="punishment-label">⚠️ 未完成惩罚:</label>
+                        <textarea id="punishment-text" placeholder="例如: 扣除班级积分"></textarea>
+                    </div>
+                    <button id="save-rules-btn">💾 保存规则</button>
+                </div>
+            </section>
+
+            <!-- 右侧：大树可视化区 -->
             <section class="visualization-zone">
                 <div class="tree-container">
                     <canvas id="tree-canvas"></canvas>
                     <div id="tree-message" class="tree-message"></div>
-                </div>
-                
-                <div class="rules-panel">
-                    <div class="rule-box reward">
-                        <label>🏆 全班全勤奖励:</label>
-                        <textarea id="reward-text" placeholder="例如: 全班奖励冰激凌🍦"></textarea>
-                    </div>
-                    <div class="rule-box punishment">
-                        <label>⚠️ 未完成惩罚:</label>
-                        <textarea id="punishment-text" placeholder="例如: 扣除班级积分"></textarea>
-                    </div>
-                    <button id="save-rules-btn">💾 保存规则</button>
                 </div>
             </section>
         </main>

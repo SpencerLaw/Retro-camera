@@ -27,6 +27,8 @@ function applyTranslations() {
     const headerTitle = document.querySelector('.header-left h2');
     if(headerTitle) headerTitle.textContent = t('headerTitle');
     
+    if(els.backBtn) els.backBtn.title = t('backHome');
+    
     els.resetWeekBtn.textContent = t('startNewWeek');
     
     const isFS = !!document.fullscreenElement;
@@ -81,6 +83,7 @@ const els = {
     verifyBtn: document.getElementById('verify-btn'),
     authMsg: document.getElementById('auth-msg'),
     dateDisplay: document.getElementById('current-date'),
+    backBtn: document.getElementById('back-btn'),
     dayDisplay: document.getElementById('current-week-day'),
     studentGrid: document.getElementById('student-grid'),
     dailyProgress: document.getElementById('daily-progress'),
@@ -257,6 +260,12 @@ els.logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('hc_verified');
     location.reload();
 });
+
+if(els.backBtn) {
+    els.backBtn.addEventListener('click', () => {
+        window.location.href = '/';
+    });
+}
 
 els.fullscreenBtn.addEventListener('click', () => {
     if (!document.fullscreenElement) {

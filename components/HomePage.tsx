@@ -135,207 +135,6 @@ export const HomePage: React.FC = () => {
 
         {/* Project Cards - Super Kawaii Style */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8 lg:gap-6 px-4">
-          {/* Retro Camera Card - Cute Pink */}
-          <Link
-            to="/camera"
-            className="group relative bg-gradient-to-br from-[#FFD6E8] via-[#FFC1E3] to-[#FFB5E8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,105,180,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,105,180,0.5)] hover:rotate-2 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Cute floating hearts decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💕</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFB5E8] to-[#FFC6FF] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,105,180,0.3)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFE5F0]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Camera size={72} className="text-[#FF69B4] drop-shadow-lg" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-marker text-4xl text-[#D5006D] mb-3 font-bold drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.camera.title')}</h2>
-              <p className="text-base text-[#B8005C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
-                {t('home.camera.subtitle')}
-              </p>
-              <p className="text-sm text-[#A0004D] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
-                {t('home.camera.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#FF69B4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(255,105,180,0.3)] border-[3px] border-[#FFE5F0] hover:bg-gradient-to-r hover:from-[#FFE5F0] hover:to-white">
-                  Enter → 💖
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Fortune Sticks Card - Disabled/Restricted */}
-          <div
-            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed transform transition-all duration-500 grayscale opacity-80 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Sparkles size={72} className="text-[#999999]" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-serif text-4xl text-[#666666] mb-3 font-bold">{t('home.fortune.title')}</h2>
-              <p className="text-base text-[#777777] mb-4 font-semibold">
-                {t('home.fortune.subtitle')}
-              </p>
-              <p className="text-sm text-[#888888] leading-relaxed font-medium">
-                {t('home.fortune.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
-                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
-                  {t('home.restricted')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Weather Card - Disabled/Gray */}
-          <div
-            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed grayscale opacity-80 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Cloud size={72} className="text-[#999999]" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#666666] mb-3">{t('home.weather.title')}</h2>
-              <p className="text-base text-[#777777] mb-4 font-semibold">
-                {t('home.weather.subtitle')}
-              </p>
-              <p className="text-sm text-[#888888] leading-relaxed font-medium">
-                {t('home.weather.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
-                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
-                  {t('home.comingSoon')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Couple Game Card - Cute Purple */}
-          <Link
-            to="/couple"
-            className="group relative bg-gradient-to-br from-[#E1BEE7] via-[#CE93D8] to-[#BA68C8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(186,104,200,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(186,104,200,0.6)] hover:rotate-2 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Cute hearts decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💝</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#BA68C8] to-[#CE93D8] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(186,104,200,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#E1BEE7]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Heart size={72} className="text-[#AB47BC] drop-shadow-lg" fill="#AB47BC" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#7B1FA2] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.couple.title')}</h2>
-              <p className="text-base text-[#6A1B9A] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
-                {t('home.couple.subtitle')}
-              </p>
-              <p className="text-sm text-[#4A148C] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
-                {t('home.couple.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#AB47BC] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(186,104,200,0.4)] border-[3px] border-[#E1BEE7] hover:bg-gradient-to-r hover:from-[#E1BEE7] hover:to-white">
-                  Enter → 💗
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Homework Crush - Cute Green */}
-          <a
-            href="/homework-crush/index.html"
-            className="group relative bg-gradient-to-br from-[#C8E6C9] via-[#A5D6A7] to-[#81C784] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(102,187,106,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(102,187,106,0.6)] hover:rotate-2 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Cute leaves decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🌱</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#81C784] to-[#A5D6A7] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(102,187,106,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#C8E6C9]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <BookOpen size={72} className="text-[#4CAF50] drop-shadow-lg" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#2E7D32] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.homeworkCrush.title')}</h2>
-              <p className="text-base text-[#388E3C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
-                {t('home.homeworkCrush.subtitle')}
-              </p>
-              <p className="text-sm text-[#1B5E20] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
-                {t('home.homeworkCrush.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#4CAF50] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(102,187,106,0.4)] border-[3px] border-[#A5D6A7] hover:bg-gradient-to-r hover:from-[#A5D6A7] hover:to-white">
-                  Enter → 📝
-                </div>
-              </div>
-            </div>
-          </a>
-
           {/* Doraemon Monitor Card - Cute Blue */}
           <Link
             to="/doraemon"
@@ -423,6 +222,135 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
+          {/* Homework Crush - Cute Green */}
+          <a
+            href="/homework-crush/index.html"
+            className="group relative bg-gradient-to-br from-[#C8E6C9] via-[#A5D6A7] to-[#81C784] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(102,187,106,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(102,187,106,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Cute leaves decoration */}
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🌱</div>
+
+            {/* Kawaii Glow Effect */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#81C784] to-[#A5D6A7] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(102,187,106,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#C8E6C9]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <BookOpen size={72} className="text-[#4CAF50] drop-shadow-lg" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#2E7D32] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.homeworkCrush.title')}</h2>
+              <p className="text-base text-[#388E3C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                {t('home.homeworkCrush.subtitle')}
+              </p>
+              <p className="text-sm text-[#1B5E20] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                {t('home.homeworkCrush.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#4CAF50] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(102,187,106,0.4)] border-[3px] border-[#A5D6A7] hover:bg-gradient-to-r hover:from-[#A5D6A7] hover:to-white">
+                  Enter → 📝
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Couple Game Card - Cute Purple */}
+          <Link
+            to="/couple"
+            className="group relative bg-gradient-to-br from-[#E1BEE7] via-[#CE93D8] to-[#BA68C8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(186,104,200,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(186,104,200,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Cute hearts decoration */}
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💝</div>
+
+            {/* Kawaii Glow Effect */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#BA68C8] to-[#CE93D8] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(186,104,200,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#E1BEE7]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Heart size={72} className="text-[#AB47BC] drop-shadow-lg" fill="#AB47BC" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#7B1FA2] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.couple.title')}</h2>
+              <p className="text-base text-[#6A1B9A] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                {t('home.couple.subtitle')}
+              </p>
+              <p className="text-sm text-[#4A148C] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                {t('home.couple.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#AB47BC] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(186,104,200,0.4)] border-[3px] border-[#E1BEE7] hover:bg-gradient-to-r hover:from-[#E1BEE7] hover:to-white">
+                  Enter → 💗
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Retro Camera Card - Cute Pink */}
+          <Link
+            to="/camera"
+            className="group relative bg-gradient-to-br from-[#FFD6E8] via-[#FFC1E3] to-[#FFB5E8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,105,180,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,105,180,0.5)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Cute floating hearts decoration */}
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💕</div>
+
+            {/* Kawaii Glow Effect */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFB5E8] to-[#FFC6FF] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,105,180,0.3)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFE5F0]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Camera size={72} className="text-[#FF69B4] drop-shadow-lg" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-marker text-4xl text-[#D5006D] mb-3 font-bold drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.camera.title')}</h2>
+              <p className="text-base text-[#B8005C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                {t('home.camera.subtitle')}
+              </p>
+              <p className="text-sm text-[#A0004D] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                {t('home.camera.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#FF69B4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(100,181,246,0.3)] border-[3px] border-[#FFE5F0] hover:bg-gradient-to-r hover:from-[#FFE5F0] hover:to-white">
+                  Enter → 💖
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Particle Flow Card - Cute Galaxy Purple */}
           <Link
             to="/particles"
@@ -465,6 +393,78 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           </Link>
+
+          {/* Fortune Sticks Card - Disabled/Restricted */}
+          <div
+            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed transform transition-all duration-500 grayscale opacity-80 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Sparkles size={72} className="text-[#999999]" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-serif text-4xl text-[#666666] mb-3 font-bold">{t('home.fortune.title')}</h2>
+              <p className="text-base text-[#777777] mb-4 font-semibold">
+                {t('home.fortune.subtitle')}
+              </p>
+              <p className="text-sm text-[#888888] leading-relaxed font-medium">
+                {t('home.fortune.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
+                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
+                  {t('home.restricted')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Weather Card - Disabled/Gray */}
+          <div
+            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed grayscale opacity-80 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Cloud size={72} className="text-[#999999]" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#666666] mb-3">{t('home.weather.title')}</h2>
+              <p className="text-base text-[#777777] mb-4 font-semibold">
+                {t('home.weather.subtitle')}
+              </p>
+              <p className="text-sm text-[#888888] leading-relaxed font-medium">
+                {t('home.weather.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
+                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
+                  {t('home.comingSoon')}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Footer Note - Kawaii Style */}

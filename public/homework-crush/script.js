@@ -278,35 +278,35 @@ function renderUI() {
         return;
     }
 
-    let incompleteStudents = [];
-    let completedStudents = [];
+    let incompleteNum = 0;
+    let completedNum = 0;
 
-    STATE.students.forEach((s, i) => {
+    STATE.students.forEach((student, index) => {
         // 确保每个学生都有history数组
-        if (!s.history || !Array.isArray(s.history) || s.history.length < 5) {
-            s.history = [false, false, false, false, false];
+        if (!student.history || !Array.isArray(student.history) || student.history.length < 5) {
+            student.history = [false, false, false, false, false];
         }
 
-        const b = document.createElement('div');
-        b.className = 'student-bubble';
+        const bubble = document.createElement('div');
+        bubble.className = 'student-bubble';
 
         // 创建爱心SVG
         const heartSVG = `
             <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                    <radialGradient id="strawberryPink-${i}" cx="30%" cy="30%" r="80%">
+                    <radialGradient id="strawberryPink-${index}" cx="30%" cy="30%" r="80%">
                         <stop offset="0%" stop-color="#ffbfd3" />
                         <stop offset="60%" stop-color="#ff6b95" />
                         <stop offset="100%" stop-color="#ff3366" />
                     </radialGradient>
-                    <filter id="softShadow-${i}" x="-20%" y="-20%" width="140%" height="140%">
+                    <filter id="softShadow-${index}" x="-20%" y="-20%" width="140%" height="140%">
                         <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#ffb3c6" flood-opacity="0.5"/>
                     </filter>
                 </defs>
                 <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z"
-                      fill="url(#strawberryPink-${i})"
+                      fill="url(#strawberryPink-${index})"
                       stroke="#ff3366" stroke-width="4" stroke-linejoin="round"
-                      filter="url(#softShadow-${i})" />
+                      filter="url(#softShadow-${index})" />
                 <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="0.9"/>
                 <circle cx="82" cy="40" r="5" fill="#ffffff" opacity="0.8"/>
                 <path d="M150,50 q10,10 5,20" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
@@ -315,47 +315,44 @@ function renderUI() {
 
         const nameDiv = document.createElement('div');
         nameDiv.className = 'name';
-        nameDiv.textContent = s.name;
+        nameDiv.textContent = student.name;
 
-        b.innerHTML = heartSVG;
-        b.appendChild(nameDiv);
+        bubble.innerHTML = heartSVG;
+        bubble.appendChild(nameDiv);
 
         // 根据完成状态分配到不同区域
-        if (s.history[day] === true) {
+        if (student.history[day] === true) {
             // 已完成 - 添加到已完成区域
-            completedStudents.push(b);
+            completedGrid.appendChild(bubble);
+            completedNum++;
         } else {
             // 未完成 - 添加到未完成区域，并绑定点击事件
-            b.onclick = () => {
-                if (confirm(t('confirmMsg').replace('{name}', s.name))) {
-                    // 添加爱心散开动画
-                    b.classList.add('heart-burst');
+            // 使用立即执行函数确保正确捕获index
+            (function(studentIndex) {
+                bubble.onclick = function() {
+                    const currentStudent = STATE.students[studentIndex];
+                    if (confirm(t('confirmMsg').replace('{name}', currentStudent.name))) {
+                        // 添加爱心散开动画
+                        bubble.classList.add('heart-burst');
 
-                    setTimeout(() => {
-                        s.history[day] = true;
-                        saveData();
-                        renderUI();
-                        renderTree();
-                    }, 600);
-                }
-            };
-            incompleteStudents.push(b);
+                        setTimeout(() => {
+                            STATE.students[studentIndex].history[day] = true;
+                            saveData();
+                            renderUI();
+                            renderTree();
+                        }, 600);
+                    }
+                };
+            })(index);
+
+            incompleteGrid.appendChild(bubble);
+            incompleteNum++;
         }
     });
 
-    // 渲染未完成学生
-    if (incompleteStudents.length > 0) {
-        incompleteStudents.forEach(bubble => incompleteGrid.appendChild(bubble));
-    }
-
-    // 渲染已完成学生
-    if (completedStudents.length > 0) {
-        completedStudents.forEach(bubble => completedGrid.appendChild(bubble));
-    }
-
     // 更新人数统计
-    if (incompleteCount) incompleteCount.textContent = `${incompleteStudents.length}人`;
-    if (completedCount) completedCount.textContent = `${completedStudents.length}人`;
+    if (incompleteCount) incompleteCount.textContent = `${incompleteNum}人`;
+    if (completedCount) completedCount.textContent = `${completedNum}人`;
 
     // 更新总进度条
     const progress = document.getElementById('daily-progress');
@@ -382,7 +379,6 @@ async function init() {
 
     syncTime().then(() => {
         startDynamicClock();
-        checkWeekCycle();
         renderUI();
         renderTree();
     });

@@ -21,10 +21,8 @@
         .screen { position: absolute; inset: 0; z-index: 10; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s; background: linear-gradient(135deg, var(--bg-deep), var(--bg-purple), var(--bg-blue)); }
         .hidden { display: none !important; }
         
-        /* 验证网关 */
         #gatekeeper-screen { position: fixed; inset: 0; z-index: 9999; background: #000; color: var(--primary-neon); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: sans-serif; }
         .spinner { width: 60px; height: 60px; border: 5px solid #222; border-top-color: var(--primary-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; }
-        .error-msg { color: #ff416c; animation: shake 0.5s ease-in-out; }
         
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
         .auth-card { padding: 40px; text-align: center; width: 400px; }
@@ -35,48 +33,39 @@
         .stage { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         textarea { width: 100%; height: 120px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; resize: none; }
         
-        /* 滑动条 */
         input[type="range"] { -webkit-appearance: none; width: 100%; background: rgba(255, 255, 255, 0.1); height: 10px; border-radius: 5px; outline: none; margin: 15px 0; cursor: pointer; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--primary-neon); border-radius: 50%; box-shadow: 0 0 10px var(--primary-neon); border: 2px solid white; transition: 0.2s; }
         
-        /* 魔法阵中心 */
         #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
         .magic-ring { position: absolute; border-radius: 50%; border: 4px solid transparent; }
         .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; }
         .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; }
         .core-orb { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon)); box-shadow: 0 0 60px var(--secondary-neon); display: flex; justify-content: center; align-items: center; z-index: 5; }
         
-        /* 召唤文字特效 */
         #orb-text { 
-            font-size: 1.5rem; text-align: center; color: #fff; font-weight: bold; 
-            text-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold), 0 0 30px #fff; 
+            font-size: 1.6rem; text-align: center; color: #fff; font-weight: bold; 
+            text-shadow: 0 0 15px var(--accent-gold), 0 0 30px var(--accent-gold), 0 0 45px #fff; 
             animation: textPulse 0.6s ease-in-out infinite; pointer-events: none; line-height: 1.2; 
         }
-        @keyframes textPulse { 0%, 100% { transform: scale(0.9); opacity: 0.8; filter: brightness(1); } 50% { transform: scale(1.1); opacity: 1; filter: brightness(1.5); } }
+        @keyframes textPulse { 0%, 100% { transform: scale(0.85); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 1; } }
         
         .magic-btn { background: linear-gradient(45deg, var(--secondary-neon), var(--accent-pink)); border: none; border-radius: 50px; color: white; padding: 15px 40px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px var(--secondary-neon); font-family: inherit; }
         .magic-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--accent-pink); }
         .btn-small { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; color: white; margin-right: 5px; }
         .btn-logout { margin-top: auto; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 10px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        /* 结果展示 */
         #result-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        .name-card { 
-            background: white; color: var(--bg-deep); padding: 20px 50px; border-radius: 15px; font-size: 3.5rem; font-weight: bold; margin: 15px; 
-            box-shadow: 0 0 40px var(--accent-gold); 
-            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-        }
+        .name-card { background: white; color: var(--bg-deep); padding: 20px 50px; border-radius: 15px; font-size: 3.5rem; font-weight: bold; margin: 15px; box-shadow: 0 0 40px var(--accent-gold); animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
         
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes popIn { 0% { transform: scale(0) rotate(-10deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         .fast-spin { animation-duration: 0.5s !important; }
         .global-back-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; background: none; border: none; cursor: pointer; z-index: 1000; }
         .fullscreen-btn { position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1000; transition: 0.3s; }
     </style>
 </head>
 <body>
-    <div id="gatekeeper-screen"><div class="spinner" id="gate-spinner"></div><div id="gate-text" style="font-size:1.5rem">✨ 正在开启魔法传送门...</div></div>
+    <div id="gatekeeper-screen"><div class="spinner"></div><div id="gate-text" style="font-size:1.5rem">✨ 正在开启魔法传送门...</div></div>
     <canvas id="canvas"></canvas>
     <button class="global-back-btn" onclick="window.location.href='/'">🔙</button>
     <button id="fullscreen-btn" class="fullscreen-btn"><svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
@@ -87,16 +76,17 @@
 
     <script>
     (function(){
+        // 核心状态
+        let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
+        let isRolling = false; 
+        let isWarpActive = false; // 修正作用域
         const LANG = localStorage.getItem('global-language') || 'zh-CN';
         const TEXTS = {
             'zh-CN': { authError: "咒语错误！", saveOk: "成功召唤 {n} 位学徒！", empty: "名单为空", noStu: "请导入名单", rolling: "✨召唤中✨" },
             'en': { authError: "Invalid spell!", saveOk: "Summoned {n} students!", empty: "Empty list", noStu: "Import first", rolling: "✨SUMMONING✨" }
         };
         const t = (k) => (TEXTS[LANG] || TEXTS['zh-CN'])[k] || k;
-        let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
-        let isRolling = false; let isLicenseValid = false;
 
-        const gate = document.getElementById('gatekeeper-screen');
         const forceExit = (msg) => {
             localStorage.setItem('magic_rc_auth', 'false');
             document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;">
@@ -107,20 +97,24 @@
         };
 
         const initApp = () => {
-            isLicenseValid = true; gate.style.display = 'none';
+            document.getElementById('gatekeeper-screen').style.display = 'none';
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').style.display = 'flex';
             
             document.getElementById('start-btn').onclick = () => {
-                if(!isLicenseValid) return forceExit("权限失效");
                 if(students.length === 0) return alert(t('noStu'));
                 if(isRolling) return;
-                isRolling = true; window.isWarp = true;
+                
+                isRolling = true;
+                isWarpActive = true; // 激活激光效果
+                
                 document.getElementById('start-btn').classList.add('hidden');
                 document.getElementById('orb-text').textContent = t('rolling');
                 document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
+                
                 setTimeout(() => {
-                    isRolling = false; window.isWarp = false;
+                    isRolling = false;
+                    isWarpActive = false;
                     document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
                     const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
                     let pool = [...students];
@@ -140,7 +134,7 @@
             document.getElementById('save-btn').onclick = () => {
                 const raw = document.getElementById('student-input').value;
                 const list = Array.from(new Set(raw.split('\n').map(x => x.trim()).filter(x => x.length > 0)));
-                if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); }
+                if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); } 
                 else alert(t('empty'));
             };
 
@@ -150,46 +144,52 @@
             renderList();
         };
 
-        const showAuth = () => { gate.style.display = 'none'; document.getElementById('auth-screen').classList.remove('hidden');
-            document.getElementById('verify-btn').onclick = async () => {
-                const code = document.getElementById('license-input').value.trim();
-                if (!code.toUpperCase().startsWith('DM')) return alert("需DM授权码");
-                try {
-                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-'+Math.random().toString(36).substr(2,5) }) });
-                    const data = await res.json();
-                    if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); initApp(); }
-                    else alert(data.message);
-                } catch(e) { alert("网络异常"); }
-            };
-        };
-
         const renderList = () => {
             const container = document.getElementById('student-preview');
             const uniqueStudents = Array.from(new Set(students));
-            container.innerHTML = uniqueStudents.map(s => `<span class="mini-tag">${s}</span>`).join('');
+            container.innerHTML = uniqueStudents.map(s => `<span style="background:rgba(255,255,255,0.1); padding:3px 10px; border-radius:10px; font-size:0.8rem; margin:2px; display:inline-block;">${s}</span>`).join('');
             document.getElementById('student-count').textContent = uniqueStudents.length;
             if (!document.getElementById('student-input').value) document.getElementById('student-input').value = uniqueStudents.join('\n');
         };
 
+        // --- Canvas 核心引擎 (修正激光逻辑) ---
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         let stars = []; window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }; window.onresize();
         for(let i=0; i<300; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, speed: 0.5 + Math.random()});
+        
         function animate() {
-            ctx.fillStyle = window.isWarp ? 'rgba(5, 5, 20, 0.3)' : '#0f0c29'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = isWarpActive ? 'rgba(5, 5, 20, 0.4)' : '#0f0c29'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             stars.forEach(s => {
-                s.y += window.isWarp ? 25 : s.speed; if(s.y > canvas.height) s.y = 0;
-                ctx.beginPath(); if(window.isWarp) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 20); ctx.strokeStyle = '#00f260'; ctx.lineWidth = 2; ctx.stroke(); } 
-                else { ctx.fillStyle = '#fff'; ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); }
+                s.y += isWarpActive ? 30 : s.speed; 
+                if(s.y > canvas.height) s.y = 0;
+                
+                if(isWarpActive) {
+                    ctx.beginPath();
+                    ctx.moveTo(s.x, s.y);
+                    ctx.lineTo(s.x, s.y + 25);
+                    ctx.strokeStyle = '#00f260';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.fillStyle = '#fff';
+                    ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
+                    ctx.fill();
+                }
             });
             requestAnimationFrame(animate);
         }
         animate();
 
+        // 全屏逻辑
         const fsBtn = document.getElementById('fullscreen-btn'); const fsIcon = document.getElementById('fs-icon');
         const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
         const exitFSPath = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
         fsBtn.onclick = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; } else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } } };
 
+        // 启动验证
         (async () => {
             const isAuth = localStorage.getItem('magic_rc_auth') === 'true';
             const savedCode = localStorage.getItem('magic_rc_license');
@@ -199,7 +199,20 @@
                     const data = await res.json();
                     if (data.success) initApp(); else forceExit(data.message);
                 } catch(e) { initApp(); }
-            } else { showAuth(); }
+            } else {
+                document.getElementById('gatekeeper-screen').style.display = 'none';
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('verify-btn').onclick = async () => {
+                    const code = document.getElementById('license-input').value.trim();
+                    if (!code.toUpperCase().startsWith('DM')) return alert("需DM授权码");
+                    try {
+                        const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-user' }) });
+                        const data = await res.json();
+                        if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); initApp(); } 
+                        else alert(data.message);
+                    } catch(e) { alert("网络波动"); }
+                };
+            }
         })();
     })();
     </script>

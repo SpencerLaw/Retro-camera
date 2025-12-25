@@ -30,7 +30,7 @@
         }
         .hidden { display: none !important; }
         
-        /* 强制覆盖全屏的验证层 */
+        /* 验证网关层 */
         #gatekeeper-screen { 
             position: fixed; inset: 0; z-index: 9999; 
             background: #000; color: var(--primary-neon); 
@@ -43,29 +43,51 @@
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
         .auth-card { padding: 40px; text-align: center; width: 400px; }
         input[type="text"] { width: 100%; padding: 15px; margin: 20px 0; border-radius: 8px; border: 2px solid white; background: white; color: #333; font-size: 1.5rem; text-align: center; }
+        
         #app-screen { display: none; flex-direction: row; padding: 20px; }
         .sidebar { width: 300px; padding: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 20; }
         .stage { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         textarea { width: 100%; height: 120px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; resize: none; }
-        .range-container { margin: 10px 0; width: 100%; }
-        input[type="range"] { -webkit-appearance: none; width: 100%; background: rgba(255, 255, 255, 0.1); height: 10px; border-radius: 5px; outline: none; margin: 15px 0; cursor: pointer; display: block; }
+        
+        /* 滑动条美化 */
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: rgba(255, 255, 255, 0.1); height: 10px; border-radius: 5px; outline: none; margin: 15px 0; cursor: pointer; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--primary-neon); border-radius: 50%; box-shadow: 0 0 10px var(--primary-neon); border: 2px solid white; transition: 0.2s; }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* 魔法阵动画 */
         #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
-        .magic-ring { position: absolute; border-radius: 50%; border: 3px solid transparent; }
+        .magic-ring { position: absolute; border-radius: 50%; border: 4px solid transparent; }
         .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; }
         .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; }
-        .core-orb { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon)); box-shadow: 0 0 60px var(--secondary-neon); display: flex; justify-content: center; align-items: center; z-index: 5; }
-        #orb-text { font-size: 1.4rem; text-align: center; color: #fff; font-weight: bold; text-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold); animation: textPulse 0.6s ease-in-out infinite; pointer-events: none; line-height: 1.2; }
-        @keyframes textPulse { 0%, 100% { transform: scale(0.9); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        .core-orb { 
+            width: 140px; height: 140px; border-radius: 50%; 
+            background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon)); 
+            box-shadow: 0 0 60px var(--secondary-neon); 
+            display: flex; justify-content: center; align-items: center; z-index: 5; 
+        }
+        
+        /* 召唤中文字效果 */
+        #orb-text { 
+            font-size: 1.4rem; text-align: center; color: #fff; font-weight: bold; 
+            text-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold); 
+            animation: textPulse 0.6s ease-in-out infinite; pointer-events: none; line-height: 1.2; 
+        }
+        @keyframes textPulse { 0%, 100% { transform: scale(0.9); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; filter: brightness(1.2); } }
+        
         .magic-btn { background: linear-gradient(45deg, var(--secondary-neon), var(--accent-pink)); border: none; border-radius: 50px; color: white; padding: 15px 40px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px var(--secondary-neon); font-family: inherit; }
         .magic-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--accent-pink); }
         .btn-small { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; color: white; margin-right: 5px; }
         .btn-logout { margin-top: auto; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 10px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-logout:hover { background: rgba(255, 65, 108, 0.2); border-color: #ff416c; color: #ff416c; }
+        
         #result-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         .name-card { background: white; color: var(--bg-deep); padding: 20px 50px; border-radius: 15px; font-size: 3.5rem; font-weight: bold; margin: 10px; box-shadow: 0 0 40px var(--accent-gold); animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards; }
+        .mini-tag { background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; margin: 2px; display: inline-block; }
+        
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .fast-spin { animation-duration: 0.5s !important; }
         .global-back-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; background: none; border: none; cursor: pointer; z-index: 1000; }
         .fullscreen-btn { position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1000; transition: 0.3s; }
     </style>
@@ -111,8 +133,14 @@
             <button id="logout-btn" class="btn-logout">🚪 退出点名魔法师</button>
         </aside>
         <main class="stage">
-            <div id="magic-circle-container"><div class="magic-ring ring-1"></div><div class="magic-ring ring-2"></div><div class="core-orb"><span id="orb-text"></span></div></div>
-            <div style="margin-top: 50px;"><button id="start-btn" class="magic-btn">⚡ 开始点名</button></div>
+            <div id="magic-circle-container">
+                <div class="magic-ring ring-1"></div>
+                <div class="magic-ring ring-2"></div>
+                <div class="core-orb"><span id="orb-text"></span></div>
+            </div>
+            <div style="margin-top: 50px;">
+                <button id="start-btn" class="magic-btn">⚡ 开始点名</button>
+            </div>
         </main>
         <div id="result-overlay" class="hidden">
             <h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉</h1>
@@ -129,7 +157,7 @@
         };
         const t = (key) => (TEXTS[LANG] || TEXTS['zh-CN'])[key] || key;
         let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
-        let isRolling = false;
+        let isRolling = false; let isLicenseValid = false;
 
         const gate = document.getElementById('gatekeeper-screen');
         const gateText = document.getElementById('gate-text');
@@ -138,19 +166,17 @@
         const forceExit = (msg) => {
             localStorage.setItem('magic_rc_auth', 'false');
             localStorage.removeItem('magic_rc_license');
-            
-            // 样式更新为错误状态
             gateSpinner.style.display = 'none';
             gateText.innerHTML = `<div class="error-msg">
                 <h1 style="font-size:3rem">⚠️ 授权失效</h1>
                 <p style="font-size:1.5rem; margin:20px 0;">${msg}</p>
                 <div style="font-size:1.2rem; color:#666">4秒后自动返回首页...</div>
             </div>`;
-            
             setTimeout(() => { window.location.replace('/'); }, 4000);
         }
 
         const showApp = () => {
+            isLicenseValid = true;
             gate.style.display = 'none';
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').style.display = 'flex';
@@ -180,7 +206,8 @@
             ctx.fillStyle = warp ? 'rgba(5, 5, 20, 0.3)' : '#0f0c29'; ctx.fillRect(0,0,canvas.width,canvas.height);
             stars.forEach(s => {
                 s.y += warp ? 25 : s.speed; if(s.y > canvas.height) s.y = 0;
-                ctx.beginPath(); if(warp) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 20); ctx.strokeStyle = '#00f260'; ctx.lineWidth = 2; ctx.stroke(); } 
+                ctx.beginPath(); 
+                if(warp) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 20); ctx.strokeStyle = '#00f260'; ctx.lineWidth = 2; ctx.stroke(); }
                 else { ctx.fillStyle = '#fff'; ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); }
             });
             requestAnimationFrame(animate);
@@ -194,7 +221,7 @@
             try {
                 const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-fixed' }) });
                 const data = await res.json();
-                if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); showApp(); } 
+                if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); showApp(); }
                 else { alert(data.message || t('authError')); }
             } catch(e) { alert("网络异常"); }
             this.disabled = false;
@@ -203,14 +230,11 @@
         document.getElementById('save-btn').onclick = () => {
             const raw = document.getElementById('student-input').value;
             const list = Array.from(new Set(raw.split('\n').map(x => x.trim()).filter(x => x.length > 0)));
-            if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); } 
+            if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); }
             else alert(t('empty'));
         };
 
-        document.getElementById('clear-btn').onclick = () => {
-            if(confirm("确定清空？")) { students = []; localStorage.setItem('magic_rc_students', '[]'); document.getElementById('student-input').value = ''; renderList(); }
-        };
-
+        document.getElementById('clear-btn').onclick = () => { if(confirm("确定清空？")) { students = []; localStorage.setItem('magic_rc_students', '[]'); document.getElementById('student-input').value = ''; renderList(); } };
         document.getElementById('logout-btn').onclick = () => { localStorage.clear(); window.location.href='/'; };
         document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
         document.getElementById('retry-btn').onclick = () => { document.getElementById('result-overlay').classList.add('hidden'); document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('orb-text').textContent = ""; };
@@ -221,6 +245,7 @@
         fsBtn.onclick = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; } else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } } };
 
         document.getElementById('start-btn').onclick = () => {
+            if(!isLicenseValid) return forceExit("权限验证未通过。");
             if(students.length === 0) return alert(t('noStu'));
             if(isRolling) return;
             isRolling = true; warp = true; document.getElementById('start-btn').classList.add('hidden');
@@ -237,7 +262,6 @@
             }, 3000);
         };
 
-        // --- 强制实时校验 ---
         (async () => {
             const isAuth = localStorage.getItem('magic_rc_auth') === 'true';
             const savedCode = localStorage.getItem('magic_rc_license');
@@ -245,12 +269,10 @@
                 try {
                     const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: savedCode, deviceId: 'rc-fixed' }) });
                     const data = await res.json();
-                    if (data.success) { showApp(); } 
+                    if (data.success) { showApp(); }
                     else { forceExit(data.message); }
-                } catch(e) { showApp(); } 
-            } else {
-                showAuth();
-            }
+                } catch(e) { showApp(); }
+            } else { showAuth(); }
         })();
     </script>
 </body>

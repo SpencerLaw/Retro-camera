@@ -76,17 +76,18 @@
 
     <script>
     (function(){
-        // 核心状态
+        // 核心状态置顶，确保所有函数可见
+        window.isWarpActive = false; 
         let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
-        let isRolling = false; 
-        let isWarpActive = false; // 修正作用域
+        let isRolling = false; let isLicenseValid = false;
         const LANG = localStorage.getItem('global-language') || 'zh-CN';
         const TEXTS = {
-            'zh-CN': { authError: "咒语错误！", saveOk: "成功召唤 {n} 位学徒！", empty: "名单为空", noStu: "请导入名单", rolling: "✨召唤中✨" },
+            'zh-CN': { authError: "咒语错误！", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请导入名单", rolling: "✨召唤中✨" },
             'en': { authError: "Invalid spell!", saveOk: "Summoned {n} students!", empty: "Empty list", noStu: "Import first", rolling: "✨SUMMONING✨" }
         };
         const t = (k) => (TEXTS[LANG] || TEXTS['zh-CN'])[k] || k;
 
+        const gate = document.getElementById('gatekeeper-screen');
         const forceExit = (msg) => {
             localStorage.setItem('magic_rc_auth', 'false');
             document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;">
@@ -97,24 +98,24 @@
         };
 
         const initApp = () => {
-            document.getElementById('gatekeeper-screen').style.display = 'none';
+            isLicenseValid = true; gate.style.display = 'none';
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').style.display = 'flex';
             
             document.getElementById('start-btn').onclick = () => {
+                if(!isLicenseValid) return forceExit("权限失效");
                 if(students.length === 0) return alert(t('noStu'));
                 if(isRolling) return;
                 
-                isRolling = true;
-                isWarpActive = true; // 激活激光效果
+                isRolling = true; 
+                window.isWarpActive = true; // 直接控制全局变量
                 
                 document.getElementById('start-btn').classList.add('hidden');
                 document.getElementById('orb-text').textContent = t('rolling');
                 document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
                 
                 setTimeout(() => {
-                    isRolling = false;
-                    isWarpActive = false;
+                    isRolling = false; window.isWarpActive = false;
                     document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
                     const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
                     let pool = [...students];
@@ -134,7 +135,7 @@
             document.getElementById('save-btn').onclick = () => {
                 const raw = document.getElementById('student-input').value;
                 const list = Array.from(new Set(raw.split('\n').map(x => x.trim()).filter(x => x.length > 0)));
-                if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); } 
+                if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); }
                 else alert(t('empty'));
             };
 
@@ -142,6 +143,19 @@
             document.getElementById('logout-btn').onclick = () => { localStorage.clear(); window.location.href='/'; };
             document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
             renderList();
+        };
+
+        const showAuth = () => { gate.style.display = 'none'; document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('verify-btn').onclick = async () => {
+                const code = document.getElementById('license-input').value.trim();
+                if (!code.toUpperCase().startsWith('DM')) return alert("需DM授权码");
+                try {
+                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-user' }) });
+                    const data = await res.json();
+                    if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); initApp(); }
+                    else alert(data.message);
+                } catch(e) { alert("网络异常"); }
+            };
         };
 
         const renderList = () => {
@@ -152,28 +166,30 @@
             if (!document.getElementById('student-input').value) document.getElementById('student-input').value = uniqueStudents.join('\n');
         };
 
-        // --- Canvas 核心引擎 (修正激光逻辑) ---
+        // --- Canvas 核心引擎 (极致激光逻辑) ---
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         let stars = []; window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }; window.onresize();
         for(let i=0; i<300; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, speed: 0.5 + Math.random()});
         
         function animate() {
-            ctx.fillStyle = isWarpActive ? 'rgba(5, 5, 20, 0.4)' : '#0f0c29'; 
+            // 激光激活时增加残影效果
+            ctx.fillStyle = window.isWarpActive ? 'rgba(5, 5, 20, 0.4)' : '#0f0c29'; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             stars.forEach(s => {
-                s.y += isWarpActive ? 30 : s.speed; 
+                s.y += window.isWarpActive ? 35 : s.speed; 
                 if(s.y > canvas.height) s.y = 0;
                 
-                if(isWarpActive) {
-                    ctx.beginPath();
+                ctx.beginPath();
+                if(window.isWarpActive) {
+                    // 激光线条模式
                     ctx.moveTo(s.x, s.y);
-                    ctx.lineTo(s.x, s.y + 25);
+                    ctx.lineTo(s.x, s.y + 30); // 线条长度 30px
                     ctx.strokeStyle = '#00f260';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 3; // 加粗激光
                     ctx.stroke();
                 } else {
-                    ctx.beginPath();
+                    // 普通星星模式
                     ctx.fillStyle = '#fff';
                     ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
                     ctx.fill();
@@ -183,13 +199,11 @@
         }
         animate();
 
-        // 全屏逻辑
         const fsBtn = document.getElementById('fullscreen-btn'); const fsIcon = document.getElementById('fs-icon');
         const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
         const exitFSPath = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
         fsBtn.onclick = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; } else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } } };
 
-        // 启动验证
         (async () => {
             const isAuth = localStorage.getItem('magic_rc_auth') === 'true';
             const savedCode = localStorage.getItem('magic_rc_license');
@@ -199,20 +213,7 @@
                     const data = await res.json();
                     if (data.success) initApp(); else forceExit(data.message);
                 } catch(e) { initApp(); }
-            } else {
-                document.getElementById('gatekeeper-screen').style.display = 'none';
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('verify-btn').onclick = async () => {
-                    const code = document.getElementById('license-input').value.trim();
-                    if (!code.toUpperCase().startsWith('DM')) return alert("需DM授权码");
-                    try {
-                        const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-user' }) });
-                        const data = await res.json();
-                        if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); initApp(); } 
-                        else alert(data.message);
-                    } catch(e) { alert("网络波动"); }
-                };
-            }
+            } else { showAuth(); }
         })();
     })();
     </script>

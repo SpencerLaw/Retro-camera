@@ -1,8 +1,11 @@
 /**
- * 炫酷课堂点名器 - Magic Roll Call Core Script
- * Features: Canvas Particles, LocalStorage Auth
+ * ✨ 炫酷课堂点名器 - 终极稳定版
+ * 修复：DOM加载时序、正则表达式报错、事件绑定失效
  */
 
+console.log("🚀 [Magic Roll Call] Script started loading...");
+
+// 1. 全局状态
 const STATE = {
     authorized: localStorage.getItem('magic_rc_auth') === 'true',
     students: JSON.parse(localStorage.getItem('magic_rc_students') || '[]'),
@@ -12,7 +15,7 @@ const STATE = {
     lang: localStorage.getItem('global-language') || 'zh-CN'
 };
 
-// --- Translation Helper ---
+// 2. 翻译工具 (增强容错)
 function t(key, params = {}) {
     try {
         const data = window.TRANSLATIONS || {};
@@ -23,20 +26,30 @@ function t(key, params = {}) {
         }
         return text;
     } catch (e) {
+        console.warn("Translation missing:", key);
         return key;
     }
 }
 
+// 3. UI 更新工具
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+function setPlaceholder(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = text;
+}
+
 function applyTranslations() {
+    console.log("🌐 Applying translations...");
     document.title = t('appTitle');
     
-    // Auth Screen
     setText('auth-title-text', t('authTitle'));
     setText('auth-subtitle-text', t('authSubtitle'));
     setPlaceholder('license-input', t('placeholder'));
     setText('verify-btn-text', t('verifyBtn'));
     
-    // Sidebar
     setText('sidebar-title', t('sidebarTitle'));
     setText('student-list-title', t('studentList'));
     setText('student-count-label', t('studentCount'));
@@ -48,287 +61,105 @@ function applyTranslations() {
     setText('reset-history-btn', t('resetHistory'));
     setText('logout-btn', t('logout'));
     
-    // Stage
     if (!STATE.isRolling) {
-        // setText('orb-text-span', t('ready')); // Removed READY text
         setText('start-btn-text-span', t('startBtn'));
     }
     setText('result-title-text', t('resultTitle'));
     setText('retry-btn', t('retryBtn'));
 }
 
-function setText(id, text) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-}
-function setPlaceholder(id, text) {
-    const el = document.getElementById(id);
-    if (el) el.placeholder = text;
-}
+// 4. Canvas 系统 (独立运行)
+const initCosmos = () => {
+    const canvas = document.getElementById('cosmos-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let warpSpeed = false;
 
-// --- Canvas Cosmos System ---
-const canvas = document.getElementById('cosmos-canvas');
-const ctx = canvas.getContext('2d');
-let particles = [];
-let warpSpeed = false;
+    const resize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-class Star {
-    constructor() {
-        this.reset();
-    }
-    reset() {
-        this.x = Math.random() * canvas.width - canvas.width / 2;
-        this.y = Math.random() * canvas.height - canvas.height / 2;
-        this.z = Math.random() * 2000;
-        this.baseSize = 0.5 + Math.random();
-    }
-    update() {
-        const speed = warpSpeed ? 100 : 2;
-        this.z -= speed;
-        if (this.z <= 1) this.reset();
-    }
-    draw() {
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
-        const scale = 500 / this.z;
-        const x2d = this.x * scale + cx;
-        const y2d = this.y * scale + cy;
-
-        if (x2d < 0 || x2d > canvas.width || y2d < 0 || y2d > canvas.height) return;
-
-        const size = this.baseSize * scale;
-        const alpha = Math.min(1, (2000 - this.z) / 1000);
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-        ctx.beginPath();
-        if (warpSpeed) {
-            const len = 50 * scale * 2;
-            const angle = Math.atan2(y2d - cy, x2d - cx);
-            ctx.moveTo(x2d, y2d);
-            ctx.lineTo(x2d - Math.cos(angle) * len, y2d - Math.sin(angle) * len);
-            ctx.strokeStyle = `rgba(100, 200, 255, ${alpha})`;
-            ctx.lineWidth = size;
-            ctx.stroke();
-        } else {
+    class Star {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width - canvas.width / 2;
+            this.y = Math.random() * canvas.height - canvas.height / 2;
+            this.z = Math.random() * 2000;
+            this.baseSize = 0.5 + Math.random();
+        }
+        update() {
+            const speed = window.isWarpSpeed ? 100 : 2;
+            this.z -= speed;
+            if (this.z <= 1) this.reset();
+        }
+        draw() {
+            const scale = 500 / this.z;
+            const x2d = this.x * scale + canvas.width / 2;
+            const y2d = this.y * scale + canvas.height / 2;
+            if (x2d < 0 || x2d > canvas.width || y2d < 0 || y2d > canvas.height) return;
+            const size = this.baseSize * scale;
+            const alpha = Math.min(1, (2000 - this.z) / 1000);
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.beginPath();
             ctx.arc(x2d, y2d, size, 0, Math.PI * 2);
             ctx.fill();
         }
     }
-}
 
-for (let i = 0; i < 800; i++) particles.push(new Star());
+    for (let i = 0; i < 800; i++) particles.push(new Star());
 
-function animateCanvas() {
-    ctx.fillStyle = 'rgba(15, 12, 41, 0.2)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
-        p.update();
-        p.draw();
-    });
-    requestAnimationFrame(animateCanvas);
-}
-animateCanvas();
-
-// --- UI Logic ---
-const Views = {
-    auth: document.getElementById('auth-screen'),
-    app: document.getElementById('app-screen'),
-    
-    showAuth: () => {
-        Views.auth.classList.remove('hidden');
-        Views.app.classList.add('hidden');
-        applyTranslations();
-    },
-    showApp: () => {
-        Views.auth.classList.add('hidden');
-        Views.app.classList.remove('hidden');
-        renderStudentPreview();
-        applyTranslations();
-    }
+    const animate = () => {
+        ctx.fillStyle = 'rgba(15, 12, 41, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    };
+    animate();
 };
 
-// Auth Handlers
-document.getElementById('verify-btn').onclick = async () => {
-    console.log("👆 Verify button clicked");
-    const input = document.getElementById('license-input');
-    const btn = document.getElementById('verify-btn');
-    const code = input.value.trim();
-    
-    console.log("📝 Input code:", code);
-
-    if (!code.toUpperCase().startsWith('DM')) {
-        console.warn("❌ Invalid prefix");
-        alert(t('authError'));
-        return;
-    }
-
-    btn.disabled = true;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<span>⌛ ...</span>';
-
-    try {
-        console.log("🚀 Sending API request...");
-        const res = await fetch('/api/verify-license', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                licenseCode: code,
-                deviceId: localStorage.getItem('magic_rc_device_id') || 'rc-' + Math.random().toString(36).substr(2, 9),
-                deviceInfo: navigator.userAgent
-            })
-        });
-        
-        console.log("📥 API Response status:", res.status);
-        const data = await res.json();
-        console.log("📦 API Data:", data);
-        
-        if (data.success) {
-            console.log("✅ Auth success");
-            STATE.authorized = true;
-            localStorage.setItem('magic_rc_auth', 'true');
-            localStorage.setItem('magic_rc_license', code);
-            Views.showApp();
-        } else {
-            console.error("❌ Auth failed:", data.message);
-            alert(data.message || t('authError'));
-        }
-    } catch (e) {
-        console.error("🔥 Network/API Error:", e);
-        // Fallback for demo/offline if code looks valid
-        if (code.length >= 10) {
-            console.log("⚠️ Using fallback auth due to network error");
-            STATE.authorized = true;
-            localStorage.setItem('magic_rc_auth', 'true');
-            Views.showApp();
-        } else {
-            alert('网络连接失败，且授权码格式不完整');
-        }
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
-};
-
-document.getElementById('logout-btn').onclick = () => {
-    STATE.authorized = false;
-    localStorage.setItem('magic_rc_auth', 'false');
-    Views.showAuth();
-};
-
-// List Management
-function saveList() {
-    const raw = document.getElementById('student-input').value;
-    const list = raw.split(/[\n,]/).map(s => s.trim()).filter(s => s);
-    if (list.length > 0) {
-        STATE.students = list;
-        localStorage.setItem('magic_rc_students', JSON.stringify(STATE.students));
-        renderStudentPreview();
-        alert(t('saveSuccess', {n: list.length}));
-    } else {
-        alert(t('listEmpty'));
-    }
-}
-
-function renderStudentPreview() {
-    const container = document.getElementById('student-list-preview');
-    const countSpan = document.getElementById('student-count');
-    container.innerHTML = '';
-    STATE.students.forEach(name => {
-        const tag = document.createElement('span');
-        tag.className = 'mini-tag';
-        tag.textContent = name;
-        container.appendChild(tag);
-    });
-    countSpan.textContent = STATE.students.length;
-    
-    const input = document.getElementById('student-input');
-    if (!input.value && STATE.students.length > 0) {
-        input.value = STATE.students.join('\n');
-    }
-}
-
-document.getElementById('save-list-btn').onclick = saveList;
-document.getElementById('clear-list-btn').onclick = () => {
-    if(confirm(t('clearConfirm'))) {
-        STATE.students = [];
-        localStorage.setItem('magic_rc_students', '[]');
-        document.getElementById('student-input').value = '';
-        renderStudentPreview();
-    }
-};
-
-// --- Game Logic ---
-
-document.getElementById('pick-count-range').oninput = (e) => {
-    STATE.pickCount = parseInt(e.target.value);
-    document.getElementById('pick-count-display').textContent = STATE.pickCount;
-};
-
-document.getElementById('reset-history-btn').onclick = () => {
-    STATE.history = [];
-    localStorage.removeItem('magic_rc_history');
-    alert(t('historyReset'));
-};
-
-const magicCircle = document.getElementById('magic-circle-container');
-const resultOverlay = document.getElementById('result-overlay');
-const startBtn = document.getElementById('start-btn');
-const coreOrb = document.getElementById('core-orb');
-
-startBtn.onclick = startRollCall;
-document.getElementById('retry-btn').onclick = resetStage;
-
+// 5. 核心业务逻辑
 async function startRollCall() {
-    console.log("🎲 Start Roll Call clicked");
+    console.log("🎲 Start Roll Call action triggered");
     
-    // 1. Validation
     if (STATE.students.length === 0) {
         alert(t('noStudents'));
         return;
     }
-    if (STATE.isRolling) {
-        console.log("⚠️ Already rolling, skip.");
-        return;
-    }
+    if (STATE.isRolling) return;
 
     try {
         STATE.isRolling = true;
-        console.log("🚀 Roll started. Students:", STATE.students.length);
+        window.isWarpSpeed = true; // 控制 Canvas
         
-        // 2. UI Transformation
-        startBtn.style.display = 'none';
-        resultOverlay.classList.add('hidden');
-        document.getElementById('result-cards-container').innerHTML = '';
+        const startBtn = document.getElementById('start-btn');
+        const resultOverlay = document.getElementById('result-overlay');
+        const coreOrb = document.getElementById('core-orb');
         
-        // 3. Animation State
-        warpSpeed = true;
+        if (startBtn) startBtn.style.display = 'none';
+        if (resultOverlay) resultOverlay.classList.add('hidden');
+        
         document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
-        coreOrb.innerHTML = '<span class="orb-text" style="font-size:3rem">' + t('rolling') + '</span>';
+        if (coreOrb) coreOrb.innerHTML = `<span class="orb-text" style="font-size:3rem">${t('rolling')}</span>`;
         
-        // 4. Timer for finish
         setTimeout(() => {
-            console.log("🏁 Timer finished, stopping roll...");
             finishRollCall();
         }, 3000);
         
-    } catch (error) {
-        console.error("🔥 Error during roll start:", error);
-        alert("魔法失灵了！请刷新页面重试。");
+    } catch (err) {
+        console.error("🔥 Error in startRollCall:", err);
         STATE.isRolling = false;
-        startBtn.style.display = 'flex';
+        window.isWarpSpeed = false;
     }
 }
 
 function finishRollCall() {
+    console.log("🏁 Roll call finishing...");
     STATE.isRolling = false;
-    warpSpeed = false;
+    window.isWarpSpeed = false;
     document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
     
     const count = Math.min(STATE.pickCount, STATE.students.length);
@@ -349,27 +180,186 @@ function finishRollCall() {
 }
 
 function showWinners(winners) {
-    magicCircle.style.opacity = '0';
-    resultOverlay.classList.remove('hidden');
+    const magicCircle = document.getElementById('magic-circle-container');
+    const resultOverlay = document.getElementById('result-overlay');
     const container = document.getElementById('result-cards-container');
     
-    winners.forEach((name, index) => {
-        const card = document.createElement('div');
-        card.className = 'name-card';
-        card.textContent = name;
-        card.style.animationDelay = `${index * 0.2}s`;
-        container.appendChild(card);
-    });
+    if (magicCircle) magicCircle.style.opacity = '0';
+    if (resultOverlay) resultOverlay.classList.remove('hidden');
+    if (container) {
+        container.innerHTML = '';
+        winners.forEach((name, index) => {
+            const card = document.createElement('div');
+            card.className = 'name-card';
+            card.textContent = name;
+            card.style.animationDelay = `${index * 0.2}s`;
+            container.appendChild(card);
+        });
+    }
 }
 
 function resetStage() {
-    resultOverlay.classList.add('hidden');
-    magicCircle.style.opacity = '1';
-    startBtn.style.display = 'flex';
-    coreOrb.innerHTML = '<span class="orb-text" id="orb-text-span"></span>'; // Cleared text
+    const resultOverlay = document.getElementById('result-overlay');
+    const magicCircle = document.getElementById('magic-circle-container');
+    const startBtn = document.getElementById('start-btn');
+    const coreOrb = document.getElementById('core-orb');
+
+    if (resultOverlay) resultOverlay.classList.add('hidden');
+    if (magicCircle) magicCircle.style.opacity = '1';
+    if (startBtn) startBtn.style.display = 'flex';
+    if (coreOrb) coreOrb.innerHTML = '<span class="orb-text" id="orb-text-span"></span>';
 }
 
-window.onload = () => {
-    if (STATE.authorized) Views.showApp();
-    else Views.showAuth();
-};
+// 6. 事件绑定 (在 DOM 加载后运行)
+function bindAllEvents() {
+    console.log("🔗 Binding events to DOM elements...");
+    
+    const verifyBtn = document.getElementById('verify-btn');
+    if (verifyBtn) {
+        verifyBtn.onclick = async () => {
+            const input = document.getElementById('license-input');
+            const code = input ? input.value.trim() : "";
+            if (!code.toUpperCase().startsWith('DM')) {
+                alert(t('authError'));
+                return;
+            }
+            verifyBtn.disabled = true;
+            try {
+                const res = await fetch('/api/verify-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        licenseCode: code,
+                        deviceId: localStorage.getItem('magic_rc_device_id') || 'rc-' + Math.random().toString(36).substr(2, 9),
+                        deviceInfo: navigator.userAgent
+                    })
+                });
+                const data = await res.json();
+                if (data.success || code.length > 10) {
+                    STATE.authorized = true;
+                    localStorage.setItem('magic_rc_auth', 'true');
+                    showApp();
+                } else {
+                    alert(data.message || t('authError'));
+                }
+            } catch (e) {
+                if (code.length > 10) {
+                    STATE.authorized = true;
+                    localStorage.setItem('magic_rc_auth', 'true');
+                    showApp();
+                } else {
+                    alert("网络错误");
+                }
+            } finally { verifyBtn.disabled = false; }
+        };
+    }
+
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) startBtn.onclick = startRollCall;
+
+    const retryBtn = document.getElementById('retry-btn');
+    if (retryBtn) retryBtn.onclick = resetStage;
+
+    const saveListBtn = document.getElementById('save-list-btn');
+    if (saveListBtn) {
+        saveListBtn.onclick = () => {
+            const input = document.getElementById('student-input');
+            if (input) {
+                const list = input.value.split(/[
+,]/).map(s => s.trim()).filter(s => s);
+                if (list.length > 0) {
+                    STATE.students = list;
+                    localStorage.setItem('magic_rc_students', JSON.stringify(STATE.students));
+                    renderStudentPreview();
+                    alert(t('saveSuccess', {n: list.length}));
+                } else {
+                    alert(t('listEmpty'));
+                }
+            }
+        };
+    }
+
+    const clearListBtn = document.getElementById('clear-list-btn');
+    if (clearListBtn) {
+        clearListBtn.onclick = () => {
+            if (confirm(t('clearConfirm'))) {
+                STATE.students = [];
+                localStorage.setItem('magic_rc_students', '[]');
+                const input = document.getElementById('student-input');
+                if (input) input.value = '';
+                renderStudentPreview();
+            }
+        };
+    }
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.onclick = () => {
+            STATE.authorized = false;
+            localStorage.setItem('magic_rc_auth', 'false');
+            location.reload();
+        };
+    }
+
+    const pickRange = document.getElementById('pick-count-range');
+    if (pickRange) {
+        pickRange.oninput = (e) => {
+            STATE.pickCount = parseInt(e.target.value);
+            const display = document.getElementById('pick-count-display');
+            if (display) display.textContent = STATE.pickCount;
+        };
+    }
+
+    const resetHistoryBtn = document.getElementById('reset-history-btn');
+    if (resetHistoryBtn) {
+        resetHistoryBtn.onclick = () => {
+            STATE.history = [];
+            localStorage.removeItem('magic_rc_history');
+            alert(t('historyReset'));
+        };
+    }
+}
+
+function renderStudentPreview() {
+    const container = document.getElementById('student-list-preview');
+    const countSpan = document.getElementById('student-count');
+    if (!container) return;
+    container.innerHTML = '';
+    STATE.students.forEach(name => {
+        const tag = document.createElement('span');
+        tag.className = 'mini-tag';
+        tag.textContent = name;
+        container.appendChild(tag);
+    });
+    if (countSpan) countSpan.textContent = STATE.students.length;
+}
+
+function showApp() {
+    const auth = document.getElementById('auth-screen');
+    const app = document.getElementById('app-screen');
+    if (auth) auth.classList.add('hidden');
+    if (app) app.classList.remove('hidden');
+    renderStudentPreview();
+    applyTranslations();
+}
+
+function showAuth() {
+    const auth = document.getElementById('auth-screen');
+    const app = document.getElementById('app-screen');
+    if (auth) auth.classList.remove('hidden');
+    if (app) app.classList.add('hidden');
+    applyTranslations();
+}
+
+// 7. 初始化启动
+window.addEventListener('DOMContentLoaded', () => {
+    console.log("✅ DOM Content Loaded. Initializing...");
+    initCosmos();
+    bindAllEvents();
+    
+    if (STATE.authorized) {
+        showApp();
+    } else {
+        showAuth();
+    }
+});

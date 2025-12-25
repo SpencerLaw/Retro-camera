@@ -23,8 +23,8 @@ body {
     color: var(--text-white);
     height: 100vh;
     overflow: hidden;
-    user-select: none; /* 移动到这里 */
-    -webkit-user-select: none;
+    /* user-select: none;  <-- REMOVED: This was causing input focus issues */
+    /* -webkit-user-select: none; */
 }
 
 input, textarea {

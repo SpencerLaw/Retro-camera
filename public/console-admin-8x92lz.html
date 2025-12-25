@@ -428,7 +428,7 @@
       `}).join('');
 
       return `
-        <div class="monitor-item expanded" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+        <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
           <div class="item-summary" onclick="toggleItem(${index})">
             <div class="toggle-btn">▶</div>
             <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">

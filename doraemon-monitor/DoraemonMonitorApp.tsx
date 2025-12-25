@@ -122,30 +122,70 @@ const DoraemonMonitorApp: React.FC = () => {
     return `${m}:${s}`;
   };
 
+  // --- 高对比度适配版参考条 ---
   const NoiseLevelReference = () => {
     const levels = [
       { min: 0, max: 20, label: "0–20 dB 极度安静" },
       { min: 20, max: 40, label: "20–40 dB 非常安静" },
-      { min: 40, max: 60, label: "40–60 dB 正常背景音" },
+      { min: 40, max: 60, label: "40–60 dB 正常背景" },
       { min: 60, max: 80, label: "60–80 dB 中等响度" },
       { min: 80, max: 100, label: "80–100 dB 响亮" },
-      { min: 100, max: 120, label: "100–120 dB 非常响亮" },
+      { min: 100, max: 120, label: "100–120 dB 极其嘈杂" },
     ];
     const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
+    
+    // 动态对比色逻辑
+    const panelBg = isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)';
+    const textColor = isDarkMode ? '#94a3b8' : '#475569';
+    const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
+    const borderColor = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)';
+
     return (
-      <div className="db-reference-panel" style={{ width: '320px', padding: '30px', background: 'rgba(255,255,255,0.03)', borderRadius: '25px', border: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '30px', textAlign: 'center', opacity: 0.8 }}>分贝等级参考</div>
+      <div className="db-reference-panel" style={{ 
+        width: '320px', padding: '30px', 
+        background: panelBg, 
+        borderRadius: '25px', 
+        border: `1px solid ${borderColor}`,
+        transition: 'all 0.3s'
+      }}>
+        <div className="reference-title" style={{ 
+          fontSize: '1.2rem', marginBottom: '30px', textAlign: 'center', 
+          color: activeTextColor, opacity: 0.8 
+        }}>分贝等级参考</div>
+        
         <div className="vertical-meter-container" style={{ height: '420px', position: 'relative', display: 'flex' }}>
           <div style={{ position: 'relative', width: '60px' }}>
-            {/* 核心修正：翻转渐变颜色，底部绿色，顶部红色 */}
-            <div style={{ width: '12px', height: '100%', margin: '0 auto', borderRadius: '10px', background: 'linear-gradient(to top, #00f260 0%, #ffff00 30%, #ff9900 60%, #ff416c 100%)', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }} />
-            <div style={{ position: 'absolute', bottom: `${pointerPos}%`, left: '50%', transform: 'translate(-50%, 50%)', zIndex: 100, width: '28px', height: '28px', background: '#fff', border: '4px solid #00d4ff', boxShadow: '0 0 20px #00d4ff', borderRadius: '50%', transition: 'bottom 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid #00d4ff' }} />
+            <div style={{ 
+              width: '12px', height: '100%', margin: '0 auto', borderRadius: '10px', 
+              background: 'linear-gradient(to top, #00f260 0%, #ffff00 30%, #ff9900 60%, #ff416c 100%)', 
+              boxShadow: isDarkMode ? 'inset 0 0 10px rgba(0,0,0,0.5)' : '0 2px 5px rgba(0,0,0,0.1)'
+            }} />
+            
+            {/* 指示球增加深色边框以适配白天模式 */}
+            <div style={{ 
+              position: 'absolute', bottom: `${pointerPos}%`, left: '50%', transform: 'translate(-50%, 50%)', 
+              zIndex: 100, width: '28px', height: '28px', background: '#fff', 
+              border: `3px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}`, 
+              boxShadow: isDarkMode ? '0 0 20px #00d4ff' : '0 4px 10px rgba(0,0,0,0.2)', 
+              borderRadius: '50%', transition: 'bottom 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center' 
+            }}>
+              <div style={{ 
+                position: 'absolute', right: '-12px', width: 0, height: 0, 
+                borderTop: '6px solid transparent', borderBottom: '6px solid transparent', 
+                borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` 
+              }} />
             </div>
           </div>
+
           <div className="level-nodes" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingLeft: '20px', paddingBottom: '10px' }}>
             {levels.reverse().map((l, i) => (
-              <div key={i} style={{ color: currentDb >= l.min && currentDb < l.max ? '#fff' : '#94a3b8', opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5, fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal', fontSize: '0.95rem' }}>{l.label}</div>
+              <div key={i} style={{ 
+                color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor, 
+                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.6, 
+                fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal', 
+                fontSize: '0.95rem', transition: 'all 0.3s'
+              }}>{l.label}</div>
             ))}
           </div>
         </div>
@@ -157,7 +197,7 @@ const DoraemonMonitorApp: React.FC = () => {
     const BAR_COUNT = 80;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     return (
-      <div className="visualizer-container" style={{ opacity: 0.4 }}>
+      <div className="visualizer-container" style={{ opacity: isDarkMode ? 0.4 : 0.2 }}>
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
           const dist = Math.abs(i - BAR_COUNT / 2);
           const norm = 1 - (dist / (BAR_COUNT / 2));
@@ -195,10 +235,10 @@ const DoraemonMonitorApp: React.FC = () => {
         <Visualizer /><NoiseLevelReference />
         <div className="center-display" style={{ flex: 1 }}><div className="doraemon-wrapper" style={{ width: '350px', height: '350px', transform: `scale(${1 + (currentDb - 40) / 150})`, transition: 'transform 0.1s' }}><DoraemonSVG /></div><div className="db-display" style={{ marginTop: '30px' }}><span className="db-number" style={{ fontSize: '8rem' }}>{Math.round(currentDb)}</span><span className="db-unit" style={{ fontSize: '2rem' }}>dB</span></div></div>
         <div className="right-panel" style={{ width: '320px', gap: '25px' }}>
-          <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>🤫 安静时长</span><strong style={{ fontSize: '3rem', color: '#00f260', marginTop: '10px' }}>{formatTime(quietTime)}</strong></div>
-          <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⏱️ 监测总计</span><strong style={{ fontSize: '3rem', color: '#0575e6', marginTop: '10px' }}>{formatTime(totalTime)}</strong></div>
-          <div className={`stat-box ${warnCount > 0 ? 'warning' : ''}`} style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⚠️ 警告次数</span><strong style={{ fontSize: '3rem', color: '#ff416c', marginTop: '10px' }}>{warnCount}</strong></div>
-          <div className="controls-box" style={{ padding: '25px', marginTop: '10px' }}><div className="slider-header" style={{ marginBottom: '15px' }}><span style={{ fontSize: '1.2rem' }}>分贝阈值</span><span style={{ fontSize: '1.5rem', color: '#00f260', fontWeight: 'bold' }}>{limit} dB</span></div><input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" style={{ height: '12px' }} /><button className="reset-btn" onClick={() => setWarnCount(0)} style={{ marginTop: '20px', padding: '12px', fontSize: '1rem' }}>重置计数</button></div>
+          <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>🤫 安静时长</span><strong style={{ fontSize: '3rem', color: isDarkMode ? '#00f260' : '#059669', marginTop: '10px' }}>{formatTime(quietTime)}</strong></div>
+          <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⏱️ 监测总计</span><strong style={{ fontSize: '3rem', color: isDarkMode ? '#0575e6' : '#2563eb', marginTop: '10px' }}>{formatTime(totalTime)}</strong></div>
+          <div className={`stat-box ${warnCount > 0 ? 'warning' : ''}`} style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⚠️ 警告次数</span><strong style={{ fontSize: '3rem', color: '#dc2626', marginTop: '10px' }}>{warnCount}</strong></div>
+          <div className="controls-box" style={{ padding: '25px', marginTop: '10px' }}><div className="slider-header" style={{ marginBottom: '15px' }}><span style={{ fontSize: '1.2rem', color: isDarkMode ? '#fff' : '#1e293b' }}>分贝阈值</span><span style={{ fontSize: '1.5rem', color: isDarkMode ? '#00f260' : '#059669', fontWeight: 'bold' }}>{limit} dB</span></div><input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" style={{ height: '12px' }} /><button className="reset-btn" onClick={() => setWarnCount(0)} style={{ marginTop: '20px', padding: '12px', fontSize: '1rem' }}>重置计数</button></div>
         </div>
       </main>
     </div>

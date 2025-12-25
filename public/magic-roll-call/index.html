@@ -80,6 +80,30 @@
             box-shadow: 0 0 30px var(--accent-gold); animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
         }
         .mini-tag { background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; margin: 2px; display: inline-block; }
+        
+        .btn-logout {
+            margin-top: auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-logout:hover {
+            background: rgba(255, 65, 108, 0.2);
+            border-color: #ff416c;
+            color: #ff416c;
+            box-shadow: 0 0 15px rgba(255, 65, 108, 0.3);
+        }
+
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .fast-spin { animation-duration: 0.5s !important; }
@@ -116,7 +140,7 @@
                 <input type="range" id="pick-range" min="1" max="10" value="1" style="width:100%">
             </div>
             <div id="student-preview" style="overflow-y:auto; flex:1; margin-top:10px"></div>
-            <button id="logout-btn" style="background:none; border:none; color:white; cursor:pointer; text-decoration:underline">退出</button>
+            <button id="logout-btn" class="btn-logout">🚪 退出点名魔法师</button>
         </aside>
 
         <main class="stage">

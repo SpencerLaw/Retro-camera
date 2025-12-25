@@ -413,10 +413,11 @@ async function validateLicenseOnLoad() {
         });
         const data = await res.json();
         if (!data.success) {
-            alert(data.message || "授权已失效");
+            alert(`⚠️ 授权失效: ${data.message || "请重新购买"}`);
             STATE.isVerified = false;
             saveData();
-            window.location.reload();
+            // 彻底踢出到主页
+            window.location.href = '/';
         }
     } catch (e) {
         // 网络错误时允许继续使用离线缓存，直到下次成功连接

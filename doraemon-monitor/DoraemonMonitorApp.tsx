@@ -72,10 +72,11 @@ const DoraemonMonitorApp: React.FC = () => {
             console.log('License heartbeat success');
           } else {
             console.warn('License heartbeat failed:', res.message);
-            alert(`⚠️ 授权失效: ${res.message}`);
+            alert(`⚠️ 授权失效: ${res.message}\n\n请联系管理员重新购买。`);
             clearLicense();
             setIsLicensed(false);
-            window.location.reload();
+            // 强行跳转回首页，物理断开连接
+            window.location.href = '/';
           }
         });
       }

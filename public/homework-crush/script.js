@@ -379,10 +379,13 @@ async function init() {
     const isAuth = STATE.isVerified && STATE.licenseCode;
 
     if (isAuth) {
-        showApp();
         // 商业加固：静默联网校验
         validateLicenseOnLoad();
     } else {
+        // 移除加载层，显示登录页
+        const gate = document.getElementById('gatekeeper-screen');
+        if (gate) gate.style.display = 'none';
+        
         const auth = document.getElementById('auth-screen');
         if (auth) {
             auth.classList.add('active');
@@ -401,6 +404,10 @@ async function init() {
 
 async function validateLicenseOnLoad() {
     console.log("🔐 Re-verifying license...");
+    const gate = document.getElementById('gatekeeper-screen');
+    const gateText = document.getElementById('gate-text');
+    const gateLoader = document.getElementById('gate-loader');
+
     try {
         const res = await fetch('/api/verify-license', {
             method: 'POST',
@@ -412,16 +419,27 @@ async function validateLicenseOnLoad() {
             })
         });
         const data = await res.json();
-        if (!data.success) {
-            alert(`⚠️ 授权失效: ${data.message || "请重新购买"}`);
+        if (data.success) {
+            if (gate) gate.style.display = 'none';
+            showApp();
+        } else {
+            // 失败熔断
+            if (gateLoader) gateLoader.style.display = 'none';
+            if (gateText) {
+                gateText.innerHTML = `<div class="error-msg">
+                    <h1 style="font-size:3rem">⚠️ 授权失效</h1>
+                    <p style="font-size:1.5rem; margin:20px 0;">${data.message}</p>
+                    <div style="font-size:1.2rem; color:#666">4秒后自动返回首页...</div>
+                </div>`;
+            }
             STATE.isVerified = false;
             saveData();
-            // 彻底踢出到主页
-            window.location.href = '/';
+            setTimeout(() => { window.location.replace('/'); }, 4000);
         }
     } catch (e) {
-        // 网络错误时允许继续使用离线缓存，直到下次成功连接
-        console.warn("License check skipped due to network error");
+        // 网络错误时允许继续演示
+        if (gate) gate.style.display = 'none';
+        showApp();
     }
 }
 

@@ -11,6 +11,16 @@
 </head>
 <body>
 
+    <!-- 0. 验证网关层 -->
+    <div id="gatekeeper-screen" style="position:fixed; inset:0; z-index:9999; background:#000; color:#84fab0; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; font-family:sans-serif;">
+        <div class="gate-loader" id="gate-loader" style="width:60px; height:60px; border:5px solid #222; border-top-color:#84fab0; border-radius:50%; animation:gate-spin 1s linear infinite; margin-bottom:25px;"></div>
+        <div id="gate-text" style="font-size:1.5rem">正在开启作业空间...</div>
+        <style>
+            @keyframes gate-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            .error-msg { color: #ff416c; }
+        </style>
+    </div>
+
     <!-- 1. 授权登录界面 -->
     <div id="auth-screen" class="screen active">
         <button class="global-back-btn" title="返回首页">🔙</button>

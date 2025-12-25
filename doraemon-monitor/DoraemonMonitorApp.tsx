@@ -61,26 +61,22 @@ const DoraemonMonitorApp: React.FC = () => {
     };
   }, []);
 
-  const [isLicensed, setIsLicensed] = useState<boolean | null>(null); // null 表示正在验证中
+  const [isLicensed, setIsLicensed] = useState<boolean | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     const code = getSavedLicenseCode();
     if (isVerified() && code) {
       verifyLicenseCode(code).then(res => {
         if (res.success) {
-          console.log('License heartbeat success');
           setIsLicensed(true);
         } else {
-          console.error('License heartbeat failed:', res.message);
-          // 物理熔断：直接清空 body，防止用户点击任何按钮
-          document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
-            <h1 style="font-size:40px;">⚠️ 授权已失效</h1>
-            <p style="font-size:20px;">${res.message}</p>
-            <button onclick="window.location.href='/'" style="padding:15px 30px;background:#ff416c;color:#fff;border:none;border-radius:10px;font-size:18px;margin-top:20px;cursor:pointer;">返回首页</button>
-          </div>`;
+          setAuthError(res.message);
           clearLicense();
-          // 5秒后强制跳转，作为兜底
-          setTimeout(() => { window.location.href = '/'; }, 5000);
+          // 4秒后强制踢回首页
+          setTimeout(() => {
+            window.location.replace('/');
+          }, 4000);
         }
       });
     } else {
@@ -88,10 +84,21 @@ const DoraemonMonitorApp: React.FC = () => {
     }
   }, []);
 
+  if (authError) {
+    return (
+      <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center', padding: '20px' }}>
+        <h1 style={{ fontSize: '3rem', color: '#ff416c', marginBottom: '20px' }}>⚠️ 授权失效</h1>
+        <p style={{ fontSize: '1.5rem', color: '#fff', marginBottom: '10px' }}>{authError}</p>
+        <p style={{ fontSize: '1.1rem', color: '#666' }}>4秒后自动返回首页...</p>
+      </div>
+    );
+  }
+
   if (isLicensed === null) {
     return (
       <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div className="start-title">🔮 正在验证授权...</div>
+        <div className="spinner" style={{ width: '60px', height: '60px', border: '5px solid rgba(255,255,255,0.1)', borderTopColor: '#00f260', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <div style={{ marginLeft: '20px', fontSize: '1.2rem', color: '#00f260' }}>正在验证魔法授权...</div>
       </div>
     );
   }

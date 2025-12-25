@@ -35,33 +35,23 @@ const DoraemonMonitorApp: React.FC = () => {
     const code = getSavedLicenseCode();
     if (isVerified() && code) {
       verifyLicenseCode(code).then(res => {
-        if (res.success) {
-          setIsLicensed(true);
-        } else {
-          setAuthError(res.message);
-          clearLicense();
-          setTimeout(() => { window.location.replace('/'); }, 4000);
-        }
+        if (res.success) setIsLicensed(true);
+        else { setAuthError(res.message); clearLicense(); setTimeout(() => window.location.replace('/'), 4000); }
       });
-    } else {
-      setIsLicensed(false);
-    }
+    } else setIsLicensed(false);
   }, []);
 
   useEffect(() => {
     const workerBlob = new Blob([`
       let interval = null;
       self.onmessage = function(e) {
-        if (e.data === 'start') {
-          interval = setInterval(() => { self.postMessage('tick'); }, 100);
-        } else if (e.data === 'stop') {
-          if (interval) clearInterval(interval);
-        }
+        if (e.data === 'start') interval = setInterval(() => self.postMessage('tick'), 100);
+        else if (e.data === 'stop') clearInterval(interval);
       }
     `], { type: 'application/javascript' });
     workerRef.current = new Worker(URL.createObjectURL(workerBlob));
-    workerRef.current.onmessage = () => { analyzeAudio(); };
-    return () => { if (workerRef.current) workerRef.current.terminate(); };
+    workerRef.current.onmessage = () => analyzeAudio();
+    return () => workerRef.current?.terminate();
   }, []);
 
   const analyzeAudio = () => {
@@ -81,7 +71,6 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const initApp = async () => {
     setIsLoading(true);
-    setError('');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const AC = window.AudioContext || (window as any).webkitAudioContext;
@@ -90,12 +79,8 @@ const DoraemonMonitorApp: React.FC = () => {
       micRef.current = audioContextRef.current.createMediaStreamSource(stream);
       micRef.current.connect(analyserRef.current);
       setIsStarted(true);
-      if (workerRef.current) workerRef.current.postMessage('start');
-    } catch (err: any) {
-      setError("无法访问麦克风: " + err.message);
-    } finally {
-      setIsLoading(false);
-    }
+      workerRef.current?.postMessage('start');
+    } catch (err: any) { setError("麦克风权限被拒绝"); } finally { setIsLoading(false); }
   };
 
   useEffect(() => {
@@ -104,26 +89,18 @@ const DoraemonMonitorApp: React.FC = () => {
     if (currentDb > limit) {
       recoverStartRef.current = 0;
       if (thresholdStartRef.current === 0) thresholdStartRef.current = now;
-      if (now - thresholdStartRef.current > 2000) {
-        if (state !== 'alarm') { setState('alarm'); setWarnCount(prev => prev + 1); setQuietTime(0); }
-      } else if (now - thresholdStartRef.current > 800 && state === 'calm') { setState('warning'); }
+      if (now - thresholdStartRef.current > 2000) { if (state !== 'alarm') { setState('alarm'); setWarnCount(prev => prev + 1); setQuietTime(0); } }
+      else if (now - thresholdStartRef.current > 800 && state === 'calm') setState('warning');
     } else {
       thresholdStartRef.current = 0;
-      if (state === 'alarm') {
-        if (recoverStartRef.current === 0) recoverStartRef.current = now;
-        if (now - recoverStartRef.current > 3000) setState('calm');
-      } else if (state !== 'calm') { setState('calm'); }
+      if (state === 'alarm') { if (recoverStartRef.current === 0) recoverStartRef.current = now; if (now - recoverStartRef.current > 3000) setState('calm'); }
+      else if (state !== 'calm') setState('calm');
     }
   }, [currentDb, limit, isStarted]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isStarted) {
-      interval = setInterval(() => {
-        setTotalTime(prev => prev + 1);
-        if (state !== 'alarm') setQuietTime(prev => prev + 1);
-      }, 1000);
-    }
+    if (isStarted) interval = setInterval(() => { setTotalTime(prev => prev + 1); if (state !== 'alarm') setQuietTime(prev => prev + 1); }, 1000);
     return () => { if (interval) clearInterval(interval); };
   }, [isStarted, state]);
 
@@ -138,30 +115,57 @@ const DoraemonMonitorApp: React.FC = () => {
     return `${m}:${s}`;
   };
 
+  // --- 优化版彩色渐变参考条 ---
   const NoiseLevelReference = () => {
     const levels = [
       { min: 0, max: 20, label: "0–20 dB 极度安静" },
       { min: 20, max: 40, label: "20–40 dB 非常安静" },
-      { min: 40, max: 60, label: "40–60 dB 正常背景音" },
+      { min: 40, max: 60, label: "40–60 dB 正常背景" },
       { min: 60, max: 80, label: "60–80 dB 中等响度" },
       { min: 80, max: 100, label: "80–100 dB 响亮" },
-      { min: 100, max: 120, label: "100–120 dB 非常响亮" },
+      { min: 100, max: 120, label: "100–120 dB 极其嘈杂" },
     ];
-    const pointerPos = Math.min(100, (currentDb / 120) * 100);
+    // 限制在轨道内
+    const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
     return (
-      <div className="db-reference-panel" style={{ width: '320px', padding: '30px' }}>
-        <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '25px' }}>分贝等级参考</div>
-        <div className="vertical-meter-container" style={{ height: '420px' }}>
-          <div className="meter-bar-bg">
-            <div className="current-level-pointer" style={{ bottom: `${pointerPos}%`, transition: 'bottom 0.3s' }} />
+      <div className="db-reference-panel" style={{ width: '320px', padding: '30px', background: 'rgba(255,255,255,0.03)', borderRadius: '25px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '30px', textAlign: 'center', opacity: 0.8 }}>分贝等级参考</div>
+        <div className="vertical-meter-container" style={{ height: '420px', position: 'relative', paddingLeft: '40px' }}>
+          
+          {/* 核心：彩色渐变轨道 */}
+          <div className="meter-bar-bg" style={{ 
+            width: '12px', 
+            borderRadius: '10px', 
+            background: 'linear-gradient(to top, #00f260 0%, #ffff00 40%, #ff9900 70%, #ff416c 100%)',
+            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)'
+          }}>
+            {/* 动态指示圆点：移到左侧并增加指向性 */}
+            <div className="current-level-pointer" style={{ 
+              bottom: `${pointerPos}%`, 
+              left: '-35px', // 移出轨道
+              width: '24px', 
+              height: '24px', 
+              background: '#fff',
+              border: '3px solid #00d4ff',
+              boxShadow: '0 0 15px #00d4ff',
+              borderRadius: '50%',
+              transition: 'bottom 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <div style={{ width: '0', height: '0', borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '8px solid #00d4ff', marginLeft: '35px' }} />
+            </div>
           </div>
-          <div className="level-nodes" style={{ gap: '25px' }}>
-            {levels.map((l, idx) => (
+
+          <div className="level-nodes" style={{ gap: '32px', marginLeft: '25px' }}>
+            {levels.reverse().map((l, idx) => (
               <div key={idx} className="level-node" style={{ 
-                color: currentDb >= l.min && currentDb < l.max ? '#00d4ff' : '#94a3b8', 
-                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.6,
+                color: currentDb >= l.min && currentDb < l.max ? '#fff' : '#94a3b8', 
+                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5,
                 fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
-                fontSize: '1rem'
+                fontSize: '0.95rem',
+                transition: '0.3s'
               }}>
                 {l.label}
               </div>
@@ -176,7 +180,7 @@ const DoraemonMonitorApp: React.FC = () => {
     const BAR_COUNT = 80;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     return (
-      <div className="visualizer-container" style={{ opacity: 0.6 }}>
+      <div className="visualizer-container" style={{ opacity: 0.4 }}>
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
           const dist = Math.abs(i - BAR_COUNT / 2);
           const norm = 1 - (dist / (BAR_COUNT / 2));
@@ -225,9 +229,7 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   }
 
-  if (isLicensed === false) {
-    return <LicenseInput onVerified={() => setIsLicensed(true)} />;
-  }
+  if (isLicensed === false) return <LicenseInput onVerified={() => setIsLicensed(true)} />;
 
   if (!isStarted) {
     return (
@@ -235,7 +237,7 @@ const DoraemonMonitorApp: React.FC = () => {
         <button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button>
         <div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div>
         <h1 className="start-title" style={{ fontSize: '3.5rem' }}>Doraemon Monitor</h1>
-        <button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>
+        <button className="doraemon-btn-big" onClick={initApp} disabled={isLoading}>
           {isLoading ? <span>正在召唤...</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>开启监测</span><span className="btn-sub-text">点击开始自习守护</span></>}
         </button>
         {error && <div className="doraemon-error-box">{error}</div>}

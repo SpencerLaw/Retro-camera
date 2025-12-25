@@ -139,6 +139,22 @@
     }
 
     function bindFunctionalEvents() {
+        // 黑夜模式切换
+        const darkModeBtn = document.getElementById('dark-mode-btn');
+        const isDark = localStorage.getItem('hc_dark_mode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            if (darkModeBtn) darkModeBtn.textContent = '🌙';
+        }
+
+        if (darkModeBtn) {
+            darkModeBtn.onclick = () => {
+                const nowDark = document.body.classList.toggle('dark-mode');
+                localStorage.setItem('hc_dark_mode', nowDark);
+                darkModeBtn.textContent = nowDark ? '🌙' : '🌞';
+            };
+        }
+
         document.getElementById('settings-btn').onclick = () => {
             document.getElementById('settings-modal').classList.remove('hidden');
             document.getElementById('student-list-input').value = STATE.students.map(s => s.name).join('\n');
@@ -221,16 +237,59 @@
         } catch (e) { initApp(); }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.global-back-btn').forEach(btn => {
-            btn.onclick = (e) => { e.preventDefault(); window.location.href = '/'; };
-        });
-        const d = new Date();
-        const dayIdx = d.getDay();
-        STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
-        const dateEl = document.getElementById('current-date');
-        if(dateEl) dateEl.textContent = d.toLocaleDateString();
-        if (STATE.isVerified && STATE.licenseCode) validateLicense();
+        window.addEventListener('DOMContentLoaded', () => {
+
+            document.querySelectorAll('.global-back-btn').forEach(btn => {
+
+                btn.onclick = (e) => { e.preventDefault(); window.location.href = '/'; };
+
+            });
+
+    
+
+            // 动态时钟逻辑
+
+            function updateClock() {
+
+                const d = new Date();
+
+                const dateStr = d.getFullYear() + '/' + (d.getMonth() + 1).toString().padStart(2, '0') + '/' + d.getDate().toString().padStart(2, '0');
+
+                const timeStr = d.getHours().toString().padStart(2, '0') + ':' + 
+
+                                d.getMinutes().toString().padStart(2, '0') + ':' + 
+
+                                d.getSeconds().toString().padStart(2, '0');
+
+                
+
+                const dateEl = document.getElementById('current-date');
+
+                const timeEl = document.getElementById('current-time');
+
+                if (dateEl) dateEl.textContent = dateStr;
+
+                if (timeEl) timeEl.textContent = timeStr;
+
+    
+
+                // 更新 todayIndex
+
+                const dayIdx = d.getDay();
+
+                STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
+
+            }
+
+    
+
+            updateClock();
+
+            setInterval(updateClock, 1000);
+
+    
+
+            if (STATE.isVerified && STATE.licenseCode) validateLicense();
         else {
             const gate = document.getElementById('gatekeeper-screen');
             if (gate) gate.style.display = 'none';

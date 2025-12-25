@@ -571,7 +571,91 @@ main {
     }
 }
 
-/* 输入框样式 */
+/* ========================================
+   黑夜模式样式 - Dark Mode
+   ======================================== */
+body.dark-mode {
+    background-color: #0f0c29;
+    color: #e0e0e0;
+}
+
+body.dark-mode .screen {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 100%);
+}
+
+body.dark-mode header {
+    background: rgba(15, 12, 41, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .game-zone,
+body.dark-mode .rules-panel,
+body.dark-mode .tree-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+body.dark-mode .student-section {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .student-section.incomplete-section {
+    border-color: rgba(255, 154, 158, 0.2);
+}
+
+body.dark-mode .student-section.completed-section {
+    border-color: rgba(132, 250, 176, 0.2);
+}
+
+body.dark-mode .rule-box textarea {
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .student-count {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+body.dark-mode .icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .icon-btn svg {
+    stroke: #fff;
+}
+
+body.dark-mode .name {
+    text-shadow: none;
+}
+
+body.dark-mode .settings-modal-premium {
+    background: #1e1e30;
+    color: white;
+}
+
+body.dark-mode .modal-header {
+    background: #252545;
+}
+
+body.dark-mode .modal-header h2 {
+    color: white;
+}
+
+body.dark-mode .premium-textarea {
+    background: #121225;
+    color: white;
+    border-color: #333;
+}
+
+body.dark-mode .modal-footer {
+    background: #1a1a2e;
+}
+
+/* ========================================
+   输入框样式 */
 .input-group {
     display: flex;
     flex-direction: column;

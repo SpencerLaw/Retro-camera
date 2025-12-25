@@ -210,6 +210,14 @@
 
     // 初始化启动
     window.addEventListener('DOMContentLoaded', () => {
+        // 核心修复：确保所有返回按钮立即生效
+        document.querySelectorAll('.global-back-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                window.location.href = '/';
+            };
+        });
+
         // 设置日期
         const d = new Date();
         const dayIdx = d.getDay();

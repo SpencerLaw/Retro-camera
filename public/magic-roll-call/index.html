@@ -262,17 +262,33 @@
             }, 3000);
         };
 
+        // --- 强制实时校验逻辑 ---
         (async () => {
             const isAuth = localStorage.getItem('magic_rc_auth') === 'true';
             const savedCode = localStorage.getItem('magic_rc_license');
             if (isAuth && savedCode) {
                 try {
-                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: savedCode, deviceId: 'rc-fixed' }) });
+                    const res = await fetch('/api/verify-license', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({ 
+                            licenseCode: savedCode, 
+                            deviceId: getDeviceId() // 核心修复：使用动态 ID
+                        }) 
+                    });
                     const data = await res.json();
-                    if (data.success) { showApp(); }
-                    else { forceExit(data.message); }
-                } catch(e) { showApp(); }
-            } else { showAuth(); }
+                    if (data.success) {
+                        showApp();
+                    } else {
+                        forceExit(`授权失效: ${data.message}`);
+                    }
+                } catch(e) {
+                    showApp(); 
+                }
+            } else {
+                document.getElementById('gatekeeper-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+            }
         })();
     </script>
 </body>

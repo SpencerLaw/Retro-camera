@@ -408,13 +408,20 @@ async function validateLicenseOnLoad() {
     const gateText = document.getElementById('gate-text');
     const gateLoader = document.getElementById('gate-loader');
 
+    // 核心修复：获取或生成设备 ID
+    let deviceId = localStorage.getItem('hc_device_id');
+    if (!deviceId) {
+        deviceId = 'hc-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('hc_device_id', deviceId);
+    }
+
     try {
         const res = await fetch('/api/verify-license', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 licenseCode: STATE.licenseCode,
-                deviceId: localStorage.getItem('hc_device_id') || 'hc-fixed',
+                deviceId: deviceId,
                 deviceInfo: navigator.userAgent
             })
         });

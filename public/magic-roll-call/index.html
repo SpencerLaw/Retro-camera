@@ -139,12 +139,21 @@
         @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .fast-spin { animation-duration: 0.5s !important; }
         .global-back-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; background: none; border: none; cursor: pointer; z-index: 1000; }
+        .fullscreen-btn {
+            position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
+            background: var(--glass-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 1000; transition: 0.3s; font-size: 1.5rem;
+        }
+        .fullscreen-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
     </style>
 </head>
 <body>
 
     <canvas id="canvas"></canvas>
     <button class="global-back-btn" onclick="window.location.href='/'">🔙</button>
+    <button id="fullscreen-btn" class="fullscreen-btn" title="全屏显示">📺</button>
 
     <!-- 1. 授权页 -->
     <div id="auth-screen" class="screen">
@@ -317,6 +326,22 @@
             document.getElementById('result-overlay').classList.add('hidden');
             document.getElementById('start-btn').classList.remove('hidden');
             document.getElementById('orb-text').textContent = "";
+        };
+
+        // --- 全屏控制 ---
+        const fsBtn = document.getElementById('fullscreen-btn');
+        fsBtn.onclick = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                fsBtn.textContent = '❌';
+                fsBtn.title = '退出全屏';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    fsBtn.textContent = '📺';
+                    fsBtn.title = '全屏显示';
+                }
+            }
         };
 
         if (localStorage.getItem('magic_rc_auth') === 'true') showApp();

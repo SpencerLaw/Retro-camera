@@ -13,12 +13,6 @@
 
 * {
     box-sizing: border-box;
-    user-select: none; /* 防止选中文字影响体验 */
-}
-
-input, textarea {
-    user-select: text;
-    -webkit-user-select: text;
 }
 
 body {
@@ -29,6 +23,16 @@ body {
     color: var(--text-white);
     height: 100vh;
     overflow: hidden;
+    user-select: none; /* 移动到这里 */
+    -webkit-user-select: none;
+}
+
+input, textarea {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 100;
 }
 
 /* --- Canvas Background --- */

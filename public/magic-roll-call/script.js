@@ -261,8 +261,7 @@ document.getElementById('logout-btn').onclick = () => {
 // List Management
 function saveList() {
     const raw = document.getElementById('student-input').value;
-    const list = raw.split(/[
-,]/).map(s => s.trim()).filter(s => s);
+    const list = raw.split(/[\n,]/).map(s => s.trim()).filter(s => s);
     if (list.length > 0) {
         STATE.students = list;
         localStorage.setItem('magic_rc_students', JSON.stringify(STATE.students));

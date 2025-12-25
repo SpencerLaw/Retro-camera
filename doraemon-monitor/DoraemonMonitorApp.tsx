@@ -68,12 +68,25 @@ const DoraemonMonitorApp: React.FC = () => {
       const code = getSavedLicenseCode();
       if (code) {
         verifyLicenseCode(code).then(res => {
-          if (res.success) console.log('License heartbeat success');
-          else console.warn('License heartbeat failed:', res.message);
+          if (res.success) {
+            console.log('License heartbeat success');
+          } else {
+            console.warn('License heartbeat failed:', res.message);
+            alert(`⚠️ 授权失效: ${res.message}`);
+            clearLicense();
+            setIsLicensed(false);
+            window.location.reload();
+          }
         });
       }
     }
   }, []);
+
+  const logout = () => {
+    clearLicense();
+    setIsLicensed(false);
+    window.location.reload();
+  };
 
   const handleLicenseVerified = () => setIsLicensed(true);
 

@@ -49,65 +49,35 @@
             width: 100%; height: 120px; background: rgba(0,0,0,0.3); color: white;
             border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; resize: none;
         }
-        /* --- 滑动条深度定制 (解决间隙问题) --- */
+        /* Range Slider */
         .range-container { margin: 10px 0; width: 100%; }
         input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            height: 10px;
-            border-radius: 5px;
-            outline: none;
-            margin: 15px 0;
-            cursor: pointer;
-            display: block;
+            -webkit-appearance: none; width: 100%; background: rgba(255, 255, 255, 0.1);
+            height: 10px; border-radius: 5px; outline: none; margin: 15px 0; cursor: pointer; display: block;
         }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 22px;
-            height: 22px;
-            background: var(--primary-neon);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-neon);
-            border: 2px solid white;
-            transition: 0.2s;
+            -webkit-appearance: none; appearance: none; width: 22px; height: 22px;
+            background: var(--primary-neon); border-radius: 50%; box-shadow: 0 0 10px var(--primary-neon);
+            border: 2px solid white; transition: 0.2s;
         }
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 20px var(--primary-neon);
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 22px;
-            height: 22px;
-            background: var(--primary-neon);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-neon);
-            border: 2px solid white;
-            cursor: pointer;
-        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
         /* Magic Circle */
         #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
-        .magic-ring { position: absolute; border-radius: 50%; border: 3px solid transparent; }
-        .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; }
-        .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; }
+        .magic-ring { position: absolute; border-radius: 50%; border: 4px solid transparent; }
+        .ring-1 { width: 100%; height: 100%; border-top-color: var(--primary-neon); animation: spin 10s linear infinite; }
+        .ring-2 { width: 70%; height: 70%; border-left-color: var(--accent-pink); animation: spin 5s linear infinite reverse; }
         .core-orb {
             width: 120px; height: 120px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon));
             box-shadow: 0 0 60px var(--secondary-neon);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 5;
+            display: flex; justify-content: center; align-items: center; z-index: 5;
         }
         #orb-text {
             font-size: 1.4rem; text-align: center; color: #fff; font-weight: bold;
             text-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold);
-            animation: textPulse 0.6s ease-in-out infinite;
-            pointer-events: none; line-height: 1.2;
+            animation: textPulse 0.6s ease-in-out infinite; pointer-events: none; line-height: 1.2;
         }
-        @keyframes textPulse {
-            0%, 100% { transform: scale(0.9); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; filter: brightness(1.2); }
-        }
+        @keyframes textPulse { 0%, 100% { transform: scale(0.9); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
         /* Buttons */
         .magic-btn {
             background: linear-gradient(45deg, var(--secondary-neon), var(--accent-pink));
@@ -144,9 +114,8 @@
             background: var(--glass-bg); backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border); border-radius: 12px;
             display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 1000; transition: 0.3s; font-size: 1.5rem;
+            cursor: pointer; z-index: 1000; transition: 0.3s;
         }
-        .fullscreen-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -206,7 +175,6 @@
     </div>
 
     <script>
-        // 1. 数据与语言
         const LANG = localStorage.getItem('global-language') || 'zh-CN';
         const TEXTS = {
             'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单", rolling: "✨召唤中✨" },
@@ -225,18 +193,19 @@
 
         const renderList = () => {
             const container = document.getElementById('student-preview');
-            container.innerHTML = students.map(s => `<span class="mini-tag">${s}</span>`).join('');
-            document.getElementById('student-count').textContent = students.length;
+            // 渲染时也确保去重展示
+            const uniqueStudents = Array.from(new Set(students));
+            container.innerHTML = uniqueStudents.map(s => `<span class="mini-tag">${s}</span>`).join('');
+            document.getElementById('student-count').textContent = uniqueStudents.length;
             if (!document.getElementById('student-input').value) {
-                document.getElementById('student-input').value = students.join('\n');
+                document.getElementById('student-input').value = uniqueStudents.join('\n');
             }
         };
 
-        // 2. Canvas 背景 (增强版)
+        // Canvas
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let stars = [];
-        let warp = false;
+        let stars = []; let warp = false;
         window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
         window.onresize();
         for(let i=0; i<300; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, speed: 0.5 + Math.random()});
@@ -257,53 +226,17 @@
         }
         animate();
 
-        // 3. 事件
-        document.getElementById('verify-btn').onclick = async function() {
-            const code = document.getElementById('license-input').value.trim();
-            if (!code.toUpperCase().startsWith('DM')) return alert(t('authError'));
-            this.disabled = true;
-            try {
-                const res = await fetch('/api/verify-license', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ licenseCode: code, deviceId: 'rc-'+Math.random().toString(36).substr(2,5) })
-                });
-                const data = await res.json();
-                if (data.success || code.length > 12) {
-                    localStorage.setItem('magic_rc_auth', 'true');
-                    showApp();
-                } else { alert(data.message || t('authError')); } 
-            } catch(e) { 
-                if(code.length > 12) { localStorage.setItem('magic_rc_auth', 'true'); showApp(); }
-                else alert("网络波动");
-            }
-            this.disabled = false;
-        };
-
+        // 录入去重优化
         document.getElementById('save-btn').onclick = () => {
             const raw = document.getElementById('student-input').value;
-            const list = raw.split('\n').map(x => x.trim()).filter(x => x.length > 0);
+            // 核心修复：使用 Set 进行全量去重，并过滤空行
+            const list = Array.from(new Set(raw.split('\n').map(x => x.trim()).filter(x => x.length > 0)));
             if(list.length > 0) {
                 students = list;
                 localStorage.setItem('magic_rc_students', JSON.stringify(list));
                 renderList();
                 alert(t('saveOk').replace('{n}', list.length));
             } else alert(t('empty'));
-        };
-
-        document.getElementById('clear-btn').onclick = () => {
-            if(confirm("确定清空？")) {
-                students = []; localStorage.setItem('magic_rc_students', '[]');
-                document.getElementById('student-input').value = ''; renderList();
-            }
-        };
-
-        document.getElementById('logout-btn').onclick = () => {
-            localStorage.setItem('magic_rc_auth', 'false'); location.reload();
-        };
-
-        document.getElementById('pick-range').oninput = function() {
-            document.getElementById('pick-val').textContent = this.value;
         };
 
         document.getElementById('start-btn').onclick = () => {
@@ -317,49 +250,56 @@
             setTimeout(() => {
                 isRolling = false; warp = false;
                 document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
+                
+                // 核心修复：采用洗牌算法抽取，绝对保证不重复
                 const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
-                let pool = [...students], winners = [];
-                for(let i=0; i<count; i++) winners.push(pool.splice(Math.floor(Math.random()*pool.length), 1)[0]);
+                let pool = [...students];
+                // Fisher-Yates Shuffle
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                const winners = pool.slice(0, count);
                 
                 document.getElementById('result-cards').innerHTML = winners.map((w,i) => `<div class="name-card" style="animation-delay:${i*0.2}s">${w}</div>`).join('');
                 document.getElementById('result-overlay').classList.remove('hidden');
             }, 3000);
         };
 
-        document.getElementById('retry-btn').onclick = () => {
-            document.getElementById('result-overlay').classList.add('hidden');
-            document.getElementById('start-btn').classList.remove('hidden');
-            document.getElementById('orb-text').textContent = "";
+        // 其他事件
+        document.getElementById('verify-btn').onclick = async function() {
+            const code = document.getElementById('license-input').value.trim();
+            if (!code.toUpperCase().startsWith('DM')) return alert(t('authError'));
+            this.disabled = true;
+            try {
+                const res = await fetch('/api/verify-license', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ licenseCode: code, deviceId: 'rc-'+Math.random().toString(36).substr(2,5) })
+                });
+                const data = await res.json();
+                if (data.success || code.length > 12) { localStorage.setItem('magic_rc_auth', 'true'); showApp(); } 
+                else { alert(data.message || t('authError')); }
+            } catch(e) { if(code.length > 12) { localStorage.setItem('magic_rc_auth', 'true'); showApp(); } else alert("网络波动"); }
+            this.disabled = false;
         };
-
-        // --- 全屏控制 ---
+        document.getElementById('clear-btn').onclick = () => {
+            if(confirm("确定清空？")) { students = []; localStorage.setItem('magic_rc_students', '[]'); document.getElementById('student-input').value = ''; renderList(); }
+        };
+        document.getElementById('logout-btn').onclick = () => { localStorage.setItem('magic_rc_auth', 'false'); location.reload(); };
+        document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
+        document.getElementById('retry-btn').onclick = () => { document.getElementById('result-overlay').classList.add('hidden'); document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('orb-text').textContent = ""; };
+        
+        // 全屏
         const fsBtn = document.getElementById('fullscreen-btn');
         const fsIcon = document.getElementById('fs-icon');
-        
         const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
         const exitFSPath = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
-
         fsBtn.onclick = () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-                fsIcon.innerHTML = exitFSPath;
-                fsBtn.title = '退出全屏';
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                    fsIcon.innerHTML = enterFSPath;
-                    fsBtn.title = '全屏显示';
-                }
-            }
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; }
+            else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } }
         };
-
-        // 监听 ESC 键导致的退出全屏，同步图标
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                fsIcon.innerHTML = enterFSPath;
-                fsBtn.title = '全屏显示';
-            }
-        });
+        document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) fsIcon.innerHTML = enterFSPath; });
 
         if (localStorage.getItem('magic_rc_auth') === 'true') showApp();
     </script>

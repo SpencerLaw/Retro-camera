@@ -334,12 +334,14 @@ function renderUI() {
                 bubble.onclick = function() {
                     const currentStudent = STATE.students[studentIndex];
                     if (confirm(t('confirmMsg').replace('{name}', currentStudent.name))) {
+                        // 立即更新状态并保存，防止动画期间刷新导致数据丢失
+                        STATE.students[studentIndex].history[day] = true;
+                        saveData();
+
                         // 添加爱心散开动画
                         bubble.classList.add('heart-burst');
 
                         setTimeout(() => {
-                            STATE.students[studentIndex].history[day] = true;
-                            saveData();
                             renderUI();
                             renderTree();
                         }, 600);
@@ -384,11 +386,11 @@ async function init() {
         }
     }
 
-    syncTime().then(() => {
-        startDynamicClock();
-        renderUI();
-        renderTree();
-    });
+    await syncTime();
+    updateTime(); // 立即更新一次时间，确保 todayIndex 正确
+    startDynamicClock();
+    renderUI();
+    renderTree();
 
     window.onresize = () => renderTree();
 }
@@ -431,18 +433,20 @@ async function syncTime() {
     } catch (e) {}
 }
 
+function updateTime() {
+    STATE.currentDate = new Date(Date.now() + serverTimeOffset);
+    const d = STATE.currentDate;
+    const days = t('days');
+    let dayIdx = d.getDay();
+    STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
+    const dateEl = document.getElementById('current-date');
+    const timeEl = document.getElementById('current-week-day');
+    if (dateEl) dateEl.textContent = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${days[STATE.todayIndex] || ''}`;
+    if (timeEl) timeEl.textContent = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+}
+
 function startDynamicClock() {
-    setInterval(() => {
-        STATE.currentDate = new Date(Date.now() + serverTimeOffset);
-        const d = STATE.currentDate;
-        const days = t('days');
-        let dayIdx = d.getDay();
-        STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
-        const dateEl = document.getElementById('current-date');
-        const timeEl = document.getElementById('current-week-day');
-        if (dateEl) dateEl.textContent = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${days[STATE.todayIndex] || ''}`;
-        if (timeEl) timeEl.textContent = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
-    }, 1000);
+    setInterval(updateTime, 1000);
 }
 
 function startNewDay() {

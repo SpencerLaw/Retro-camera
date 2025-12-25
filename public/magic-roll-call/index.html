@@ -36,7 +36,7 @@
         }
         /* Auth */
         .auth-card { padding: 40px; text-align: center; width: 400px; }
-        input {
+        input[type="text"] {
             width: 100%; padding: 15px; margin: 20px 0; border-radius: 8px;
             border: 2px solid white; background: white; color: #333;
             font-size: 1.5rem; text-align: center;
@@ -48,6 +48,43 @@
         textarea {
             width: 100%; height: 120px; background: rgba(0,0,0,0.3); color: white;
             border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; resize: none;
+        }
+        /* --- 滑动条深度定制 (解决间隙问题) --- */
+        .range-container { margin: 10px 0; width: 100%; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            height: 10px;
+            border-radius: 5px;
+            outline: none;
+            margin: 15px 0;
+            cursor: pointer;
+            display: block;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            background: var(--primary-neon);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-neon);
+            border: 2px solid white;
+            transition: 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px var(--primary-neon);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            background: var(--primary-neon);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-neon);
+            border: 2px solid white;
+            cursor: pointer;
         }
         /* Magic Circle */
         #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
@@ -129,9 +166,9 @@
                 <button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000">💾 保存</button>
                 <button id="clear-btn" class="btn-small" style="background:#ff416c">🗑️ 清空</button>
             </div>
-            <div style="margin-top:10px">
-                <label>抽取人数: <span id="pick-val">1</span></label><br>
-                <input type="range" id="pick-range" min="1" max="10" value="1" style="width:100%">
+            <div class="range-container">
+                <label>抽取人数: <span id="pick-val" style="color:var(--primary-neon); font-weight:bold">1</span></label>
+                <input type="range" id="pick-range" min="1" max="10" value="1">
             </div>
             <div id="student-preview" style="overflow-y:auto; flex:1; margin-top:10px"></div>
             <button id="logout-btn" class="btn-logout">🚪 退出点名魔法师</button>
@@ -193,15 +230,14 @@
         function animate() {
             ctx.fillStyle = warp ? 'rgba(5, 5, 20, 0.3)' : '#0f0c29'; 
             ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = warp ? 'var(--primary-neon)' : '#fff';
             stars.forEach(s => {
                 s.y += warp ? 25 : s.speed;
                 if(s.y > canvas.height) s.y = 0;
                 ctx.beginPath(); 
                 if(warp) {
-                    ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 20); ctx.strokeStyle = '#00f260'; ctx.stroke();
+                    ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 20); ctx.strokeStyle = '#00f260'; ctx.lineWidth = 2; ctx.stroke();
                 } else {
-                    ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
                 }
             });
             requestAnimationFrame(animate);

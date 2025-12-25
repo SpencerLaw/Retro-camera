@@ -60,6 +60,18 @@
             box-shadow: 0 0 50px var(--secondary-neon);
             display: flex; justify-content: center; align-items: center;
         }
+        #orb-text {
+            font-size: 1rem;
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 10px var(--primary-neon), 0 0 20px var(--primary-neon);
+            animation: textPulse 0.8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes textPulse {
+            0%, 100% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
         /* Buttons */
         .magic-btn {
             background: linear-gradient(45deg, var(--secondary-neon), var(--accent-pink));
@@ -167,8 +179,8 @@
         // 1. 数据与语言
         const LANG = localStorage.getItem('global-language') || 'zh-CN';
         const TEXTS = {
-            'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单", rolling: "抽选中..." },
-            'en': { authError: "Invalid code! Must start with DM.", saveOk: "Summoned {n} students!", empty: "List is empty", noStu: "Import list first", rolling: "Rolling..." }
+            'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单", rolling: "施法中..." },
+            'en': { authError: "Invalid code! Must start with DM.", saveOk: "Summoned {n} students!", empty: "List is empty", noStu: "Import list first", rolling: "CASTING..." }
         };
         const t = (key) => (TEXTS[LANG] || TEXTS['zh-CN'])[key] || key;
 
@@ -266,7 +278,7 @@
             if(isRolling) return;
             isRolling = true; warp = true;
             document.getElementById('start-btn').classList.add('hidden');
-            document.getElementById('orb-text').textContent = "WAIT...";
+            document.getElementById('orb-text').textContent = t('rolling');
             document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
             
             setTimeout(() => {

@@ -178,8 +178,8 @@
     <script>
         const LANG = localStorage.getItem('global-language') || 'zh-CN';
         const TEXTS = {
-            'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单" },
-            'en': { authError: "Invalid code! Must start with DM.", saveOk: "Summoned {n} students!", empty: "List is empty", noStu: "Import list first" }
+            'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单", rolling: "✨召唤中✨" },
+            'en': { authError: "Invalid code! Must start with DM.", saveOk: "Summoned {n} students!", empty: "List is empty", noStu: "Import list first", rolling: "✨SUMMONING✨" }
         };
         const t = (key) => (TEXTS[LANG] || TEXTS['zh-CN'])[key] || key;
 

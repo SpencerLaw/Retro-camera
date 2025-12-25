@@ -19,7 +19,7 @@
         body {
             margin: 0; padding: 0; overflow: hidden;
             font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
-            background: linear-gradient(135deg, var(--bg-deep), var(--bg-purple), var(--bg-blue));
+            background: #000; /* 默认纯黑，防止闪烁 */
             color: var(--text-white); height: 100vh; width: 100vw;
         }
         canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
@@ -27,8 +27,14 @@
             position: absolute; inset: 0; z-index: 10;
             display: flex; justify-content: center; align-items: center;
             transition: opacity 0.3s;
+            background: linear-gradient(135deg, var(--bg-deep), var(--bg-purple), var(--bg-blue));
         }
+        /* 初始全部隐藏 */
         .hidden { display: none !important; }
+        
+        #loading-screen { z-index: 2000; background: #000; color: var(--primary-neon); flex-direction: column; }
+        .spinner { width: 50px; height: 50px; border: 5px solid var(--glass-border); border-top-color: var(--primary-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+
         .glass-panel {
             background: var(--glass-bg); backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border); border-radius: 16px;
@@ -42,14 +48,14 @@
             font-size: 1.5rem; text-align: center;
         }
         /* Main Layout */
-        #app-screen { display: flex; flex-direction: row; padding: 20px; }
+        #app-screen { display: none; flex-direction: row; padding: 20px; }
         .sidebar { width: 300px; padding: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 20; }
         .stage { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         textarea {
             width: 100%; height: 120px; background: rgba(0,0,0,0.3); color: white;
             border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; resize: none;
         }
-        /* --- 滑动条深度定制 (解决间隙问题) --- */
+        /* Range Slider */
         .range-container { margin: 10px 0; width: 100%; }
         input[type="range"] {
             -webkit-appearance: none; width: 100%; background: rgba(255, 255, 255, 0.1);
@@ -60,17 +66,11 @@
             background: var(--primary-neon); border-radius: 50%; box-shadow: 0 0 10px var(--primary-neon);
             border: 2px solid white; transition: 0.2s;
         }
-        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-        input[type="range"]::-moz-range-thumb {
-            width: 22px; height: 22px; background: var(--primary-neon);
-            border-radius: 50%; box-shadow: 0 0 10px var(--primary-neon);
-            border: 2px solid white; cursor: pointer;
-        }
         /* Magic Circle */
         #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
-        .magic-ring { position: absolute; border-radius: 50%; border: 3px solid transparent; }
-        .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; }
-        .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; }
+        .magic-ring { position: absolute; border-radius: 50%; border: 4px solid transparent; }
+        .ring-1 { width: 100%; height: 100%; border-top-color: var(--primary-neon); animation: spin 10s linear infinite; }
+        .ring-2 { width: 70%; height: 70%; border-left-color: var(--accent-pink); animation: spin 5s linear infinite reverse; }
         .core-orb {
             width: 120px; height: 120px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon));
@@ -125,6 +125,11 @@
 </head>
 <body>
 
+    <div id="loading-screen" class="screen">
+        <div class="spinner"></div>
+        <div id="loading-text">正在验证魔法授权...</div>
+    </div>
+
     <canvas id="canvas"></canvas>
     <button class="global-back-btn" onclick="window.location.href='/'">🔙</button>
     <button id="fullscreen-btn" class="fullscreen-btn" title="全屏显示">
@@ -134,7 +139,7 @@
     </button>
 
     <!-- 1. 授权页 -->
-    <div id="auth-screen" class="screen">
+    <div id="auth-screen" class="screen hidden">
         <div class="auth-card glass-panel">
             <h1>✨ 魔法课堂入口</h1>
             <p>请输入咒语（授权码）开启传送门</p>
@@ -144,7 +149,7 @@
     </div>
 
     <!-- 2. 主页 -->
-    <div id="app-screen" class="screen hidden">
+    <div id="app-screen" class="screen">
         <aside class="sidebar glass-panel">
             <h2>🎓 点名魔法师</h2>
             <div class="stats">人数: <span id="student-count">0</span></div>
@@ -196,16 +201,24 @@
             return id;
         }
 
-        const logout = () => {
+        const forceExit = (msg) => {
             localStorage.setItem('magic_rc_auth', 'false');
             localStorage.removeItem('magic_rc_license');
-            window.location.href = '/'; // 强制踢出到主页
+            if(msg) alert(msg);
+            window.location.replace('/'); // replace 不产生历史记录，防止后退回来
         }
 
         const showApp = () => {
+            document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('app-screen').style.display = 'flex';
             renderList();
+        };
+
+        const showAuth = () => {
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('app-screen').style.display = 'none';
+            document.getElementById('auth-screen').classList.remove('hidden');
         };
 
         const renderList = () => {
@@ -228,14 +241,14 @@
             ctx.fillStyle = warp ? 'rgba(5, 5, 20, 0.3)' : '#0f0c29'; ctx.fillRect(0,0,canvas.width,canvas.height);
             stars.forEach(s => {
                 s.y += warp ? 25 : s.speed; if(s.y > canvas.height) s.y = 0;
-                ctx.beginPath(); if(warp) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 20); ctx.strokeStyle = '#00f260'; ctx.lineWidth = 2; ctx.stroke(); }
+                ctx.beginPath(); if(warp) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 20); ctx.strokeStyle = '#00f260'; ctx.lineWidth = 2; ctx.stroke(); } 
                 else { ctx.fillStyle = '#fff'; ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); }
             });
             requestAnimationFrame(animate);
         }
         animate();
 
-        // 事件
+        // 绑定事件
         document.getElementById('verify-btn').onclick = async function() {
             const code = document.getElementById('license-input').value.trim();
             if (!code.toUpperCase().startsWith('DM')) return alert(t('authError'));
@@ -267,7 +280,7 @@
             if(confirm("确定清空？")) { students = []; localStorage.setItem('magic_rc_students', '[]'); document.getElementById('student-input').value = ''; renderList(); }
         };
 
-        document.getElementById('logout-btn').onclick = logout;
+        document.getElementById('logout-btn').onclick = () => forceExit();
         document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
         document.getElementById('retry-btn').onclick = () => { document.getElementById('result-overlay').classList.add('hidden'); document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('orb-text').textContent = ""; };
         
@@ -278,7 +291,6 @@
             if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; }
             else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } }
         };
-        document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) fsIcon.innerHTML = enterFSPath; });
 
         document.getElementById('start-btn').onclick = () => {
             if(students.length === 0) return alert(t('noStu'));
@@ -297,10 +309,11 @@
             }, 3000);
         };
 
-        // --- 强制实时校验逻辑 ---
+        // --- 终极安全逻辑：先验证，后放行 ---
         (async () => {
             const isAuth = localStorage.getItem('magic_rc_auth') === 'true';
             const savedCode = localStorage.getItem('magic_rc_license');
+            
             if (isAuth && savedCode) {
                 try {
                     const res = await fetch('/api/verify-license', {
@@ -310,14 +323,15 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        showApp(); // 只有后端说 OK，才允许显示界面
+                        showApp(); // 只有验证通过，才移除黑屏并显示功能
                     } else {
-                        alert(`⚠️ 授权已过期或失效: ${data.message}`);
-                        logout();
+                        forceExit(`⚠️ 授权失效: ${data.message}`);
                     }
                 } catch(e) {
-                    showApp(); // 网络不通时允许离线演示，但下次联网必踢
+                    showApp(); // 网络不通时允许临时进入
                 }
+            } else {
+                showAuth(); // 未登录显示验证页
             }
         })();
     </script>

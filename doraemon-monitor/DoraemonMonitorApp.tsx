@@ -61,27 +61,39 @@ const DoraemonMonitorApp: React.FC = () => {
     };
   }, []);
 
+  const [isLicensed, setIsLicensed] = useState<boolean | null>(null); // null 表示正在验证中
+
   useEffect(() => {
-    const localVerified = isVerified();
-    setIsLicensed(localVerified);
-    if (localVerified) {
-      const code = getSavedLicenseCode();
-      if (code) {
-        verifyLicenseCode(code).then(res => {
-          if (res.success) {
-            console.log('License heartbeat success');
-          } else {
-            console.warn('License heartbeat failed:', res.message);
-            alert(`⚠️ 授权失效: ${res.message}\n\n请联系管理员重新购买。`);
-            clearLicense();
-            setIsLicensed(false);
-            // 强行跳转回首页，物理断开连接
-            window.location.href = '/';
-          }
-        });
-      }
+    const code = getSavedLicenseCode();
+    if (isVerified() && code) {
+      verifyLicenseCode(code).then(res => {
+        if (res.success) {
+          console.log('License heartbeat success');
+          setIsLicensed(true);
+        } else {
+          console.warn('License heartbeat failed:', res.message);
+          alert(`⚠️ 授权失效: ${res.message}\n\n请联系管理员重新购买。`);
+          clearLicense();
+          setIsLicensed(false);
+          window.location.replace('/'); // 强制跳转，不留后路
+        }
+      });
+    } else {
+      setIsLicensed(false);
     }
   }, []);
+
+  if (isLicensed === null) {
+    return (
+      <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div className="start-title">🔮 正在验证授权...</div>
+      </div>
+    );
+  }
+
+  if (isLicensed === false) {
+    return <LicenseInput onVerified={() => setIsLicensed(true)} />;
+  };
 
   const logout = () => {
     clearLicense();

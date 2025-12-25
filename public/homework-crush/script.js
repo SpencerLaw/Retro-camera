@@ -376,8 +376,12 @@ async function init() {
     bindEvents();
     try { applyTranslations(); } catch(e) {}
 
-    if (STATE.isVerified && STATE.licenseCode) {
+    const isAuth = STATE.isVerified && STATE.licenseCode;
+
+    if (isAuth) {
         showApp();
+        // 商业加固：静默联网校验
+        validateLicenseOnLoad();
     } else {
         const auth = document.getElementById('auth-screen');
         if (auth) {
@@ -387,12 +391,37 @@ async function init() {
     }
 
     await syncTime();
-    updateTime(); // 立即更新一次时间，确保 todayIndex 正确
+    updateTime();
     startDynamicClock();
     renderUI();
     renderTree();
 
     window.onresize = () => renderTree();
+}
+
+async function validateLicenseOnLoad() {
+    console.log("🔐 Re-verifying license...");
+    try {
+        const res = await fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                licenseCode: STATE.licenseCode,
+                deviceId: localStorage.getItem('hc_device_id') || 'hc-fixed',
+                deviceInfo: navigator.userAgent
+            })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.message || "授权已失效");
+            STATE.isVerified = false;
+            saveData();
+            window.location.reload();
+        }
+    } catch (e) {
+        // 网络错误时允许继续使用离线缓存，直到下次成功连接
+        console.warn("License check skipped due to network error");
+    }
 }
 
 function applyTranslations() {

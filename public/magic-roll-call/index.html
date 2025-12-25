@@ -66,17 +66,15 @@
         .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; }
         .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; }
         .core-orb {
-            width: 140px; height: 140px; border-radius: 50%;
+            width: 120px; height: 120px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon));
             box-shadow: 0 0 60px var(--secondary-neon);
             display: flex; justify-content: center; align-items: center; z-index: 5;
-            overflow: hidden; padding: 10px;
         }
         #orb-text {
-            font-size: 1.2rem; text-align: center; color: #fff; font-weight: bold;
+            font-size: 1.4rem; text-align: center; color: #fff; font-weight: bold;
             text-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold);
             animation: textPulse 0.6s ease-in-out infinite; pointer-events: none; line-height: 1.2;
-            word-break: break-all;
         }
         @keyframes textPulse { 0%, 100% { transform: scale(0.9); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
         /* Buttons */
@@ -186,19 +184,48 @@
         let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
         let isRolling = false;
 
+        const getDeviceId = () => {
+            let id = localStorage.getItem('magic_rc_device_id');
+            if(!id) { id = 'rc-'+Math.random().toString(36).substr(2,9); localStorage.setItem('magic_rc_device_id', id); }
+            return id;
+        }
+
+        // --- 安全加固：强制静默校验 ---
+        const checkLicenseStatus = async (code) => {
+            if (!code) return false;
+            try {
+                const res = await fetch('/api/verify-license', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ licenseCode: code, deviceId: getDeviceId() })
+                });
+                const data = await res.json();
+                return data.success;
+            } catch(e) {
+                // 网络异常时，为了不影响教学，允许本地缓存继续使用
+                // 但如果是 401 错误，服务器会明确返回 success: false
+                return true; 
+            }
+        }
+
         const showApp = () => {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             renderList();
         };
 
+        const logout = () => {
+            localStorage.setItem('magic_rc_auth', 'false');
+            localStorage.removeItem('magic_rc_license');
+            location.reload();
+        }
+
         const renderList = () => {
             const container = document.getElementById('student-preview');
-            const uniqueStudents = Array.from(new Set(students));
-            container.innerHTML = uniqueStudents.map(s => `<span class="mini-tag">${s}</span>`).join('');
-            document.getElementById('student-count').textContent = uniqueStudents.length;
+            container.innerHTML = students.map(s => `<span class="mini-tag">${s}</span>`).join('');
+            document.getElementById('student-count').textContent = students.length;
             if (!document.getElementById('student-input').value) {
-                document.getElementById('student-input').value = uniqueStudents.join('\n');
+                document.getElementById('student-input').value = students.join('\n');
             }
         };
 
@@ -226,7 +253,27 @@
         }
         animate();
 
-        // 录入去重
+        // 事件
+        document.getElementById('verify-btn').onclick = async function() {
+            const code = document.getElementById('license-input').value.trim();
+            if (!code.toUpperCase().startsWith('DM')) return alert(t('authError'));
+            this.disabled = true;
+            try {
+                const res = await fetch('/api/verify-license', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ licenseCode: code, deviceId: getDeviceId() })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('magic_rc_auth', 'true');
+                    localStorage.setItem('magic_rc_license', code); // 保存码
+                    showApp();
+                } else { alert(data.message || t('authError')); }
+            } catch(e) { alert("网络连接异常，请检查网络"); }
+            this.disabled = false;
+        };
+
         document.getElementById('save-btn').onclick = () => {
             const raw = document.getElementById('student-input').value;
             const list = Array.from(new Set(raw.split('\n').map(x => x.trim()).filter(x => x.length > 0)));
@@ -238,62 +285,11 @@
             } else alert(t('empty'));
         };
 
-        // 核心抽取逻辑：深度随机 + 无重复
-        document.getElementById('start-btn').onclick = () => {
-            if(students.length === 0) return alert(t('noStu'));
-            if(isRolling) return;
-            isRolling = true; warp = true;
-            document.getElementById('start-btn').classList.add('hidden');
-            
-            // 恢复稳定的文案显示，移除名字闪烁
-            const orbText = document.getElementById('orb-text');
-            orbText.textContent = t('rolling');
-
-            document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
-            
-            setTimeout(() => {
-                isRolling = false; warp = false;
-                document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
-                
-                // 100% 杜绝重复：Fisher-Yates 深度洗牌
-                const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
-                let pool = [...students];
-                // 进行 3 轮深度打乱
-                for (let pass = 0; pass < 3; pass++) {
-                    for (let i = pool.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [pool[i], pool[j]] = [pool[j], pool[i]];
-                    }
-                }
-                const winners = pool.slice(0, count);
-                
-                document.getElementById('result-cards').innerHTML = winners.map((w,i) => `<div class="name-card" style="animation-delay:${i*0.2}s">${w}</div>`).join('');
-                document.getElementById('result-overlay').classList.remove('hidden');
-                orbText.textContent = "";
-            }, 3000);
-        };
-
-        // 授权与全屏
-        document.getElementById('verify-btn').onclick = async function() {
-            const code = document.getElementById('license-input').value.trim();
-            if (!code.toUpperCase().startsWith('DM')) return alert(t('authError'));
-            this.disabled = true;
-            try {
-                const res = await fetch('/api/verify-license', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ licenseCode: code, deviceId: 'rc-'+Math.random().toString(36).substr(2,5) })
-                });
-                const data = await res.json();
-                if (data.success || code.length > 12) { localStorage.setItem('magic_rc_auth', 'true'); showApp(); } 
-                else { alert(data.message || t('authError')); }
-            } catch(e) { if(code.length > 12) { localStorage.setItem('magic_rc_auth', 'true'); showApp(); } else alert("网络波动"); }
-            this.disabled = false;
-        };
         document.getElementById('clear-btn').onclick = () => {
             if(confirm("确定清空？")) { students = []; localStorage.setItem('magic_rc_students', '[]'); document.getElementById('student-input').value = ''; renderList(); }
         };
-        document.getElementById('logout-btn').onclick = () => { localStorage.setItem('magic_rc_auth', 'false'); location.reload(); };
+
+        document.getElementById('logout-btn').onclick = logout;
         document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
         document.getElementById('retry-btn').onclick = () => { document.getElementById('result-overlay').classList.add('hidden'); document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('orb-text').textContent = ""; };
         
@@ -302,12 +298,49 @@
         const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
         const exitFSPath = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
         fsBtn.onclick = () => {
-            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; } 
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; }
             else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } }
         };
         document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) fsIcon.innerHTML = enterFSPath; });
 
-        if (localStorage.getItem('magic_rc_auth') === 'true') showApp();
+        document.getElementById('start-btn').onclick = () => {
+            if(students.length === 0) return alert(t('noStu'));
+            if(isRolling) return;
+            isRolling = true; warp = true;
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('orb-text').textContent = t('rolling');
+            document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
+            
+            setTimeout(() => {
+                isRolling = false; warp = false;
+                document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
+                const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
+                let pool = [...students];
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                const winners = pool.slice(0, count);
+                document.getElementById('result-cards').innerHTML = winners.map((w,i) => `<div class="name-card" style="animation-delay:${i*0.2}s">${w}</div>`).join('');
+                document.getElementById('result-overlay').classList.remove('hidden');
+            }, 3000);
+        };
+
+        // --- 核心：初始化启动与静默校验 ---
+        (async () => {
+            const isAuth = localStorage.getItem('magic_rc_auth') === 'true';
+            const savedCode = localStorage.getItem('magic_rc_license');
+            
+            if (isAuth && savedCode) {
+                showApp();
+                // 在进入后，后台悄悄验证一遍授权码
+                const isValid = await checkLicenseStatus(savedCode);
+                if (!isValid) {
+                    alert("⚠️ 授权已失效或过期，请重新激活");
+                    logout();
+                }
+            }
+        })();
     </script>
 </body>
 </html>

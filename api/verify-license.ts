@@ -230,8 +230,8 @@ export default async function handler(
     const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
     
     // 1. 基础检查
-    if (cleanCode.length !== 16 || !isCodeInWhitelist(cleanCode)) {
-      return res.status(401).json({ success: false, message: '授权码无效' });
+    if (!isCodeInWhitelist(cleanCode)) {
+      return res.status(401).json({ success: false, message: '授权码不存在或已被禁用，请联系管理员购买' });
     }
 
     const generatedDate = extractDateFromCode(cleanCode);
@@ -239,7 +239,9 @@ export default async function handler(
     
     const expiryDate = new Date(generatedDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-    if (new Date() > expiryDate) return res.status(401).json({ success: false, message: '授权码已过期' });
+    if (new Date() > expiryDate) {
+      return res.status(401).json({ success: false, message: `授权码已于 ${expiryDate.toLocaleDateString()} 过期，请购买新码` });
+    }
 
     // 2. 读取 Redis
     const redisKey = `license:${cleanCode}`;

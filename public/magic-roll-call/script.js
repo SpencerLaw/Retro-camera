@@ -1,6 +1,6 @@
 /**
  * 炫酷课堂点名器 - Magic Roll Call Core Script
- * Features: Canvas Particles, LocalStorage Auth, Audio Synthesis
+ * Features: Canvas Particles, LocalStorage Auth
  */
 
 const STATE = {
@@ -8,7 +8,6 @@ const STATE = {
     students: JSON.parse(localStorage.getItem('magic_rc_students') || '[]'),
     history: JSON.parse(localStorage.getItem('magic_rc_history') || '[]'),
     isRolling: false,
-    soundEnabled: true,
     pickCount: 1,
     lang: localStorage.getItem('global-language') || 'zh-CN'
 };
@@ -46,13 +45,12 @@ function applyTranslations() {
     setText('clear-btn-text', t('clearBtn'));
     setText('settings-title', t('magicSettings'));
     setText('pick-count-label', t('pickCount'));
-    setText('sound-label-text', t('soundEffect'));
     setText('reset-history-btn', t('resetHistory'));
     setText('logout-btn', t('logout'));
     
     // Stage
     if (!STATE.isRolling) {
-        setText('orb-text-span', t('ready'));
+        // setText('orb-text-span', t('ready')); // Removed READY text
         setText('start-btn-text-span', t('startBtn'));
     }
     setText('result-title-text', t('resultTitle'));
@@ -67,40 +65,6 @@ function setPlaceholder(id, text) {
     const el = document.getElementById(id);
     if (el) el.placeholder = text;
 }
-
-// --- Audio System (Web Audio API) ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const SoundFX = {
-    playTone: (freq, type, duration) => {
-        if (!STATE.soundEnabled) return;
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        } catch (e) {}
-    },
-    playRoll: () => {
-        let count = 0;
-        const interval = setInterval(() => {
-            if (!STATE.isRolling) { clearInterval(interval); return; }
-            const freq = 400 + Math.random() * 200;
-            SoundFX.playTone(freq, 'square', 0.1);
-        }, 100);
-        return interval;
-    },
-    playWin: () => {
-        [440, 554, 659, 880].forEach((f, i) => {
-            setTimeout(() => SoundFX.playTone(f, 'sine', 1.0), i * 100);
-        });
-    }
-};
 
 // --- Canvas Cosmos System ---
 const canvas = document.getElementById('cosmos-canvas');
@@ -261,7 +225,8 @@ document.getElementById('logout-btn').onclick = () => {
 // List Management
 function saveList() {
     const raw = document.getElementById('student-input').value;
-    const list = raw.split(/[\n,]/).map(s => s.trim()).filter(s => s);
+    const list = raw.split(/[
+,]/).map(s => s.trim()).filter(s => s);
     if (list.length > 0) {
         STATE.students = list;
         localStorage.setItem('magic_rc_students', JSON.stringify(STATE.students));
@@ -307,10 +272,6 @@ document.getElementById('pick-count-range').oninput = (e) => {
     document.getElementById('pick-count-display').textContent = STATE.pickCount;
 };
 
-document.getElementById('sound-toggle').onchange = (e) => {
-    STATE.soundEnabled = e.target.checked;
-};
-
 document.getElementById('reset-history-btn').onclick = () => {
     STATE.history = [];
     localStorage.removeItem('magic_rc_history');
@@ -325,34 +286,45 @@ const coreOrb = document.getElementById('core-orb');
 startBtn.onclick = startRollCall;
 document.getElementById('retry-btn').onclick = resetStage;
 
-function startRollCall() {
+async function startRollCall() {
+    console.log("🎲 Start Roll Call clicked");
+    
+    // 1. Validation
     if (STATE.students.length === 0) {
         alert(t('noStudents'));
         return;
     }
-    if (STATE.isRolling) return;
+    if (STATE.isRolling) {
+        console.log("⚠️ Already rolling, skip.");
+        return;
+    }
 
-    STATE.isRolling = true;
-    
-    startBtn.style.display = 'none';
-    resultOverlay.classList.add('hidden');
-    document.getElementById('result-cards-container').innerHTML = '';
-    
-    warpSpeed = true;
-    document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
-    coreOrb.innerHTML = '<span class="orb-text" style="font-size:3rem">' + t('rolling') + '</span>';
-    
-    const rollSound = SoundFX.playRoll();
-    
-    const hudInterval = setInterval(() => {
-        // Optional HUD effect
-    }, 50);
-
-    setTimeout(() => {
-        clearInterval(hudInterval);
-        clearInterval(rollSound);
-        finishRollCall();
-    }, 3000);
+    try {
+        STATE.isRolling = true;
+        console.log("🚀 Roll started. Students:", STATE.students.length);
+        
+        // 2. UI Transformation
+        startBtn.style.display = 'none';
+        resultOverlay.classList.add('hidden');
+        document.getElementById('result-cards-container').innerHTML = '';
+        
+        // 3. Animation State
+        warpSpeed = true;
+        document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
+        coreOrb.innerHTML = '<span class="orb-text" style="font-size:3rem">' + t('rolling') + '</span>';
+        
+        // 4. Timer for finish
+        setTimeout(() => {
+            console.log("🏁 Timer finished, stopping roll...");
+            finishRollCall();
+        }, 3000);
+        
+    } catch (error) {
+        console.error("🔥 Error during roll start:", error);
+        alert("魔法失灵了！请刷新页面重试。");
+        STATE.isRolling = false;
+        startBtn.style.display = 'flex';
+    }
 }
 
 function finishRollCall() {
@@ -382,8 +354,6 @@ function showWinners(winners) {
     resultOverlay.classList.remove('hidden');
     const container = document.getElementById('result-cards-container');
     
-    SoundFX.playWin();
-    
     winners.forEach((name, index) => {
         const card = document.createElement('div');
         card.className = 'name-card';
@@ -397,7 +367,7 @@ function resetStage() {
     resultOverlay.classList.add('hidden');
     magicCircle.style.opacity = '1';
     startBtn.style.display = 'flex';
-    coreOrb.innerHTML = '<span class="orb-text" id="orb-text-span">' + t('ready') + '</span>';
+    coreOrb.innerHTML = '<span class="orb-text" id="orb-text-span"></span>'; // Cleared text
 }
 
 window.onload = () => {

@@ -122,7 +122,6 @@ const DoraemonMonitorApp: React.FC = () => {
     return `${m}:${s}`;
   };
 
-  // --- 高对比度适配版参考条 ---
   const NoiseLevelReference = () => {
     const levels = [
       { min: 0, max: 20, label: "0–20 dB 极度安静" },
@@ -133,59 +132,22 @@ const DoraemonMonitorApp: React.FC = () => {
       { min: 100, max: 120, label: "100–120 dB 极其嘈杂" },
     ];
     const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
-    
-    // 动态对比色逻辑
     const panelBg = isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)';
-    const textColor = isDarkMode ? '#94a3b8' : '#475569';
     const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
-    const borderColor = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)';
-
+    const textColor = isDarkMode ? '#94a3b8' : '#475569';
     return (
-      <div className="db-reference-panel" style={{ 
-        width: '320px', padding: '30px', 
-        background: panelBg, 
-        borderRadius: '25px', 
-        border: `1px solid ${borderColor}`,
-        transition: 'all 0.3s'
-      }}>
-        <div className="reference-title" style={{ 
-          fontSize: '1.2rem', marginBottom: '30px', textAlign: 'center', 
-          color: activeTextColor, opacity: 0.8 
-        }}>分贝等级参考</div>
-        
+      <div className="db-reference-panel" style={{ width: '320px', padding: '30px', background: panelBg, borderRadius: '25px', border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)'}` }}>
+        <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '30px', textAlign: 'center', color: activeTextColor, opacity: 0.8 }}>分贝等级参考</div>
         <div className="vertical-meter-container" style={{ height: '420px', position: 'relative', display: 'flex' }}>
           <div style={{ position: 'relative', width: '60px' }}>
-            <div style={{ 
-              width: '12px', height: '100%', margin: '0 auto', borderRadius: '10px', 
-              background: 'linear-gradient(to top, #00f260 0%, #ffff00 30%, #ff9900 60%, #ff416c 100%)', 
-              boxShadow: isDarkMode ? 'inset 0 0 10px rgba(0,0,0,0.5)' : '0 2px 5px rgba(0,0,0,0.1)'
-            }} />
-            
-            {/* 指示球增加深色边框以适配白天模式 */}
-            <div style={{ 
-              position: 'absolute', bottom: `${pointerPos}%`, left: '50%', transform: 'translate(-50%, 50%)', 
-              zIndex: 100, width: '28px', height: '28px', background: '#fff', 
-              border: `3px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}`, 
-              boxShadow: isDarkMode ? '0 0 20px #00d4ff' : '0 4px 10px rgba(0,0,0,0.2)', 
-              borderRadius: '50%', transition: 'bottom 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center' 
-            }}>
-              <div style={{ 
-                position: 'absolute', right: '-12px', width: 0, height: 0, 
-                borderTop: '6px solid transparent', borderBottom: '6px solid transparent', 
-                borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` 
-              }} />
+            <div style={{ width: '12px', height: '100%', margin: '0 auto', borderRadius: '10px', background: 'linear-gradient(to top, #00f260 0%, #ffff00 30%, #ff9900 60%, #ff416c 100%)', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }} />
+            <div style={{ position: 'absolute', bottom: `${pointerPos}%`, left: '50%', transform: 'translate(-50%, 50%)', zIndex: 100, width: '28px', height: '28px', background: '#fff', border: `3px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}`, boxShadow: isDarkMode ? '0 0 20px #00d4ff' : '0 4px 10px rgba(0,0,0,0.2)', borderRadius: '50%', transition: 'bottom 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` }} />
             </div>
           </div>
-
           <div className="level-nodes" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingLeft: '20px', paddingBottom: '10px' }}>
             {levels.reverse().map((l, i) => (
-              <div key={i} style={{ 
-                color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor, 
-                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.6, 
-                fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal', 
-                fontSize: '0.95rem', transition: 'all 0.3s'
-              }}>{l.label}</div>
+              <div key={i} style={{ color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor, opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5, fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal', fontSize: '0.95rem' }}>{l.label}</div>
             ))}
           </div>
         </div>
@@ -193,16 +155,34 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   };
 
+  // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
     const BAR_COUNT = 80;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
+    // 在白天模式下使用更深的颜色和更高的不透明度
+    const opacity = isDarkMode ? 0.7 : 0.5;
+    const mainColor = `hsl(${hue}, 95%, 50%)`; // 极高饱和度
+    const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
+
     return (
-      <div className="visualizer-container" style={{ opacity: isDarkMode ? 0.4 : 0.2 }}>
+      <div className="visualizer-container" style={{ opacity: 1, pointerEvents: 'none' }}>
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
           const dist = Math.abs(i - BAR_COUNT / 2);
           const norm = 1 - (dist / (BAR_COUNT / 2));
-          const height = 15 + (Math.pow(currentDb/60, 2) * 200 * norm * (0.8 + Math.random()*0.4));
-          return <div key={i} className="wave-bar" style={{ height: `${height}px`, background: `hsl(${hue}, 85%, 55%)` }} />;
+          const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
+          const wave = Math.sin(i * 0.35 + Date.now() / 150) * 0.15;
+          const height = 20 + (350 * norm * (dbPower + wave + 0.08));
+          return (
+            <div key={i} className="wave-bar" style={{ 
+              height: `${height}px`, 
+              background: `linear-gradient(to top, transparent, ${mainColor})`,
+              opacity: opacity + norm * 0.3,
+              boxShadow: `0 0 15px ${glowColor}`,
+              width: '4px',
+              borderRadius: '4px',
+              transition: 'height 0.1s ease-out'
+            }} />
+          );
         })}
       </div>
     );

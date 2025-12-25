@@ -282,6 +282,7 @@
         <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
         <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
         <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
+        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
       </div>
       
       <div class="gen-list" id="genList"></div>
@@ -502,6 +503,13 @@
           random += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         code = 'ZY' + datePart + random;
+      } else if (type === 'magic') {
+        // DM + YYYYMMDD (8) + Random (6) = 16 chars
+        let random = '';
+        for (let j = 0; j < 6; j++) {
+          random += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        code = 'DM' + datePart + random;
       } else {
         // YYYYMMDD (8) + Random (8) = 16 chars
         let random = '';

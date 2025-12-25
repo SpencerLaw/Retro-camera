@@ -17,15 +17,24 @@
         }
         * { box-sizing: border-box; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'ZCOOL KuaiLe', cursive, sans-serif; background: #000; color: var(--text-white); height: 100vh; width: 100vw; }
+        
+        /* Canvas 必须置底但可见 */
         canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
-        .screen { position: absolute; inset: 0; z-index: 10; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s; background: linear-gradient(135deg, var(--bg-deep), var(--bg-purple), var(--bg-blue)); }
+        
+        .screen { 
+            position: absolute; inset: 0; z-index: 10; 
+            display: flex; justify-content: center; align-items: center; 
+            transition: opacity 0.3s; 
+            background: transparent !important; /* 核心修复：背景必须透明，否则挡住 Canvas */
+        }
         .hidden { display: none !important; }
         
+        /* 验证层依然保持黑色背景 */
         #gatekeeper-screen { position: fixed; inset: 0; z-index: 9999; background: #000; color: var(--primary-neon); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: sans-serif; }
         .spinner { width: 60px; height: 60px; border: 5px solid #222; border-top-color: var(--primary-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; }
         
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
-        .auth-card { padding: 40px; text-align: center; width: 400px; }
+        .auth-card { padding: 40px; text-align: center; width: 400px; background: rgba(15, 12, 41, 0.8); }
         input[type="text"] { width: 100%; padding: 15px; margin: 20px 0; border-radius: 8px; border: 2px solid white; background: white; color: #333; font-size: 1.5rem; text-align: center; }
         
         #app-screen { display: none; flex-direction: row; padding: 20px; }
@@ -38,8 +47,8 @@
         
         #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
         .magic-ring { position: absolute; border-radius: 50%; border: 4px solid transparent; }
-        .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; }
-        .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; }
+        .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; filter: drop-shadow(0 0 10px var(--primary-neon)); }
+        .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; filter: drop-shadow(0 0 10px var(--accent-pink)); }
         .core-orb { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon)); box-shadow: 0 0 60px var(--secondary-neon); display: flex; justify-content: center; align-items: center; z-index: 5; }
         
         #orb-text { 
@@ -51,10 +60,9 @@
         
         .magic-btn { background: linear-gradient(45deg, var(--secondary-neon), var(--accent-pink)); border: none; border-radius: 50px; color: white; padding: 15px 40px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px var(--secondary-neon); font-family: inherit; }
         .magic-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--accent-pink); }
-        .btn-small { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; color: white; margin-right: 5px; }
         .btn-logout { margin-top: auto; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 10px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        #result-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        #result-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         .name-card { background: white; color: var(--bg-deep); padding: 20px 50px; border-radius: 15px; font-size: 3.5rem; font-weight: bold; margin: 15px; box-shadow: 0 0 40px var(--accent-gold); animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
         
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -66,17 +74,19 @@
 </head>
 <body>
     <div id="gatekeeper-screen"><div class="spinner"></div><div id="gate-text" style="font-size:1.5rem">✨ 正在开启魔法传送门...</div></div>
+    
+    <!-- 星空画布 -->
     <canvas id="canvas"></canvas>
+    
     <button class="global-back-btn" onclick="window.location.href='/'">🔙</button>
-    <button id="fullscreen-btn" class="fullscreen-btn"><svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
+    <button id="fullscreen-btn" class="fullscreen-btn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
     
     <div id="auth-screen" class="screen hidden"><div class="auth-card glass-panel"><h1>✨ 魔法课堂入口</h1><p>请输入咒语（授权码）开启传送门</p><input type="text" id="license-input" placeholder="DM-xxxx"><button id="verify-btn" class="magic-btn">🔮 芝麻开门</button></div></div>
     
-    <div id="app-screen" class="screen"><aside class="sidebar glass-panel"><h2>🎓 点名魔法师</h2><div>人数: <span id="student-count">0</span></div><textarea id="student-input" placeholder="每行一个姓名"></textarea><div><button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000">💾 保存</button><button id="clear-btn" class="btn-small" style="background:#ff416c">🗑️ 清空</button></div><div style="margin-top:10px"><label>抽取人数: <span id="pick-val" style="color:var(--primary-neon); font-weight:bold">1</span></label><input type="range" id="pick-range" min="1" max="10" value="1"></div><div id="student-preview" style="overflow-y:auto; flex:1; margin-top:10px"></div><button id="logout-btn" class="btn-logout">🚪 退出系统</button></aside><main class="stage"><div id="magic-circle-container"><div class="magic-ring ring-1"></div><div class="magic-ring ring-2"></div><div class="core-orb"><span id="orb-text"></span></div></div><div style="margin-top: 50px;"><button id="start-btn" class="magic-btn">⚡ 开始点名</button></div></main><div id="result-overlay" class="hidden"><h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉</h1><div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div><button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button></div></div>
+    <div id="app-screen" class="screen"><aside class="sidebar glass-panel"><h2>🎓 点名魔法师</h2><div>人数: <span id="student-count">0</span></div><textarea id="student-input" placeholder="每行一个姓名"></textarea><div><button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000; font-weight:bold; padding:8px 15px; border-radius:5px; border:none; cursor:pointer;">💾 保存</button><button id="clear-btn" class="btn-small" style="background:#ff416c; color:white; padding:8px 15px; border-radius:5px; border:none; cursor:pointer; margin-left:5px;">🗑️ 清空</button></div><div style="margin-top:10px"><label>抽取人数: <span id="pick-val" style="color:var(--primary-neon); font-weight:bold">1</span></label><input type="range" id="pick-range" min="1" max="10" value="1"></div><div id="student-preview" style="overflow-y:auto; flex:1; margin-top:10px"></div><button id="logout-btn" class="btn-logout">🚪 退出系统</button></aside><main class="stage"><div id="magic-circle-container"><div class="magic-ring ring-1"></div><div class="magic-ring ring-2"></div><div class="core-orb"><span id="orb-text"></span></div></div><div style="margin-top: 50px;"><button id="start-btn" class="magic-btn">⚡ 开始点名</button></div></main><div id="result-overlay" class="hidden"><h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉</h1><div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div><button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button></div></div>
 
     <script>
     (function(){
-        // 核心状态置顶，确保所有函数可见
         window.isWarpActive = false; 
         let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
         let isRolling = false; let isLicenseValid = false;
@@ -87,7 +97,6 @@
         };
         const t = (k) => (TEXTS[LANG] || TEXTS['zh-CN'])[k] || k;
 
-        const gate = document.getElementById('gatekeeper-screen');
         const forceExit = (msg) => {
             localStorage.setItem('magic_rc_auth', 'false');
             document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;">
@@ -98,7 +107,8 @@
         };
 
         const initApp = () => {
-            isLicenseValid = true; gate.style.display = 'none';
+            isLicenseValid = true; 
+            document.getElementById('gatekeeper-screen').style.display = 'none';
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').style.display = 'flex';
             
@@ -106,14 +116,10 @@
                 if(!isLicenseValid) return forceExit("权限失效");
                 if(students.length === 0) return alert(t('noStu'));
                 if(isRolling) return;
-                
-                isRolling = true; 
-                window.isWarpActive = true; // 直接控制全局变量
-                
+                isRolling = true; window.isWarpActive = true;
                 document.getElementById('start-btn').classList.add('hidden');
                 document.getElementById('orb-text').textContent = t('rolling');
                 document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
-                
                 setTimeout(() => {
                     isRolling = false; window.isWarpActive = false;
                     document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
@@ -125,71 +131,63 @@
                     document.getElementById('result-overlay').classList.remove('hidden');
                 }, 3000);
             };
-
             document.getElementById('retry-btn').onclick = () => {
                 document.getElementById('result-overlay').classList.add('hidden');
                 document.getElementById('start-btn').classList.remove('hidden');
                 document.getElementById('orb-text').textContent = "";
             };
-
             document.getElementById('save-btn').onclick = () => {
                 const raw = document.getElementById('student-input').value;
                 const list = Array.from(new Set(raw.split('\n').map(x => x.trim()).filter(x => x.length > 0)));
-                if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); }
+                if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert(t('saveOk').replace('{n}', list.length)); } 
                 else alert(t('empty'));
             };
-
             document.getElementById('clear-btn').onclick = () => { if(confirm("确定清空？")) { students = []; localStorage.setItem('magic_rc_students', '[]'); document.getElementById('student-input').value = ''; renderList(); } };
             document.getElementById('logout-btn').onclick = () => { localStorage.clear(); window.location.href='/'; };
             document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
             renderList();
         };
 
-        const showAuth = () => { gate.style.display = 'none'; document.getElementById('auth-screen').classList.remove('hidden');
-            document.getElementById('verify-btn').onclick = async () => {
-                const code = document.getElementById('license-input').value.trim();
-                if (!code.toUpperCase().startsWith('DM')) return alert("需DM授权码");
-                try {
-                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-user' }) });
-                    const data = await res.json();
-                    if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); initApp(); }
-                    else alert(data.message);
-                } catch(e) { alert("网络异常"); }
-            };
-        };
-
         const renderList = () => {
             const container = document.getElementById('student-preview');
-            const uniqueStudents = Array.from(new Set(students));
-            container.innerHTML = uniqueStudents.map(s => `<span style="background:rgba(255,255,255,0.1); padding:3px 10px; border-radius:10px; font-size:0.8rem; margin:2px; display:inline-block;">${s}</span>`).join('');
-            document.getElementById('student-count').textContent = uniqueStudents.length;
-            if (!document.getElementById('student-input').value) document.getElementById('student-input').value = uniqueStudents.join('\n');
+            container.innerHTML = Array.from(new Set(students)).map(s => `<span style="background:rgba(255,255,255,0.1); padding:3px 10px; border-radius:10px; font-size:0.8rem; margin:2px; display:inline-block;">${s}</span>`).join('');
+            document.getElementById('student-count').textContent = students.length;
+            if (!document.getElementById('student-input').value) document.getElementById('student-input').value = students.join('\n');
         };
 
-        // --- Canvas 核心引擎 (极致激光逻辑) ---
+        // --- Canvas 引擎 (背景 + 星空 + 激光) ---
         const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
         let stars = []; window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }; window.onresize();
         for(let i=0; i<300; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, speed: 0.5 + Math.random()});
         
         function animate() {
-            // 激光激活时增加残影效果
-            ctx.fillStyle = window.isWarpActive ? 'rgba(5, 5, 20, 0.4)' : '#0f0c29'; 
+            // 背景绘制
+            if (window.isWarpActive) {
+                ctx.fillStyle = 'rgba(5, 5, 25, 0.4)'; // 激光时的残影黑
+            } else {
+                // 绘制深色渐变背景
+                let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                grad.addColorStop(0, '#0f0c29'); grad.addColorStop(0.5, '#302b63'); grad.addColorStop(1, '#24243e');
+                ctx.fillStyle = grad;
+            }
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             stars.forEach(s => {
-                s.y += window.isWarpActive ? 35 : s.speed; 
+                s.y += window.isWarpActive ? 40 : s.speed; 
                 if(s.y > canvas.height) s.y = 0;
                 
-                ctx.beginPath();
                 if(window.isWarpActive) {
-                    // 激光线条模式
+                    ctx.beginPath();
                     ctx.moveTo(s.x, s.y);
-                    ctx.lineTo(s.x, s.y + 30); // 线条长度 30px
+                    ctx.lineTo(s.x, s.y + 40); // 极长激光
                     ctx.strokeStyle = '#00f260';
-                    ctx.lineWidth = 3; // 加粗激光
+                    ctx.lineWidth = 3;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#00f260';
                     ctx.stroke();
+                    ctx.shadowBlur = 0; // 重置防止性能损耗
                 } else {
-                    // 普通星星模式
+                    ctx.beginPath();
                     ctx.fillStyle = '#fff';
                     ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
                     ctx.fill();
@@ -199,11 +197,7 @@
         }
         animate();
 
-        const fsBtn = document.getElementById('fullscreen-btn'); const fsIcon = document.getElementById('fs-icon');
-        const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
-        const exitFSPath = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
-        fsBtn.onclick = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; } else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } } };
-
+        // 验证逻辑
         (async () => {
             const isAuth = localStorage.getItem('magic_rc_auth') === 'true';
             const savedCode = localStorage.getItem('magic_rc_license');
@@ -212,8 +206,21 @@
                     const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: savedCode, deviceId: 'rc-user' }) });
                     const data = await res.json();
                     if (data.success) initApp(); else forceExit(data.message);
-                } catch(e) { initApp(); }
-            } else { showAuth(); }
+                } catch(e) { initApp(); } // 如果验证失败，也尝试初始化，可能本地存储已过期
+            } else { 
+                document.getElementById('gatekeeper-screen').style.display = 'none';
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('verify-btn').onclick = async () => {
+                    const code = document.getElementById('license-input').value.trim();
+                    if (!code.toUpperCase().startsWith('DM')) return alert("需DM授权码");
+                    try {
+                        const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-user' }) });
+                        const data = await res.json();
+                        if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); initApp(); } 
+                        else alert(data.message);
+                    } catch(e) { alert("网络波动"); }
+                };
+            }
         })();
     })();
     </script>

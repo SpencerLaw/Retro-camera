@@ -153,7 +153,11 @@
 
     <canvas id="canvas"></canvas>
     <button class="global-back-btn" onclick="window.location.href='/'">🔙</button>
-    <button id="fullscreen-btn" class="fullscreen-btn" title="全屏显示">📺</button>
+    <button id="fullscreen-btn" class="fullscreen-btn" title="全屏显示">
+        <svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+    </button>
 
     <!-- 1. 授权页 -->
     <div id="auth-screen" class="screen">
@@ -330,19 +334,32 @@
 
         // --- 全屏控制 ---
         const fsBtn = document.getElementById('fullscreen-btn');
+        const fsIcon = document.getElementById('fs-icon');
+        
+        const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+        const exitFSPath = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
+
         fsBtn.onclick = () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
-                fsBtn.textContent = '❌';
+                fsIcon.innerHTML = exitFSPath;
                 fsBtn.title = '退出全屏';
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                    fsBtn.textContent = '📺';
+                    fsIcon.innerHTML = enterFSPath;
                     fsBtn.title = '全屏显示';
                 }
             }
         };
+
+        // 监听 ESC 键导致的退出全屏，同步图标
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fsIcon.innerHTML = enterFSPath;
+                fsBtn.title = '全屏显示';
+            }
+        });
 
         if (localStorage.getItem('magic_rc_auth') === 'true') showApp();
     </script>

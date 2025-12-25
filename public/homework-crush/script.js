@@ -170,17 +170,14 @@
                 renderUI(); renderTree();
             }
         };
+        // 清空数据
         document.getElementById('clear-data-btn').onclick = () => {
             if (confirm('确定清空所有数据？')) { STATE.students = []; saveData(); renderUI(); renderTree(); }
         };
-        document.getElementById('logout-btn').onclick = () => { localStorage.clear(); window.location.href = '/'; };
+
+        // 开始新一天
         document.getElementById('reset-day-btn').onclick = () => {
-            if(confirm(t('resetDayConfirm'))) {
-                const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-                STATE.students.forEach(s => { if(!s.history) s.history=[false,false,false,false,false]; s.history[day] = false; });
-                saveData(); renderUI(); renderTree();
-            }
-        };
+
         document.getElementById('fullscreen-btn').onclick = () => {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
             else document.exitFullscreen();

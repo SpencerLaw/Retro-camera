@@ -16,6 +16,11 @@
     user-select: none; /* 防止选中文字影响体验 */
 }
 
+input, textarea {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
 body {
     margin: 0;
     padding: 0;

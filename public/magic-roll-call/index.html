@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 炫酷课堂点名器 - Magic Roll Call</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 背景画布：星空与粒子特效 -->
+    <canvas id="cosmos-canvas"></canvas>
+
+    <!-- 1. 授权界面 -->
+    <div id="auth-screen" class="screen active">
+        <button class="global-back-btn" title="返回首页" onclick="window.location.href='/'" style="position:absolute;top:20px;left:20px;z-index:100;background:none;border:none;font-size:2rem;cursor:pointer;">🔙</button>
+        <div class="auth-card glass-panel">
+            <h1 class="glow-text" id="auth-title-text">✨ 魔法课堂入口</h1>
+            <p id="auth-subtitle-text">请输入咒语（授权码）开启传送门</p>
+            <div class="input-group">
+                <input type="text" id="license-input" placeholder="DM-xxxx" maxlength="20">
+                <button id="verify-btn" class="magic-btn">🔮 <span id="verify-btn-text">芝麻开门</span></button>
+            </div>
+            <p id="auth-msg"></p>
+        </div>
+    </div>
+
+    <!-- 2. 主界面 -->
+    <div id="app-screen" class="screen hidden">
+        
+        <!-- 左侧：控制塔 -->
+        <aside class="sidebar glass-panel">
+            <button class="global-back-btn" title="返回首页" onclick="window.location.href='/'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;align-self: flex-start;">🔙</button>
+            <div class="logo-area">
+                <h2 id="sidebar-title">🎓 点名魔法师</h2>
+            </div>
+
+            <div class="control-group">
+                <h3 id="student-list-title">👥 学生名单</h3>
+                <div class="student-stats">
+                    <span id="student-count-label">当前人数:</span> <span id="student-count" class="highlight-number">0</span>
+                </div>
+                <textarea id="student-input" placeholder="在此粘贴名单&#10;每行一个姓名&#10;支持Excel复制"></textarea>
+                <div class="btn-row">
+                    <button id="save-list-btn" class="btn-small primary"><span id="save-btn-text">💾 保存名单</span></button>
+                    <button id="clear-list-btn" class="btn-small danger"><span id="clear-btn-text">🗑️ 清空</span></button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3 id="settings-title">⚙️ 魔法设定</h3>
+                <label id="pick-count-label">抽取人数:</label>
+                <div class="range-selector">
+                    <input type="range" id="pick-count-range" min="1" max="10" value="1" step="1">
+                    <span id="pick-count-display" class="highlight-number">1</span>
+                </div>
+                
+                <div class="toggle-row">
+                    <label>
+                        <input type="checkbox" id="sound-toggle" checked>
+                        <span id="sound-label-text">🔊 魔法音效</span>
+                    </label>
+                </div>
+                
+                <button id="reset-history-btn" class="btn-small secondary">🔄 重置已点记录</button>
+            </div>
+
+            <div class="student-list-preview" id="student-list-preview">
+                <!-- 这里的名字会动态生成 -->
+            </div>
+            
+            <button id="logout-btn" class="btn-text">退出登录</button>
+        </aside>
+
+        <!-- 右侧：魔法舞台 -->
+        <main class="stage">
+            
+            <!-- 待机/动画中心：魔法阵 -->
+            <div id="magic-circle-container">
+                <div class="magic-ring ring-1"></div>
+                <div class="magic-ring ring-2"></div>
+                <div class="magic-ring ring-3"></div>
+                <div class="core-orb" id="core-orb">
+                    <span class="orb-text" id="orb-text-span">READY</span>
+                </div>
+            </div>
+
+            <!-- 抽奖结果展示区 -->
+            <div id="result-overlay" class="hidden">
+                <h2 class="result-title" id="result-title-text">🎉 天选之子 🎉</h2>
+                <div id="result-cards-container" class="cards-grid">
+                    <!-- 结果卡片 -->
+                </div>
+                <button id="retry-btn" class="magic-btn large">✨ 再来一次</button>
+            </div>
+
+            <!-- 底部大按钮 -->
+            <div class="controls-bottom">
+                <button id="start-btn" class="magic-btn giant pulsate">
+                    <span class="btn-icon">⚡</span>
+                    <span class="btn-text" id="start-btn-text-span">开始点名</span>
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="translations.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen } from 'lucide-react';
+import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2 } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -260,6 +260,49 @@ export const HomePage: React.FC = () => {
               <div className="mt-6 pt-6 border-t-[3px] border-white/70">
                 <div className="inline-block px-6 py-3 bg-white text-[#4CAF50] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(102,187,106,0.4)] border-[3px] border-[#A5D6A7] hover:bg-gradient-to-r hover:from-[#A5D6A7] hover:to-white">
                   Enter → 📝
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Magic Roll Call - Cosmic Purple/Blue */}
+          <a
+            href="/magic-roll-call/index.html"
+            className="group relative bg-gradient-to-br from-[#1a0b2e] via-[#302b63] to-[#24243e] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(48,43,99,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(48,43,99,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Cute stars decoration */}
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🔮</div>
+
+            {/* Kawaii Glow Effect */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#00f260] to-[#0575e6] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-[#302b63] rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(0,0,0,0.3)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#4a4380]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Wand2 size={72} className="text-[#00f260] drop-shadow-[0_0_15px_rgba(0,242,96,0.8)]" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#00f260] mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ textShadow: '0 0 10px rgba(0,242,96,0.5)' }}>{t('home.magicRollCall.title')}</h2>
+              <p className="text-base text-[#76e4ff] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                {t('home.magicRollCall.subtitle')}
+              </p>
+              <p className="text-sm text-[#bcaae3] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                {t('home.magicRollCall.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/20">
+                <div className="inline-block px-6 py-3 bg-[#302b63] text-[#00f260] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)] border-[3px] border-[#00f260] hover:bg-gradient-to-r hover:from-[#00f260] hover:to-[#0575e6] hover:text-white">
+                  Enter → ✨
                 </div>
               </div>
             </div>

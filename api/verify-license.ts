@@ -58,8 +58,8 @@ function extractDateFromCode(code: string): Date | null {
   try {
     let cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
     
-    // 如果是以 ZY 开头的码，日期从第 3 位开始 (ZY + YYYYMMDD + ...)
-    if (cleanCode.startsWith('ZY')) {
+    // 支持多种前缀 (ZY 或 DM)
+    if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM')) {
       cleanCode = cleanCode.substring(2);
     }
     

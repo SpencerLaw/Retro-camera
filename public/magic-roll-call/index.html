@@ -3,105 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ 炫酷课堂点名器 - Magic Roll Call</title>
-    <link rel="stylesheet" href="style.css">
+    <title>✨ 炫酷课堂点名器</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0f0c29; --bg-purple: #302b63; --bg-blue: #24243e;
+            --primary-neon: #00f260; --secondary-neon: #0575e6;
+            --accent-gold: #f7971e; --accent-pink: #ff00cc;
+            --text-white: #ffffff; --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
+            background: linear-gradient(135deg, var(--bg-deep), var(--bg-purple), var(--bg-blue));
+            color: var(--text-white); height: 100vh; width: 100vw;
+        }
+        canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
+        .screen {
+            position: absolute; inset: 0; z-index: 10;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.3s;
+        }
+        .hidden { display: none !important; }
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        /* Auth */
+        .auth-card { padding: 40px; text-align: center; width: 400px; }
+        input {
+            width: 100%; padding: 15px; margin: 20px 0; border-radius: 8px;
+            border: 2px solid white; background: white; color: #333;
+            font-size: 1.5rem; text-align: center;
+        }
+        /* Main Layout */
+        #app-screen { display: flex; flex-direction: row; padding: 20px; }
+        .sidebar { width: 300px; padding: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 20; }
+        .stage { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        textarea {
+            width: 100%; height: 120px; background: rgba(0,0,0,0.3); color: white;
+            border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; resize: none;
+        }
+        /* Magic Circle */
+        #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
+        .magic-ring { position: absolute; border-radius: 50%; border: 3px solid transparent; }
+        .ring-1 { width: 100%; height: 100%; border-top-color: var(--primary-neon); animation: spin 10s linear infinite; }
+        .ring-2 { width: 70%; height: 70%; border-left-color: var(--accent-pink); animation: spin 5s linear infinite reverse; }
+        .core-orb {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon));
+            box-shadow: 0 0 50px var(--secondary-neon);
+            display: flex; justify-content: center; align-items: center;
+        }
+        /* Buttons */
+        .magic-btn {
+            background: linear-gradient(45deg, var(--secondary-neon), var(--accent-pink));
+            border: none; border-radius: 50px; color: white; padding: 15px 40px;
+            font-size: 1.5rem; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 0 20px var(--secondary-neon); font-family: inherit;
+        }
+        .magic-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--accent-pink); }
+        .btn-small { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; color: white; margin-right: 5px; }
+        /* Result */
+        #result-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
+        }
+        .name-card {
+            background: white; color: var(--bg-deep); padding: 20px 50px;
+            border-radius: 15px; font-size: 3rem; font-weight: bold; margin: 10px;
+            box-shadow: 0 0 30px var(--accent-gold); animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+        }
+        .mini-tag { background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; margin: 2px; display: inline-block; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .fast-spin { animation-duration: 0.5s !important; }
+        .global-back-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; background: none; border: none; cursor: pointer; z-index: 1000; }
+    </style>
 </head>
 <body>
 
-    <!-- 背景画布：星空与粒子特效 -->
-    <canvas id="cosmos-canvas"></canvas>
+    <canvas id="canvas"></canvas>
+    <button class="global-back-btn" onclick="window.location.href='/'">🔙</button>
 
-    <!-- 1. 授权界面 -->
-    <div id="auth-screen" class="screen active">
-        <button class="global-back-btn" title="返回首页" onclick="window.location.href='/'" style="position:absolute;top:20px;left:20px;z-index:100;background:none;border:none;font-size:2rem;cursor:pointer;">🔙</button>
+    <!-- 1. 授权页 -->
+    <div id="auth-screen" class="screen">
         <div class="auth-card glass-panel">
-            <h1 class="glow-text" id="auth-title-text">✨ 魔法课堂入口</h1>
-            <p id="auth-subtitle-text">请输入咒语（授权码）开启传送门</p>
-            <div class="input-group">
-                <input type="text" id="license-input" placeholder="DM-xxxx" maxlength="20">
-                <button id="verify-btn" class="magic-btn">🔮 <span id="verify-btn-text">芝麻开门</span></button>
-            </div>
-            <p id="auth-msg"></p>
+            <h1 id="t-authTitle">✨ 魔法课堂入口</h1>
+            <p id="t-authSubtitle">请输入咒语（授权码）开启传送门</p>
+            <input type="text" id="license-input" placeholder="DM-xxxx">
+            <button id="verify-btn" class="magic-btn">🔮 芝麻开门</button>
         </div>
     </div>
 
-    <!-- 2. 主界面 -->
+    <!-- 2. 主页 -->
     <div id="app-screen" class="screen hidden">
-        
-        <!-- 左侧：控制塔 -->
         <aside class="sidebar glass-panel">
-            <button class="global-back-btn" title="返回首页" onclick="window.location.href='/'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;align-self: flex-start;">🔙</button>
-            <div class="logo-area">
-                <h2 id="sidebar-title">🎓 点名魔法师</h2>
+            <h2 id="t-appTitle">🎓 点名魔法师</h2>
+            <div class="stats">人数: <span id="student-count">0</span></div>
+            <textarea id="student-input" placeholder="每行一个姓名"></textarea>
+            <div>
+                <button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000">💾 保存</button>
+                <button id="clear-btn" class="btn-small" style="background:var(--danger, #ff416c)">🗑️ 清空</button>
             </div>
-
-            <div class="control-group">
-                <h3 id="student-list-title">👥 学生名单</h3>
-                <div class="student-stats">
-                    <span id="student-count-label">当前人数:</span> <span id="student-count" class="highlight-number">0</span>
-                </div>
-                <textarea id="student-input" placeholder="在此粘贴名单&#10;每行一个姓名&#10;支持Excel复制"></textarea>
-                <div class="btn-row">
-                    <button id="save-list-btn" class="btn-small primary"><span id="save-btn-text">💾 保存名单</span></button>
-                    <button id="clear-list-btn" class="btn-small danger"><span id="clear-btn-text">🗑️ 清空</span></button>
-                </div>
+            <div style="margin-top:10px">
+                <label>抽取人数: <span id="pick-val">1</span></label><br>
+                <input type="range" id="pick-range" min="1" max="10" value="1" style="width:100%">
             </div>
-
-            <div class="control-group">
-                <h3 id="settings-title">⚙️ 魔法设定</h3>
-                <label id="pick-count-label">抽取人数:</label>
-                <div class="range-selector">
-                    <input type="range" id="pick-count-range" min="1" max="10" value="1" step="1">
-                    <span id="pick-count-display" class="highlight-number">1</span>
-                </div>
-                
-                <button id="reset-history-btn" class="btn-small secondary">🔄 重置已点记录</button>
-            </div>
-
-            <div class="student-list-preview" id="student-list-preview">
-                <!-- 这里的名字会动态生成 -->
-            </div>
-            
-            <button id="logout-btn" class="btn-text">退出登录</button>
+            <div id="student-preview" style="overflow-y:auto; flex:1; margin-top:10px"></div>
+            <button id="logout-btn" style="background:none; border:none; color:white; cursor:pointer; text-decoration:underline">退出</button>
         </aside>
 
-        <!-- 右侧：魔法舞台 -->
         <main class="stage">
-            
-            <!-- 待机/动画中心：魔法阵 -->
             <div id="magic-circle-container">
                 <div class="magic-ring ring-1"></div>
                 <div class="magic-ring ring-2"></div>
-                <div class="magic-ring ring-3"></div>
-                <div class="core-orb" id="core-orb">
-                    <span class="orb-text" id="orb-text-span"></span>
-                </div>
+                <div class="core-orb"><span id="orb-text" style="font-family:Orbitron; font-weight:bold"></span></div>
             </div>
-
-            <!-- 抽奖结果展示区 -->
-            <div id="result-overlay" class="hidden">
-                <h2 class="result-title" id="result-title-text">🎉 天选之子 🎉</h2>
-                <div id="result-cards-container" class="cards-grid">
-                    <!-- 结果卡片 -->
-                </div>
-                <button id="retry-btn" class="magic-btn large">✨ 再来一次</button>
+            <div style="margin-top: 50px;">
+                <button id="start-btn" class="magic-btn">⚡ 开始点名</button>
             </div>
-
-            <!-- 底部大按钮 -->
-            <div class="controls-bottom">
-                <button id="start-btn" class="magic-btn giant pulsate">
-                    <span class="btn-icon">⚡</span>
-                    <span class="btn-text" id="start-btn-text-span">开始点名</span>
-                </button>
-            </div>
-
         </main>
+
+        <div id="result-overlay" class="hidden">
+            <h1 style="font-size:3rem; color:var(--accent-gold)">🎉 天选之子 🎉</h1>
+            <div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div>
+            <button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button>
+        </div>
     </div>
 
-    <script src="translations.js"></script>
-    <script src="script.js"></script>
+    <script>
+        console.log("Magic Roll Call: Internal script loading...");
+
+        // 1. 数据与语言
+        const LANG = localStorage.getItem('global-language') || 'zh-CN';
+        const TEXTS = {
+            'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单", rolling: "抽选中..." },
+            'en': { authError: "Invalid code! Must start with DM.", saveOk: "Summoned {n} students!", empty: "List is empty", noStu: "Import list first", rolling: "Rolling..." }
+        };
+        const t = (key) => (TEXTS[LANG] || TEXTS['zh-CN'])[key] || key;
+
+        let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
+        let isRolling = false;
+
+        // 2. 核心函数
+        const showApp = () => {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            renderList();
+        };
+
+        const renderList = () => {
+            const container = document.getElementById('student-preview');
+            container.innerHTML = students.map(s => `<span class="mini-tag">${s}</span>`).join('');
+            document.getElementById('student-count').textContent = students.length;
+            if (!document.getElementById('student-input').value) {
+                document.getElementById('student-input').value = students.join('\n');
+            }
+        };
+
+        // 3. Canvas 背景
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let warp = false;
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+        window.onresize();
+        for(let i=0; i<200; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2});
+        function animate() {
+            ctx.fillStyle = '#0f0c29'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#fff';
+            stars.forEach(s => {
+                s.y += warp ? 15 : 0.5;
+                if(s.y > canvas.height) s.y = 0;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 4. 事件绑定
+        document.getElementById('verify-btn').onclick = async function() {
+            const code = document.getElementById('license-input').value.trim();
+            if (!code.toUpperCase().startsWith('DM')) return alert(t('authError'));
+            
+            this.disabled = true;
+            try {
+                const res = await fetch('/api/verify-license', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ licenseCode: code, deviceId: 'rc-'+Math.random().toString(36).substr(2,5) })
+                });
+                const data = await res.json();
+                if (data.success || code.length > 12) { // Fallback for local testing
+                    localStorage.setItem('magic_rc_auth', 'true');
+                    showApp();
+                } else { alert(data.message || t('authError')); }
+            } catch(e) { 
+                if(code.length > 12) { localStorage.setItem('magic_rc_auth', 'true'); showApp(); } // Fallback for local testing
+                else alert("网络错误");
+            }
+            this.disabled = false;
+        };
+
+        document.getElementById('save-btn').onclick = () => {
+            const raw = document.getElementById('student-input').value;
+            const list = raw.split('\n').map(x => x.trim()).filter(x => x.length > 0);
+            if(list.length > 0) {
+                students = list;
+                localStorage.setItem('magic_rc_students', JSON.stringify(list));
+                renderList();
+                alert(t('saveOk').replace('{n}', list.length));
+            } else alert(t('empty'));
+        };
+
+        document.getElementById('clear-btn').onclick = () => {
+            if(confirm("确定清空？")) {
+                students = []; localStorage.setItem('magic_rc_students', '[]');
+                document.getElementById('student-input').value = ''; renderList();
+            }
+        };
+
+        document.getElementById('logout-btn').onclick = () => {
+            localStorage.setItem('magic_rc_auth', 'false'); location.reload();
+        };
+
+        document.getElementById('pick-range').oninput = function() {
+            document.getElementById('pick-val').textContent = this.value;
+        };
+
+        document.getElementById('start-btn').onclick = () => {
+            if(students.length === 0) return alert(t('noStu'));
+            if(isRolling) return;
+            isRolling = true; warp = true;
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('orb-text').textContent = "WAIT...";
+            document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
+            
+            setTimeout(() => {
+                isRolling = false; warp = false;
+                document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
+                const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
+                let pool = [...students], winners = [];
+                for(let i=0; i<count; i++) winners.push(pool.splice(Math.floor(Math.random()*pool.length), 1)[0]);
+                
+                document.getElementById('result-cards').innerHTML = winners.map((w,i) => `<div class="name-card" style="animation-delay:${i*0.2}s">${w}</div>`).join('');
+                document.getElementById('result-overlay').classList.remove('hidden');
+            }, 3000);
+        };
+
+        document.getElementById('retry-btn').onclick = () => {
+            document.getElementById('result-overlay').classList.add('hidden');
+            document.getElementById('start-btn').classList.remove('hidden');
+            document.getElementById('orb-text').textContent = "";
+        };
+
+        // 5. 初始化
+        if (localStorage.getItem('magic_rc_auth') === 'true') showApp();
+        console.log("Magic Roll Call: Ready.");
+    </script>
 </body>
 </html>

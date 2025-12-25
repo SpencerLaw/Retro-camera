@@ -60,22 +60,23 @@
             background: var(--primary-neon); border-radius: 50%; box-shadow: 0 0 10px var(--primary-neon);
             border: 2px solid white; transition: 0.2s;
         }
-        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
         /* Magic Circle */
         #magic-circle-container { position: relative; width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; }
         .magic-ring { position: absolute; border-radius: 50%; border: 4px solid transparent; }
-        .ring-1 { width: 100%; height: 100%; border-top-color: var(--primary-neon); animation: spin 10s linear infinite; }
-        .ring-2 { width: 70%; height: 70%; border-left-color: var(--accent-pink); animation: spin 5s linear infinite reverse; }
+        .ring-1 { width: 100%; height: 100%; border-top: 4px solid var(--primary-neon); animation: spin 10s linear infinite; }
+        .ring-2 { width: 70%; height: 70%; border-left: 4px solid var(--accent-pink); animation: spin 5s linear infinite reverse; }
         .core-orb {
-            width: 120px; height: 120px; border-radius: 50%;
+            width: 140px; height: 140px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fff, var(--secondary-neon));
             box-shadow: 0 0 60px var(--secondary-neon);
             display: flex; justify-content: center; align-items: center; z-index: 5;
+            overflow: hidden; padding: 10px;
         }
         #orb-text {
-            font-size: 1.4rem; text-align: center; color: #fff; font-weight: bold;
+            font-size: 1.2rem; text-align: center; color: #fff; font-weight: bold;
             text-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold);
             animation: textPulse 0.6s ease-in-out infinite; pointer-events: none; line-height: 1.2;
+            word-break: break-all;
         }
         @keyframes textPulse { 0%, 100% { transform: scale(0.9); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
         /* Buttons */
@@ -177,8 +178,8 @@
     <script>
         const LANG = localStorage.getItem('global-language') || 'zh-CN';
         const TEXTS = {
-            'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单", rolling: "✨召唤中✨" },
-            'en': { authError: "Invalid code! Must start with DM.", saveOk: "Summoned {n} students!", empty: "List is empty", noStu: "Import list first", rolling: "⚡SUMMON⚡" }
+            'zh-CN': { authError: "咒语错误！需要以 DM 开头的授权码。", saveOk: "成功召唤 {n} 位学徒！", empty: "名单不能为空", noStu: "请先导入名单" },
+            'en': { authError: "Invalid code! Must start with DM.", saveOk: "Summoned {n} students!", empty: "List is empty", noStu: "Import list first" }
         };
         const t = (key) => (TEXTS[LANG] || TEXTS['zh-CN'])[key] || key;
 
@@ -193,7 +194,6 @@
 
         const renderList = () => {
             const container = document.getElementById('student-preview');
-            // 渲染时也确保去重展示
             const uniqueStudents = Array.from(new Set(students));
             container.innerHTML = uniqueStudents.map(s => `<span class="mini-tag">${s}</span>`).join('');
             document.getElementById('student-count').textContent = uniqueStudents.length;
@@ -226,10 +226,9 @@
         }
         animate();
 
-        // 录入去重优化
+        // 录入去重
         document.getElementById('save-btn').onclick = () => {
             const raw = document.getElementById('student-input').value;
-            // 核心修复：使用 Set 进行全量去重，并过滤空行
             const list = Array.from(new Set(raw.split('\n').map(x => x.trim()).filter(x => x.length > 0)));
             if(list.length > 0) {
                 students = list;
@@ -239,34 +238,45 @@
             } else alert(t('empty'));
         };
 
+        // 核心抽取逻辑：深度随机 + 无重复
         document.getElementById('start-btn').onclick = () => {
             if(students.length === 0) return alert(t('noStu'));
             if(isRolling) return;
             isRolling = true; warp = true;
             document.getElementById('start-btn').classList.add('hidden');
-            document.getElementById('orb-text').textContent = t('rolling');
+            
+            // 视觉随机见证：快速闪烁名字
+            const orbText = document.getElementById('orb-text');
+            const flickerInterval = setInterval(() => {
+                orbText.textContent = students[Math.floor(Math.random() * students.length)];
+            }, 80);
+
             document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
             
             setTimeout(() => {
+                clearInterval(flickerInterval);
                 isRolling = false; warp = false;
                 document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
                 
-                // 核心修复：采用洗牌算法抽取，绝对保证不重复
+                // 100% 杜绝重复：Fisher-Yates 深度洗牌
                 const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
                 let pool = [...students];
-                // Fisher-Yates Shuffle
-                for (let i = pool.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                // 进行 3 轮深度打乱
+                for (let pass = 0; pass < 3; pass++) {
+                    for (let i = pool.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [pool[i], pool[j]] = [pool[j], pool[i]];
+                    }
                 }
                 const winners = pool.slice(0, count);
                 
                 document.getElementById('result-cards').innerHTML = winners.map((w,i) => `<div class="name-card" style="animation-delay:${i*0.2}s">${w}</div>`).join('');
                 document.getElementById('result-overlay').classList.remove('hidden');
+                orbText.textContent = "";
             }, 3000);
         };
 
-        // 其他事件
+        // 授权与全屏
         document.getElementById('verify-btn').onclick = async function() {
             const code = document.getElementById('license-input').value.trim();
             if (!code.toUpperCase().startsWith('DM')) return alert(t('authError'));
@@ -290,13 +300,12 @@
         document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
         document.getElementById('retry-btn').onclick = () => { document.getElementById('result-overlay').classList.add('hidden'); document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('orb-text').textContent = ""; };
         
-        // 全屏
         const fsBtn = document.getElementById('fullscreen-btn');
         const fsIcon = document.getElementById('fs-icon');
         const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
         const exitFSPath = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
         fsBtn.onclick = () => {
-            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; }
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); fsIcon.innerHTML = exitFSPath; } 
             else { if (document.exitFullscreen) { document.exitFullscreen(); fsIcon.innerHTML = enterFSPath; } }
         };
         document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) fsIcon.innerHTML = enterFSPath; });

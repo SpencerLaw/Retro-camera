@@ -1,9 +1,8 @@
 /**
- * 作业消消乐 - 商业加固完整版
+ * 作业消消乐 - 视觉巅峰 + 商业加固版
  */
 
 (function(){
-    // 1. 全局状态
     const STATE = {
         licenseCode: localStorage.getItem('hc_license') || null,
         isVerified: localStorage.getItem('hc_verified') === 'true',
@@ -19,7 +18,6 @@
         return langData[k] || k;
     };
 
-    // 2. 安全熔断与跳转
     const forceExit = (msg) => {
         localStorage.setItem('hc_verified', 'false');
         localStorage.removeItem('hc_license');
@@ -31,12 +29,50 @@
         setTimeout(() => { window.location.replace('/'); }, 4000);
     };
 
-    // 3. UI 渲染逻辑
     function saveData() {
         localStorage.setItem('hc_students', JSON.stringify(STATE.students));
         localStorage.setItem('hc_rules', JSON.stringify(STATE.rules));
         localStorage.setItem('hc_verified', 'true');
         localStorage.setItem('hc_license', STATE.licenseCode);
+    }
+
+    // --- 核心：精美爱心渲染 ---
+    function createStudentBubble(student, index, isDone, day) {
+        const bubble = document.createElement('div');
+        bubble.className = `student-bubble ${isDone ? 'done' : ''}`;
+        
+        const heartSVG = `
+            <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200">
+                <defs>
+                    <radialGradient id="grad-${index}" cx="30%" cy="30%" r="80%">
+                        <stop offset="0%" stop-color="#ffbfd3" />
+                        <stop offset="60%" stop-color="#ff6b95" />
+                        <stop offset="100%" stop-color="#ff3366" />
+                    </radialGradient>
+                </defs>
+                <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z"
+                      fill="${isDone ? 'url(#grad-' + index + ')' : '#e0e0e0'}"
+                      stroke="#ff3366" stroke-width="4" />
+                <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="0.7"/>
+            </svg>
+        `;
+
+        bubble.innerHTML = heartSVG + `<div class="name">${student.name}</div>`;
+
+        if (!isDone) {
+            bubble.onclick = () => {
+                if (confirm(`确认 ${student.name} 完成了吗？`)) {
+                    bubble.classList.add('heart-burst');
+                    setTimeout(() => {
+                        student.history[day] = true;
+                        saveData();
+                        renderUI();
+                        renderTree();
+                    }, 600);
+                }
+            };
+        }
+        return bubble;
     }
 
     function renderUI() {
@@ -49,132 +85,116 @@
         const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
 
         if (STATE.students.length === 0) {
-            incompleteGrid.innerHTML = `<div style="padding:20px;color:#999;text-align:center;grid-column:1/-1;">${t('emptyState')}</div>`;
+            incompleteGrid.innerHTML = `<div class="empty-state">${t('emptyState')}</div>`;
             return;
         }
 
-        let doneCount = 0;
+        let doneNum = 0;
         STATE.students.forEach((student, index) => {
             if (!student.history) student.history = [false, false, false, false, false];
             const isDone = student.history[day];
+            const bubble = createStudentBubble(student, index, isDone, day);
             
-            const bubble = document.createElement('div');
-            bubble.className = 'student-bubble';
-            bubble.innerHTML = `
-                <svg class="heart-svg" width="80" height="80" viewBox="0 0 200 200">
-                    <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z" 
-                          fill="${isDone ? '#ff3366' : '#eee'}" stroke="#ff3366" stroke-width="4"/>
-                </svg>
-                <div class="name" style="color:${isDone ? '#fff' : '#666'}">${student.name}</div>
-            `;
-
             if (isDone) {
                 completedGrid.appendChild(bubble);
-                doneCount++;
+                doneNum++;
             } else {
-                bubble.onclick = () => {
-                    if (confirm("确认 " + student.name + " 完成了吗？")) {
-                        student.history[day] = true;
-                        saveData();
-                        renderUI();
-                        renderTree();
-                    }
-                };
                 incompleteGrid.appendChild(bubble);
             }
         });
 
-        document.getElementById('incomplete-count').textContent = (STATE.students.length - doneCount) + '人';
-        document.getElementById('completed-count').textContent = doneCount + '人';
-        document.getElementById('daily-progress').style.width = `${(doneCount / STATE.students.length) * 100}%`;
+        document.getElementById('incomplete-count').textContent = (STATE.students.length - doneNum) + '人';
+        document.getElementById('completed-count').textContent = doneNum + '人';
+        const progress = document.getElementById('daily-progress');
+        if (progress) progress.style.width = `${(doneNum / STATE.students.length) * 100}%`;
     }
 
+    // --- 核心：精美大树引擎 ---
     function renderTree() {
         const container = document.getElementById('tree-container');
         if (!container) return;
         const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+        const total = STATE.students.length;
         const done = STATE.students.filter(s => s.history && s.history[day]).length;
-        const percent = STATE.students.length > 0 ? done / STATE.students.length : 0;
-        
-        // 极简大树 SVG
+        const percent = total > 0 ? done / total : 0;
+
+        let stage = 0;
+        if (percent < 0.2) stage = 0;
+        else if (percent < 0.5) stage = 1;
+        else if (percent < 0.8) stage = 2;
+        else if (percent < 1) stage = 3;
+        else stage = 4;
+
+        const treeScale = 0.5 + stage * 0.12;
+        const leafOpacity = Math.min(stage * 0.25, 1);
+
         container.innerHTML = `
-            <svg viewBox="0 0 200 200" style="width:100%; height:100%">
-                <rect x="95" y="${200 - (percent * 150)}" width="10" height="${percent * 150}" fill="#8d6e63" />
-                ${percent > 0.2 ? `<circle cx="100" cy="50" r="${percent * 40}" fill="#84fab0" opacity="0.8"/>` : ''}
+            <svg width="100%" height="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#A1C4FD"/><stop offset="100%" stop-color="#C2E9FB"/></linearGradient>
+                    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6d4c41"/><stop offset="100%" stop-color="#5d4037"/></linearGradient>
+                </defs>
+                <rect width="500" height="500" fill="url(#skyGrad)" />
+                <path d="M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z" fill="#84fab0" />
+                <g transform="translate(250, 420) scale(${treeScale})">
+                    <path d="M-15,0 Q-10,-60 -30,-100 Q-40,-120 -80,-140 M0,0 Q15,-50 25,-100 Q35,-150 80,-180 L0,0 Z" fill="none" stroke="url(#trunkGrad)" stroke-width="20" stroke-linecap="round" />
+                    <path d="M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z" fill="url(#trunkGrad)" />
+                    ${stage >= 1 ? `
+                    <g class="sway">
+                        <circle cx="-50" cy="-140" r="40" fill="#2e7d32" opacity="${leafOpacity}" />
+                        <circle cx="50" cy="-160" r="45" fill="#2e7d32" opacity="${leafOpacity}" />
+                        <circle cx="0" cy="-210" r="50" fill="#2e7d32" opacity="${leafOpacity}" />
+                        ${stage >= 2 ? `<circle cx="-30" cy="-170" r="35" fill="#66bb6a" opacity="${leafOpacity}"/><circle cx="30" cy="-190" r="35" fill="#66bb6a" opacity="${leafOpacity}"/>` : ''}
+                    </g>` : ''}
+                </g>
+                ${stage === 4 ? `
+                    <g class="firework">
+                        <circle cx="150" cy="100" r="5" fill="#ff6b95"><animate attributeName="r" from="0" to="50" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></circle>
+                        <circle cx="350" cy="120" r="5" fill="#ffd700"><animate attributeName="r" from="0" to="60" dur="2s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="2s" begin="0.5s" repeatCount="indefinite"/></circle>
+                    </g>
+                ` : ''}
             </svg>
-            ${percent >= 1 ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;">🎉 全员完成!</div>' : ''}
+            ${stage === 4 ? `<div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,0.9); padding:10px 20px; border-radius:20px; color:#ff3366; font-weight:bold; font-size:1.5rem; box-shadow:0 5px 15px rgba(0,0,0,0.2);">🎉 全班完成！太棒了！</div>` : ''}
         `;
     }
 
-    // 4. 事件绑定
     function bindFunctionalEvents() {
-        // 设置按钮与弹窗
-        const settingsBtn = document.getElementById('settings-btn');
-        const modal = document.getElementById('settings-modal');
-        if (settingsBtn && modal) {
-            settingsBtn.onclick = () => {
-                modal.classList.remove('hidden');
-                document.getElementById('student-list-input').value = STATE.students.map(s => s.name).join('\n');
-            };
-        }
-
-        // 关闭弹窗
+        document.getElementById('settings-btn').onclick = () => {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            document.getElementById('student-list-input').value = STATE.students.map(s => s.name).join('\n');
+        };
         document.querySelectorAll('.close-modal-btn, .modal-backdrop').forEach(el => {
-            el.onclick = () => modal.classList.add('hidden');
+            el.onclick = () => document.getElementById('settings-modal').classList.add('hidden');
         });
-
-        // 导入名单
         document.getElementById('import-btn').onclick = () => {
             const raw = document.getElementById('student-list-input').value;
             const names = Array.from(new Set(raw.split('\n').map(n => n.trim()).filter(n => n)));
             if (names.length > 0) {
                 STATE.students = names.map(n => ({ name: n, history: [false,false,false,false,false] }));
                 saveData();
-                modal.classList.add('hidden');
-                renderUI();
-                renderTree();
+                document.getElementById('settings-modal').classList.add('hidden');
+                renderUI(); renderTree();
             }
         };
-
-        // 清空数据
         document.getElementById('clear-data-btn').onclick = () => {
-            if (confirm('确定清空所有数据？')) {
-                STATE.students = [];
-                saveData();
-                renderUI();
-                renderTree();
-            }
+            if (confirm('确定清空所有数据？')) { STATE.students = []; saveData(); renderUI(); renderTree(); }
         };
-
-        // 退出按钮
-        document.getElementById('logout-btn').onclick = () => {
-            localStorage.clear();
-            window.location.href = '/';
-        };
-
-        // 开始新一天
+        document.getElementById('logout-btn').onclick = () => { localStorage.clear(); window.location.href = '/'; };
         document.getElementById('reset-day-btn').onclick = () => {
             if(confirm(t('resetDayConfirm'))) {
                 const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-                STATE.students.forEach(s => s.history[day] = false);
-                saveData();
-                renderUI();
-                renderTree();
+                STATE.students.forEach(s => { if(!s.history) s.history=[false,false,false,false,false]; s.history[day] = false; });
+                saveData(); renderUI(); renderTree();
             }
         };
-
-        // 全屏
         document.getElementById('fullscreen-btn').onclick = () => {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
             else document.exitFullscreen();
         };
-
-        // 保存规则
         document.getElementById('save-rules-btn').onclick = () => {
             STATE.rules.reward = document.getElementById('reward-text').value;
             STATE.rules.punishment = document.getElementById('punishment-text').value;
-            saveData();
-            alert(t('rulesSaved'));
+            saveData(); alert(t('rulesSaved'));
         };
     }
 
@@ -182,11 +202,8 @@
         const gate = document.getElementById('gatekeeper-screen');
         if (gate) gate.style.display = 'none';
         document.getElementById('app-screen').style.display = 'flex';
-        
-        // 填充规则数据
         document.getElementById('reward-text').value = STATE.rules.reward || '';
         document.getElementById('punishment-text').value = STATE.rules.punishment || '';
-
         bindFunctionalEvents();
         renderUI();
         renderTree();
@@ -197,10 +214,7 @@
             const res = await fetch('/api/verify-license', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    licenseCode: STATE.licenseCode,
-                    deviceId: localStorage.getItem('hc_device_id') || 'hc-user'
-                })
+                body: JSON.stringify({ licenseCode: STATE.licenseCode, deviceId: localStorage.getItem('hc_device_id') || 'hc-fixed' })
             });
             const data = await res.json();
             if (data.success) initApp();
@@ -208,42 +222,29 @@
         } catch (e) { initApp(); }
     }
 
-    // 初始化启动
     window.addEventListener('DOMContentLoaded', () => {
-        // 核心修复：确保所有返回按钮立即生效
         document.querySelectorAll('.global-back-btn').forEach(btn => {
-            btn.onclick = (e) => {
-                e.preventDefault();
-                window.location.href = '/';
-            };
+            btn.onclick = (e) => { e.preventDefault(); window.location.href = '/'; };
         });
-
-        // 设置日期
         const d = new Date();
         const dayIdx = d.getDay();
         STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
-        document.getElementById('current-date').textContent = d.toLocaleDateString();
+        const dateEl = document.getElementById('current-date');
+        if(dateEl) dateEl.textContent = d.toLocaleDateString();
 
-        if (STATE.isVerified && STATE.licenseCode) {
-            validateLicense();
-        } else {
+        if (STATE.isVerified && STATE.licenseCode) validateLicense();
+        else {
             const gate = document.getElementById('gatekeeper-screen');
             if (gate) gate.style.display = 'none';
             document.getElementById('auth-screen').style.display = 'flex';
-            
-            // 登录校验
             document.getElementById('verify-btn').onclick = async () => {
                 const code = document.getElementById('license-input').value.trim();
-                if (!code.toUpperCase().startsWith('ZY')) return alert('需要以 ZY 开头的授权码');
+                if (!code.toUpperCase().startsWith('ZY')) return alert('需 ZY 授权码');
                 try {
-                    const res = await fetch('/api/verify-license', { 
-                        method: 'POST', 
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ licenseCode: code, deviceId: 'hc-' + Math.random().toString(36).substr(2,5) })
-                    });
+                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'hc-user' }) });
                     const data = await res.json();
-                    if (data.success) {
-                        STATE.isVerified = true; STATE.licenseCode = code;
+                    if (data.success) { 
+                        STATE.isVerified = true; STATE.licenseCode = code; 
                         saveData(); initApp();
                     } else alert(data.message);
                 } catch(e) { alert("网络异常"); }

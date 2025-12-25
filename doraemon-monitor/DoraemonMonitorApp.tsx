@@ -10,11 +10,8 @@ const DoraemonMonitorApp: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations();
   
-  // 授权状态
   const [isLicensed, setIsLicensed] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-
-  // 业务状态
   const [isStarted, setIsStarted] = useState(false);
   const [currentDb, setCurrentDb] = useState(40);
   const [limit, setLimit] = useState(60);
@@ -27,16 +24,13 @@ const DoraemonMonitorApp: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Refs
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const wakeLockRef = useRef<any>(null);
   const workerRef = useRef<Worker | null>(null);
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
 
-  // 1. 安全心跳校验
   useEffect(() => {
     const code = getSavedLicenseCode();
     if (isVerified() && code) {
@@ -54,7 +48,6 @@ const DoraemonMonitorApp: React.FC = () => {
     }
   }, []);
 
-  // 2. 计时 Worker
   useEffect(() => {
     const workerBlob = new Blob([`
       let interval = null;
@@ -145,30 +138,32 @@ const DoraemonMonitorApp: React.FC = () => {
     return `${m}:${s}`;
   };
 
-  // --- 恢复版 UI 组件 ---
-
   const NoiseLevelReference = () => {
     const levels = [
-      { min: 0, max: 20, icon: "🤫", label: "0–20 dB 极度安静", desc: "几乎听不到声音" },
-      { min: 20, max: 40, icon: "🍃", label: "20–40 dB 非常安静", desc: "轻声细语" },
-      { min: 40, max: 60, icon: "💬", label: "40–60 dB 正常背景", desc: "普通交谈" },
-      { min: 60, max: 80, icon: "🚗", label: "60–80 dB 中等响度", desc: "繁忙街道音" },
-      { min: 80, max: 100, icon: "⚠️", label: "80–100 dB 响亮有害", desc: "极其嘈杂" },
-      { min: 100, max: 120, icon: "📢", label: "100–120 dB 非常响亮", desc: "震耳欲聋" },
+      { min: 0, max: 20, label: "0–20 dB 极度安静" },
+      { min: 20, max: 40, label: "20–40 dB 非常安静" },
+      { min: 40, max: 60, label: "40–60 dB 正常背景音" },
+      { min: 60, max: 80, label: "60–80 dB 中等响度" },
+      { min: 80, max: 100, label: "80–100 dB 响亮" },
+      { min: 100, max: 120, label: "100–120 dB 非常响亮" },
     ];
     const pointerPos = Math.min(100, (currentDb / 120) * 100);
     return (
-      <div className="db-reference-panel" style={{ width: '280px', padding: '20px' }}>
-        <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>分贝等级参考</div>
-        <div className="vertical-meter-container" style={{ height: '400px' }}>
+      <div className="db-reference-panel" style={{ width: '320px', padding: '30px' }}>
+        <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '25px' }}>分贝等级参考</div>
+        <div className="vertical-meter-container" style={{ height: '420px' }}>
           <div className="meter-bar-bg">
             <div className="current-level-pointer" style={{ bottom: `${pointerPos}%`, transition: 'bottom 0.3s' }} />
           </div>
-          <div className="level-nodes" style={{ gap: '15px' }}>
+          <div className="level-nodes" style={{ gap: '25px' }}>
             {levels.map((l, idx) => (
-              <div key={idx} className="level-node" style={{ color: currentDb >= l.min && currentDb < l.max ? '#00d4ff' : '#94a3b8', opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.6 }}>
-                <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>{l.icon} {l.label}</div>
-                <div style={{ fontSize: '0.8rem', marginTop: '2px' }}>{l.desc}</div>
+              <div key={idx} className="level-node" style={{ 
+                color: currentDb >= l.min && currentDb < l.max ? '#00d4ff' : '#94a3b8', 
+                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.6,
+                fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
+                fontSize: '1rem'
+              }}>
+                {l.label}
               </div>
             ))}
           </div>
@@ -211,8 +206,6 @@ const DoraemonMonitorApp: React.FC = () => {
     </svg>
   );
 
-  // --- 隔离与启动页 ---
-
   if (authError) {
     return (
       <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}>
@@ -253,7 +246,6 @@ const DoraemonMonitorApp: React.FC = () => {
   return (
     <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
       {state === 'alarm' && <div className="doraemon-giant-text" style={{ fontSize: '12vw' }}>{t('doraemon.quiet')}</div>}
-      
       <header className="doraemon-header" style={{ padding: '20px 40px' }}>
         <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
         <div style={{ display: 'flex', gap: '20px' }}>
@@ -261,25 +253,16 @@ const DoraemonMonitorApp: React.FC = () => {
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
         </div>
       </header>
-
-      <main className="doraemon-main" style={{ padding: '0 60px', gap: '40px' }}>
+      <main className="doraemon-main" style={{ padding: '0 60px', gap: '40px', justifyContent: 'space-between' }}>
         <Visualizer />
-        
-        {/* 左侧：描述丰富的参考面板 */}
         <NoiseLevelReference />
-
-        {/* 中心：极大的分贝显示 */}
-        <div className="center-display" style={{ flex: 1.5 }}>
-          <div className="doraemon-wrapper" style={{ width: '350px', height: '350px', transform: `scale(${1 + (currentDb - 40) / 150})`, transition: 'transform 0.1s' }}>
-            <DoraemonSVG />
-          </div>
+        <div className="center-display" style={{ flex: 1 }}>
+          <div className="doraemon-wrapper" style={{ width: '350px', height: '350px', transform: `scale(${1 + (currentDb - 40) / 150})`, transition: 'transform 0.1s' }}><DoraemonSVG /></div>
           <div className="db-display" style={{ marginTop: '30px' }}>
             <span className="db-number" style={{ fontSize: '8rem' }}>{Math.round(currentDb)}</span>
             <span className="db-unit" style={{ fontSize: '2rem' }}>dB</span>
           </div>
         </div>
-
-        {/* 右侧：极大化的统计卡片 */}
         <div className="right-panel" style={{ width: '320px', gap: '25px' }}>
           <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <span style={{ fontSize: '1.2rem', opacity: 0.8 }}>🤫 安静时长</span>
@@ -293,14 +276,10 @@ const DoraemonMonitorApp: React.FC = () => {
             <span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⚠️ 警告次数</span>
             <strong style={{ fontSize: '3rem', color: '#ff416c', marginTop: '10px' }}>{warnCount}</strong>
           </div>
-
           <div className="controls-box" style={{ padding: '25px', marginTop: '10px' }}>
-            <div className="slider-header" style={{ marginBottom: '15px' }}>
-              <span style={{ fontSize: '1.2rem' }}>分贝阈值</span>
-              <span style={{ fontSize: '1.5rem', color: '#00f260', fontWeight: 'bold' }}>{limit} dB</span>
-            </div>
+            <div className="slider-header" style={{ marginBottom: '15px' }}><span style={{ fontSize: '1.2rem' }}>分贝阈值</span><span style={{ fontSize: '1.5rem', color: '#00f260', fontWeight: 'bold' }}>{limit} dB</span></div>
             <input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" style={{ height: '12px' }} />
-            <button className="reset-btn" onClick={() => setWarnCount(0)} style={{ marginTop: '20px', padding: '12px', fontSize: '1rem' }}>清空记录</button>
+            <button className="reset-btn" onClick={() => setWarnCount(0)} style={{ marginTop: '20px', padding: '12px', fontSize: '1rem' }}>重置计数</button>
           </div>
         </div>
       </main>

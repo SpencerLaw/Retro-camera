@@ -245,16 +245,13 @@
             isRolling = true; warp = true;
             document.getElementById('start-btn').classList.add('hidden');
             
-            // 视觉随机见证：快速闪烁名字
+            // 恢复稳定的文案显示，移除名字闪烁
             const orbText = document.getElementById('orb-text');
-            const flickerInterval = setInterval(() => {
-                orbText.textContent = students[Math.floor(Math.random() * students.length)];
-            }, 80);
+            orbText.textContent = t('rolling');
 
             document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
             
             setTimeout(() => {
-                clearInterval(flickerInterval);
                 isRolling = false; warp = false;
                 document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
                 

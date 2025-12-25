@@ -9,7 +9,6 @@ import './doraemon-monitor.css';
 const DoraemonMonitorApp: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations();
-  
   const [isLicensed, setIsLicensed] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isStarted, setIsStarted] = useState(false);
@@ -23,7 +22,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
@@ -74,9 +72,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const initApp = async () => {
     setIsLoading(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } 
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
       const AC = window.AudioContext || (window as any).webkitAudioContext;
       const context = new AC();
       audioContextRef.current = context;
@@ -126,72 +122,30 @@ const DoraemonMonitorApp: React.FC = () => {
     return `${m}:${s}`;
   };
 
-  // --- 修复的小球指示器组件 ---
   const NoiseLevelReference = () => {
     const levels = [
       { min: 0, max: 20, label: "0–20 dB 极度安静" },
       { min: 20, max: 40, label: "20–40 dB 非常安静" },
-      { min: 40, max: 60, label: "40–60 dB 正常背景" },
+      { min: 40, max: 60, label: "40–60 dB 正常背景音" },
       { min: 60, max: 80, label: "60–80 dB 中等响度" },
       { min: 80, max: 100, label: "80–100 dB 响亮" },
-      { min: 100, max: 120, label: "100–120 dB 极其嘈杂" },
+      { min: 100, max: 120, label: "100–120 dB 非常响亮" },
     ];
-    // 强制限制 0-100% 范围
     const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
-    
     return (
       <div className="db-reference-panel" style={{ width: '320px', padding: '30px', background: 'rgba(255,255,255,0.03)', borderRadius: '25px', border: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '30px', textAlign: 'center', opacity: 0.8 }}>分贝等级参考</div>
-        
-        {/* 轨道容器 */}
-        <div className="vertical-meter-container" style={{ height: '420px', position: 'relative', display: 'flex', alignItems: 'stretch' }}>
-          
-          <div style={{ position: 'relative', width: '60px', height: '100%' }}>
-            {/* 彩色渐变柱子 */}
-            <div className="meter-bar-bg" style={{ 
-              width: '12px', 
-              height: '100%',
-              margin: '0 auto',
-              borderRadius: '10px', 
-              background: 'linear-gradient(to top, #00f260 0%, #ffff00 40%, #ff9900 70%, #ff416c 100%)',
-              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)'
-            }} />
-
-            {/* 修复后的指示球：使用 absolute 定位并确保在柱子边缘 */}
-            <div style={{ 
-              position: 'absolute',
-              bottom: `${pointerPos}%`,
-              left: '50%',
-              transform: 'translate(-50%, 50%)',
-              zIndex: 100,
-              width: '28px',
-              height: '28px',
-              background: '#fff',
-              border: '4px solid #00d4ff',
-              boxShadow: '0 0 20px #00d4ff, 0 0 10px rgba(0,0,0,0.5)',
-              borderRadius: '50%',
-              transition: 'bottom 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {/* 指向小三角 */}
+        <div className="vertical-meter-container" style={{ height: '420px', position: 'relative', display: 'flex' }}>
+          <div style={{ position: 'relative', width: '60px' }}>
+            {/* 核心修正：翻转渐变颜色，底部绿色，顶部红色 */}
+            <div style={{ width: '12px', height: '100%', margin: '0 auto', borderRadius: '10px', background: 'linear-gradient(to top, #00f260 0%, #ffff00 30%, #ff9900 60%, #ff416c 100%)', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }} />
+            <div style={{ position: 'absolute', bottom: `${pointerPos}%`, left: '50%', transform: 'translate(-50%, 50%)', zIndex: 100, width: '28px', height: '28px', background: '#fff', border: '4px solid #00d4ff', boxShadow: '0 0 20px #00d4ff', borderRadius: '50%', transition: 'bottom 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid #00d4ff' }} />
             </div>
           </div>
-
-          {/* 文字节点 */}
           <div className="level-nodes" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingLeft: '20px', paddingBottom: '10px' }}>
             {levels.reverse().map((l, i) => (
-              <div key={i} style={{ 
-                color: currentDb >= l.min && currentDb < l.max ? '#fff' : '#94a3b8', 
-                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5, 
-                fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal', 
-                fontSize: '0.95rem',
-                transition: 'all 0.3s'
-              }}>
-                {l.label}
-              </div>
+              <div key={i} style={{ color: currentDb >= l.min && currentDb < l.max ? '#fff' : '#94a3b8', opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5, fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal', fontSize: '0.95rem' }}>{l.label}</div>
             ))}
           </div>
         </div>
@@ -231,7 +185,6 @@ const DoraemonMonitorApp: React.FC = () => {
   if (authError) return <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}><h1 style={{ fontSize: '4rem', color: '#ff416c' }}>⚠️ 授权失效</h1><p style={{ fontSize: '2rem', margin: '20px 0' }}>{authError}</p><p style={{ color: '#666' }}>4秒后自动返回首页...</p></div>;
   if (isLicensed === null) return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>🔮 正在验证魔法授权...</h2></div>;
   if (isLicensed === false) return <LicenseInput onVerified={() => setIsLicensed(true)} />;
-
   if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>Doraemon Monitor</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>正在召唤...</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>开启监测</span><span className="btn-sub-text">点击开始自习守护</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;
 
   return (

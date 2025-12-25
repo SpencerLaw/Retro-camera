@@ -1,5 +1,5 @@
 /**
- * 作业消消乐 - 视觉巅峰 + 商业加固版 (极致还原)
+ * 作业消消乐 - 视觉巅峰版 (修复位置与配色)
  */
 
 (function(){
@@ -21,7 +21,7 @@
     const forceExit = (msg) => {
         localStorage.setItem('hc_verified', 'false');
         localStorage.removeItem('hc_license');
-        document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
+        document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;">
             <h1 style="font-size:3rem">⚠️ 授权失效</h1>
             <p style="font-size:1.5rem; margin:20px 0;">${msg}</p>
             <div style="font-size:1.2rem; color:#666">4秒后自动返回首页...</div>
@@ -36,12 +36,10 @@
         localStorage.setItem('hc_license', STATE.licenseCode);
     }
 
-    // --- 还原粉色气泡效果 ---
     function createStudentBubble(student, index, isDone, day) {
         const bubble = document.createElement('div');
         bubble.className = `student-bubble ${isDone ? 'done' : ''}`;
         
-        // 未完成也是粉色系，只是带灰色滤镜或半透明
         const heartSVG = `
             <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200">
                 <defs>
@@ -50,13 +48,10 @@
                         <stop offset="60%" stop-color="#ff6b95" />
                         <stop offset="100%" stop-color="#ff3366" />
                     </radialGradient>
-                    <filter id="shadow-${index}">
-                        <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#ffb3c6" flood-opacity="0.5"/>
-                    </filter>
                 </defs>
                 <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z"
                       fill="${isDone ? 'url(#strawberry-' + index + ')' : '#ffdce5'}"
-                      stroke="#ff3366" stroke-width="4" filter="${isDone ? 'url(#shadow-' + index + ')' : ''}" />
+                      stroke="#ff3366" stroke-width="4" />
                 <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="${isDone ? '0.8' : '0.4'}"/>
             </svg>
         `;
@@ -93,7 +88,8 @@
             if (!student.history) student.history = [false, false, false, false, false];
             const isDone = student.history[day];
             const bubble = createStudentBubble(student, index, isDone, day);
-            if (isDone) { completedGrid.appendChild(bubble); doneNum++; } else { incompleteGrid.appendChild(bubble); }
+            if (isDone) { completedGrid.appendChild(bubble); doneNum++; }
+            else { incompleteGrid.appendChild(bubble); }
         });
 
         document.getElementById('incomplete-count').textContent = (STATE.students.length - doneNum) + '人';
@@ -102,13 +98,13 @@
         if (progress) progress.style.width = `${(doneNum / STATE.students.length) * 100}%`;
     }
 
-    // --- 还原全量大树逻辑 ---
     function renderTree() {
         const container = document.getElementById('tree-container');
         if (!container) return;
         const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+        const total = STATE.students.length;
         const done = STATE.students.filter(s => s.history && s.history[day]).length;
-        const percent = STATE.students.length > 0 ? done / STATE.students.length : 0;
+        const percent = total > 0 ? done / total : 0;
 
         let stage = 0;
         if (percent < 0.2) stage = 0;
@@ -124,18 +120,16 @@
             <svg width="100%" height="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#A1C4FD"/><stop offset="100%" stop-color="#C2E9FB"/></linearGradient>
-                    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6d4c41"/><stop offset="40%" stop-color="#8d6e63"/><stop offset="100%" stop-color="#5d4037"/></linearGradient>
+                    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%" ><stop offset="0%" stop-color="#6d4c41"/><stop offset="40%" stop-color="#8d6e63"/><stop offset="100%" stop-color="#5d4037"/></linearGradient>
                     <radialGradient id="leafDark" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#66bb6a"/><stop offset="100%" stop-color="#2e7d32"/></radialGradient>
                     <radialGradient id="leafLight" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#b9f6ca"/><stop offset="100%" stop-color="#00c853"/></radialGradient>
                 </defs>
                 <rect width="500" height="500" fill="url(#skyGrad)" />
                 <path d="M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z" fill="#84fab0" />
-                
                 <g transform="translate(250, 420) scale(${treeScale})">
                     <path d="M-15,0 Q-10,-60 -30,-100 Q-40,-120 -80,-140 M-10,-60 Q5,-120 40,-160 M0,0 Q15,-50 25,-100 Q35,-150 80,-180 L0,0 Z" 
                           fill="none" stroke="url(#trunkGrad)" stroke-width="20" stroke-linecap="round" />
                     <path d="M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z" fill="url(#trunkGrad)" />
-                    
                     ${stage >= 1 ? `
                     <g class="sway">
                         <circle cx="-50" cy="-140" r="40" fill="url(#leafDark)" opacity="${leafOpacity}" />
@@ -145,15 +139,13 @@
                         <circle cx="-30" cy="-170" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/>
                         <circle cx="30" cy="-190" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/>` : ''}
                         ${stage >= 3 ? `
-                        <circle cx="0" cy="-230" r="30" fill="#b9f6ca" opacity="${leafOpacity}"/>
-                        <circle cx="-40" cy="-190" r="25" fill="#fff" opacity="0.3"/>` : ''}
+                        <circle cx="0" cy="-230" r="30" fill="#b9f6ca" opacity="${leafOpacity}"/>` : ''}
                     </g>` : ''}
                 </g>
                 ${stage === 4 ? `
                     <g class="firework">
                         <circle cx="150" cy="100" r="5" fill="#ff6b95"><animate attributeName="r" from="0" to="50" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></circle>
                         <circle cx="350" cy="120" r="5" fill="#ffd700"><animate attributeName="r" from="0" to="60" dur="2s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="2s" begin="0.5s" repeatCount="indefinite"/></circle>
-                        <circle cx="250" cy="80" r="5" fill="#00c853"><animate attributeName="r" from="0" to="40" dur="1.8s" begin="0.8s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="1.8s" begin="0.8s" repeatCount="indefinite"/></circle>
                     </g>` : ''}
             </svg>
             ${stage === 4 ? `<div class="celebrate-badge">🎉 全班完成！</div>` : ''}
@@ -215,7 +207,10 @@
             const res = await fetch('/api/verify-license', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ licenseCode: STATE.licenseCode, deviceId: localStorage.getItem('hc_device_id') || 'hc-fixed' })
+                body: JSON.stringify({
+                    licenseCode: STATE.licenseCode,
+                    deviceId: localStorage.getItem('hc_device_id') || 'hc-fixed'
+                })
             });
             const data = await res.json();
             if (data.success) initApp(); else forceExit(data.message);

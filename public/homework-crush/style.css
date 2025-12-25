@@ -512,25 +512,38 @@ main {
     overflow: hidden;
 }
 
-#tree-canvas {
-    width: 100%;
-    height: 100%;
-}
-
-.tree-message {
+.celebrate-badge {
     position: absolute;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.95);
-    padding: 15px 30px;
+    padding: 12px 25px;
     border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    font-size: 1.3rem;
+    box-shadow: 0 8px 25px rgba(255, 51, 102, 0.2);
+    font-size: 1.5rem;
     font-weight: bold;
-    color: var(--primary-pink);
+    color: #ff3366;
     text-align: center;
-    max-width: 90%;
+    white-space: nowrap;
+    animation: slideUpPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid #ff3366;
+    z-index: 100;
+}
+
+@keyframes slideUpPop {
+    from { transform: translateX(-50%) translateY(50px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.sway {
+    transform-origin: bottom center;
+    animation: treeSway 4s ease-in-out infinite;
+}
+
+@keyframes treeSway {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(1.5deg); }
 }
 
 /* 响应式 */

@@ -71,11 +71,16 @@ const DoraemonMonitorApp: React.FC = () => {
           console.log('License heartbeat success');
           setIsLicensed(true);
         } else {
-          console.warn('License heartbeat failed:', res.message);
-          alert(`⚠️ 授权失效: ${res.message}\n\n请联系管理员重新购买。`);
+          console.error('License heartbeat failed:', res.message);
+          // 物理熔断：直接清空 body，防止用户点击任何按钮
+          document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
+            <h1 style="font-size:40px;">⚠️ 授权已失效</h1>
+            <p style="font-size:20px;">${res.message}</p>
+            <button onclick="window.location.href='/'" style="padding:15px 30px;background:#ff416c;color:#fff;border:none;border-radius:10px;font-size:18px;margin-top:20px;cursor:pointer;">返回首页</button>
+          </div>`;
           clearLicense();
-          setIsLicensed(false);
-          window.location.replace('/'); // 强制跳转，不留后路
+          // 5秒后强制跳转，作为兜底
+          setTimeout(() => { window.location.href = '/'; }, 5000);
         }
       });
     } else {

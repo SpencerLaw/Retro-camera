@@ -1,5 +1,5 @@
 /**
- * 作业消消乐 - 视觉巅峰版 (修复位置与配色)
+ * 作业消消乐 - 视觉巅峰版 (修复语法错误与安全加固)
  */
 
 (function(){
@@ -21,7 +21,7 @@
     const forceExit = (msg) => {
         localStorage.setItem('hc_verified', 'false');
         localStorage.removeItem('hc_license');
-        document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;">
+        document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
             <h1 style="font-size:3rem">⚠️ 授权失效</h1>
             <p style="font-size:1.5rem; margin:20px 0;">${msg}</p>
             <div style="font-size:1.2rem; color:#666">4秒后自动返回首页...</div>
@@ -39,7 +39,6 @@
     function createStudentBubble(student, index, isDone, day) {
         const bubble = document.createElement('div');
         bubble.className = `student-bubble ${isDone ? 'done' : ''}`;
-        
         const heartSVG = `
             <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200">
                 <defs>
@@ -55,9 +54,7 @@
                 <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="${isDone ? '0.8' : '0.4'}"/>
             </svg>
         `;
-
         bubble.innerHTML = heartSVG + `<div class="name" style="color: ${isDone ? '#ff3366' : '#a36d7d'}">${student.name}</div>`;
-
         if (!isDone) {
             bubble.onclick = () => {
                 if (confirm(`确认 ${student.name} 完成了吗？`)) {
@@ -78,20 +75,17 @@
         const incompleteGrid = document.getElementById('incomplete-grid');
         const completedGrid = document.getElementById('completed-grid');
         if (!incompleteGrid || !completedGrid) return;
-
         incompleteGrid.innerHTML = '';
         completedGrid.innerHTML = '';
         const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
-
         let doneNum = 0;
         STATE.students.forEach((student, index) => {
             if (!student.history) student.history = [false, false, false, false, false];
             const isDone = student.history[day];
             const bubble = createStudentBubble(student, index, isDone, day);
-            if (isDone) { completedGrid.appendChild(bubble); doneNum++; }
+            if (isDone) { completedGrid.appendChild(bubble); doneNum++; } 
             else { incompleteGrid.appendChild(bubble); }
         });
-
         document.getElementById('incomplete-count').textContent = (STATE.students.length - doneNum) + '人';
         document.getElementById('completed-count').textContent = doneNum + '人';
         const progress = document.getElementById('daily-progress');
@@ -105,22 +99,19 @@
         const total = STATE.students.length;
         const done = STATE.students.filter(s => s.history && s.history[day]).length;
         const percent = total > 0 ? done / total : 0;
-
         let stage = 0;
         if (percent < 0.2) stage = 0;
         else if (percent < 0.5) stage = 1;
         else if (percent < 0.8) stage = 2;
         else if (percent < 1) stage = 3;
         else stage = 4;
-
         const treeScale = 0.5 + stage * 0.12;
         const leafOpacity = Math.min(stage * 0.25, 1);
-
         container.innerHTML = `
             <svg width="100%" height="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#A1C4FD"/><stop offset="100%" stop-color="#C2E9FB"/></linearGradient>
-                    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%" ><stop offset="0%" stop-color="#6d4c41"/><stop offset="40%" stop-color="#8d6e63"/><stop offset="100%" stop-color="#5d4037"/></linearGradient>
+                    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6d4c41"/><stop offset="40%" stop-color="#8d6e63"/><stop offset="100%" stop-color="#5d4037"/></linearGradient>
                     <radialGradient id="leafDark" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#66bb6a"/><stop offset="100%" stop-color="#2e7d32"/></radialGradient>
                     <radialGradient id="leafLight" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#b9f6ca"/><stop offset="100%" stop-color="#00c853"/></radialGradient>
                 </defs>
@@ -130,23 +121,18 @@
                     <path d="M-15,0 Q-10,-60 -30,-100 Q-40,-120 -80,-140 M-10,-60 Q5,-120 40,-160 M0,0 Q15,-50 25,-100 Q35,-150 80,-180 L0,0 Z" 
                           fill="none" stroke="url(#trunkGrad)" stroke-width="20" stroke-linecap="round" />
                     <path d="M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z" fill="url(#trunkGrad)" />
-                    ${stage >= 1 ? `
-                    <g class="sway">
+                    ${stage >= 1 ? `<g class="sway">
                         <circle cx="-50" cy="-140" r="40" fill="url(#leafDark)" opacity="${leafOpacity}" />
                         <circle cx="50" cy="-160" r="45" fill="url(#leafDark)" opacity="${leafOpacity}" />
                         <circle cx="0" cy="-210" r="50" fill="url(#leafDark)" opacity="${leafOpacity}" />
-                        ${stage >= 2 ? `
-                        <circle cx="-30" cy="-170" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/>
-                        <circle cx="30" cy="-190" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/>` : ''}
-                        ${stage >= 3 ? `
-                        <circle cx="0" cy="-230" r="30" fill="#b9f6ca" opacity="${leafOpacity}"/>` : ''}
+                        ${stage >= 2 ? `<circle cx="-30" cy="-170" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/><circle cx="30" cy="-190" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/>` : ''}
+                        ${stage >= 3 ? `<circle cx="0" cy="-230" r="30" fill="#b9f6ca" opacity="${leafOpacity}"/>` : ''}
                     </g>` : ''}
                 </g>
-                ${stage === 4 ? `
-                    <g class="firework">
-                        <circle cx="150" cy="100" r="5" fill="#ff6b95"><animate attributeName="r" from="0" to="50" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></circle>
-                        <circle cx="350" cy="120" r="5" fill="#ffd700"><animate attributeName="r" from="0" to="60" dur="2s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="2s" begin="0.5s" repeatCount="indefinite"/></circle>
-                    </g>` : ''}
+                ${stage === 4 ? `<g class="firework">
+                    <circle cx="150" cy="100" r="5" fill="#ff6b95"><animate attributeName="r" from="0" to="50" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></circle>
+                    <circle cx="350" cy="120" r="5" fill="#ffd700"><animate attributeName="r" from="0" to="60" dur="2s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="2s" begin="0.5s" repeatCount="indefinite"/></circle>
+                </g>` : ''}
             </svg>
             ${stage === 4 ? `<div class="celebrate-badge">🎉 全班完成！</div>` : ''}
         `;
@@ -170,14 +156,16 @@
                 renderUI(); renderTree();
             }
         };
-        // 清空数据
         document.getElementById('clear-data-btn').onclick = () => {
             if (confirm('确定清空所有数据？')) { STATE.students = []; saveData(); renderUI(); renderTree(); }
         };
-
-        // 开始新一天
         document.getElementById('reset-day-btn').onclick = () => {
-
+            if(confirm(t('resetDayConfirm'))) {
+                const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
+                STATE.students.forEach(s => { if(!s.history) s.history=[false,false,false,false,false]; s.history[day] = false; });
+                saveData(); renderUI(); renderTree();
+            }
+        };
         document.getElementById('fullscreen-btn').onclick = () => {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
             else document.exitFullscreen();
@@ -200,14 +188,13 @@
     };
 
     async function validateLicense() {
+        let deviceId = localStorage.getItem('hc_device_id');
+        if (!deviceId) { deviceId = 'hc-' + Math.random().toString(36).substr(2, 9); localStorage.setItem('hc_device_id', deviceId); }
         try {
             const res = await fetch('/api/verify-license', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    licenseCode: STATE.licenseCode,
-                    deviceId: localStorage.getItem('hc_device_id') || 'hc-fixed'
-                })
+                body: JSON.stringify({ licenseCode: STATE.licenseCode, deviceId: deviceId })
             });
             const data = await res.json();
             if (data.success) initApp(); else forceExit(data.message);
@@ -230,13 +217,10 @@
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('verify-btn').onclick = async () => {
                 const code = document.getElementById('license-input').value.trim();
-                if (!code.toUpperCase().startsWith('ZY')) return alert('需 ZY 授权码');
-                try {
-                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'hc-user' }) });
-                    const data = await res.json();
-                    if (data.success) { STATE.isVerified = true; STATE.licenseCode = code; saveData(); initApp(); }
-                    else alert(data.message);
-                } catch(e) { alert("网络异常"); }
+                const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'hc-user' }) });
+                const data = await res.json();
+                if (data.success) { STATE.isVerified = true; STATE.licenseCode = code; saveData(); initApp(); } 
+                else alert(data.message);
             };
         }
     });

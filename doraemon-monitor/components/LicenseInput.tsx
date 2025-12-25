@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Key, CheckCircle, XCircle, Loader, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Key, CheckCircle, XCircle, Loader, Trash2, ArrowLeft } from 'lucide-react';
 import { 
   verifyLicenseCode, 
   formatLicenseCode, 
@@ -12,8 +13,10 @@ interface LicenseInputProps {
 }
 
 const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
+  const navigate = useNavigate();
   const [licenseCode, setLicenseCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // ... (rest of states)
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showDevTools, setShowDevTools] = useState(false);
@@ -43,7 +46,7 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
 
   const handleVerify = async () => {
     if (!isValidFormat(licenseCode)) {
-      setError('授权码格式不正确，应为16位字符');
+      setError('授权码格式不正确');
       return;
     }
 
@@ -88,6 +91,25 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
   return (
     <div className="license-container">
       <div className="license-card">
+        {/* 返回按钮 */}
+        <button 
+          onClick={() => navigate('/')} 
+          className="license-back-btn"
+          title="返回首页"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            background: 'none',
+            border: 'none',
+            color: '#94a3b8',
+            cursor: 'pointer',
+            padding: '5px'
+          }}
+        >
+          <ArrowLeft size={24} />
+        </button>
+
         {/* 图标 */}
         <div className="license-icon">
           <Key size={48} />
@@ -164,12 +186,6 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
             <span>{success}</span>
           </div>
         )}
-
-        {/* 说明 */}
-        <div className="license-info">
-          <p>💡 授权码为16位字符</p>
-          <p>💡 有效期1年，不限设备数量</p>
-        </div>
       </div>
     </div>
   );

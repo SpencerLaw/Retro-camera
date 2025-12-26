@@ -66,7 +66,26 @@
         bubble.innerHTML = heartSVG + `<div class="name" style="color: ${isDone ? '#ff3366' : '#a36d7d'}">${student.name}</div>`;
         if (!isDone) {
             bubble.onclick = () => {
-                if (confirm(`确认 ${student.name} 完成了吗？`)) {
+                const modal = document.getElementById('confirm-modal');
+                const title = document.getElementById('confirm-title');
+                const msg = document.getElementById('confirm-message');
+                const yesBtn = document.getElementById('confirm-yes-btn');
+                const noBtn = document.getElementById('confirm-no-btn');
+                const backdrop = modal.querySelector('.modal-backdrop');
+
+                title.textContent = '完成确认';
+                msg.textContent = `确认 ${student.name} 完成了吗？`;
+                modal.classList.remove('hidden');
+
+                const closeModal = () => {
+                    modal.classList.add('hidden');
+                    yesBtn.onclick = null;
+                    noBtn.onclick = null;
+                    backdrop.onclick = null;
+                };
+
+                yesBtn.onclick = () => {
+                    closeModal();
                     bubble.classList.add('heart-burst');
                     setTimeout(() => {
                         student.history[day] = true;
@@ -74,7 +93,10 @@
                         renderUI();
                         renderTree();
                     }, 600);
-                }
+                };
+
+                noBtn.onclick = closeModal;
+                backdrop.onclick = closeModal;
             };
         }
         return bubble;

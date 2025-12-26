@@ -125,6 +125,23 @@
         </div>
     </div>
 
+    <!-- 弹窗：自定义确认 -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content settings-modal-premium" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center;">
+                <h2 id="confirm-title" style="margin: 0;">确认操作</h2>
+            </div>
+            <div class="input-card" style="border: none; background: transparent; padding: 20px 0;">
+                <p id="confirm-message" style="font-size: 1.2rem; color: var(--text-dark);">你确定吗？</p>
+            </div>
+            <div class="modal-footer" style="justify-content: center; gap: 20px;">
+                <button id="confirm-yes-btn" class="btn-premium btn-primary" style="padding: 10px 30px;">确认</button>
+                <button id="confirm-no-btn" class="btn-premium btn-danger" style="padding: 10px 30px; background: #95a5a6;">取消</button>
+            </div>
+        </div>
+    </div>
+
     <script src="translations.js"></script>
     <script src="script.js?v=2"></script>
 </body>

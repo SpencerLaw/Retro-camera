@@ -99,7 +99,7 @@
     "warningCount": "警告次數",
     "currentDecibel": "當前分貝 (dB)",
     "alarmThreshold": "報警閾值",
-    "resetCount": "重置次數",
+    "resetCount": "重置警告次數",
     "quiet": "安靜！！",
     "errors": {
       "browserNotSupported": "您的瀏覽器不支持音頻功能，請升級瀏覽器。",

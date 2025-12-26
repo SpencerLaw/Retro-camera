@@ -102,7 +102,7 @@
     "totalDuration": "监测总时长",
     "currentDecibel": "当前分贝",
     "alarmThreshold": "报警阈值",
-    "resetCount": "重置次数",
+    "resetCount": "重置警告次数",
     "quiet": "安静！！",
     "errors": {
       "locationRestricted": "🌍 地区限制",

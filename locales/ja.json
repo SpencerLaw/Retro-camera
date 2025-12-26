@@ -99,7 +99,7 @@
     "warningCount": "警告回数",
     "currentDecibel": "現在のデシベル (dB)",
     "alarmThreshold": "アラーム閾値",
-    "resetCount": "回数をリセット",
+    "resetCount": "警告回数をリセット",
     "quiet": "静かに！！",
     "errors": {
       "browserNotSupported": "お使いのブラウザは音声機能をサポートしていません。ブラウザをアップグレードしてください。",

@@ -102,7 +102,7 @@
     "totalDuration": "Total Duration",
     "currentDecibel": "Current Decibel",
     "alarmThreshold": "Alarm Threshold",
-    "resetCount": "Reset Count",
+    "resetCount": "Reset Warning Count",
     "quiet": "QUIET!!",
     "errors": {
       "locationRestricted": "🌍 Regional Restriction",

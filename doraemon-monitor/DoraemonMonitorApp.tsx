@@ -180,7 +180,7 @@ const DoraemonMonitorApp: React.FC = () => {
     const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
 
     return (
-      <div className="visualizer-container" style={{ opacity: 1, pointerEvents: 'none' }}>
+      <div className="visualizer-container" style={{ opacity: 1, pointerEvents: 'none', height: '100%', maxHeight: '800px' }}>
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
           const dist = Math.abs(i - BAR_COUNT / 2);
           const norm = 1 - (dist / (BAR_COUNT / 2));
@@ -233,7 +233,8 @@ const DoraemonMonitorApp: React.FC = () => {
           <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>🤫 安静时长</span><strong style={{ fontSize: '3rem', color: isDarkMode ? '#00f260' : '#059669', marginTop: '10px' }}>{formatTime(quietTime)}</strong></div>
           <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⏱️ 监测总计</span><strong style={{ fontSize: '3rem', color: isDarkMode ? '#0575e6' : '#2563eb', marginTop: '10px' }}>{formatTime(totalTime)}</strong></div>
           <div className={`stat-box ${warnCount > 0 ? 'warning' : ''}`} style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⚠️ 警告次数</span><strong style={{ fontSize: '3rem', color: '#dc2626', marginTop: '10px' }}>{warnCount}</strong></div>
-          <div className="controls-box" style={{ padding: '25px', marginTop: '10px' }}><div className="slider-header" style={{ marginBottom: '15px' }}><span style={{ fontSize: '1.2rem', color: isDarkMode ? '#fff' : '#1e293b' }}>分贝阈值</span><span style={{ fontSize: '1.5rem', color: isDarkMode ? '#00f260' : '#059669', fontWeight: 'bold' }}>{limit} dB</span></div><input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" style={{ height: '12px' }} /><button className="reset-btn" onClick={() => setWarnCount(0)} style={{ marginTop: '20px', padding: '12px', fontSize: '1rem' }}>重置计数</button></div>
+          <button className="reset-btn" onClick={() => setWarnCount(0)} style={{ padding: '12px', fontSize: '1rem' }}>{t('doraemon.resetCount')}</button>
+          <div className="controls-box" style={{ padding: '25px', marginTop: '10px' }}><div className="slider-header" style={{ marginBottom: '15px' }}><span style={{ fontSize: '1.2rem', color: isDarkMode ? '#fff' : '#1e293b' }}>分贝阈值</span><span style={{ fontSize: '1.5rem', color: isDarkMode ? '#00f260' : '#059669', fontWeight: 'bold' }}>{limit} dB</span></div><input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" style={{ height: '12px' }} /></div>
         </div>
       </main>
     </div>

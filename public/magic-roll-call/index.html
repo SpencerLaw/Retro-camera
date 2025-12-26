@@ -152,8 +152,23 @@
                     const data = await res.json();
                     if (data.success) initApp(); 
                     else {
-                        document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;"><h1>⚠️ 授权失效</h1><p>${data.message}</p></div>`;
-                        setTimeout(() => window.location.replace('/'), 4000);
+                        localStorage.setItem('magic_rc_auth', 'false');
+                        localStorage.removeItem('magic_rc_license');
+                        let timeLeft = 4;
+                        document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
+                            <h1 style="font-size:3.3rem">⚠️ 授权失效</h1>
+                            <p style="font-size:1.65rem; margin:20px 0;">${data.message}</p>
+                            <div id="countdown-timer" style="font-size:1.32rem; color:#666">${timeLeft}秒后自动返回首页...</div>
+                        </div>`;
+                        const timer = setInterval(() => {
+                            timeLeft--;
+                            const el = document.getElementById('countdown-timer');
+                            if (el) el.textContent = `${timeLeft}秒后自动返回首页...`;
+                            if (timeLeft <= 0) {
+                                clearInterval(timer);
+                                window.location.replace('/');
+                            }
+                        }, 1000);
                     }
                 } catch(e) { initApp(); }
             } else {

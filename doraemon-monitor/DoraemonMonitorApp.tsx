@@ -185,7 +185,7 @@ const DoraemonMonitorApp: React.FC = () => {
 
   // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
-    const BAR_COUNT = 80;
+    const BAR_COUNT = 50;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     // 在白天模式下使用更深的颜色和更高的不透明度
     const opacity = isDarkMode ? 0.7 : 0.5;
@@ -193,7 +193,7 @@ const DoraemonMonitorApp: React.FC = () => {
     const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
 
     return (
-      <div className="visualizer-container" style={{ opacity: 1, pointerEvents: 'none', height: '100%', maxHeight: '800px' }}>
+      <div className="visualizer-container" style={{ opacity: 1 }}>
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
           const dist = Math.abs(i - BAR_COUNT / 2);
           const norm = 1 - (dist / (BAR_COUNT / 2));
@@ -202,7 +202,7 @@ const DoraemonMonitorApp: React.FC = () => {
           
           // 优化：边缘高度自然收尾 (Taper height at edges)
           const taperedNorm = Math.pow(norm, 1.5); 
-          const height = 10 + (350 * taperedNorm * (dbPower + wave + 0.05));
+          const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
           
           return (
             <div key={i} className="wave-bar" style={{ 
@@ -210,7 +210,7 @@ const DoraemonMonitorApp: React.FC = () => {
               background: `linear-gradient(to top, transparent, ${mainColor})`,
               opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
               boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
-              width: '4px',
+              width: '6px',
               borderRadius: '4px',
               transition: 'height 0.1s ease-out'
             }} />
@@ -253,8 +253,12 @@ const DoraemonMonitorApp: React.FC = () => {
         </div>
       </header>
       <main className="doraemon-main" style={{ padding: '0 60px', gap: '40px', justifyContent: 'space-between' }}>
-        <Visualizer /><NoiseLevelReference />
-        <div className="center-display" style={{ flex: 1 }}><div className="doraemon-wrapper" style={{ width: '350px', height: '350px', transform: `scale(${1 + (currentDb - 40) / 150})`, transition: 'transform 0.1s' }}><DoraemonSVG /></div><div className="db-display" style={{ marginTop: '30px' }}><span className="db-number" style={{ fontSize: '8rem' }}>{Math.round(currentDb)}</span><span className="db-unit" style={{ fontSize: '2rem' }}>dB</span></div></div>
+        <NoiseLevelReference />
+        <div className="center-display" style={{ flex: 1 }}>
+          <div className="doraemon-wrapper" style={{ width: '350px', height: '350px', transform: `scale(${1 + (currentDb - 40) / 150})`, transition: 'transform 0.1s' }}><DoraemonSVG /></div>
+          <div className="db-display" style={{ marginTop: '30px' }}><span className="db-number" style={{ fontSize: '8rem' }}>{Math.round(currentDb)}</span><span className="db-unit" style={{ fontSize: '2rem' }}>dB</span></div>
+          <Visualizer />
+        </div>
         <div className="right-panel" style={{ width: '320px', gap: '25px' }}>
           <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>🤫 安静时长</span><strong style={{ fontSize: '3rem', color: isDarkMode ? '#00f260' : '#059669', marginTop: '10px' }}>{formatTime(quietTime)}</strong></div>
           <div className="stat-box" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⏱️ 监测总计</span><strong style={{ fontSize: '3rem', color: isDarkMode ? '#0575e6' : '#2563eb', marginTop: '10px' }}>{formatTime(totalTime)}</strong></div>

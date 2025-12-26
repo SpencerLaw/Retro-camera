@@ -239,18 +239,13 @@
 
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   width: 100%;
-  max-width: 1400px;
-  height: 450px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  z-index: 0;
+  gap: 3px;
+  margin-top: 20px;
   pointer-events: none;
 }
 

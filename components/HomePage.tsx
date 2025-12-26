@@ -351,42 +351,6 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
-          {/* Retro Camera Card - Disabled */}
-          <div
-            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed transform transition-all duration-500 grayscale opacity-80 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Camera size={72} className="text-[#999999]" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-marker text-4xl text-[#666666] mb-3 font-bold">{t('home.camera.title')}</h2>
-              <p className="text-base text-[#777777] mb-4 font-semibold">
-                {t('home.camera.subtitle')}
-              </p>
-              <p className="text-sm text-[#888888] leading-relaxed font-medium">
-                {t('home.camera.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
-                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
-                  {t('home.restricted')}
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Particle Flow Card - Cute Galaxy Purple */}
           <Link
             to="/particles"
@@ -429,6 +393,44 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           </Link>
+
+          {/* Retro Camera Card - Disabled */}
+          <div
+            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed transform transition-all duration-500 grayscale opacity-80 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Camera size={72} className="text-[#999999]" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-marker text-4xl text-[#666666] mb-3 font-bold">{t('home.camera.title')}</h2>
+              <p className="text-base text-[#777777] mb-4 font-semibold">
+                {t('home.camera.subtitle')}
+              </p>
+              <p className="text-sm text-[#888888] leading-relaxed font-medium">
+                {t('home.camera.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
+                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
+                  {t('home.restricted')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+
 
           {/* Fortune Sticks Card - Disabled/Restricted */}
           <div

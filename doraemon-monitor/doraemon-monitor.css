@@ -202,7 +202,7 @@
   justify-content: center;
   z-index: 10;
   flex: 1;
-  max-width: 500px;
+  max-width: 100%; /* Allow full width expansion */
   min-width: 300px;
 }
 
@@ -239,13 +239,14 @@
 
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
-  width: 100%;
+  width: 120%; /* Extend wider than parent to get closer to side panels */
+  max-width: 1000px;
   height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  margin-top: 20px;
+  gap: 4px;
+  margin-top: 10px;
   pointer-events: none;
 }
 

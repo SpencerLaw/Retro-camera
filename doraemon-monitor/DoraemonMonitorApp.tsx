@@ -23,12 +23,21 @@ const DoraemonMonitorApp: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(4);
+  const [timeStr, setTimeStr] = useState('');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const workerRef = useRef<Worker | null>(null);
-  const thresholdStartRef = useRef(0);
-  const recoverStartRef = useRef(0);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const d = new Date();
+      const date = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+      const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+      setTimeStr(`${date} ${time}`);
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const code = getSavedLicenseCode();
@@ -238,7 +247,16 @@ const DoraemonMonitorApp: React.FC = () => {
   return (
     <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
       {state === 'alarm' && <div className="doraemon-giant-text" style={{ fontSize: '12vw' }}>{t('doraemon.quiet')}</div>}
-      <header className="doraemon-header" style={{ padding: '20px 40px' }}><button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button><div style={{ display: 'flex', gap: '20px' }}><button onClick={toggleFullscreen} className="icon-btn"><Maximize size={32} /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button></div></header>
+      <header className="doraemon-header" style={{ padding: '20px 40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
+          <div style={{ fontSize: '1.2rem', fontWeight: 'bold', fontFamily: 'monospace', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
+        </div>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <button onClick={toggleFullscreen} className="icon-btn"><Maximize size={32} /></button>
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
+        </div>
+      </header>
       <main className="doraemon-main" style={{ padding: '0 60px', gap: '40px', justifyContent: 'space-between' }}>
         <Visualizer /><NoiseLevelReference />
         <div className="center-display" style={{ flex: 1 }}><div className="doraemon-wrapper" style={{ width: '350px', height: '350px', transform: `scale(${1 + (currentDb - 40) / 150})`, transition: 'transform 0.1s' }}><DoraemonSVG /></div><div className="db-display" style={{ marginTop: '30px' }}><span className="db-number" style={{ fontSize: '8rem' }}>{Math.round(currentDb)}</span><span className="db-unit" style={{ fontSize: '2rem' }}>dB</span></div></div>

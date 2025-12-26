@@ -80,7 +80,7 @@
                                 </div>
                                 <div class="modal-footer" style="justify-content: center; gap: 20px;">
                                     <button id="confirm-yes-btn" class="btn-premium btn-primary" style="padding: 10px 30px;">确认</button>
-                                    <button id="confirm-no-btn" class="btn-premium btn-danger" style="padding: 10px 30px; background: #95a5a6;">取消</button>
+                                    <button id="confirm-no-btn" class="btn-premium" style="padding: 10px 30px; background: white; color: #666; border: 2px solid #eee;">取消</button>
                                 </div>
                             </div>
                         </div>
@@ -229,11 +229,55 @@
             if (confirm('确定清空所有数据？')) { STATE.students = []; saveData(); renderUI(); renderTree(); }
         };
         document.getElementById('reset-day-btn').onclick = () => {
-            if(confirm(t('resetDayConfirm'))) {
+            // 动态注入弹窗如果不存在（解决HTML缓存问题）
+            if (!document.getElementById('confirm-modal')) {
+                const modalHTML = `
+                    <div id="confirm-modal" class="modal hidden">
+                        <div class="modal-backdrop"></div>
+                        <div class="modal-content settings-modal-premium" style="max-width: 400px; text-align: center;">
+                            <div class="modal-header" style="justify-content: center;">
+                                <h2 id="confirm-title" style="margin: 0;">确认操作</h2>
+                            </div>
+                            <div class="input-card" style="border: none; background: transparent; padding: 20px 0;">
+                                <p id="confirm-message" style="font-size: 1.2rem; color: var(--text-dark);">你确定吗？</p>
+                            </div>
+                            <div class="modal-footer" style="justify-content: center; gap: 20px;">
+                                <button id="confirm-yes-btn" class="btn-premium btn-primary" style="padding: 10px 30px;">确认</button>
+                                <button id="confirm-no-btn" class="btn-premium" style="padding: 10px 30px; background: white; color: #666; border: 2px solid #eee;">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+
+            const modal = document.getElementById('confirm-modal');
+            const title = document.getElementById('confirm-title');
+            const msg = document.getElementById('confirm-message');
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            const noBtn = document.getElementById('confirm-no-btn');
+            const backdrop = modal.querySelector('.modal-backdrop');
+
+            title.textContent = '开启新的一天';
+            msg.textContent = t('resetDayConfirm');
+            modal.classList.remove('hidden');
+
+            const closeModal = () => {
+                modal.classList.add('hidden');
+                yesBtn.onclick = null;
+                noBtn.onclick = null;
+                backdrop.onclick = null;
+            };
+
+            yesBtn.onclick = () => {
+                closeModal();
                 const day = STATE.todayIndex > 4 ? 4 : STATE.todayIndex;
                 STATE.students.forEach(s => { if(!s.history) s.history=[false,false,false,false,false]; s.history[day] = false; });
                 saveData(); renderUI(); renderTree();
-            }
+            };
+
+            noBtn.onclick = closeModal;
+            backdrop.onclick = closeModal;
         };
         // 全屏
         const fsBtn = document.getElementById('fullscreen-btn');

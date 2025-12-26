@@ -26,6 +26,10 @@ const DoraemonMonitorApp: React.FC = () => {
   const [timeStr, setTimeStr] = useState('');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const thresholdStartRef = useRef(0);
+  const recoverStartRef = useRef(0);
 
   useEffect(() => {
     const updateTime = () => {

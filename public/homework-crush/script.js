@@ -66,6 +66,28 @@
         bubble.innerHTML = heartSVG + `<div class="name" style="color: ${isDone ? '#ff3366' : '#a36d7d'}">${student.name}</div>`;
         if (!isDone) {
             bubble.onclick = () => {
+                // 动态注入弹窗如果不存在（解决HTML缓存问题）
+                if (!document.getElementById('confirm-modal')) {
+                    const modalHTML = `
+                        <div id="confirm-modal" class="modal hidden">
+                            <div class="modal-backdrop"></div>
+                            <div class="modal-content settings-modal-premium" style="max-width: 400px; text-align: center;">
+                                <div class="modal-header" style="justify-content: center;">
+                                    <h2 id="confirm-title" style="margin: 0;">确认操作</h2>
+                                </div>
+                                <div class="input-card" style="border: none; background: transparent; padding: 20px 0;">
+                                    <p id="confirm-message" style="font-size: 1.2rem; color: var(--text-dark);">你确定吗？</p>
+                                </div>
+                                <div class="modal-footer" style="justify-content: center; gap: 20px;">
+                                    <button id="confirm-yes-btn" class="btn-premium btn-primary" style="padding: 10px 30px;">确认</button>
+                                    <button id="confirm-no-btn" class="btn-premium btn-danger" style="padding: 10px 30px; background: #95a5a6;">取消</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', modalHTML);
+                }
+
                 const modal = document.getElementById('confirm-modal');
                 const title = document.getElementById('confirm-title');
                 const msg = document.getElementById('confirm-message');

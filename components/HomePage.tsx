@@ -351,48 +351,41 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
-          {/* Retro Camera Card - Cute Pink */}
-          <Link
-            to="/camera"
-            className="group relative bg-gradient-to-br from-[#FFD6E8] via-[#FFC1E3] to-[#FFB5E8] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,105,180,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,105,180,0.5)] hover:rotate-2 block"
+          {/* Retro Camera Card - Disabled */}
+          <div
+            className="group relative bg-gradient-to-br from-[#E0E0E0] via-[#D0D0D0] to-[#C0C0C0] rounded-[2.5rem] p-8 cursor-not-allowed transform transition-all duration-500 grayscale opacity-80 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
           >
-            {/* Cute floating hearts decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💕</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFB5E8] to-[#FFC6FF] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
             {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
               <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,105,180,0.3)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFE5F0]"
+                className="w-36 h-36 bg-[#F5F5F5] rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] border-[6px] border-[#D0D0D0]"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <Camera size={72} className="text-[#FF69B4] drop-shadow-lg" />
+                <Camera size={72} className="text-[#999999]" />
               </div>
             </div>
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-marker text-4xl text-[#D5006D] mb-3 font-bold drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.camera.title')}</h2>
-              <p className="text-base text-[#B8005C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+              <h2 className="font-marker text-4xl text-[#666666] mb-3 font-bold">{t('home.camera.title')}</h2>
+              <p className="text-base text-[#777777] mb-4 font-semibold">
                 {t('home.camera.subtitle')}
               </p>
-              <p className="text-sm text-[#A0004D] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+              <p className="text-sm text-[#888888] leading-relaxed font-medium">
                 {t('home.camera.description')}
               </p>
 
               {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#FF69B4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(100,181,246,0.3)] border-[3px] border-[#FFE5F0] hover:bg-gradient-to-r hover:from-[#FFE5F0] hover:to-white">
-                  Enter → 💖
+              <div className="mt-6 pt-6 border-t-[3px] border-white/50">
+                <div className="inline-block px-6 py-3 bg-[#EEEEEE] text-[#999999] rounded-full text-base font-bold border-[3px] border-[#DDDDDD]">
+                  {t('home.restricted')}
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
 
           {/* Particle Flow Card - Cute Galaxy Purple */}
           <Link

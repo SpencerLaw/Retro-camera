@@ -186,15 +186,22 @@ const DoraemonMonitorApp: React.FC = () => {
           const norm = 1 - (dist / (BAR_COUNT / 2));
           const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
           const wave = Math.sin(i * 0.35 + Date.now() / 150) * 0.15;
-          const height = 20 + (350 * norm * (dbPower + wave + 0.08));
+          
+          // 优化：边缘高度自然收尾 (Taper height at edges)
+          const taperedNorm = Math.pow(norm, 1.5); 
+          const height = 10 + (350 * taperedNorm * (dbPower + wave + 0.05));
+          
+          // 优化：线宽由粗到细 (Variable width: thick to thin)
+          const barWidth = Math.max(1.5, 6 * Math.pow(norm, 0.8));
+          
           return (
             <div key={i} className="wave-bar" style={{ 
               height: `${height}px`, 
               background: `linear-gradient(to top, transparent, ${mainColor})`,
-              opacity: opacity + norm * 0.3,
-              boxShadow: `0 0 15px ${glowColor}`,
-              width: '4px',
-              borderRadius: '4px',
+              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
+              boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
+              width: `${barWidth}px`,
+              borderRadius: `${barWidth}px`,
               transition: 'height 0.1s ease-out'
             }} />
           );

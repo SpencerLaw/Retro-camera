@@ -191,17 +191,14 @@ const DoraemonMonitorApp: React.FC = () => {
           const taperedNorm = Math.pow(norm, 1.5); 
           const height = 10 + (350 * taperedNorm * (dbPower + wave + 0.05));
           
-          // 优化：线宽由粗到细 (Variable width: thick to thin)
-          const barWidth = Math.max(1.5, 6 * Math.pow(norm, 0.8));
-          
           return (
             <div key={i} className="wave-bar" style={{ 
               height: `${height}px`, 
               background: `linear-gradient(to top, transparent, ${mainColor})`,
               opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
               boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
-              width: `${barWidth}px`,
-              borderRadius: `${barWidth}px`,
+              width: '4px',
+              borderRadius: '4px',
               transition: 'height 0.1s ease-out'
             }} />
           );

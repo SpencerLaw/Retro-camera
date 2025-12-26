@@ -21,12 +21,21 @@
     const forceExit = (msg) => {
         localStorage.setItem('hc_verified', 'false');
         localStorage.removeItem('hc_license');
+        let timeLeft = 4;
         document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
-            <h1 style="font-size:3rem">⚠️ 授权失效</h1>
-            <p style="font-size:1.5rem; margin:20px 0;">${msg}</p>
-            <div style="font-size:1.2rem; color:#666">4秒后自动返回首页...</div>
+            <h1 style="font-size:3.3rem">⚠️ 授权失效</h1>
+            <p style="font-size:1.65rem; margin:20px 0;">${msg}</p>
+            <div id="countdown-timer" style="font-size:1.32rem; color:#666">${timeLeft}秒后自动返回首页...</div>
         </div>`;
-        setTimeout(() => { window.location.replace('/'); }, 4000);
+        const timer = setInterval(() => {
+            timeLeft--;
+            const el = document.getElementById('countdown-timer');
+            if (el) el.textContent = `${timeLeft}秒后自动返回首页...`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                window.location.replace('/');
+            }
+        }, 1000);
     };
 
     function saveData() {

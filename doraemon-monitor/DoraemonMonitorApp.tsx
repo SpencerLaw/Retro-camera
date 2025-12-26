@@ -22,6 +22,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(4);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
@@ -34,7 +35,21 @@ const DoraemonMonitorApp: React.FC = () => {
     if (isVerified() && code) {
       verifyLicenseCode(code).then(res => {
         if (res.success) setIsLicensed(true);
-        else { setAuthError(res.message); clearLicense(); setTimeout(() => window.location.replace('/'), 4000); }
+        else { 
+          setAuthError(res.message); 
+          clearLicense(); 
+          // Start countdown
+          const timer = setInterval(() => {
+            setCountdown((prev) => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                window.location.replace('/');
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
       });
     } else setIsLicensed(false);
   }, []);
@@ -202,7 +217,7 @@ const DoraemonMonitorApp: React.FC = () => {
     </svg>
   );
 
-  if (authError) return <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}><h1 style={{ fontSize: '4rem', color: '#ff416c' }}>⚠️ 授权失效</h1><p style={{ fontSize: '2rem', margin: '20px 0' }}>{authError}</p><p style={{ color: '#666' }}>4秒后自动返回首页...</p></div>;
+  if (authError) return <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}><h1 style={{ fontSize: '4.4rem', color: '#ff416c' }}>⚠️ 授权失效</h1><p style={{ fontSize: '2.2rem', margin: '20px 0' }}>{authError}</p><p style={{ color: '#666', fontSize: '1.1rem' }}>{countdown}秒后自动返回首页...</p></div>;
   if (isLicensed === null) return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>🔮 正在验证魔法授权...</h2></div>;
   if (isLicensed === false) return <LicenseInput onVerified={() => setIsLicensed(true)} />;
   if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>Doraemon Monitor</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>正在召唤...</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>开启监测</span><span className="btn-sub-text">点击开始自习守护</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;

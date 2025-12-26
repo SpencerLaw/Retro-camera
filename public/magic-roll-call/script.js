@@ -6,6 +6,7 @@ console.log("🚀 [Magic Roll Call] Script loading...");
 
 const STATE = {
     authorized: localStorage.getItem('magic_rc_auth') === 'true',
+    licenseCode: localStorage.getItem('magic_rc_license') || '',
     students: JSON.parse(localStorage.getItem('magic_rc_students') || '[]'),
     history: JSON.parse(localStorage.getItem('magic_rc_history') || '[]'),
     isRolling: false,
@@ -137,6 +138,59 @@ function showWinners(winners) {
     }
 }
 
+const forceExit = (msg) => {
+    localStorage.setItem('magic_rc_auth', 'false');
+    localStorage.removeItem('magic_rc_license');
+    let timeLeft = 4;
+    document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
+        <h1 style="font-size:3.3rem">⚠️ 授权失效</h1>
+        <p style="font-size:1.65rem; margin:20px 0;">${msg}</p>
+        <div id="countdown-timer" style="font-size:1.32rem; color:#666">${timeLeft}秒后自动返回首页...</div>
+    </div>`;
+    const timer = setInterval(() => {
+        timeLeft--;
+        const el = document.getElementById('countdown-timer');
+        if (el) el.textContent = `${timeLeft}秒后自动返回首页...`;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            window.location.replace('/');
+        }
+    }, 1000);
+};
+
+async function validateLicense() {
+    let deviceId = localStorage.getItem('magic_rc_device_id');
+    if (!deviceId) {
+        deviceId = 'rc-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('magic_rc_device_id', deviceId);
+    }
+
+    if (!STATE.licenseCode) {
+        forceExit('未检测到授权信息，请重新登录');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                licenseCode: STATE.licenseCode,
+                deviceId: deviceId,
+                deviceInfo: navigator.userAgent
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showApp();
+        } else {
+            forceExit(data.message || '授权已失效');
+        }
+    } catch (e) {
+        showApp();
+    }
+}
+
 function bindAllEvents() {
     const get = (id) => document.getElementById(id);
     const startBtn = get('start-btn');
@@ -194,6 +248,13 @@ function bindAllEvents() {
             const input = get('license-input');
             const code = input ? input.value.trim() : "";
             if (!code.toUpperCase().startsWith('DM')) { alert(t('authError')); return; }
+            
+            let deviceId = localStorage.getItem('magic_rc_device_id');
+            if (!deviceId) {
+                deviceId = 'rc-' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('magic_rc_device_id', deviceId);
+            }
+            
             verifyBtn.disabled = true;
             try {
                 const res = await fetch('/api/verify-license', {
@@ -201,14 +262,16 @@ function bindAllEvents() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         licenseCode: code,
-                        deviceId: 'rc-' + Math.random().toString(36).substr(2, 9),
+                        deviceId: deviceId,
                         deviceInfo: navigator.userAgent
                     })
                 });
                 const data = await res.json();
                 if (data.success || code.length > 10) {
                     STATE.authorized = true;
+                    STATE.licenseCode = code;
                     localStorage.setItem('magic_rc_auth', 'true');
+                    localStorage.setItem('magic_rc_license', code);
                     showApp();
                 } else { alert(data.message || t('authError')); }
             } catch (e) {
@@ -273,6 +336,6 @@ function showAuth() {
 window.addEventListener('DOMContentLoaded', () => {
     initCosmos();
     bindAllEvents();
-    if (STATE.authorized) showApp();
+    if (STATE.authorized) validateLicense();
     else showAuth();
 });

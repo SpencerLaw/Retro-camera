@@ -172,34 +172,43 @@ const DoraemonMonitorApp: React.FC = () => {
 
   // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
-    const BAR_COUNT = 80;
+    const BAR_COUNT = 100;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
-    // 在白天模式下使用更深的颜色和更高的不透明度
-    const opacity = isDarkMode ? 0.7 : 0.5;
-    const mainColor = `hsl(${hue}, 95%, 50%)`; // 极高饱和度
-    const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
+    const opacity = isDarkMode ? 0.8 : 0.6;
+    const mainColor = `hsl(${hue}, 95%, 60%)`;
+    const glowColor = `hsla(${hue}, 95%, 60%, 0.8)`;
 
     return (
-      <div className="visualizer-container" style={{ opacity: 1, pointerEvents: 'none', height: '100%', maxHeight: '800px' }}>
+      <div className="visualizer-container" style={{ opacity: 1, pointerEvents: 'none', height: '100%', maxHeight: '800px', gap: '3px' }}>
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
-          const dist = Math.abs(i - BAR_COUNT / 2);
-          const norm = 1 - (dist / (BAR_COUNT / 2));
-          const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
-          const wave = Math.sin(i * 0.35 + Date.now() / 150) * 0.15;
+          const center = BAR_COUNT / 2;
+          const dist = Math.abs(i - center);
+          const norm = 1 - (dist / center); // 0 (edge) -> 1 (center)
           
-          // 优化：边缘高度自然收尾 (Taper height at edges)
-          const taperedNorm = Math.pow(norm, 1.5); 
-          const height = 10 + (350 * taperedNorm * (dbPower + wave + 0.05));
+          // 声音能量 (Energy)
+          const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.2);
           
+          // 灵动波浪：双重波浪叠加 (Dynamic Dual-Layer Wave)
+          const time = Date.now() / 1000;
+          const wave1 = Math.sin(norm * 6 + time * 3) * 0.1; // 基础律动
+          const wave2 = Math.cos(norm * 15 - time * 6) * 0.05; // 细节抖动
+          
+          // 形状计算：更饱满的拱形 (Fuller Arch Shape)
+          const shape = Math.pow(norm, 0.6); 
+          
+          // 最终高度 (Final Height)
+          let height = 15 + (450 * shape * dbPower) + (120 * shape * (wave1 + wave2 + 0.1));
+          height = Math.max(12, height);
+
           return (
             <div key={i} className="wave-bar" style={{ 
               height: `${height}px`, 
-              background: `linear-gradient(to top, transparent, ${mainColor})`,
-              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
-              boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
-              width: '4px',
-              borderRadius: '4px',
-              transition: 'height 0.1s ease-out'
+              background: `linear-gradient(to top, transparent 5%, ${mainColor})`,
+              opacity: (opacity + norm * 0.2) * Math.pow(norm, 0.25), // 边缘自然渐隐
+              boxShadow: `0 0 ${25 * norm * dbPower}px ${glowColor}`, // 光效随音量律动
+              width: '5px',
+              borderRadius: '10px',
+              transition: 'height 0.08s ease-out' // 极速响应
             }} />
           );
         })}

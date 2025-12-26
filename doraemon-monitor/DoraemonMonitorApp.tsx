@@ -185,7 +185,7 @@ const DoraemonMonitorApp: React.FC = () => {
 
   // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
-    const BAR_COUNT = 80;
+    const BAR_COUNT = 120;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     // 在白天模式下使用更深的颜色和更高的不透明度
     const opacity = isDarkMode ? 0.7 : 0.5;

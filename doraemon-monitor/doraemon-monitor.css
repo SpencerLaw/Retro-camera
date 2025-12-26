@@ -239,14 +239,13 @@
 
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
-  width: 120%; /* Extend wider than parent to get closer to side panels */
-  max-width: 1000px;
+  width: 100%;
   height: 120px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 10px;
+  justify-content: space-between; /* Spread bars across full width */
+  padding: 0 10px; /* Add small padding */
+  margin-top: 20px;
   pointer-events: none;
 }
 

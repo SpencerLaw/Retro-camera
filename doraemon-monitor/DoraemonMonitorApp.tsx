@@ -118,13 +118,52 @@ const DoraemonMonitorApp: React.FC = () => {
     } catch (err: any) { setError("授权失败: " + err.message); } finally { setIsLoading(false); }
   };
 
+  const playAlarmSound = () => {
+    if (!audioContextRef.current) return;
+    try {
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+      
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      // Double beep alarm
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, t); // A5
+      osc.frequency.setValueAtTime(880, t + 0.1);
+      osc.frequency.setValueAtTime(0, t + 0.15); // Pause
+      osc.frequency.setValueAtTime(880, t + 0.25);
+      osc.frequency.setValueAtTime(880, t + 0.35);
+      
+      gain.gain.setValueAtTime(0.1, t);
+      gain.gain.linearRampToValueAtTime(0.1, t + 0.35);
+      gain.gain.linearRampToValueAtTime(0, t + 0.4);
+      
+      osc.start(t);
+      osc.stop(t + 0.4);
+    } catch (e) {
+      console.error("Audio play failed", e);
+    }
+  };
+
   useEffect(() => {
     if (!isStarted) return;
     const now = Date.now();
     if (currentDb > limit) {
       recoverStartRef.current = 0;
       if (thresholdStartRef.current === 0) thresholdStartRef.current = now;
-      if (now - thresholdStartRef.current > 2000) { if (state !== 'alarm') { setState('alarm'); setWarnCount(prev => prev + 1); setQuietTime(0); } }
+      if (now - thresholdStartRef.current > 2000) { 
+        if (state !== 'alarm') { 
+          setState('alarm'); 
+          setWarnCount(prev => prev + 1); 
+          setQuietTime(0); 
+          playAlarmSound();
+        } 
+      }
       else if (now - thresholdStartRef.current > 800 && state === 'calm') setState('warning');
     } else {
       thresholdStartRef.current = 0;

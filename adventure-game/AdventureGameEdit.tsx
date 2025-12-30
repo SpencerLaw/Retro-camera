@@ -113,7 +113,17 @@ const AdventureGameEdit: React.FC = () => {
           <X size={24} />
         </button>
 
-        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>内容编辑器 (Content Editor)</h1>
+        <h1 style={{ 
+          fontSize: '2.5rem', 
+          marginBottom: '1.5rem', 
+          color: '#FF9F43', 
+          webkitTextStroke: '0px', 
+          textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+          fontFamily: '"Varela Round", "Fredoka", sans-serif',
+          fontWeight: '800'
+        }}>
+          内容编辑器 (Content Editor)
+        </h1>
         
         <div className="couple-game-stage-buttons">
           {(['stage1', 'stage2', 'stage3'] as Stage[]).map((stage) => (

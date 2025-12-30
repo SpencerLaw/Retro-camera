@@ -20,11 +20,8 @@
         canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
         .screen { position: absolute; inset: 0; z-index: 10; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s; background: transparent !important; }
         .hidden { display: none !important; }
-        #gatekeeper-screen { position: fixed; inset: 0; z-index: 9999; background: #000; color: var(--primary-neon); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: sans-serif; }
-        .spinner { width: 60px; height: 60px; border: 5px solid #222; border-top-color: var(--primary-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; }
-        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
-        .auth-card { padding: 40px; text-align: center; width: 400px; background: rgba(15, 12, 41, 0.8); }
-        input[type="text"] { width: 100%; padding: 15px; margin: 20px 0; border-radius: 8px; border: 2px solid white; background: white; color: #333; font-size: 1.5rem; text-align: center; }
+        .names-hidden #student-preview span { filter: blur(5px); transition: filter 0.3s; }
+        .names-hidden #student-preview span:hover { filter: blur(0); } /* 悬停可见，增加互动感 */
         #app-screen { display: none; flex-direction: row; padding: 20px; }
         .sidebar { width: 300px; padding: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 20; }
         .stage { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -64,14 +61,29 @@
     <div id="clock-display" style="position:absolute; top:32px; left:80px; font-size:1.5rem; font-family:'Orbitron', sans-serif; z-index:1000; color:var(--text-white); font-weight:bold; text-shadow:0 0 5px var(--primary-neon);"></div>
     <button id="fullscreen-btn" class="fullscreen-btn"><svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
     <div id="auth-screen" class="screen hidden"><div class="auth-card glass-panel"><h1>✨ 魔法课堂入口</h1><p>请输入授权码</p><input type="text" id="license-input" placeholder="DM-xxxx"><button id="verify-btn" class="magic-btn">🔮 芝麻开门</button></div></div>
-    <div id="app-screen" class="screen"><aside class="sidebar glass-panel"><h2>🎓 点名魔法师</h2><div>人数: <span id="student-count">0</span></div><textarea id="student-input" placeholder="每行一个姓名"></textarea><div><button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000; font-weight:bold; border:none; cursor:pointer;">💾 保存</button><button id="clear-btn" class="btn-small" style="background:#ff416c; color:white; border:none; cursor:pointer; margin-left:5px;">🗑️ 清空</button></div><div style="margin-top:10px"><label>抽取人数: <span id="pick-val" style="color:var(--primary-neon); font-weight:bold">1</span></label><input type="range" id="pick-range" min="1" max="10" value="1"></div><div id="student-preview" style="overflow-y:auto; flex:1; margin-top:10px"></div><button id="logout-btn" class="btn-logout">🚪 退出系统</button></aside><main class="stage"><div id="magic-circle-container"><div class="magic-ring ring-1"></div><div class="magic-ring ring-2"></div><div class="core-orb"><span id="orb-text"></span></div></div><div style="margin-top: 50px;"><button id="start-btn" class="magic-btn">⚡ 开始点名</button></div></main><div id="result-overlay" class="hidden"><h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉</h1><div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div><button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button></div></div>
+    <div id="app-screen" class="screen"><aside class="sidebar glass-panel"><h2>🎓 点名魔法师</h2><div>人数: <span id="student-count">0</span></div><textarea id="student-input" placeholder="每行一个姓名"></textarea><div><button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000; font-weight:bold; border:none; cursor:pointer;">💾 保存</button><button id="clear-btn" class="btn-small" style="background:#ff416c; color:white; border:none; cursor:pointer; margin-left:5px;">🗑️ 清空</button><button id="toggle-names-btn" class="btn-small" style="background:var(--secondary-neon); color:white; border:none; cursor:pointer; margin-left:5px;">👁️ 显示名字</button></div><div style="margin-top:10px"><label>抽取人数: <span id="pick-val" style="color:var(--primary-neon); font-weight:bold">1</span></label><input type="range" id="pick-range" min="1" max="10" value="1"></div><div id="student-preview" style="overflow-y:auto; flex:1; margin-top:10px"></div><button id="logout-btn" class="btn-logout">🚪 退出系统</button></aside><main class="stage"><div id="magic-circle-container"><div class="magic-ring ring-1"></div><div class="magic-ring ring-2"></div><div class="core-orb"><span id="orb-text"></span></div></div><div style="margin-top: 50px;"><button id="start-btn" class="magic-btn">⚡ 开始点名</button></div></main><div id="result-overlay" class="hidden"><h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉</h1><div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div><button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button></div></div>
 
     <script>
     (function(){
         window.isWarp = false;
         let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
         let isRolling = false;
+        let namesHidden = true; // 默认隐藏
         const gate = document.getElementById('gatekeeper-screen');
+
+        const updateVisibility = () => {
+            const sidebar = document.querySelector('.sidebar');
+            const btn = document.getElementById('toggle-names-btn');
+            if (btn) {
+                if (namesHidden) {
+                    sidebar.classList.add('names-hidden');
+                    btn.textContent = '👁️ 显示名字';
+                } else {
+                    sidebar.classList.remove('names-hidden');
+                    btn.textContent = '🙈 隐藏名字';
+                }
+            }
+        };
 
         // Clock Logic
         const updateClock = () => {
@@ -104,6 +116,11 @@
             gate.style.display = 'none';
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').style.display = 'flex';
+            updateVisibility();
+            document.getElementById('toggle-names-btn').onclick = () => {
+                namesHidden = !namesHidden;
+                updateVisibility();
+            };
             document.getElementById('start-btn').onclick = () => {
                 if(students.length === 0) return alert("请导入名单");
                 if(isRolling) return;

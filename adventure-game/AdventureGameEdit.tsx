@@ -103,23 +103,16 @@ const AdventureGameEdit: React.FC = () => {
 
   return (
     <div className="couple-game-app">
-      <button
-        onClick={() => navigate('/adventure')}
-        className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-pink-500 backdrop-blur-sm transition-all text-pink-500 hover:text-pink-600 shadow-xl hover:scale-110"
-      >
-        <ArrowLeft size={24} />
-      </button>
+      <div className="couple-game-main-container" style={{ maxWidth: '800px', position: 'relative' }}>
+        {/* Close Button (X) inside the dialog container */}
+        <button
+          onClick={() => navigate('/adventure')}
+          className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/90 hover:bg-red-50 border-2 border-red-400 transition-all text-red-400 hover:text-red-500 shadow-sm hover:scale-110 hover:rotate-90"
+          title="关闭 (Close)"
+        >
+          <X size={24} />
+        </button>
 
-      {/* Close Button (X) in Top Right */}
-      <button
-        onClick={() => navigate('/adventure')}
-        className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-red-50 border-2 sm:border-3 border-red-400 backdrop-blur-sm transition-all text-red-400 hover:text-red-500 shadow-xl hover:scale-110 hover:rotate-90"
-        title="关闭 (Close)"
-      >
-        <X size={24} />
-      </button>
-
-      <div className="couple-game-main-container" style={{ maxWidth: '800px' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>内容编辑器 (Content Editor)</h1>
         
         <div className="couple-game-stage-buttons">

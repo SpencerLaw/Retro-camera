@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, RotateCcw, Download, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, RotateCcw, Download, Plus, Trash2, X } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 // @ts-ignore
 import daresEn from './public/dares.en.json';
@@ -108,6 +108,15 @@ const AdventureGameEdit: React.FC = () => {
         className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-pink-500 backdrop-blur-sm transition-all text-pink-500 hover:text-pink-600 shadow-xl hover:scale-110"
       >
         <ArrowLeft size={24} />
+      </button>
+
+      {/* Close Button (X) in Top Right */}
+      <button
+        onClick={() => navigate('/adventure')}
+        className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-red-50 border-2 sm:border-3 border-red-400 backdrop-blur-sm transition-all text-red-400 hover:text-red-500 shadow-xl hover:scale-110 hover:rotate-90"
+        title="关闭 (Close)"
+      >
+        <X size={24} />
       </button>
 
       <div className="couple-game-main-container" style={{ maxWidth: '800px' }}>

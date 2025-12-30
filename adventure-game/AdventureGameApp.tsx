@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Edit } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 // Import JSON files - Vite handles these as modules
 // @ts-ignore
@@ -11,19 +11,19 @@ import daresEn from './public/dares.en.json';
 import daresZh from './public/dares.zh.json';
 // @ts-ignore
 import daresJa from './public/dares.ja.json';
-import './CoupleGameStyles.css';
+import './AdventureGameStyles.css';
 
 type Language = 'en' | 'zh' | 'ja';
-type Stage = 'ambiguous' | 'advanced' | 'passionate' | null;
+type Stage = 'stage1' | 'stage2' | 'stage3' | null;
 
-// Map global language to couple game language
-const mapGlobalToCoupleLang = (globalLang: GlobalLanguage): Language => {
+// Map global language to adventure game language
+const mapGlobalToAdventureLang = (globalLang: GlobalLanguage): Language => {
   if (globalLang === 'zh-CN' || globalLang === 'zh-TW') return 'zh';
   if (globalLang === 'ja') return 'ja';
   return 'en';
 };
 
-const daresByLang: Record<Language, any> = {
+const defaultDaresByLang: Record<Language, any> = {
   en: daresEn,
   zh: daresZh,
   ja: daresJa,
@@ -31,15 +31,31 @@ const daresByLang: Record<Language, any> = {
 
 const translations = translationsData as Record<Language, Record<string, string>>;
 
-const CoupleGameApp: React.FC = () => {
+const AdventureGameApp: React.FC = () => {
   const navigate = useNavigate();
   const { language: globalLanguage } = useLanguage();
-  const currentLang = mapGlobalToCoupleLang(globalLanguage);
+  const currentLang = mapGlobalToAdventureLang(globalLanguage);
   const [currentStage, setCurrentStage] = useState<Stage>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentDare, setCurrentDare] = useState<string>('');
   const slotReelRef = useRef<HTMLDivElement>(null);
   const activeTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  const [activeDares, setActiveDares] = useState<any>(defaultDaresByLang[currentLang]);
+
+  // Load custom dares from localStorage on mount or lang change
+  useEffect(() => {
+    const stored = localStorage.getItem(`pixar_game_dares_${currentLang}`);
+    if (stored) {
+      try {
+        setActiveDares(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse stored dares, using defaults");
+        setActiveDares(defaultDaresByLang[currentLang]);
+      }
+    } else {
+      setActiveDares(defaultDaresByLang[currentLang]);
+    }
+  }, [currentLang]);
 
   const t = (key: string): string => {
     return translations[currentLang]?.[key] || key;
@@ -66,7 +82,7 @@ const CoupleGameApp: React.FC = () => {
       return;
     }
 
-    const dares = daresByLang[currentLang][currentStage];
+    const dares = activeDares[currentStage];
     if (!dares || dares.length === 0) {
       setCurrentDare(t('noDares'));
       return;
@@ -166,7 +182,7 @@ const CoupleGameApp: React.FC = () => {
 
   return (
     <div className="couple-game-app">
-      {/* Back Button - Same style as other modules */}
+      {/* Back Button */}
       <button
         onClick={() => navigate('/')}
         className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-pink-500 backdrop-blur-sm transition-all text-pink-500 hover:text-pink-600 shadow-xl hover:scale-110"
@@ -175,33 +191,42 @@ const CoupleGameApp: React.FC = () => {
         <ArrowLeft size={24} className="hidden sm:block" />
       </button>
 
+      {/* Edit Button */}
+      <button
+        onClick={() => navigate('/adventure/edit')}
+        className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-blue-400 backdrop-blur-sm transition-all text-blue-400 hover:text-blue-500 shadow-xl hover:scale-110"
+      >
+        <Edit size={20} className="sm:hidden" />
+        <Edit size={24} className="hidden sm:block" />
+      </button>
+
       <div className="couple-game-main-container">
         <h1>{t('title')}</h1>
 
         <div className="couple-game-stage-buttons">
           <button
-            className={`couple-game-stage-btn ${currentStage === 'ambiguous' ? 'active' : ''}`}
-            onClick={() => setCurrentStage('ambiguous')}
+            className={`couple-game-stage-btn ${currentStage === 'stage1' ? 'active' : ''}`}
+            onClick={() => setCurrentStage('stage1')}
             disabled={isSpinning}
-            data-i18n="ambiguous"
+            data-i18n="stage1"
           >
-            {t('ambiguous')}
+            {t('stage1')}
           </button>
           <button
-            className={`couple-game-stage-btn ${currentStage === 'advanced' ? 'active' : ''}`}
-            onClick={() => setCurrentStage('advanced')}
+            className={`couple-game-stage-btn ${currentStage === 'stage2' ? 'active' : ''}`}
+            onClick={() => setCurrentStage('stage2')}
             disabled={isSpinning}
-            data-i18n="advanced"
+            data-i18n="stage2"
           >
-            {t('advanced')}
+            {t('stage2')}
           </button>
           <button
-            className={`couple-game-stage-btn ${currentStage === 'passionate' ? 'active' : ''}`}
-            onClick={() => setCurrentStage('passionate')}
+            className={`couple-game-stage-btn ${currentStage === 'stage3' ? 'active' : ''}`}
+            onClick={() => setCurrentStage('stage3')}
             disabled={isSpinning}
-            data-i18n="passionate"
+            data-i18n="stage3"
           >
-            {t('passionate')}
+            {t('stage3')}
           </button>
         </div>
 
@@ -225,4 +250,4 @@ const CoupleGameApp: React.FC = () => {
   );
 };
 
-export default CoupleGameApp;
+export default AdventureGameApp;

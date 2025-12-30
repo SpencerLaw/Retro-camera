@@ -1,0 +1,41 @@
+{
+    "en": {
+        "title": "Friendship Adventure 🎒",
+        "stage1": "Freshman",
+        "stage2": "Senior",
+        "stage3": "Graduate",
+        "start": "✨ Draw Challenge ✨",
+        "stop": "Stop",
+        "spinning": "Drawing...",
+        "selectStage": "Select a difficulty level! 🎓",
+        "noDares": "No challenges available for this level.",
+        "initialMsg": "Choose a level & Start the Adventure! 🎲",
+        "backHome": "Back Home"
+    },
+    "zh": {
+        "title": "奖惩大冒险 🎒",
+        "stage1": "青涩萌新",
+        "stage2": "社团老手",
+        "stage3": "毕业传说",
+        "start": "✨ 抽取挑战 ✨",
+        "stop": "停止",
+        "spinning": "抽取中...",
+        "selectStage": "请先选择一个难度等级！🎓",
+        "noDares": "该等级没有可用的挑战。",
+        "initialMsg": "选择难度等级，开启你的校园冒险！🎲",
+        "backHome": "返回首页"
+    },
+    "ja": {
+        "title": "学園アドベンチャー 🎒",
+        "stage1": "新入生",
+        "stage2": "先輩",
+        "stage3": "卒業伝説",
+        "start": "✨ チャレンジ ✨",
+        "stop": "ストップ",
+        "spinning": "抽選中...",
+        "selectStage": "難易度を選択してください！🎓",
+        "noDares": "このレベルのチャレンジはありません。",
+        "initialMsg": "レベルを選んで、冒険を始めよう！🎲",
+        "backHome": "ホームに戻る"
+    }
+}

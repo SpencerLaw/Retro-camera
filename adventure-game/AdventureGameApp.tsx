@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Maximize, Minimize } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 // Import JSON files - Vite handles these as modules
 // @ts-ignore
@@ -42,9 +42,32 @@ const AdventureGameApp: React.FC = () => {
   const [currentStage, setCurrentStage] = useState<Stage>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentDare, setCurrentDare] = useState<string>('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const slotReelRef = useRef<HTMLDivElement>(null);
   const activeTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const [activeDares, setActiveDares] = useState<any>(defaultDaresByLang[currentLang]);
+
+  // Handle Fullscreen
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
   // Load custom dares from localStorage on mount or lang change
   useEffect(() => {
@@ -186,14 +209,35 @@ const AdventureGameApp: React.FC = () => {
 
   return (
     <div className="couple-game-app">
-      {/* Back Button */}
-      <button
-        onClick={() => navigate('/')}
-        className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-pink-500 backdrop-blur-sm transition-all text-pink-500 hover:text-pink-600 shadow-xl hover:scale-110"
-      >
-        <ArrowLeft size={20} className="sm:hidden" />
-        <ArrowLeft size={24} className="hidden sm:block" />
-      </button>
+      {/* Top Left Buttons */}
+      <div className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 flex gap-2 sm:gap-4">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-pink-500 backdrop-blur-sm transition-all text-pink-500 hover:text-pink-600 shadow-xl hover:scale-110"
+        >
+          <ArrowLeft size={20} className="sm:hidden" />
+          <ArrowLeft size={24} className="hidden sm:block" />
+        </button>
+
+        {/* Fullscreen Button */}
+        <button
+          onClick={toggleFullscreen}
+          className="p-2 sm:p-3 rounded-full bg-white/95 hover:bg-white border-2 sm:border-3 border-purple-500 backdrop-blur-sm transition-all text-purple-500 hover:text-purple-600 shadow-xl hover:scale-110"
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize size={20} className="sm:hidden" />
+              <Minimize size={24} className="hidden sm:block" />
+            </>
+          ) : (
+            <>
+              <Maximize size={20} className="sm:hidden" />
+              <Maximize size={24} className="hidden sm:block" />
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Edit Button */}
       <button

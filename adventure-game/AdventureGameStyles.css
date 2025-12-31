@@ -41,9 +41,9 @@
   box-shadow: 
     0 20px 0 #E5C100, /* 3D effect for container */
     0 30px 40px rgba(0, 0, 0, 0.2);
-  padding: 3rem 2rem;
+  padding: 3.5rem 2.5rem;
   width: 100%;
-  max-width: 700px;
+  max-width: 850px; /* Increased from 700px (~20% increase for better visibility) */
   position: relative;
   z-index: 1;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -54,13 +54,13 @@
 .couple-game-main-container h1 {
   font-family: 'Fredoka', sans-serif;
   font-weight: 700;
-  font-size: clamp(2.5rem, 8vw, 3.5rem);
+  font-size: clamp(3rem, 10vw, 4.2rem); /* Increased font size */
   color: #FF6B6B;
   -webkit-text-stroke: 3px white;
   text-shadow: 
     4px 4px 0 #FF9F43,
     7px 7px 0 rgba(0,0,0,0.1);
-  margin: 0 0 2rem;
+  margin: 0 0 2.5rem;
   letter-spacing: 2px;
   transform: rotate(-2deg);
   animation: title-float 3s ease-in-out infinite;
@@ -73,22 +73,22 @@
 
 /* Stage Buttons */
 .couple-game-stage-buttons {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   display: flex;
   flex-direction: row;
   justify-content: center;
-  gap: 1.5rem;
+  gap: 2rem;
   flex-wrap: wrap;
 }
 
 .couple-game-stage-btn {
-  padding: 1rem 2rem;
+  padding: 1.2rem 2.5rem;
   border: none;
   background: #48DBFB; /* Bright Cyan */
   color: white;
   border-radius: 25px;
   cursor: pointer;
-  font-size: clamp(1.2rem, 4vw, 1.4rem);
+  font-size: clamp(1.4rem, 4.5vw, 1.7rem); /* Increased font size */
   font-weight: 700;
   font-family: 'Fredoka', sans-serif;
   position: relative;
@@ -126,16 +126,16 @@
 /* Dare Display Area */
 .couple-game-dare-display {
   width: 100%;
-  min-height: 250px;
+  min-height: 320px; /* Increased min-height */
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   background: #FFFFFF;
-  border-radius: 30px;
-  border: 5px dashed #C4E538; /* Lime Green */
-  padding: 2.5rem 2rem;
-  margin: 2rem 0;
+  border-radius: 35px;
+  border: 6px dashed #C4E538; /* Thicker border */
+  padding: 3rem 2.5rem;
+  margin: 2.5rem 0;
   box-shadow: inset 0 0 40px rgba(196, 229, 56, 0.2);
 }
 
@@ -143,15 +143,15 @@
   width: 100%;
   margin: 0;
   padding: 0;
-  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-size: clamp(1.8rem, 6vw, 2.4rem); /* Increased font size */
   font-weight: 600;
   color: #576574;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 #slot-reel p.final-result {
   font-weight: 800;
-  font-size: clamp(1.8rem, 6vw, 2.4rem);
+  font-size: clamp(2.2rem, 8vw, 3.2rem); /* Significantly increased for back row visibility */
   color: #EE5A24; /* Burnt Orange */
   text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
   animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -164,21 +164,21 @@
 
 /* Generate Button */
 .couple-game-generate-btn {
-  padding: 1.2rem 4rem;
-  font-size: clamp(1.5rem, 5vw, 1.8rem);
+  padding: 1.5rem 5rem;
+  font-size: clamp(1.8rem, 6vw, 2.2rem); /* Increased font size */
   font-weight: 800;
   font-family: 'Fredoka', sans-serif;
   cursor: pointer;
   border: none;
   background: #FF6B6B; /* Coral Red */
   color: white;
-  border-radius: 50px;
-  box-shadow: 0 10px 0 #EE5253, 0 20px 30px rgba(0,0,0,0.3);
+  border-radius: 60px;
+  box-shadow: 0 12px 0 #EE5253, 0 25px 35px rgba(0,0,0,0.3);
   transition: all 0.1s;
   position: relative;
   top: 0;
   width: auto;
-  min-width: 250px;
+  min-width: 300px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }

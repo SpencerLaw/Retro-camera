@@ -10,15 +10,18 @@ import daresEn from './public/dares.en.json';
 // @ts-ignore
 import daresZh from './public/dares.zh.json';
 // @ts-ignore
+import daresTw from './public/dares.zh-TW.json';
+// @ts-ignore
 import daresJa from './public/dares.ja.json';
 import './AdventureGameStyles.css';
 
-type Language = 'en' | 'zh' | 'ja';
+type Language = 'en' | 'zh' | 'zh-TW' | 'ja';
 type Stage = 'stage1' | 'stage2' | 'stage3' | null;
 
 // Map global language to adventure game language
 const mapGlobalToAdventureLang = (globalLang: GlobalLanguage): Language => {
-  if (globalLang === 'zh-CN' || globalLang === 'zh-TW') return 'zh';
+  if (globalLang === 'zh-CN') return 'zh';
+  if (globalLang === 'zh-TW') return 'zh-TW';
   if (globalLang === 'ja') return 'ja';
   return 'en';
 };
@@ -26,6 +29,7 @@ const mapGlobalToAdventureLang = (globalLang: GlobalLanguage): Language => {
 const defaultDaresByLang: Record<Language, any> = {
   en: daresEn,
   zh: daresZh,
+  'zh-TW': daresTw,
   ja: daresJa,
 };
 

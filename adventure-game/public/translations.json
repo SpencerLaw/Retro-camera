@@ -25,6 +25,19 @@
         "initialMsg": "选择难度等级，开启你的校园冒险！🎲",
         "backHome": "返回首页"
     },
+    "zh-TW": {
+        "title": "獎懲大冒險 🎒",
+        "stage1": "青澀萌新",
+        "stage2": "社團老手",
+        "stage3": "畢業傳說",
+        "start": "✨ 抽取挑戰 ✨",
+        "stop": "停止",
+        "spinning": "抽取中...",
+        "selectStage": "請先選擇一個難度等級！🎓",
+        "noDares": "該等級沒有可用挑戰。",
+        "initialMsg": "選擇難度等級，開啟你的校園冒險！🎲",
+        "backHome": "返回首頁"
+    },
     "ja": {
         "title": "学園アドベンチャー 🎒",
         "stage1": "新入生",

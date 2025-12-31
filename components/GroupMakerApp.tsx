@@ -76,8 +76,7 @@ export const GroupMakerApp: React.FC = () => {
   }, [isAnimating]);
 
   const handleStartGrouping = async () => {
-    const list = names.split(/[
-,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
     if (list.length < numGroups) {
       alert("人數不足！");
       return;

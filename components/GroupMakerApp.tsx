@@ -19,8 +19,7 @@ export const GroupMakerApp: React.FC = () => {
   const clawArmRef = useRef<HTMLDivElement>(null);
 
   const handleStartGrouping = async () => {
-    const studentList = names.split(/[
-,，、\s]+/).filter(n => n.trim() !== "");
+    const studentList = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
     if (studentList.length < numGroups) {
       alert("學生人數不能少於組數！Students must be more than groups!");
       return;

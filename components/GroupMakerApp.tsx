@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, RefreshCcw, Download, Play } from 'lucide-react';
+import { ArrowLeft, Users, RefreshCcw, Download, Play, Trash2 } from 'lucide-react';
 import './GroupMakerStyles.css';
 
 interface Group {
@@ -17,9 +17,11 @@ export const GroupMakerApp: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentPickingName, setCurrentPickingName] = useState<string | null>(null);
   const clawArmRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleStartGrouping = async () => {
-    const studentList = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
+    const studentList = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
     if (studentList.length < numGroups) {
       alert("學生人數不能少於組數！Students must be more than groups!");
       return;
@@ -45,17 +47,23 @@ export const GroupMakerApp: React.FC = () => {
       
       setCurrentPickingName(student);
       
-      // Animate claw (simulated)
+      // Animate claw
       if (clawArmRef.current) {
-        clawArmRef.current.style.height = '200px';
-        await new Promise(r => setTimeout(r, 500));
-        clawArmRef.current.style.height = '50px';
+        clawArmRef.current.style.height = '120px';
         await new Promise(r => setTimeout(r, 300));
+        clawArmRef.current.style.height = '30px';
+        await new Promise(r => setTimeout(r, 150));
       }
 
       newGroups[targetGroupId].members.push(student);
       setGroups([...newGroups]);
-      await new Promise(r => setTimeout(r, 200));
+      
+      // Auto scroll to bottom during animation if needed
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      }
+      
+      await new Promise(r => setTimeout(r, 100));
     }
 
     setCurrentPickingName(null);
@@ -63,8 +71,9 @@ export const GroupMakerApp: React.FC = () => {
   };
 
   const handleExport = () => {
-    let text = "--- 分組名單 (Grouping Results) ---\
-\n";
+    let text = "--- 分組名單 (Grouping Results) ---
+
+";
     groups.forEach(g => {
       text += `${g.name}: ${g.members.join(", ")}\n`;
     });
@@ -78,22 +87,34 @@ export const GroupMakerApp: React.FC = () => {
     document.body.removeChild(element);
   };
 
+  const clearNames = () => {
+    if (window.confirm("確定要清空名單嗎？Clear list?")) {
+      setNames("");
+      setGroups([]);
+    }
+  };
+
   return (
     <div className="group-maker-app">
       <button
         onClick={() => navigate('/')}
-        className="fixed top-6 left-6 z-50 p-3 rounded-full bg-white/95 border-3 border-blue-500 text-blue-500 shadow-xl hover:scale-110 transition-all"
+        className="fixed top-4 left-4 z-50 p-2 sm:p-3 rounded-full bg-white/95 border-2 sm:border-3 border-blue-500 text-blue-500 shadow-xl hover:scale-110 transition-all"
       >
-        <ArrowLeft size={24} />
+        <ArrowLeft size={20} />
       </button>
 
       <div className="group-maker-container">
         <h1 className="group-maker-title">The Claw! 隨機分組器</h1>
         
         <div className="input-section">
-          <div className="flex items-center gap-2 mb-4 text-blue-600 font-bold">
-            <Users size={24} />
-            <span>輸入學生名單 (姓名間用換行或逗號隔開)</span>
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-2 text-blue-600 font-bold text-sm sm:text-base">
+              <Users size={20} />
+              <span>學生名單 (支持批量複製)</span>
+            </div>
+            <button onClick={clearNames} className="clear-btn flex items-center gap-1">
+              <Trash2 size={14} /> 清空
+            </button>
           </div>
           <textarea 
             placeholder="張小明, 王小美, 李大華..."
@@ -102,22 +123,24 @@ export const GroupMakerApp: React.FC = () => {
             disabled={isAnimating}
           />
           <div className="controls">
-            <label className="font-bold text-gray-700">分成幾組？</label>
-            <input 
-              type="number" 
-              className="num-input" 
-              min={2} 
-              max={20} 
-              value={numGroups}
-              onChange={(e) => setNumGroups(parseInt(e.target.value))}
-              disabled={isAnimating}
-            />
+            <div className="flex items-center gap-2">
+              <label className="font-bold text-gray-700 text-sm">組數：</label>
+              <input 
+                type="number" 
+                className="num-input" 
+                min={2} 
+                max={50} 
+                value={numGroups}
+                onChange={(e) => setNumGroups(parseInt(e.target.value) || 2)}
+                disabled={isAnimating}
+              />
+            </div>
             <button 
               className="start-btn flex items-center gap-2"
               onClick={handleStartGrouping}
               disabled={isAnimating || !names.trim()}
             >
-              <Play fill="white" /> {isAnimating ? "分組中..." : "開始抓取！"}
+              <Play size={18} fill="white" /> {isAnimating ? "分組中..." : "開始抓取！"}
             </button>
           </div>
         </div>
@@ -126,43 +149,44 @@ export const GroupMakerApp: React.FC = () => {
           <div className="claw-arm" ref={clawArmRef}></div>
           {currentPickingName && (
             <div className="alien-ball">
-              {currentPickingName}
+              {currentPickingName.slice(0, 4)}
             </div>
           )}
           {!currentPickingName && !isAnimating && (
             <div className="flex gap-4 opacity-30">
               <div className="alien-ball">?</div>
               <div className="alien-ball">?</div>
-              <div className="alien-ball">?</div>
             </div>
           )}
         </div>
 
-        {groups.length > 0 && (
-          <div className="mt-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-blue-600">分組結果</h2>
-              <button 
-                onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full font-bold shadow-lg hover:bg-green-600 transition-all"
-              >
-                <Download size={18} /> 導出結果
-              </button>
-            </div>
-            <div className="groups-display">
-              {groups.map(group => (
-                <div key={group.id} className="group-bucket">
-                  <h3>{group.name}</h3>
-                  <div className="flex flex-wrap justify-center">
-                    {group.members.map((member, i) => (
-                      <span key={i} className="member-tag">{member}</span>
-                    ))}
+        <div className="groups-scroll-area" ref={scrollAreaRef}>
+          {groups.length > 0 && (
+            <div className="results-container">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-blue-600">分組結果</h2>
+                <button 
+                  onClick={handleExport}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500 text-white rounded-full font-bold shadow-md hover:bg-green-600 text-sm transition-all"
+                >
+                  <Download size={16} /> 導出 TXT
+                </button>
+              </div>
+              <div className="groups-display">
+                {groups.map(group => (
+                  <div key={group.id} className="group-bucket">
+                    <h3>{group.name}</h3>
+                    <div className="flex flex-wrap justify-center">
+                      {group.members.map((member, i) => (
+                        <span key={i} className="member-tag">{member}</span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

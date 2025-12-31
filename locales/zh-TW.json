@@ -17,11 +17,6 @@
       "subtitle": "校園大挑戰",
       "description": "轉動輪盤，迎接屬於你的趣事和挑戰！"
     },
-    "couple": {
-      "title": "心跳契約",
-      "subtitle": "心跳契約",
-      "description": "情侶遊戲，有趣的挑戰和老虎機動畫"
-    },
     "doraemon": {
       "title": "哆啦A夢",
       "subtitle": "教室分貝監測儀",
@@ -43,9 +38,20 @@
       "description": "超炫酷的課堂點名神器，讓被點名成為一種期待"
     },
     "groupMaker": {
-      "title": "三眼怪分組器",
+      "title": "三眼怪分組機",
       "subtitle": "爪子選取 • 公平分組",
-      "description": "像抓娃娃一樣選取學生名單，讓課堂分組變得公平又有趣！"
+      "description": "像抓娃娃一樣選取學生名單，讓課堂分組變得公平又有趣！",
+      "inputPlaceholder": "在這裡輸入或粘貼學生名單（用換行或逗號隔開）...",
+      "groupCount": "分組數量：",
+      "startBtn": "開始抓取！",
+      "runningBtn": "正在抓取...",
+      "results": "分組結果",
+      "exportBtn": "導出 TXT",
+      "clearBtn": "清空",
+      "waitingMsg": "等待幸運降臨...",
+      "groupNamePrefix": "第",
+      "groupNameSuffix": "組",
+      "errorLow": "學生人數不能少於分組數量！"
     },
     "particles": {
       "title": "粒子流",
@@ -53,7 +59,9 @@
       "description": "通過手勢控制交互式3D粒子，展現多種美麗形態"
     },
     "backHome": "返回首頁",
-    "contactMerchant": "聯繫商家"
+    "contactMerchant": "聯繫商家",
+    "restricted": "地區限制 🔒",
+    "comingSoon": "即將上線 🔒"
   },
   "camera": {
     "backHome": "返回首頁",

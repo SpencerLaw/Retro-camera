@@ -47,7 +47,8 @@
       "subtitle": "3D粒子系統 • 手勢控制",
       "description": "通過手勢控制交互式3D粒子，展現多種美麗形態"
     },
-    "backHome": "返回首頁"
+    "backHome": "返回首頁",
+    "contactMerchant": "聯繫商家"
   },
   "camera": {
     "backHome": "返回首頁",

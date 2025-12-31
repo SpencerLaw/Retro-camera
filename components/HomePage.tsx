@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2 } from 'lucide-react';
+import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2, X } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -14,6 +14,7 @@ const languageLabels: Record<GlobalLanguage, string> = {
 export const HomePage: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   const t = useTranslations();
+  const [isWeChatOpen, setIsWeChatOpen] = React.useState(false);
 
   return (
     <div className="w-full pb-8 relative">
@@ -71,8 +72,17 @@ export const HomePage: React.FC = () => {
         }}
       />
       
-      {/* Global Language Switcher - Kawaii Style */}
-      <div className="fixed top-6 right-6 z-50">
+      {/* Top Bar - Buttons */}
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-4">
+        {/* Contact Merchant Button */}
+        <button
+          onClick={() => setIsWeChatOpen(true)}
+          className="p-3 rounded-full bg-gradient-to-br from-[#74B9FF] to-[#0984E3] hover:from-[#0984E3] hover:to-[#74B9FF] shadow-[0_8px_20px_rgba(9,132,227,0.4)] border-3 border-white transition-all hover:scale-110 hover:shadow-[0_12px_30px_rgba(9,132,227,0.6)] flex items-center gap-2 px-6 font-bold hover:-rotate-3"
+        >
+          <span className="text-sm font-marker text-white drop-shadow-md">{t('home.contactMerchant')}</span>
+        </button>
+
+        {/* Global Language Switcher - Kawaii Style */}
         <div className="relative group">
           <button
             className="p-3 rounded-full bg-gradient-to-br from-[#FFB5E8] to-[#FFC6FF] hover:from-[#FFC6FF] hover:to-[#FFD1FF] shadow-[0_8px_20px_rgba(255,182,193,0.5)] border-3 border-white transition-all hover:scale-110 hover:shadow-[0_12px_30px_rgba(255,182,193,0.7)] flex items-center gap-2 px-5 font-bold hover:rotate-3"
@@ -95,6 +105,44 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* WeChat Dialog - Pixar-inspired */}
+      {isWeChatOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-[#87CEEB]/60 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setIsWeChatOpen(false)}
+          ></div>
+          <div 
+            className="relative bg-white rounded-[40px] border-8 border-[#FFD700] shadow-[0_20px_0_#E5C100,0_30px_50px_rgba(0,0,0,0.3)] p-8 max-w-sm w-full animate-in zoom-in duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setIsWeChatOpen(false)}
+              className="absolute -top-6 -right-6 w-12 h-12 bg-[#FF6B6B] border-4 border-white rounded-full text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform hover:rotate-90"
+            >
+              <X size={24} />
+            </button>
+            
+            <div className="text-center">
+              <h3 className="font-marker text-3xl text-[#FF6B6B] mb-6 drop-shadow-sm rotate-[-2deg]">
+                {t('home.contactMerchant')}
+              </h3>
+              <div className="bg-white p-4 rounded-3xl border-4 border-dashed border-[#C4E538] shadow-inner mb-6">
+                <img 
+                  src="/wechat.png" 
+                  alt="WeChat QR Code" 
+                  className="w-full aspect-square object-contain rounded-xl"
+                />
+              </div>
+              <p className="font-marker text-[#576574] text-lg">
+                Scan to add on WeChat ✨
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 pt-8">

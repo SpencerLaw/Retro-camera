@@ -47,7 +47,8 @@
       "subtitle": "3Dパーティクルシステム • ジェスチャー制御",
       "description": "ジェスチャーで制御するインタラクティブな3Dパーティクル、美しい形状を表現"
     },
-    "backHome": "ホームに戻る"
+    "backHome": "ホームに戻る",
+    "contactMerchant": "お問合せ"
   },
   "camera": {
     "backHome": "ホームに戻る",

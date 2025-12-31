@@ -72,6 +72,7 @@
     (function(){
         window.isWarp = false;
         let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
+        let remainingPool = JSON.parse(localStorage.getItem('magic_rc_remaining_pool') || '[]');
         let isRolling = false;
         let namesHidden = true; // 默认隐藏
         const gate = document.getElementById('gatekeeper-screen');

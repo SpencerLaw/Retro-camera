@@ -33,8 +33,7 @@ export const GroupMakerApp: React.FC = () => {
 
   // Initialize balls when names change or manually reset
   useEffect(() => {
-    const list = names.split(/[
-,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
     if (list.length > 0 && !isAnimating) {
       const newBalls = list.map(name => ({
         name,

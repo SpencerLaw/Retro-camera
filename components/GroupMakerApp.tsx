@@ -9,27 +9,94 @@ interface Group {
   members: string[];
 }
 
+interface BallData {
+  name: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  isPicked: boolean;
+}
+
 export const GroupMakerApp: React.FC = () => {
   const navigate = useNavigate();
   const [names, setNames] = useState<string>("");
   const [numGroups, setNumGroups] = useState<number>(2);
   const [groups, setGroups] = useState<Group[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [balls, setBalls] = useState<BallData[]>([]);
   const [currentPickingName, setCurrentPickingName] = useState<string | null>(null);
+  
   const clawArmRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const ballPitRef = useRef<HTMLDivElement>(null);
+  const requestRef = useRef<number>();
+
+  // Initialize balls when names change or manually reset
+  useEffect(() => {
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
+    if (list.length > 0 && !isAnimating) {
+      const newBalls = list.map(name => ({
+        name,
+        x: Math.random() * 300 + 50,
+        y: Math.random() * 200 + 50,
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 0.5) * 4,
+        isPicked: false
+      }));
+      setBalls(newBalls);
+    }
+  }, [names, isAnimating]);
+
+  // Ball Physics Animation
+  const animateBalls = () => {
+    setBalls(prevBalls => {
+      return prevBalls.map(ball => {
+        if (ball.isPicked) return ball;
+
+        let newX = ball.x + ball.vx;
+        let newY = ball.y + ball.vy;
+
+        // Bounce off walls
+        if (newX < 0 || newX > 380) ball.vx *= -1;
+        if (newY < 0 || newY > 350) ball.vy *= -1;
+
+        return { ...ball, x: newX, y: newY };
+      });
+    });
+    requestRef.current = requestAnimationFrame(animateBalls);
+  };
+
+  useEffect(() => {
+    if (isAnimating) {
+      requestRef.current = requestAnimationFrame(animateBalls);
+    } else {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    }
+    return () => { if (requestRef.current) cancelAnimationFrame(requestRef.current); };
+  }, [isAnimating]);
 
   const handleStartGrouping = async () => {
-    const studentList = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
-    if (studentList.length < numGroups) {
-      alert("學生人數不能少於組數！Students must be more than groups!");
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
+    if (list.length < numGroups) {
+      alert("人數不足！");
       return;
     }
 
     setIsAnimating(true);
     setGroups([]);
     
-    const shuffled = [...studentList].sort(() => Math.random() - 0.5);
+    // Reset all balls to pit
+    const resetBalls = balls.map(b => ({
+      ...b,
+      isPicked: false,
+      vx: (Math.random() - 0.5) * 15, // Increase speed
+      vy: (Math.random() - 0.5) * 15
+    }));
+    setBalls(resetBalls);
+
+    const shuffled = [...resetBalls].sort(() => Math.random() - 0.5);
     const newGroups: Group[] = Array.from({ length: numGroups }, (_, i) => ({
       id: i + 1,
       name: `第 ${i + 1} 組`,
@@ -37,140 +104,109 @@ export const GroupMakerApp: React.FC = () => {
     }));
 
     for (let i = 0; i < shuffled.length; i++) {
-      const student = shuffled[i];
+      const targetBall = shuffled[i];
       const targetGroupId = i % numGroups;
-      setCurrentPickingName(student);
-      
+
+      // 1. Move claw down
       if (clawArmRef.current) {
-        clawArmRef.current.style.height = '100px';
-        await new Promise(r => setTimeout(r, 200));
-        clawArmRef.current.style.height = '20px';
-        await new Promise(r => setTimeout(r, 100));
+        clawArmRef.current.style.height = '250px';
+        await new Promise(r => setTimeout(r, 400));
       }
 
-      newGroups[targetGroupId].members.push(student);
-      setGroups([...newGroups]);
-      
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      // 2. Pick the ball
+      setCurrentPickingName(targetBall.name);
+      setBalls(prev => prev.map(b => b.name === targetBall.name ? { ...b, isPicked: true } : b));
+
+      // 3. Move claw up
+      if (clawArmRef.current) {
+        clawArmRef.current.style.height = '40px';
+        await new Promise(r => setTimeout(r, 300));
       }
-      
-      await new Promise(r => setTimeout(r, 50));
+
+      // 4. Add to group
+      newGroups[targetGroupId].members.push(targetBall.name);
+      setGroups([...newGroups]);
+      setCurrentPickingName(null);
+
+      await new Promise(r => setTimeout(r, 100));
     }
 
-    setCurrentPickingName(null);
     setIsAnimating(false);
-  };
-
-  const handleExport = () => {
-    let text = "--- 分組名單 ---\\n\n";
-    groups.forEach(g => {
-      text += `${g.name}: ${g.members.join(", ")}\n`;
-    });
-    const element = document.createElement("a");
-    const file = new Blob([text], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = "grouping_results.txt";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
   };
 
   return (
     <div className="group-maker-app">
-      <button
-        onClick={() => navigate('/')}
-        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-white/95 border-2 border-blue-500 text-blue-500 shadow-xl hover:scale-110"
-      >
-        <ArrowLeft size={20} />
+      <button onClick={() => navigate('/')} className="fixed top-6 left-6 z-50 p-3 rounded-full bg-white border-3 border-blue-500 text-blue-500 shadow-xl">
+        <ArrowLeft size={24} />
       </button>
 
       <div className="group-maker-container">
-        {/* Left Panel: Controls */}
+        {/* Left: Ball Pit and Controls */}
         <div className="left-panel">
-          <h1 className="group-maker-title">The Claw! 分組器</h1>
+          <h1 className="group-maker-title">三眼怪抽獎分組機</h1>
           
           <div className="input-section">
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2 text-blue-600 font-bold">
-                <Users size={18} />
-                <span>學生名單</span>
-              </div>
-              <button onClick={() => setNames("")} className="clear-btn">清空</button>
-            </div>
             <textarea 
-              placeholder="貼入學生名單..."
+              placeholder="輸入名單（換行或逗號隔開）..."
               value={names}
               onChange={(e) => setNames(e.target.value)}
               disabled={isAnimating}
             />
-            <div className="controls">
-              <div className="flex items-center gap-2 mb-2 w-full justify-center">
-                <label className="font-bold text-gray-700">分成幾組：</label>
-                <input 
-                  type="number" 
-                  className="num-input" 
-                  min={2} max={50} 
-                  value={numGroups}
-                  onChange={(e) => setNumGroups(parseInt(e.target.value) || 2)}
-                  disabled={isAnimating}
-                  style={{ width: '80px', padding: '5px', borderRadius: '8px', border: '2px solid #FFD700', textAlign: 'center' }}
-                />
-              </div>
-              <button 
-                className="start-btn"
-                onClick={handleStartGrouping}
-                disabled={isAnimating || !names.trim()}
-              >
-                {isAnimating ? "正在分組..." : "開始抓取！"}
+            <div className="flex gap-4 items-center justify-center">
+              <label className="font-bold">組數:</label>
+              <input 
+                type="number" className="num-input" 
+                value={numGroups} onChange={(e) => setNumGroups(parseInt(e.target.value) || 2)}
+                disabled={isAnimating}
+              />
+              <button className="start-btn" onClick={handleStartGrouping} disabled={isAnimating || !names.trim()}>
+                {isAnimating ? "正在抓取..." : "開始抽獎！"}
               </button>
             </div>
           </div>
 
-          <div className="claw-machine">
-            <div className="claw-arm" ref={clawArmRef}></div>
-            {currentPickingName ? (
-              <div className="alien-ball">{currentPickingName.slice(0, 4)}</div>
-            ) : (
-              <div className="flex gap-2 opacity-20">
-                <div className="alien-ball">?</div>
-                <div className="alien-ball">?</div>
-              </div>
-            )}
+          <div className="ball-pit" ref={ballPitRef}>
+            <div className="claw-arm" ref={clawArmRef}>
+              {currentPickingName && (
+                <div className="alien-ball" style={{ position: 'absolute', bottom: '-45px', left: '-20px' }}>
+                  {currentPickingName.slice(0, 4)}
+                </div>
+              )}
+            </div>
+            {balls.map((ball, i) => (
+              !ball.isPicked && (
+                <div 
+                  key={i}
+                  className={`alien-ball ${isAnimating ? 'ball-rolling' : ''}`}
+                  style={{
+                    left: `${ball.x}px`,
+                    top: `${ball.y}px`,
+                    backgroundColor: `hsl(${(i * 45) % 360}, 70%, 60%)`
+                  }}
+                >
+                  {ball.name.slice(0, 2)}
+                </div>
+              )
+            ))}
           </div>
         </div>
 
-        {/* Right Panel: Results */}
+        {/* Right: Results */}
         <div className="right-panel">
-          <div className="flex justify-between items-center mb-4 px-2">
-            <h2 className="text-xl font-bold text-blue-600">分組結果區 (可滾動)</h2>
-            {groups.length > 0 && (
-              <button onClick={handleExport} className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-full font-bold text-sm">
-                <Download size={14} /> 導出 TXT
-              </button>
-            )}
-          </div>
-          
-          <div className="groups-scroll-area" ref={scrollAreaRef}>
-            {groups.length > 0 ? (
-              <div className="groups-display">
-                {groups.map(group => (
-                  <div key={group.id} className="group-bucket">
-                    <h3>{group.name}</h3>
-                    <div className="flex flex-wrap justify-center">
-                      {group.members.map((m, i) => (
-                        <span key={i} className="member-tag">{m}</span>
-                      ))}
-                    </div>
+          <h2 className="text-2xl font-bold text-blue-600 mb-4 text-center">分組結果</h2>
+          <div className="groups-scroll-area">
+            <div className="groups-display">
+              {groups.map(group => (
+                <div key={group.id} className="group-bucket">
+                  <h3>{group.name}</h3>
+                  <div className="flex flex-wrap">
+                    {group.members.map((m, idx) => (
+                      <span key={idx} className="member-tag">{m}</span>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4">
-                <Users size={64} className="opacity-20" />
-                <p className="font-bold italic text-lg">等待分組結果... Results will appear here</p>
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

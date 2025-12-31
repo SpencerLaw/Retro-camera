@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2, X } from 'lucide-react';
+import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2, X, Users } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 

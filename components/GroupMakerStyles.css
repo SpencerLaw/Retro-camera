@@ -2,56 +2,59 @@
 
 .group-maker-app {
   font-family: 'Varela Round', 'Fredoka', sans-serif;
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
   position: fixed;
   top: 0;
   left: 0;
-  padding: 0.5rem;
-  background-color: #0984E3; /* Deep Pixar Blue */
+  background-color: #0984E3;
   background-image: radial-gradient(#74B9FF 1px, transparent 1px);
   background-size: 40px 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-y: auto;
+  padding: 10px;
 }
 
 .group-maker-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 30px;
   border: 6px solid #FFD700;
   box-shadow: 0 15px 0 #E5C100, 0 25px 40px rgba(0,0,0,0.3);
   padding: 1.5rem;
   width: 100%;
-  max-width: 800px;
-  text-align: center;
-  position: relative;
-  max-height: 95vh;
+  max-width: 900px;
+  height: 92vh; /* 強制固定高度，留出邊距 */
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* 垂直佈局 */
+  position: relative;
 }
 
 .group-maker-title {
-  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
   color: #FF6B6B;
   -webkit-text-stroke: 1.5px white;
   text-shadow: 2px 2px 0 #FF9F43;
   margin-bottom: 1rem;
+  flex-shrink: 0; /* 禁止縮放 */
 }
 
-/* Input Area */
+/* 上半部分：輸入與控制 */
+.top-section {
+  flex-shrink: 0; /* 禁止縮放 */
+  margin-bottom: 10px;
+}
+
 .input-section {
   background: #F0F9FF;
   border-radius: 20px;
   padding: 1rem;
   border: 3px dashed #74B9FF;
-  margin-bottom: 1rem;
 }
 
 textarea {
   width: 100%;
-  height: 80px;
+  height: 70px;
   border-radius: 12px;
   border: 2px solid #D1D8E0;
   padding: 0.8rem;
@@ -60,11 +63,6 @@ textarea {
   resize: none;
   margin-bottom: 0.8rem;
   outline: none;
-  transition: border-color 0.3s;
-}
-
-textarea:focus {
-  border-color: #0984E3;
 }
 
 .controls {
@@ -75,28 +73,20 @@ textarea:focus {
   flex-wrap: wrap;
 }
 
-.num-input {
-  width: 60px;
-  padding: 0.4rem;
-  border-radius: 8px;
-  border: 2px solid #FFD700;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* The Claw Animation Area */
+/* 爪子動畫區 - 縮小高度以騰出空間 */
 .claw-machine {
-  height: 180px;
+  height: 120px;
   background: #1e272e;
   border-radius: 15px;
   position: relative;
   overflow: hidden;
-  margin: 1rem 0;
+  margin: 10px 0;
   border: 4px solid #576574;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-bottom: 15px;
+  padding-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .claw-arm {
@@ -105,24 +95,15 @@ textarea:focus {
   left: 50%;
   transform: translateX(-50%);
   width: 8px;
-  height: 30px;
+  height: 20px;
   background: #FFD700;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 10;
 }
 
-.claw-arm::after {
-  content: '▼';
-  position: absolute;
-  bottom: -15px;
-  left: -8px;
-  font-size: 20px;
-  color: #FFD700;
-}
-
 .alien-ball {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background: #C4E538;
   border-radius: 50%;
   border: 2px solid white;
@@ -132,59 +113,71 @@ textarea:focus {
   font-size: 9px;
   font-weight: bold;
   color: #1B1464;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-  margin: 3px;
-  position: relative;
   animation: float 3s ease-in-out infinite;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-/* Results Section */
+/* 下半部分：關鍵滾動區 */
 .groups-scroll-area {
-  overflow-y: auto;
-  flex: 1;
-  padding-right: 5px;
-  margin-top: 1rem;
+  flex: 1; /* 自動佔滿剩餘空間 */
+  overflow-y: scroll !important; /* 強制顯示滾動條軌道 */
+  background: #f8f9fa;
+  border-radius: 20px;
+  padding: 15px;
+  border: 2px solid #eee;
+  margin-top: 10px;
 }
 
 .groups-display {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
-  padding-bottom: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+  padding-bottom: 20px;
 }
 
 .group-bucket {
   background: white;
   border-radius: 15px;
   border: 4px solid #48DBFB;
-  padding: 0.8rem;
+  padding: 1rem;
   box-shadow: 0 6px 0 #0ABDE3;
-  min-height: 100px;
 }
 
 .group-bucket h3 {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #0984E3;
-  border-bottom: 2px solid #E0E0E0;
-  padding-bottom: 0.3rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.8rem;
+  border-bottom: 2px solid #f0f0f0;
 }
 
 .member-tag {
   background: #F0F9FF;
   border: 1.5px solid #74B9FF;
-  padding: 0.2rem 0.6rem;
+  padding: 3px 10px;
   border-radius: 8px;
-  margin: 0.2rem;
+  margin: 3px;
   display: inline-block;
   font-weight: bold;
-  font-size: 0.85rem;
-  color: #2D3436;
+  font-size: 0.9rem;
+}
+
+/* 讓滾動條超級明顯 */
+.groups-scroll-area::-webkit-scrollbar {
+  width: 12px;
+}
+
+.groups-scroll-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.groups-scroll-area::-webkit-scrollbar-thumb {
+  background: #FFD700; /* 金黃色 */
+  border-radius: 10px;
+  border: 3px solid #f1f1f1;
+}
+
+.groups-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #FF6B6B;
 }
 
 .start-btn {
@@ -198,54 +191,18 @@ textarea:focus {
   box-shadow: 0 8px 0 #EE5253;
   cursor: pointer;
   transition: all 0.1s;
-  position: relative;
-  top: 0;
 }
 
-.start-btn:hover:not(:disabled) {
-  top: -2px;
-  box-shadow: 0 10px 0 #EE5253;
-}
-
-.start-btn:active:not(:disabled) {
-  top: 6px;
+.start-btn:active {
+  transform: translateY(6px);
   box-shadow: 0 2px 0 #EE5253;
 }
 
-.start-btn:disabled {
-  background: #ccc;
-  box-shadow: 0 4px 0 #999;
-  cursor: not-allowed;
-}
-
 .clear-btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  font-weight: bold;
-  background: #fab1a0;
-  color: #d63031;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.clear-btn:hover {
+  padding: 4px 12px;
   background: #ff7675;
   color: white;
-}
-
-/* Scrollbar styling for the container */
-.groups-scroll-area::-webkit-scrollbar {
-  width: 8px;
-}
-
-.groups-scroll-area::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.05);
-  border-radius: 10px;
-}
-
-.groups-scroll-area::-webkit-scrollbar-thumb {
-  background: #FFD700;
-  border-radius: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.8rem;
 }

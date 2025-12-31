@@ -38,9 +38,14 @@
       "description": "Turn homework into a match game and grow a tree together"
     },
     "magicRollCall": {
-      "title": "Magic Roll Call",
-      "subtitle": "Magic Class • Interstellar",
-      "description": "Super cool roll call tool that makes being picked an excitement"
+      "title": "Cool Roll Call",
+      "subtitle": "Magic Classroom • Interstellar",
+      "description": "Super cool roll call tool that makes being called on something to look forward to"
+    },
+    "groupMaker": {
+      "title": "The Claw! Group Maker",
+      "subtitle": "Alien Grab • Fair Grouping",
+      "description": "Grab student names like a crane game, making classroom grouping fair and fun!"
     },
     "particles": {
       "title": "Particle Flow",

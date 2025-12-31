@@ -9,6 +9,7 @@ import AdventureGameEdit from './adventure-game/AdventureGameEdit';
 import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
 import WeatherApp from './nanoworld-weather/WeatherApp';
 import ThreeJSParticles from './components/ThreeJSParticles';
+import { GroupMakerApp } from './components/GroupMakerApp';
 
 const App: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ const App: React.FC = () => {
           <Route path="/doraemon" element={<DoraemonMonitorApp />} />
           <Route path="/weather" element={<WeatherApp />} />
           <Route path="/particles" element={<ThreeJSParticles />} />
+          <Route path="/group-maker" element={<GroupMakerApp />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

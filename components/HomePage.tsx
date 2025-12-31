@@ -356,6 +356,49 @@ export const HomePage: React.FC = () => {
             </div>
           </a>
 
+          {/* Adventure Game Card */}
+          <Link
+            to="/adventure"
+            className="group relative bg-gradient-to-br from-[#FFD1FF] via-[#FFB5E8] to-[#FF8DC7] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,182,193,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,182,193,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Cute stars decoration */}
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>⭐</div>
+
+            {/* Kawaii Glow Effect */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFB5E8] to-[#CE93D8] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,182,193,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFD1FF]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Sparkles size={72} className="text-[#FF69B4] drop-shadow-lg" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#D81B60] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.adventure.title')}</h2>
+              <p className="text-base text-[#E91E63] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                {t('home.adventure.subtitle')}
+              </p>
+              <p className="text-sm text-[#C2185B] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                {t('home.adventure.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#FF69B4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(255,182,193,0.4)] border-[3px] border-[#FFD1FF] hover:bg-gradient-to-r hover:from-[#FFD1FF] hover:to-white">
+                  Enter → 🎲
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Group Maker Card - Bright Yellow/Blue */}
           <Link
             to="/group-maker"
@@ -402,7 +445,7 @@ export const HomePage: React.FC = () => {
           {/* Particle Flow Card - Cute Galaxy Purple */}
           <Link
             to="/particles"
-            className="group relative bg-gradient-to-br from-[#D1C4E9] via-[#B39DDB] to-[#9575CD] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(149,117,205,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(149,117,205,0.6)] hover:rotate-2 block"
+            className="group relative bg-gradient-to-br from-[#D1C4E9] via-[#B39DDB] to-[#9575CD] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(149,117,205,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40_rgba(149,117,205,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -425,7 +468,7 @@ export const HomePage: React.FC = () => {
 
             {/* Content */}
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#5E35B1] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.particles.title')}</h2>
+              <h2 className="font-bold text-4xl text-[#5E35B1] mb-3 drop-shadow-[0_2px_8_rgba(255,255,255,0.8)]">{t('home.particles.title')}</h2>
               <p className="text-base text-[#512DA8] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
                 {t('home.particles.subtitle')}
               </p>
@@ -437,49 +480,6 @@ export const HomePage: React.FC = () => {
               <div className="mt-6 pt-6 border-t-[3px] border-white/70">
                 <div className="inline-block px-6 py-3 bg-white text-[#7E57C2] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(149,117,205,0.4)] border-[3px] border-[#D1C4E9] hover:bg-gradient-to-r hover:from-[#D1C4E9] hover:to-white">
                   Enter → ✨
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Adventure Game Card */}
-          <Link
-            to="/adventure"
-            className="group relative bg-gradient-to-br from-[#FFD1FF] via-[#FFB5E8] to-[#FF8DC7] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,182,193,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,182,193,0.6)] hover:rotate-2 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Cute stars decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>⭐</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFB5E8] to-[#CE93D8] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,182,193,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFD1FF]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Sparkles size={72} className="text-[#FF69B4] drop-shadow-lg" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#D81B60] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.adventure.title')}</h2>
-              <p className="text-base text-[#E91E63] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
-                {t('home.adventure.subtitle')}
-              </p>
-              <p className="text-sm text-[#C2185B] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
-                {t('home.adventure.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#FF69B4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(255,182,193,0.4)] border-[3px] border-[#FFD1FF] hover:bg-gradient-to-r hover:from-[#FFD1FF] hover:to-white">
-                  Enter → 🎲
                 </div>
               </div>
             </div>

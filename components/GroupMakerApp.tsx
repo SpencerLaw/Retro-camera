@@ -86,6 +86,7 @@ const ClawSVG: React.FC<{ isGrabbing: boolean; pickedBallName: string | null; ba
 export const GroupMakerApp: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations();
+  const cabinetRef = useRef<HTMLDivElement>(null);
   const [names, setNames] = useState<string>("");
   const [numGroups, setNumGroups] = useState<number>(2);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -114,13 +115,15 @@ export const GroupMakerApp: React.FC = () => {
 
   useEffect(() => {
     const list = names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "");
-    if (!isAnimating) {
+    if (!isAnimating && cabinetRef.current) {
+      const width = cabinetRef.current.clientWidth || 800;
+      const height = cabinetRef.current.clientHeight || 600;
       setBalls(list.map((name, i) => ({
         name,
-        x: Math.random() * 300 + 100,
-        y: Math.random() * 200 + 200,
-        vx: (Math.random() - 0.5) * 12,
-        vy: (Math.random() - 0.5) * 12,
+        x: Math.random() * (width - 150) + 75,
+        y: height - 150 - (Math.random() * 100),
+        vx: (Math.random() - 0.5) * 10,
+        vy: (Math.random() - 0.5) * 10,
         color: colors[i % colors.length],
         isPicked: false,
         angle: Math.random() * 360
@@ -129,16 +132,26 @@ export const GroupMakerApp: React.FC = () => {
   }, [names, isAnimating]);
 
   const animate = () => {
+    if (!cabinetRef.current) return;
+    const width = cabinetRef.current.clientWidth;
+    const height = cabinetRef.current.clientHeight;
+
     setBalls(prev => prev.map(ball => {
       if (ball.isPicked) return ball;
       let nx = ball.x + ball.vx;
       let ny = ball.y + ball.vy;
       let nvx = ball.vx;
       let nvy = ball.vy;
-      if (nx < 20 || nx > 450) nvx *= -0.95;
-      if (ny < 50 || ny > 550) nvy *= -0.95;
-      nvy -= 0.12; if (ny < 150) nvy += 0.35;
-      return { ...ball, x: nx, y: ny, vx: nvx, vy: nvy, angle: ball.angle + nvx * 5 };
+
+      // Elastic wall collisions
+      if (nx < 50 || nx > width - 50) nvx *= -0.9;
+      if (ny < 50 || ny > height - 80) nvy *= -0.9;
+
+      // Gravity and gentle float up
+      nvy += 0.15; 
+      if (ny > height - 150) nvy -= 0.3; 
+
+      return { ...ball, x: nx, y: ny, vx: nvx, vy: nvy, angle: ball.angle + nvx * 2 };
     }));
     requestRef.current = requestAnimationFrame(animate);
   };
@@ -148,6 +161,16 @@ export const GroupMakerApp: React.FC = () => {
     else if (requestRef.current) cancelAnimationFrame(requestRef.current);
     return () => { if (requestRef.current) cancelAnimationFrame(requestRef.current); };
   }, [isAnimating]);
+
+  const handleDownloadAll = () => {
+    if (groups.length === 0) return;
+    const textContent = groups.map(g => `${g.name} (${g.members.length}人):\n${g.members.join(', ')}`).join('\n\n');
+    const blob = new Blob([textContent], {type: 'text/plain'});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `分组结果_${new Date().toLocaleTimeString()}.txt`;
+    link.click();
+  };
 
   const handleStartGrouping = async () => {
     const list = names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "");
@@ -169,41 +192,32 @@ export const GroupMakerApp: React.FC = () => {
     for (let i = 0; i < shuffledNames.length; i++) {
       const name = shuffledNames[i];
       const color = colors[list.indexOf(name) % colors.length];
+      const targetHeight = cabinetRef.current ? cabinetRef.current.clientHeight * 0.7 : 400;
       
-      // 1. Drop
-      setClawState({ height: 400, isGrabbing: false, shake: 0 });
-      await new Promise(r => setTimeout(r, 500));
+      // 1. Drop Claw
+      setClawState({ height: targetHeight, isGrabbing: false, shake: 0 });
+      await new Promise(r => setTimeout(r, 600));
       
-      // 2. Grab
-      setClawState({ height: 400, isGrabbing: true, shake: 5 });
+      // 2. Grab Action
+      setClawState({ height: targetHeight, isGrabbing: true, shake: 5 });
       setCurrentPicking({ name, color });
       setBalls(prev => prev.map(b => b.name === name ? { ...b, isPicked: true } : b));
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 500));
 
       // 3. Lift
-      setClawState({ height: 40, isGrabbing: true, shake: 0 });
-      await new Promise(r => setTimeout(r, 600));
+      setClawState({ height: 40, isGrabbing: true, shake: 2 });
+      await new Promise(r => setTimeout(r, 800));
 
-      // 4. Release at top
+      // 4. Release
       setClawState({ height: 40, isGrabbing: false, shake: 0 });
       newGroups[i % numGroups].members.push(name);
       setGroups([...newGroups]);
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 300));
       
       setCurrentPicking(null);
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 200));
     }
     setIsAnimating(false);
-  };
-
-  const handleDownloadAll = () => {
-    if (groups.length === 0) return;
-    const textContent = groups.map(g => `${g.name} (${g.members.length}人):\n${g.members.join(', ')}`).join('\n\n');
-    const blob = new Blob([textContent], {type: 'text/plain'});
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `分组结果_${new Date().toLocaleTimeString()}.txt`;
-    link.click();
   };
 
   return (
@@ -226,7 +240,7 @@ export const GroupMakerApp: React.FC = () => {
         {/* 2. Toy Claw Machine */}
         <div className="factory-panel middle-panel">
           <div className="panel-header">🎈 {t('home.groupMaker.actionTitle')}</div>
-          <div className="machine-cabinet">
+          <div className="machine-cabinet" ref={cabinetRef}>
             <div className="claw-container" style={{ transform: `translateX(-50%) translateY(${clawState.shake}px)` }}>
               <div className="claw-cable" style={{ height: clawState.height }}></div>
               <ClawSVG isGrabbing={clawState.isGrabbing} pickedBallName={currentPicking?.name || null} ballColor={currentPicking?.color} />

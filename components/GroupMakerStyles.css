@@ -57,15 +57,15 @@
 }
 
 .modal-content {
-  width: 90%;
-  max-width: 1100px; /* Increased size significantly */
-  max-height: 92vh;
+  width: 95%;
+  max-width: 1400px;
+  max-height: 95vh;
   background: #FFF;
   border: 12px solid #FFB7C5;
-  border-radius: 50px;
+  border-radius: 60px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.4);
   animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
 }
@@ -128,10 +128,25 @@
 /* Reuse existing member-tile styles but adjust grid for modal */
 .modal-body .member-scroll-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  padding: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
   background: transparent;
+}
+
+/* ... existing panel styles ... */
+
+.member-tile { 
+  background: white;
+  border: 5px solid #FFB7C5;
+  border-radius: 25px;
+  padding: 30px 15px; 
+  font-weight: 900; 
+  color: #555; 
+  font-size: 5rem;
+  line-height: 1.1;
+  text-align: center; 
+  box-shadow: 0 8px 0 rgba(0,0,0,0.05);
 }
 .factory-panel {
   display: flex;

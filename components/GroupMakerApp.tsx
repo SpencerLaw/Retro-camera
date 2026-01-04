@@ -282,7 +282,7 @@ export const GroupMakerApp: React.FC = () => {
             {groups.length > 0 && (
               <div className="p-4 bg-white border-t-4 border-yellow-200">
                 <button onClick={handleDownloadAll} className="w-full py-3 bg-yellow-400 text-white rounded-xl font-black text-xl shadow-md hover:bg-yellow-500 active:translate-y-1 transition-all">
-                  📥 下载全部
+                  {t('home.groupMaker.downloadAll')}
                 </button>
               </div>
             )}
@@ -301,8 +301,8 @@ export const GroupMakerApp: React.FC = () => {
             
             <div className="modal-body">
               <div className="flex justify-between items-center mb-4 px-2">
-                  <span className="text-xl text-pink-500 font-bold">小组成员</span>
-                  <span className="bg-white text-pink-500 px-3 py-1 rounded-full text-sm border-2 border-pink-200 font-bold">{selectedGroup.members.length}人</span>
+                  <span className="text-xl text-pink-500 font-bold">{t('home.groupMaker.memberListTitle')}</span>
+                  <span className="bg-white text-pink-500 px-3 py-1 rounded-full text-sm border-2 border-pink-200 font-bold">{selectedGroup.members.length}{t('home.groupMaker.members')}</span>
               </div>
               <div className="member-scroll-list">
                 {selectedGroup.members.map((member, idx) => (
@@ -319,7 +319,7 @@ export const GroupMakerApp: React.FC = () => {
                   link.href = URL.createObjectURL(blob);
                   link.download = `${selectedGroup.name}.txt`;
                   link.click();
-                }} className="start-btn-arcade" style={{fontSize: '1.2rem', padding: '12px 30px', background: '#4ECDC4'}}>导出本组名单</button>
+                }} className="start-btn-arcade" style={{fontSize: '1.2rem', padding: '12px 30px', background: '#4ECDC4'}}>{t('home.groupMaker.exportCurrentGroup')}</button>
             </div>
           </div>
         </div>

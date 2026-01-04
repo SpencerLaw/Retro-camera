@@ -1,114 +1,118 @@
 @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
 
-/* --- 极致全屏：彻底消除所有缝隙 --- */
+/* --- 基础样式：参考作业消消乐 --- */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body, html {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: #000;
+body {
+  background-color: #fef9fb; /* 消消乐背景色 */
   font-family: 'ZCOOL KuaiLe', cursive;
 }
 
 .group-maker-app {
-  width: 100vw;
   height: 100vh;
+  width: 100vw;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #74b9ff 0%, #a29bfe 100%);
+  padding: 20px;
+}
+
+/* --- 主容器：非全屏，居中大卡片 --- */
+.group-maker-container {
+  display: flex;
+  width: 96vw;
+  max-width: 1800px;
+  height: 90vh;
+  background: #f1c40f; /* 街机黄 */
+  border-radius: 50px;
+  border: 12px solid #f39c12;
+  box-shadow: 
+    0 25px 0 #d35400,
+    0 40px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
   position: relative;
 }
 
-.group-maker-container {
-  display: flex; /* 改用 Flex 确保物理宽度 100% */
-  width: 100%;
-  height: 100%;
-}
-
-/* --- 面板：无缝直角拼接 --- */
+/* --- 面板：无缝占满容器 --- */
 .factory-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
-  position: relative;
-  /* 面板间用深色粗线分隔，增加厚重感 */
-  border-right: 10px solid #2c3e50;
+  border-right: 8px solid #d35400;
+  background: #fff;
 }
 
-/* 物理宽度分配：20% / 35% / 45% = 100% */
-.left-panel { flex: 0 0 20%; background: #fff; }
+/* 重新分配比例 */
+.left-panel { flex: 0 0 25%; }
 .middle-panel { flex: 0 0 35%; background: #000; }
-.right-panel { flex: 0 0 45%; border-right: none; background: #fff; }
+.right-panel { flex: 0 0 40%; border-right: none; }
 
-/* 巨型页眉 */
 .panel-header {
-  height: 120px;
+  height: 85px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   color: white;
   background: #34495e;
-  text-shadow: 4px 4px 0 rgba(0,0,0,0.3);
-  position: relative;
   flex-shrink: 0;
-  border-bottom: 10px solid rgba(0,0,0,0.2);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .header-badge {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  margin-left: 10px;
   background: #e74c3c;
-  padding: 8px 20px;
-  border-radius: 10px;
-  font-size: 1.4rem;
-  border: 4px solid white;
+  padding: 2px 12px;
+  border-radius: 15px;
+  font-size: 1rem;
+  border: 2px solid white;
 }
 
-/* --- 1. 左侧：名单墙 --- */
+/* --- 左侧：名单卷轴 --- */
 .left-panel .panel-header { background: #e67e22; }
 .input-content { 
   flex: 1; 
   display: flex; 
   flex-direction: column;
-  background: #fffdf0;
+  background: #fffdf0; /* 纸张颜色 */
 }
 
 textarea { 
   flex: 1; 
   width: 100%;
   border: none;
-  padding: 40px; 
+  padding: 25px; 
   font-family: inherit; 
   resize: none; 
   outline: none;
-  font-size: 2.2rem;
-  line-height: 1.4;
+  font-size: 1.5rem;
+  line-height: 1.6;
   background: transparent;
-  color: #333;
+  color: #5d5d5d;
 }
 
-.clear-btn-wrap {
-  padding: 30px;
+.clear-btn-footer {
+  padding: 20px;
   background: #f8f9fa;
-  border-top: 10px solid #e67e22;
+  border-top: 4px solid #eee;
 }
 
-/* --- 2. 中间：街机核心 --- */
+/* --- 中间：机器屏幕 (全覆盖) --- */
 .middle-panel .panel-header { background: #3498db; }
 
 .machine-cabinet {
   flex: 1;
-  background: radial-gradient(circle at 50% 50%, #222, #000);
+  background: radial-gradient(circle at 50% 50%, #2c3e50, #000);
   position: relative;
   overflow: hidden;
 }
 
+/* 爪子样式优化 */
 .claw-container {
   position: absolute;
   top: 0;
@@ -121,56 +125,55 @@ textarea {
 }
 
 .claw-cable {
-  width: 12px;
+  width: 8px;
   background: #95a5a6;
   background-image: repeating-linear-gradient(0deg, #7f8c8d, #7f8c8d 10px, #bdc3c7 10px, #bdc3c7 20px);
 }
 
 .claw-svg-wrapper {
-  width: 300px; /* 极致巨型爪子 */
-  height: 300px;
-  margin-top: -50px;
+  width: 220px;
+  height: 220px;
+  margin-top: -30px;
 }
 
 .alien-ball {
   position: absolute;
-  width: 120px;
-  height: 130px;
+  width: 80px;
+  height: 90px;
   border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
   color: white;
-  box-shadow: inset -15px -15px 30px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.6);
-  font-size: 2rem;
-  text-shadow: 0 3px 6px #000;
+  box-shadow: inset -10px -10px 20px rgba(0,0,0,0.3), 0 15px 30px rgba(0,0,0,0.4);
+  font-size: 1.1rem;
 }
 
 .machine-controls { 
-  padding: 40px; 
+  padding: 25px; 
   background: #2980b9; 
-  border-top: 15px solid #1c3d5a;
+  border-top: 8px solid rgba(0,0,0,0.2);
 }
 
 .start-btn-arcade {
   width: 100%;
-  padding: 30px;
+  padding: 18px;
   background: #e74c3c;
   color: white;
   border: none;
   border-radius: 20px;
   font-weight: 900;
-  font-size: 3.5rem;
+  font-size: 2.2rem;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 15px 0 #c0392b;
+  box-shadow: 0 10px 0 #c0392b;
   transition: all 0.1s;
 }
 
-.start-btn-arcade:active { transform: translateY(10px); box-shadow: 0 5px 0 #c0392b; }
+.start-btn-arcade:active { transform: translateY(6px); box-shadow: 0 4px 0 #c0392b; }
 
-/* --- 3. 右侧：结果展示墙 --- */
+/* --- 右侧：分组结果 (核心：自动拉伸填满) --- */
 .right-panel .panel-header { background: #2ecc71; }
 
 .delivery-station {
@@ -178,56 +181,64 @@ textarea {
   display: flex;
   flex-direction: column;
   position: relative;
+  background: #f4f7f6;
 }
 
 .results-scroll-area {
   flex: 1;
   overflow-y: auto;
-  background: #ecf0f1;
+  padding: 15px; /* 轻微间距，让卡片不粘边 */
 }
 
 .groups-grid {
   display: flex;
-  flex-wrap: wrap; /* 关键：强制铺满宽度 */
-  width: 100%;
+  flex-wrap: wrap; /* 关键：使用 flex 配合 wrap */
+  gap: 15px;
 }
 
 .group-capsule {
-  flex: 1 1 350px; /* 强力自适应：最少 350px，不足则横向拉满整行 */
+  /* 关键：flex-grow: 1 确保卡片横向撑满剩余空间，消除右侧空隙 */
+  flex: 1 1 220px; 
   background: white;
   border: 6px solid #2ecc71;
-  padding: 80px 40px;
+  border-radius: 30px;
+  padding: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  min-height: 400px;
+  box-shadow: 0 10px 0 #27ae60;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  min-height: 220px;
   position: relative;
 }
 
 .group-capsule:hover {
-  background: #f0fff4;
-  z-index: 10;
-  transform: scale(1.01);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 0 #27ae60;
 }
 
-.capsule-icon { font-size: 8rem; margin-bottom: 20px; }
-.capsule-name { font-weight: 900; color: #27ae60; font-size: 3rem; }
+.capsule-icon { font-size: 4rem; margin-bottom: 10px; }
+.capsule-name { font-weight: 900; color: #27ae60; font-size: 1.5rem; text-align: center; }
 .capsule-badge {
   position: absolute;
-  top: 40px;
-  right: 40px;
+  top: -10px;
+  right: -10px;
   background: #e74c3c;
   color: white;
-  padding: 10px 40px;
-  border-radius: 50px;
-  font-size: 2.5rem;
-  border: 8px solid white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  border: 4px solid white;
 }
 
-/* --- 4. 详情层：100% 无缝全屏覆盖 --- */
+/* --- 详情视图：100% 占满右侧面板 --- */
 .fixed-detail-view {
   position: absolute;
   top: 0;
@@ -241,26 +252,23 @@ textarea {
 }
 
 .detail-nav {
-  height: 150px;
-  padding: 0 50px;
+  padding: 20px;
   background: #34495e;
   color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
 }
 
 .arcade-back-btn {
   background: #2ecc71;
-  padding: 30px 60px;
-  border-radius: 20px;
+  padding: 8px 20px;
+  border-radius: 15px;
   font-weight: 900;
-  font-size: 2.5rem;
   color: white;
   border: none;
   cursor: pointer;
-  box-shadow: 0 15px 0 #27ae60;
+  box-shadow: 0 5px 0 #27ae60;
 }
 
 .member-scroll-list {
@@ -268,53 +276,42 @@ textarea {
   overflow-y: auto;
   display: flex;
   flex-wrap: wrap;
-  background: #fff;
+  padding: 20px;
+  gap: 12px;
+  align-content: flex-start;
 }
 
 .member-capsule {
-  flex: 1 1 250px;
-  border: 1px solid #eee;
-  padding: 60px;
+  flex: 1 1 120px; /* 成员卡片也要横向铺满 */
+  background: #f1f8e9;
+  border: 3px solid #8bc34a;
+  padding: 15px;
+  border-radius: 20px;
   font-weight: 900;
-  color: #333;
-  font-size: 3rem;
+  color: #33691e;
+  font-size: 1.3rem;
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 6px 0 #8bc34a;
 }
 
-.member-capsule:nth-child(odd) { background: #fdfdfd; }
+/* 滚动条 */
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-thumb { background: #34495e; border-radius: 10px; border: 3px solid #fff; }
 
-.detail-actions {
-  padding: 50px;
-  background: #f8f9fa;
-  border-top: 15px solid #2ecc71;
-}
-
-/* --- 全局交互控件 --- */
-::-webkit-scrollbar { width: 20px; }
-::-webkit-scrollbar-thumb { background: #34495e; border: 5px solid #fff; border-radius: 10px; }
-
+/* 悬浮首页按钮 */
 .home-back-btn {
   position: fixed;
-  top: 40px;
-  left: 40px;
+  top: 30px;
+  left: 30px;
   z-index: 9999;
   background: white;
-  border: 10px solid #3498db;
+  border: 6px solid #3498db;
   border-radius: 50%;
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #3498db;
-  cursor: pointer;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-}
-
-@media (max-width: 1200px) {
-  .group-maker-container { flex-direction: column; overflow-y: auto; }
-  .factory-panel { flex: 0 0 90vh; width: 100%; border-right: none; border-bottom: 15px solid #34495e; }
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }

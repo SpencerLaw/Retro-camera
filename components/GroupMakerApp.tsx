@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Download, Play, Trash2, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, Users, Download, Play, Trash2, LayoutGrid, X } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import './GroupMakerStyles.css';
 
@@ -29,6 +29,7 @@ export const GroupMakerApp: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [balls, setBalls] = useState<BallData[]>([]);
   const [currentPickingName, setCurrentPickingName] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   
   const clawArmRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number>();
@@ -36,7 +37,8 @@ export const GroupMakerApp: React.FC = () => {
   const colors = ['#FF6B6B', '#48DBFB', '#1DD1A1', '#FECA57', '#5F27CD', '#FF9FF3', '#00D2D3', '#54A0FF'];
 
   useEffect(() => {
-    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
     if (!isAnimating) {
       setBalls(list.map((name, i) => ({
         name,
@@ -69,7 +71,8 @@ export const GroupMakerApp: React.FC = () => {
   }, [isAnimating]);
 
   const handleStartGrouping = async () => {
-    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
     if (list.length < numGroups) {
       alert(t('home.groupMaker.errorLow'));
       return;
@@ -115,14 +118,14 @@ export const GroupMakerApp: React.FC = () => {
 
   return (
     <div className="group-maker-app">
-      <button onClick={() => navigate('/')} className="fixed top-6 left-6 z-50 p-3 rounded-full bg-white border-4 border-pink-400 text-pink-500 shadow-xl hover:scale-110">
+      <button onClick={() => navigate('/')} className="fixed top-6 left-6 z-50 p-3 rounded-full bg-white border-4 border-pink-400 text-pink-500 shadow-xl hover:scale-110 transition-transform">
         <ArrowLeft size={28} strokeWidth={3} />
       </button>
 
       <div className="group-maker-container">
         {/* Panel 1: Name Registry */}
         <div className="factory-panel left-panel">
-          <div className="panel-header">📝 {t('home.groupMaker.results')}</div>
+          <div className="panel-header">📝 {t('home.groupMaker.inputPlaceholder')?.split('...')[0] || 'Name List'}</div>
           <div className="input-content">
             <textarea 
               placeholder={t('home.groupMaker.inputPlaceholder')}
@@ -130,7 +133,7 @@ export const GroupMakerApp: React.FC = () => {
               onChange={(e) => setNames(e.target.value)}
               disabled={isAnimating}
             />
-            <button onClick={() => setNames("")} className="clear-btn self-end">{t('home.groupMaker.clearBtn')}</button>
+            <button onClick={() => setNames("")} className="clear-btn">{t('home.groupMaker.clearBtn')}</button>
           </div>
         </div>
 
@@ -155,7 +158,7 @@ export const GroupMakerApp: React.FC = () => {
             <div className="flex items-center justify-center gap-4 bg-white/20 p-2 rounded-2xl mb-2">
               <span className="font-bold text-white text-lg">{t('home.groupMaker.groupCount')}</span>
               <input 
-                type="number" className="w-20 p-2 rounded-xl border-none text-center font-black text-blue-600"
+                type="number" className="w-20 p-2 rounded-xl border-none text-center font-black text-blue-600 outline-none"
                 value={numGroups} onChange={(e) => setNumGroups(parseInt(e.target.value) || 2)}
                 disabled={isAnimating}
               />
@@ -166,7 +169,7 @@ export const GroupMakerApp: React.FC = () => {
           </div>
         </div>
 
-        {/* Panel 3: Delivery Station */}
+        {/* Panel 3: Delivery Station (Results) */}
         <div className="factory-panel right-panel">
           <div className="panel-header flex justify-between items-center px-6">
             <span>📦 {t('home.groupMaker.results')}</span>
@@ -178,8 +181,8 @@ export const GroupMakerApp: React.FC = () => {
                 link.href = URL.createObjectURL(blob);
                 link.download = 'groups.txt';
                 link.click();
-              }} className="bg-white/20 hover:bg-white/40 p-2 rounded-full transition-colors">
-                <Download size={20} color="white" />
+              }} className="bg-white/30 hover:bg-white/50 p-2 rounded-full transition-colors text-green-900">
+                <Download size={20} />
               </button>
             )}
           </div>
@@ -187,11 +190,21 @@ export const GroupMakerApp: React.FC = () => {
             {groups.length > 0 ? (
               <div className="groups-grid">
                 {groups.map(group => (
-                  <div key={group.id} className="group-box">
-                    <h3>{group.name}</h3>
-                    <div className="flex flex-wrap justify-center">
-                      {group.members.map((m, idx) => <span key={idx} className="member-chip">{m}</span>)}
+                  <div key={group.id} className="group-card-compact" onClick={() => setSelectedGroup(group)}>
+                    <div className="group-avatar-stack">
+                      {group.members.slice(0, 3).map((m, idx) => (
+                        <div key={idx} className="group-avatar">
+                          {m.slice(0, 1).toUpperCase()}
+                        </div>
+                      ))}
+                      {group.members.length > 3 && (
+                        <div className="group-avatar" style={{background: '#BDBDBD', color: 'white'}}>
+                          +{group.members.length - 3}
+                        </div>
+                      )}
                     </div>
+                    <div className="group-name">{group.name}</div>
+                    <div className="group-count">{group.members.length} <Users size={12} className="inline"/></div>
                   </div>
                 ))}
               </div>
@@ -204,6 +217,28 @@ export const GroupMakerApp: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for Group Details */}
+      {selectedGroup && (
+        <div className="modal-overlay" onClick={() => setSelectedGroup(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={() => setSelectedGroup(null)}>
+              <X size={28} strokeWidth={3} />
+            </button>
+            <div className="modal-header">
+              <h2 className="modal-title">{selectedGroup.name}</h2>
+              <p className="text-gray-500 font-bold">{selectedGroup.members.length} Members</p>
+            </div>
+            <div className="modal-body">
+              {selectedGroup.members.map((member, idx) => (
+                <span key={idx} className="member-chip-large">
+                  {member}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -45,12 +45,12 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(255, 255, 255, 0.6); /* Lighter, milkier overlay for Peppa Pig style */
-  backdrop-filter: blur(15px); /* Stronger blur to mask the background */
-  -webkit-backdrop-filter: blur(15px);
-  z-index: 9999; /* Ensure it's on top of EVERYTHING */
+  width: 100vw; /* Force full viewport width */
+  height: 100vh; /* Force full viewport height */
+  background: rgba(255, 255, 255, 0.9); /* High opacity to block background */
+  backdrop-filter: blur(20px); /* Heavy frosted glass */
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 10000; /* Highest level */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,14 +58,14 @@
 
 .modal-content {
   width: 90%;
-  max-width: 800px; /* 30% wider (was 600px) */
-  max-height: 90vh; /* Taller */
+  max-width: 1100px; /* Increased size significantly */
+  max-height: 92vh;
   background: #FFF;
-  border: 10px solid #FFB7C5; /* Thicker border */
-  border-radius: 40px;
+  border: 12px solid #FFB7C5;
+  border-radius: 50px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.2);
   animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
 }

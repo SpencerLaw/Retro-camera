@@ -43,8 +43,8 @@
       "description": "Super cool roll call tool that makes being called on something to look forward to"
     },
     "groupMaker": {
-      "title": "The Claw! Group Maker",
-      "subtitle": "Alien Grab • Fair Grouping",
+      "title": "Claw Machine Group Maker",
+      "subtitle": "Claw Grab • Fair Grouping",
       "description": "Grab student names like a crane game, making classroom grouping fair and fun!",
       "inputPlaceholder": "Paste or type student names here (separated by newlines or commas)...",
       "inputTitle": "Name List",

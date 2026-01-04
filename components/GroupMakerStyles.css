@@ -30,7 +30,7 @@
 
 .group-maker-container {
   display: grid;
-  grid-template-columns: 33.33% 33.33% 33.33%; /* Equal thirds */
+  grid-template-columns: 1.5fr 2.5fr 4fr;
   width: 100vw;
   height: 100vh;
   gap: 15px;
@@ -276,13 +276,19 @@ textarea::-webkit-scrollbar-thumb { background: #FFB7C5; border-radius: 10px; }
 
 .picked-ball-in-claw {
   position: absolute !important;
-  top: 130px !important; /* Center of the claw arms */
+  top: 135px !important; /* Position it where the claw hands meet */
   left: 50% !important;
-  transform: translateX(-50%) scale(0.7) !important;
+  transform: translateX(-50%) scale(0.75) !important;
   z-index: 40;
+  animation: ballGrabPulse 0.4s ease-out;
 }
 
-.claw-svg-wrapper { width: 220px; height: 220px; margin-top: -30px; position: relative; }
+@keyframes ballGrabPulse {
+  0% { transform: translateX(-50%) scale(0.2); opacity: 0; }
+  100% { transform: translateX(-50%) scale(0.75); opacity: 1; }
+}
+
+.claw-svg-wrapper { width: 260px; height: 260px; margin-top: -40px; position: relative; }
 
 .alien-ball {
   position: absolute;

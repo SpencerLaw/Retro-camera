@@ -1,66 +1,66 @@
 @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
 
-/* --- 极致全屏：零死角填充 --- */
+/* --- 彻底清除所有默认间距 --- */
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body, html {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  font-family: 'ZCOOL KuaiLe', cursive;
+}
+
+/* --- 全屏容器：100% 占满 --- */
+.group-maker-app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
   background: #000;
 }
 
-.group-maker-app {
-  font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  background: #f39c12; /* 街机金黄 */
-  border: 15px solid #d35400; /* 外部加厚边框 */
-}
-
 .group-maker-container {
-  display: flex; /* 改用 Flex 确保百分比绝对准确 */
+  display: flex; /* 使用 Flex 确保百分比绝对物理占满 */
   width: 100%;
   height: 100%;
 }
 
-/* --- 面板：无缝拼接 --- */
+/* --- 核心面板：无缝填充 --- */
 .factory-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #ecf0f1;
-  border: 4px solid #34495e;
   overflow: hidden;
   position: relative;
+  /* 使用内阴影和右侧边框区分，不使用间隙 */
+  border-right: 8px solid #2c3e50;
 }
 
-/* 锁定百分比宽度 */
-.left-panel { flex: 0 0 20%; border-left: none; }
-.middle-panel { flex: 0 0 30%; }
-.right-panel { flex: 0 0 50%; border-right: none; }
+/* 物理宽度锁定：占满 100% */
+.left-panel { flex: 0 0 20%; background: #fff; }
+.middle-panel { flex: 0 0 35%; background: #000; }
+.right-panel { flex: 0 0 45%; border-right: none; background: #fff; }
 
+/* 巨型头部 */
 .panel-header {
-  height: 90px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
   font-size: 2.2rem;
   color: white;
   background: #34495e;
+  text-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+  position: relative;
   flex-shrink: 0;
-  border-bottom: 8px solid rgba(0,0,0,0.2);
-  text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
 }
 
 .header-badge {
   position: absolute;
+  top: 15px;
   right: 15px;
   background: #e74c3c;
   padding: 5px 15px;
@@ -69,40 +69,40 @@ body, html {
   border: 3px solid white;
 }
 
-/* --- 左侧：名单输入 (物理占满) --- */
+/* --- 1. 左侧：名单 (100% 物理填充) --- */
 .left-panel .panel-header { background: #e67e22; }
 .input-content { 
   flex: 1; 
   display: flex; 
-  flex-direction: column;
-  background: #fffdf0;
+  flex-direction: column; 
 }
 
 textarea { 
   flex: 1; 
   width: 100%;
   border: none;
-  padding: 30px; 
+  padding: 40px; 
   font-family: inherit; 
   resize: none; 
   outline: none;
-  font-size: 1.8rem;
-  line-height: 1.6;
-  background: transparent;
+  font-size: 2rem;
+  line-height: 1.5;
+  background: #fffdf0;
+  color: #333;
 }
 
 .clear-btn-wrap {
   padding: 20px;
-  background: #f8f9fa;
-  border-top: 6px solid #e67e22;
+  background: #f1f1f1;
+  border-top: 8px solid #e67e22;
 }
 
-/* --- 中间：机器核心 (极致全屏) --- */
+/* --- 2. 中间：街机屏幕 (极致空间) --- */
 .middle-panel .panel-header { background: #3498db; }
 
 .machine-cabinet {
   flex: 1;
-  background: linear-gradient(180deg, #000 0%, #1a1a1a 100%);
+  background: radial-gradient(circle at 50% 50%, #222, #000);
   position: relative;
   overflow: hidden;
 }
@@ -121,34 +121,34 @@ textarea {
 .claw-cable {
   width: 12px;
   background: #95a5a6;
-  background-image: repeating-linear-gradient(0deg, #7f8c8d, #7f8c8d 10px, #bdc3c7 10px, #bdc3c7 20px);
+  background-image: repeating-linear-gradient(0deg, #7f8c8d, #7f8c8d 15px, #bdc3c7 15px, #bdc3c7 30px);
 }
 
 .claw-svg-wrapper {
-  width: 260px;
-  height: 260px;
-  margin-top: -40px;
+  width: 280px;
+  height: 280px;
+  margin-top: -45px;
 }
 
 .alien-ball {
   position: absolute;
-  width: 100px;
-  height: 110px;
+  width: 110px;
+  height: 120px;
   border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
   color: white;
-  box-shadow: inset -10px -10px 25px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.6);
-  font-size: 1.5rem;
-  text-shadow: 0 2px 4px #000;
+  box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.6);
+  font-size: 1.8rem;
+  text-shadow: 0 3px 6px #000;
 }
 
 .machine-controls { 
   padding: 30px; 
   background: #2980b9; 
-  border-top: 10px solid rgba(0,0,0,0.2);
+  border-top: 10px solid #1c3d5a;
 }
 
 .start-btn-arcade {
@@ -159,8 +159,8 @@ textarea {
   border: none;
   border-radius: 20px;
   font-weight: 900;
-  font-size: 2.8rem;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 3rem;
+  font-family: inherit;
   cursor: pointer;
   box-shadow: 0 12px 0 #c0392b;
   transition: all 0.1s;
@@ -168,7 +168,7 @@ textarea {
 
 .start-btn-arcade:active { transform: translateY(8px); box-shadow: 0 4px 0 #c0392b; }
 
-/* --- 右侧：结果展示 (真正的铺满) --- */
+/* --- 3. 右侧：分组结果 (饱和填充网格) --- */
 .right-panel .panel-header { background: #2ecc71; }
 
 .delivery-station {
@@ -176,58 +176,58 @@ textarea {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: #f0f3f2;
+  background: #fff;
 }
 
 .results-scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding: 0; /* 移除内缩 */
+  background: #ecf0f1;
 }
 
 .groups-grid {
-  display: grid;
-  /* 强行平分：确保卡片一定占满 100% 宽度，绝无黄色背景露出 */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 0; 
+  display: flex;
+  flex-wrap: wrap; /* 使用 flex-wrap 配合 flex-grow 强行占满 */
+  width: 100%;
+  height: auto;
 }
 
 .group-capsule {
+  flex: 1 1 300px; /* 强力拉伸：最少 300px，不足则拉满 100% */
   background: white;
   border: 4px solid #2ecc71;
-  padding: 50px;
+  padding: 60px 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  min-height: 300px;
+  min-height: 350px;
   position: relative;
 }
 
 .group-capsule:hover {
-  background: #f9fffb;
+  background: #f0fff4;
   z-index: 10;
-  transform: scale(1.02);
-  box-shadow: 0 0 50px rgba(46, 204, 113, 0.2);
+  transform: scale(1.01);
 }
 
-.capsule-icon { font-size: 6rem; margin-bottom: 20px; }
-.capsule-name { font-weight: 900; color: #27ae60; font-size: 2.2rem; }
+.capsule-icon { font-size: 7rem; margin-bottom: 20px; }
+.capsule-name { font-weight: 900; color: #27ae60; font-size: 2.5rem; }
 .capsule-badge {
   position: absolute;
-  top: 25px;
-  right: 25px;
+  top: 30px;
+  right: 30px;
   background: #e74c3c;
   color: white;
   padding: 10px 30px;
   border-radius: 40px;
-  font-size: 1.8rem;
-  border: 5px solid white;
+  font-size: 2rem;
+  border: 6px solid white;
 }
 
-/* --- 详情层：100% 物理填充覆盖 --- */
+/* --- 4. 详情层：100% 无缝覆盖 --- */
 .fixed-detail-view {
   position: absolute;
   top: 0;
@@ -241,7 +241,8 @@ textarea {
 }
 
 .detail-nav {
-  padding: 30px 40px;
+  height: 120px;
+  padding: 0 40px;
   background: #34495e;
   color: white;
   display: flex;
@@ -255,7 +256,7 @@ textarea {
   padding: 20px 40px;
   border-radius: 20px;
   font-weight: 900;
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: white;
   border: none;
   cursor: pointer;
@@ -265,19 +266,19 @@ textarea {
 .member-scroll-list {
   flex: 1;
   overflow-y: auto;
-  display: grid;
-  /* 列表也强行拉伸占满 */
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
   background: #fff;
-  gap: 0;
 }
 
 .member-capsule {
+  flex: 1 1 200px;
   border: 1px solid #eee;
-  padding: 40px;
+  padding: 50px;
   font-weight: 900;
   color: #333;
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   text-align: center;
   display: flex;
   align-items: center;
@@ -292,25 +293,30 @@ textarea {
   border-top: 10px solid #2ecc71;
 }
 
-/* 隐藏滚动条但保留功能，极致简约 */
-::-webkit-scrollbar { width: 12px; }
-::-webkit-scrollbar-thumb { background: #34495e; border-radius: 10px; border: 3px solid #ecf0f1; }
+/* 响应式 */
+@media (max-width: 1200px) {
+  .group-maker-container { flex-direction: column; overflow-y: auto; }
+  .left-panel, .middle-panel, .right-panel { flex: 0 0 80vh; width: 100%; border-right: none; border-bottom: 10px solid #34495e; }
+}
 
-/* 返回首页按钮 */
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-thumb { background: #34495e; border-radius: 10px; border: 4px solid #fff; }
+
+/* 悬浮返回按钮 */
 .home-back-btn {
   position: fixed;
-  top: 25px;
-  left: 25px;
-  z-index: 999;
+  top: 30px;
+  left: 30px;
+  z-index: 9999;
   background: white;
-  border: 6px solid #3498db;
+  border: 8px solid #3498db;
   border-radius: 50%;
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #3498db;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.3);
 }

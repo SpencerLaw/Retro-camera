@@ -171,8 +171,10 @@ export const GroupMakerApp: React.FC = () => {
 
         {/* Panel 3: Delivery Station (Results) */}
         <div className="factory-panel right-panel">
-          <div className="panel-header flex justify-between items-center px-6">
-            <span>📦 {t('home.groupMaker.results')}</span>
+          <div className="panel-header">
+            <div className="header-title">
+               <span>📦</span> {t('home.groupMaker.results')}
+            </div>
             {groups.length > 0 && (
               <button onClick={() => {
                 const text = groups.map(g => `${g.name}: ${g.members.join(", ")}`).join("\n");
@@ -181,8 +183,8 @@ export const GroupMakerApp: React.FC = () => {
                 link.href = URL.createObjectURL(blob);
                 link.download = 'groups.txt';
                 link.click();
-              }} className="bg-white/30 hover:bg-white/50 p-2 rounded-full transition-colors text-green-900">
-                <Download size={20} />
+              }} className="icon-btn" title={t('home.groupMaker.exportBtn')}>
+                <Download size={18} strokeWidth={3} />
               </button>
             )}
           </div>
@@ -191,25 +193,19 @@ export const GroupMakerApp: React.FC = () => {
               <div className="groups-grid">
                 {groups.map(group => (
                   <div key={group.id} className="group-card-compact" onClick={() => setSelectedGroup(group)}>
-                    <div className="group-avatar-stack">
-                      {group.members.slice(0, 3).map((m, idx) => (
-                        <div key={idx} className="group-avatar">
-                          {m.slice(0, 1).toUpperCase()}
-                        </div>
-                      ))}
-                      {group.members.length > 3 && (
-                        <div className="group-avatar" style={{background: '#BDBDBD', color: 'white'}}>
-                          +{group.members.length - 3}
-                        </div>
-                      )}
-                    </div>
+                    <div className="group-badge">{group.members.length}</div>
+                    <div className="group-icon-large">🗳️</div>
                     <div className="group-name">{group.name}</div>
-                    <div className="group-count">{group.members.length} <Users size={12} className="inline"/></div>
+                    <div className="mini-avatars">
+                         <div className="mini-avatar" style={{background: '#FF6B6B'}}></div>
+                         <div className="mini-avatar" style={{background: '#4DB6AC'}}></div>
+                         <div className="mini-avatar" style={{background: '#FFD54F'}}></div>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-green-800/30 gap-4">
+              <div className="h-full flex flex-col items-center justify-center text-teal-800/30 gap-4">
                 <LayoutGrid size={80} strokeWidth={3} />
                 <p className="font-bold italic text-xl text-center px-4">{t('home.groupMaker.waitingMsg')}</p>
               </div>

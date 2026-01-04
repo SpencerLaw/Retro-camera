@@ -125,7 +125,7 @@ export const GroupMakerApp: React.FC = () => {
       <div className="group-maker-container">
         {/* Panel 1: Name Registry */}
         <div className="factory-panel left-panel">
-          <div className="panel-header">📝 {t('home.groupMaker.inputPlaceholder')?.split('...')[0] || 'Name List'}</div>
+          <div className="panel-header">📝 {t('home.groupMaker.inputTitle')}</div>
           <div className="input-content">
             <textarea 
               placeholder={t('home.groupMaker.inputPlaceholder')}
@@ -139,7 +139,7 @@ export const GroupMakerApp: React.FC = () => {
 
         {/* Panel 2: The Machine Hub */}
         <div className="factory-panel middle-panel">
-          <div className="panel-header">🏗️ ACTION CENTER</div>
+          <div className="panel-header">🏗️ {t('home.groupMaker.actionTitle')}</div>
           <div className="machine-cabinet">
             <div className="claw-arm" ref={clawArmRef}>
               {currentPickingName && (
@@ -227,7 +227,7 @@ export const GroupMakerApp: React.FC = () => {
             </button>
             <div className="modal-header">
               <h2 className="modal-title">{selectedGroup.name}</h2>
-              <p className="text-gray-500 font-bold">{selectedGroup.members.length} Members</p>
+              <p className="text-gray-500 font-bold">{selectedGroup.members.length} {t('home.groupMaker.members')}</p>
             </div>
             <div className="modal-body">
               {selectedGroup.members.map((member, idx) => (

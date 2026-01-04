@@ -45,7 +45,21 @@
     "groupMaker": {
       "title": "The Claw! Group Maker",
       "subtitle": "Alien Grab • Fair Grouping",
-      "description": "Grab student names like a crane game, making classroom grouping fair and fun!"
+      "description": "Grab student names like a crane game, making classroom grouping fair and fun!",
+      "inputPlaceholder": "Paste or type student names here (separated by newlines or commas)...",
+      "inputTitle": "Name List",
+      "actionTitle": "Action Center",
+      "members": "Members",
+      "groupCount": "Groups:",
+      "startBtn": "Start Grabbing!",
+      "runningBtn": "Grabbing...",
+      "results": "Grouping Results",
+      "exportBtn": "Export TXT",
+      "clearBtn": "Clear",
+      "waitingMsg": "Waiting for luck...",
+      "groupNamePrefix": "Group",
+      "groupNameSuffix": "",
+      "errorLow": "Number of students cannot be less than number of groups!"
     },
     "particles": {
       "title": "Particle Flow",

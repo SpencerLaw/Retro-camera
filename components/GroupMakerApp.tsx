@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, LayoutGrid, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, Download, LayoutGrid, X, Trash2, ChevronLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import './GroupMakerStyles.css';
 
@@ -18,7 +18,6 @@ interface BallData {
   vy: number;
   color: string;
   isPicked: boolean;
-  rotation: number;
 }
 
 export const GroupMakerApp: React.FC = () => {
@@ -31,66 +30,64 @@ export const GroupMakerApp: React.FC = () => {
   const [balls, setBalls] = useState<BallData[]>([]);
   const [currentPickingName, setCurrentPickingName] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [clawState, setClawState] = useState<{height: number, isGrabbing: boolean}>({ height: 40, isGrabbing: false });
+  const [clawState, setClawState] = useState({ height: 40, isGrabbing: false });
   
   const requestRef = useRef<number>();
+  const lastTimeRef = useRef<number>(0);
 
   const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22', '#1abc9c', '#fd79a8'];
 
-  // Init balloon balls
   useEffect(() => {
-    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
     if (!isAnimating) {
       setBalls(list.map((name, i) => ({
         name,
-        x: Math.random() * 240 + 20,
-        y: Math.random() * 200 + 100,
-        vx: (Math.random() - 0.5) * 6,
-        vy: (Math.random() - 0.5) * 6,
+        x: Math.random() * 200 + 30,
+        y: Math.random() * 150 + 100,
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 0.5) * 4,
         color: colors[i % colors.length],
-        isPicked: false,
-        rotation: (Math.random() - 0.5) * 20
+        isPicked: false
       })));
     }
   }, [names, isAnimating]);
 
-  // Balloon bounce animation
-  const animateBalls = () => {
-    setBalls(prev => prev.map(ball => {
-      if (ball.isPicked) return ball;
-      let newX = ball.x + ball.vx;
-      let newY = ball.y + ball.vy;
-      let newVx = ball.vx;
-      let newVy = ball.vy;
+  // Performance Optimized Animation (Using delta time and single state update)
+  const animate = (time: number) => {
+    if (lastTimeRef.current !== undefined) {
+      setBalls(prev => prev.map(ball => {
+        if (ball.isPicked) return ball;
+        
+        let nx = ball.x + ball.vx;
+        let ny = ball.y + ball.vy;
+        let nvx = ball.vx;
+        let nvy = ball.vy;
 
-      // Bounce off walls with balloon feel
-      if (newX < 10 || newX > 280) newVx *= -0.9;
-      if (newY < 20 || newY > 320) newVy *= -0.9;
-      
-      // Floating effect
-      newVy -= 0.05; // Gravity/Upward float
-      if (newY < 30) newVy += 0.2; // Ceiling bounce
+        // Bounce with "Balloon" air resistance
+        if (nx < 10 || nx > 250) nvx *= -0.8;
+        if (ny < 30 || ny > 300) nvy *= -0.8;
+        
+        // Simulating air current/float
+        nvy -= 0.05; 
+        if (ny < 50) nvy += 0.15;
 
-      return { 
-        ...ball, 
-        x: newX, 
-        y: newY, 
-        vx: newVx, 
-        vy: newVy,
-        rotation: ball.rotation + ball.vx * 0.5
-      };
-    }));
-    requestRef.current = requestAnimationFrame(animateBalls);
+        return { ...ball, x: nx, y: ny, vx: nvx, vy: nvy };
+      }));
+    }
+    lastTimeRef.current = time;
+    requestRef.current = requestAnimationFrame(animate);
   };
 
   useEffect(() => {
-    if (isAnimating) requestRef.current = requestAnimationFrame(animateBalls);
+    if (isAnimating) requestRef.current = requestAnimationFrame(animate);
     else if (requestRef.current) cancelAnimationFrame(requestRef.current);
     return () => { if (requestRef.current) cancelAnimationFrame(requestRef.current); };
   }, [isAnimating]);
 
   const handleStartGrouping = async () => {
-    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
     if (list.length < numGroups) {
       alert(t('home.groupMaker.errorLow'));
       return;
@@ -98,51 +95,48 @@ export const GroupMakerApp: React.FC = () => {
 
     setIsAnimating(true);
     setGroups([]);
+    setSelectedGroup(null);
     
-    const shuffledBalls = [...balls].sort(() => Math.random() - 0.5);
+    const shuffledNames = [...list].sort(() => Math.random() - 0.5);
     const newGroups: Group[] = Array.from({ length: numGroups }, (_, i) => ({
       id: i + 1,
       name: `${t('home.groupMaker.groupNamePrefix')}${i + 1}${t('home.groupMaker.groupNameSuffix')}`,
       members: []
     }));
 
-    // Start grouping sequence
-    for (let i = 0; i < shuffledBalls.length; i++) {
-      const target = shuffledBalls[i];
+    for (let i = 0; i < shuffledNames.length; i++) {
+      const name = shuffledNames[i];
       const gid = i % numGroups;
 
-      // 1. Drop claw
-      setClawState({ height: 280, isGrabbing: false });
+      // Claw Sequence
+      setClawState({ height: 260, isGrabbing: false });
       await new Promise(r => setTimeout(r, 400));
       
-      // 2. Grab
-      setClawState({ height: 280, isGrabbing: true });
-      setCurrentPickingName(target.name);
-      setBalls(prev => prev.map(b => b.name === target.name ? { ...b, isPicked: true } : b));
+      setClawState({ height: 260, isGrabbing: true });
+      setCurrentPickingName(name);
+      setBalls(prev => prev.map(b => b.name === name ? { ...b, isPicked: true } : b));
       await new Promise(r => setTimeout(r, 300));
 
-      // 3. Lift claw
       setClawState({ height: 40, isGrabbing: true });
       await new Promise(r => setTimeout(r, 400));
 
-      // 4. Deliver
-      newGroups[gid].members.push(target.name);
+      newGroups[gid].members.push(name);
       setGroups([...newGroups]);
       setCurrentPickingName(null);
       setClawState({ height: 40, isGrabbing: false });
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 50));
     }
     setIsAnimating(false);
   };
 
   return (
     <div className="group-maker-app">
-      <button onClick={() => navigate('/')} className="fixed top-8 left-8 z-[1001] p-5 rounded-full bg-white border-8 border-orange-500 text-orange-600 shadow-2xl hover:scale-110 active:scale-90 transition-all">
-        <ArrowLeft size={35} strokeWidth={4} />
+      <button onClick={() => navigate('/')} className="fixed top-8 left-8 z-[100] p-4 rounded-full bg-white border-4 border-blue-400 text-blue-500 shadow-xl hover:scale-110 active:scale-95 transition-all">
+        <ArrowLeft size={28} strokeWidth={3} />
       </button>
 
       <div className="group-maker-container">
-        {/* Panel 1: Registry */}
+        {/* Left: Input */}
         <div className="factory-panel left-panel">
           <div className="panel-header">📝 {t('home.groupMaker.inputTitle')}</div>
           <div className="input-content">
@@ -152,51 +146,46 @@ export const GroupMakerApp: React.FC = () => {
               onChange={(e) => setNames(e.target.value)}
               disabled={isAnimating}
             />
-            <button onClick={() => setNames("")} className="start-btn" style={{ fontSize: '1.2rem', padding: '15px', background: '#e67e22', boxShadow: '0 6px 0 #d35400' }}>
-              <Trash2 size={20} className="inline mr-2" />
-              {t('home.groupMaker.clearBtn')}
+            <button onClick={() => setNames("")} className="start-btn" style={{ fontSize: '1rem', padding: '10px' }}>
+               {t('home.groupMaker.clearBtn')}
             </button>
           </div>
         </div>
 
-        {/* Panel 2: Arcade Machine */}
+        {/* Middle: Optimized Animation */}
         <div className="factory-panel middle-panel">
           <div className="panel-header">🕹️ {t('home.groupMaker.actionTitle')}</div>
           <div className="machine-cabinet">
             {/* The Claw */}
-            <div className={`claw-container ${clawState.isGrabbing ? 'grabbing' : ''}`} style={{ top: 0 }}>
+            <div className={`claw-container ${clawState.isGrabbing ? 'grabbing' : ''}`}>
               <div className="claw-cable" style={{ height: clawState.height }}></div>
               <div className="claw-head">
-                <div className="claw-hand">
-                  <div className="claw-finger left"></div>
-                  <div className="claw-finger right"></div>
-                </div>
+                <div className="claw-finger left"></div>
+                <div className="claw-finger right"></div>
                 {currentPickingName && (
-                  <div className="alien-ball picked-ball" style={{ background: '#f1c40f', border: '4px solid #fff' }}>
+                  <div className="alien-ball" style={{ position: 'absolute', bottom: '-45px', left: '-5px', background: '#f1c40f', width: '60px', height: '60px' }}>
                     {currentPickingName.slice(0, 4)}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Balloon Balls */}
+            {/* Balls using transform for performance */}
             {balls.map((ball, i) => !ball.isPicked && (
               <div key={i} className="alien-ball" style={{ 
-                left: ball.x, 
-                top: ball.y, 
                 background: ball.color,
-                transform: `rotate(${ball.rotation}deg)` 
+                transform: `translate3d(${ball.x}px, ${ball.y}px, 0)` 
               }}>
-                {ball.name.slice(0, 3)}
+                {ball.name.slice(0, 2)}
               </div>
             ))}
           </div>
           
           <div className="machine-controls">
-            <div className="control-item">
-              <span className="font-black text-white text-xl">{t('home.groupMaker.groupCount')}</span>
+            <div className="flex justify-between items-center bg-white/20 p-3 rounded-2xl">
+              <span className="font-bold text-white">{t('home.groupMaker.groupCount')}</span>
               <input 
-                type="number" className="w-24 p-2 rounded-2xl border-none text-center font-black text-blue-600 text-2xl outline-none"
+                type="number" className="w-16 p-1 rounded-lg text-center font-bold text-blue-800"
                 value={numGroups} onChange={(e) => setNumGroups(parseInt(e.target.value) || 2)}
                 disabled={isAnimating}
               />
@@ -207,65 +196,57 @@ export const GroupMakerApp: React.FC = () => {
           </div>
         </div>
 
-        {/* Panel 3: Results */}
+        {/* Right: Fixed Layout Results/Details */}
         <div className="factory-panel right-panel">
-          <div className="panel-header">
-             <span>📦 {t('home.groupMaker.results')}</span>
-             {groups.length > 0 && (
-              <button onClick={() => {
-                const text = groups.map(g => `${g.name}: ${g.members.join(", ")}`).join("\n");
-                const blob = new Blob([text], {type: 'text/plain'});
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'groups.txt';
-                link.click();
-              }} className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white">
-                <Download size={24} strokeWidth={3} />
-              </button>
-            )}
-          </div>
-          <div className="results-content">
-            {groups.length > 0 ? (
-              <div className="groups-grid">
-                {groups.map(group => (
-                  <div key={group.id} className="group-card" onClick={() => setSelectedGroup(group)}>
-                    <div className="group-badge">{group.members.length}</div>
-                    <div className="group-icon">🎒</div>
-                    <div className="group-name">{group.name}</div>
+          <div className="panel-header">📦 {t('home.groupMaker.results')}</div>
+          <div className="delivery-station">
+            {!selectedGroup ? (
+              <div className="results-scroll-area">
+                {groups.length > 0 ? (
+                  <div className="groups-grid">
+                    {groups.map(group => (
+                      <div key={group.id} className="group-pod" onClick={() => setSelectedGroup(group)}>
+                        <div className="pod-badge">{group.members.length}</div>
+                        <span style={{fontSize: '2rem'}}>📦</span>
+                        <div className="card-name" style={{fontSize: '0.9rem'}}>{group.name}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4">
+                    <LayoutGrid size={80} strokeWidth={2} />
+                    <p className="font-bold text-center px-4">{t('home.groupMaker.waitingMsg')}</p>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4">
-                <LayoutGrid size={100} strokeWidth={3} />
-                <p className="font-black italic text-2xl text-center px-6">{t('home.groupMaker.waitingMsg')}</p>
+              <div className="detail-view">
+                <div className="detail-header">
+                  <button className="back-btn" onClick={() => setSelectedGroup(null)}>
+                    <ChevronLeft size={20} className="inline mr-1" />返回
+                  </button>
+                  <span className="font-black text-green-700">{selectedGroup.name} ({selectedGroup.members.length})</span>
+                </div>
+                <div className="member-list-fixed">
+                  {selectedGroup.members.map((member, idx) => (
+                    <div key={idx} className="member-card">{member}</div>
+                  ))}
+                </div>
+                <div className="p-4 border-t">
+                   <button onClick={() => {
+                      const text = `${selectedGroup.name}:\n${selectedGroup.members.join("\n")}`;
+                      const blob = new Blob([text], {type: 'text/plain'});
+                      const link = document.createElement('a');
+                      link.href = URL.createObjectURL(blob);
+                      link.download = `${selectedGroup.name}.txt`;
+                      link.click();
+                   }} className="w-full p-2 bg-blue-500 text-white rounded-xl font-bold">导出本组</button>
+                </div>
               </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Detail Modal */}
-      {selectedGroup && (
-        <div className="modal-overlay" onClick={() => setSelectedGroup(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedGroup(null)}>
-              <X size={35} strokeWidth={4} />
-            </button>
-            <div className="text-center mb-8">
-              <h2 className="text-5xl font-black text-orange-600 mb-2">{selectedGroup.name}</h2>
-              <p className="text-2xl font-bold text-gray-500">{selectedGroup.members.length} {t('home.groupMaker.members')}</p>
-            </div>
-            <div className="flex flex-wrap justify-center bg-orange-50 p-6 rounded-[40px] border-4 border-dashed border-orange-200">
-              {selectedGroup.members.map((member, idx) => (
-                <div key={idx} className="member-tag">
-                  {member}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

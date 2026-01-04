@@ -212,17 +212,17 @@ export const GroupMakerApp: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. 结果展示墙 (关键：卡片拉伸填满) */}
+        {/* 右：结果区 (无缝网格) */}
         <div className="factory-panel right-panel">
           <div className="panel-header">📦 {t('home.groupMaker.results')}</div>
           <div className="delivery-station">
             <div className="results-scroll-area">
               <div className="groups-grid">
                 {groups.map(group => (
-                  <div key={group.id} className="group-capsule" onClick={() => setSelectedGroup(group)}>
-                    <div className="capsule-badge">{group.members.length}</div>
-                    <div className="capsule-icon">🗳️</div>
-                    <div className="capsule-name">{group.name}</div>
+                  <div key={group.id} className="group-tile" onClick={() => setSelectedGroup(group)}>
+                    <div className="tile-icon">🗳️</div>
+                    <div className="tile-name">{group.name}</div>
+                    <div className="tile-count">{group.members.length}人</div>
                   </div>
                 ))}
               </div>
@@ -230,15 +230,14 @@ export const GroupMakerApp: React.FC = () => {
             {selectedGroup && (
               <div className="fixed-detail-view">
                 <div className="detail-nav">
-                  <button className="arcade-back-btn" onClick={() => setSelectedGroup(null)}><ChevronLeft size={35} strokeWidth={4} /> 返回</button>
-                  <div className="text-right">
-                    <span className="font-black text-3xl block">{selectedGroup.name}</span>
-                    <span className="text-xl font-bold bg-white/20 px-4 py-1 rounded-full">{selectedGroup.members.length}人</span>
-                  </div>
+                  <button className="arcade-back-btn" onClick={() => setSelectedGroup(null)}>
+                    <ChevronLeft size={20} strokeWidth={3} className="inline"/> 返回
+                  </button>
+                  <div className="font-bold text-xl">{selectedGroup.name} ({selectedGroup.members.length}人)</div>
                 </div>
                 <div className="member-scroll-list">
                   {selectedGroup.members.map((member, idx) => (
-                    <div key={idx} className="member-capsule">{member}</div>
+                    <div key={idx} className="member-tile">{member}</div>
                   ))}
                 </div>
                 <div className="detail-actions">
@@ -249,7 +248,7 @@ export const GroupMakerApp: React.FC = () => {
                       link.href = URL.createObjectURL(blob);
                       link.download = `${selectedGroup.name}.txt`;
                       link.click();
-                   }} className="start-btn-arcade" style={{fontSize: '1.8rem'}}>导出 TXT 名单</button>
+                   }} className="start-btn-arcade" style={{ fontSize: '1.2rem', padding: '10px' }}>导出本组名单</button>
                 </div>
               </div>
             )}

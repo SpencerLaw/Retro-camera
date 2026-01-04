@@ -87,6 +87,7 @@ export const GroupMakerApp: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations();
   const cabinetRef = useRef<HTMLDivElement>(null);
+  const ballsRef = useRef<BallData[]>([]); 
   const [names, setNames] = useState<string>("");
   const [numGroups, setNumGroups] = useState<number>(2);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -94,7 +95,7 @@ export const GroupMakerApp: React.FC = () => {
   const [balls, setBalls] = useState<BallData[]>([]);
   const [currentPicking, setCurrentPicking] = useState<{name: string, color: string} | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [clawState, setClawState] = useState({ height: 40, x: 50, isGrabbing: false, shake: 0 }); // Added x in %
+  const [clawState, setClawState] = useState({ height: 40, x: 50, isGrabbing: false, shake: 0 });
   const requestRef = useRef<number>();
 
   const studentCount = useMemo(() => {
@@ -110,16 +111,18 @@ export const GroupMakerApp: React.FC = () => {
       const width = cabinetRef.current?.clientWidth || window.innerWidth * 0.6;
       const height = cabinetRef.current?.clientHeight || 600;
       
-      setBalls(list.map((name, i) => ({
+      const newBalls = list.map((name, i) => ({
         name,
         x: Math.random() * (width - 150) + 75,
         y: height - 120 - (Math.random() * 50),
-        vx: (Math.random() - 0.5) * 8,
-        vy: (Math.random() - 0.5) * 8,
+        vx: (Math.random() - 0.5) * 10,
+        vy: (Math.random() - 0.5) * 10,
         color: colors[i % colors.length],
         isPicked: false,
         angle: Math.random() * 360
-      })));
+      }));
+      setBalls(newBalls);
+      ballsRef.current = newBalls;
     }
   }, [names, isAnimating]);
 
@@ -128,26 +131,25 @@ export const GroupMakerApp: React.FC = () => {
     const width = cabinetRef.current.clientWidth;
     const height = cabinetRef.current.clientHeight;
 
-    setBalls(prev => prev.map(ball => {
+    const nextBalls = ballsRef.current.map(ball => {
       if (ball.isPicked) return ball;
       let nx = ball.x + ball.vx;
       let ny = ball.y + ball.vy;
       let nvx = ball.vx;
       let nvy = ball.vy;
 
-      // Robust Clamping Boundaries
       if (nx < 60) { nx = 60; nvx = Math.abs(nvx) * 0.8; }
       else if (nx > width - 60) { nx = width - 60; nvx = -Math.abs(nvx) * 0.8; }
       
       if (ny < 60) { ny = 60; nvy = Math.abs(nvy) * 0.8; }
       else if (ny > height - 100) { ny = height - 100; nvy = -Math.abs(nvy) * 0.8; }
 
-      // Gravity and random jitter
-      nvy += 0.1;
-      nvx += (Math.random() - 0.5) * 0.2;
-
+      nvy += 0.15;
       return { ...ball, x: nx, y: ny, vx: nvx, vy: nvy, angle: ball.angle + nvx * 2 };
-    }));
+    });
+
+    ballsRef.current = nextBalls;
+    setBalls(nextBalls);
     requestRef.current = requestAnimationFrame(animate);
   };
 
@@ -188,18 +190,12 @@ export const GroupMakerApp: React.FC = () => {
       const name = shuffledNames[i];
       const color = colors[list.indexOf(name) % colors.length];
       
-      // Find the ball to "track" it visually
-      let targetBall: BallData | undefined;
-      setBalls(currentBalls => {
-        targetBall = currentBalls.find(b => b.name === name);
-        return currentBalls;
-      });
-
+      const targetBall = ballsRef.current.find(b => b.name === name);
       const cabinetWidth = cabinetRef.current?.clientWidth || 800;
       const targetXPercent = targetBall ? (targetBall.x / cabinetWidth) * 100 : 50;
-      const targetHeight = targetBall ? targetBall.y - 100 : 450;
+      const targetHeight = targetBall ? targetBall.y - 110 : 450;
 
-      // 1. Move claw horizontally to ball
+      // 1. Move claw horizontally
       setClawState(prev => ({ ...prev, x: targetXPercent, height: 40, isGrabbing: false }));
       await new Promise(r => setTimeout(r, 800));
 
@@ -210,10 +206,11 @@ export const GroupMakerApp: React.FC = () => {
       // 3. Grab Action
       setClawState(prev => ({ ...prev, isGrabbing: true, shake: 5 }));
       setCurrentPicking({ name, color });
-      setBalls(prev => prev.map(b => b.name === name ? { ...b, isPicked: true } : b));
+      ballsRef.current = ballsRef.current.map(b => b.name === name ? { ...b, isPicked: true } : b);
+      setBalls([...ballsRef.current]);
       await new Promise(r => setTimeout(r, 500));
 
-      // 4. Lift & Move back to center
+      // 4. Lift & Center
       setClawState(prev => ({ ...prev, height: 40, x: 50, shake: 2 }));
       await new Promise(r => setTimeout(r, 1000));
 

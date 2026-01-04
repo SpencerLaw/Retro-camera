@@ -7,13 +7,7 @@
   box-sizing: border-box;
 }
 
-body, html {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  font-family: 'ZCOOL KuaiLe', cursive;
-  background: #A4EBF3; /* Sky Blue */
-}
+/* body, html styles removed to prevent global side effects */
 
 .group-maker-app {
   width: 100vw;
@@ -24,6 +18,14 @@ body, html {
     radial-gradient(circle at 10% 20%, white 10%, transparent 20%),
     radial-gradient(circle at 90% 10%, white 15%, transparent 25%);
   background-size: 100% 100%;
+  
+  /* Ensure it covers the screen only when this component is mounted */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50; /* High z-index to sit on top of everything */
+  overflow: hidden; /* Prevent scrolling within this "app" view */
+  font-family: 'ZCOOL KuaiLe', cursive;
 }
 
 .group-maker-container {

@@ -196,6 +196,16 @@ export const GroupMakerApp: React.FC = () => {
     setIsAnimating(false);
   };
 
+  const handleDownloadAll = () => {
+    if (groups.length === 0) return;
+    const textContent = groups.map(g => `${g.name} (${g.members.length}人):\n${g.members.join(', ')}`).join('\n\n');
+    const blob = new Blob([textContent], {type: 'text/plain'});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `分组结果_${new Date().toLocaleTimeString()}.txt`;
+    link.click();
+  };
+
   return (
     <div className="group-maker-app">
       <div className="group-maker-container">
@@ -249,6 +259,13 @@ export const GroupMakerApp: React.FC = () => {
                 ))}
               </div>
             </div>
+            {groups.length > 0 && (
+              <div className="p-4 bg-white border-t-4 border-yellow-200">
+                <button onClick={handleDownloadAll} className="w-full py-3 bg-yellow-400 text-white rounded-xl font-black text-xl shadow-md hover:bg-yellow-500 active:translate-y-1 transition-all">
+                  📥 下载全部
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -30,7 +30,7 @@
 
 .group-maker-container {
   display: grid;
-  grid-template-columns: 280px 450px 1fr; /* Fixed width for input and machine, rest for results */
+  grid-template-columns: 33.33% 33.33% 33.33%; /* Equal thirds */
   width: 100vw;
   height: 100vh;
   gap: 15px;
@@ -241,7 +241,15 @@ textarea {
   border-radius: 4px;
 }
 
-.claw-svg-wrapper { width: 220px; height: 220px; margin-top: -30px; }
+.picked-ball-in-claw {
+  position: absolute !important;
+  top: 130px !important; /* Center of the claw arms */
+  left: 50% !important;
+  transform: translateX(-50%) scale(0.7) !important;
+  z-index: 40;
+}
+
+.claw-svg-wrapper { width: 220px; height: 220px; margin-top: -30px; position: relative; }
 
 .alien-ball {
   position: absolute;

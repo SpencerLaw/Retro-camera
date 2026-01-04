@@ -22,66 +22,60 @@ interface BallData {
 }
 
 const ClawSVG: React.FC<{ isGrabbing: boolean; pickedBallName: string | null; ballColor?: string }> = ({ isGrabbing, pickedBallName, ballColor }) => {
-  const rotation = isGrabbing ? 10 : 35;
+  const rotation = isGrabbing ? 8 : 32; // Tighter grab
   return (
     <div className="relative">
       <div className="claw-svg-wrapper">
         <svg width="100%" height="100%" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="plasticBody" cx="30%" cy="30%" r="80%">
-              <stop offset="0%" stopColor="#FFB7C5" stopOpacity="1" /> {/* Piggy Pink */}
-              <stop offset="100%" stopColor="#FF69B4" stopOpacity="1" />
+            <radialGradient id="toyBody" cx="30%" cy="30%" r="80%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+              <stop offset="40%" stopColor="#FFB7C5" stopOpacity="1" />
+              <stop offset="100%" stopColor="#FF85A1" stopOpacity="1" />
             </radialGradient>
-            <radialGradient id="glowBlue" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#E0F7FA" stopOpacity="1" />
+            <radialGradient id="toyJoint" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
               <stop offset="100%" stopColor="#4ECDC4" stopOpacity="1" />
             </radialGradient>
-            <linearGradient id="softPad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#FFF" stopOpacity="1" />
-              <stop offset="100%" stopColor="#FFE0E0" stopOpacity="1" />
-            </linearGradient>
-            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-              <feOffset dx="0" dy="5" result="offsetblur"/>
-              <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+            <filter id="toyGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+              <feOffset dx="0" dy="4" result="offsetblur"/>
+              <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
               <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
-          <g transform="translate(200, 180)" filter="url(#softShadow)">
-            {/* Cable */}
-            <path d="M-10,-180 Q-15,-140 -10,-100 Q-15,-60 -10,-20 L10,-20 Q15,-60 10,-100 Q15,-140 10,-180" fill="none" stroke="#FF6B6B" strokeWidth="12" strokeLinecap="round"/>
-            
-            {/* Claw Body Base */}
-            <g transform="translate(0, -20) scale(0.9)"><path d="M-20,0 Q-30,40 0,70 Q30,40 20,0 Z" fill="url(#plasticBody)"/></g>
-            <circle cx="0" cy="0" r="45" fill="url(#plasticBody)"/>
-            <circle cx="0" cy="0" r="25" fill="#FFF"/>
-            <circle cx="0" cy="0" r="18" fill="url(#glowBlue)"/>
-            
-            {/* Left Claw Arm */}
-            <g transform={`rotate(${rotation})`}>
-                <g transform="translate(-45, 20) rotate(15)">
-                    <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)" stroke="white" strokeWidth="3"/>
-                    <ellipse cx="-15" cy="65" rx="10" ry="14" fill="url(#softPad)" transform="rotate(-10)"/>
-                    <path d="M-15,10 Q-30,30 -20,60" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.6"/>
-                </g>
-            </g>
-            
-            {/* Right Claw Arm (Mirrored) */}
-            <g transform={`scale(-1, 1) rotate(${rotation})`}>
-                <g transform="translate(-45, 20) rotate(15)">
-                    <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)" stroke="white" strokeWidth="3"/>
-                    <ellipse cx="-15" cy="65" rx="10" ry="14" fill="url(#softPad)" transform="rotate(-10)"/>
-                    <path d="M-15,10 Q-30,30 -20,60" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.6"/>
-                </g>
-            </g>
+          
+          <g transform="translate(200, 180)" filter="url(#toyGlow)">
+            {/* Main Joint Shell */}
+            <circle cx="0" cy="0" r="48" fill="url(#toyBody)" stroke="white" strokeWidth="4"/>
+            <circle cx="0" cy="0" r="28" fill="url(#toyJoint)"/>
+            <circle cx="0" cy="0" r="15" fill="white" opacity="0.6"/>
 
-            {/* Hinge Detail */}
-            <path d="M-30,-30 Q-10,-50 20,-40" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.7"/>
+            {/* Arms */}
+            {[0, 120, 240].map((angle) => (
+              <g key={angle} transform={`rotate(${angle})`}>
+                <g transform={`rotate(${rotation})`}>
+                   <g transform="translate(-15, 30)">
+                      <path 
+                        d="M0,0 Q-30,20 -25,80 Q-20,110 15,100 Q40,90 20,40 Z" 
+                        fill="url(#toyBody)" 
+                        stroke="white" 
+                        strokeWidth="3"
+                      />
+                      {/* Rubber Grip Pad */}
+                      <path d="M-10,85 Q0,95 10,85" fill="none" stroke="#FF6B6B" strokeWidth="6" strokeLinecap="round" opacity="0.8"/>
+                   </g>
+                </g>
+              </g>
+            ))}
+
+            {/* Highlights */}
+            <ellipse cx="-15" cy="-15" rx="10" ry="6" fill="white" opacity="0.4" transform="rotate(-45)"/>
           </g>
         </svg>
       </div>
       {pickedBallName && (
-        <div className="alien-ball picked-ball-in-claw" style={{ background: ballColor || '#f1c40f', transform: 'scale(0.8)' }}>
+        <div className="alien-ball picked-ball-in-claw" style={{ background: ballColor || '#f1c40f' }}>
           {pickedBallName.slice(0, 4)}
         </div>
       )}

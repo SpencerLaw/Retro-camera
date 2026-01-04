@@ -126,10 +126,10 @@ export const GroupMakerApp: React.FC = () => {
     if (!isAnimating) {
       setBalls(list.map((name, i) => ({
         name,
-        x: Math.random() * 250 + 20,
-        y: Math.random() * 200 + 80,
-        vx: (Math.random() - 0.5) * 4,
-        vy: (Math.random() - 0.5) * 4,
+        x: Math.random() * 260 + 40,
+        y: Math.random() * 180 + 100,
+        vx: (Math.random() - 0.5) * 5,
+        vy: (Math.random() - 0.5) * 5,
         color: colors[i % colors.length],
         isPicked: false,
         angle: Math.random() * 360
@@ -147,17 +147,17 @@ export const GroupMakerApp: React.FC = () => {
       let nvx = ball.vx;
       let nvy = ball.vy;
 
-      // Realistic bounce with balloon gravity
-      if (nx < 10 || nx > 260) nvx *= -0.85;
-      if (ny < 40 || ny > 300) nvy *= -0.85;
+      // Realistic bounce with balloon gravity (adjusted for larger machine)
+      if (nx < 10 || nx > 280) nvx *= -0.85;
+      if (ny < 40 || ny > 320) nvy *= -0.85;
       
       // Balloon lift
-      nvy -= 0.05; 
-      if (ny < 80) nvy += 0.15;
+      nvy -= 0.06; 
+      if (ny < 100) nvy += 0.18;
 
       // Add slight random jitter
-      nvx += (Math.random() - 0.5) * 0.1;
-      nvy += (Math.random() - 0.5) * 0.1;
+      nvx += (Math.random() - 0.5) * 0.15;
+      nvy += (Math.random() - 0.5) * 0.15;
 
       return { 
         ...ball, 
@@ -165,7 +165,7 @@ export const GroupMakerApp: React.FC = () => {
         y: ny, 
         vx: nvx, 
         vy: nvy, 
-        angle: ball.angle + nvx * 2 
+        angle: ball.angle + nvx * 2.5 
       };
     }));
     requestRef.current = requestAnimationFrame(animate);
@@ -287,7 +287,8 @@ export const GroupMakerApp: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Fixed Layout Results */}        <div className="factory-panel right-panel">
+        {/* Right: Fixed Layout Results */}
+        <div className="factory-panel right-panel">
           <div className="panel-header">📦 {t('home.groupMaker.results')}</div>
           <div className="delivery-station">
             <div className="results-scroll-area">

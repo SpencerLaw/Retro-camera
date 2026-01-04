@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Varela+Round&display=swap');
 
-/* --- 基础布局保持锁定 --- */
+/* --- 全局布局 --- */
 .group-maker-app {
   font-family: 'Varela Round', 'Fredoka', sans-serif;
   height: 100vh;
@@ -15,7 +15,7 @@
   align-items: center;
   padding: 15px;
   box-sizing: border-box;
-  overflow: hidden; /* 禁止全屏滚动 */
+  overflow: hidden;
 }
 
 .group-maker-container {
@@ -23,7 +23,7 @@
   grid-template-columns: 320px 1fr 420px;
   width: 100%;
   max-width: 1650px;
-  height: 92vh; /* 严格限制高度 */
+  height: 92vh;
   gap: 20px;
   background: #f1c40f;
   border-radius: 50px;
@@ -33,15 +33,15 @@
   box-sizing: border-box;
 }
 
-/* --- 面板通用控制 --- */
+/* --- 面板样式 --- */
 .factory-panel {
   background: #ecf0f1;
   border-radius: 35px;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* 面板内部也要限制溢出 */
+  overflow: hidden;
   border: 4px solid #bdc3c7;
-  height: 100%; /* 填满 Grid 容器高度 */
+  height: 100%;
 }
 
 .panel-header {
@@ -66,7 +66,7 @@
   font-size: 0.85rem;
 }
 
-/* --- 左侧面板：名单输入 --- */
+/* --- 左侧面板 --- */
 .left-panel .panel-header { background: #e67e22; }
 .input-content { 
   flex: 1; 
@@ -74,7 +74,7 @@
   display: flex; 
   flex-direction: column; 
   gap: 12px;
-  height: 0; /* 触发 flex 内部滚动 */
+  height: 0;
   min-height: 0;
 }
 textarea { 
@@ -86,10 +86,9 @@ textarea {
   resize: none; 
   outline: none;
   font-size: 1rem;
-  box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
 }
 
-/* --- 中间面板：动画区 --- */
+/* --- 中间面板 (机器) --- */
 .middle-panel { background: #2c3e50; border-color: #3498db; }
 .machine-cabinet {
   flex: 1;
@@ -101,15 +100,31 @@ textarea {
   overflow: hidden;
 }
 
-/* 优化后的爪子与球体样式 */
-.claw-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 50; will-change: transform; display: flex; flex-direction: column; align-items: center; }
-.claw-cable { width: 4px; background: #bdc3c7; }
-.claw-head { width: 50px; height: 30px; background: #bdc3c7; border-radius: 5px; border: 2px solid #7f8c8d; position: relative; }
-.claw-finger { position: absolute; bottom: -20px; width: 12px; height: 28px; background: #bdc3c7; border: 2px solid #7f8c8d; transition: transform 0.2s; }
-.claw-finger.left { left: 6px; transform: rotate(30deg); transform-origin: top; }
-.claw-finger.right { right: 6px; transform: rotate(-30deg); transform-origin: top; }
-.grabbing .claw-finger.left { transform: rotate(-5deg); }
-.grabbing .claw-finger.right { transform: rotate(5deg); }
+/* 爪子容器 (SVG版) */
+.claw-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+}
+
+.claw-cable {
+  width: 6px;
+  background: #78909c;
+  background-image: linear-gradient(90deg, transparent 2px, rgba(255,255,255,0.3) 3px, transparent 4px);
+}
+
+.claw-svg-head {
+  width: 140px;
+  height: 140px;
+  margin-top: -10px; /* 稍微向上抵住线 */
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+}
 
 .alien-ball {
   position: absolute;
@@ -125,7 +140,18 @@ textarea {
   will-change: transform;
 }
 
-/* --- 右侧面板：结果与固定详情 (核心修改) --- */
+/* 抓取中的球位置微调 */
+.picked-ball-in-claw {
+  position: absolute;
+  top: 65px; /* 放在爪子手心位置 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55px;
+  height: 55px;
+  z-index: 45; /* 在爪子主体的后面一点，营造包裹感 */
+}
+
+/* --- 右侧面板 --- */
 .right-panel { border-color: #2ecc71; background: #f8f9fa; }
 .right-panel .panel-header { background: #2ecc71; }
 
@@ -133,15 +159,15 @@ textarea {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 0; /* 强制锁定高度，关键！ */
+  height: 0;
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
 
-/* 列表滚动区 */
 .results-scroll-area {
   flex: 1;
-  overflow-y: auto !important; /* 强制溢出显示滚动条 */
+  overflow-y: auto !important;
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -154,7 +180,42 @@ textarea {
   padding-bottom: 20px;
 }
 
-/* --- 详情视图：必须完全固定且带滚动条 --- */
+.group-pod {
+  background: white;
+  border: 4px solid #2ecc71;
+  border-radius: 20px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #27ae60;
+  transition: all 0.1s;
+  aspect-ratio: 1;
+  position: relative;
+}
+.group-pod:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #27ae60; }
+.group-pod:active { transform: translateY(3px); box-shadow: 0 3px 0 #27ae60; }
+
+.pod-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #e74c3c;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 900;
+  border: 2px solid white;
+}
+
+/* 详情视图 */
 .detail-view {
   position: absolute;
   top: 0;
@@ -177,7 +238,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0; /* 头部不缩放 */
+  flex-shrink: 0;
 }
 
 .back-btn {
@@ -193,10 +254,9 @@ textarea {
   gap: 4px;
 }
 
-/* 详情名单滚动区：这是最关键的固定部分 */
 .member-list-fixed {
   flex: 1;
-  overflow-y: auto !important; /* 必须溢出显示滚动条 */
+  overflow-y: auto !important;
   padding: 20px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -224,14 +284,13 @@ textarea {
   flex-shrink: 0;
 }
 
-/* --- 滚动条全局美化 --- */
+/* 滚动条美化 */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; border: 2px solid #f1f1f1; }
 .results-scroll-area::-webkit-scrollbar-thumb, 
 .member-list-fixed::-webkit-scrollbar-thumb { background: #2ecc71; }
 
-/* 其他控件 */
 .machine-controls { padding: 15px; background: #3498db; display: flex; flex-direction: column; gap: 10px; }
 .start-btn { padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 20px; font-weight: 900; font-size: 1.4rem; cursor: pointer; box-shadow: 0 6px 0 #c0392b; }
 .start-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #c0392b; }

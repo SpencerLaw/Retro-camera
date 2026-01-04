@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, LayoutGrid, Trash2, ChevronLeft, Users } from 'lucide-react';
+import { ArrowLeft, Download, LayoutGrid, Trash2, ChevronLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import './GroupMakerStyles.css';
 
@@ -20,6 +20,82 @@ interface BallData {
   isPicked: boolean;
 }
 
+const ClawSVG: React.FC<{ isGrabbing: boolean; pickedBallName: string | null }> = ({ isGrabbing, pickedBallName }) => {
+  const rotation = isGrabbing ? 10 : 30;
+  
+  return (
+    <div className="relative">
+      <svg width="140" height="140" viewBox="0 0 400 350" xmlns="http://www.w3.org/2000/svg" className="claw-svg-head">
+        <defs>
+          <radialGradient id="plasticBody" cx="30%" cy="30%" r="80%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+            <stop offset="60%" stopColor="#e6efff" stopOpacity="1" />
+            <stop offset="100%" stopColor="#b0c4de" stopOpacity="1" />
+          </radialGradient>
+          <radialGradient id="glowBlue" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#a2f5ff" stopOpacity="1" />
+            <stop offset="60%" stopColor="#40c4ff" stopOpacity="1" />
+            <stop offset="100%" stopColor="#0091ea" stopOpacity="1" />
+          </radialGradient>
+          <linearGradient id="softPad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#ffcc80" stopOpacity="1" />
+            <stop offset="100%" stopColor="#ff9800" stopOpacity="1" />
+          </linearGradient>
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+            <feOffset dx="0" dy="5" result="offsetblur"/>
+            <feComponentTransfer>
+               <feFuncA type="linear" slope="0.2"/>
+            </feComponentTransfer>
+            <feMerge> 
+              <feMergeNode/>
+              <feMergeNode in="SourceGraphic"/> 
+            </feMerge>
+          </filter>
+        </defs>
+
+        <g transform="translate(200, 80)" filter="url(#softShadow)">
+          {/* 后方爪子 */}
+          <g transform="translate(0, -20) scale(0.8)">
+             <path d="M-20,0 Q-30,40 0,70 Q30,40 20,0 Z" fill="url(#plasticBody)"/>
+          </g>
+
+          {/* 中央核心 */}
+          <circle cx="0" cy="0" r="50" fill="url(#plasticBody)"/>
+          <circle cx="0" cy="0" r="30" fill="#29b6f6"/>
+          <circle cx="0" cy="0" r="24" fill="url(#glowBlue)"/>
+          <ellipse cx="-10" cy="-10" rx="6" ry="4" fill="white" opacity="0.8" transform="rotate(-45)"/>
+
+          {/* 左爪子 */}
+          <g transform={`rotate(${rotation})`}>
+              <g transform="translate(-45, 20) rotate(15)">
+                  <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)"/>
+                  <ellipse cx="-15" cy="65" rx="10" ry="14" fill="url(#softPad)" transform="rotate(-10)"/>
+                  <path d="M-15,10 Q-30,30 -20,60" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.6"/>
+              </g>
+          </g>
+
+          {/* 右爪子 */}
+          <g transform={`scale(-1, 1) rotate(${rotation})`}>
+              <g transform="translate(-45, 20) rotate(15)">
+                  <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)"/>
+                  <ellipse cx="-15" cy="65" rx="10" ry="14" fill="url(#softPad)" transform="rotate(-10)"/>
+                  <path d="M-15,10 Q-30,30 -20,60" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.6"/>
+              </g>
+          </g>
+
+          <path d="M-30,-30 Q-10,-50 20,-40" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.7"/>
+        </g>
+      </svg>
+      {pickedBallName && (
+        <div className="alien-ball picked-ball-in-claw" style={{ background: '#f1c40f' }}>
+          {pickedBallName.slice(0, 4)}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const GroupMakerApp: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations();
@@ -33,18 +109,17 @@ export const GroupMakerApp: React.FC = () => {
   const [clawState, setClawState] = useState({ height: 40, isGrabbing: false });
   
   const requestRef = useRef<number>();
-  const lastTimeRef = useRef<number>(0);
 
-  // 计算实时人数
   const studentCount = useMemo(() => {
-    return names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "").length;
+    return names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "").length;
   }, [names]);
 
   const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22', '#1abc9c', '#fd79a8'];
 
-  // 初始化气球
   useEffect(() => {
-    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
     if (!isAnimating) {
       setBalls(list.map((name, i) => ({
         name,
@@ -58,24 +133,17 @@ export const GroupMakerApp: React.FC = () => {
     }
   }, [names, isAnimating]);
 
-  // 高性能动画帧
-  const animate = (time: number) => {
+  const animate = () => {
     setBalls(prev => prev.map(ball => {
       if (ball.isPicked) return ball;
-      
       let nx = ball.x + ball.vx;
       let ny = ball.y + ball.vy;
       let nvx = ball.vx;
       let nvy = ball.vy;
-
-      // 边缘碰撞逻辑
       if (nx < 10 || nx > 240) nvx *= -0.9;
       if (ny < 30 || ny > 280) nvy *= -0.9;
-      
-      // 漂浮阻力
       nvy -= 0.04; 
       if (ny < 60) nvy += 0.12;
-
       return { ...ball, x: nx, y: ny, vx: nvx, vy: nvy };
     }));
     requestRef.current = requestAnimationFrame(animate);
@@ -88,38 +156,32 @@ export const GroupMakerApp: React.FC = () => {
   }, [isAnimating]);
 
   const handleStartGrouping = async () => {
-    const list = names.split(/[\n,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[
+,，、\s]+/).filter(n => n.trim() !== "");
     if (list.length < numGroups) {
       alert(t('home.groupMaker.errorLow'));
       return;
     }
-
     setIsAnimating(true);
     setGroups([]);
     setSelectedGroup(null);
-    
     const shuffledNames = [...list].sort(() => Math.random() - 0.5);
     const newGroups: Group[] = Array.from({ length: numGroups }, (_, i) => ({
       id: i + 1,
       name: `${t('home.groupMaker.groupNamePrefix')}${i + 1}${t('home.groupMaker.groupNameSuffix')}`,
       members: []
     }));
-
     for (let i = 0; i < shuffledNames.length; i++) {
       const name = shuffledNames[i];
       const gid = i % numGroups;
-
       setClawState({ height: 260, isGrabbing: false });
       await new Promise(r => setTimeout(r, 400));
-      
       setClawState({ height: 260, isGrabbing: true });
       setCurrentPickingName(name);
       setBalls(prev => prev.map(b => b.name === name ? { ...b, isPicked: true } : b));
       await new Promise(r => setTimeout(r, 300));
-
       setClawState({ height: 40, isGrabbing: true });
       await new Promise(r => setTimeout(r, 400));
-
       newGroups[gid].members.push(name);
       setGroups([...newGroups]);
       setCurrentPickingName(null);
@@ -136,7 +198,6 @@ export const GroupMakerApp: React.FC = () => {
       </button>
 
       <div className="group-maker-container">
-        {/* 左：名单输入 */}
         <div className="factory-panel left-panel">
           <div className="panel-header">
             📝 {t('home.groupMaker.inputTitle')}
@@ -155,21 +216,12 @@ export const GroupMakerApp: React.FC = () => {
           </div>
         </div>
 
-        {/* 中：动画区 */}
         <div className="factory-panel middle-panel">
           <div className="panel-header">🕹️ {t('home.groupMaker.actionTitle')}</div>
           <div className="machine-cabinet">
-            <div className={`claw-container ${clawState.isGrabbing ? 'grabbing' : ''}`}>
+            <div className="claw-container">
               <div className="claw-cable" style={{ height: clawState.height }}></div>
-              <div className="claw-head">
-                <div className="claw-finger left"></div>
-                <div className="claw-finger right"></div>
-                {currentPickingName && (
-                  <div className="alien-ball" style={{ position: 'absolute', bottom: '-45px', left: '-5px', background: '#f1c40f', width: '60px', height: '60px' }}>
-                    {currentPickingName.slice(0, 4)}
-                  </div>
-                )}
-              </div>
+              <ClawSVG isGrabbing={clawState.isGrabbing} pickedBallName={currentPickingName} />
             </div>
 
             {balls.map((ball, i) => !ball.isPicked && (
@@ -181,7 +233,6 @@ export const GroupMakerApp: React.FC = () => {
               </div>
             ))}
           </div>
-          
           <div className="machine-controls">
             <div className="flex justify-between items-center bg-white/20 p-3 rounded-2xl">
               <span className="font-bold text-white">{t('home.groupMaker.groupCount')}</span>
@@ -197,11 +248,9 @@ export const GroupMakerApp: React.FC = () => {
           </div>
         </div>
 
-        {/* 右：固定布局结果/详情 */}
         <div className="factory-panel right-panel">
           <div className="panel-header">📦 {t('home.groupMaker.results')}</div>
           <div className="delivery-station">
-            {/* 概览网格 */}
             <div className="results-scroll-area">
               {groups.length > 0 ? (
                 <div className="groups-grid">
@@ -221,7 +270,6 @@ export const GroupMakerApp: React.FC = () => {
               )}
             </div>
 
-            {/* 固定详情视图 (采用绝对定位覆盖在 station 之上) */}
             {selectedGroup && (
               <div className="detail-view">
                 <div className="detail-header">

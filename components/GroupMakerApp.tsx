@@ -94,36 +94,28 @@ export const GroupMakerApp: React.FC = () => {
   const [balls, setBalls] = useState<BallData[]>([]);
   const [currentPicking, setCurrentPicking] = useState<{name: string, color: string} | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [clawState, setClawState] = useState({ height: 40, isGrabbing: false, shake: 0 });
+  const [clawState, setClawState] = useState({ height: 40, x: 50, isGrabbing: false, shake: 0 }); // Added x in %
   const requestRef = useRef<number>();
 
   const studentCount = useMemo(() => {
     return names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "").length;
   }, [names]);
 
-  // Pastel / Cute Colors
-  const colors = [
-    '#FFB7C5', // Piggy Pink
-    '#A4EBF3', // Sky Blue
-    '#C1E1C1', // Pale Green
-    '#FDFD96', // Pastel Yellow
-    '#C3B1E1', // Lavender
-    '#FF6961', // Salmon
-    '#FFD1DC', // Pastel Pink
-    '#B4E7CE'  // Mint
-  ];
+  const colors = ['#FFB7C5', '#A4EBF3', '#C1E1C1', '#FDFD96', '#C3B1E1', '#FF6961', '#FFD1DC', '#B4E7CE'];
 
+  // Initialize balls
   useEffect(() => {
-    const list = names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "");
-    if (!isAnimating && cabinetRef.current) {
-      const width = cabinetRef.current.clientWidth || 800;
-      const height = cabinetRef.current.clientHeight || 600;
+    if (!isAnimating) {
+      const list = names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "");
+      const width = cabinetRef.current?.clientWidth || window.innerWidth * 0.6;
+      const height = cabinetRef.current?.clientHeight || 600;
+      
       setBalls(list.map((name, i) => ({
         name,
         x: Math.random() * (width - 150) + 75,
-        y: height - 150 - (Math.random() * 100),
-        vx: (Math.random() - 0.5) * 10,
-        vy: (Math.random() - 0.5) * 10,
+        y: height - 120 - (Math.random() * 50),
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8,
         color: colors[i % colors.length],
         isPicked: false,
         angle: Math.random() * 360
@@ -143,13 +135,16 @@ export const GroupMakerApp: React.FC = () => {
       let nvx = ball.vx;
       let nvy = ball.vy;
 
-      // Elastic wall collisions
-      if (nx < 50 || nx > width - 50) nvx *= -0.9;
-      if (ny < 50 || ny > height - 80) nvy *= -0.9;
+      // Robust Clamping Boundaries
+      if (nx < 60) { nx = 60; nvx = Math.abs(nvx) * 0.8; }
+      else if (nx > width - 60) { nx = width - 60; nvx = -Math.abs(nvx) * 0.8; }
+      
+      if (ny < 60) { ny = 60; nvy = Math.abs(nvy) * 0.8; }
+      else if (ny > height - 100) { ny = height - 100; nvy = -Math.abs(nvy) * 0.8; }
 
-      // Gravity and gentle float up
-      nvy += 0.15; 
-      if (ny > height - 150) nvy -= 0.3; 
+      // Gravity and random jitter
+      nvy += 0.1;
+      nvx += (Math.random() - 0.5) * 0.2;
 
       return { ...ball, x: nx, y: ny, vx: nvx, vy: nvy, angle: ball.angle + nvx * 2 };
     }));
@@ -192,30 +187,44 @@ export const GroupMakerApp: React.FC = () => {
     for (let i = 0; i < shuffledNames.length; i++) {
       const name = shuffledNames[i];
       const color = colors[list.indexOf(name) % colors.length];
-      const targetHeight = cabinetRef.current ? cabinetRef.current.clientHeight * 0.7 : 400;
       
-      // 1. Drop Claw
-      setClawState({ height: targetHeight, isGrabbing: false, shake: 0 });
+      // Find the ball to "track" it visually
+      let targetBall: BallData | undefined;
+      setBalls(currentBalls => {
+        targetBall = currentBalls.find(b => b.name === name);
+        return currentBalls;
+      });
+
+      const cabinetWidth = cabinetRef.current?.clientWidth || 800;
+      const targetXPercent = targetBall ? (targetBall.x / cabinetWidth) * 100 : 50;
+      const targetHeight = targetBall ? targetBall.y - 100 : 450;
+
+      // 1. Move claw horizontally to ball
+      setClawState(prev => ({ ...prev, x: targetXPercent, height: 40, isGrabbing: false }));
+      await new Promise(r => setTimeout(r, 800));
+
+      // 2. Drop Claw
+      setClawState(prev => ({ ...prev, height: targetHeight, isGrabbing: false }));
       await new Promise(r => setTimeout(r, 600));
       
-      // 2. Grab Action
-      setClawState({ height: targetHeight, isGrabbing: true, shake: 5 });
+      // 3. Grab Action
+      setClawState(prev => ({ ...prev, isGrabbing: true, shake: 5 }));
       setCurrentPicking({ name, color });
       setBalls(prev => prev.map(b => b.name === name ? { ...b, isPicked: true } : b));
       await new Promise(r => setTimeout(r, 500));
 
-      // 3. Lift
-      setClawState({ height: 40, isGrabbing: true, shake: 2 });
-      await new Promise(r => setTimeout(r, 800));
+      // 4. Lift & Move back to center
+      setClawState(prev => ({ ...prev, height: 40, x: 50, shake: 2 }));
+      await new Promise(r => setTimeout(r, 1000));
 
-      // 4. Release
-      setClawState({ height: 40, isGrabbing: false, shake: 0 });
+      // 5. Release
+      setClawState(prev => ({ ...prev, isGrabbing: false, shake: 0 }));
       newGroups[i % numGroups].members.push(name);
       setGroups([...newGroups]);
       await new Promise(r => setTimeout(r, 300));
       
       setCurrentPicking(null);
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 300));
     }
     setIsAnimating(false);
   };
@@ -232,7 +241,7 @@ export const GroupMakerApp: React.FC = () => {
               value={names} onChange={(e) => setNames(e.target.value)} disabled={isAnimating}
             />
             <div className="clear-btn-wrap">
-              <button onClick={() => setNames("")} className="start-btn-arcade" style={{fontSize: '1.5rem', background: '#FF6961', padding: '10px'}}>{t('home.groupMaker.clearBtn')}</button>
+              <button onClick={() => setNames("")} className="start-btn-arcade" style={{fontSize: '1.2rem', padding: '8px 20px', background: '#FF6961'}}>{t('home.groupMaker.clearBtn')}</button>
             </div>
           </div>
         </div>
@@ -241,18 +250,18 @@ export const GroupMakerApp: React.FC = () => {
         <div className="factory-panel middle-panel">
           <div className="panel-header">🎈 {t('home.groupMaker.actionTitle')}</div>
           <div className="machine-cabinet" ref={cabinetRef}>
-            <div className="claw-container" style={{ transform: `translateX(-50%) translateY(${clawState.shake}px)` }}>
+            <div className="claw-container" style={{ left: `${clawState.x}%`, transform: `translateX(-50%) translateY(${clawState.shake}px)`, transition: 'left 0.8s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s ease-in' }}>
               <div className="claw-cable" style={{ height: clawState.height }}></div>
               <ClawSVG isGrabbing={clawState.isGrabbing} pickedBallName={currentPicking?.name || null} ballColor={currentPicking?.color} />
             </div>
-            {balls.map((ball, i) => !ball.isPicked && (
-              <div key={i} className="alien-ball" style={{ background: ball.color, transform: `translate3d(${ball.x}px, ${ball.y}px, 0) rotate(${ball.angle}deg)` }}>{ball.name.slice(0, 3)}</div>
+            {balls.map((ball) => !ball.isPicked && (
+              <div key={ball.name} className="alien-ball" style={{ background: ball.color, transform: `translate3d(${ball.x}px, ${ball.y}px, 0) rotate(${ball.angle}deg)` }}>{ball.name.slice(0, 3)}</div>
             ))}
           </div>
           <div className="machine-controls">
-            <div className="flex justify-between items-center bg-white p-4 rounded-3xl border-4 border-white mb-2 shadow-sm">
-              <span className="font-black text-gray-500 text-2xl">{t('home.groupMaker.groupCount')}</span>
-              <input type="number" className="w-24 p-2 rounded-2xl text-center font-black text-pink-500 text-3xl outline-none bg-gray-50" value={numGroups} onChange={(e) => setNumGroups(parseInt(e.target.value) || 2)} disabled={isAnimating} />
+            <div className="flex justify-between items-center bg-white p-4 rounded-3xl border-4 border-white shadow-sm flex-1">
+              <span className="font-black text-gray-500 text-xl">{t('home.groupMaker.groupCount')}</span>
+              <input type="number" className="w-20 p-1 rounded-xl text-center font-black text-pink-500 text-2xl outline-none bg-gray-50" value={numGroups} onChange={(e) => setNumGroups(parseInt(e.target.value) || 2)} disabled={isAnimating} />
             </div>
             <button className="start-btn-arcade" onClick={handleStartGrouping} disabled={isAnimating || !names.trim()}>{isAnimating ? t('home.groupMaker.runningBtn') : t('home.groupMaker.startBtn')}</button>
           </div>

@@ -86,8 +86,7 @@ export const GroupMakerApp: React.FC = () => {
   const requestRef = useRef<number>();
 
   const studentCount = useMemo(() => {
-    return names.split(/[
-,，、\s]+/).filter(n => n.trim() !== "").length;
+    return names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "").length;
   }, [names]);
 
   // Pastel / Cute Colors
@@ -103,8 +102,7 @@ export const GroupMakerApp: React.FC = () => {
   ];
 
   useEffect(() => {
-    const list = names.split(/[
-,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "");
     if (!isAnimating) {
       setBalls(list.map((name, i) => ({
         name,
@@ -141,8 +139,7 @@ export const GroupMakerApp: React.FC = () => {
   }, [isAnimating]);
 
   const handleStartGrouping = async () => {
-    const list = names.split(/[
-,，、\s]+/).filter(n => n.trim() !== "");
+    const list = names.split(/[ ,，、\s]+/).filter(n => n.trim() !== "");
     if (list.length < numGroups) {
       alert(t('home.groupMaker.errorLow'));
       return;

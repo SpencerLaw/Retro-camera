@@ -36,6 +36,10 @@ const ClawSVG: React.FC<{ isGrabbing: boolean; pickedBallName: string | null; ba
               <stop offset="0%" stopColor="#E0F7FA" stopOpacity="1" />
               <stop offset="100%" stopColor="#4ECDC4" stopOpacity="1" />
             </radialGradient>
+            <linearGradient id="softPad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FFF" stopOpacity="1" />
+              <stop offset="100%" stopColor="#FFE0E0" stopOpacity="1" />
+            </linearGradient>
             <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
               <feOffset dx="0" dy="5" result="offsetblur"/>
@@ -44,22 +48,35 @@ const ClawSVG: React.FC<{ isGrabbing: boolean; pickedBallName: string | null; ba
             </filter>
           </defs>
           <g transform="translate(200, 180)" filter="url(#softShadow)">
+            {/* Cable */}
             <path d="M-10,-180 Q-15,-140 -10,-100 Q-15,-60 -10,-20 L10,-20 Q15,-60 10,-100 Q15,-140 10,-180" fill="none" stroke="#FF6B6B" strokeWidth="12" strokeLinecap="round"/>
+            
+            {/* Claw Body Base */}
             <g transform="translate(0, -20) scale(0.9)"><path d="M-20,0 Q-30,40 0,70 Q30,40 20,0 Z" fill="url(#plasticBody)"/></g>
             <circle cx="0" cy="0" r="45" fill="url(#plasticBody)"/>
             <circle cx="0" cy="0" r="25" fill="#FFF"/>
             <circle cx="0" cy="0" r="18" fill="url(#glowBlue)"/>
             
+            {/* Left Claw Arm */}
             <g transform={`rotate(${rotation})`}>
                 <g transform="translate(-45, 20) rotate(15)">
-                    <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)" stroke="#fff" strokeWidth="2"/>
+                    <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)" stroke="white" strokeWidth="3"/>
+                    <ellipse cx="-15" cy="65" rx="10" ry="14" fill="url(#softPad)" transform="rotate(-10)"/>
+                    <path d="M-15,10 Q-30,30 -20,60" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.6"/>
                 </g>
             </g>
+            
+            {/* Right Claw Arm (Mirrored) */}
             <g transform={`scale(-1, 1) rotate(${rotation})`}>
                 <g transform="translate(-45, 20) rotate(15)">
-                    <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)" stroke="#fff" strokeWidth="2"/>
+                    <path d="M-10,-20 C-40,-10 -50,50 -20,80 C0,90 20,80 30,50 C40,20 20,-30 -10,-20 Z" fill="url(#plasticBody)" stroke="white" strokeWidth="3"/>
+                    <ellipse cx="-15" cy="65" rx="10" ry="14" fill="url(#softPad)" transform="rotate(-10)"/>
+                    <path d="M-15,10 Q-30,30 -20,60" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.6"/>
                 </g>
             </g>
+
+            {/* Hinge Detail */}
+            <path d="M-30,-30 Q-10,-50 20,-40" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.7"/>
           </g>
         </svg>
       </div>
@@ -239,28 +256,35 @@ export const GroupMakerApp: React.FC = () => {
               </div>
             </div>
             {selectedGroup && (
-              <div className="fixed-detail-view">
-                <div className="detail-nav">
-                  <button className="arcade-back-btn" onClick={() => setSelectedGroup(null)}><ChevronLeft size={30} strokeWidth={4} /> 返回</button>
-                  <div className="text-right">
-                    <span className="font-black text-4xl block">{selectedGroup.name}</span>
-                    <span className="text-xl font-bold bg-white/30 px-4 py-1 rounded-full">{selectedGroup.members.length}人</span>
+              <div className="modal-overlay" onClick={() => setSelectedGroup(null)}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <div className="modal-title">{selectedGroup.name}</div>
+                    <button className="modal-close-btn" onClick={() => setSelectedGroup(null)}>✕</button>
                   </div>
-                </div>
-                <div className="member-scroll-list">
-                  {selectedGroup.members.map((member, idx) => (
-                    <div key={idx} className="member-tile">{member}</div>
-                  ))}
-                </div>
-                <div className="detail-actions">
-                   <button onClick={() => {
-                      const text = `${selectedGroup.name}:\n${selectedGroup.members.join("\n")}`;
-                      const blob = new Blob([text], {type: 'text/plain'});
-                      const link = document.createElement('a');
-                      link.href = URL.createObjectURL(blob);
-                      link.download = `${selectedGroup.name}.txt`;
-                      link.click();
-                   }} className="start-btn-arcade" style={{fontSize: '1.5rem', background: '#4ECDC4'}}>导出本组名单</button>
+                  
+                  <div className="modal-body">
+                    <div className="flex justify-between items-center mb-4 px-2">
+                       <span className="text-xl text-pink-500 font-bold">小组成员</span>
+                       <span className="bg-white text-pink-500 px-3 py-1 rounded-full text-sm border-2 border-pink-200 font-bold">{selectedGroup.members.length}人</span>
+                    </div>
+                    <div className="member-scroll-list">
+                      {selectedGroup.members.map((member, idx) => (
+                        <div key={idx} className="member-tile">{member}</div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="modal-footer">
+                     <button onClick={() => {
+                        const text = `${selectedGroup.name}:\n${selectedGroup.members.join("\n")}`;
+                        const blob = new Blob([text], {type: 'text/plain'});
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `${selectedGroup.name}.txt`;
+                        link.click();
+                     }} className="start-btn-arcade" style={{fontSize: '1.2rem', padding: '12px 30px', background: '#4ECDC4'}}>导出本组名单</button>
+                  </div>
                 </div>
               </div>
             )}

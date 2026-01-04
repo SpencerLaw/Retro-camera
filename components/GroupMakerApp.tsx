@@ -249,42 +249,45 @@ export const GroupMakerApp: React.FC = () => {
                 ))}
               </div>
             </div>
-            {selectedGroup && (
-              <div className="modal-overlay" onClick={() => setSelectedGroup(null)}>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                  <div className="modal-header">
-                    <div className="modal-title">{selectedGroup.name}</div>
-                    <button className="modal-close-btn" onClick={() => setSelectedGroup(null)}>✕</button>
-                  </div>
-                  
-                  <div className="modal-body">
-                    <div className="flex justify-between items-center mb-4 px-2">
-                       <span className="text-xl text-pink-500 font-bold">小组成员</span>
-                       <span className="bg-white text-pink-500 px-3 py-1 rounded-full text-sm border-2 border-pink-200 font-bold">{selectedGroup.members.length}人</span>
-                    </div>
-                    <div className="member-scroll-list">
-                      {selectedGroup.members.map((member, idx) => (
-                        <div key={idx} className="member-tile">{member}</div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="modal-footer">
-                     <button onClick={() => {
-                        const text = `${selectedGroup.name}:\n${selectedGroup.members.join("\n")}`;
-                        const blob = new Blob([text], {type: 'text/plain'});
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(blob);
-                        link.download = `${selectedGroup.name}.txt`;
-                        link.click();
-                     }} className="start-btn-arcade" style={{fontSize: '1.2rem', padding: '12px 30px', background: '#4ECDC4'}}>导出本组名单</button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
+      
+      {/* Modal moved outside the grid container to ensure it sits on top of everything */}
+      {selectedGroup && (
+        <div className="modal-overlay" onClick={() => setSelectedGroup(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">{selectedGroup.name}</div>
+              <button className="modal-close-btn" onClick={() => setSelectedGroup(null)}>✕</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="flex justify-between items-center mb-4 px-2">
+                  <span className="text-xl text-pink-500 font-bold">小组成员</span>
+                  <span className="bg-white text-pink-500 px-3 py-1 rounded-full text-sm border-2 border-pink-200 font-bold">{selectedGroup.members.length}人</span>
+              </div>
+              <div className="member-scroll-list">
+                {selectedGroup.members.map((member, idx) => (
+                  <div key={idx} className="member-tile">{member}</div>
+                ))}
+              </div>
+            </div>
+
+            <div className="modal-footer">
+                <button onClick={() => {
+                  const text = `${selectedGroup.name}:\n${selectedGroup.members.join("\n")}`;
+                  const blob = new Blob([text], {type: 'text/plain'});
+                  const link = document.createElement('a');
+                  link.href = URL.createObjectURL(blob);
+                  link.download = `${selectedGroup.name}.txt`;
+                  link.click();
+                }} className="start-btn-arcade" style={{fontSize: '1.2rem', padding: '12px 30px', background: '#4ECDC4'}}>导出本组名单</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <button onClick={() => navigate('/')} className="home-back-btn"><ArrowLeft size={40} strokeWidth={5} /></button>
     </div>
   );

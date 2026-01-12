@@ -334,7 +334,7 @@ const DoraemonMonitorApp: React.FC = () => {
             </div>
             <button
               className="reset-icon-btn"
-              onClick={() => { setWarnCount(0); setMaxDb(0); }}
+              onClick={() => { setWarnCount(0); }}
               title={t('doraemon.resetCount')}
             >
               <RotateCcw size={20} />

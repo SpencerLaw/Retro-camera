@@ -123,10 +123,10 @@
 }
 
 .meter-bar-bg {
-  width: 12px;
+  width: 16px; /* Reverted to original width */
   height: 100%;
   background: #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px; /* Reverted border radius */
   overflow: hidden;
   position: relative;
 }
@@ -143,15 +143,19 @@
 
 .current-level-pointer {
   position: absolute;
-  left: -4px;
-  width: 20px; height: 20px;
+  left: -6px; /* Adjusted for larger size */
+  width: 28px; /* Reverted to original size */
+  height: 28px;
   background: var(--accent-blue);
-  border: 3px solid white;
+  border: 3px solid white; /* Keep 3px border */
   border-radius: 50%;
-  box-shadow: 0 3px 8px rgba(0,150,225,0.6);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* Reverted shadow */
   transition: bottom 0.15s ease-out;
   z-index: 10;
   transform: translateY(50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .level-nodes {

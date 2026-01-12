@@ -222,7 +222,7 @@ const DoraemonMonitorApp: React.FC = () => {
                 transform: 'translate(-50%, 50%)'
               }} 
             >
-              {/* 三角形指示器可通过 CSS 伪元素实现，或简化为纯圆点 */}
+              <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` }} />
             </div>
           </div>
           <div className="level-nodes">

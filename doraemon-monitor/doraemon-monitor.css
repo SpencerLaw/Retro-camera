@@ -302,6 +302,36 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+.stat-box-with-action {
+  justify-content: space-between;
+}
+
+.reset-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent-blue);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 150, 225, 0.3);
+}
+
+.reset-icon-btn:hover {
+  transform: scale(1.1) rotate(-15deg);
+  box-shadow: 0 4px 12px rgba(0, 150, 225, 0.5);
+  background: #0575e6;
+}
+
+.reset-icon-btn:active {
+  transform: scale(0.95) rotate(-15deg);
+}
+
 .stat-icon {
   font-size: 2rem;
   line-height: 1;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize, RotateCcw } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
@@ -47,9 +47,9 @@ const DoraemonMonitorApp: React.FC = () => {
     if (isVerified() && code) {
       verifyLicenseCode(code).then(res => {
         if (res.success) setIsLicensed(true);
-        else { 
-          setAuthError(res.message); 
-          clearLicense(); 
+        else {
+          setAuthError(res.message);
+          clearLicense();
           // Start countdown
           const timer = setInterval(() => {
             setCountdown((prev) => {
@@ -126,14 +126,14 @@ const DoraemonMonitorApp: React.FC = () => {
     try {
       const ctx = audioContextRef.current;
       if (ctx.state === 'suspended') ctx.resume();
-      
+
       const t = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
+
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
+
       // Double beep alarm
       osc.type = 'square';
       osc.frequency.setValueAtTime(880, t); // A5
@@ -141,11 +141,11 @@ const DoraemonMonitorApp: React.FC = () => {
       osc.frequency.setValueAtTime(0, t + 0.15); // Pause
       osc.frequency.setValueAtTime(880, t + 0.25);
       osc.frequency.setValueAtTime(880, t + 0.35);
-      
+
       gain.gain.setValueAtTime(0.1, t);
       gain.gain.linearRampToValueAtTime(0.1, t + 0.35);
       gain.gain.linearRampToValueAtTime(0, t + 0.4);
-      
+
       osc.start(t);
       osc.stop(t + 0.4);
     } catch (e) {
@@ -159,13 +159,13 @@ const DoraemonMonitorApp: React.FC = () => {
     if (currentDb > limit) {
       recoverStartRef.current = 0;
       if (thresholdStartRef.current === 0) thresholdStartRef.current = now;
-      if (now - thresholdStartRef.current > 2000) { 
-        if (state !== 'alarm') { 
-          setState('alarm'); 
-          setWarnCount(prev => prev + 1); 
-          setQuietTime(0); 
+      if (now - thresholdStartRef.current > 2000) {
+        if (state !== 'alarm') {
+          setState('alarm');
+          setWarnCount(prev => prev + 1);
+          setQuietTime(0);
           playAlarmSound();
-        } 
+        }
       }
       else if (now - thresholdStartRef.current > 800 && state === 'calm') setState('warning');
     } else {
@@ -202,7 +202,7 @@ const DoraemonMonitorApp: React.FC = () => {
       { min: 100, max: 120, label: "100–120 dB 极其嘈杂" },
     ];
     const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
-    
+
     // 移除内联颜色逻辑，依赖 CSS 类
     const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
     const textColor = isDarkMode ? '#94a3b8' : '#475569';
@@ -215,20 +215,20 @@ const DoraemonMonitorApp: React.FC = () => {
             <div className="meter-bar-bg">
               <div className="meter-gradient-fill"></div>
             </div>
-            <div 
+            <div
               className="current-level-pointer"
-              style={{ 
+              style={{
                 bottom: `${pointerPos}%`
-              }} 
+              }}
             >
               <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` }} />
             </div>
           </div>
           <div className="level-nodes">
             {levels.reverse().map((l, i) => (
-              <div key={i} style={{ 
-                color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor, 
-                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5, 
+              <div key={i} style={{
+                color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor,
+                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5,
                 fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
                 fontSize: '0.9rem'
               }}>
@@ -257,13 +257,13 @@ const DoraemonMonitorApp: React.FC = () => {
           const norm = 1 - (dist / (BAR_COUNT / 2));
           const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
           const wave = Math.sin(i * 0.35 + Date.now() / 150) * 0.15;
-          
+
           // 优化：边缘高度自然收尾 (Taper height at edges)
-          const taperedNorm = Math.pow(norm, 1.5); 
+          const taperedNorm = Math.pow(norm, 1.5);
           const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
-          
+
           return (
-            <div key={i} className="wave-bar" style={{ 
+            <div key={i} className="wave-bar" style={{
               height: `${Math.min(100, height)}%`, // 使用百分比高度
               background: `linear-gradient(to top, transparent, ${mainColor})`,
               opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
@@ -277,15 +277,15 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const DoraemonSVG = () => (
     <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%' }}>
-      <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2"/><circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2"/><ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2"/><ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
+      <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" /><circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
       {state === 'alarm' ? (
-        <g stroke="#333" strokeWidth="5"><line x1="70" y1="60" x2="90" y2="80"/><line x1="90" y1="60" x2="70" y2="80"/><line x1="110" y1="60" x2="130" y2="80"/><line x1="130" y1="60" x2="110" y2="80"/></g>
+        <g stroke="#333" strokeWidth="5"><line x1="70" y1="60" x2="90" y2="80" /><line x1="90" y1="60" x2="70" y2="80" /><line x1="110" y1="60" x2="130" y2="80" /><line x1="130" y1="60" x2="110" y2="80" /></g>
       ) : (
-        <g><circle cx={state === 'warning' ? 82 : 88} cy="70" r={state === 'warning' ? 3 : 4} fill="#000"/><circle cx={state === 'warning' ? 118 : 112} cy="70" r={state === 'warning' ? 3 : 4} fill="#000"/></g>
+        <g><circle cx={state === 'warning' ? 82 : 88} cy="70" r={state === 'warning' ? 3 : 4} fill="#000" /><circle cx={state === 'warning' ? 118 : 112} cy="70" r={state === 'warning' ? 3 : 4} fill="#000" /></g>
       )}
-      <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2"/><line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2"/>
-      {state === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2"/> : <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none"/>}
-      <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2"/><circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2"/>
+      <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" /><line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2" />
+      {state === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2" /> : <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" />}
+      <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2" /><circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2" />
     </svg>
   );
 
@@ -327,11 +327,18 @@ const DoraemonMonitorApp: React.FC = () => {
               <strong className="stat-value" style={{ color: isDarkMode ? '#0575e6' : '#2563eb' }}>{formatTime(totalTime)}</strong>
             </div>
           </div>
-          <div className={`stat-box ${warnCount > 0 ? 'warning' : ''}`}>
+          <div className={`stat-box stat-box-with-action ${warnCount > 0 ? 'warning' : ''}`}>
             <div className="stat-content">
               <span className="stat-label">⚠️ 警告次数</span>
               <strong className="stat-value" style={{ color: '#dc2626' }}>{warnCount}</strong>
             </div>
+            <button
+              className="reset-icon-btn"
+              onClick={() => { setWarnCount(0); setMaxDb(0); }}
+              title={t('doraemon.resetCount')}
+            >
+              <RotateCcw size={20} />
+            </button>
           </div>
           <div className="stat-box">
             <div className="stat-content">
@@ -339,7 +346,6 @@ const DoraemonMonitorApp: React.FC = () => {
               <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
             </div>
           </div>
-          <button className="reset-btn" onClick={() => { setWarnCount(0); setMaxDb(0); }}>{t('doraemon.resetCount')}</button>
           <div className="controls-box">
             <div className="slider-header">
               <span>分贝阈值</span>

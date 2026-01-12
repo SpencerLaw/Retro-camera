@@ -13,7 +13,10 @@
   --card-border: #e2e8f0;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
 /* Global styles removed to prevent affecting other pages */
 /* body, html {
@@ -25,22 +28,24 @@
 
 /* ===== 主容器 ===== */
 .doraemon-app {
-  width: 100vw; 
+  width: 100vw;
   height: 100vh;
   background: var(--bg-light);
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
   color: var(--text-primary);
   transition: all 0.4s ease;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow: hidden; /* 保持 hidden，滚动交由 main 处理 */
+  overflow: hidden;
+  /* 保持 hidden，滚动交由 main 处理 */
 }
 
 .doraemon-app.dark-mode {
   background: var(--bg-dark);
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
-  --card-bg: rgba(255,255,255,0.1);
-  --card-border: rgba(255,255,255,0.15);
+  --card-bg: rgba(255, 255, 255, 0.1);
+  --card-border: rgba(255, 255, 255, 0.15);
 }
 
 /* ===== 简洁顶部栏 ===== */
@@ -55,7 +60,9 @@
 }
 
 .icon-btn {
-  width: 40px; height: 40px; /* 稍微调小以适应小屏 */
+  width: 40px;
+  height: 40px;
+  /* 稍微调小以适应小屏 */
   border-radius: 12px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -79,19 +86,24 @@
 .doraemon-main {
   flex: 1;
   display: flex;
-  align-items: center; /* 垂直居中 */
-  justify-content: center; /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  justify-content: center;
+  /* 水平居中 */
   padding: 10px 20px 20px;
-  gap: 20px; /* 减小默认间距 */
+  gap: 20px;
+  /* 减小默认间距 */
   position: relative;
-  overflow-y: auto; /* 允许垂直滚动 */
+  overflow-y: auto;
+  /* 允许垂直滚动 */
   overflow-x: hidden;
   width: 100%;
 }
 
 /* ===== 分贝参考面板 ===== */
 .db-reference-panel {
-  width: 260px; /* 默认宽度略微减小 */
+  width: 260px;
+  /* 默认宽度略微减小 */
   min-width: 220px;
   max-width: 280px;
   background: var(--card-bg);
@@ -117,42 +129,52 @@
 }
 
 .vertical-meter-container {
-  height: 350px; /* 默认高度减小 */
+  height: 350px;
+  /* 默认高度减小 */
   display: flex;
   gap: 12px;
 }
 
 .meter-bar-bg {
-  width: 16px; /* Reverted to original width */
+  width: 16px;
+  /* Reverted to original width */
   height: 100%;
   background: #e2e8f0;
-  border-radius: 8px; /* Reverted border radius */
+  border-radius: 8px;
+  /* Reverted border radius */
   overflow: hidden;
   position: relative;
 }
 
 .dark-mode .meter-bar-bg {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .meter-gradient-fill {
   position: absolute;
-  bottom: 0; width: 100%; height: 100%;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(to top, #22c55e 0%, #84cc16 25%, #eab308 50%, #f97316 75%, #ef4444 100%);
 }
 
 .current-level-pointer {
   position: absolute;
-  left: 50%; /* Center horizontally relative to parent */
-  width: 28px; /* Reverted to original size */
+  left: 50%;
+  /* Center horizontally relative to parent */
+  width: 28px;
+  /* Reverted to original size */
   height: 28px;
   background: var(--accent-blue);
-  border: 3px solid white; /* Keep 3px border */
+  border: 3px solid white;
+  /* Keep 3px border */
   border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* Reverted shadow */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  /* Reverted shadow */
   transition: bottom 0.15s ease-out;
   z-index: 10;
-  transform: translateX(-50%) translateY(50%); /* Center perfectly */
+  transform: translateX(-50%) translateY(50%);
+  /* Center perfectly */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,7 +183,8 @@
 .level-nodes {
   flex: 1;
   display: flex;
-  flex-direction: column; /* Fixed: High dB at top, Low dB at bottom */
+  flex-direction: column;
+  /* Fixed: High dB at top, Low dB at bottom */
   justify-content: space-between;
 }
 
@@ -194,7 +217,7 @@
 .reference-footer {
   margin-top: 15px;
   padding: 10px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(0, 0, 0, 0.03);
   border-radius: 12px;
   text-align: center;
   font-size: 0.9rem;
@@ -203,7 +226,7 @@
 }
 
 .dark-mode .reference-footer {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* ===== 中心显示区 ===== */
@@ -214,15 +237,17 @@
   justify-content: center;
   z-index: 10;
   flex: 1;
-  min-width: 280px; /* 防止过度压缩 */
+  min-width: 280px;
+  /* 防止过度压缩 */
   max-width: 600px;
   height: 100%;
 }
 
 .doraemon-wrapper {
-  width: min(300px, 25vw); /* 响应式大小 */
+  width: min(300px, 25vw);
+  /* 响应式大小 */
   height: min(300px, 25vw);
-  filter: drop-shadow(0 10px 25px rgba(0,150,225,0.25));
+  filter: drop-shadow(0 10px 25px rgba(0, 150, 225, 0.25));
   transition: transform 0.1s ease-out;
   transform-origin: center center;
   margin-bottom: 2vh;
@@ -237,7 +262,8 @@
 }
 
 .db-number {
-  font-size: clamp(4.4rem, 11vw, 8.8rem); /* Increased by ~10% */
+  font-size: clamp(4.4rem, 11vw, 8.8rem);
+  /* Increased by ~10% */
   font-weight: 900;
   line-height: 1;
   color: var(--text-primary);
@@ -254,18 +280,23 @@
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
   width: 100%;
-  height: 100px; /* 略微减小 */
+  height: 120px;
+  /* 增加20%: 100px -> 120px */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 5%; 
-  margin-top: auto; /* 推到底部 */
+  padding: 0 2.5%;
+  /* 减少padding以增加宽度15% */
+  margin-top: auto;
+  /* 推到底部 */
   pointer-events: none;
 }
 
 .wave-bar {
-  flex: 1; /* 自适应宽度 */
-  margin: 0 1px;
+  flex: 1;
+  /* 自适应宽度 */
+  margin: 0 1.15px;
+  /* 增加15%宽度: 1px -> 1.15px */
   min-height: 4px;
   border-radius: 4px;
   transition: height 0.08s ease-out;
@@ -278,7 +309,8 @@
   gap: 12px;
   z-index: 10;
   flex-shrink: 0;
-  width: 260px; /* 默认略微减小 */
+  width: 260px;
+  /* 默认略微减小 */
   min-width: 220px;
   max-width: 280px;
   align-self: center;
@@ -384,7 +416,8 @@
 .threshold-slider {
   -webkit-appearance: none;
   width: 100%;
-  height: 8px; /* 变细 */
+  height: 8px;
+  /* 变细 */
   background: #e2e8f0;
   border-radius: 4px;
   outline: none;
@@ -392,16 +425,17 @@
 }
 
 .dark-mode .threshold-slider {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .threshold-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 24px; height: 24px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--accent-blue);
   cursor: pointer;
-  box-shadow: 0 3px 8px rgba(0,150,225,0.4);
+  box-shadow: 0 3px 8px rgba(0, 150, 225, 0.4);
   transition: transform 0.2s;
 }
 
@@ -420,12 +454,12 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(0,150,225,0.3);
+  box-shadow: 0 4px 12px rgba(0, 150, 225, 0.3);
 }
 
 .reset-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,150,225,0.4);
+  box-shadow: 0 6px 16px rgba(0, 150, 225, 0.4);
 }
 
 /* ===== 响应式适配 ===== */
@@ -436,21 +470,22 @@
     gap: 15px;
     padding: 10px;
   }
-  
-  .db-reference-panel, .right-panel {
+
+  .db-reference-panel,
+  .right-panel {
     width: 220px;
     min-width: 200px;
     padding: 15px;
   }
-  
+
   .stat-box {
     padding: 10px 15px;
   }
-  
+
   .stat-value {
     font-size: 1.6rem;
   }
-  
+
   .doraemon-wrapper {
     width: 180px;
     height: 180px;
@@ -460,22 +495,24 @@
 /* 平板/窄屏 (小于 1024px) - 切换为竖排 */
 @media (max-width: 1024px) {
   .doraemon-app {
-    height: 100vh; /* 恢复视口高度 */
-    overflow: hidden; 
+    height: 100vh;
+    /* 恢复视口高度 */
+    overflow: hidden;
   }
 
   .doraemon-main {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    overflow-y: auto; /* 主区域可滚动 */
+    overflow-y: auto;
+    /* 主区域可滚动 */
     padding-bottom: 40px;
     height: 100%;
   }
 
   /* 隐藏左侧参考面板以节省空间，或者移动到底部 */
   .db-reference-panel {
-    display: none; 
+    display: none;
   }
 
   .center-display {
@@ -497,20 +534,22 @@
   .right-panel {
     width: 90%;
     max-width: 400px;
-    flex-direction: row; /* 数据横向排列 */
+    flex-direction: row;
+    /* 数据横向排列 */
     flex-wrap: wrap;
     justify-content: center;
   }
 
   .stat-box {
-    flex: 1 1 140px; /* 允许换行 */
+    flex: 1 1 140px;
+    /* 允许换行 */
   }
 
   .controls-box {
     width: 100%;
     order: 10;
   }
-  
+
   .reset-btn {
     width: 100%;
     order: 11;
@@ -523,20 +562,20 @@
     width: 120px;
     height: 120px;
   }
-  
+
   .db-number {
     font-size: 4rem;
   }
-  
+
   .right-panel {
     width: 100%;
     gap: 10px;
   }
-  
+
   .stat-box {
     padding: 10px;
   }
-  
+
   .doraemon-giant-text {
     font-size: 15vw;
   }
@@ -547,18 +586,19 @@
   .doraemon-main {
     padding-top: 5px;
   }
-  
+
   .doraemon-wrapper {
     width: 150px;
     height: 150px;
     margin-bottom: 1vh;
   }
-  
+
   .vertical-meter-container {
     height: 280px;
   }
-  
-  .db-reference-panel, .right-panel {
+
+  .db-reference-panel,
+  .right-panel {
     padding: 10px;
   }
 }
@@ -569,7 +609,7 @@
     height: 50px;
     padding: 0 20px;
   }
-  
+
   .doraemon-main {
     gap: 15px;
     padding: 10px 20px;
@@ -579,46 +619,57 @@
     font-size: 6.6rem;
     margin-top: 5px;
   }
-  
+
   .db-unit {
     font-size: 2rem;
   }
-  
+
   .visualizer-container {
-    height: 80px;
+    height: 96px;
+    /* 增加20%: 80px -> 96px */
     margin-top: 15px;
   }
-  
+
   .doraemon-wrapper {
     width: 140px;
     height: 140px;
     margin-bottom: 10px;
   }
-  
+
   .vertical-meter-container {
     height: 260px;
   }
-  
-  .db-reference-panel, .right-panel {
+
+  .db-reference-panel,
+  .right-panel {
     width: 220px;
     min-width: 200px;
     padding: 12px;
     gap: 10px;
   }
-  
+
   .stat-box {
     padding: 10px 16px;
     gap: 10px;
   }
-  
-  .stat-icon { font-size: 1.8rem; }
-  .stat-value { font-size: 1.8rem; }
-  .stat-label { font-size: 0.85rem; margin-bottom: 2px; }
-  
+
+  .stat-icon {
+    font-size: 1.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+  }
+
   .controls-box {
     padding: 12px 16px;
   }
-  
+
   .reset-btn {
     padding: 10px;
     font-size: 1rem;
@@ -636,23 +687,30 @@
   font-size: clamp(6rem, 40vw, 18rem);
   font-weight: 900;
   color: #FFF;
-  text-shadow: 0 10px 0 rgba(0,0,0,0.3);
+  text-shadow: 0 10px 0 rgba(0, 0, 0, 0.3);
   z-index: 9999;
   pointer-events: none;
   animation: pulse-alarm 0.4s ease-in-out infinite alternate;
 }
 
 @keyframes pulse-alarm {
-  from { transform: scale(0.95); opacity: 0.9; }
-  to { transform: scale(1.05); opacity: 1; }
+  from {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 
 .doraemon-app.alarm-mode {
   background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
   --text-primary: #ffffff;
-  --text-secondary: rgba(255,255,255,0.8);
-  --card-bg: rgba(255,255,255,0.15);
-  --card-border: rgba(255,255,255,0.25);
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --card-bg: rgba(255, 255, 255, 0.15);
+  --card-border: rgba(255, 255, 255, 0.25);
 }
 
 .alarm-mode .db-number,
@@ -661,12 +719,13 @@
 }
 
 .alarm-mode .db-unit {
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* ===== 启动页面 ===== */
 .doraemon-start-layer {
-  width: 100vw; height: 100vh;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
   display: flex;
   flex-direction: column;
@@ -679,8 +738,10 @@
 
 .back-btn {
   position: fixed;
-  top: 20px; left: 20px;
-  width: 50px; height: 50px;
+  top: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
   border-radius: 14px;
   background: white;
   border: 1px solid #e2e8f0;
@@ -689,7 +750,7 @@
   justify-content: center;
   cursor: pointer;
   color: #64748b;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
   z-index: 100;
 }
@@ -701,15 +762,23 @@
 }
 
 .doraemon-start-icon {
-  width: 200px; height: 200px;
+  width: 200px;
+  height: 200px;
   margin-bottom: 24px;
-  filter: drop-shadow(0 15px 30px rgba(0,150,225,0.25));
+  filter: drop-shadow(0 15px 30px rgba(0, 150, 225, 0.25));
   animation: bounce-icon 2s ease-in-out infinite;
 }
 
 @keyframes bounce-icon {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 .start-title {
@@ -731,12 +800,12 @@
   border-radius: 24px;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 10px 40px rgba(0,150,225,0.35);
+  box-shadow: 0 10px 40px rgba(0, 150, 225, 0.35);
 }
 
 .doraemon-btn-big:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 16px 50px rgba(0,150,225,0.45);
+  box-shadow: 0 16px 50px rgba(0, 150, 225, 0.45);
 }
 
 .doraemon-btn-big:active {
@@ -753,7 +822,7 @@
 .btn-sub-text {
   font-size: 1.1rem;
   font-weight: 500;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .doraemon-error-box {
@@ -778,5 +847,5 @@
   color: #64748b;
   font-size: 1rem;
   font-weight: 500;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }

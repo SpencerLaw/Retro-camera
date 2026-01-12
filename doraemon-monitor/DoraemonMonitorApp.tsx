@@ -20,14 +20,12 @@ const DoraemonMonitorApp: React.FC = () => {
   const [totalTime, setTotalTime] = useState(0);
   const [state, setState] = useState<'calm' | 'warning' | 'alarm'>('calm');
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(4);
   const [timeStr, setTimeStr] = useState('');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const micRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
@@ -204,22 +202,39 @@ const DoraemonMonitorApp: React.FC = () => {
       { min: 100, max: 120, label: "100–120 dB 极其嘈杂" },
     ];
     const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
-    const panelBg = isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)';
+    
+    // 移除内联颜色逻辑，依赖 CSS 类
     const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
     const textColor = isDarkMode ? '#94a3b8' : '#475569';
+
     return (
-      <div className="db-reference-panel" style={{ width: '320px', padding: '30px', background: panelBg, borderRadius: '25px', border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)'}` }}>
-        <div className="reference-title" style={{ fontSize: '1.2rem', marginBottom: '30px', textAlign: 'center', color: activeTextColor, opacity: 0.8 }}>分贝等级参考</div>
-        <div className="vertical-meter-container" style={{ height: '420px', position: 'relative', display: 'flex' }}>
-          <div style={{ position: 'relative', width: '60px' }}>
-            <div style={{ width: '12px', height: '100%', margin: '0 auto', borderRadius: '10px', background: 'linear-gradient(to top, #00f260 0%, #ffff00 30%, #ff9900 60%, #ff416c 100%)', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }} />
-            <div style={{ position: 'absolute', bottom: `${pointerPos}%`, left: '50%', transform: 'translate(-50%, 50%)', zIndex: 100, width: '28px', height: '28px', background: '#fff', border: `3px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}`, boxShadow: isDarkMode ? '0 0 20px #00d4ff' : '0 4px 10px rgba(0,0,0,0.2)', borderRadius: '50%', transition: 'bottom 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` }} />
+      <div className="db-reference-panel">
+        <div className="reference-title">分贝等级参考</div>
+        <div className="vertical-meter-container">
+          <div style={{ position: 'relative', width: '12px' }}>
+            <div className="meter-bar-bg">
+              <div className="meter-gradient-fill"></div>
+            </div>
+            <div 
+              className="current-level-pointer"
+              style={{ 
+                bottom: `${pointerPos}%`, 
+                transform: 'translate(-50%, 50%)'
+              }} 
+            >
+              {/* 三角形指示器可通过 CSS 伪元素实现，或简化为纯圆点 */}
             </div>
           </div>
-          <div className="level-nodes" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingLeft: '20px', paddingBottom: '10px' }}>
+          <div className="level-nodes">
             {levels.reverse().map((l, i) => (
-              <div key={i} style={{ color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor, opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5, fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal', fontSize: '0.95rem' }}>{l.label}</div>
+              <div key={i} style={{ 
+                color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor, 
+                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5, 
+                fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
+                fontSize: '0.9rem'
+              }}>
+                {l.label}
+              </div>
             ))}
           </div>
         </div>
@@ -229,7 +244,7 @@ const DoraemonMonitorApp: React.FC = () => {
 
   // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
-    const BAR_COUNT = 120;
+    const BAR_COUNT = 80; // 减少数量以提高性能和适应性
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     // 在白天模式下使用更深的颜色和更高的不透明度
     const opacity = isDarkMode ? 0.7 : 0.5;
@@ -237,7 +252,7 @@ const DoraemonMonitorApp: React.FC = () => {
     const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
 
     return (
-      <div className="visualizer-container" style={{ opacity: 1 }}>
+      <div className="visualizer-container">
         {Array.from({ length: BAR_COUNT }).map((_, i) => {
           const dist = Math.abs(i - BAR_COUNT / 2);
           const norm = 1 - (dist / (BAR_COUNT / 2));
@@ -250,13 +265,10 @@ const DoraemonMonitorApp: React.FC = () => {
           
           return (
             <div key={i} className="wave-bar" style={{ 
-              height: `${height}px`, 
+              height: `${Math.min(100, height)}%`, // 使用百分比高度
               background: `linear-gradient(to top, transparent, ${mainColor})`,
               opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
               boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
-              width: '6px',
-              borderRadius: '4px',
-              transition: 'height 0.1s ease-out'
             }} />
           );
         })}
@@ -285,8 +297,8 @@ const DoraemonMonitorApp: React.FC = () => {
 
   return (
     <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
-      {state === 'alarm' && <div className="doraemon-giant-text" style={{ fontSize: '12vw' }}>{t('doraemon.quiet')}</div>}
-      <header className="doraemon-header" style={{ padding: '20px 40px' }}>
+      {state === 'alarm' && <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>}
+      <header className="doraemon-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
           <div style={{ fontSize: '1.2rem', fontWeight: 'bold', fontFamily: 'monospace', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
@@ -296,20 +308,46 @@ const DoraemonMonitorApp: React.FC = () => {
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
         </div>
       </header>
-      <main className="doraemon-main" style={{ padding: '0 60px', gap: '40px', justifyContent: 'space-between' }}>
+      <main className="doraemon-main">
         <NoiseLevelReference />
-        <div className="center-display" style={{ flex: 1 }}>
-          <div className="doraemon-wrapper" style={{ width: '350px', height: '350px', transform: `scale(${1 + (currentDb - 40) / 150})`, transition: 'transform 0.1s' }}><DoraemonSVG /></div>
-          <div className="db-display" style={{ marginTop: '30px' }}><span className="db-number" style={{ fontSize: '8rem' }}>{Math.round(currentDb)}</span><span className="db-unit" style={{ fontSize: '2rem' }}>dB</span></div>
+        <div className="center-display">
+          <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 150})` }}><DoraemonSVG /></div>
+          <div className="db-display"><span className="db-number">{Math.round(currentDb)}</span><span className="db-unit">dB</span></div>
           <Visualizer />
         </div>
-        <div className="right-panel" style={{ width: '320px', gap: '15px' }}>
-          <div className="stat-box" style={{ padding: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>🤫 安静时长</span><strong style={{ fontSize: '2.5rem', color: isDarkMode ? '#00f260' : '#059669', marginTop: '5px' }}>{formatTime(quietTime)}</strong></div>
-          <div className="stat-box" style={{ padding: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⏱️ 监测总计</span><strong style={{ fontSize: '2.5rem', color: isDarkMode ? '#0575e6' : '#2563eb', marginTop: '5px' }}>{formatTime(totalTime)}</strong></div>
-          <div className={`stat-box ${warnCount > 0 ? 'warning' : ''}`} style={{ padding: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>⚠️ 警告次数</span><strong style={{ fontSize: '2.5rem', color: '#dc2626', marginTop: '5px' }}>{warnCount}</strong></div>
-          <div className="stat-box" style={{ padding: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span style={{ fontSize: '1.2rem', opacity: 0.8 }}>🔊 最高分贝</span><strong style={{ fontSize: '2.5rem', color: isDarkMode ? '#ff00ff' : '#d946ef', marginTop: '5px' }}>{Math.round(maxDb)}</strong></div>
-          <button className="reset-btn" onClick={() => { setWarnCount(0); setMaxDb(0); }} style={{ padding: '12px', fontSize: '1rem' }}>{t('doraemon.resetCount')}</button>
-          <div className="controls-box" style={{ padding: '18px', marginTop: '5px' }}><div className="slider-header" style={{ marginBottom: '15px' }}><span style={{ fontSize: '1.2rem', color: isDarkMode ? '#fff' : '#1e293b' }}>分贝阈值</span><span style={{ fontSize: '1.5rem', color: isDarkMode ? '#00f260' : '#059669', fontWeight: 'bold' }}>{limit} dB</span></div><input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" style={{ height: '12px' }} /></div>
+        <div className="right-panel">
+          <div className="stat-box">
+            <div className="stat-content">
+              <span className="stat-label">🤫 安静时长</span>
+              <strong className="stat-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{formatTime(quietTime)}</strong>
+            </div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-content">
+              <span className="stat-label">⏱️ 监测总计</span>
+              <strong className="stat-value" style={{ color: isDarkMode ? '#0575e6' : '#2563eb' }}>{formatTime(totalTime)}</strong>
+            </div>
+          </div>
+          <div className={`stat-box ${warnCount > 0 ? 'warning' : ''}`}>
+            <div className="stat-content">
+              <span className="stat-label">⚠️ 警告次数</span>
+              <strong className="stat-value" style={{ color: '#dc2626' }}>{warnCount}</strong>
+            </div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-content">
+              <span className="stat-label">🔊 最高分贝</span>
+              <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
+            </div>
+          </div>
+          <button className="reset-btn" onClick={() => { setWarnCount(0); setMaxDb(0); }}>{t('doraemon.resetCount')}</button>
+          <div className="controls-box">
+            <div className="slider-header">
+              <span>分贝阈值</span>
+              <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{limit} dB</span>
+            </div>
+            <input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" />
+          </div>
         </div>
       </main>
     </div>
@@ -317,3 +355,4 @@ const DoraemonMonitorApp: React.FC = () => {
 };
 
 export default DoraemonMonitorApp;
+

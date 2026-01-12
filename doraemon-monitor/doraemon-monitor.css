@@ -25,13 +25,14 @@
 
 /* ===== 主容器 ===== */
 .doraemon-app {
-  width: 100vw; height: 100vh;
+  width: 100vw; 
+  height: 100vh;
   background: var(--bg-light);
   display: flex; flex-direction: column;
   color: var(--text-primary);
   transition: all 0.4s ease;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow: hidden;
+  overflow: hidden; /* 保持 hidden，滚动交由 main 处理 */
 }
 
 .doraemon-app.dark-mode {
@@ -50,11 +51,12 @@
   justify-content: space-between;
   padding: 0 20px;
   flex-shrink: 0;
+  z-index: 50;
 }
 
 .icon-btn {
-  width: 48px; height: 48px;
-  border-radius: 14px;
+  width: 40px; height: 40px; /* 稍微调小以适应小屏 */
+  border-radius: 12px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   display: flex;
@@ -62,7 +64,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: var(--text-primary);
 }
 
@@ -77,48 +79,54 @@
 .doraemon-main {
   flex: 1;
   display: flex;
-  align-items: stretch;
-  justify-content: center;
+  align-items: center; /* 垂直居中 */
+  justify-content: center; /* 水平居中 */
   padding: 10px 20px 20px;
-  gap: 30px;
+  gap: 20px; /* 减小默认间距 */
   position: relative;
-  overflow: hidden;
+  overflow-y: auto; /* 允许垂直滚动 */
+  overflow-x: hidden;
+  width: 100%;
 }
 
-/* ===== 分贝参考面板 - 放大50%显示 ===== */
+/* ===== 分贝参考面板 ===== */
 .db-reference-panel {
-  width: 280px;
-  min-width: 280px;
+  width: 260px; /* 默认宽度略微减小 */
+  min-width: 220px;
   max-width: 280px;
   background: var(--card-bg);
   border: 2px solid var(--card-border);
   border-radius: 24px;
-  padding: 24px 20px;
+  padding: 20px;
   flex-shrink: 0;
   z-index: 10;
+  height: auto;
+  max-height: 100%;
+  overflow-y: auto;
   align-self: center;
+  transition: all 0.3s ease;
 }
 
 .reference-title {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 800;
   text-align: center;
   color: var(--text-secondary);
-  margin-bottom: 20px;
-  letter-spacing: 2px;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
 }
 
 .vertical-meter-container {
-  height: 380px;
+  height: 350px; /* 默认高度减小 */
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 
 .meter-bar-bg {
-  width: 16px;
+  width: 12px;
   height: 100%;
   background: #e2e8f0;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   position: relative;
 }
@@ -136,11 +144,11 @@
 .current-level-pointer {
   position: absolute;
   left: -4px;
-  width: 24px; height: 24px;
+  width: 20px; height: 20px;
   background: var(--accent-blue);
-  border: 4px solid white;
+  border: 3px solid white;
   border-radius: 50%;
-  box-shadow: 0 3px 12px rgba(0,150,225,0.6);
+  box-shadow: 0 3px 8px rgba(0,150,225,0.6);
   transition: bottom 0.15s ease-out;
   z-index: 10;
   transform: translateY(50%);
@@ -165,7 +173,7 @@
 }
 
 .node-label {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
@@ -173,19 +181,19 @@
 }
 
 .node-desc {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-secondary);
   opacity: 0.8;
 }
 
 .reference-footer {
-  margin-top: 20px;
-  padding: 12px;
+  margin-top: 15px;
+  padding: 10px;
   background: rgba(0,0,0,0.03);
   border-radius: 12px;
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-secondary);
 }
@@ -194,7 +202,7 @@
   background: rgba(255,255,255,0.05);
 }
 
-/* ===== 中心显示区 - 固定尺寸容器 ===== */
+/* ===== 中心显示区 ===== */
 .center-display {
   display: flex;
   flex-direction: column;
@@ -202,36 +210,38 @@
   justify-content: center;
   z-index: 10;
   flex: 1;
-  max-width: 100%; /* Allow full width expansion */
-  min-width: 300px;
+  min-width: 280px; /* 防止过度压缩 */
+  max-width: 600px;
+  height: 100%;
 }
 
 .doraemon-wrapper {
-  width: 180px;
-  height: 180px;
+  width: min(300px, 25vw); /* 响应式大小 */
+  height: min(300px, 25vw);
   filter: drop-shadow(0 10px 25px rgba(0,150,225,0.25));
   transition: transform 0.1s ease-out;
-  /* 缩放不影响布局 */
   transform-origin: center center;
+  margin-bottom: 2vh;
 }
 
 .db-display {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
 }
 
 .db-number {
-  font-size: clamp(5rem, 18vw, 10rem);
+  font-size: clamp(4rem, 10vw, 8rem); /* 调整字体大小范围 */
   font-weight: 900;
   line-height: 1;
   color: var(--text-primary);
-  letter-spacing: -4px;
+  letter-spacing: -2px;
 }
 
 .db-unit {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
   font-weight: 700;
   color: var(--accent-blue);
   margin-left: 8px;
@@ -240,44 +250,45 @@
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
   width: 100%;
-  height: 120px;
+  height: 100px; /* 略微减小 */
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Spread bars across full width */
-  padding: 0 10px; /* Add small padding */
-  margin-top: 20px;
+  justify-content: space-between;
+  padding: 0 5%; 
+  margin-top: auto; /* 推到底部 */
   pointer-events: none;
 }
 
 .wave-bar {
-  width: 8px;
-  min-height: 12px;
-  border-radius: 8px;
+  flex: 1; /* 自适应宽度 */
+  margin: 0 1px;
+  min-height: 4px;
+  border-radius: 4px;
   transition: height 0.08s ease-out;
 }
 
-/* ===== 右侧面板 - 固定宽度 ===== */
+/* ===== 右侧面板 ===== */
 .right-panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   z-index: 10;
   flex-shrink: 0;
-  width: 280px;
-  min-width: 280px;
+  width: 260px; /* 默认略微减小 */
+  min-width: 220px;
   max-width: 280px;
   align-self: center;
 }
 
-/* ===== 统计卡片 - 超大字体 ===== */
+/* ===== 统计卡片 ===== */
 .stat-box {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   background: var(--card-bg);
   border: 2px solid var(--card-border);
-  border-radius: 20px;
-  padding: 18px 24px;
+  border-radius: 16px;
+  padding: 14px 20px;
   width: 100%;
   transition: all 0.3s;
 }
@@ -288,24 +299,25 @@
 }
 
 .stat-icon {
-  font-size: 3rem;
+  font-size: 2rem;
   line-height: 1;
 }
 
 .stat-content {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .stat-label {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .stat-value {
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 900;
   color: var(--text-primary);
   line-height: 1;
@@ -315,22 +327,22 @@
 .controls-box {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 20px;
-  padding: 20px 24px;
+  border-radius: 16px;
+  padding: 16px 20px;
 }
 
 .slider-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 1rem;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-secondary);
 }
 
 .threshold-value {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 900;
   color: var(--accent-blue);
 }
@@ -338,11 +350,11 @@
 .threshold-slider {
   -webkit-appearance: none;
   width: 100%;
-  height: 12px;
+  height: 8px; /* 变细 */
   background: #e2e8f0;
-  border-radius: 6px;
+  border-radius: 4px;
   outline: none;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .dark-mode .threshold-slider {
@@ -351,11 +363,11 @@
 
 .threshold-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 32px; height: 32px;
+  width: 24px; height: 24px;
   border-radius: 50%;
   background: var(--accent-blue);
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(0,150,225,0.4);
+  box-shadow: 0 3px 8px rgba(0,150,225,0.4);
   transition: transform 0.2s;
 }
 
@@ -365,71 +377,222 @@
 
 .reset-btn {
   width: 100%;
-  padding: 14px 24px;
-  border-radius: 14px;
+  padding: 12px 20px;
+  border-radius: 12px;
   border: none;
   background: var(--accent-blue);
   color: white;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(0,150,225,0.3);
+  box-shadow: 0 4px 12px rgba(0,150,225,0.3);
 }
 
 .reset-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,150,225,0.4);
+  box-shadow: 0 6px 16px rgba(0,150,225,0.4);
 }
 
-/* ===== 响应式 - 竖屏布局 ===== */
-@media (max-width: 1200px) {
+/* ===== 响应式适配 ===== */
+
+/* 笔记本/中等屏幕 (小于 1280px) */
+@media (max-width: 1280px) {
   .doraemon-main {
-    flex-direction: column;
-    gap: 16px;
-    padding: 10px 16px;
-    overflow-y: auto;
+    gap: 15px;
+    padding: 10px;
+  }
+  
+  .db-reference-panel, .right-panel {
+    width: 220px;
+    min-width: 200px;
+    padding: 15px;
+  }
+  
+  .stat-box {
+    padding: 10px 15px;
+  }
+  
+  .stat-value {
+    font-size: 1.6rem;
+  }
+  
+  .doraemon-wrapper {
+    width: 180px;
+    height: 180px;
+  }
+}
+
+/* 平板/窄屏 (小于 1024px) - 切换为竖排 */
+@media (max-width: 1024px) {
+  .doraemon-app {
+    height: 100vh; /* 恢复视口高度 */
+    overflow: hidden; 
   }
 
+  .doraemon-main {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-y: auto; /* 主区域可滚动 */
+    padding-bottom: 40px;
+    height: 100%;
+  }
+
+  /* 隐藏左侧参考面板以节省空间，或者移动到底部 */
   .db-reference-panel {
-    display: none;
+    display: none; 
   }
 
   .center-display {
-    flex: none;
+    flex: 0 0 auto;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   .doraemon-wrapper {
-    width: 100px;
-    height: 100px;
+    width: 160px;
+    height: 160px;
   }
 
   .db-number {
-    font-size: 4.5rem;
+    font-size: 5rem;
   }
 
   .right-panel {
-    width: 100%;
-    flex-direction: column;
-    gap: 10px;
+    width: 90%;
+    max-width: 400px;
+    flex-direction: row; /* 数据横向排列 */
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .stat-box {
-    width: 100%;
-    min-width: auto;
-    padding: 14px 20px;
+    flex: 1 1 140px; /* 允许换行 */
   }
-
-  .stat-icon { font-size: 2.2rem; }
-  .stat-value { font-size: 2.2rem; }
-  .stat-label { font-size: 0.85rem; }
 
   .controls-box {
     width: 100%;
+    order: 10;
+  }
+  
+  .reset-btn {
+    width: 100%;
+    order: 11;
   }
 }
 
-/* ===== 报警模式 ===== */
+/* 手机 (小于 600px) */
+@media (max-width: 600px) {
+  .doraemon-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .db-number {
+    font-size: 4rem;
+  }
+  
+  .right-panel {
+    width: 100%;
+    gap: 10px;
+  }
+  
+  .stat-box {
+    padding: 10px;
+  }
+  
+  .doraemon-giant-text {
+    font-size: 15vw;
+  }
+}
+
+/* 高度不足的情况 (如宽屏笔记本 1366x768) */
+@media (max-height: 800px) and (min-width: 1024px) {
+  .doraemon-main {
+    padding-top: 5px;
+  }
+  
+  .doraemon-wrapper {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 1vh;
+  }
+  
+  .vertical-meter-container {
+    height: 280px;
+  }
+  
+  .db-reference-panel, .right-panel {
+    padding: 10px;
+  }
+}
+
+/* 针对超小高度屏幕的极致优化 (如 1366x768 浏览器内容区较小的情况) */
+@media (max-height: 720px) and (min-width: 1024px) {
+  .doraemon-header {
+    height: 40px;
+    padding: 0 15px;
+  }
+  
+  .doraemon-main {
+    gap: 10px;
+    padding: 5px 15px;
+  }
+
+  .db-number {
+    font-size: 4rem;
+    margin-top: 0;
+  }
+  
+  .db-unit {
+    font-size: 1.5rem;
+  }
+  
+  .visualizer-container {
+    height: 60px;
+    margin-top: 10px;
+  }
+  
+  .doraemon-wrapper {
+    width: 110px;
+    height: 110px;
+    margin-bottom: 5px;
+  }
+  
+  .vertical-meter-container {
+    height: 220px;
+  }
+  
+  .db-reference-panel, .right-panel {
+    width: 200px;
+    min-width: 180px;
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .stat-box {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .stat-icon { font-size: 1.4rem; }
+  .stat-value { font-size: 1.4rem; }
+  .stat-label { font-size: 0.75rem; margin-bottom: 0; }
+  
+  .controls-box {
+    padding: 10px;
+  }
+  
+  .reset-btn {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== 报警模式保持不变 ===== */
+
 .doraemon-giant-text {
   position: fixed;
   inset: 0;

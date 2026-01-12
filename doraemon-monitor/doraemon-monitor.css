@@ -161,7 +161,7 @@
 .level-nodes {
   flex: 1;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column; /* Fixed: High dB at top, Low dB at bottom */
   justify-content: space-between;
 }
 

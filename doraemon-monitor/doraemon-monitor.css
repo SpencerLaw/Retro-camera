@@ -143,7 +143,7 @@
 
 .current-level-pointer {
   position: absolute;
-  left: -6px; /* Adjusted for larger size */
+  left: 50%; /* Center horizontally relative to parent */
   width: 28px; /* Reverted to original size */
   height: 28px;
   background: var(--accent-blue);
@@ -152,7 +152,7 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* Reverted shadow */
   transition: bottom 0.15s ease-out;
   z-index: 10;
-  transform: translateY(50%);
+  transform: translateX(-50%) translateY(50%); /* Center perfectly */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,62 +536,62 @@
 /* 针对超小高度屏幕的极致优化 (如 1366x768 浏览器内容区较小的情况) */
 @media (max-height: 720px) and (min-width: 1024px) {
   .doraemon-header {
-    height: 40px;
-    padding: 0 15px;
+    height: 50px;
+    padding: 0 20px;
   }
   
   .doraemon-main {
-    gap: 10px;
-    padding: 5px 15px;
+    gap: 15px;
+    padding: 10px 20px;
   }
 
   .db-number {
-    font-size: 4rem;
-    margin-top: 0;
+    font-size: 6rem;
+    margin-top: 5px;
   }
   
   .db-unit {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
   
   .visualizer-container {
-    height: 60px;
-    margin-top: 10px;
+    height: 80px;
+    margin-top: 15px;
   }
   
   .doraemon-wrapper {
-    width: 110px;
-    height: 110px;
-    margin-bottom: 5px;
+    width: 140px;
+    height: 140px;
+    margin-bottom: 10px;
   }
   
   .vertical-meter-container {
-    height: 220px;
+    height: 260px;
   }
   
   .db-reference-panel, .right-panel {
-    width: 200px;
-    min-width: 180px;
-    padding: 8px;
-    gap: 8px;
+    width: 220px;
+    min-width: 200px;
+    padding: 12px;
+    gap: 10px;
   }
   
   .stat-box {
-    padding: 8px 12px;
-    gap: 8px;
+    padding: 10px 16px;
+    gap: 10px;
   }
   
-  .stat-icon { font-size: 1.4rem; }
-  .stat-value { font-size: 1.4rem; }
-  .stat-label { font-size: 0.75rem; margin-bottom: 0; }
+  .stat-icon { font-size: 1.8rem; }
+  .stat-value { font-size: 1.8rem; }
+  .stat-label { font-size: 0.85rem; margin-bottom: 2px; }
   
   .controls-box {
-    padding: 10px;
+    padding: 12px 16px;
   }
   
   .reset-btn {
-    padding: 8px;
-    font-size: 0.9rem;
+    padding: 10px;
+    font-size: 1rem;
   }
 }
 

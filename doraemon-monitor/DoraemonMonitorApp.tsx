@@ -218,8 +218,7 @@ const DoraemonMonitorApp: React.FC = () => {
             <div 
               className="current-level-pointer"
               style={{ 
-                bottom: `${pointerPos}%`, 
-                transform: 'translate(-50%, 50%)'
+                bottom: `${pointerPos}%`
               }} 
             >
               <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` }} />

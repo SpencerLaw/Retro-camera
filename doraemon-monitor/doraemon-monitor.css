@@ -237,7 +237,7 @@
 }
 
 .db-number {
-  font-size: clamp(4rem, 10vw, 8rem); /* 调整字体大小范围 */
+  font-size: clamp(4.4rem, 11vw, 8.8rem); /* Increased by ~10% */
   font-weight: 900;
   line-height: 1;
   color: var(--text-primary);
@@ -546,7 +546,7 @@
   }
 
   .db-number {
-    font-size: 6rem;
+    font-size: 6.6rem;
     margin-top: 5px;
   }
   

@@ -280,8 +280,8 @@
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
   width: 100%;
-  height: 120px;
-  /* 增加20%: 100px -> 120px */
+  height: 180px;
+  /* 增加高度以提升视觉冲击力 */
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -44,7 +44,6 @@
             if (el) el.textContent = t(key);
         }
         
-        // Placeholders and Titles
         const licInput = document.getElementById('license-input');
         if (licInput) licInput.placeholder = t('placeholder');
         const rewardInput = document.getElementById('reward-text');
@@ -59,7 +58,6 @@
         const setBtn = document.getElementById('settings-btn');
         if (setBtn) setBtn.title = t('settings');
         
-        // Modal Header
         const settingsModal = document.getElementById('settings-modal');
         if (settingsModal) {
             const h2 = settingsModal.querySelector('.modal-header h2');
@@ -68,7 +66,6 @@
             if (p) p.textContent = t('settingsSubtitle');
         }
         
-        // Gate text
         const gateText = document.getElementById('gate-text');
         if (gateText) gateText.textContent = t('initializing');
     };
@@ -114,7 +111,7 @@
                 <path d=\"M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z\"
                       fill=\"${isDone ? 'url(#strawberry-' + index + ')' : '#ffdce5'}\" 
                       stroke=\"#ff3366\" stroke-width=\"4\" />
-                <ellipse cx=\"60\" cy=\"50\" rx=\"12\" ry=\"20\" fill=\"#ffffff\" transform=\"rotate(-15 60 50)\" opacity=\"${isDone ? '0.8' : '0.4'}\"/>
+                <ellipse cx=\"60\" cy=\"50\" rx=\"12\" ry=\"20\" fill=\"#ffffff\" transform=\"rotate(-15 60 50)\" opacity=\"${isDone ? '0.8' : '0.4'}"/>
             </svg>";
         bubble.innerHTML = heartSVG + `<div class="name" style="color: ${isDone ? '#374151' : '#a36d7d'}">${student.name}</div>`;
         if (!isDone) {
@@ -202,7 +199,7 @@
                 </defs>
                 <rect width=\"500\" height=\"500\" fill=\"url(#skyGrad)\" />
                 <path d=\"M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z\" fill=\"#84fab0\" />
-                <g transform=\"translate(250, 420) scale(${treeScale})\">
+                <g transform=\"translate(250, 420) scale(${treeScale})">
                     <path d=\"M-15,0 Q-10,-60 -30,-100 Q-40,-120 -80,-140 M-10,-60 Q5,-120 40,-160 M0,0 Q15,-50 25,-100 Q35,-150 80,-180 L0,0 Z\" 
                           fill=\"none\" stroke=\"url(#trunkGrad)\" stroke-width=\"20\" stroke-linecap=\"round\" />
                     <path d=\"M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z\" fill=\"url(#trunkGrad)\" />
@@ -211,7 +208,7 @@
                         <circle cx=\"50\" cy=\"-160\" r=\"45\" fill=\"url(#leafDark)\" opacity=\"${leafOpacity}\" />
                         <circle cx=\"0\" cy=\"-210\" r=\"50\" fill=\"url(#leafDark)\" opacity=\"${leafOpacity}\" />
                         ${stage >= 2 ? `<circle cx=\"-30\" cy=\"-170\" r=\"35\" fill=\"url(#leafLight)\" opacity=\"${leafOpacity}\"/><circle cx=\"30\" cy=\"-190\" r=\"35\" fill=\"url(#leafLight)\" opacity=\"${leafOpacity}\"/>` : ''}
-                        ${stage >= 3 ? `<circle cx=\"0\" cy=\"-230\" r=\"30\" fill=\"#b9f6ca\" opacity=\"${leafOpacity}\"/>` : ''}
+                        ${stage >= 3 ? `<circle cx=\"0\" cy=\"-230\" r=\"30\" fill=\"#b9f6ca\" opacity=\"${leafOpacity}\" />` : ''}
                     </g>` : ''}
                 </g>
                 ${stage === 4 ? `<g class=\"firework\">
@@ -219,7 +216,7 @@
                     <circle cx=\"350\" cy=\"120\" r=\"5\" fill=\"#ffd700\"><animate attributeName=\"r\" from=\"0\" to=\"60\" dur=\"2s\" begin=\"0.5s\" repeatCount=\"indefinite"/><animate attributeName=\"opacity\" from=\"1\" to=\"0\" dur=\"2s\" begin=\"0.5s\" repeatCount=\"indefinite"/></circle>
                 </g>` : ''}
             </svg>
-            ${stage === 4 ? `<div class="celebrate-badge">${t('allDone')}</div>` : ''}
+            ${stage === 4 ? `<div class=\"celebrate-badge\">${t('allDone')}</div>` : ''}
         `;
     }
 
@@ -254,7 +251,6 @@
                 saveData();
                 document.getElementById('settings-modal').classList.add('hidden');
                 renderUI(); renderTree();
-                alert(t('importSuccess'));
             }
         };
         document.getElementById('clear-data-btn').onclick = () => {
@@ -317,12 +313,11 @@
         document.getElementById('save-rules-btn').onclick = () => {
             STATE.rules.reward = document.getElementById('reward-text').value;
             STATE.rules.punishment = document.getElementById('punishment-text').value;
-            saveData(); alert(t('rulesSaved'));
+            saveData();
         };
     }
 
     const initApp = () => {
-        // 确保网关隐藏
         const gate = document.getElementById('gatekeeper-screen');
         if (gate) gate.style.display = 'none';
         
@@ -337,9 +332,8 @@
         let deviceId = localStorage.getItem('hc_device_id');
         if (!deviceId) { deviceId = 'hc-' + Math.random().toString(36).substr(2, 9); localStorage.setItem('hc_device_id', deviceId); }
         
-        // 设置一个超时控制器，防止网络慢导致卡死在开启界面
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
 
         try {
             const res = await fetch('/api/verify-license', {
@@ -350,23 +344,21 @@
             });
             clearTimeout(timeoutId);
             const data = await res.json();
-            if (data.success) initApp(); else forceExit(data.message);
+            if (!data.success) forceExit(data.message);
         } catch (e) { 
-            console.warn('验证请求超时或失败，进入离线模式:', e);
+            console.warn('Silent license check failed/timeout, staying in offline mode');
             clearTimeout(timeoutId);
-            initApp(); 
         }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         applyTranslations();
         
-        // --- 核心优化：强制移除网关，防止卡死 ---
         const hideGate = () => {
             const gate = document.getElementById('gatekeeper-screen');
             if (gate) gate.style.display = 'none';
         };
-        // 哪怕后续脚本报错，500ms 后也必须让黑屏消失
+        // 保底定时器
         setTimeout(hideGate, 500); 
 
         document.querySelectorAll('.global-back-btn').forEach(btn => {
@@ -389,16 +381,19 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        if (STATE.isVerified && STATE.licenseCode) validateLicense();
+        if (STATE.isVerified && STATE.licenseCode) {
+            // --- 核心秒开逻辑：直接初始化，不等待 ---
+            initApp();
+            validateLicense(); // 后台悄悄验证
+        }
         else {
-            const gate = document.getElementById('gatekeeper-screen');
-            if (gate) gate.style.display = 'none';
+            hideGate();
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('verify-btn').onclick = async () => {
                 const code = document.getElementById('license-input').value.trim();
                 const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'hc-user' }) });
                 const data = await res.json();
-                if (data.success) { STATE.isVerified = true; STATE.licenseCode = code; saveData(); initApp(); alert(t('saveSuccess')); } 
+                if (data.success) { STATE.isVerified = true; STATE.licenseCode = code; saveData(); initApp(); } 
                 else alert(data.message);
             };
         }

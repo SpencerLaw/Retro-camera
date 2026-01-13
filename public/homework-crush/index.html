@@ -19,6 +19,16 @@
             @keyframes gate-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
             .error-msg { color: #ff416c; }
         </style>
+        <script>
+            // 绝地保底：无论如何1秒后关闭黑屏
+            setTimeout(function() {
+                var g = document.getElementById('gatekeeper-screen');
+                if (g && g.style.display !== 'none') {
+                    g.style.display = 'none';
+                    console.log('Gate forced closed by inline failsafe');
+                }
+            }, 1000);
+        </script>
     </div>
 
     <!-- 1. 授权登录界面 -->

@@ -334,15 +334,26 @@
     async function validateLicense() {
         let deviceId = localStorage.getItem('hc_device_id');
         if (!deviceId) { deviceId = 'hc-' + Math.random().toString(36).substr(2, 9); localStorage.setItem('hc_device_id', deviceId); }
+        
+        // 设置一个超时控制器，防止网络慢导致卡死在开启界面
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时
+
         try {
             const res = await fetch('/api/verify-license', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ licenseCode: STATE.licenseCode, deviceId: deviceId })
+                body: JSON.stringify({ licenseCode: STATE.licenseCode, deviceId: deviceId }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
             const data = await res.json();
             if (data.success) initApp(); else forceExit(data.message);
-        } catch (e) { initApp(); }
+        } catch (e) { 
+            console.warn('验证请求超时或失败，进入离线模式:', e);
+            clearTimeout(timeoutId);
+            initApp(); 
+        }
     }
 
     window.addEventListener('DOMContentLoaded', () => {

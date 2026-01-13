@@ -332,6 +332,8 @@ function renderStudentPreview() {
 }
 
 function showApp() {
+    const gate = document.getElementById('gatekeeper-screen');
+    if (gate) gate.style.display = 'none';
     const auth = document.getElementById('auth-screen');
     const app = document.getElementById('app-screen');
     if (auth) auth.classList.add('hidden');
@@ -341,6 +343,8 @@ function showApp() {
 }
 
 function showAuth() {
+    const gate = document.getElementById('gatekeeper-screen');
+    if (gate) gate.style.display = 'none';
     const auth = document.getElementById('auth-screen');
     const app = document.getElementById('app-screen');
     if (auth) auth.classList.remove('hidden');

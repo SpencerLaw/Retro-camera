@@ -1,39 +1,39 @@
 {
   "home": {
-    "title": "naypok",
+    "title": "Anypok",
     "subtitle": "Awe",
 
 
     "adventure": {
-      "title": "奖惩大冒险",
-      "subtitle": "校园大挑战",
-      "description": "转动轮盘，迎接属于你的趣事和挑战！"
+      "title": "奖惩大冒�?,
+      "subtitle": "校园大挑�?,
+      "description": "转动轮盘，迎接属于你的趣事和挑战�?
     },
     "doraemon": {
-      "title": "哆啦A梦",
-      "subtitle": "教室分贝监测仪",
+      "title": "哆啦A�?,
+      "subtitle": "教室分贝监测�?,
       "description": "实时监测环境噪音，超过阈值时自动警报，帮助维持安静的学习环境"
     },
 
     "homeworkCrush": {
-      "title": "作业消消乐",
-      "subtitle": "趣味闯关 • 习惯养成",
-      "description": "让交作业变成消消乐游戏，全班一起种出大树"
+      "title": "作业消消�?,
+      "subtitle": "趣味闯关 �?习惯养成",
+      "description": "让交作业变成消消乐游戏，全班一起种出大�?
     },
     "magicRollCall": {
-      "title": "炫酷点名器",
-      "subtitle": "魔法课堂 • 星际穿越",
-      "description": "超炫酷的课堂点名神器，让被点名成为一种期待"
+      "title": "炫酷点名�?,
+      "subtitle": "魔法课堂 �?星际穿越",
+      "description": "超炫酷的课堂点名神器，让被点名成为一种期�?
     },
     "groupMaker": {
       "title": "抓抓乐分组器",
-      "subtitle": "爪子抓取 • 公平分组",
-      "description": "像抓娃娃一样抓取学生名单，让课堂分组变得公平又有趣！",
-      "inputPlaceholder": "在这里输入或粘贴学生名单（支持换行或逗号分隔）...",
+      "subtitle": "爪子抓取 �?公平分组",
+      "description": "像抓娃娃一样抓取学生名单，让课堂分组变得公平又有趣�?,
+      "inputPlaceholder": "在这里输入或粘贴学生名单（支持换行或逗号分隔�?..",
       "inputTitle": "名单列表",
       "actionTitle": "操作中心",
       "members": "成员",
-      "groupCount": "分组数量：",
+      "groupCount": "分组数量�?,
       "startBtn": "开始抓取！",
       "runningBtn": "正在抓取...",
       "results": "分组结果",
@@ -43,9 +43,9 @@
       "exportBtn": "导出 TXT",
       "clearBtn": "清空",
       "waitingMsg": "等待幸运降临...",
-      "groupNamePrefix": "第",
-      "groupNameSuffix": "组",
-      "errorLow": "学生人数不能少于分组数量！",
+      "groupNamePrefix": "�?,
+      "groupNameSuffix": "�?,
+      "errorLow": "学生人数不能少于分组数量�?,
       "downloadFileName": "分组结果_{time}.txt"
     },
 
@@ -61,63 +61,63 @@
     "backHome": "返回首页",
     "title": "哆啦A梦教室分贝仪",
     "starting": "正在启动...",
-    "pleaseAllowPermission": "请点击允许权限",
-    "startQuiet": "开始安静",
+    "pleaseAllowPermission": "请点击允许权�?,
+    "startQuiet": "开始安�?,
     "studyBegin": "自习开始！",
-    "pleaseAllowMic": "点击后请务必选择\"允许\"麦克风",
+    "pleaseAllowMic": "点击后请务必选择\"允许\"麦克�?,
     "quietDuration": "安静时长",
     "warningCount": "警告次数",
-    "totalDuration": "监测总时长",
+    "totalDuration": "监测总时�?,
     "currentDecibel": "当前分贝",
-    "alarmThreshold": "报警阈值",
+    "alarmThreshold": "报警阈�?,
     "resetCount": "重置警告次数",
     "quiet": "安静！！",
-    "monitorTitle": "{db} dB - 监测中",
-    "appTitle": "naypok Doraemon",
+    "monitorTitle": "{db} dB - 监测�?,
+    "appTitle": "Anypok Doraemon",
     "summoning": "正在召唤...",
-    "startMonitor": "开启监测",
-    "startMonitorSub": "点击开始自习守护",
-    "dbReference": "分贝等级参考",
+    "startMonitor": "开启监�?,
+    "startMonitorSub": "点击开始自习守�?,
+    "dbReference": "分贝等级参�?,
     "levels": {
-      "l0": "0–20 dB 极度安静",
-      "l20": "20–40 dB 非常安静",
-      "l40": "40–60 dB 正常背景",
-      "l60": "60–80 dB 中等响度",
-      "l80": "80–100 dB 响亮",
-      "l100": "100–120 dB 极其嘈杂"
+      "l0": "0�?0 dB 极度安静",
+      "l20": "20�?0 dB 非常安静",
+      "l40": "40�?0 dB 正常背景",
+      "l60": "60�?0 dB 中等响度",
+      "l80": "80�?00 dB 响亮",
+      "l100": "100�?20 dB 极其嘈杂"
     },
     "quietTime": "🤫 安静时长",
     "totalTime": "⏱️ 监测总计",
     "warnCount": "⚠️ 警告次数",
-    "maxDb": "🔊 最高分贝",
-    "threshold": "分贝阈值",
+    "maxDb": "🔊 最高分�?,
+    "threshold": "分贝阈�?,
     "authFailed": "授权失败: ",
     "authExpired": "⚠️ 授权失效",
     "returnHome": "{seconds}秒后自动返回首页...",
     "verifying": "🔮 正在验证魔法授权...",
     "license": {
       "invalidFormat": "授权码格式不正确",
-      "success": "✅ 授权成功！正在启动...",
+      "success": "�?授权成功！正在启�?..",
       "invalidCode": "授权码无效，请检查后重试",
-      "confirmClear": "确定要清除本地授权缓存吗？",
-      "cleared": "✅ 缓存已清除！刷新页面生效",
+      "confirmClear": "确定要清除本地授权缓存吗�?,
+      "cleared": "�?缓存已清除！刷新页面生效",
       "backHome": "返回首页",
       "title": "🤫 分贝检测仪",
       "subtitle": "请输入您购买的授权码",
       "clearCache": "清除授权缓存",
       "devMode": "开发者模式已启用",
-      "verifying": "验证中...",
-      "verify": "验证授权码"
+      "verifying": "验证�?..",
+      "verify": "验证授权�?
     },
     "errors": {
       "locationRestricted": "🌍 地区限制",
-      "locationRestrictedDesc": "很抱歉，灵签功能在您当前的地区不可用。\n\n💡 建议：\n• 使用 VPN 连接到支持的地区\n• 或者尝试探索工作室中的其他应用！",
-      "browserNotSupported": "您的浏览器不支持音频功能，请升级浏览器。",
-      "micDisconnected": "⚠️ 麦克风连接已断开！\n监测停止，请重新点击开始。",
-      "startFailed": "🔴 启动失败！",
-      "permissionDenied": "\n⛔ 您刚才点击了\"禁止\"麦克风。\n\n✅ 解决方法：\n1. 点击浏览器地址栏左侧的\"锁\"或\"设置\"图标。\n2. 找到\"麦克风\"并点击\"重置\"或\"允许\"。\n3. 刷新页面或点击下方按钮重试。",
-      "noMicFound": "\n🔌 未检测到麦克风设备，请检查连接。",
-      "unknownError": "\n❓ "
+      "locationRestrictedDesc": "很抱歉，灵签功能在您当前的地区不可用。\n\n💡 建议：\n�?使用 VPN 连接到支持的地区\n�?或者尝试探索工作室中的其他应用�?,
+      "browserNotSupported": "您的浏览器不支持音频功能，请升级浏览器�?,
+      "micDisconnected": "⚠️ 麦克风连接已断开！\n监测停止，请重新点击开始�?,
+      "startFailed": "🔴 启动失败�?,
+      "permissionDenied": "\n�?您刚才点击了\"禁止\"麦克风。\n\n�?解决方法：\n1. 点击浏览器地址栏左侧的\"锁\"或\"设置\"图标。\n2. 找到\"麦克风\"并点击\"重置\"或\"允许\"。\n3. 刷新页面或点击下方按钮重试�?,
+      "noMicFound": "\n🔌 未检测到麦克风设备，请检查连接�?,
+      "unknownError": "\n�?"
     }
   }
 }

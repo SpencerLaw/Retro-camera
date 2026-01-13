@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>naypok 授权管理后台</title>  <style>
+      <title>Anypok 授权管理后台</title>  <style>
     :root {
       --primary: #6366f1;
       --primary-dark: #4f46e5;
@@ -243,7 +243,7 @@
   <div class="header">
     <div style="display: flex; align-items: center;">
       <div>
-        <h1>🚀 naypok Admin</h1>
+        <h1>🚀 Anypok Admin</h1>
         <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
       </div>
       <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
@@ -253,7 +253,7 @@
   <!-- Tabs -->
   <div class="tabs">
     <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
-    <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
+    <div class="tab" onclick="switchTab('generate')">📝 生成授权�?/div>
   </div>
 
   <!-- SECTION 1: MONITOR -->
@@ -261,13 +261,13 @@
     <div class="monitor-list">
       <div class="monitor-header">
         <div></div>
-        <div>授权码</div>
-        <div>设备数</div>
-        <div>最后活跃</div>
+        <div>授权�?/div>
+        <div>设备�?/div>
+        <div>最后活�?/div>
       </div>
       <div id="monitorContent">
         <div style="padding: 40px; text-align: center; color: var(--text-light);">
-          加载中...
+          加载�?..
         </div>
       </div>
     </div>
@@ -276,12 +276,12 @@
   <!-- SECTION 2: GENERATOR -->
   <div id="generateSection" class="view-section">
     <div class="gen-card">
-      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
+      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权�?/h2>
       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
         <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
         <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
         <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
-        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
+        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名�?(DM)</button>
       </div>
       
       <div class="gen-list" id="genList"></div>
@@ -305,8 +305,7 @@
 
   // === 初始化：自动登录 ===
   window.addEventListener('load', () => {
-    // 检查主题
-    const savedTheme = localStorage.getItem('theme');
+    // 检查主�?    const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.getElementById('themeBtn').textContent = '🌞';
@@ -337,7 +336,7 @@
       }
 
       // 登录成功
-      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+      document.getElementById('connectionStatus').textContent = `🟢 已连�?(�?${json.data.length} 条记�?`;
       document.getElementById('connectionStatus').style.color = 'var(--success)';
 
       currentData = json.data;
@@ -363,7 +362,7 @@
     }
   }
 
-  // === 辅助：解析 User Agent ===
+  // === 辅助：解�?User Agent ===
   function parseUA(ua) {
     if (!ua) return '未知设备';
     if (ua.includes('iPhone')) return 'iPhone (iOS)';
@@ -380,32 +379,29 @@
     const container = document.getElementById('monitorContent');
     
     if (currentData.length === 0) {
-      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记�?/div>';
       return;
     }
 
     container.innerHTML = currentData.map((item, index) => {
-      // 检查是否失效
-      const isRevoked = item.status === 'revoked';
+      // 检查是否失�?      const isRevoked = item.status === 'revoked';
       
-      // 计算状态颜色
-      const usage = item.totalDevices;
+      // 计算状态颜�?      const usage = item.totalDevices;
       const max = item.maxDevices || 3;
       let badgeClass = 'status-good';
       let statusText = '正常';
       
       if (isRevoked) {
-        badgeClass = 'status-full'; // 用红色表示失效
-        statusText = '🚫 已删除';
+        badgeClass = 'status-full'; // 用红色表示失�?        statusText = '🚫 已删�?;
       } else if (usage >= max) {
         badgeClass = 'status-full';
         statusText = '已满';
       } else if (usage > max * 0.8) {
         badgeClass = 'status-warn';
-        statusText = '即将满';
+        statusText = '即将�?;
       }
 
-      // 构建设备详情行 (略微调整样式)
+      // 构建设备详情�?(略微调整样式)
       const deviceRows = item.devices.map((dev, i) => {
         const deviceName = parseUA(dev.ua);
         const fullUA = dev.ua.replace(/"/g, '&quot;');
@@ -429,7 +425,7 @@
       return `
         <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
           <div class="item-summary" onclick="toggleItem(${index})">
-            <div class="toggle-btn">▶</div>
+            <div class="toggle-btn">�?/div>
             <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
               ${item.code}
             </div>
@@ -445,7 +441,7 @@
             <div class="details-grid">
               <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); margin-bottom:10px;">
                 <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
-                <span>首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
+                <span>首次激�? ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
               </div>
               
               <table class="device-table">
@@ -455,7 +451,7 @@
                     <th>设备信息</th>
                     <th>Device ID</th>
                     <th>首次绑定</th>
-                    <th>最后在线</th>
+                    <th>最后在�?/th>
                   </tr>
                 </thead>
                 <tbody>
@@ -483,7 +479,7 @@
     }
   }
 
-  // === 生成器功能 ===
+  // === 生成器功�?===
   function generateCodes(type = 'doraemon') {
     const count = document.getElementById('genCount').value;
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -527,13 +523,13 @@
     listEl.innerHTML = generatedCodes.map(c => `
       <div class="gen-item">
         <span>${c}</span>
-        <span style="color:var(--text-light); font-size:12px;">未激活</span>
+        <span style="color:var(--text-light); font-size:12px;">未激�?/span>
       </div>
     `).join('');
   }
 
   function exportEnv() {
-    if(!generatedCodes.length) return alert('没有生成的代码');
+    if(!generatedCodes.length) return alert('没有生成的代�?);
     const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], {type: 'text/plain'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -544,12 +540,12 @@
   function copyAllGenerated() {
     if(!generatedCodes.length) return;
     navigator.clipboard.writeText(generatedCodes.join('\n'));
-    alert(`已复制 ${generatedCodes.length} 个授权码`);
+    alert(`已复�?${generatedCodes.length} 个授权码`);
   }
   
   function copy(text) {
     navigator.clipboard.writeText(text);
-    alert('已复制 ID: ' + text);
+    alert('已复�?ID: ' + text);
   }
 
   // === 工具函数 ===

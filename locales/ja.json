@@ -1,38 +1,38 @@
 {
   "home": {
-    "title": "naypok",
+    "title": "Anypok",
     "subtitle": "Awe",
 
 
     "adventure": {
-      "title": "罰ゲーム大冒険",
+      "title": "罰ゲーム大冒�?,
       "subtitle": "キャンパスチャレンジ",
-      "description": "ルーレットを回して、楽しいストーリーとチャレンジを迎えよう！"
+      "description": "ルーレットを回して、楽しいストーリーとチャレンジを迎えよう�?
     },
     "couple": {
-      "title": "ハートビートパクト",
-      "subtitle": "ハートビートパクト",
+      "title": "ハートビートパク�?,
+      "subtitle": "ハートビートパク�?,
       "description": "カップルゲーム、楽しいチャレンジとスロットマシンアニメーション"
     },
     "doraemon": {
-      "title": "ドラえもん",
+      "title": "ドラえも�?,
       "subtitle": "教室デシベルモニター",
-      "description": "リアルタイムで環境ノイズを監視し、しきい値を超えると自動的に警報を発します"
+      "description": "リアルタイムで環境ノイズを監視し、しきい値を超えると自動的に警報を発しま�?
     },
 
     "homeworkCrush": {
-      "title": "宿題クラッシュ",
-      "subtitle": "楽しいチャレンジ • 習慣作り",
+      "title": "宿題クラッシ�?,
+      "subtitle": "楽しいチャレンジ �?習慣作り",
       "description": "宿題をゲームに変えて、みんなで大きな木を育てよう"
     },
     "magicRollCall": {
       "title": "魔法の点名簿",
-      "subtitle": "魔法教室 • 星間旅行",
-      "description": "指名されるのが待ち遠しくなる、超クールな点呼ツール"
+      "subtitle": "魔法教室 �?星間旅行",
+      "description": "指名されるのが待ち遠しくなる、超クールな点呼ツー�?
     },
           "results": "グループ分け結果",
-          "downloadAll": "📥 すべてダウンロード",
-          "memberListTitle": "メンバーリスト",
+          "downloadAll": "📥 すべてダウンロー�?,
+          "memberListTitle": "メンバーリス�?,
           "exportCurrentGroup": "グループリストを出力",
           "exportBtn": "TXT出力",
     "backHome": "ホームに戻る",
@@ -43,62 +43,62 @@
 
   "doraemon": {
     "backHome": "ホームに戻る",
-    "title": "ドラえもん教室デシベルモニター",
-    "starting": "起動中...",
-    "pleaseAllowPermission": "マイクの許可をクリックしてください",
+    "title": "ドラえもん教室デシベルモニタ�?,
+    "starting": "起動�?..",
+    "pleaseAllowPermission": "マイクの許可をクリックしてくださ�?,
     "startQuiet": "静かに始める",
-    "studyBegin": "自習開始！",
-    "pleaseAllowMic": "クリック後、必ずマイクの\"許可\"を選択してください",
-    "quietDuration": "静かな時間",
+    "studyBegin": "自習開始�?,
+    "pleaseAllowMic": "クリック後、必ずマイクの\"許可\"を選択してくださ�?,
+    "quietDuration": "静かな時�?,
     "warningCount": "警告回数",
-    "currentDecibel": "現在のデシベル (dB)",
-    "alarmThreshold": "アラーム閾値",
-    "resetCount": "警告回数をリセット",
-    "quiet": "静かに！！",
-    "monitorTitle": "{db} dB - 監視中",
-    "appTitle": "naypok ドラえもん",
-    "summoning": "召喚中...",
-    "startMonitor": "監視を開始",
-    "startMonitorSub": "クリックして自習を守る",
-    "dbReference": "デシベルレベル参考",
+    "currentDecibel": "現在のデシベ�?(dB)",
+    "alarmThreshold": "アラーム閾�?,
+    "resetCount": "警告回数をリセッ�?,
+    "quiet": "静かに！�?,
+    "monitorTitle": "{db} dB - 監視�?,
+    "appTitle": "Anypok ドラえも�?,
+    "summoning": "召喚�?..",
+    "startMonitor": "監視を開�?,
+    "startMonitorSub": "クリックして自習を守�?,
+    "dbReference": "デシベルレベル参�?,
     "levels": {
-      "l0": "0–20 dB 非常に静か",
-      "l20": "20–40 dB 静か",
-      "l40": "40–60 dB 通常の背景音",
-      "l60": "60–80 dB 中程度の音量",
-      "l80": "80–100 dB うるさい",
-      "l100": "100–120 dB 非常にうるさい"
+      "l0": "0�?0 dB 非常に静�?,
+      "l20": "20�?0 dB 静か",
+      "l40": "40�?0 dB 通常の背景音",
+      "l60": "60�?0 dB 中程度の音量",
+      "l80": "80�?00 dB うるさい",
+      "l100": "100�?20 dB 非常にうるさ�?
     },
     "quietTime": "🤫 静寂時間",
     "totalTime": "⏱️ 合計時間",
     "warnCount": "⚠️ 警告回数",
-    "maxDb": "🔊 最大デシベル",
-    "threshold": "デシベル閾値",
+    "maxDb": "🔊 最大デシベ�?,
+    "threshold": "デシベル閾�?,
     "authFailed": "認証失敗: ",
     "authExpired": "⚠️ 認証期限切れ",
-    "returnHome": "{seconds}秒後にホームに戻ります...",
-    "verifying": "🔮 魔法の認証を確認中...",
+    "returnHome": "{seconds}秒後にホームに戻りま�?..",
+    "verifying": "🔮 魔法の認証を確認�?..",
     "license": {
       "invalidFormat": "ライセンス形式が無効です",
-      "success": "✅ 認証成功！起動中...",
+      "success": "�?認証成功！起動中...",
       "invalidCode": "コードが無効です。確認して再試行してください",
-      "confirmClear": "ローカルライセンスキャッシュをクリアしてもよろしいですか？",
-      "cleared": "✅ キャッシュがクリアされました！ページを更新中...",
+      "confirmClear": "ローカルライセンスキャッシュをクリアしてもよろしいですか�?,
+      "cleared": "�?キャッシュがクリアされました！ページを更新中...",
       "backHome": "ホームに戻る",
       "title": "🤫 デシベルモニター",
-      "subtitle": "購入したライセンスコードを入力してください",
-      "clearCache": "認証キャッシュをクリア",
-      "devMode": "開発者モードが有効になりました",
-      "verifying": "検証中...",
+      "subtitle": "購入したライセンスコードを入力してくださ�?,
+      "clearCache": "認証キャッシュをクリ�?,
+      "devMode": "開発者モードが有効になりまし�?,
+      "verifying": "検証�?..",
       "verify": "ライセンスを検証"
     },
     "errors": {
-      "browserNotSupported": "お使いのブラウザは音声機能をサポートしていません。ブラウザをアップグレードしてください。",
-      "micDisconnected": "⚠️ マイク接続が切断されました！\n監視が停止しました。もう一度開始をクリックしてください。",
+      "browserNotSupported": "お使いのブラウザは音声機能をサポートしていません。ブラウザをアップグレードしてください�?,
+      "micDisconnected": "⚠️ マイク接続が切断されました！\n監視が停止しました。もう一度開始をクリックしてください�?,
       "startFailed": "🔴 起動に失敗しました！",
-      "permissionDenied": "\n⛔ マイクを\"拒否\"しました。\n\n✅ 解決方法：\n1. ブラウザのアドレスバーの左側にある\"ロック\"または\"設定\"アイコンをクリックします。\n2. \"マイク\"を見つけて\"リセット\"または\"許可\"をクリックします。\n3. ページを更新するか、下のボタンをクリックして再試行します。",
-      "noMicFound": "\n🔌 マイクデバイスが検出されませんでした。接続を確認してください。",
-      "unknownError": "\n❓ "
+      "permissionDenied": "\n�?マイクを\"拒否\"しました。\n\n�?解決方法：\n1. ブラウザのアドレスバーの左側にある\"ロック\"または\"設定\"アイコンをクリックします。\n2. \"マイク\"を見つけて\"リセット\"または\"許可\"をクリックします。\n3. ページを更新するか、下のボタンをクリックして再試行します�?,
+      "noMicFound": "\n🔌 マイクデバイスが検出されませんでした。接続を確認してください�?,
+      "unknownError": "\n�?"
     }
   }
 }

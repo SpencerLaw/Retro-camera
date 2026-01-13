@@ -1,40 +1,40 @@
 {
   "home": {
-    "title": "naypok",
+    "title": "Anypok",
     "subtitle": "Awe",
 
 
     "adventure": {
-      "title": "獎懲大冒險",
-      "subtitle": "校園大挑戰",
-      "description": "轉動輪盤，迎接屬於你的趣事和挑戰！"
+      "title": "獎懲大冒�?,
+      "subtitle": "校園大挑�?,
+      "description": "轉動輪盤，迎接屬於你的趣事和挑戰�?
     },
     "doraemon": {
-      "title": "哆啦A夢",
+      "title": "哆啦A�?,
       "subtitle": "教室分貝監測儀",
       "description": "實時監測環境噪音，超過閾值時自動警報，幫助維持安靜的學習環境"
     },
 
     "homeworkCrush": {
-      "title": "作業消消樂",
-      "subtitle": "趣味闖關 • 習慣養成",
-      "description": "讓交作業變成消消樂遊戲，全班一起種出大樹"
+      "title": "作業消消�?,
+      "subtitle": "趣味闖關 �?習慣養成",
+      "description": "讓交作業變成消消樂遊戲，全班一起種出大�?
     },
     "magicRollCall": {
-      "title": "炫酷點名器",
-      "subtitle": "魔法課堂 • 星際穿越",
-      "description": "超炫酷的課堂點名神器，讓被點名成為一種期待"
+      "title": "炫酷點名�?,
+      "subtitle": "魔法課堂 �?星際穿越",
+      "description": "超炫酷的課堂點名神器，讓被點名成為一種期�?
     },
     "groupMaker": {
       "title": "抓抓樂分組器",
-      "subtitle": "爪子選取 • 公平分組",
-      "description": "像抓娃娃一樣選取學生名單，讓課堂分組變得公平又有趣！",
-      "inputPlaceholder": "在這裡輸入或粘貼學生名單（支持換行或逗號分隔）...",
+      "subtitle": "爪子選取 �?公平分組",
+      "description": "像抓娃娃一樣選取學生名單，讓課堂分組變得公平又有趣�?,
+      "inputPlaceholder": "在這裡輸入或粘貼學生名單（支持換行或逗號分隔�?..",
       "inputTitle": "名單列表",
       "actionTitle": "操作中心",
       "members": "成員",
-      "groupCount": "分組數量：",
-      "startBtn": "開始抓取！",
+      "groupCount": "分組數量�?,
+      "startBtn": "開始抓取�?,
       "runningBtn": "正在抓取...",
       "results": "分組結果",
       "downloadAll": "📥 下載全部",
@@ -43,9 +43,9 @@
       "exportBtn": "導出 TXT",
       "clearBtn": "清空",
       "waitingMsg": "等待幸運降臨...",
-      "groupNamePrefix": "第",
-      "groupNameSuffix": "組",
-      "errorLow": "學生人數不能少於分組數量！",
+      "groupNamePrefix": "�?,
+      "groupNameSuffix": "�?,
+      "errorLow": "學生人數不能少於分組數量�?,
       "downloadFileName": "分組結果_{time}.txt"
     },
     "backHome": "返回首頁",
@@ -60,73 +60,73 @@
     "backHome": "返回首頁",
     "title": "哆啦A夢教室分貝儀",
     "starting": "正在啟動...",
-    "pleaseAllowPermission": "請點擊允許權限",
+    "pleaseAllowPermission": "請點擊允許權�?,
     "startQuiet": "開始安靜",
-    "studyBegin": "自習開始！",
-    "pleaseAllowMic": "點擊後請務必選擇\"允許\"麥克風",
+    "studyBegin": "自習開始�?,
+    "pleaseAllowMic": "點擊後請務必選擇\"允許\"麥克�?,
     "quietDuration": "安靜時長",
     "warningCount": "警告次數",
     "currentDecibel": "當前分貝 (dB)",
-    "alarmThreshold": "報警閾值",
+    "alarmThreshold": "報警閾�?,
     "resetCount": "重置警告次數",
     "quiet": "安靜！！",
-    "monitorTitle": "{db} dB - 監測中",
-    "appTitle": "naypok Doraemon",
+    "monitorTitle": "{db} dB - 監測�?,
+    "appTitle": "Anypok Doraemon",
     "summoning": "正在召喚...",
     "startMonitor": "開啟監測",
     "startMonitorSub": "點擊開始自習守護",
-    "dbReference": "分貝等級參考",
+    "dbReference": "分貝等級參�?,
     "levels": {
-      "l0": "0–20 dB 極度安靜",
-      "l20": "20–40 dB 非常安靜",
-      "l40": "40–60 dB 正常背景",
-      "l60": "60–80 dB 中等響度",
-      "l80": "80–100 dB 響亮",
-      "l100": "100–120 dB 極其嘈雜"
+      "l0": "0�?0 dB 極度安靜",
+      "l20": "20�?0 dB 非常安靜",
+      "l40": "40�?0 dB 正常背景",
+      "l60": "60�?0 dB 中等響度",
+      "l80": "80�?00 dB 響亮",
+      "l100": "100�?20 dB 極其嘈雜"
     },
     "quietTime": "🤫 安靜時長",
     "totalTime": "⏱️ 監測總計",
     "warnCount": "⚠️ 警告次數",
-    "maxDb": "🔊 最高分貝",
-    "threshold": "分貝閾值",
+    "maxDb": "🔊 最高分�?,
+    "threshold": "分貝閾�?,
     "authFailed": "授權失敗: ",
     "authExpired": "⚠️ 授權失效",
     "returnHome": "{seconds}秒後自動返回首頁...",
     "verifying": "🔮 正在驗證魔法授權...",
     "license": {
       "invalidFormat": "授權碼格式不正確",
-      "success": "✅ 授權成功！正在啟動...",
+      "success": "�?授權成功！正在啟�?..",
       "invalidCode": "授權碼無效，請檢查後重試",
-      "confirmClear": "確定要清除本地授權緩存嗎？",
-      "cleared": "✅ 緩存已清除！刷新頁面生效",
+      "confirmClear": "確定要清除本地授權緩存嗎�?,
+      "cleared": "�?緩存已清除！刷新頁面生效",
       "backHome": "返回首頁",
       "title": "🤫 分貝檢測儀",
       "subtitle": "請輸入您購買的授權碼",
       "clearCache": "清除授權緩存",
       "devMode": "開發者模式已啟用",
-      "verifying": "驗證中...",
-      "verify": "驗證授權碼"
+      "verifying": "驗證�?..",
+      "verify": "驗證授權�?
     },
     "errors": {
-      "browserNotSupported": "您的瀏覽器不支持音頻功能，請升級瀏覽器。",
-      "micDisconnected": "⚠️ 麥克風連接已斷開！\n監測停止，請重新點擊開始。",
-      "startFailed": "🔴 啟動失敗！",
-      "permissionDenied": "\n⛔ 您剛才點擊了\"禁止\"麥克風。\n\n✅ 解決方法：\n1. 點擊瀏覽器地址欄左側的\"鎖\"或\"設置\"圖標。\n2. 找到\"麥克風\"並點擊\"重置\"或\"允許\"。\n3. 刷新頁面或點擊下方按鈕重試。",
-      "noMicFound": "\n🔌 未檢測到麥克風設備，請檢查連接。",
-      "unknownError": "\n❓ "
+      "browserNotSupported": "您的瀏覽器不支持音頻功能，請升級瀏覽器�?,
+      "micDisconnected": "⚠️ 麥克風連接已斷開！\n監測停止，請重新點擊開始�?,
+      "startFailed": "🔴 啟動失敗�?,
+      "permissionDenied": "\n�?您剛才點擊了\"禁止\"麥克風。\n\n�?解決方法：\n1. 點擊瀏覽器地址欄左側的\"鎖\"或\"設置\"圖標。\n2. 找到\"麥克風\"並點擊\"重置\"或\"允許\"。\n3. 刷新頁面或點擊下方按鈕重試�?,
+      "noMicFound": "\n🔌 未檢測到麥克風設備，請檢查連接�?,
+      "unknownError": "\n�?"
     }
   },
   "particles": {
-    "waitingForCamera": "等待攝像頭...",
+    "waitingForCamera": "等待攝像�?..",
     "handsTracking": "{count} 隻手正在追蹤",
     "lookingForHands": "正在尋找手勢...",
     "controls": "控制面板",
     "shapeMode": "形狀模式",
     "particleColor": "粒子顏色",
-    "oneHand": "單手：",
+    "oneHand": "單手�?,
     "pinchToPulse": "捏合產生脈衝",
-    "twoHands": "雙手：",
-    "expandAndZoom": "展開和縮放",
+    "twoHands": "雙手�?,
+    "expandAndZoom": "展開和縮�?,
     "toggleFullscreen": "切換全屏",
     "shapes": {
       "heart": "愛心",
@@ -134,7 +134,7 @@
       "saturn": "土星",
       "buddha": "佛像",
       "fireworks": "煙花",
-      "christmasTree": "🎄 聖誕樹"
+      "christmasTree": "🎄 聖誕�?
     },
     "cameraError": "攝像頭訪問被拒絕/錯誤"
   }

@@ -65,159 +65,53 @@
     <button class="global-back-btn" onclick="window.location.href='/'">🔙</button>
     <div id="clock-display" style="position:absolute; top:32px; left:80px; font-size:1.5rem; font-family:'Orbitron', sans-serif; z-index:1000; color:var(--text-white); font-weight:bold; text-shadow:0 0 5px var(--primary-neon);"></div>
     <button id="fullscreen-btn" class="fullscreen-btn"><svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
-    <div id="auth-screen" class="screen hidden"><div class="auth-card glass-panel"><h1>✨ 魔法课堂入口</h1><p>请输入授权码</p><input type="text" id="license-input" placeholder="DM-xxxx"><button id="verify-btn" class="magic-btn">🔮 芝麻开门</button></div></div>
-    <div id="app-screen" class="screen"><aside class="sidebar glass-panel"><h2>🎓 点名魔法师</h2><div>人数: <span id="student-count">0</span></div><textarea id="student-input" placeholder="每行一个姓名"></textarea><div><button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000; font-weight:bold; border:none; cursor:pointer;">💾 保存</button><button id="clear-btn" class="btn-small" style="background:#ff416c; color:white; border:none; cursor:pointer; margin-left:5px;">🗑️ 清空</button></div><div style="margin-top:10px"><label>抽取人数: <span id="pick-val" style="color:var(--primary-neon); font-weight:bold">1</span></label><input type="range" id="pick-range" min="1" max="10" value="1"></div><div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px 8px 0 0; border-bottom:1px solid var(--glass-border);"><span style="font-size:0.9rem; color:var(--primary-neon); font-weight:bold;">📋 名单预览</span><button id="toggle-names-btn" class="btn-small" style="background:var(--secondary-neon); color:white; border:none; cursor:pointer; font-size:0.75rem; padding:4px 10px;">👁️ 显示名字</button></div><div id="student-preview" style="overflow-y:auto; flex:1; background:rgba(0,0,0,0.2); border-radius:0 0 8px 8px; padding:10px;"></div></aside><main class="stage"><div id="magic-circle-container"><div class="magic-ring ring-1"></div><div class="magic-ring ring-2"></div><div class="core-orb"><span id="orb-text"></span></div></div><div style="margin-top: 50px;"><button id="start-btn" class="magic-btn">⚡ 开始点名</button></div></main><div id="result-overlay" class="hidden"><h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉</h1><div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div><button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button></div></div>
+    
+    <div id="auth-screen" class="screen hidden">
+        <div class="auth-card glass-panel">
+            <h1 id="auth-title">✨ 魔法课堂入口</h1>
+            <p id="auth-subtitle">请输入授权码</p>
+            <input type="text" id="license-input" placeholder="DM-xxxx">
+            <button id="verify-btn" class="magic-btn">🔮 芝麻开门</button>
+        </div>
+    </div>
+    
+    <div id="app-screen" class="screen">
+        <aside class="sidebar glass-panel">
+            <h2 id="sidebar-title">🎓 点名魔法师</h2>
+            <div><span id="count-label">人数: </span><span id="student-count">0</span></div>
+            <textarea id="student-input" placeholder="每行一个姓名"></textarea>
+            <div>
+                <button id="save-btn" class="btn-small" style="background:var(--primary-neon); color:#000; font-weight:bold; border:none; cursor:pointer;">💾 保存</button>
+                <button id="clear-btn" class="btn-small" style="background:#ff416c; color:white; border:none; cursor:pointer; margin-left:5px;">🗑️ 清空</button>
+            </div>
+            <div style="margin-top:10px">
+                <label><span id="pick-label">抽取人数: </span><span id="pick-val" style="color:var(--primary-neon); font-weight:bold">1</span></label>
+                <input type="range" id="pick-range" min="1" max="10" value="1">
+            </div>
+            <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px 8px 0 0; border-bottom:1px solid var(--glass-border);">
+                <span id="preview-title" style="font-size:0.9rem; color:var(--primary-neon); font-weight:bold;">📋 名单预览</span>
+                <button id="toggle-names-btn" class="btn-small" style="background:var(--secondary-neon); color:white; border:none; cursor:pointer; font-size:0.75rem; padding:4px 10px;">👁️ 显示名字</button>
+            </div>
+            <div id="student-preview" style="overflow-y:auto; flex:1; background:rgba(0,0,0,0.2); border-radius:0 0 8px 8px; padding:10px;"></div>
+        </aside>
+        <main class="stage">
+            <div id="magic-circle-container">
+                <div class="magic-ring ring-1"></div>
+                <div class="magic-ring ring-2"></div>
+                <div class="core-orb"><span id="orb-text"></span></div>
+            </div>
+            <div style="margin-top: 50px;">
+                <button id="start-btn" class="magic-btn">⚡ 开始点名</button>
+            </div>
+        </main>
+        <div id="result-overlay" class="hidden">
+            <h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉</h1>
+            <div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div>
+            <button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button>
+        </div>
+    </div>
 
-    <script>
-    (function(){
-        window.isWarp = false;
-        let students = JSON.parse(localStorage.getItem('magic_rc_students') || '[]');
-        let remainingPool = JSON.parse(localStorage.getItem('magic_rc_remaining_pool') || '[]');
-        let isRolling = false;
-        let namesHidden = true; // 默认隐藏
-        const gate = document.getElementById('gatekeeper-screen');
-
-        const updateVisibility = () => {
-            const sidebar = document.querySelector('.sidebar');
-            const btn = document.getElementById('toggle-names-btn');
-            if (btn) {
-                if (namesHidden) {
-                    sidebar.classList.add('names-hidden');
-                    btn.textContent = '👁️ 显示名字';
-                } else {
-                    sidebar.classList.remove('names-hidden');
-                    btn.textContent = '🙈 隐藏名字';
-                }
-            }
-        };
-
-        // Clock Logic
-        const updateClock = () => {
-            const d = new Date();
-            const date = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
-            const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-            const el = document.getElementById('clock-display');
-            if(el) el.textContent = `${date} ${time}`;
-        };
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // 全屏逻辑 (修正：直接放在闭包最顶层并立即执行)
-        const fsBtn = document.getElementById('fullscreen-btn');
-        const fsIcon = document.getElementById('fs-icon');
-        const paths = {
-            enter: '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>',
-            exit: '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>'
-        };
-        fsBtn.onclick = () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().then(() => fsIcon.innerHTML = paths.exit);
-            } else {
-                document.exitFullscreen().then(() => fsIcon.innerHTML = paths.enter);
-            }
-        };
-        document.addEventListener('fullscreenchange', () => { if(!document.fullscreenElement) fsIcon.innerHTML = paths.enter; });
-
-        const initApp = () => {
-            gate.style.display = 'none';
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app-screen').style.display = 'flex';
-            updateVisibility();
-            document.getElementById('toggle-names-btn').onclick = () => {
-                namesHidden = !namesHidden;
-                updateVisibility();
-            };
-            document.getElementById('start-btn').onclick = () => {
-                if(students.length === 0) return alert("请导入名单");
-                if(isRolling) return;
-                isRolling = true; window.isWarp = true;
-                document.getElementById('start-btn').classList.add('hidden');
-                document.getElementById('orb-text').textContent = "✨召唤中✨";
-                document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
-                setTimeout(() => {
-                    isRolling = false; window.isWarp = false;
-                    document.querySelectorAll('.magic-ring').forEach(r => r.classList.remove('fast-spin'));
-                    const count = Math.min(parseInt(document.getElementById('pick-range').value), students.length);
-                    let pool = [...students];
-                    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-                    const winners = pool.slice(0, count);
-                    document.getElementById('result-cards').innerHTML = winners.map((w,i) => `<div class="name-card" style="animation-delay:${i*0.2}s">${w}</div>`).join('');
-                    document.getElementById('result-overlay').classList.remove('hidden');
-                }, 3000);
-            };
-            document.getElementById('retry-btn').onclick = () => { document.getElementById('result-overlay').classList.add('hidden'); document.getElementById('start-btn').classList.remove('hidden'); document.getElementById('orb-text').textContent = ""; };
-            document.getElementById('save-btn').onclick = () => {
-                const list = Array.from(new Set(document.getElementById('student-input').value.split('\n').map(x => x.trim()).filter(x => x)));
-                if(list.length > 0) { students = list; localStorage.setItem('magic_rc_students', JSON.stringify(list)); renderList(); alert("成功召唤！"); }
-                else alert("名单不能为空");
-            };
-            document.getElementById('clear-btn').onclick = () => { if(confirm("确定清空？")) { students = []; localStorage.setItem('magic_rc_students', '[]'); document.getElementById('student-input').value = ''; renderList(); } };
-            document.getElementById('pick-range').oninput = function() { document.getElementById('pick-val').textContent = this.value; };
-            renderList();
-        };
-
-        const renderList = () => {
-            const container = document.getElementById('student-preview');
-            container.innerHTML = students.map(s => `<span style="background:rgba(255,255,255,0.1); padding:3px 10px; border-radius:10px; font-size:0.8rem; margin:2px; display:inline-block;">${s}</span>`).join('');
-            document.getElementById('student-count').textContent = students.length;
-            if (!document.getElementById('student-input').value) document.getElementById('student-input').value = students.join('\n');
-        };
-
-        const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
-        let stars = []; window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }; window.onresize();
-        for(let i=0; i<300; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, speed: 0.5 + Math.random()});
-        function animate() {
-            ctx.fillStyle = window.isWarp ? 'rgba(5, 5, 25, 0.4)' : '#0f0c29'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(s => {
-                s.y += window.isWarp ? 40 : s.speed; if(s.y > canvas.height) s.y = 0;
-                ctx.beginPath();
-                if(window.isWarp) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + 40); ctx.strokeStyle = '#00f260'; ctx.lineWidth = 3; ctx.stroke(); }
-                else { ctx.fillStyle = '#fff'; ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); }
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        (async () => {
-            const savedCode = localStorage.getItem('magic_rc_license');
-            if (localStorage.getItem('magic_rc_auth') === 'true' && savedCode) {
-                try {
-                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: savedCode, deviceId: 'rc-user' }) });
-                    const data = await res.json();
-                    if (data.success) initApp(); 
-                    else {
-                        localStorage.setItem('magic_rc_auth', 'false');
-                        localStorage.removeItem('magic_rc_license');
-                        let timeLeft = 4;
-                        document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
-                            <h1 style="font-size:3.3rem">⚠️ 授权失效</h1>
-                            <p style="font-size:1.65rem; margin:20px 0;">${data.message}</p>
-                            <div id="countdown-timer" style="font-size:1.32rem; color:#666">${timeLeft}秒后自动返回首页...</div>
-                        </div>`;
-                        const timer = setInterval(() => {
-                            timeLeft--;
-                            const el = document.getElementById('countdown-timer');
-                            if (el) el.textContent = `${timeLeft}秒后自动返回首页...`;
-                            if (timeLeft <= 0) {
-                                clearInterval(timer);
-                                window.location.replace('/');
-                            }
-                        }, 1000);
-                    }
-                } catch(e) { initApp(); }
-            } else {
-                gate.style.display = 'none';
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('verify-btn').onclick = async () => {
-                    const code = document.getElementById('license-input').value.trim();
-                    const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'rc-user' }) });
-                    const data = await res.json();
-                    if (data.success) { localStorage.setItem('magic_rc_auth', 'true'); localStorage.setItem('magic_rc_license', code); initApp(); }
-                    else alert(data.message);
-                };
-            }
-        })();
-    })();
-    </script>
+    <script src="translations.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

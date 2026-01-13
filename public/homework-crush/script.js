@@ -18,6 +18,55 @@
         return langData[k] || k;
     };
 
+    const applyTranslations = () => {
+        document.title = t('title');
+        const ids = {
+            'auth-title-text': 'title',
+            'auth-subtitle-text': 'subtitle',
+            'verify-btn': 'verifyBtn',
+            'app-header-title': 'headerTitle',
+            'reset-day-btn': 'startNewDay',
+            'daily-task-title': 'dailyTask',
+            'incomplete-homework-title': 'incompleteHomework',
+            'completed-homework-title': 'completedHomework',
+            'reward-label': 'rewardLabel',
+            'punishment-label': 'punishmentLabel',
+            'save-rules-btn': 'saveRules',
+            'import-btn': 'importBtn',
+            'clear-data-btn': 'clearDataBtn'
+        };
+        for (const [id, key] of Object.entries(ids)) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = t(key);
+        }
+        
+        // Placeholders and Titles
+        const licInput = document.getElementById('license-input');
+        if (licInput) licInput.placeholder = t('placeholder');
+        const rewardInput = document.getElementById('reward-text');
+        if (rewardInput) rewardInput.placeholder = t('rewardPlaceholder');
+        const punishInput = document.getElementById('punishment-text');
+        if (punishInput) punishInput.placeholder = t('punishmentPlaceholder');
+        const studentInput = document.getElementById('student-list-input');
+        if (studentInput) studentInput.placeholder = t('manualPlaceholder');
+        
+        const fsBtn = document.getElementById('fullscreen-btn');
+        if (fsBtn) fsBtn.title = t('fullscreen');
+        const setBtn = document.getElementById('settings-btn');
+        if (setBtn) setBtn.title = t('settings');
+        
+        // Modal Header
+        const settingsModal = document.getElementById('settings-modal');
+        if (settingsModal) {
+            const h2 = settingsModal.querySelector('.modal-header h2');
+            if (h2) h2.textContent = t('settingsTitle');
+        }
+        
+        // Gate text
+        const gateText = document.getElementById('gate-text');
+        if (gateText) gateText.textContent = t('verifying');
+    };
+
     const forceExit = (msg) => {
         localStorage.setItem('hc_verified', 'false');
         localStorage.removeItem('hc_license');
@@ -335,8 +384,9 @@
     }
 
         window.addEventListener('DOMContentLoaded', () => {
+        applyTranslations();
 
-            document.querySelectorAll('.global-back-btn').forEach(btn => {
+        document.querySelectorAll('.global-back-btn').forEach(btn => {
 
                 btn.onclick = (e) => { e.preventDefault(); window.location.href = '/'; };
 

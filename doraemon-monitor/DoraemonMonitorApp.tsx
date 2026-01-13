@@ -300,7 +300,7 @@ const DoraemonMonitorApp: React.FC = () => {
       <header className="doraemon-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
-          <div style={{ fontSize: '1.26rem', fontWeight: 'bold', fontFamily: '"Comic Sans MS", "Chalkboard SE", "Comic Neue", sans-serif', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
+          <div style={{ fontSize: '1.26rem', fontWeight: 'bold', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
         </div>
         <div style={{ display: 'flex', gap: '20px' }}>
           <button onClick={toggleFullscreen} className="icon-btn"><Maximize size={32} /></button>

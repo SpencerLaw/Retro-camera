@@ -96,8 +96,8 @@ const DoraemonMonitorApp: React.FC = () => {
       setMaxDb(m => Math.max(m, next));
       return next;
     });
-    if (document.hidden) document.title = `${Math.round(rawDb)} dB - 监测中`;
-    else document.title = "AnyPok Doraemon";
+    if (document.hidden) document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(rawDb).toString());
+    else document.title = t('doraemon.appTitle');
   };
 
   const initApp = async () => {
@@ -118,7 +118,7 @@ const DoraemonMonitorApp: React.FC = () => {
       muteGain.connect(context.destination);
       setIsStarted(true);
       workerRef.current?.postMessage('start');
-    } catch (err: any) { setError("授权失败: " + err.message); } finally { setIsLoading(false); }
+    } catch (err: any) { setError(t('doraemon.authFailed') + err.message); } finally { setIsLoading(false); }
   };
 
   const playAlarmSound = () => {
@@ -194,12 +194,12 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const NoiseLevelReference = () => {
     const levels = [
-      { min: 0, max: 20, label: "0–20 dB 极度安静" },
-      { min: 20, max: 40, label: "20–40 dB 非常安静" },
-      { min: 40, max: 60, label: "40–60 dB 正常背景" },
-      { min: 60, max: 80, label: "60–80 dB 中等响度" },
-      { min: 80, max: 100, label: "80–100 dB 响亮" },
-      { min: 100, max: 120, label: "100–120 dB 极其嘈杂" },
+      { min: 0, max: 20, label: t('doraemon.levels.l0') },
+      { min: 20, max: 40, label: t('doraemon.levels.l20') },
+      { min: 40, max: 60, label: t('doraemon.levels.l40') },
+      { min: 60, max: 80, label: t('doraemon.levels.l60') },
+      { min: 80, max: 100, label: t('doraemon.levels.l80') },
+      { min: 100, max: 120, label: t('doraemon.levels.l100') },
     ];
     const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
 
@@ -209,7 +209,7 @@ const DoraemonMonitorApp: React.FC = () => {
 
     return (
       <div className="db-reference-panel">
-        <div className="reference-title">分贝等级参考</div>
+        <div className="reference-title">{t('doraemon.dbReference')}</div>
         <div className="vertical-meter-container">
           <div style={{ position: 'relative', width: '12px' }}>
             <div className="meter-bar-bg">
@@ -289,10 +289,10 @@ const DoraemonMonitorApp: React.FC = () => {
     </svg>
   );
 
-  if (authError) return <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}><h1 style={{ fontSize: '4.4rem', color: '#ff416c' }}>⚠️ 授权失效</h1><p style={{ fontSize: '2.2rem', margin: '20px 0' }}>{authError}</p><p style={{ color: '#666', fontSize: '1.1rem' }}>{countdown}秒后自动返回首页...</p></div>;
-  if (isLicensed === null) return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>🔮 正在验证魔法授权...</h2></div>;
+  if (authError) return <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}><h1 style={{ fontSize: '4.4rem', color: '#ff416c' }}>{t('doraemon.authExpired')}</h1><p style={{ fontSize: '2.2rem', margin: '20px 0' }}>{authError}</p><p style={{ color: '#666', fontSize: '1.1rem' }}>{t('doraemon.returnHome').replace('{seconds}', countdown.toString())}</p></div>;
+  if (isLicensed === null) return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>{t('doraemon.verifying')}</h2></div>;
   if (isLicensed === false) return <LicenseInput onVerified={() => setIsLicensed(true)} />;
-  if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>Doraemon Monitor</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>正在召唤...</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>开启监测</span><span className="btn-sub-text">点击开始自习守护</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;
+  if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>Doraemon Monitor</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>{t('doraemon.summoning')}</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>{t('doraemon.startMonitor')}</span><span className="btn-sub-text">{t('doraemon.startMonitorSub')}</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;
 
   return (
     <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
@@ -317,19 +317,19 @@ const DoraemonMonitorApp: React.FC = () => {
         <div className="right-panel">
           <div className="stat-box">
             <div className="stat-content">
-              <span className="stat-label">🤫 安静时长</span>
+              <span className="stat-label">{t('doraemon.quietTime')}</span>
               <strong className="stat-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{formatTime(quietTime)}</strong>
             </div>
           </div>
           <div className="stat-box">
             <div className="stat-content">
-              <span className="stat-label">⏱️ 监测总计</span>
+              <span className="stat-label">{t('doraemon.totalTime')}</span>
               <strong className="stat-value" style={{ color: isDarkMode ? '#0575e6' : '#2563eb' }}>{formatTime(totalTime)}</strong>
             </div>
           </div>
           <div className={`stat-box stat-box-with-action ${warnCount > 0 ? 'warning' : ''}`}>
             <div className="stat-content">
-              <span className="stat-label">⚠️ 警告次数</span>
+              <span className="stat-label">{t('doraemon.warnCount')}</span>
               <strong className="stat-value" style={{ color: '#dc2626' }}>{warnCount}</strong>
             </div>
             <button
@@ -342,13 +342,13 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
           <div className="stat-box">
             <div className="stat-content">
-              <span className="stat-label">🔊 最高分贝</span>
+              <span className="stat-label">{t('doraemon.maxDb')}</span>
               <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
             </div>
           </div>
           <div className="controls-box">
             <div className="slider-header">
-              <span>分贝阈值</span>
+              <span>{t('doraemon.threshold')}</span>
               <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{limit} dB</span>
             </div>
             <input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" />

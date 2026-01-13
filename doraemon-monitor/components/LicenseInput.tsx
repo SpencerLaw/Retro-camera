@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslations } from '../../hooks/useTranslations';
 import { Key, CheckCircle, XCircle, Loader, Trash2, ArrowLeft } from 'lucide-react';
 import { 
   verifyLicenseCode, 
@@ -14,6 +15,7 @@ interface LicenseInputProps {
 
 const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
   const navigate = useNavigate();
+  const t = useTranslations();
   const [licenseCode, setLicenseCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   // ... (rest of states)
@@ -46,7 +48,7 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
 
   const handleVerify = async () => {
     if (!isValidFormat(licenseCode)) {
-      setError('授权码格式不正确');
+      setError(t('doraemon.license.invalidFormat'));
       return;
     }
 
@@ -59,12 +61,12 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
     setIsLoading(false);
 
     if (result.success) {
-      setSuccess('✅ 授权成功！正在启动...');
+      setSuccess(t('doraemon.license.success'));
       setTimeout(() => {
         onVerified();
       }, 1000);
     } else {
-      setError(result.message || '授权码无效，请检查后重试');
+      setError(result.message || t('doraemon.license.invalidCode'));
     }
   };
 
@@ -77,11 +79,11 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
 
   // 清除本地授权数据
   const handleClearCache = () => {
-    if (window.confirm('确定要清除本地授权缓存吗？')) {
+    if (window.confirm(t('doraemon.license.confirmClear'))) {
       localStorage.removeItem('doraemon_license_code');
       localStorage.removeItem('doraemon_verified');
       localStorage.removeItem('doraemon_device_id');
-      setSuccess('✅ 缓存已清除！刷新页面生效');
+      setSuccess(t('doraemon.license.cleared'));
       setTimeout(() => {
         window.location.reload();
       }, 1500);
@@ -95,7 +97,7 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
         <button 
           onClick={() => navigate('/')} 
           className="license-back-btn"
-          title="返回首页"
+          title={t('doraemon.license.backHome')}
           style={{
             position: 'absolute',
             top: '20px',
@@ -121,19 +123,19 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
           onClick={() => setClickCount(c => c + 1)}
           style={{ cursor: 'pointer', userSelect: 'none' }}
         >
-          🤫 分贝检测仪
+          {t('doraemon.license.title')}
         </h1>
-        <p className="license-subtitle">请输入您购买的授权码</p>
+        <p className="license-subtitle">{t('doraemon.license.subtitle')}</p>
 
         {/* 开发者工具 */}
         {showDevTools && (
           <div className="dev-tools">
             <button className="dev-clear-btn" onClick={handleClearCache}>
               <Trash2 size={16} />
-              <span>清除授权缓存</span>
+              <span>{t('doraemon.license.clearCache')}</span>
             </button>
             <p style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
-              开发者模式已启用
+              {t('doraemon.license.devMode')}
             </p>
           </div>
         )}
@@ -161,12 +163,12 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
           {isLoading ? (
             <>
               <Loader className="spinning" size={20} />
-              <span>验证中...</span>
+              <span>{t('doraemon.license.verifying')}</span>
             </>
           ) : (
             <>
               <CheckCircle size={20} />
-              <span>验证授权码</span>
+              <span>{t('doraemon.license.verify')}</span>
             </>
           )}
         </button>

@@ -17,9 +17,8 @@ export default defineConfig(({ mode }) => {
           includeAssets: ['favicon.ico', 'robots.txt', 'icons/*.png', 'icons/*.svg'],
           injectRegister: 'auto',
           manifest: {
-            name: 'AnyPok',
-            short_name: 'AnyPok',
-            description: '趣味创意工具集合 - 复古相机、情侣游戏、求签、微观天气等',
+                    name: 'naypok',
+                    short_name: 'naypok',            description: '趣味创意工具集合 - 复古相机、情侣游戏、求签、微观天气等',
             theme_color: '#ff6b35',
             background_color: '#ffffff',
             display: 'standalone',

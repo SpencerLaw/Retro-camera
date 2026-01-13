@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "AnyPok",
+    "title": "naypok",
     "subtitle": "Awe",
 
 
@@ -56,7 +56,7 @@
     "resetCount": "警告回数をリセット",
     "quiet": "静かに！！",
     "monitorTitle": "{db} dB - 監視中",
-    "appTitle": "AnyPok ドラえもん",
+    "appTitle": "naypok ドラえもん",
     "summoning": "召喚中...",
     "startMonitor": "監視を開始",
     "startMonitorSub": "クリックして自習を守る",

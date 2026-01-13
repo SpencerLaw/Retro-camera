@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "AnyPok",
+    "title": "naypok",
     "subtitle": "Awe",
 
 
@@ -73,7 +73,7 @@
     "resetCount": "重置警告次数",
     "quiet": "安静！！",
     "monitorTitle": "{db} dB - 监测中",
-    "appTitle": "AnyPok Doraemon",
+    "appTitle": "naypok Doraemon",
     "summoning": "正在召唤...",
     "startMonitor": "开启监测",
     "startMonitorSub": "点击开始自习守护",

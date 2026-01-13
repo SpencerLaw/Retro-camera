@@ -1,7 +1,7 @@
 {
-  "name": "AnyPok",
-  "short_name": "AnyPok",
-  "description": "趣味创意工具集合 - 哆啦A梦分贝仪、奖惩大冒险、分组器等",
+  "name": "naypok",
+  "short_name": "naypok",
+  "description": "naypok - 趣味创意工具集合 - 哆啦A梦分贝仪、奖惩大冒险、分组器等",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

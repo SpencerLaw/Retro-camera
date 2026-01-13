@@ -1,6 +1,6 @@
 /**
  * 作业消消乐 - 逻辑修复稳定版
- * 修复了全部完成的Bug，恢复了所有功能按钮
+ * 修复了按钮无反应的问题，并统一使用自定义确认弹窗
  */
 (function(){
     // 1. 救命代码：立即隐藏黑屏
@@ -74,7 +74,30 @@
         localStorage.setItem('hc_license', STATE.licenseCode);
     };
 
-    // 5. 核心渲染逻辑
+    // 5. 自定义确认弹窗逻辑
+    var showConfirm = function(title, msg, onYes) {
+        var modal = document.getElementById('confirm-modal');
+        if (!modal) return;
+        
+        document.getElementById('confirm-title').textContent = title || t('confirmTitle');
+        document.getElementById('confirm-message').textContent = msg || t('confirmMsg');
+        
+        var yesBtn = document.getElementById('confirm-yes-btn');
+        var noBtn = document.getElementById('confirm-no-btn');
+        
+        modal.classList.remove('hidden');
+        
+        yesBtn.onclick = function() {
+            modal.classList.add('hidden');
+            if (onYes) onYes();
+        };
+        
+        noBtn.onclick = function() {
+            modal.classList.add('hidden');
+        };
+    };
+
+    // 6. 核心渲染逻辑
     var createStudentBubble = function(student, index, isDone, day) {
         var bubble = document.createElement('div');
         bubble.className = 'student-bubble ' + (isDone ? 'done' : '');
@@ -88,13 +111,7 @@
         
         if (!isDone) {
             bubble.onclick = function() {
-                var modal = document.getElementById('confirm-modal');
-                document.getElementById('confirm-title').textContent = t('confirmDoneTitle');
-                document.getElementById('confirm-message').textContent = t('confirmDoneMsg', {name: student.name});
-                modal.classList.remove('hidden');
-                
-                document.getElementById('confirm-yes-btn').onclick = function() {
-                    modal.classList.add('hidden');
+                showConfirm(t('confirmDoneTitle'), t('confirmDoneMsg', {name: student.name}), function() {
                     bubble.classList.add('heart-burst');
                     setTimeout(function() {
                         if (!student.history) student.history = [false,false,false,false,false,false,false];
@@ -103,8 +120,7 @@
                         renderUI();
                         renderTree();
                     }, 600);
-                };
-                document.getElementById('confirm-no-btn').onclick = function() { modal.classList.add('hidden'); };
+                });
             };
         }
         return bubble;
@@ -122,7 +138,6 @@
         var doneCount = 0;
         
         STATE.students.forEach(function(student, idx) {
-            // 补全历史记录数组
             if (!student.history || student.history.length < 7) {
                 var old = student.history || [];
                 student.history = [false,false,false,false,false,false,false];
@@ -178,7 +193,7 @@
         container.innerHTML = treeSVG;
     };
 
-    // 6. 交互绑定
+    // 7. 交互绑定
     var bindEvents = function() {
         // 暗黑模式
         var darkBtn = document.getElementById('dark-mode-btn');
@@ -229,20 +244,20 @@
 
         // 清空
         document.getElementById('clear-data-btn').onclick = function() {
-            if (confirm(t('clearDataConfirm') || '确定清空所有数据吗？')) {
+            showConfirm(t('confirmTitle'), t('clearDataConfirm'), function() {
                 STATE.students = []; saveData(); renderUI(); renderTree();
-            }
+            });
         };
 
         // 重置当天
         document.getElementById('reset-day-btn').onclick = function() {
-            if (confirm(t('resetDayConfirm') || '确定重置今天的进度吗？')) {
+            showConfirm(t('confirmTitle'), t('resetDayConfirm'), function() {
                 var day = STATE.todayIndex;
                 STATE.students.forEach(function(s){
                     if(s.history) s.history[day] = false;
                 });
                 saveData(); renderUI(); renderTree();
-            }
+            });
         };
 
         // 保存规则
@@ -270,7 +285,7 @@
         STATE.todayIndex = (dayIdx === 0 ? 6 : dayIdx - 1);
     };
 
-    // 7. 初始化入口
+    // 8. 初始化入口
     var initApp = function() {
         hideGate();
         document.getElementById('app-screen').style.display = 'flex';

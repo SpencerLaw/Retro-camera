@@ -22,17 +22,17 @@
 
     "homeworkCrush": {
       "title": "Homework Crush",
-      "subtitle": "Fun Challenge ‚Ä?Habit Builder",
+      "subtitle": "Fun Challenge ‚Ä¢ Habit Builder",
       "description": "Turn homework into a match game and grow a tree together"
     },
     "magicRollCall": {
       "title": "Cool Roll Call",
-      "subtitle": "Magic Classroom ‚Ä?Interstellar",
+      "subtitle": "Magic Classroom ‚Ä¢ Interstellar",
       "description": "Super cool roll call tool that makes being called on something to look forward to"
     },
     "groupMaker": {
       "title": "Claw Machine Group Maker",
-      "subtitle": "Claw Grab ‚Ä?Fair Grouping",
+      "subtitle": "Claw Grab ‚Ä¢ Fair Grouping",
       "description": "Grab student names like a crane game, making classroom grouping fair and fun!",
       "inputPlaceholder": "Paste or type student names here (separated by newlines or commas)...",
       "inputTitle": "Name List",
@@ -84,12 +84,12 @@
     "startMonitorSub": "Click to protect study time",
     "dbReference": "dB Level Reference",
     "levels": {
-      "l0": "0‚Ä?0 dB Extremely Quiet",
-      "l20": "20‚Ä?0 dB Very Quiet",
-      "l40": "40‚Ä?0 dB Normal Background",
-      "l60": "60‚Ä?0 dB Medium Loudness",
-      "l80": "80‚Ä?00 dB Loud",
-      "l100": "100‚Ä?20 dB Extremely Noisy"
+      "l0": "0‚Äì20 dB Extremely Quiet",
+      "l20": "20‚Äì40 dB Very Quiet",
+      "l40": "40‚Äì60 dB Normal Background",
+      "l60": "60‚Äì80 dB Medium Loudness",
+      "l80": "80‚Äì100 dB Loud",
+      "l100": "100‚Äì120 dB Extremely Noisy"
     },
     "quietTime": "ü§´ Quiet Time",
     "totalTime": "‚è±Ô∏è Total Time",
@@ -102,10 +102,10 @@
     "verifying": "üîÆ Verifying magic auth...",
     "license": {
       "invalidFormat": "Invalid license format",
-      "success": "‚ú?Auth Success! Starting...",
+      "success": "‚úÖ Auth Success! Starting...",
       "invalidCode": "Invalid code, please check again",
       "confirmClear": "Are you sure to clear local license cache?",
-      "cleared": "‚ú?Cache cleared! Refreshing page...",
+      "cleared": "‚úÖ Cache cleared! Refreshing page...",
       "backHome": "Back Home",
       "title": "ü§´ Decibel Monitor",
       "subtitle": "Please enter your purchased license code",
@@ -116,13 +116,13 @@
     },
     "errors": {
       "locationRestricted": "üåç Regional Restriction",
-      "locationRestrictedDesc": "Sorry, the Fortune Sticks feature is not available in your current region.\n\nüí° Suggestions:\n‚Ä?Use a VPN to connect from a supported region\n‚Ä?Or explore other apps in the studio!",
+      "locationRestrictedDesc": "Sorry, the Fortune Sticks feature is not available in your current region.\n\nüí° Suggestions:\n‚Ä¢ Use a VPN to connect from a supported region\n‚Ä¢ Or explore other apps in the studio!",
       "browserNotSupported": "Your browser does not support audio features. Please upgrade your browser.",
       "micDisconnected": "‚ö†Ô∏è Microphone connection disconnected!\nMonitoring stopped. Please click start again.",
       "startFailed": "üî¥ Failed to start!",
-      "permissionDenied": "\n‚õ?You clicked \"Deny\" for microphone.\n\n‚ú?Solution:\n1. Click the \"lock\" or \"settings\" icon on the left side of the browser address bar.\n2. Find \"Microphone\" and click \"Reset\" or \"Allow\".\n3. Refresh the page or click the button below to retry.",
+      "permissionDenied": "\n‚õî You clicked \"Deny\" for microphone.\n\n‚úÖ Solution:\n1. Click the \"lock\" or \"settings\" icon on the left side of the browser address bar.\n2. Find \"Microphone\" and click \"Reset\" or \"Allow\".\n3. Refresh the page or click the button below to retry.",
       "noMicFound": "\nüîå No microphone device detected. Please check connection.",
-      "unknownError": "\n‚ù?"
+      "unknownError": "\n‚ùì "
     }
   }
 }

@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
           injectRegister: 'auto',
           manifest: {
                     name: 'Anypok',
-                    short_name: 'Anypok',            description: '趣味创意工具集合 - 复古相机、情侣游戏、求签、微观天气等',
+                    short_name: 'Anypok',            description: 'Anypok - 趣味创意工具集合 - 哆啦A梦分贝仪、奖惩大冒险、分组器等',
             theme_color: '#ff6b35',
             background_color: '#ffffff',
             display: 'standalone',

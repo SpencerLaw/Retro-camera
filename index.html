@@ -22,62 +22,7 @@
       tailwind.config = {
         darkMode: 'class',
         theme: {
-          extend: {
-            fontFamily: {
-              serif: ['"Noto Serif TC"', '"Songti SC"', 'serif'],
-            },
-            colors: {
-              wood: {
-                300: '#d4a373',
-                400: '#c19a6b',
-                500: '#a9845b',
-                600: '#8c6b4a',
-                800: '#5c4033',
-              },
-              paper: '#fdf6e3',
-              ink: '#2c2c2c',
-              red: {
-                traditional: '#8B0000',
-                bright: '#D2042D'
-              }
-            },
-            animation: {
-              'shake': 'shake 0.18s infinite',
-              'drop': 'drop 1.2s cubic-bezier(0.5, 0, 0.5, 1) forwards',
-              'appear': 'appear 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'jostle': 'jostle 0.1s infinite',
-              'fadeIn': 'fadeIn 0.5s ease-out forwards',
-            },
-            keyframes: {
-              shake: {
-                '0%': { transform: 'rotate(0deg) translateY(0)' },
-                '25%': { transform: 'rotate(-15deg) translateY(5px)' },
-                '50%': { transform: 'rotate(0deg) translateY(-8px)' }, 
-                '75%': { transform: 'rotate(15deg) translateY(5px)' },
-                '100%': { transform: 'rotate(0deg) translateY(0)' },
-              },
-              jostle: {
-                '0%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-25px)' },
-                '100%': { transform: 'translateY(0)' },
-              },
-              drop: {
-                '0%': { transform: 'translate(-50%, 0) rotate(0deg) scale(0.9)', opacity: '1' },
-                '15%': { transform: 'translate(-50%, -140px) rotate(-5deg) scale(1)' },
-                '30%': { transform: 'translate(-60%, -120px) rotate(-25deg)' },
-                '100%': { transform: 'translate(-200%, 600px) rotate(-180deg)', opacity: '1' },
-              },
-              appear: {
-                '0%': { opacity: '0', transform: 'scale(0.5) translateY(50px)' },
-                '60%': { opacity: '1', transform: 'scale(1.05) translateY(-10px)' },
-                '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
-              },
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              }
-            }
-          }
+          extend: {}
         }
       }
     </script>
@@ -108,73 +53,7 @@
       .font-marker {
         font-family: 'Permanent Marker', cursive;
       }
-
-      /* Polaroid specific shadows */
-      .polaroid-shadow {
-        box-shadow: 2px 2px 15px rgba(0,0,0,0.15);
-      }
-
-      /* Developing Animation */
-      @keyframes develop {
-        0% { filter: brightness(0.1) grayscale(100%) blur(4px); }
-        40% { filter: brightness(0.4) grayscale(80%) blur(2px); }
-        70% { filter: brightness(0.8) grayscale(40%) blur(1px) sepia(30%); }
-        100% { filter: brightness(1) grayscale(0%) blur(0px); }
-      }
-
-      .developing-photo {
-        animation: develop 6s ease-out forwards;
-      }
-
-      /* Camera Plastic Texture */
-      .plastic-texture {
-         background-image: radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px);
-         background-size: 4px 4px;
-      }
-      
-      /* Rainbow Stripe */
-      .rainbow-stripe {
-        background: linear-gradient(to right, 
-          #FF355E 14.28%, 
-          #FD5B78 14.28% 28.56%, 
-          #FF6037 28.56% 42.84%, 
-          #FF9966 42.84% 57.12%, 
-          #FFCC33 57.12% 71.4%, 
-          #FFFF66 71.4% 85.68%, 
-          #CCFF00 85.68%
-        );
-      }
-
-      /* Custom Scrollbar for Fortune App */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.05);
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(139, 0, 0, 0.2);
-        border-radius: 3px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(139, 0, 0, 0.4);
-      }
-
-      /* Writing modes for Fortune App */
-      .writing-vertical {
-        writing-mode: vertical-rl;
-        text-orientation: upright;
-      }
-      .writing-vertical-rl {
-        writing-mode: vertical-rl;
-      }
     </style>
-    <!-- MediaPipe for Hand Tracking -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-
     <script type="importmap">
     {
       "imports": {

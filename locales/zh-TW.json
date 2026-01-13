@@ -2,8 +2,6 @@
   "home": {
     "title": "Anypok",
     "subtitle": "Awe",
-
-
     "adventure": {
       "title": "獎懲大冒險",
       "subtitle": "校園大挑戰",
@@ -14,7 +12,6 @@
       "subtitle": "教室分貝監測儀",
       "description": "實時監測環境噪音，超過閾值時自動警報，幫助維持安靜的學習環境"
     },
-
     "homeworkCrush": {
       "title": "作業消消樂",
       "subtitle": "趣味闖關 • 習慣養成",
@@ -46,16 +43,14 @@
       "groupNamePrefix": "第",
       "groupNameSuffix": "組",
       "errorLow": "學生人數不能少於分組數量！",
-      "downloadFileName": "分組結果_{time}.txt"
+      "downloadFileName": "分組結果_{time}.txt",
+      "membersCount": "({count}人):"
     },
     "backHome": "返回首頁",
     "contactMerchant": "聯繫商家",
     "restricted": "地區限制 🔒",
     "comingSoon": "即將上線 🔒"
   },
-
-
-
   "doraemon": {
     "backHome": "返回首頁",
     "title": "哆啦A夢教室分貝儀",
@@ -66,6 +61,7 @@
     "pleaseAllowMic": "點擊後請務必選擇\"允許\"麥克風",
     "quietDuration": "安靜時長",
     "warningCount": "警告次數",
+    "totalDuration": "監測總時長",
     "currentDecibel": "當前分貝 (dB)",
     "alarmThreshold": "報警閾值",
     "resetCount": "重置警告次數",
@@ -94,7 +90,7 @@
     "returnHome": "{seconds}秒後自動返回首頁...",
     "verifying": "🔮 正在驗證魔法授權...",
     "license": {
-      "invalidFormat": "授權碼格式不正確",
+      "invalidFormat": "授權碼格式不正确",
       "success": "✅ 授權成功！正在啟動...",
       "invalidCode": "授權碼無效，請檢查後重試",
       "confirmClear": "確定要清除本地授權緩存嗎？",
@@ -111,31 +107,9 @@
       "browserNotSupported": "您的瀏覽器不支持音頻功能，請升級瀏覽器。",
       "micDisconnected": "⚠️ 麥克風連接已斷開！\n監測停止，請重新點擊開始。",
       "startFailed": "🔴 啟動失敗！",
-      "permissionDenied": "\n⛔ 您剛才點擊了\"禁止\"麥克風。\n\n✅ 解決方法：\n1. 點擊瀏覽器地址欄左側的\"鎖\"或\"設置\"圖標。\n2. 找到\"麥克風\"並點擊\"重置\"或\"允許\"。\n3. 刷新頁面或點擊下方按鈕重試。",
+      "permissionDenied": "\n⛔ 您剛才點擊了\"禁止\"麥克風。\n\n✅ 解決方法：\n1. 點擊瀏覽器地址欄左側的\"鎖\"或\"設置\"圖標。\n2. 找到\"麥克风\"並點擊\"重置\"或\"允許\"。\n3. 刷新頁面或點擊下方按鈕重試。",
       "noMicFound": "\n🔌 未檢測到麥克風設備，請檢查連接。",
       "unknownError": "\n❓ "
     }
-  },
-  "particles": {
-    "waitingForCamera": "等待攝像頭...",
-    "handsTracking": "{count} 隻手正在追蹤",
-    "lookingForHands": "正在尋找手勢...",
-    "controls": "控制面板",
-    "shapeMode": "形狀模式",
-    "particleColor": "粒子顏色",
-    "oneHand": "單手：",
-    "pinchToPulse": "捏合產生脈衝",
-    "twoHands": "雙手：",
-    "expandAndZoom": "展開和縮放",
-    "toggleFullscreen": "切換全屏",
-    "shapes": {
-      "heart": "愛心",
-      "flower": "花朵",
-      "saturn": "土星",
-      "buddha": "佛像",
-      "fireworks": "煙花",
-      "christmasTree": "🎄 聖誕樹"
-    },
-    "cameraError": "攝像頭訪問被拒絕/錯誤"
   }
 }

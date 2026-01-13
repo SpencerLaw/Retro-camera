@@ -161,11 +161,12 @@ export const GroupMakerApp: React.FC = () => {
 
   const handleDownloadAll = () => {
     if (groups.length === 0) return;
-    const textContent = groups.map(g => `${g.name} (${g.members.length}人):\n${g.members.join(', ')}`).join('\n\n');
+    const textContent = groups.map(g => `${g.name} ${t('home.groupMaker.membersCount').replace('{count}', g.members.length.toString())}\n${g.members.join(', ')}`).join('\n\n');
     const blob = new Blob([textContent], {type: 'text/plain'});
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `分组结果_${new Date().toLocaleTimeString()}.txt`;
+    const time = new Date().toLocaleTimeString().replace(/:/g, '-');
+    link.download = t('home.groupMaker.downloadFileName').replace('{time}', time);
     link.click();
   };
 

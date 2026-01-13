@@ -10,10 +10,14 @@ import daresZh from './public/dares.zh.json';
 import daresTw from './public/dares.zh-TW.json';
 // @ts-ignore
 import daresJa from './public/dares.ja.json';
+// @ts-ignore
+import translationsData from './public/translations.json';
 import './AdventureGameStyles.css';
 
 type Language = 'en' | 'zh' | 'zh-TW' | 'ja';
 type Stage = 'stage1' | 'stage2' | 'stage3';
+
+const translations = translationsData as Record<Language, Record<string, string>>;
 
 const mapGlobalToAdventureLang = (globalLang: GlobalLanguage): Language => {
   if (globalLang === 'zh-CN') return 'zh';
@@ -42,6 +46,10 @@ const AdventureGameEdit: React.FC = () => {
   });
   const [hasChanges, setHasChanges] = useState(false);
 
+  const t = (key: string): string => {
+    return translations[currentLang]?.[key] || key;
+  };
+
   // Load from localStorage or fall back to defaults
   useEffect(() => {
     const loadDares = () => {
@@ -63,11 +71,11 @@ const AdventureGameEdit: React.FC = () => {
   const handleSave = () => {
     localStorage.setItem(`pixar_game_dares_${currentLang}`, JSON.stringify(dares));
     setHasChanges(false);
-    alert('保存成功！Saved!');
+    alert(t('saveSuccess'));
   };
 
   const handleReset = () => {
-    if (confirm('确定要重置回默认内容吗？Are you sure you want to reset to defaults?')) {
+    if (confirm(t('resetConfirm'))) {
       setDares(defaultDares[currentLang]);
       localStorage.removeItem(`pixar_game_dares_${currentLang}`);
       setHasChanges(false);
@@ -112,7 +120,7 @@ const AdventureGameEdit: React.FC = () => {
         <button
           onClick={() => navigate('/adventure')}
           className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/90 hover:bg-red-50 border-2 border-red-400 transition-all text-red-400 hover:text-red-500 shadow-sm hover:scale-110 hover:rotate-90"
-          title="关闭 (Close)"
+          title={t('editClose')}
         >
           <X size={24} />
         </button>
@@ -126,7 +134,7 @@ const AdventureGameEdit: React.FC = () => {
           fontFamily: '"Varela Round", "Fredoka", sans-serif',
           fontWeight: '800'
         }}>
-          内容编辑器 (Content Editor)
+          {t('editTitle')}
         </h1>
         
         <div className="couple-game-stage-buttons">
@@ -136,7 +144,7 @@ const AdventureGameEdit: React.FC = () => {
               className={`couple-game-stage-btn ${activeStage === stage ? 'active' : ''}`}
               onClick={() => setActiveStage(stage)}
             >
-              {stage === 'stage1' ? '简单 (Easy)' : stage === 'stage2' ? '普通 (Normal)' : '困难 (Hard)'}
+              {stage === 'stage1' ? t('stageEasy') : stage === 'stage2' ? t('stageNormal') : t('stageHard')}
             </button>
           ))}
         </div>
@@ -163,7 +171,7 @@ const AdventureGameEdit: React.FC = () => {
             onClick={addDare}
             className="w-full py-2 border-2 border-dashed border-pink-300 text-pink-500 rounded-lg hover:bg-pink-50 transition-colors flex justify-center items-center gap-2 font-bold"
           >
-            <Plus size={20} /> 添加一条 (Add New)
+            <Plus size={20} /> {t('addNew')}
           </button>
         </div>
 
@@ -173,19 +181,19 @@ const AdventureGameEdit: React.FC = () => {
             disabled={!hasChanges}
             className="flex items-center gap-2 px-6 py-3 rounded-full bg-green-500 text-white font-bold shadow-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
           >
-            <Save size={20} /> 保存 (Save)
+            <Save size={20} /> {t('save')}
           </button>
           <button
             onClick={handleReset}
             className="flex items-center gap-2 px-6 py-3 rounded-full bg-yellow-500 text-white font-bold shadow-lg hover:bg-yellow-600 transition-all hover:scale-105"
           >
-            <RotateCcw size={20} /> 重置 (Reset)
+            <RotateCcw size={20} /> {t('reset')}
           </button>
           <button
             onClick={handleDownload}
             className="flex items-center gap-2 px-6 py-3 rounded-full bg-blue-500 text-white font-bold shadow-lg hover:bg-blue-600 transition-all hover:scale-105"
           >
-            <Download size={20} /> 导出 (Export)
+            <Download size={20} /> {t('export')}
           </button>
         </div>
       </div>

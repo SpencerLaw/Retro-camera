@@ -49,22 +49,20 @@ function applyTranslations() {
     setText('save-btn', t('saveBtn'));
     setText('clear-btn', t('clearBtn'));
     setText('pick-label', t('pickCount'));
-    // setText('reset-history-btn', t('resetHistory')); // Not in HTML
-    // setText('logout-btn', t('logout')); // Not in HTML
     if (!STATE.isRolling) {
         setText('start-btn', t('startBtn'));
     }
-    // setText('result-title-text', t('resultTitle')); // Not in HTML
     setText('retry-btn', t('retryBtn'));
+    setText('win-title', t('winTitle'));
     
-    // Toggle names button
     const toggleBtn = document.getElementById('toggle-names-btn');
     if (toggleBtn) {
         const sidebar = document.querySelector('.sidebar');
-        // Check if sidebar has names-hidden class to decide text
-        // But script.js doesn't manage names-hidden state in global scope easily? 
-        // Wait, script.js doesn't have toggle logic in bindAllEvents?
-        // Let's check bindAllEvents.
+        if (sidebar.classList.contains('names-hidden')) {
+            toggleBtn.textContent = t('toggleNamesShow');
+        } else {
+            toggleBtn.textContent = t('toggleNamesHide');
+        }
     }
 }
 
@@ -85,16 +83,24 @@ const initCosmos = () => {
         });
     }
     const animate = () => {
-        ctx.fillStyle = '#0f0c29';
+        ctx.fillStyle = window.isWarpSpeed ? 'rgba(5, 5, 25, 0.4)' : '#0f0c29';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#fff';
-        const isWarp = window.isWarpSpeed;
+        
         stars.forEach(s => {
-            s.y += isWarp ? s.speed * 20 : s.speed;
+            s.y += window.isWarpSpeed ? 40 : s.speed;
             if (s.y > canvas.height) s.y = 0;
             ctx.beginPath();
-            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-            ctx.fill();
+            if(window.isWarpSpeed) {
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(s.x, s.y + 40);
+                ctx.strokeStyle = '#00f260';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = '#fff';
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
         });
         requestAnimationFrame(animate);
     };
@@ -107,9 +113,9 @@ async function startRollCall() {
     STATE.isRolling = true;
     window.isWarpSpeed = true;
     const startBtn = document.getElementById('start-btn');
-    const coreOrb = document.getElementById('core-orb');
-    if (startBtn) startBtn.style.display = 'none';
-    if (coreOrb) coreOrb.innerHTML = `<span class="orb-text" style="font-size:3rem">${t('rolling')}</span>`;
+    const orbText = document.getElementById('orb-text');
+    if (startBtn) startBtn.classList.add('hidden');
+    if (orbText) orbText.textContent = t('rolling');
     document.querySelectorAll('.magic-ring').forEach(r => r.classList.add('fast-spin'));
     setTimeout(finishRollCall, 3000);
 }
@@ -133,18 +139,14 @@ function finishRollCall() {
 function showWinners(winners) {
     const magicCircle = document.getElementById('magic-circle-container');
     const resultOverlay = document.getElementById('result-overlay');
-    const container = document.getElementById('result-cards-container');
-    if (magicCircle) magicCircle.style.opacity = '0';
+    const container = document.getElementById('result-cards');
     if (resultOverlay) resultOverlay.classList.remove('hidden');
     if (container) {
-        container.innerHTML = '';
-        winners.forEach((name, index) => {
-            const card = document.createElement('div');
-            card.className = 'name-card';
-            card.textContent = name;
-            card.style.animationDelay = (index * 0.2) + 's';
-            container.appendChild(card);
-        });
+        container.innerHTML = winners.map((name, index) => `
+            <div class="name-card" style="animation-delay: ${index * 0.2}s">
+                ${name}
+            </div>
+        `).join('');
     }
 }
 
@@ -153,14 +155,14 @@ const forceExit = (msg) => {
     localStorage.removeItem('magic_rc_license');
     let timeLeft = 4;
     document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
-        <h1 style="font-size:3.3rem">⚠️ 授权失效</h1>
+        <h1 style="font-size:3.3rem">${t('authExpired')}</h1>
         <p style="font-size:1.65rem; margin:20px 0;">${msg}</p>
-        <div id="countdown-timer" style="font-size:1.32rem; color:#666">${timeLeft}秒后自动返回首页...</div>
+        <div id="countdown-timer" style="font-size:1.32rem; color:#666">${t('returnHome', {n: timeLeft})}</div>
     </div>`;
     const timer = setInterval(() => {
         timeLeft--;
         const el = document.getElementById('countdown-timer');
-        if (el) el.textContent = `${timeLeft}秒后自动返回首页...`;
+        if (el) el.textContent = t('returnHome', {n: timeLeft});
         if (timeLeft <= 0) {
             clearInterval(timer);
             window.location.replace('/');
@@ -176,7 +178,7 @@ async function validateLicense() {
     }
 
     if (!STATE.licenseCode) {
-        forceExit('未检测到授权信息，请重新登录');
+        forceExit(t('authError'));
         return;
     }
 
@@ -194,7 +196,7 @@ async function validateLicense() {
         if (data.success) {
             showApp();
         } else {
-            forceExit(data.message || '授权已失效');
+            forceExit(data.message || t('authError'));
         }
     } catch (e) {
         showApp();
@@ -210,12 +212,9 @@ function bindAllEvents() {
         const resultOverlay = get('result-overlay');
         const magicCircle = get('magic-circle-container');
         if (resultOverlay) resultOverlay.classList.add('hidden');
-        if (magicCircle) magicCircle.style.opacity = '1';
-        if (startBtn) startBtn.style.display = 'block';
-        const coreOrb = get('core-orb');
-        if (coreOrb) {
-            coreOrb.innerHTML = '<span id="orb-text"></span>';
-        }
+        if (startBtn) startBtn.classList.remove('hidden');
+        const orbText = get('orb-text');
+        if (orbText) orbText.textContent = "";
     };
     const saveBtn = get('save-btn');
     if (saveBtn) {
@@ -286,14 +285,12 @@ function bindAllEvents() {
                     showApp();
                 } else { alert(data.message || t('authError')); }
             } catch (e) {
-                // Offline fallback or error handling
                 if (code.length > 5) { STATE.authorized = true; localStorage.setItem('magic_rc_auth', 'true'); showApp(); }
                 else { alert("API Error"); }
             } finally { verifyBtn.disabled = false; }
         };
     }
     
-    // Toggle Names
     const toggleBtn = get('toggle-names-btn');
     if (toggleBtn) {
         toggleBtn.onclick = () => {
@@ -321,13 +318,11 @@ function bindAllEvents() {
 function renderStudentPreview() {
     const container = document.getElementById('student-preview');
     if (!container) return;
-    container.innerHTML = '';
-    STATE.students.forEach(name => {
-        const tag = document.createElement('span');
-        tag.className = 'mini-tag';
-        tag.textContent = name;
-        container.appendChild(tag);
-    });
+    container.innerHTML = STATE.students.map(name => `
+        <span style="background:rgba(255,255,255,0.1); padding:3px 10px; border-radius:10px; font-size:0.8rem; margin:2px; display:inline-block;">
+            ${name}
+        </span>
+    `).join('');
     const countSpan = document.getElementById('student-count');
     if (countSpan) countSpan.textContent = STATE.students.length;
 }
@@ -353,7 +348,17 @@ function showAuth() {
     applyTranslations();
 }
 
+function updateClock() {
+    const d = new Date();
+    const date = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+    const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+    const el = document.getElementById('clock-display');
+    if(el) el.textContent = `${date} ${time}`;
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+    updateClock();
+    setInterval(updateClock, 1000);
     initCosmos();
     bindAllEvents();
     if (STATE.authorized) validateLicense();

@@ -46,7 +46,8 @@
       "groupNamePrefix": "第",
       "groupNameSuffix": "组",
       "errorLow": "学生人数不能少于分组数量！",
-      "downloadFileName": "分组结果_{time}.txt"
+      "downloadFileName": "分组结果_{time}.txt",
+      "membersCount": "({count}人):"
     },
 
     "backHome": "返回首页",

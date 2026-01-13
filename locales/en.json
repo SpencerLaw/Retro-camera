@@ -2,24 +2,16 @@
   "home": {
     "title": "Anypok",
     "subtitle": "Awe",
-
-
     "adventure": {
       "title": "Adventure Game",
       "subtitle": "Campus Challenge",
       "description": "Spin the wheel and embrace fun stories and challenges!"
-    },
-    "couple": {
-      "title": "Heartbeat Pact",
-      "subtitle": "Heartbeat Pact",
-      "description": "Couple's game with fun challenges and slot machine animation"
     },
     "doraemon": {
       "title": "Doraemon",
       "subtitle": "Classroom Decibel Monitor",
       "description": "Real-time noise monitoring with automatic alerts when threshold is exceeded"
     },
-
     "homeworkCrush": {
       "title": "Homework Crush",
       "subtitle": "Fun Challenge • Habit Builder",
@@ -34,38 +26,35 @@
       "title": "Claw Machine Group Maker",
       "subtitle": "Claw Grab • Fair Grouping",
       "description": "Grab student names like a crane game, making classroom grouping fair and fun!",
-      "inputPlaceholder": "Paste or type student names here (separated by newlines or commas)...",
+      "inputPlaceholder": "Paste or type student names here (separated by newlines or commas)…",
       "inputTitle": "Name List",
       "actionTitle": "Action Center",
       "members": "Members",
       "groupCount": "Groups:",
       "startBtn": "Start Grabbing!",
-      "runningBtn": "Grabbing...",
+      "runningBtn": "Grabbing…",
       "results": "Grouping Results",
       "downloadAll": "📥 Download All",
       "memberListTitle": "Group Members",
       "exportCurrentGroup": "Export Group",
       "exportBtn": "Export TXT",
       "clearBtn": "Clear",
-      "waitingMsg": "Waiting for luck...",
+      "waitingMsg": "Waiting for luck…",
       "groupNamePrefix": "Group",
       "groupNameSuffix": "",
       "errorLow": "Number of students cannot be less than number of groups!",
-      "downloadFileName": "Grouping_Result_{time}.txt"
+      "downloadFileName": "Grouping_Result_{time}.txt",
+      "membersCount": "({count} members):"
     },
-
     "backHome": "Back Home",
     "contactMerchant": "Contact",
     "restricted": "Restricted 🔒",
     "comingSoon": "Coming Soon 🔒"
   },
-
-
-
   "doraemon": {
     "backHome": "Back Home",
     "title": "Doraemon Classroom Decibel Monitor",
-    "starting": "Starting...",
+    "starting": "Starting…",
     "pleaseAllowPermission": "Please allow microphone permission",
     "startQuiet": "Start Quiet",
     "studyBegin": "Study Begins!",
@@ -79,7 +68,7 @@
     "quiet": "QUIET!!",
     "monitorTitle": "{db} dB - Monitoring",
     "appTitle": "Anypok Doraemon",
-    "summoning": "Summoning...",
+    "summoning": "Summoning…",
     "startMonitor": "Start Monitor",
     "startMonitorSub": "Click to protect study time",
     "dbReference": "dB Level Reference",
@@ -98,25 +87,25 @@
     "threshold": "dB Threshold",
     "authFailed": "Auth Failed: ",
     "authExpired": "⚠️ Auth Expired",
-    "returnHome": "{seconds}s returning home...",
-    "verifying": "🔮 Verifying magic auth...",
+    "returnHome": "{seconds}s returning home…",
+    "verifying": "🔮 Verifying magic auth…",
     "license": {
       "invalidFormat": "Invalid license format",
-      "success": "✅ Auth Success! Starting...",
+      "success": "✅ Auth Success! Starting…",
       "invalidCode": "Invalid code, please check again",
       "confirmClear": "Are you sure to clear local license cache?",
-      "cleared": "✅ Cache cleared! Refreshing page...",
+      "cleared": "✅ Cache cleared! Refreshing page…",
       "backHome": "Back Home",
       "title": "🤫 Decibel Monitor",
       "subtitle": "Please enter your purchased license code",
       "clearCache": "Clear Auth Cache",
       "devMode": "Developer mode enabled",
-      "verifying": "Verifying...",
+      "verifying": "Verifying…",
       "verify": "Verify License"
     },
     "errors": {
       "locationRestricted": "🌍 Regional Restriction",
-      "locationRestrictedDesc": "Sorry, the Fortune Sticks feature is not available in your current region.\n\n💡 Suggestions:\n• Use a VPN to connect from a supported region\n• Or explore other apps in the studio!",
+      "locationRestrictedDesc": "Sorry, this feature is not available in your current region.\n\n💡 Suggestions:\n• Use a VPN to connect from a supported region\n• Or explore other apps in the studio!",
       "browserNotSupported": "Your browser does not support audio features. Please upgrade your browser.",
       "micDisconnected": "⚠️ Microphone connection disconnected!\nMonitoring stopped. Please click start again.",
       "startFailed": "🔴 Failed to start!",

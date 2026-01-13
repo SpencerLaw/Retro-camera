@@ -2,24 +2,16 @@
   "home": {
     "title": "Anypok",
     "subtitle": "Awe",
-
-
     "adventure": {
       "title": "罰ゲーム大冒険",
       "subtitle": "キャンパスチャレンジ",
       "description": "ルーレットを回して、楽しいストーリーとチャレンジを迎えよう！"
-    },
-    "couple": {
-      "title": "ハートビートパクト",
-      "subtitle": "ハートビートパクト",
-      "description": "カップルゲーム、楽しいチャレンジとスロットマシンアニメーション"
     },
     "doraemon": {
       "title": "ドラえもん",
       "subtitle": "教室デシベルモニター",
       "description": "リアルタイムで環境ノイズを監視し、しきい値を超えると自動的に警報を発します"
     },
-
     "homeworkCrush": {
       "title": "宿題クラッシュ",
       "subtitle": "楽しいチャレンジ • 習慣作り",
@@ -30,17 +22,35 @@
       "subtitle": "魔法教室 • 星間旅行",
       "description": "指名されるのが待ち遠しくなる、超クールな点呼ツール"
     },
-          "results": "グループ分け結果",
-          "downloadAll": "📥 すべてダウンロード",
-          "memberListTitle": "メンバーリスト",
-          "exportCurrentGroup": "グループリストを出力",
-          "exportBtn": "TXT出力",
+    "groupMaker": {
+      "title": "UFOキャッチャー・グループ分け",
+      "subtitle": "アームで狙え！ • 公平なチーム作り",
+      "description": "クレーンゲームのように生徒の名前をキャッチ！クラスのグループ分けがワクワク楽しく、公平に行えます！",
+      "inputPlaceholder": "生徒の名前をここに入力または貼り付けてください（改行またはカンマ区切り）...",
+      "inputTitle": "名簿リスト",
+      "actionTitle": "アクションセンター",
+      "members": "メンバー",
+      "groupCount": "グループ数：",
+      "startBtn": "キャッチ開始！",
+      "runningBtn": "キャッチ中...",
+      "results": "グループ分け結果",
+      "downloadAll": "📥 すべてダウンロード",
+      "memberListTitle": "メンバーリスト",
+      "exportCurrentGroup": "グループリストを出力",
+      "exportBtn": "TXT出力",
+      "clearBtn": "クリア",
+      "waitingMsg": "幸運を待っています...",
+      "groupNamePrefix": "第",
+      "groupNameSuffix": "組",
+      "errorLow": "生徒数はグループ数より少なくすることはできません！",
+      "downloadFileName": "グループ分け結果_{time}.txt",
+      "membersCount": "({count}名):"
+    },
     "backHome": "ホームに戻る",
-    "contactMerchant": "お問合せ"
+    "contactMerchant": "お問い合わせ",
+    "restricted": "地域制限 🔒",
+    "comingSoon": "近日公開 🔒"
   },
-
-
-
   "doraemon": {
     "backHome": "ホームに戻る",
     "title": "ドラえもん教室デシベルモニター",
@@ -51,6 +61,7 @@
     "pleaseAllowMic": "クリック後、必ずマイクの\"許可\"を選択してください",
     "quietDuration": "静かな時間",
     "warningCount": "警告回数",
+    "totalDuration": "監視合計時間",
     "currentDecibel": "現在のデシベル (dB)",
     "alarmThreshold": "アラーム閾値",
     "resetCount": "警告回数をリセット",
@@ -86,7 +97,7 @@
       "cleared": "✅ キャッシュがクリアされました！ページを更新中...",
       "backHome": "ホームに戻る",
       "title": "🤫 デシベルモニター",
-      "subtitle": "購入したライセンスコードを入力してください",
+      "subtitle": "ご購入いただいたライセンスコードを入力してください",
       "clearCache": "認証キャッシュをクリア",
       "devMode": "開発者モードが有効になりました",
       "verifying": "検証中...",

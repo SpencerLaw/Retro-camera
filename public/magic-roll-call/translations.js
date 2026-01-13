@@ -5,7 +5,6 @@ window.TRANSLATIONS = {
         authSubtitle: "请输入授权码",
         placeholder: "DM-xxxx",
         verifyBtn: "🔮 芝麻开门",
-        verifyingAuth: "✨ 正在验证魔法授权...",
         sidebarTitle: "🎓 点名魔法师",
         studentList: "📋 名单预览",
         studentCount: "人数: ",
@@ -26,7 +25,11 @@ window.TRANSLATIONS = {
         authError: "授权码无效",
         historyReset: "历史记录已重置",
         toggleNamesShow: "👁️ 显示名字",
-        toggleNamesHide: "🙈 隐藏名字"
+        toggleNamesHide: "🙈 隐藏名字",
+        authExpired: "⚠️ 授权失效",
+        returnHome: "{n}秒后自动返回首页...",
+        verifyingAuth: "✨ 正在验证魔法授权...",
+        winTitle: "🎉 天选之子 🎉"
     },
     'zh-TW': {
         appTitle: "✨ 炫酷課堂點名器",
@@ -34,13 +37,12 @@ window.TRANSLATIONS = {
         authSubtitle: "請輸入授權碼",
         placeholder: "DM-xxxx",
         verifyBtn: "🔮 芝麻開門",
-        verifyingAuth: "✨ 正在驗證魔法授權...",
         sidebarTitle: "🎓 點名魔法師",
         studentList: "📋 名單預覽",
         studentCount: "人數: ",
         placeholderList: "每行一個姓名",
         saveBtn: "💾 保存",
-        clearBtn: "🗑️ 清空",
+        clearBtn: "🗑️ 凊空",
         magicSettings: "⚙️ 魔法設置",
         pickCount: "抽取人數: ",
         resetHistory: "🔄 重置歷史",
@@ -51,11 +53,15 @@ window.TRANSLATIONS = {
         rolling: "✨召喚中✨",
         saveSuccess: "成功召喚！已保存 {n} 名學生",
         listEmpty: "名單不能為空",
-        clearConfirm: "確定清空？",
+        clearConfirm: "確定凊空？",
         authError: "授權碼無效",
         historyReset: "歷史記錄已重置",
         toggleNamesShow: "👁️ 顯示名字",
-        toggleNamesHide: "🙈 隱藏名字"
+        toggleNamesHide: "🙈 隱藏名字",
+        authExpired: "⚠️ 授權失效",
+        returnHome: "{n}秒後自動返回首頁...",
+        verifyingAuth: "✨ 正在驗證魔法授權...",
+        winTitle: "🎉 天選之子 🎉"
     },
     'en': {
         appTitle: "✨ Magic Roll Call",
@@ -63,7 +69,6 @@ window.TRANSLATIONS = {
         authSubtitle: "Enter License Code",
         placeholder: "DM-xxxx",
         verifyBtn: "🔮 Open Sesame",
-        verifyingAuth: "✨ Verifying Magic Auth...",
         sidebarTitle: "🎓 Magic Caller",
         studentList: "📋 List Preview",
         studentCount: "Count: ",
@@ -84,7 +89,11 @@ window.TRANSLATIONS = {
         authError: "Invalid Code",
         historyReset: "History Reset",
         toggleNamesShow: "👁️ Show Names",
-        toggleNamesHide: "🙈 Hide Names"
+        toggleNamesHide: "🙈 Hide Names",
+        authExpired: "⚠️ Auth Expired",
+        returnHome: "{n}s returning home...",
+        verifyingAuth: "✨ Verifying Magic Auth...",
+        winTitle: "🎉 The Chosen One 🎉"
     },
     'ja': {
         appTitle: "✨ 魔法の点名簿",
@@ -92,7 +101,6 @@ window.TRANSLATIONS = {
         authSubtitle: "ライセンスコードを入力",
         placeholder: "DM-xxxx",
         verifyBtn: "🔮 開けゴマ",
-        verifyingAuth: "✨ 魔法の認証を確認中...",
         sidebarTitle: "🎓 点名魔法使い",
         studentList: "📋 リストプレビュー",
         studentCount: "人数: ",
@@ -113,6 +121,10 @@ window.TRANSLATIONS = {
         authError: "無効なコード",
         historyReset: "履歴をリセットしました",
         toggleNamesShow: "👁️ 名前を表示",
-        toggleNamesHide: "🙈 名前を隠す"
+        toggleNamesHide: "🙈 名前を隠す",
+        authExpired: "⚠️ 認証切れ",
+        returnHome: "{n}秒後にホームに戻ります...",
+        verifyingAuth: "✨ 魔法の認証を確認中...",
+        winTitle: "🎉 選ばれし者 🎉"
     }
 };

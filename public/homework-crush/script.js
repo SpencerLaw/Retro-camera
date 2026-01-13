@@ -12,10 +12,14 @@
         lang: localStorage.getItem('global-language') || 'zh-CN'
     };
 
-    const t = (k) => {
+    const t = (k, params = {}) => {
         const data = window.TRANSLATIONS || {};
         const langData = data[STATE.lang] || data['zh-CN'] || {};
-        return langData[k] || k;
+        let text = langData[k] || k;
+        for (const [key, val] of Object.entries(params)) {
+            text = text.replace(`{${key}}`, val);
+        }
+        return text;
     };
 
     const applyTranslations = () => {
@@ -60,6 +64,8 @@
         if (settingsModal) {
             const h2 = settingsModal.querySelector('.modal-header h2');
             if (h2) h2.textContent = t('settingsTitle');
+            const p = settingsModal.querySelector('.modal-header p');
+            if (p) p.textContent = t('settingsSubtitle');
         }
         
         // Gate text
@@ -72,14 +78,14 @@
         localStorage.removeItem('hc_license');
         let timeLeft = 4;
         document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
-            <h1 style="font-size:3.3rem">⚠️ 授权失效</h1>
+            <h1 style="font-size:3.3rem">${t('authExpired')}</h1>
             <p style="font-size:1.65rem; margin:20px 0;">${msg}</p>
-            <div id="countdown-timer" style="font-size:1.32rem; color:#666">${timeLeft}秒后自动返回首页...</div>
+            <div id="countdown-timer" style="font-size:1.32rem; color:#666">${t('returnHome', {n: timeLeft})}</div>
         </div>`;
         const timer = setInterval(() => {
             timeLeft--;
             const el = document.getElementById('countdown-timer');
-            if (el) el.textContent = `${timeLeft}秒后自动返回首页...`;
+            if (el) el.textContent = t('returnHome', {n: timeLeft});
             if (timeLeft <= 0) {
                 clearInterval(timer);
                 window.location.replace('/');
@@ -97,46 +103,22 @@
     function createStudentBubble(student, index, isDone, day) {
         const bubble = document.createElement('div');
         bubble.className = `student-bubble ${isDone ? 'done' : ''}`;
-        const heartSVG = `
-            <svg class="heart-svg" width="100" height="100" viewBox="0 0 200 200">
+        const heartSVG = "            <svg class=\"heart-svg\" width=\"100\" height=\"100\" viewBox=\"0 0 200 200\">
                 <defs>
-                    <radialGradient id="strawberry-${index}" cx="30%" cy="30%" r="80%">
-                        <stop offset="0%" stop-color="#ffbfd3" />
-                        <stop offset="60%" stop-color="#ff6b95" />
-                        <stop offset="100%" stop-color="#ff3366" />
+                    <radialGradient id=\"strawberry-${index}\" cx=\"30%\" cy=\"30%\" r=\"80%\">
+                        <stop offset=\"0%\" stop-color=\"#ffbfd3\" />
+                        <stop offset=\"60%\" stop-color=\"#ff6b95\" />
+                        <stop offset=\"100%\" stop-color=\"#ff3366\" />
                     </radialGradient>
                 </defs>
-                <path d="M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z"
-                      fill="${isDone ? 'url(#strawberry-' + index + ')' : '#ffdce5'}"
-                      stroke="#ff3366" stroke-width="4" />
-                <ellipse cx="60" cy="50" rx="12" ry="20" fill="#ffffff" transform="rotate(-15 60 50)" opacity="${isDone ? '0.8' : '0.4'}"/>
-            </svg>
-        `;
+                <path d=\"M100,175 C 40,115 20,85 20,60 C 20,25 50,15 75,15 C 92,15 100,25 100,30 C 100,25 108,15 125,15 C 150,15 180,25 180,60 C 180,85 160,115 100,175 Z\"
+                      fill=\"${isDone ? 'url(#strawberry-' + index + ')' : '#ffdce5'}\" 
+                      stroke=\"#ff3366\" stroke-width=\"4\" />
+                <ellipse cx=\"60\" cy=\"50\" rx=\"12\" ry=\"20\" fill=\"#ffffff\" transform=\"rotate(-15 60 50)\" opacity=\"${isDone ? '0.8' : '0.4'}\"/>
+            </svg>";
         bubble.innerHTML = heartSVG + `<div class="name" style="color: ${isDone ? '#ff3366' : '#a36d7d'}">${student.name}</div>`;
         if (!isDone) {
             bubble.onclick = () => {
-                // 动态注入弹窗如果不存在（解决HTML缓存问题）
-                if (!document.getElementById('confirm-modal')) {
-                    const modalHTML = `
-                        <div id="confirm-modal" class="modal hidden">
-                            <div class="modal-backdrop"></div>
-                            <div class="modal-content settings-modal-premium" style="max-width: 400px; text-align: center;">
-                                <div class="modal-header" style="justify-content: center;">
-                                    <h2 id="confirm-title" style="margin: 0;">确认操作</h2>
-                                </div>
-                                <div class="input-card" style="border: none; background: transparent; padding: 20px 0;">
-                                    <p id="confirm-message" style="font-size: 1.2rem; color: var(--text-dark);">你确定吗？</p>
-                                </div>
-                                <div class="modal-footer" style="justify-content: center; gap: 20px;">
-                                    <button id="confirm-yes-btn" class="btn-premium btn-primary" style="padding: 10px 30px;">确认</button>
-                                    <button id="confirm-no-btn" class="btn-premium" style="padding: 10px 30px; background: white; color: #666; border: 2px solid #eee;">取消</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    document.body.insertAdjacentHTML('beforeend', modalHTML);
-                }
-
                 const modal = document.getElementById('confirm-modal');
                 const title = document.getElementById('confirm-title');
                 const msg = document.getElementById('confirm-message');
@@ -144,8 +126,10 @@
                 const noBtn = document.getElementById('confirm-no-btn');
                 const backdrop = modal.querySelector('.modal-backdrop');
 
-                title.textContent = '完成确认';
-                msg.textContent = `确认 ${student.name} 完成了吗？`;
+                title.textContent = t('confirmDoneTitle');
+                msg.textContent = t('confirmDoneMsg', {name: student.name});
+                yesBtn.textContent = t('confirmYes');
+                noBtn.textContent = t('confirmNo');
                 modal.classList.remove('hidden');
 
                 const closeModal = () => {
@@ -188,8 +172,8 @@
             if (isDone) { completedGrid.appendChild(bubble); doneNum++; } 
             else { incompleteGrid.appendChild(bubble); }
         });
-        document.getElementById('incomplete-count').textContent = (STATE.students.length - doneNum) + '人';
-        document.getElementById('completed-count').textContent = doneNum + '人';
+        document.getElementById('incomplete-count').textContent = (STATE.students.length - doneNum) + t('studentCountUnit');
+        document.getElementById('completed-count').textContent = doneNum + t('studentCountUnit');
         const progress = document.getElementById('daily-progress');
         if (progress) progress.style.width = `${(doneNum / STATE.students.length) * 100}%`;
     }
@@ -209,39 +193,37 @@
         else stage = 4;
         const treeScale = 0.5 + stage * 0.12;
         const leafOpacity = Math.min(stage * 0.25, 1);
-        container.innerHTML = `
-            <svg width="100%" height="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+        container.innerHTML = "            <svg width=\"100%\" height=\"100%\" viewBox=\"0 0 500 500\" xmlns=\"http://www.w3.org/2000/svg\">
                 <defs>
-                    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#A1C4FD"/><stop offset="100%" stop-color="#C2E9FB"/></linearGradient>
-                    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6d4c41"/><stop offset="40%" stop-color="#8d6e63"/><stop offset="100%" stop-color="#5d4037"/></linearGradient>
-                    <radialGradient id="leafDark" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#66bb6a"/><stop offset="100%" stop-color="#2e7d32"/></radialGradient>
-                    <radialGradient id="leafLight" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#b9f6ca"/><stop offset="100%" stop-color="#00c853"/></radialGradient>
+                    <linearGradient id=\"skyGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\"><stop offset=\"0%\" stop-color=\"#A1C4FD\"/><stop offset=\"100%\" stop-color=\"#C2E9FB\"/></linearGradient>
+                    <linearGradient id=\"trunkGrad\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\"><stop offset=\"0%\" stop-color=\"#6d4c41\"/><stop offset=\"40%\" stop-color=\"#8d6e63\"/><stop offset=\"100%\" stop-color=\"#5d4037\"/></linearGradient>
+                    <radialGradient id=\"leafDark\" cx=\"30%\" cy=\"30%\" r=\"70%\"><stop offset=\"0%\" stop-color=\"#66bb6a\"/><stop offset=\"100%\" stop-color=\"#2e7d32\"/></radialGradient>
+                    <radialGradient id=\"leafLight\" cx=\"30%\" cy=\"30%\" r=\"70%\"><stop offset=\"0%\" stop-color=\"#b9f6ca\"/><stop offset=\"100%\" stop-color=\"#00c853\"/></radialGradient>
                 </defs>
-                <rect width="500" height="500" fill="url(#skyGrad)" />
-                <path d="M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z" fill="#84fab0" />
-                <g transform="translate(250, 420) scale(${treeScale})">
-                    <path d="M-15,0 Q-10,-60 -30,-100 Q-40,-120 -80,-140 M-10,-60 Q5,-120 40,-160 M0,0 Q15,-50 25,-100 Q35,-150 80,-180 L0,0 Z" 
-                          fill="none" stroke="url(#trunkGrad)" stroke-width="20" stroke-linecap="round" />
-                    <path d="M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z" fill="url(#trunkGrad)" />
-                    ${stage >= 1 ? `<g class="sway">
-                        <circle cx="-50" cy="-140" r="40" fill="url(#leafDark)" opacity="${leafOpacity}" />
-                        <circle cx="50" cy="-160" r="45" fill="url(#leafDark)" opacity="${leafOpacity}" />
-                        <circle cx="0" cy="-210" r="50" fill="url(#leafDark)" opacity="${leafOpacity}" />
-                        ${stage >= 2 ? `<circle cx="-30" cy="-170" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/><circle cx="30" cy="-190" r="35" fill="url(#leafLight)" opacity="${leafOpacity}"/>` : ''}
-                        ${stage >= 3 ? `<circle cx="0" cy="-230" r="30" fill="#b9f6ca" opacity="${leafOpacity}"/>` : ''}
+                <rect width=\"500\" height=\"500\" fill=\"url(#skyGrad)\" />
+                <path d=\"M-50,400 Q100,350 250,420 T550,400 V550 H-50 Z\" fill=\"#84fab0\" />
+                <g transform=\"translate(250, 420) scale(${treeScale})\">
+                    <path d=\"M-15,0 Q-10,-60 -30,-100 Q-40,-120 -80,-140 M-10,-60 Q5,-120 40,-160 M0,0 Q15,-50 25,-100 Q35,-150 80,-180 L0,0 Z\" 
+                          fill=\"none\" stroke=\"url(#trunkGrad)\" stroke-width=\"20\" stroke-linecap=\"round\" />
+                    <path d=\"M-20,0 Q-10,-80 -5,-150 L5,-150 Q15,-80 20,0 Z\" fill=\"url(#trunkGrad)\" />
+                    ${stage >= 1 ? `<g class=\"sway\">
+                        <circle cx=\"-50\" cy=\"-140\" r=\"40\" fill=\"url(#leafDark)\" opacity=\"${leafOpacity}\" />
+                        <circle cx=\"50\" cy=\"-160\" r=\"45\" fill=\"url(#leafDark)\" opacity=\"${leafOpacity}\" />
+                        <circle cx=\"0\" cy=\"-210\" r=\"50\" fill=\"url(#leafDark)\" opacity=\"${leafOpacity}\" />
+                        ${stage >= 2 ? `<circle cx=\"-30\" cy=\"-170\" r=\"35\" fill=\"url(#leafLight)\" opacity=\"${leafOpacity}\"/><circle cx=\"30\" cy=\"-190\" r=\"35\" fill=\"url(#leafLight)\" opacity=\"${leafOpacity}\"/>` : ''}
+                        ${stage >= 3 ? `<circle cx=\"0\" cy=\"-230\" r=\"30\" fill=\"#b9f6ca\" opacity=\"${leafOpacity}\"/>` : ''}
                     </g>` : ''}
                 </g>
-                ${stage === 4 ? `<g class="firework">
-                    <circle cx="150" cy="100" r="5" fill="#ff6b95"><animate attributeName="r" from="0" to="50" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></circle>
-                    <circle cx="350" cy="120" r="5" fill="#ffd700"><animate attributeName="r" from="0" to="60" dur="2s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="1" to="0" dur="2s" begin="0.5s" repeatCount="indefinite"/></circle>
+                ${stage === 4 ? `<g class=\"firework\">
+                    <circle cx=\"150\" cy=\"100\" r=\"5\" fill=\"#ff6b95\"><animate attributeName=\"r\" from=\"0\" to=\"50\" dur=\"1.5s\" repeatCount=\"indefinite"/><animate attributeName=\"opacity\" from=\"1\" to=\"0\" dur=\"1.5s\" repeatCount=\"indefinite"/></circle>
+                    <circle cx=\"350\" cy=\"120\" r=\"5\" fill=\"#ffd700\"><animate attributeName=\"r\" from=\"0\" to=\"60\" dur=\"2s\" begin=\"0.5s\" repeatCount=\"indefinite"/><animate attributeName=\"opacity\" from=\"1\" to=\"0\" dur=\"2s\" begin=\"0.5s\" repeatCount=\"indefinite"/></circle>
                 </g>` : ''}
             </svg>
-            ${stage === 4 ? `<div class="celebrate-badge">🎉 全班完成！</div>` : ''}
+            ${stage === 4 ? `<div class="celebrate-badge">${t('allDone')}</div>` : ''}
         `;
     }
 
     function bindFunctionalEvents() {
-        // 黑夜模式切换
         const darkModeBtn = document.getElementById('dark-mode-btn');
         const isDark = localStorage.getItem('hc_dark_mode') === 'true';
         if (isDark) {
@@ -272,34 +254,13 @@
                 saveData();
                 document.getElementById('settings-modal').classList.add('hidden');
                 renderUI(); renderTree();
+                alert(t('importSuccess'));
             }
         };
         document.getElementById('clear-data-btn').onclick = () => {
-            if (confirm('确定清空所有数据？')) { STATE.students = []; saveData(); renderUI(); renderTree(); }
+            if (confirm(t('clearDataConfirm'))) { STATE.students = []; saveData(); renderUI(); renderTree(); }
         };
         document.getElementById('reset-day-btn').onclick = () => {
-            // 动态注入弹窗如果不存在（解决HTML缓存问题）
-            if (!document.getElementById('confirm-modal')) {
-                const modalHTML = `
-                    <div id="confirm-modal" class="modal hidden">
-                        <div class="modal-backdrop"></div>
-                        <div class="modal-content settings-modal-premium" style="max-width: 400px; text-align: center;">
-                            <div class="modal-header" style="justify-content: center;">
-                                <h2 id="confirm-title" style="margin: 0;">确认操作</h2>
-                            </div>
-                            <div class="input-card" style="border: none; background: transparent; padding: 20px 0;">
-                                <p id="confirm-message" style="font-size: 1.2rem; color: var(--text-dark);">你确定吗？</p>
-                            </div>
-                            <div class="modal-footer" style="justify-content: center; gap: 20px;">
-                                <button id="confirm-yes-btn" class="btn-premium btn-primary" style="padding: 10px 30px;">确认</button>
-                                <button id="confirm-no-btn" class="btn-premium" style="padding: 10px 30px; background: white; color: #666; border: 2px solid #eee;">取消</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                document.body.insertAdjacentHTML('beforeend', modalHTML);
-            }
-
             const modal = document.getElementById('confirm-modal');
             const title = document.getElementById('confirm-title');
             const msg = document.getElementById('confirm-message');
@@ -307,8 +268,10 @@
             const noBtn = document.getElementById('confirm-no-btn');
             const backdrop = modal.querySelector('.modal-backdrop');
 
-            title.textContent = '开启新的一天';
+            title.textContent = t('confirmTitle');
             msg.textContent = t('resetDayConfirm');
+            yesBtn.textContent = t('confirmYes');
+            noBtn.textContent = t('confirmNo');
             modal.classList.remove('hidden');
 
             const closeModal = () => {
@@ -328,7 +291,7 @@
             noBtn.onclick = closeModal;
             backdrop.onclick = closeModal;
         };
-        // 全屏
+        
         const fsBtn = document.getElementById('fullscreen-btn');
         const fsIcon = document.getElementById('fs-icon');
         const enterFSPath = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
@@ -346,7 +309,6 @@
             }
         };
 
-        // 监听 ESC 键导致的退出全屏，同步图标
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement && fsIcon) {
                 fsIcon.innerHTML = enterFSPath;
@@ -383,60 +345,29 @@
         } catch (e) { initApp(); }
     }
 
-        window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', () => {
         applyTranslations();
-
         document.querySelectorAll('.global-back-btn').forEach(btn => {
+            btn.onclick = (e) => { e.preventDefault(); window.location.href = '/'; };
+        });
 
-                btn.onclick = (e) => { e.preventDefault(); window.location.href = '/'; };
+        function updateClock() {
+            const d = new Date();
+            const dateStr = d.getFullYear() + '/' + (d.getMonth() + 1).toString().padStart(2, '0') + '/' + d.getDate().toString().padStart(2, '0');
+            const timeStr = d.getHours().toString().padStart(2, '0') + ':' + 
+                            d.getMinutes().toString().padStart(2, '0') + ':' + 
+                            d.getSeconds().toString().padStart(2, '0');
+            const dateEl = document.getElementById('current-date');
+            const timeEl = document.getElementById('current-time');
+            if (dateEl) dateEl.textContent = dateStr;
+            if (timeEl) timeEl.textContent = timeStr;
+            const dayIdx = d.getDay();
+            STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
 
-            });
-
-    
-
-            // 动态时钟逻辑
-
-            function updateClock() {
-
-                const d = new Date();
-
-                const dateStr = d.getFullYear() + '/' + (d.getMonth() + 1).toString().padStart(2, '0') + '/' + d.getDate().toString().padStart(2, '0');
-
-                const timeStr = d.getHours().toString().padStart(2, '0') + ':' + 
-
-                                d.getMinutes().toString().padStart(2, '0') + ':' + 
-
-                                d.getSeconds().toString().padStart(2, '0');
-
-                
-
-                const dateEl = document.getElementById('current-date');
-
-                const timeEl = document.getElementById('current-time');
-
-                if (dateEl) dateEl.textContent = dateStr;
-
-                if (timeEl) timeEl.textContent = timeStr;
-
-    
-
-                // 更新 todayIndex
-
-                const dayIdx = d.getDay();
-
-                STATE.todayIndex = dayIdx === 0 ? 6 : dayIdx - 1;
-
-            }
-
-    
-
-            updateClock();
-
-            setInterval(updateClock, 1000);
-
-    
-
-            if (STATE.isVerified && STATE.licenseCode) validateLicense();
+        if (STATE.isVerified && STATE.licenseCode) validateLicense();
         else {
             const gate = document.getElementById('gatekeeper-screen');
             if (gate) gate.style.display = 'none';
@@ -445,7 +376,7 @@
                 const code = document.getElementById('license-input').value.trim();
                 const res = await fetch('/api/verify-license', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ licenseCode: code, deviceId: 'hc-user' }) });
                 const data = await res.json();
-                if (data.success) { STATE.isVerified = true; STATE.licenseCode = code; saveData(); initApp(); } 
+                if (data.success) { STATE.isVerified = true; STATE.licenseCode = code; saveData(); initApp(); alert(t('saveSuccess')); } 
                 else alert(data.message);
             };
         }

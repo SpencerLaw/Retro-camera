@@ -64,7 +64,7 @@
         
         // Gate text
         const gateText = document.getElementById('gate-text');
-        if (gateText) gateText.textContent = t('verifying');
+        if (gateText) gateText.textContent = t('initializing');
     };
 
     const forceExit = (msg) => {

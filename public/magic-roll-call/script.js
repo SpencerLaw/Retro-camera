@@ -37,6 +37,7 @@ function setPlaceholder(id, text) {
 
 function applyTranslations() {
     document.title = t('appTitle');
+    setText('gate-text', t('verifyingAuth'));
     setText('auth-title', t('authTitle'));
     setText('auth-subtitle', t('authSubtitle'));
     setPlaceholder('license-input', t('placeholder'));

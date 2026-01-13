@@ -116,7 +116,7 @@
                       stroke=\"#ff3366\" stroke-width=\"4\" />
                 <ellipse cx=\"60\" cy=\"50\" rx=\"12\" ry=\"20\" fill=\"#ffffff\" transform=\"rotate(-15 60 50)\" opacity=\"${isDone ? '0.8' : '0.4'}\"/>
             </svg>";
-        bubble.innerHTML = heartSVG + `<div class="name" style="color: ${isDone ? '#ff3366' : '#a36d7d'}">${student.name}</div>`;
+        bubble.innerHTML = heartSVG + `<div class="name" style="color: ${isDone ? '#374151' : '#a36d7d'}">${student.name}</div>`;
         if (!isDone) {
             bubble.onclick = () => {
                 const modal = document.getElementById('confirm-modal');

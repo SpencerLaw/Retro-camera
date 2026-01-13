@@ -2,16 +2,8 @@
   "home": {
     "title": "AnyPok",
     "subtitle": "Awe",
-    "camera": {
-      "title": "Retro Camera",
-      "subtitle": "Vintage Camera • Instant Photo",
-      "description": "Capture moments with vintage filters and create your own photo wall"
-    },
-    "fortune": {
-      "title": "Fortune Sticks",
-      "subtitle": "Sincere Prayer • Divine Guidance",
-      "description": "Draw a fortune stick and receive divine guidance for your future"
-    },
+
+
     "adventure": {
       "title": "Adventure Game",
       "subtitle": "Campus Challenge",
@@ -27,11 +19,7 @@
       "subtitle": "Classroom Decibel Monitor",
       "description": "Real-time noise monitoring with automatic alerts when threshold is exceeded"
     },
-    "weather": {
-      "title": "Nano Weather",
-      "subtitle": "Miniature Diorama • Weather Explorer",
-      "description": "Explore city weather through beautiful miniature dioramas"
-    },
+
     "homeworkCrush": {
       "title": "Homework Crush",
       "subtitle": "Fun Challenge • Habit Builder",
@@ -62,61 +50,18 @@
       "waitingMsg": "Waiting for luck...",
       "groupNamePrefix": "Group",
       "groupNameSuffix": "",
-      "errorLow": "Number of students cannot be less than number of groups!"
+      "errorLow": "Number of students cannot be less than number of groups!",
+      "downloadFileName": "Grouping_Result_{time}.txt"
     },
-    "particles": {
-      "title": "Particle Flow",
-      "subtitle": "3D Particle System • Hand Gesture Control",
-      "description": "Interactive 3D particles controlled by hand gestures with beautiful shapes"
-    },
+
     "backHome": "Back Home",
     "contactMerchant": "Contact",
     "restricted": "Restricted 🔒",
     "comingSoon": "Coming Soon 🔒"
   },
-  "camera": {
-    "backHome": "Back Home",
-    "instructions": {
-      "snap": "Click Red Button to Snap",
-      "drag": "Drag photos to arrange"
-    },
-    "photoWall": "My Photo Wall",
-    "download": "Download",
-    "delete": "Delete",
-    "clearAll": "Clear All",
-    "clearConfirm": "Are you sure you want to clear all photos?",
-    "clearSuccess": "All photos cleared",
-    "filters": {
-      "normal": "Normal",
-      "vivid": "Vivid",
-      "soft": "Film",
-      "clean": "Fresh",
-      "warm": "Warm",
-      "rich": "Rich",
-      "cyber": "Cyber",
-      "candy": "Candy",
-      "retro": "Retro"
-    }
-  },
-  "weather": {
-    "backHome": "Back Home",
-    "loadingWeather": "Checking the forecast...",
-    "generatingImage": "Crafting miniature world...",
-    "searchPlaceholder": "Enter a city name to explore its weather",
-    "download": "Download Image",
-    "generateButton": "Generate Weather Picture",
-    "styleSelector": {
-      "title": "Choose Style",
-      "diorama": "Miniature Diorama",
-      "dioramaDesc": "Dreamy fairy-tale miniature scenes",
-      "cake": "Sweet Cake",
-      "cakeDesc": "A delicious world built from pastries"
-    },
-    "errors": {
-      "locationRestricted": "🌍 Regional Restriction",
-      "locationRestrictedDesc": "Sorry, the Gemini API is not available in your current region.\n\n💡 Suggestions:\n• Use a VPN to connect from a supported region\n• Or explore other apps in the studio!"
-    }
-  },
+
+
+
   "doraemon": {
     "backHome": "Back Home",
     "title": "Doraemon Classroom Decibel Monitor",
@@ -179,27 +124,5 @@
       "noMicFound": "\n🔌 No microphone device detected. Please check connection.",
       "unknownError": "\n❓ "
     }
-  },
-  "particles": {
-    "waitingForCamera": "Waiting for camera...",
-    "handsTracking": "{count} Hand(s) Tracking",
-    "lookingForHands": "Looking for hands...",
-    "controls": "Controls",
-    "shapeMode": "Shape Mode",
-    "particleColor": "Particle Color",
-    "oneHand": "One Hand:",
-    "pinchToPulse": "Pinch to pulse",
-    "twoHands": "Two Hands:",
-    "expandAndZoom": "Expand & zoom",
-    "toggleFullscreen": "Toggle Fullscreen",
-    "shapes": {
-      "heart": "Heart",
-      "flower": "Flower",
-      "saturn": "Saturn",
-      "buddha": "Buddha",
-      "fireworks": "Fireworks",
-      "christmasTree": "🎄 Christmas Tree"
-    },
-    "cameraError": "Camera access denied/error"
   }
 }

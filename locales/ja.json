@@ -2,16 +2,8 @@
   "home": {
     "title": "AnyPok",
     "subtitle": "Awe",
-    "camera": {
-      "title": "レトロカメラ",
-      "subtitle": "ビンテージカメラ • インスタント写真",
-      "description": "ビンテージフィルターで瞬間を捉え、独自のフォトウォールを作成"
-    },
-    "fortune": {
-      "title": "おみくじ",
-      "subtitle": "誠心誠意 • 運命を知る",
-      "description": "おみくじを引いて、神様からの未来のガイダンスを受け取る"
-    },
+
+
     "adventure": {
       "title": "罰ゲーム大冒険",
       "subtitle": "キャンパスチャレンジ",
@@ -27,11 +19,7 @@
       "subtitle": "教室デシベルモニター",
       "description": "リアルタイムで環境ノイズを監視し、しきい値を超えると自動的に警報を発します"
     },
-    "weather": {
-      "title": "ナノ天気",
-      "subtitle": "ミニチュアジオラマ • 天気探索",
-      "description": "美しいミニチュアジオラマで都市の天気を探索"
-    },
+
     "homeworkCrush": {
       "title": "宿題クラッシュ",
       "subtitle": "楽しいチャレンジ • 習慣作り",
@@ -46,57 +34,13 @@
           "downloadAll": "📥 すべてダウンロード",
           "memberListTitle": "メンバーリスト",
           "exportCurrentGroup": "グループリストを出力",
-          "exportBtn": "TXT出力",    "particles": {
-      "title": "パーティクルフロー",
-      "subtitle": "3Dパーティクルシステム • ジェスチャー制御",
-      "description": "ジェスチャーで制御するインタラクティブな3Dパーティクル、美しい形状を表現"
-    },
+          "exportBtn": "TXT出力",
     "backHome": "ホームに戻る",
     "contactMerchant": "お問合せ"
   },
-  "camera": {
-    "backHome": "ホームに戻る",
-    "instructions": {
-      "snap": "赤いボタンをクリックして撮影",
-      "drag": "写真をドラッグして配置"
-    },
-    "photoWall": "マイフォトウォール",
-    "download": "ダウンロード",
-    "delete": "削除",
-    "clearAll": "すべて削除",
-    "clearConfirm": "すべての写真を削除してもよろしいですか？",
-    "clearSuccess": "すべての写真を削除しました",
-    "filters": {
-      "normal": "通常",
-      "vivid": "鮮やか",
-      "soft": "フィルム",
-      "clean": "フレッシュ",
-      "warm": "暖かい",
-      "rich": "リッチ",
-      "cyber": "サイバー",
-      "candy": "キャンディ",
-      "retro": "レトロ"
-    }
-  },
-  "weather": {
-    "backHome": "ホームに戻る",
-    "loadingWeather": "天気予報を確認中...",
-    "generatingImage": "ミニチュア世界を作成中...",
-    "searchPlaceholder": "都市名を入力して天気を探索",
-    "download": "画像をダウンロード",
-    "generateButton": "天気画像を生成",
-    "styleSelector": {
-      "title": "スタイルを選択",
-      "diorama": "ミニチュアジオラマ",
-      "dioramaDesc": "夢のようなおとぎ話のミニチュアシーン",
-      "cake": "スイートケーキ",
-      "cakeDesc": "お菓子で作られた美味しい世界"
-    },
-    "errors": {
-      "locationRestricted": "🌍 地域制限",
-      "locationRestrictedDesc": "申し訳ございません。Gemini APIは現在の地域ではご利用いただけません。\n\n💡 提案：\n• VPNを使用してサポートされている地域から接続する\n• またはスタジオの他のアプリをお楽しみください！"
-    }
-  },
+
+
+
   "doraemon": {
     "backHome": "ホームに戻る",
     "title": "ドラえもん教室デシベルモニター",
@@ -156,27 +100,5 @@
       "noMicFound": "\n🔌 マイクデバイスが検出されませんでした。接続を確認してください。",
       "unknownError": "\n❓ "
     }
-  },
-  "particles": {
-    "waitingForCamera": "カメラを待機中...",
-    "handsTracking": "{count} 本の手を追跡中",
-    "lookingForHands": "手を探しています...",
-    "controls": "コントロール",
-    "shapeMode": "形状モード",
-    "particleColor": "パーティクルカラー",
-    "oneHand": "片手：",
-    "pinchToPulse": "ピンチでパルス",
-    "twoHands": "両手：",
-    "expandAndZoom": "展開とズーム",
-    "toggleFullscreen": "フルスクリーン切り替え",
-    "shapes": {
-      "heart": "ハート",
-      "flower": "花",
-      "saturn": "土星",
-      "buddha": "仏像",
-      "fireworks": "花火",
-      "christmasTree": "🎄 クリスマスツリー"
-    },
-    "cameraError": "カメラアクセス拒否/エラー"
   }
 }

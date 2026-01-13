@@ -322,8 +322,10 @@
     }
 
     const initApp = () => {
+        // 确保网关隐藏
         const gate = document.getElementById('gatekeeper-screen');
         if (gate) gate.style.display = 'none';
+        
         document.getElementById('app-screen').style.display = 'flex';
         document.getElementById('reward-text').value = STATE.rules.reward || '';
         document.getElementById('punishment-text').value = STATE.rules.punishment || '';
@@ -358,6 +360,15 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         applyTranslations();
+        
+        // --- 核心优化：强制移除网关，防止卡死 ---
+        const hideGate = () => {
+            const gate = document.getElementById('gatekeeper-screen');
+            if (gate) gate.style.display = 'none';
+        };
+        // 哪怕后续脚本报错，500ms 后也必须让黑屏消失
+        setTimeout(hideGate, 500); 
+
         document.querySelectorAll('.global-back-btn').forEach(btn => {
             btn.onclick = (e) => { e.preventDefault(); window.location.href = '/'; };
         });

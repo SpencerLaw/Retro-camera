@@ -10,7 +10,18 @@
         "selectStage": "Select a difficulty level! 🎓",
         "noDares": "No challenges available for this level.",
         "initialMsg": "Choose a level & Start the Adventure! 🎲",
-        "backHome": "Back Home"
+        "backHome": "Back Home",
+        "editTitle": "Content Editor",
+        "editClose": "Close",
+        "stageEasy": "Easy",
+        "stageNormal": "Normal",
+        "stageHard": "Hard",
+        "addNew": "Add New",
+        "save": "Save",
+        "reset": "Reset",
+        "export": "Export",
+        "saveSuccess": "Saved successfully!",
+        "resetConfirm": "Are you sure you want to reset to defaults?"
     },
     "zh": {
         "title": "奖惩大冒险 🎒",
@@ -23,7 +34,18 @@
         "selectStage": "请先选择一个难度等级！🎓",
         "noDares": "该等级没有可用的挑战。",
         "initialMsg": "选择难度等级，开启你的校园冒险！🎲",
-        "backHome": "返回首页"
+        "backHome": "返回首页",
+        "editTitle": "内容编辑器",
+        "editClose": "关闭",
+        "stageEasy": "简单",
+        "stageNormal": "普通",
+        "stageHard": "困难",
+        "addNew": "添加一条",
+        "save": "保存",
+        "reset": "重置",
+        "export": "导出",
+        "saveSuccess": "保存成功！",
+        "resetConfirm": "确定要重置回默认内容吗？"
     },
     "zh-TW": {
         "title": "獎懲大冒險 🎒",
@@ -36,7 +58,18 @@
         "selectStage": "請先選擇一個難度等級！🎓",
         "noDares": "該等級沒有可用挑戰。",
         "initialMsg": "選擇難度等級，開啟你的校園冒險！🎲",
-        "backHome": "返回首頁"
+        "backHome": "返回首頁",
+        "editTitle": "內容編輯器",
+        "editClose": "關閉",
+        "stageEasy": "簡單",
+        "stageNormal": "普通",
+        "stageHard": "困難",
+        "addNew": "添加一條",
+        "save": "保存",
+        "reset": "重置",
+        "export": "導出",
+        "saveSuccess": "保存成功！",
+        "resetConfirm": "確定要重置回默認內容嗎？"
     },
     "ja": {
         "title": "学園アドベンチャー 🎒",
@@ -49,6 +82,17 @@
         "selectStage": "難易度を選択してください！🎓",
         "noDares": "このレベルのチャレンジはありません。",
         "initialMsg": "レベルを選んで、冒険を始めよう！🎲",
-        "backHome": "ホームに戻る"
+        "backHome": "ホームに戻る",
+        "editTitle": "コンテンツエディター",
+        "editClose": "閉じる",
+        "stageEasy": "簡単",
+        "stageNormal": "普通",
+        "stageHard": "困難",
+        "addNew": "新しく追加",
+        "save": "保存",
+        "reset": "リセット",
+        "export": "エクスポート",
+        "saveSuccess": "保存しました！",
+        "resetConfirm": "デフォルトに戻してもよろしいですか？"
     }
 }

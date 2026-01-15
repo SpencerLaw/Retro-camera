@@ -10,6 +10,12 @@ interface Message {
     timestamp: string;
 }
 
+const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+    <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] ${className}`}>
+        {children}
+    </div>
+);
+
 const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
     const t = useTranslations();
     const licensePrefix = getLicensePrefix(license);
@@ -103,12 +109,6 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         setStatus({ type: 'success', msg: 'Room ID Copied' });
         setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
     };
-
-    const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] ${className}`}>
-            {children}
-        </div>
-    );
 
     return (
         <div className="space-y-8 max-w-2xl mx-auto px-4">

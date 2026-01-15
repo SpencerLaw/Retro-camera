@@ -9,6 +9,12 @@ import Receiver from './Receiver';
 import { isBCVerified, verifyLicense, clearBCLicense, getBCLicense } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 
+const GlassContainer = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+    <div className={`backdrop-blur-3xl bg-white/80 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)] ${className}`}>
+        {children}
+    </div>
+);
+
 const BroadcastApp: React.FC = () => {
     const navigate = useNavigate();
     const t = useTranslations();
@@ -58,12 +64,6 @@ const BroadcastApp: React.FC = () => {
             setMode('license');
         }
     };
-
-    const GlassContainer = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`backdrop-blur-3xl bg-white/80 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)] ${className}`}>
-            {children}
-        </div>
-    );
 
     if (mode === 'license') {
         return (

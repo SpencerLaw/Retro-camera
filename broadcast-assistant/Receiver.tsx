@@ -9,6 +9,12 @@ interface Message {
     timestamp: string;
 }
 
+const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+    <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-2xl ${className}`}>
+        {children}
+    </div>
+);
+
 const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     const t = useTranslations();
     const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
@@ -110,13 +116,6 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
         window.speechSynthesis.speak(wakeUp);
     };
 
-
-    const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-2xl ${className}`}>
-            {children}
-        </div>
-    );
-
     if (!isJoined) {
         return (
             <div className="flex flex-col items-center">
@@ -134,9 +133,17 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
                             <input
                                 type="text"
                                 value={fullRoomId}
-                                onChange={(e) => setFullRoomId(e.target.value.toUpperCase())}
+                                onChange={(e) => {
+                                    const start = e.target.selectionStart;
+                                    const end = e.target.selectionEnd;
+                                    const val = e.target.value.toUpperCase();
+                                    setFullRoomId(val);
+                                    requestAnimationFrame(() => {
+                                        if (e.target) e.target.setSelectionRange(start, end);
+                                    });
+                                }}
                                 placeholder="例如: 8859"
-                                className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600 shadow-inner"
+                                className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600 shadow-inner uppercase"
                             />
                             <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                         </div>

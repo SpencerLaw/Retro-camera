@@ -382,7 +382,10 @@ function showApp() {
     const auth = document.getElementById('auth-screen');
     const app = document.getElementById('app-screen');
     if (auth) auth.classList.add('hidden');
-    if (app) app.classList.remove('hidden');
+    if (app) {
+        app.classList.remove('hidden');
+        app.style.display = 'flex'; // Explicitly set display to flex
+    }
     applyTranslations();
     renderStudentPreview();
 }

@@ -157,9 +157,9 @@
     },
     "receiver": {
       "joinChannel": "進入通道",
-      "joinDesc": "輸入老師分配的固定通道 ID 以開始同步。",
+      "joinDesc": "請輸入老師給的通信號碼",
       "channelPlaceholder": "例如: 8859",
-      "initializeLive": "初始化直播",
+      "initializeLive": "進入通信",
       "missingChannel": "請輸入通道號",
       "online": "在線",
       "signalLost": "信號丟失",

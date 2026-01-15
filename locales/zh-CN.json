@@ -170,9 +170,9 @@
     },
     "receiver": {
       "joinChannel": "进入通道",
-      "joinDesc": "输入老师分配的固定通道 ID 以开始同步。",
+      "joinDesc": "请输入老师给的通信号码",
       "channelPlaceholder": "例如: 8859",
-      "initializeLive": "初始化直播",
+      "initializeLive": "进入通信",
       "missingChannel": "请输入通道号",
       "online": "在线",
       "signalLost": "信号丢失",

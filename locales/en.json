@@ -46,6 +46,11 @@
       "downloadFileName": "Grouping_Result_{time}.txt",
       "membersCount": "({count} members):"
     },
+    "broadcast": {
+      "title": "Classroom Broadcast",
+      "subtitle": "Ultra-light • TTL Sync",
+      "description": "Teachers send notifications, classrooms display & read aloud automatically. Supports emergency mode."
+    },
     "backHome": "Back Home",
     "contactMerchant": "Contact",
     "restricted": "Restricted 🔒",

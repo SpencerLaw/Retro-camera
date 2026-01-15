@@ -6,6 +6,7 @@ import AdventureGameApp from './adventure-game/AdventureGameApp';
 import AdventureGameEdit from './adventure-game/AdventureGameEdit';
 import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
 import { GroupMakerApp } from './components/GroupMakerApp';
+import BroadcastApp from './broadcast-assistant/BroadcastApp';
 
 const App: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const App: React.FC = () => {
           <Route path="/adventure/edit" element={<AdventureGameEdit />} />
           <Route path="/doraemon" element={<DoraemonMonitorApp />} />
           <Route path="/group-maker" element={<GroupMakerApp />} />
+          <Route path="/broadcast" element={<BroadcastApp />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

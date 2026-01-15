@@ -3,9 +3,9 @@
  * 
  * Features:
  * 1. Gatekeeper Authorization (ZD-XXX)
- * 2. Web Audio API Analysis (RMS)
+ * 2. Web Audio API Analysis (TimeDomain -> dB)
  * 3. Fractal Tree Visualization (Canvas)
- * 4. Gamification (Energy Bar, Rewards)
+ * 4. Gamification (Energy Bar, dB Meter, Rewards)
  */
 
 /* --- Constants & State --- */
@@ -15,8 +15,10 @@ const LICENSE_PREFIX = 'ZD';
 const STATE = {
     isListening: false,
     energy: 0, // 0 to 100
-    sensitivity: 50, // 1 to 100
-    volume: 0, // Current smoothed volume (0.0 to 1.0)
+    sensitivity: 50, // 1 to 100 (Still useful for fine tuning dB offset maybe? or remove)
+    // Let's keep sensitivity as a gain multiplier or offset if needed.
+    // For now, hard standard dB is better.
+    currentDB: 30,
     treeColor: '#4caf50',
     isSuperMode: false,
     superModeTimer: 0
@@ -30,6 +32,7 @@ const canvas = $('tree-canvas');
 const ctx = canvas.getContext('2d');
 const energyFill = $('energy-fill');
 const micBtn = $('mic-toggle-btn');
+const dbValue = $('db-value');
 
 /* --- 1. Gatekeeper Logic --- */
 function initGatekeeper() {
@@ -74,7 +77,7 @@ function showApp() {
     }, 500);
 }
 
-/* --- 2. Audio Logic --- */
+/* --- 2. Audio Logic (dB Calculation) --- */
 let audioCtx, analyser, dataArray, source;
 
 async function toggleMic() {
@@ -87,21 +90,26 @@ async function toggleMic() {
 
 async function startMic() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            }
+        });
 
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
+        analyser.fftSize = 512; // Time domain needs reasonable size
         source = audioCtx.createMediaStreamSource(stream);
-        source.connect(analyser); // Only connect to analyser, not destination (to avoid feedback loop)
+        source.connect(analyser);
 
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        dataArray = new Uint8Array(analyser.fftSize);
 
         STATE.isListening = true;
         micBtn.textContent = '⏸';
         micBtn.classList.add('active');
 
-        // Resume context if suspended
         if (audioCtx.state === 'suspended') {
             await audioCtx.resume();
         }
@@ -116,68 +124,104 @@ async function startMic() {
 function stopMic() {
     if (source) {
         source.disconnect();
-        // track.stop() to release hardware
     }
     STATE.isListening = false;
     micBtn.textContent = '🎤';
     micBtn.classList.remove('active');
+    dbValue.textContent = '--';
 }
 
-function getVolume() {
-    if (!STATE.isListening || !analyser) return 0;
+function calculateDB() {
+    if (!STATE.isListening || !analyser) return 30;
 
-    analyser.getByteFrequencyData(dataArray);
+    analyser.getByteTimeDomainData(dataArray);
 
-    // Calculate RMS (average power)
     let sum = 0;
     for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
+        // Convert 0-255 to -1 to 1 float
+        const x = (dataArray[i] - 128) / 128;
+        sum += x * x;
     }
-    const average = sum / dataArray.length;
 
-    // Normalize based on sensitivity (0 to 255 -> 0.0 to 1.0)
-    // Higher sensitivity slider = lower threshold needed = multiply average by higher factor
-    // Slider 1-100. Factor 0.5 to 3.0
-    const factor = 0.5 + (STATE.sensitivity / 100 * 4);
-    let norm = (average * factor) / 100;
-    if (norm > 1) norm = 1;
+    const rms = Math.sqrt(sum / dataArray.length);
 
-    return norm;
+    // Doraemon Logic: Math.log10(rms) * 20 + 100
+    // Adjusted: RMS of pure sine wave at max is 0.707. 20log(.707) = -3dB.
+    // +100 offset roughly maps full scale to 100dB (loud).
+    // Silence rms ~ 0 -> log(-inf). Handle rms=0.
+
+    let db = 30;
+    if (rms > 0) {
+        db = (Math.log10(rms) * 20) + 100;
+    }
+
+    // Sensitivity Slider Adjustment (-20dB to +20dB range ?)
+    // value 50 = 0 adj.
+    const adj = (STATE.sensitivity - 50) * 0.5; // +/- 25dB
+    db += adj;
+
+    // Clamp
+    if (db < 30) db = 30;
+    if (db > 120) db = 120;
+
+    return db;
 }
 
 /* --- 3. Game Logic --- */
 function updateState() {
-    const targetVolume = getVolume();
-    // Smooth volume transition
-    STATE.volume += (targetVolume - STATE.volume) * 0.1;
-
     if (!STATE.isListening) return;
 
-    // Energy logic
-    // Ideal range: 0.1 to 0.8.
-    // > 0.9 is noise (penalty).
+    const targetDB = calculateDB();
 
-    const THRESHOLD = 0.2;
-    if (STATE.volume > THRESHOLD) {
-        if (STATE.volume > 0.9) {
-            // Noise penalty
-            STATE.energy -= 0.5;
-            shakeScreen();
-        } else {
-            // Growth
-            const growth = (STATE.volume - THRESHOLD) * 0.5;
-            STATE.energy += growth;
+    // Smooth transition for UI
+    STATE.currentDB += (targetDB - STATE.currentDB) * 0.2;
+
+    // Update DB Meter UI
+    dbValue.textContent = Math.round(STATE.currentDB);
+
+    // Text color change based on loudness
+    if (STATE.currentDB > 85) {
+        dbValue.style.color = '#ff6b6b'; // Red
+    } else if (STATE.currentDB > 70) {
+        dbValue.style.color = '#4caf50'; // Green
+    } else {
+        dbValue.style.color = '#fff';
+    }
+
+    // --- Growth Rules ---
+    // Rule: Sounds < 70dB = Stop/Decay.
+    // Rule: Sounds >= 70dB = Grow.
+    // > 100dB = Too Loud? (Maybe warn, but still grow? "Morning Reading" should be loud)
+    // Let's set a "reading zone" 70-95.
+
+    const READING_THRESHOLD = 70;
+
+    if (STATE.currentDB >= READING_THRESHOLD) {
+        // Growth logic
+        // Faster growth for louder reading (up to a point)
+        // Rate: 0.1 per frame basic.
+        // If 80dB -> (80-70)*0.02 = 0.2
+
+        let rate = (STATE.currentDB - READING_THRESHOLD) * 0.03;
+        if (rate > 1.0) rate = 1.0; // Cap growth speed
+
+        STATE.energy += rate;
+
+        // Shake screen slightly if REALLY loud to show power
+        if (STATE.currentDB > 95) {
+            shakeScreen(2);
         }
     } else {
-        // Decay if silent
-        STATE.energy -= 0.08;
+        // Silence or Whisper (< 70)
+        // Decay slowly
+        STATE.energy -= 0.1;
     }
 
     // Clamp energy
     if (STATE.energy < 0) STATE.energy = 0;
     if (STATE.energy > 100) STATE.energy = 100;
 
-    // Update UI
+    // Update Energy UI
     energyFill.style.width = STATE.energy + '%';
 
     // Check Super Mode
@@ -191,19 +235,19 @@ function triggerSuperMode() {
     STATE.treeColor = '#ffd700'; // Gold
     showToast("🎉 班级早读成就达成！ 🎉");
 
-    // Keep super mode for 5 seconds then reset energy slightly to keep playing
+    // Keep super mode for 5 seconds
     setTimeout(() => {
         STATE.isSuperMode = false;
-        STATE.energy = 80;
+        STATE.energy = 80; // Reset to 80 to keep going
         STATE.treeColor = '#4caf50';
     }, 5000);
 }
 
-function shakeScreen() {
-    document.body.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+function shakeScreen(intensity = 5) {
+    document.body.style.transform = `translate(${Math.random() * intensity - intensity / 2}px, ${Math.random() * intensity - intensity / 2}px)`;
     setTimeout(() => {
         document.body.style.transform = 'none';
-    }, 100);
+    }, 50);
 }
 
 function showToast(msg) {
@@ -228,8 +272,8 @@ function resizeCanvas() {
 function drawTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.beginPath();
     ctx.save();
-    ctx.strokeStyle = depth < 2 ? '#2e7d32' : STATE.isSuperMode ? '#f1c40f' : '#5d4037'; // Green leaves, brown trunk
-    if (depth <= 2) ctx.strokeStyle = STATE.treeColor; // Leaves color
+    ctx.strokeStyle = depth < 2 ? '#2e7d32' : STATE.isSuperMode ? '#f1c40f' : '#5d4037';
+    if (depth <= 2) ctx.strokeStyle = STATE.treeColor;
 
     ctx.lineWidth = branchWidth;
     ctx.translate(startX, startY);
@@ -239,32 +283,27 @@ function drawTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.stroke();
 
     if (len < 10) {
-        // Draw fruit/flower if deep enough
         if (STATE.isSuperMode || depth < 1) {
             ctx.beginPath();
             ctx.arc(0, -len, 5, 0, Math.PI * 2);
-            ctx.fillStyle = '#e74c3c'; // Red fruit
+            ctx.fillStyle = '#e74c3c';
             ctx.fill();
         }
         ctx.restore();
         return;
     }
 
-    // Dynamic params based on volume and energy
-    // More volume = more spread (angle)
-    // More energy = more length recursion
+    // Tree Jitter based on DB volume
+    // Map 30-100dB to 0-1 jitter factor
+    let volumeFactor = (STATE.currentDB - 30) / 70;
+    if (volumeFactor < 0) volumeFactor = 0;
 
-    // Base spread angle: 15 to 30 degrees
-    let spread = 15 + (STATE.volume * 20);
-    // Random jitter (wind)
-    spread += (Math.random() - 0.5) * 4;
+    let spread = 15 + (volumeFactor * 25); // 15 to 40 degrees
+    spread += (Math.random() - 0.5) * 5;
 
     ctx.translate(0, -len);
 
-    // Recursive calls
-    // Left branch
     drawTree(0, 0, len * 0.75, -spread, branchWidth * 0.7, depth + 1);
-    // Right branch
     drawTree(0, 0, len * 0.75, spread, branchWidth * 0.7, depth + 1);
 
     ctx.restore();
@@ -273,23 +312,16 @@ function drawTree(startX, startY, len, angle, branchWidth, depth) {
 function loop() {
     updateState();
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw Ground
     ctx.fillStyle = '#81c784';
     ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
 
-    // Calculate Tree Size based on Energy
-    // Base trunk length: 50 px + (Energy * 1.5)
-    // Max trunk: 200px
     const treeSize = 60 + (STATE.energy * 1.4);
 
     if (treeSize > 50) {
-        // Only draw if there is some energy
         drawTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 10, 0);
     } else {
-        // Draw seed
         ctx.beginPath();
         ctx.arc(canvas.width / 2, canvas.height - 10, 5, 0, Math.PI * 2);
         ctx.fillStyle = '#5d4037';

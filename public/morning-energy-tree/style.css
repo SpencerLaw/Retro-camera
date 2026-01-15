@@ -46,6 +46,39 @@ body {
     transform: translateX(-2px);
 }
 
+.db-display {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s;
+}
+
+#db-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: monospace;
+    /* Fixed width prevents jitter */
+}
+
+.db-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
 /* --- Gatekeeper Screen --- */
 #gatekeeper-screen {
     position: fixed;

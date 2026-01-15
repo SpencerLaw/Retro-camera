@@ -143,7 +143,8 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder={t('broadcast.sender.broadcastPlaceholder')}
                         rows={4}
-                        className="w-full bg-transparent border-none text-2xl font-bold tracking-tight outline-none resize-none placeholder:opacity-20 transition-all min-h-[140px]"
+                        autoFocus
+                        className="w-full bg-transparent border-none text-2xl font-bold tracking-tight outline-none resize-none placeholder:opacity-20 transition-all min-h-[140px] dark:text-white"
                     />
                     <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                 </div>
@@ -152,8 +153,8 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <button
                         onClick={() => setIsEmergency(!isEmergency)}
                         className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isEmergency
-                                ? 'bg-red-500 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.5)] scale-105'
-                                : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
+                            ? 'bg-red-500 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.5)] scale-105'
+                            : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
                             }`}
                     >
                         <AlertTriangle size={18} /> {t('broadcast.sender.emergencyMode')}
@@ -171,7 +172,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
                 {status.type && (
                     <div className={`p-4 rounded-xl flex items-center gap-2 text-sm font-bold border ${status.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
-                            status.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-gray-500/10 border-gray-500/20 text-gray-400'
+                        status.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-gray-500/10 border-gray-500/20 text-gray-400'
                         }`}>
                         {status.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
                         {status.msg}

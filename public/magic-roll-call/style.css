@@ -557,6 +557,28 @@ textarea#student-input {
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        padding: 20px;
+        /* Add padding to prevent edge sticking */
+    }
+
+    /* Enable scrolling for result cards on mobile */
+    #result-cards {
+        max-height: 60vh;
+        overflow-y: auto;
+        width: 100%;
+        padding: 10px 0;
+        /* Custom scrollbar for webkit */
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-neon) rgba(255, 255, 255, 0.1);
+    }
+
+    #result-cards::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #result-cards::-webkit-scrollbar-thumb {
+        background: var(--primary-neon);
+        border-radius: 3px;
     }
 
     #result-overlay.hidden {

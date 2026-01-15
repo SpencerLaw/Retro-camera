@@ -136,7 +136,6 @@ const BroadcastApp: React.FC = () => {
                     </button>
 
                     <div className="flex flex-col items-center">
-                        <span className="text-[10px] uppercase tracking-[0.3em] font-black opacity-40 mb-1">{t('broadcast.appleEco')}</span>
                         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tighter flex items-center gap-2">
                             {t('home.broadcast.title').split(' ')[0]} <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">{t('home.broadcast.title').split(' ').slice(1).join(' ') || 'Assistant'}</span>
                         </h1>
@@ -162,7 +161,7 @@ const BroadcastApp: React.FC = () => {
 
                 <main className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150">
                     {mode === 'selection' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                             {/* Mode Cards */}
                             {[
                                 {
@@ -170,7 +169,7 @@ const BroadcastApp: React.FC = () => {
                                     title: t('broadcast.teacherMode'),
                                     sub: t('broadcast.teacherSubtitle'),
                                     desc: t('broadcast.teacherDesc'),
-                                    icon: <Radio size={56} />,
+                                    icon: <Radio size={72} />,
                                     color: 'from-blue-500 to-indigo-600',
                                     handler: handleTeacherMode
                                 },
@@ -179,7 +178,7 @@ const BroadcastApp: React.FC = () => {
                                     title: t('broadcast.classroomMode'),
                                     sub: t('broadcast.classroomSubtitle'),
                                     desc: t('broadcast.classroomDesc'),
-                                    icon: <Tv size={56} />,
+                                    icon: <Tv size={72} />,
                                     color: 'from-purple-500 to-pink-600',
                                     handler: () => setMode('receiver')
                                 }
@@ -187,18 +186,18 @@ const BroadcastApp: React.FC = () => {
                                 <button
                                     key={item.m}
                                     onClick={item.handler}
-                                    className="group relative h-[380px] p-12 rounded-[3.5rem] overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col text-left border border-white/10"
+                                    className="group relative h-[500px] p-16 rounded-[4rem] overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col text-left border border-white/10"
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-[0.03] group-hover:opacity-10 dark:opacity-[0.08] dark:group-hover:opacity-20 transition-opacity`}></div>
                                     <div className="relative z-10 flex-1">
-                                        <div className={`w-28 h-28 rounded-3xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-xl group-hover:scale-110 transition-transform duration-500`}>
+                                        <div className={`w-36 h-36 rounded-[2.5rem] bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-xl group-hover:scale-110 transition-transform duration-500`}>
                                             {item.icon}
                                         </div>
                                     </div>
-                                    <div className="relative z-10 space-y-3">
-                                        <span className={`text-xs font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity`}>{item.sub}</span>
-                                        <h2 className="text-4xl font-extrabold tracking-tight">{item.title}</h2>
-                                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed max-w-[240px]">{item.desc}</p>
+                                    <div className="relative z-10 space-y-4">
+                                        <span className={`text-sm font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity`}>{item.sub}</span>
+                                        <h2 className="text-5xl font-extrabold tracking-tight">{item.title}</h2>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed max-w-[280px]">{item.desc}</p>
                                     </div>
                                     <div className="absolute top-12 right-12 opacity-0 group-hover:opacity-20 transition-opacity -rotate-12 scale-150">
                                         {item.icon}

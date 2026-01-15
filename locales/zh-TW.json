@@ -164,9 +164,11 @@
       "online": "在線",
       "signalLost": "信號丟失",
       "criticalBroadcast": "緊急播報",
-      "downlinkSync": "下行同步中",
+      "downlinkSync": "正在接收信息中",
       "standbySource": "等待播報源接入...",
-      "realtimeDecryption": "實時解密激活 // 緩存優化"
+      "voiceSelect": "播報音色",
+      "gentleFemale": "溫柔女生",
+      "magneticMale": "磁性男聲"
     }
   }
 }

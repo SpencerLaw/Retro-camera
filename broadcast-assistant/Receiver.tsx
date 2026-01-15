@@ -18,6 +18,10 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+    const [preferredVoice, setPreferredVoice] = useState<'female' | 'male'>(
+        localStorage.getItem('br_preferred_voice') as 'female' | 'male' || 'female'
+    );
 
     const lastPlayedId = useRef<string | null>(null);
     const pollingTimer = useRef<NodeJS.Timeout | null>(null);
@@ -27,6 +31,14 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
         const handleOffline = () => setIsOnline(false);
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
+
+        const loadVoices = () => {
+            const allVoices = window.speechSynthesis.getVoices();
+            setVoices(allVoices);
+        };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
@@ -36,9 +48,25 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     const speak = useCallback((text: string, isEmergency: boolean) => {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
+
         const utterance = new SpeechSynthesisUtterance(text);
+
+        // Find best voice match
+        const availableVoices = window.speechSynthesis.getVoices();
+        const zhVoices = availableVoices.filter(v => v.lang.includes('zh'));
+
+        let selectedVoice = null;
+        if (preferredVoice === 'female') {
+            selectedVoice = zhVoices.find(v => v.name.toLowerCase().includes('xiaoxiao') || v.name.includes('female') || v.name.includes('Google') || v.name.includes('Microsoft')) || zhVoices[0];
+        } else {
+            selectedVoice = zhVoices.find(v => v.name.toLowerCase().includes('yunyang') || v.name.includes('male') || v.name.includes('Kangkang')) || zhVoices[1] || zhVoices[0];
+        }
+
+        if (selectedVoice) utterance.voice = selectedVoice;
         utterance.lang = 'zh-CN';
         utterance.rate = isEmergency ? 0.85 : 1.0;
+        utterance.pitch = preferredVoice === 'female' ? 1.1 : 0.9;
+
         if (isEmergency) {
             let count = 0;
             utterance.onend = () => {
@@ -49,7 +77,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
             };
         }
         window.speechSynthesis.speak(utterance);
-    }, []);
+    }, [preferredVoice]);
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;
@@ -105,80 +133,105 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
         window.speechSynthesis.speak(wakeUp);
     };
 
+    const switchVoice = (v: 'female' | 'male') => {
+        setPreferredVoice(v);
+        localStorage.setItem('br_preferred_voice', v);
+        const testText = v === 'female' ? t('broadcast.gentleFemale') : t('broadcast.magneticMale');
+        const testUtterance = new SpeechSynthesisUtterance(testText);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(testUtterance);
+    };
+
     const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`backdrop-blur-2xl bg-white/70 dark:bg-black/60 border border-white/20 dark:border-white/10 shadow-2xl ${className}`}>
+        <div className={`backdrop-blur-3xl bg-white/80 dark:bg-black/70 border border-white/40 dark:border-white/20 shadow-2xl ${className}`}>
             {children}
         </div>
     );
 
     if (!isJoined) {
         return (
-            <GlassCard className="max-w-md mx-auto p-12 rounded-[3rem] text-center space-y-10 animate-in zoom-in duration-500 mt-10">
-                <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-[2rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-purple-500/20">
-                    <Tv size={48} />
-                </div>
-                <div className="space-y-2">
-                    <h2 className="text-3xl font-black tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-6">{t('broadcast.receiver.joinDesc')}</p>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="relative group">
-                        <input
-                            type="text"
-                            value={fullRoomId}
-                            onChange={(e) => setFullRoomId(e.target.value.toUpperCase())}
-                            placeholder="例如: 8859"
-                            className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600"
-                        />
-                        <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+            <div className="flex flex-col items-center">
+                <GlassCard className="max-w-md mx-auto p-12 rounded-[3rem] text-center space-y-10 animate-in zoom-in duration-500 mt-10">
+                    <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-[2rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-purple-500/20">
+                        <Tv size={48} />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-black tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-6">{t('broadcast.receiver.joinDesc')}</p>
                     </div>
 
-                    {error && <p className="text-red-500 text-xs font-black uppercase tracking-widest">{error}</p>}
+                    <div className="space-y-6">
+                        <div className="relative group">
+                            <input
+                                type="text"
+                                value={fullRoomId}
+                                onChange={(e) => setFullRoomId(e.target.value.toUpperCase())}
+                                placeholder="例如: 8859"
+                                className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600 shadow-inner"
+                            />
+                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                        </div>
 
-                    <button
-                        onClick={handleStart}
-                        className="w-full h-16 rounded-[1.5rem] bg-black dark:bg-white text-white dark:text-black font-extrabold text-xl shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3 group"
-                    >
-                        <Volume2 size={24} className="group-hover:scale-110 transition-transform" />
-                        {t('broadcast.receiver.initializeLive')}
-                    </button>
-                </div>
+                        {error && <p className="text-red-500 text-xs font-black uppercase tracking-widest">{error}</p>}
 
-                <div className="flex items-center gap-2 justify-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    <Info size={12} /> Format: 4-Digit Number
-                </div>
-            </GlassCard>
+                        <button
+                            onClick={handleStart}
+                            className="w-full h-16 rounded-[1.5rem] bg-black dark:bg-white text-white dark:text-black font-extrabold text-xl shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3 group"
+                        >
+                            <Volume2 size={24} className="group-hover:scale-110 transition-transform" />
+                            {t('broadcast.receiver.initializeLive')}
+                        </button>
+                    </div>
+
+                    <div className="p-4 border border-gray-100 dark:border-white/5 rounded-2xl space-y-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">{t('broadcast.voiceSelect')}</p>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => switchVoice('female')}
+                                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${preferredVoice === 'female' ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500'}`}
+                            >
+                                {t('broadcast.gentleFemale')}
+                            </button>
+                            <button
+                                onClick={() => switchVoice('male')}
+                                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${preferredVoice === 'male' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500'}`}
+                            >
+                                {t('broadcast.magneticMale')}
+                            </button>
+                        </div>
+                    </div>
+                </GlassCard>
+            </div>
         );
     }
 
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
             ? 'bg-red-600 text-white'
-            : (isDark ? 'bg-black text-white' : 'bg-white text-black')
+            : (isDark ? 'bg-[#000] text-white' : 'bg-[#EFEEF4] text-black')
             }`}>
             {/* HUD Header */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-20">
                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3 px-6 py-2 rounded-full GlassContainer border border-white/20">
+                    <div className="flex items-center gap-3 px-6 py-2 rounded-full GlassContainer border border-white/20 bg-white/10 backdrop-blur-md">
                         <div className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
-                            {fullRoomId} // {isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost')}
+                            {fullRoomId} // {isOnline ? (currentMsg ? t('broadcast.receiver.online') : t('broadcast.receiver.downlinkSync')) : t('broadcast.receiver.signalLost')}
                         </span>
                     </div>
                     <button
                         onClick={() => setIsListening(!isListening)}
-                        className={`w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center transition-all ${isListening ? 'text-green-500 scale-110' : 'text-gray-400'}`}
+                        className={`w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center transition-all bg-white/10 backdrop-blur-md ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}
                     >
                         {isListening ? <Volume2 size={24} /> : <VolumeX size={24} />}
                     </button>
                 </div>
 
                 <div className="flex gap-4">
-                    <button onClick={toggleFullscreen} className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+                    <button onClick={toggleFullscreen} className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors bg-white/10 backdrop-blur-md">
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>
-                    <button onClick={() => setIsJoined(false)} className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all">
+                    <button onClick={() => setIsJoined(false)} className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all bg-white/10 backdrop-blur-md">
                         <X size={24} />
                     </button>
                 </div>
@@ -193,9 +246,9 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
             )}
 
             {/* Main Broadcast Area */}
-            <div className="flex-1 flex flex-col items-center justify-center p-10 md:p-24 text-center relative z-10">
+            <div className={`flex-1 flex flex-col items-center justify-center p-10 md:p-24 text-center relative z-10 overflow-hidden`}>
                 {currentMsg ? (
-                    <div className="space-y-12 animate-in fade-in zoom-in-95 duration-1000">
+                    <div className="w-full max-h-full overflow-y-auto space-y-12 animate-in fade-in zoom-in-95 duration-1000 px-4 py-10 custom-scrollbar">
                         {currentMsg.isEmergency && (
                             <div className="flex flex-col items-center gap-6 animate-pulse">
                                 <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center shadow-2xl">
@@ -206,7 +259,8 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
                                 </div>
                             </div>
                         )}
-                        <h1 className={`font-black tracking-tighter leading-[1.05] drop-shadow-sm select-none transition-all duration-500 ${currentMsg.text.length > 40 ? 'text-6xl md:text-8xl lg:text-9xl' : 'text-8xl md:text-10xl lg:text-11xl'
+                        <h1 className={`font-black tracking-tighter leading-[1.05] drop-shadow-sm select-none transition-all duration-500 whitespace-pre-wrap ${currentMsg.text.length > 100 ? 'text-4xl md:text-6xl lg:text-7xl text-left' :
+                            currentMsg.text.length > 40 ? 'text-6xl md:text-8xl lg:text-9xl' : 'text-8xl md:text-10xl lg:text-11xl'
                             }`}>
                             {currentMsg.text}
                         </h1>
@@ -214,8 +268,8 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
                 ) : (
                     <div className="text-center space-y-10 animate-in fade-in duration-1000">
                         <div className="relative inline-block">
-                            <div className="absolute inset-0 rounded-full border-4 border-dashed border-gray-300 dark:border-white/10 animate-[spin_20s_linear_infinite]"></div>
-                            <div className="m-8 w-32 h-32 rounded-full GlassContainer border border-white/20 flex items-center justify-center">
+                            <div className="absolute inset-0 rounded-full border-4 border-dashed border-gray-400/20 animate-[spin_20s_linear_infinite]"></div>
+                            <div className="m-8 w-32 h-32 rounded-full GlassContainer border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl shadow-inner">
                                 <Signal size={60} className="opacity-20 animate-pulse" />
                             </div>
                         </div>
@@ -231,11 +285,11 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
 
             {/* HUD Footer */}
             <div className="p-10 flex justify-center pb-12 relative z-20">
-                <div className="px-8 py-3 rounded-full GlassContainer border border-white/20 text-[10px] font-black uppercase tracking-[0.35em] opacity-30 flex items-center gap-4">
+                <div className="px-8 py-3 rounded-full GlassContainer border border-white/20 text-[10px] font-black uppercase tracking-[0.35em] opacity-30 flex items-center gap-4 bg-white/5 backdrop-blur-md">
                     <span className="flex gap-1">
                         {[...Array(4)].map((_, i) => <div key={i} className="w-1 h-3 bg-current opacity-40 rounded-full"></div>)}
                     </span>
-                    {t('broadcast.receiver.realtimeDecryption')}
+                    BROADCAST MODE // ACTIVE
                 </div>
             </div>
         </div>

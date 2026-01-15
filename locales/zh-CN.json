@@ -171,9 +171,11 @@
       "online": "在线",
       "signalLost": "信号丢失",
       "criticalBroadcast": "紧急播报",
-      "downlinkSync": "下行同步中",
+      "downlinkSync": "正在接收信息中",
       "standbySource": "等待播报源接入...",
-      "realtimeDecryption": "实时解密激活 // 缓存优化"
+      "voiceSelect": "播报音色",
+      "gentleFemale": "温柔女生",
+      "magneticMale": "磁性男声"
     }
   }
 }

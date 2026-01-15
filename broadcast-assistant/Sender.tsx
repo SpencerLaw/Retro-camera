@@ -105,7 +105,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     };
 
     const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`backdrop-blur-xl bg-white/50 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-[2rem] shadow-sm ${className}`}>
+        <div className={`backdrop-blur-3xl bg-white/80 dark:bg-black/70 border border-white/40 dark:border-white/20 rounded-[2rem] shadow-[0_12px_40px_rgba(0,0,0,0.12)] ${className}`}>
             {children}
         </div>
     );

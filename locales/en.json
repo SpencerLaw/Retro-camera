@@ -165,10 +165,12 @@
       "missingChannel": "Missing Channel Code",
       "online": "Online",
       "signalLost": "Signal Lost",
-      "criticalBroadcast": "CRITICAL BROADCAST",
-      "downlinkSync": "Downlink Synchronizing",
-      "standbySource": "Standby for broadcast source",
-      "realtimeDecryption": "Real-time Decryption Active // Buffer Optimized"
+      "criticalBroadcast": "Emergency Broadcast",
+      "downlinkSync": "Receiving messages...",
+      "standbySource": "Waiting for broadcast source...",
+      "voiceSelect": "Voice Accent",
+      "gentleFemale": "Gentle Female",
+      "magneticMale": "Magnetic Male"
     }
   }
 }

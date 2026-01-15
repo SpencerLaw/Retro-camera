@@ -164,9 +164,11 @@
       "online": "オンライン",
       "signalLost": "信号を失いました",
       "criticalBroadcast": "緊急放送",
-      "downlinkSync": "下り同期中",
-      "standbySource": "放送ソースの待機中...",
-      "realtimeDecryption": "リアルタイム復号化がアクティブ // バッファを最適化"
+      "downlinkSync": "メッセージを受信中...",
+      "standbySource": "放送源の接続を待機中...",
+      "voiceSelect": "放送の音声",
+      "gentleFemale": "優しい女性",
+      "magneticMale": "渋い男性"
     }
   }
 }

@@ -167,10 +167,7 @@
       "signalLost": "Signal Lost",
       "criticalBroadcast": "Emergency Broadcast",
       "downlinkSync": "Receiving messages...",
-      "standbySource": "Waiting for broadcast source...",
-      "voiceSelect": "Voice Accent",
-      "gentleFemale": "Gentle Female",
-      "magneticMale": "Magnetic Male"
+      "standbySource": "Waiting for broadcast source..."
     }
   }
 }

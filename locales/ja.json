@@ -165,10 +165,7 @@
       "signalLost": "信号を失いました",
       "criticalBroadcast": "緊急放送",
       "downlinkSync": "メッセージを受信中...",
-      "standbySource": "放送源の接続を待機中...",
-      "voiceSelect": "放送の音声",
-      "gentleFemale": "優しい女性",
-      "magneticMale": "渋い男性"
+      "standbySource": "放送源の接続を待機中..."
     }
   }
 }

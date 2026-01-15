@@ -165,10 +165,7 @@
       "signalLost": "信號丟失",
       "criticalBroadcast": "緊急播報",
       "downlinkSync": "正在接收信息中",
-      "standbySource": "等待播報源接入...",
-      "voiceSelect": "播報音色",
-      "gentleFemale": "溫柔女生",
-      "magneticMale": "磁性男聲"
+      "standbySource": "等待播報源接入..."
     }
   }
 }

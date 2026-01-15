@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2, X, Users } from 'lucide-react';
+import { Camera, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2, X, Users, TreeDeciduous } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -71,7 +71,7 @@ export const HomePage: React.FC = () => {
           background: 'radial-gradient(circle at 30% 20%, #FFB5E8 0%, transparent 50%), radial-gradient(circle at 70% 80%, #B5DEFF 0%, transparent 50%)',
         }}
       />
-      
+
       {/* Top Bar - Buttons */}
       <div className="fixed top-6 right-6 z-50 flex items-center gap-4">
         {/* Contact Merchant Button */}
@@ -95,9 +95,8 @@ export const HomePage: React.FC = () => {
               <button
                 key={lang}
                 onClick={() => setLanguage(lang)}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-gradient-to-r hover:from-[#FFE5EC] hover:to-[#FFF0F5] transition-colors rounded-lg font-bold ${
-                  language === lang ? 'text-[#FF69B4] bg-gradient-to-r from-[#FFE5EC] to-[#FFF0F5]' : 'text-[#FF8DC7]'
-                }`}
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-gradient-to-r hover:from-[#FFE5EC] hover:to-[#FFF0F5] transition-colors rounded-lg font-bold ${language === lang ? 'text-[#FF69B4] bg-gradient-to-r from-[#FFE5EC] to-[#FFF0F5]' : 'text-[#FF8DC7]'
+                  }`}
               >
                 {languageLabels[lang]}
               </button>
@@ -109,29 +108,29 @@ export const HomePage: React.FC = () => {
       {/* WeChat Dialog - Pixar-inspired */}
       {isWeChatOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div 
+          <div
             className="absolute inset-0 bg-[#87CEEB]/60 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setIsWeChatOpen(false)}
           ></div>
-          <div 
+          <div
             className="relative bg-white rounded-[40px] border-8 border-[#FFD700] shadow-[0_20px_0_#E5C100,0_30px_50px_rgba(0,0,0,0.3)] p-8 max-w-sm w-full animate-in zoom-in duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)"
             onClick={(e) => e.stopPropagation()}
           >
-            <button 
+            <button
               onClick={() => setIsWeChatOpen(false)}
               className="absolute -top-6 -right-6 w-12 h-12 bg-[#FF6B6B] border-4 border-white rounded-full text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform hover:rotate-90"
             >
               <X size={24} />
             </button>
-            
+
             <div className="text-center">
               <h3 className="font-marker text-3xl text-[#FF6B6B] mb-6 drop-shadow-sm rotate-[-2deg]">
                 {t('home.contactMerchant')}
               </h3>
               <div className="bg-white p-4 rounded-3xl border-4 border-dashed border-[#C4E538] shadow-inner mb-6">
-                <img 
-                  src="/wechat.png" 
-                  alt="WeChat QR Code" 
+                <img
+                  src="/wechat.png"
+                  alt="WeChat QR Code"
                   className="w-full aspect-square object-contain rounded-xl"
                 />
               </div>
@@ -143,7 +142,7 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      
+
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 pt-8">
         {/* Title - Super Kawaii Style with Bouncy Effect */}
@@ -206,47 +205,47 @@ export const HomePage: React.FC = () => {
                 {/* Doraemon - 经典形象 */}
                 <svg viewBox="0 0 200 200" className="w-28 h-28">
                   {/* 头部背景 (蓝色) */}
-                  <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2"/>
+                  <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" />
 
                   {/* 脸部 (白色) */}
-                  <circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
+                  <circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
 
                   {/* 眼睛 (左 & 右) */}
-                  <ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
-                  <ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
+                  <ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+                  <ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
 
                   {/* 眼珠 (对眼效果) */}
-                  <circle cx="88" cy="70" r="4" fill="#000000"/>
-                  <circle cx="112" cy="70" r="4" fill="#000000"/>
+                  <circle cx="88" cy="70" r="4" fill="#000000" />
+                  <circle cx="112" cy="70" r="4" fill="#000000" />
 
                   {/* 鼻子 (红色) */}
-                  <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2"/>
+                  <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" />
                   {/* 鼻子高光 */}
-                  <circle cx="97" cy="89" r="3" fill="#FFFFFF" opacity="0.8"/>
+                  <circle cx="97" cy="89" r="3" fill="#FFFFFF" opacity="0.8" />
 
                   {/* 嘴巴 */}
-                  <line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2"/>
-                  <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                  <line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2" />
+                  <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round" />
 
                   {/* 胡须 (左边) */}
-                  <line x1="30" y1="95" x2="80" y2="105" stroke="#333" strokeWidth="2"/>
-                  <line x1="25" y1="115" x2="80" y2="115" stroke="#333" strokeWidth="2"/>
-                  <line x1="30" y1="135" x2="80" y2="125" stroke="#333" strokeWidth="2"/>
+                  <line x1="30" y1="95" x2="80" y2="105" stroke="#333" strokeWidth="2" />
+                  <line x1="25" y1="115" x2="80" y2="115" stroke="#333" strokeWidth="2" />
+                  <line x1="30" y1="135" x2="80" y2="125" stroke="#333" strokeWidth="2" />
 
                   {/* 胡须 (右边) */}
-                  <line x1="170" y1="95" x2="120" y2="105" stroke="#333" strokeWidth="2"/>
-                  <line x1="175" y1="115" x2="120" y2="115" stroke="#333" strokeWidth="2"/>
-                  <line x1="170" y1="135" x2="120" y2="125" stroke="#333" strokeWidth="2"/>
+                  <line x1="170" y1="95" x2="120" y2="105" stroke="#333" strokeWidth="2" />
+                  <line x1="175" y1="115" x2="120" y2="115" stroke="#333" strokeWidth="2" />
+                  <line x1="170" y1="135" x2="120" y2="125" stroke="#333" strokeWidth="2" />
 
                   {/* 项圈 (红色) */}
-                  <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2"/>
+                  <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2" />
 
                   {/* 铃铛 (黄色) */}
-                  <circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2"/>
-                  <line x1="86" y1="180" x2="114" y2="180" stroke="#333" strokeWidth="2"/>
-                  <line x1="85" y1="183" x2="115" y2="183" stroke="#333" strokeWidth="2"/>
-                  <circle cx="100" cy="192" r="3" fill="#333"/>
-                  <line x1="100" y1="192" x2="100" y2="200" stroke="#333" strokeWidth="2"/>
+                  <circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2" />
+                  <line x1="86" y1="180" x2="114" y2="180" stroke="#333" strokeWidth="2" />
+                  <line x1="85" y1="183" x2="115" y2="183" stroke="#333" strokeWidth="2" />
+                  <circle cx="100" cy="192" r="3" fill="#333" />
+                  <line x1="100" y1="192" x2="100" y2="200" stroke="#333" strokeWidth="2" />
                 </svg>
               </div>
             </div>
@@ -351,6 +350,49 @@ export const HomePage: React.FC = () => {
               <div className="mt-6 pt-6 border-t-[3px] border-white/20">
                 <div className="inline-block px-6 py-3 bg-[#302b63] text-[#00f260] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)] border-[3px] border-[#00f260] hover:bg-gradient-to-r hover:from-[#00f260] hover:to-[#0575e6] hover:text-white">
                   Enter → ✨
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Morning Energy Tree - Sky Blue/Green */}
+          <a
+            href="/morning-energy-tree/index.html"
+            className="group relative bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(77,208,225,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(77,208,225,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Cute sun decoration */}
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>☀️</div>
+
+            {/* Kawaii Glow Effect */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#4DD0E1] to-[#26C6DA] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(38,198,218,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#E0F7FA]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <TreeDeciduous size={72} className="text-[#00BCD4] drop-shadow-lg" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#0097A7] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.morningTree.title')}</h2>
+              <p className="text-base text-[#00838F] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                {t('home.morningTree.subtitle')}
+              </p>
+              <p className="text-sm text-[#006064] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                {t('home.morningTree.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#00BCD4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(77,208,225,0.4)] border-[3px] border-[#80DEEA] hover:bg-gradient-to-r hover:from-[#80DEEA] hover:to-white">
+                  Enter → 🌳
                 </div>
               </div>
             </div>
@@ -470,7 +512,7 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };

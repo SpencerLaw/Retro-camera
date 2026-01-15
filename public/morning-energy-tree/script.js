@@ -1,9 +1,10 @@
 /**
- * Morning Energy Tree - Enhanced Version 2.0 (Aesthetic Update)
+ * Morning Energy Tree - Enhanced Version 3.0 (Living Environment)
  * 
  * Features:
  * 1. Session Timer & Game Logic (Preserved)
  * 2. Visual Upgrade: Lush Foliage, Gradient Trunk, Wind Animation
+ * 3. Environment: Animated Clouds, Flying Birds, Pulsing Sun
  */
 
 /* --- Constants & State --- */
@@ -99,6 +100,7 @@ function showApp() {
         initCanvas();
         resizeCanvas();
         initTimer();
+        initEnvironment(); // New
     }, 500);
 }
 
@@ -263,7 +265,7 @@ function updateState() {
 function triggerSuperMode() {
     STATE.isSuperMode = true;
     STATE.treeColor = '#ffd700';
-    showToast("🎉 能量树显灵了！全班棒棒哒！ 🎉"); // Changed toast text slightly
+    showToast("🎉 能量树显灵了！全班棒棒哒！ 🎉");
 
     setTimeout(() => {
         STATE.isSuperMode = false;
@@ -289,17 +291,83 @@ function showToast(msg) {
 }
 
 /* --- 5. AESTHETIC Visualization Engine --- */
-function initCanvas() {
-    window.addEventListener('resize', resizeCanvas);
-}
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-// Sparkle Particle (for Super Mode or Growth)
+// --- Environment Systems (Clouds, Birds) ---
+const clouds = [];
+const birds = [];
 const sparkles = [];
+
+class Cloud {
+    constructor() {
+        this.reset();
+        this.x = Math.random() * canvas.width; // Start randomly on screen
+    }
+    reset() {
+        this.x = -200 - Math.random() * 200;
+        this.y = Math.random() * (canvas.height / 3);
+        this.speed = Math.random() * 0.3 + 0.1;
+        this.size = Math.random() * 0.6 + 0.6; // Scale
+        this.puffs = [];
+        // Create cloud shape (3-5 circles)
+        const count = Math.floor(Math.random() * 3) + 3;
+        for (let i = 0; i < count; i++) {
+            this.puffs.push({
+                x: (Math.random() - 0.5) * 60,
+                y: (Math.random() - 0.5) * 30,
+                r: 30 + Math.random() * 20
+            });
+        }
+    }
+    update() {
+        this.x += this.speed;
+        if (this.x > canvas.width + 100) this.reset();
+    }
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.size, this.size);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.beginPath();
+        this.puffs.forEach(puff => {
+            ctx.arc(puff.x, puff.y, puff.r, 0, Math.PI * 2);
+        });
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class Bird {
+    constructor() {
+        this.reset();
+    }
+    reset() {
+        this.x = -Math.random() * 500;
+        this.y = 50 + Math.random() * (canvas.height / 3);
+        this.speed = 2 + Math.random() * 2;
+        this.size = 0.5 + Math.random() * 0.5;
+        this.wingPhase = Math.random() * Math.PI * 2;
+    }
+    update() {
+        this.x += this.speed;
+        this.wingPhase += 0.2;
+        if (this.x > canvas.width + 50) this.reset();
+    }
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.size, this.size);
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Flapping V
+        const wingY = Math.sin(this.wingPhase) * 5;
+        ctx.moveTo(-10, -wingY);
+        ctx.quadraticCurveTo(0, 5, 10, -wingY);
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
 class Sparkle {
     constructor(x, y) {
         this.x = x;
@@ -322,7 +390,24 @@ class Sparkle {
     }
 }
 
-// Enhanced Recursive Tree with "Clump" Foliage
+
+function initCanvas() {
+    window.addEventListener('resize', resizeCanvas);
+}
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+function initEnvironment() {
+    // Spawn Clouds
+    for (let i = 0; i < 5; i++) clouds.push(new Cloud());
+    // Spawn Birds
+    for (let i = 0; i < 3; i++) birds.push(new Bird());
+}
+
+// Enhanced Recursive Tree
 function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.beginPath();
     ctx.save();
@@ -334,9 +419,9 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     // Trunk Gradient & Color
     if (depth < 2) {
         const grad = ctx.createLinearGradient(0, 0, 0, -len);
-        grad.addColorStop(0, '#4e342e'); // Darker Wood
-        grad.addColorStop(0.5, '#795548'); // Medium Wood
-        grad.addColorStop(1, '#8d6e63'); // Lighter Top
+        grad.addColorStop(0, '#4e342e');
+        grad.addColorStop(0.5, '#795548');
+        grad.addColorStop(1, '#8d6e63');
         ctx.strokeStyle = grad;
     } else {
         ctx.strokeStyle = '#6d4c41';
@@ -351,40 +436,24 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.stroke();
 
     // 🌳 LUSH FOLIAGE (CLUMPS) 🌳
-    // Draw clouds of leaves at higher depths
     if (depth >= 4 || (len < 10 && depth > 2)) {
         if (STATE.energy > 15) {
-            // Size pulses with wind/energy
             const baseSize = (STATE.energy / 100) * 12 + 3;
             const size = baseSize + Math.sin(Date.now() / 500 + depth) * 2;
 
-            // Color Selection
             const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
-            // Random-ish but deterministic by depth to avoid flickering
             const colorIndex = (depth * 3) % colorSet.length;
             const color = colorSet[colorIndex];
 
             ctx.beginPath();
             ctx.fillStyle = color;
-            // Draw main clump
             ctx.arc(0, -len, size, 0, Math.PI * 2);
             ctx.fill();
 
-            // Highlight (Sunlight)
             ctx.beginPath();
             ctx.fillStyle = 'rgba(255,255,255,0.15)';
             ctx.arc(-size * 0.3, -len - size * 0.3, size * 0.5, 0, Math.PI * 2);
             ctx.fill();
-
-            // Super Mode Glint
-            if (STATE.isSuperMode && Math.random() < 0.05) {
-                sparkles.push(new Sparkle(
-                    // World coords rough approximation would be hard here?
-                    // Actually we can just draw sparkle here relative to ctx
-                    0 + (Math.random() - 0.5) * size,
-                    -len + (Math.random() - 0.5) * size
-                ));
-            }
         }
     }
 
@@ -396,30 +465,26 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     // Branching with Wind
     let wind = 0;
     if (STATE.currentDB > 50) {
-        // Wind affects thinner branches more
         wind = Math.sin(Date.now() / 400 + depth) * ((STATE.currentDB - 50) / 30) * (depth * 0.5);
     }
 
-    // Spread based on volume presence
     let volumeFactor = (STATE.currentDB - 30) / 70;
     if (volumeFactor < 0) volumeFactor = 0;
 
-    let spread = 20 + (volumeFactor * 10); // Base spread
+    let spread = 20 + (volumeFactor * 10);
 
     ctx.translate(0, -len);
 
     const branchCount = 2;
     for (let i = 0; i < branchCount; i++) {
-        // Natural asymmetry
         const dir = i === 0 ? -1 : 1;
-        const offset = (Math.random() - 0.5) * 5; // Slight jitter
+        const offset = (Math.random() - 0.5) * 5;
         const branchAngle = (spread * dir) + wind + offset;
-        const lengthFactor = 0.72 + (Math.random() * 0.05); // Varying lengths
+        const lengthFactor = 0.72 + (Math.random() * 0.05);
 
         drawEnhancedTree(0, 0, len * lengthFactor, branchAngle, branchWidth * 0.7, depth + 1);
     }
 
-    // Occasional 3rd branch for fullness if energy is high
     if (depth < 3 && STATE.energy > 60 && Math.random() < 0.3) {
         drawEnhancedTree(0, 0, len * 0.6, wind, branchWidth * 0.6, depth + 1);
     }
@@ -430,7 +495,6 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
 function loop() {
     updateState();
 
-    // Clear
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Beautiful Sky Background
@@ -440,14 +504,40 @@ function loop() {
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Sun
+    // Sun Animation
+    const now = Date.now();
+    const sunScale = 1 + Math.sin(now / 1000) * 0.05;
+    ctx.save();
+    ctx.translate(canvas.width - 100, 100);
+    ctx.scale(sunScale, sunScale);
+
+    // Sun Rays
     ctx.beginPath();
-    const sunGrad = ctx.createRadialGradient(canvas.width, 0, 20, canvas.width, 0, 150);
+    const sunGrad = ctx.createRadialGradient(0, 0, 20, 0, 0, 150);
     sunGrad.addColorStop(0, 'rgba(255, 235, 59, 0.8)');
     sunGrad.addColorStop(1, 'rgba(255, 235, 59, 0)');
     ctx.fillStyle = sunGrad;
-    ctx.arc(canvas.width, 0, 150, 0, Math.PI * 2);
+    ctx.arc(0, 0, 150, 0, Math.PI * 2);
     ctx.fill();
+
+    // Core
+    ctx.beginPath();
+    ctx.fillStyle = '#fff176';
+    ctx.arc(0, 0, 40, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Draw Clouds
+    clouds.forEach(cloud => {
+        cloud.update();
+        cloud.draw();
+    });
+
+    // Draw Birds
+    birds.forEach(bird => {
+        bird.update();
+        bird.draw();
+    });
 
     // Rolling Hills (Ground)
     ctx.beginPath();
@@ -478,11 +568,7 @@ function loop() {
         ctx.stroke();
     }
 
-    // Render and update sparkles (no transform context needed as they are stored in screen coords? 
-    // Wait, my sparkle gen logic in drawEnhancedTree was flawed because canvas was transformed.
-    // Fixed: Sparkles generated relative to tree are tricky.
-    // Let's just generate global ambient sparkles in loop if super mode.
-
+    // Render Sparkles
     if (STATE.isSuperMode && Math.random() < 0.2) {
         sparkles.push(new Sparkle(Math.random() * canvas.width, Math.random() * canvas.height));
     }
@@ -502,7 +588,6 @@ function loop() {
 
 // Init
 initGatekeeper();
-// Re-bind listener just in case overwriting removed them (it doesn't, listeners are on DOM nodes)
 micBtn.onclick = toggleMic;
 if ($('reset-btn')) $('reset-btn').onclick = () => {
     STATE.energy = 0;

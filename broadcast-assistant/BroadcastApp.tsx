@@ -212,27 +212,6 @@ const BroadcastApp: React.FC = () => {
                     {mode === 'receiver' && <Receiver isDark={theme === 'dark'} />}
                 </main>
 
-                {mode === 'selection' && (
-                    <footer className="mt-24 text-center space-y-8 animate-in fade-in duration-1000 delay-300 px-4">
-                        <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-gray-200 dark:border-white/10 text-xs font-bold text-gray-500">
-                            <LayoutGrid size={14} /> {t('broadcast.systemInfrastructure')}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left opacity-60 hover:opacity-100 transition-opacity px-10">
-                            <div className="space-y-3">
-                                <h4 className="font-bold text-sm tracking-tight">{t('broadcast.enterpriseSecurity')}</h4>
-                                <p className="text-[13px] leading-relaxed">{t('broadcast.enterpriseSecurityDesc')}</p>
-                            </div>
-                            <div className="space-y-3 border-x border-gray-100 dark:border-white/5 md:px-10">
-                                <h4 className="font-bold text-sm tracking-tight">{t('broadcast.globalProximity')}</h4>
-                                <p className="text-[13px] leading-relaxed">{t('broadcast.globalProximityDesc')}</p>
-                            </div>
-                            <div className="space-y-3 md:pl-10">
-                                <h4 className="font-bold text-sm tracking-tight">{t('broadcast.audioSynthesis')}</h4>
-                                <p className="text-[13px] leading-relaxed">{t('broadcast.audioSynthesisDesc')}</p>
-                            </div>
-                        </div>
-                    </footer>
-                )}
             </div>
         </div>
     );

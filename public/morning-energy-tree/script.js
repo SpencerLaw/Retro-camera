@@ -1,10 +1,11 @@
 /**
- * Morning Energy Tree - Enhanced Version 3.0 (Living Environment)
+ * Morning Energy Tree - Enhanced Version 3.1 (Stable & Fixes)
  * 
  * Features:
  * 1. Session Timer & Game Logic (Preserved)
  * 2. Visual Upgrade: Lush Foliage, Gradient Trunk, Wind Animation
- * 3. Environment: Animated Clouds, Flying Birds, Pulsing Sun
+ * 3. Environment: Animated Clouds, Birds, Sun
+ * 4. Fixes: Auto-reset on finish, smoother animation, canvas-only shake
  */
 
 /* --- Constants & State --- */
@@ -100,7 +101,7 @@ function showApp() {
         initCanvas();
         resizeCanvas();
         initTimer();
-        initEnvironment(); // New
+        initEnvironment();
     }, 500);
 }
 
@@ -161,6 +162,11 @@ async function toggleMic() {
 
 async function startMic() {
     try {
+        // FIX: If previous session finished, reset everything
+        if (STATE.remainingTime === 0) {
+            resetGame();
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
         });
@@ -199,6 +205,14 @@ function stopMic() {
         clearInterval(STATE.timerInterval);
         STATE.timerInterval = null;
     }
+}
+
+function resetGame() {
+    STATE.energy = 0;
+    STATE.isSuperMode = false;
+    STATE.remainingTime = STATE.sessionDuration * 60;
+    updateTimerDisplay();
+    sparkles.length = 0;
 }
 
 function calculateDB() {
@@ -249,7 +263,8 @@ function updateState() {
         const rate = STATE.baseGrowthRate * (1 + volumeBonus);
         STATE.energy += rate;
 
-        if (STATE.currentDB > 95) shakeScreen(3);
+        // FIX: Reduced shake threshold and diverted to canvas only
+        if (STATE.currentDB > 100) shakeCanvas(2);
     } else {
         STATE.energy -= 0.05;
     }
@@ -274,10 +289,11 @@ function triggerSuperMode() {
     }, 5000);
 }
 
-function shakeScreen(intensity = 5) {
-    document.body.style.transform = `translate(${Math.random() * intensity - intensity / 2}px, ${Math.random() * intensity - intensity / 2}px)`;
+// FIX: Renamed to shakeCanvas and targeting canvas only
+function shakeCanvas(intensity = 2) {
+    canvas.style.transform = `translate(${Math.random() * intensity - intensity / 2}px, ${Math.random() * intensity - intensity / 2}px)`;
     setTimeout(() => {
-        document.body.style.transform = 'none';
+        canvas.style.transform = 'none';
     }, 50);
 }
 
@@ -300,15 +316,14 @@ const sparkles = [];
 class Cloud {
     constructor() {
         this.reset();
-        this.x = Math.random() * canvas.width; // Start randomly on screen
+        this.x = Math.random() * canvas.width;
     }
     reset() {
         this.x = -200 - Math.random() * 200;
         this.y = Math.random() * (canvas.height / 3);
         this.speed = Math.random() * 0.3 + 0.1;
-        this.size = Math.random() * 0.6 + 0.6; // Scale
+        this.size = Math.random() * 0.6 + 0.6;
         this.puffs = [];
-        // Create cloud shape (3-5 circles)
         const count = Math.floor(Math.random() * 3) + 3;
         for (let i = 0; i < count; i++) {
             this.puffs.push({
@@ -359,7 +374,6 @@ class Bird {
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        // Flapping V
         const wingY = Math.sin(this.wingPhase) * 5;
         ctx.moveTo(-10, -wingY);
         ctx.quadraticCurveTo(0, 5, 10, -wingY);
@@ -401,9 +415,7 @@ function resizeCanvas() {
 }
 
 function initEnvironment() {
-    // Spawn Clouds
     for (let i = 0; i < 5; i++) clouds.push(new Cloud());
-    // Spawn Birds
     for (let i = 0; i < 3; i++) birds.push(new Bird());
 }
 
@@ -412,11 +424,9 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.beginPath();
     ctx.save();
 
-    // Aesthetic: Tapered Branches
     ctx.lineCap = 'round';
     ctx.lineWidth = branchWidth;
 
-    // Trunk Gradient & Color
     if (depth < 2) {
         const grad = ctx.createLinearGradient(0, 0, 0, -len);
         grad.addColorStop(0, '#4e342e');
@@ -430,7 +440,6 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.translate(startX, startY);
     ctx.rotate(angle * Math.PI / 180);
 
-    // Draw Curve Branch (More natural)
     ctx.moveTo(0, 0);
     ctx.quadraticCurveTo(0, -len / 2, 0, -len);
     ctx.stroke();
@@ -439,7 +448,8 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     if (depth >= 4 || (len < 10 && depth > 2)) {
         if (STATE.energy > 15) {
             const baseSize = (STATE.energy / 100) * 12 + 3;
-            const size = baseSize + Math.sin(Date.now() / 500 + depth) * 2;
+            // FIX: Slower wind animation (Date.now() / 1000 instead of / 500)
+            const size = baseSize + Math.sin(Date.now() / 1000 + depth) * 1.5;
 
             const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
@@ -465,7 +475,8 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     // Branching with Wind
     let wind = 0;
     if (STATE.currentDB > 50) {
-        wind = Math.sin(Date.now() / 400 + depth) * ((STATE.currentDB - 50) / 30) * (depth * 0.5);
+        // FIX: Slower wind (Date.now() / 1000)
+        wind = Math.sin(Date.now() / 1000 + depth) * ((STATE.currentDB - 50) / 30) * (depth * 0.5);
     }
 
     let volumeFactor = (STATE.currentDB - 30) / 70;
@@ -497,14 +508,12 @@ function loop() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Beautiful Sky Background
     const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGradient.addColorStop(0, '#4facfe'); // Fresh Blue
-    skyGradient.addColorStop(1, '#00f2fe'); // Light Blue
+    skyGradient.addColorStop(0, '#4facfe');
+    skyGradient.addColorStop(1, '#00f2fe');
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Sun Animation
     const now = Date.now();
     const sunScale = 1 + Math.sin(now / 1000) * 0.05;
     ctx.save();
@@ -527,39 +536,33 @@ function loop() {
     ctx.fill();
     ctx.restore();
 
-    // Draw Clouds
     clouds.forEach(cloud => {
         cloud.update();
         cloud.draw();
     });
 
-    // Draw Birds
     birds.forEach(bird => {
         bird.update();
         bird.draw();
     });
 
-    // Rolling Hills (Ground)
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
     ctx.quadraticCurveTo(canvas.width / 2, canvas.height - 80, canvas.width, canvas.height);
     ctx.fillStyle = '#66bb6a';
     ctx.fill();
 
-    // Main Tree
     const treeSize = 80 + (STATE.energy * 1.6);
 
     if (treeSize > 60) {
         drawEnhancedTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 9, 0);
     } else {
-        // Quality Seed
         ctx.beginPath();
         const startX = canvas.width / 2;
         const startY = canvas.height - 30;
         ctx.fillStyle = '#795548';
         ctx.ellipse(startX, startY, 10, 6, 0.2, 0, Math.PI * 2);
         ctx.fill();
-        // Sprout
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.quadraticCurveTo(startX - 5, startY - 15, startX - 15, startY - 20);
@@ -568,7 +571,6 @@ function loop() {
         ctx.stroke();
     }
 
-    // Render Sparkles
     if (STATE.isSuperMode && Math.random() < 0.2) {
         sparkles.push(new Sparkle(Math.random() * canvas.width, Math.random() * canvas.height));
     }
@@ -589,11 +591,5 @@ function loop() {
 // Init
 initGatekeeper();
 micBtn.onclick = toggleMic;
-if ($('reset-btn')) $('reset-btn').onclick = () => {
-    STATE.energy = 0;
-    STATE.isSuperMode = false;
-    STATE.remainingTime = STATE.sessionDuration * 60;
-    updateTimerDisplay();
-    sparkles.length = 0;
-};
+if ($('reset-btn')) $('reset-btn').onclick = resetGame; // FIX: Use shared reset function
 if ($('sensitivity-slider')) $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };

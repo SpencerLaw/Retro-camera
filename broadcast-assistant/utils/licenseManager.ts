@@ -43,7 +43,11 @@ export const verifyLicense = async (code: string): Promise<{ success: boolean; m
         const response = await fetch('/api/verify-license', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: cleanCode }),
+            body: JSON.stringify({
+                licenseCode: cleanCode,
+                deviceId: `bc-${Math.random().toString(36).substr(2, 9)}`,
+                deviceInfo: 'Web Broadcast Assistant'
+            }),
         });
         const data = await response.json();
         if (data.success) {

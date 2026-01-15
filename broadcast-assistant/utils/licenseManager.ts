@@ -52,6 +52,7 @@ export const verifyLicense = async (code: string): Promise<{ success: boolean; m
         const data = await response.json();
         if (data.success) {
             localStorage.setItem(BC_LICENSE_KEY, cleanCode);
+            localStorage.setItem(BC_VERIFIED_KEY, 'true');
             return { success: true };
         }
         return { success: false, message: data.message || 'Verification Failed' };

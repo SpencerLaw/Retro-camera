@@ -60,7 +60,7 @@ const BroadcastApp: React.FC = () => {
     };
 
     const GlassContainer = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`backdrop-blur-3xl bg-white/80 dark:bg-black/70 border border-white/40 dark:border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.12)] ${className}`}>
+        <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)] ${className}`}>
             {children}
         </div>
     );
@@ -119,7 +119,7 @@ const BroadcastApp: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#000] text-white' : 'bg-[#EFEEF4] text-[#1D1D1F]'} font-sans`}>
+        <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#000] text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'} font-sans`}>
             {/* Apple 风格流光背景 */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className={`absolute top-0 left-1/4 w-[60%] h-[40%] rounded-full blur-[150px] opacity-10 transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-200'}`}></div>

@@ -143,7 +143,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     };
 
     const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`backdrop-blur-3xl bg-white/80 dark:bg-black/70 border border-white/40 dark:border-white/20 shadow-2xl ${className}`}>
+        <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-2xl ${className}`}>
             {children}
         </div>
     );
@@ -151,7 +151,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     if (!isJoined) {
         return (
             <div className="flex flex-col items-center">
-                <GlassCard className="max-w-md mx-auto p-12 rounded-[3rem] text-center space-y-10 animate-in zoom-in duration-500 mt-10">
+                <GlassCard className="max-w-md mx-auto p-12 rounded-[3rem] text-center space-y-10 animate-in zoom-in duration-500 mt-10 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
                     <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-[2rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-purple-500/20">
                         <Tv size={48} />
                     </div>
@@ -208,7 +208,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
             ? 'bg-red-600 text-white'
-            : (isDark ? 'bg-[#000] text-white' : 'bg-[#EFEEF4] text-black')
+            : (isDark ? 'bg-[#000] text-white' : 'bg-[#E5E5EA] text-black')
             }`}>
             {/* HUD Header */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-20">

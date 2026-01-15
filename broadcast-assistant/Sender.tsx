@@ -73,6 +73,17 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         localStorage.setItem('br_active_channel_id', activeChannelId);
     }, [activeChannelId]);
 
+    // Auto-activate room on server
+    useEffect(() => {
+        if (channelCode && license) {
+            fetch('/api/broadcast/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: channelCode, license })
+            }).catch(console.error);
+        }
+    }, [channelCode, license]);
+
     const addChannel = () => {
         const newId = Date.now().toString();
         const newChannel: Channel = {

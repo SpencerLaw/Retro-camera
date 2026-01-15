@@ -67,6 +67,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
 
         try {
             const resp = await fetch(`/api/broadcast/fetch?code=${fullRoomId.trim().toUpperCase()}`);
+
+            if (resp.status === 404) {
+                setError('无效的房间号');
+                setCurrentMsg(null);
+                setIsJoined(false); // Force exit to join screen
+                return;
+            }
+
             const data = await resp.json();
 
             if (data.message) {

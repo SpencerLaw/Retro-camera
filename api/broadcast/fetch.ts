@@ -16,14 +16,29 @@ export default async function handler(
     }
 
     try {
-        // V2: Try Global Pool First
-        let key = `br:v2:room:${code}`;
+        const cleanCode = code.toUpperCase().trim();
+
+        // 1. Check if room is active/registered
+        const activeKey = `br:v2:active:${cleanCode}`;
+        const isActive = await kv.exists(activeKey);
+
+        if (!isActive) {
+            // Check legacy key just in case
+            const legacyKeyPattern = `br:lic:*:rm:${cleanCode}:act`;
+            const keys = await kv.keys(legacyKeyPattern);
+            if (keys.length === 0) {
+                return response.status(404).json({ error: 'Room not found or inactive' });
+            }
+        }
+
+        // 2. Try Global Pool First
+        let key = `br:v2:room:${cleanCode}`;
         let message = await kv.get(key);
 
         // Fallback for V1 (in case some old sessions are still using it)
         if (!message && license) {
             const licPrefix = license.replace(/[-\s]/g, '').substring(0, 8).toUpperCase();
-            const oldKey = `br:lic:${licPrefix}:rm:${code}:act`;
+            const oldKey = `br:lic:${licPrefix}:rm:${cleanCode}:act`;
             message = await kv.get(oldKey);
         }
 

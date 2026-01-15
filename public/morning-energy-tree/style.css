@@ -212,7 +212,7 @@ canvas {
 }
 
 #countdown-time {
-    font-size: 2rem;
+    font-size: 2.4rem;
     font-weight: 800;
     font-family: 'Courier New', monospace;
     color: #f1c40f;
@@ -220,7 +220,7 @@ canvas {
 }
 
 .timer-label {
-    font-size: 0.8rem;
+    font-size: 1rem;
     opacity: 0.8;
     margin-top: 5px;
 }
@@ -269,7 +269,7 @@ canvas {
 }
 
 .energy-label {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     margin-bottom: 8px;

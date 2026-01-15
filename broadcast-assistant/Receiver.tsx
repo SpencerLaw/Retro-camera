@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface Message {
@@ -15,7 +15,7 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode, cl
     </div>
 );
 
-const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
+const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDark, toggleTheme }) => {
     const t = useTranslations();
     const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
     const [isJoined, setIsJoined] = useState(false);
@@ -193,6 +193,12 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
                 </div>
 
                 <div className="flex gap-4">
+                    <button
+                        onClick={toggleTheme}
+                        className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors bg-white/10 backdrop-blur-md text-orange-500"
+                    >
+                        {isDark ? <Moon size={24} /> : <Sun size={24} />}
+                    </button>
                     <button onClick={toggleFullscreen} className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors bg-white/10 backdrop-blur-md">
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>

@@ -208,7 +208,7 @@ const BroadcastApp: React.FC = () => {
                     )}
 
                     {mode === 'sender' && <Sender license={getBCLicense() || 'DEMO-ONLY'} isDark={theme === 'dark'} />}
-                    {mode === 'receiver' && <Receiver isDark={theme === 'dark'} />}
+                    {mode === 'receiver' && <Receiver isDark={theme === 'dark'} toggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')} />}
                 </main>
 
             </div>

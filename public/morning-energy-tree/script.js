@@ -1,11 +1,11 @@
 /**
- * Morning Energy Tree - Core Logic
+ * Morning Energy Tree - Enhanced Version
  * 
  * Features:
- * 1. Gatekeeper Authorization (ZD-XXX)
- * 2. Web Audio API Analysis (TimeDomain -> dB)
- * 3. Fractal Tree Visualization (Canvas)
- * 4. Gamification (Energy Bar, dB Meter, Rewards)
+ * 1. Session Timer (30/40 min + custom)
+ * 2. Calibrated Growth: 1 min @ 70dB = 100% energy
+ * 3. Enhanced Tree Visualization
+ * 4. Animated dB Meter
  */
 
 /* --- Constants & State --- */
@@ -15,13 +15,20 @@ const LICENSE_PREFIX = 'ZD';
 const STATE = {
     isListening: false,
     energy: 0, // 0 to 100
-    sensitivity: 50, // 1 to 100 (Still useful for fine tuning dB offset maybe? or remove)
-    // Let's keep sensitivity as a gain multiplier or offset if needed.
-    // For now, hard standard dB is better.
+    sensitivity: 50,
     currentDB: 30,
     treeColor: '#4caf50',
     isSuperMode: false,
-    superModeTimer: 0
+
+    // Timer System
+    sessionDuration: 30, // minutes
+    remainingTime: 30 * 60, // seconds
+    timerInterval: null,
+
+    // Growth calibration: 1 min loud reading = full tree
+    // So growth rate per second at 70dB+ should be: 100 / 60 = 1.67% per second
+    // At 60fps, that's 1.67/60 = 0.028 per frame
+    baseGrowthRate: 1.67 / 60 // per frame at 70dB
 };
 
 /* --- DOM Elements --- */
@@ -33,6 +40,10 @@ const ctx = canvas.getContext('2d');
 const energyFill = $('energy-fill');
 const micBtn = $('mic-toggle-btn');
 const dbValue = $('db-value');
+const dbDisplay = document.querySelector('.db-display');
+const countdownTime = $('countdown-time');
+const durationSelect = $('duration-select');
+const customDuration = $('custom-duration');
 
 /* --- 1. Gatekeeper Logic --- */
 function initGatekeeper() {
@@ -57,7 +68,6 @@ function verifyLicense() {
     } else {
         errorMsg.style.display = 'block';
         errorMsg.textContent = '无效的授权码：必须以 "ZD" 开头';
-        // Shake animation
         $('gatekeeper-screen').querySelector('.auth-card').animate([
             { transform: 'translateX(0)' },
             { transform: 'translateX(-10px)' },
@@ -74,10 +84,57 @@ function showApp() {
         appContainer.classList.remove('hidden');
         initCanvas();
         resizeCanvas();
+        initTimer();
     }, 500);
 }
 
-/* --- 2. Audio Logic (dB Calculation) --- */
+/* --- 2. Timer System --- */
+function initTimer() {
+    updateTimerDisplay();
+
+    durationSelect.onchange = (e) => {
+        const value = e.target.value;
+        if (value === 'custom') {
+            customDuration.classList.remove('hidden');
+        } else {
+            customDuration.classList.add('hidden');
+            STATE.sessionDuration = parseInt(value);
+            STATE.remainingTime = STATE.sessionDuration * 60;
+            updateTimerDisplay();
+        }
+    };
+
+    customDuration.onchange = (e) => {
+        const mins = parseInt(e.target.value) || 30;
+        STATE.sessionDuration = Math.max(1, Math.min(120, mins));
+        STATE.remainingTime = STATE.sessionDuration * 60;
+        updateTimerDisplay();
+    };
+}
+
+function startTimer() {
+    if (STATE.timerInterval) return;
+
+    STATE.timerInterval = setInterval(() => {
+        if (STATE.remainingTime > 0) {
+            STATE.remainingTime--;
+            updateTimerDisplay();
+
+            if (STATE.remainingTime === 0) {
+                showToast("⏰ 早读时间结束！");
+                stopMic();
+            }
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const mins = Math.floor(STATE.remainingTime / 60);
+    const secs = STATE.remainingTime % 60;
+    countdownTime.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+/* --- 3. Audio Logic --- */
 let audioCtx, analyser, dataArray, source;
 
 async function toggleMic() {
@@ -100,7 +157,7 @@ async function startMic() {
 
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 512; // Time domain needs reasonable size
+        analyser.fftSize = 512;
         source = audioCtx.createMediaStreamSource(stream);
         source.connect(analyser);
 
@@ -109,11 +166,13 @@ async function startMic() {
         STATE.isListening = true;
         micBtn.textContent = '⏸';
         micBtn.classList.add('active');
+        dbDisplay.classList.add('active');
 
         if (audioCtx.state === 'suspended') {
             await audioCtx.resume();
         }
 
+        startTimer();
         loop();
     } catch (err) {
         console.error("Mic Error:", err);
@@ -128,7 +187,13 @@ function stopMic() {
     STATE.isListening = false;
     micBtn.textContent = '🎤';
     micBtn.classList.remove('active');
+    dbDisplay.classList.remove('active');
     dbValue.textContent = '--';
+
+    if (STATE.timerInterval) {
+        clearInterval(STATE.timerInterval);
+        STATE.timerInterval = null;
+    }
 }
 
 function calculateDB() {
@@ -138,93 +203,72 @@ function calculateDB() {
 
     let sum = 0;
     for (let i = 0; i < dataArray.length; i++) {
-        // Convert 0-255 to -1 to 1 float
         const x = (dataArray[i] - 128) / 128;
         sum += x * x;
     }
 
     const rms = Math.sqrt(sum / dataArray.length);
-
-    // Doraemon Logic: Math.log10(rms) * 20 + 100
-    // Adjusted: RMS of pure sine wave at max is 0.707. 20log(.707) = -3dB.
-    // +100 offset roughly maps full scale to 100dB (loud).
-    // Silence rms ~ 0 -> log(-inf). Handle rms=0.
-
     let db = 30;
     if (rms > 0) {
         db = (Math.log10(rms) * 20) + 100;
     }
 
-    // Sensitivity Slider Adjustment (-20dB to +20dB range ?)
-    // value 50 = 0 adj.
-    const adj = (STATE.sensitivity - 50) * 0.5; // +/- 25dB
+    const adj = (STATE.sensitivity - 50) * 0.5;
     db += adj;
 
-    // Clamp
     if (db < 30) db = 30;
     if (db > 120) db = 120;
 
     return db;
 }
 
-/* --- 3. Game Logic --- */
+/* --- 4. Game Logic --- */
 function updateState() {
     if (!STATE.isListening) return;
 
     const targetDB = calculateDB();
+    STATE.currentDB += (targetDB - STATE.currentDB) * 0.3; // Faster response
 
-    // Smooth transition for UI
-    STATE.currentDB += (targetDB - STATE.currentDB) * 0.2;
+    // Update dB UI with dramatic color changes
+    const displayDB = Math.round(STATE.currentDB);
+    dbValue.textContent = displayDB;
 
-    // Update DB Meter UI
-    dbValue.textContent = Math.round(STATE.currentDB);
-
-    // Text color change based on loudness
     if (STATE.currentDB > 85) {
-        dbValue.style.color = '#ff6b6b'; // Red
+        dbValue.style.color = '#ff6b6b';
+        dbDisplay.style.borderColor = 'rgba(255, 107, 107, 0.8)';
     } else if (STATE.currentDB > 70) {
-        dbValue.style.color = '#4caf50'; // Green
+        dbValue.style.color = '#4caf50';
+        dbDisplay.style.borderColor = 'rgba(76, 175, 80, 0.8)';
     } else {
         dbValue.style.color = '#fff';
+        dbDisplay.style.borderColor = 'rgba(255, 255, 255, 0.4)';
     }
 
-    // --- Growth Rules ---
-    // Rule: Sounds < 70dB = Stop/Decay.
-    // Rule: Sounds >= 70dB = Grow.
-    // > 100dB = Too Loud? (Maybe warn, but still grow? "Morning Reading" should be loud)
-    // Let's set a "reading zone" 70-95.
-
+    // Growth Logic: Calibrated for 1 min @ 70dB = full tree
     const READING_THRESHOLD = 70;
 
     if (STATE.currentDB >= READING_THRESHOLD) {
-        // Growth logic
-        // Faster growth for louder reading (up to a point)
-        // Rate: 0.1 per frame basic.
-        // If 80dB -> (80-70)*0.02 = 0.2
-
-        let rate = (STATE.currentDB - READING_THRESHOLD) * 0.03;
-        if (rate > 1.0) rate = 1.0; // Cap growth speed
+        // Growth rate increases with volume
+        // At 70dB: base rate
+        // At 90dB: 2x rate
+        const volumeBonus = Math.min((STATE.currentDB - READING_THRESHOLD) / 20, 1);
+        const rate = STATE.baseGrowthRate * (1 + volumeBonus);
 
         STATE.energy += rate;
 
-        // Shake screen slightly if REALLY loud to show power
         if (STATE.currentDB > 95) {
-            shakeScreen(2);
+            shakeScreen(3);
         }
     } else {
-        // Silence or Whisper (< 70)
-        // Decay slowly
-        STATE.energy -= 0.1;
+        // Slow decay when quiet
+        STATE.energy -= 0.05;
     }
 
-    // Clamp energy
     if (STATE.energy < 0) STATE.energy = 0;
     if (STATE.energy > 100) STATE.energy = 100;
 
-    // Update Energy UI
     energyFill.style.width = STATE.energy + '%';
 
-    // Check Super Mode
     if (STATE.energy >= 100 && !STATE.isSuperMode) {
         triggerSuperMode();
     }
@@ -232,13 +276,12 @@ function updateState() {
 
 function triggerSuperMode() {
     STATE.isSuperMode = true;
-    STATE.treeColor = '#ffd700'; // Gold
-    showToast("🎉 班级早读成就达成！ 🎉");
+    STATE.treeColor = '#ffd700';
+    showToast("🎉 能量树已长成！继续保持！ 🎉");
 
-    // Keep super mode for 5 seconds
     setTimeout(() => {
         STATE.isSuperMode = false;
-        STATE.energy = 80; // Reset to 80 to keep going
+        STATE.energy = 80;
         STATE.treeColor = '#4caf50';
     }, 5000);
 }
@@ -259,7 +302,7 @@ function showToast(msg) {
     setTimeout(() => el.remove(), 4000);
 }
 
-/* --- 4. Visualization (Canvas) --- */
+/* --- 5. Enhanced Tree Visualization --- */
 function initCanvas() {
     window.addEventListener('resize', resizeCanvas);
 }
@@ -269,42 +312,134 @@ function resizeCanvas() {
     canvas.height = window.innerHeight;
 }
 
-function drawTree(startX, startY, len, angle, branchWidth, depth) {
+// Particle system for leaves
+const leaves = [];
+class Leaf {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = Math.random() * 2 + 1;
+        this.size = Math.random() * 8 + 4;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+        this.life = 1;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.rotation += this.rotationSpeed;
+        this.life -= 0.01;
+        return this.life > 0;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.globalAlpha = this.life;
+
+        // Leaf shape
+        ctx.fillStyle = STATE.isSuperMode ? '#ffd700' : '#4caf50';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size, this.size * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+}
+
+function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.beginPath();
     ctx.save();
-    ctx.strokeStyle = depth < 2 ? '#2e7d32' : STATE.isSuperMode ? '#f1c40f' : '#5d4037';
-    if (depth <= 2) ctx.strokeStyle = STATE.treeColor;
+
+    // Trunk color with gradient
+    if (depth === 0) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, -len);
+        gradient.addColorStop(0, '#5d4037');
+        gradient.addColorStop(1, '#8d6e63');
+        ctx.strokeStyle = gradient;
+    } else if (depth < 3) {
+        ctx.strokeStyle = '#6d4c41';
+    } else {
+        ctx.strokeStyle = STATE.isSuperMode ? '#ffd700' : STATE.treeColor;
+    }
 
     ctx.lineWidth = branchWidth;
+    ctx.lineCap = 'round';
     ctx.translate(startX, startY);
     ctx.rotate(angle * Math.PI / 180);
     ctx.moveTo(0, 0);
     ctx.lineTo(0, -len);
     ctx.stroke();
 
-    if (len < 10) {
-        if (STATE.isSuperMode || depth < 1) {
-            ctx.beginPath();
-            ctx.arc(0, -len, 5, 0, Math.PI * 2);
-            ctx.fillStyle = '#e74c3c';
-            ctx.fill();
+    // Add leaves/flowers at branch ends
+    if (len < 15 && STATE.energy > 30) {
+        const endX = startX + Math.sin(angle * Math.PI / 180) * len;
+        const endY = startY - Math.cos(angle * Math.PI / 180) * len;
+
+        // Occasionally spawn leaves
+        if (Math.random() < 0.02 && STATE.currentDB > 70) {
+            leaves.push(new Leaf(endX, endY));
         }
+
+        // Draw flower/fruit
+        if (STATE.energy > 60) {
+            ctx.beginPath();
+            ctx.arc(0, -len, 6, 0, Math.PI * 2);
+
+            if (STATE.isSuperMode) {
+                const flowerGradient = ctx.createRadialGradient(0, -len, 0, 0, -len, 6);
+                flowerGradient.addColorStop(0, '#fff');
+                flowerGradient.addColorStop(1, '#ffd700');
+                ctx.fillStyle = flowerGradient;
+            } else {
+                ctx.fillStyle = STATE.energy > 80 ? '#ff6b9d' : '#e74c3c';
+            }
+            ctx.fill();
+
+            // Flower petals for super mode
+            if (STATE.isSuperMode) {
+                for (let i = 0; i < 5; i++) {
+                    const petalAngle = (i / 5) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        Math.cos(petalAngle) * 8,
+                        -len + Math.sin(petalAngle) * 8,
+                        4, 6, petalAngle, 0, Math.PI * 2
+                    );
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                }
+            }
+        }
+
         ctx.restore();
         return;
     }
 
-    // Tree Jitter based on DB volume
-    // Map 30-100dB to 0-1 jitter factor
+    if (len < 10) {
+        ctx.restore();
+        return;
+    }
+
+    // Dynamic branching based on volume
     let volumeFactor = (STATE.currentDB - 30) / 70;
     if (volumeFactor < 0) volumeFactor = 0;
+    if (volumeFactor > 1) volumeFactor = 1;
 
-    let spread = 15 + (volumeFactor * 25); // 15 to 40 degrees
-    spread += (Math.random() - 0.5) * 5;
+    let spread = 18 + (volumeFactor * 20);
+    spread += (Math.random() - 0.5) * 8;
 
     ctx.translate(0, -len);
 
-    drawTree(0, 0, len * 0.75, -spread, branchWidth * 0.7, depth + 1);
-    drawTree(0, 0, len * 0.75, spread, branchWidth * 0.7, depth + 1);
+    // Recursive branches
+    const branchCount = depth < 2 ? 2 : 2;
+    for (let i = 0; i < branchCount; i++) {
+        const branchAngle = i === 0 ? -spread : spread;
+        drawEnhancedTree(0, 0, len * 0.72, branchAngle, branchWidth * 0.65, depth + 1);
+    }
 
     ctx.restore();
 }
@@ -312,20 +447,47 @@ function drawTree(startX, startY, len, angle, branchWidth, depth) {
 function loop() {
     updateState();
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear with slight trail effect for smoothness
+    ctx.fillStyle = 'rgba(41, 128, 185, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#81c784';
-    ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+    // Sky gradient
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    skyGradient.addColorStop(0, '#2980b9');
+    skyGradient.addColorStop(1, '#6dd5fa');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const treeSize = 60 + (STATE.energy * 1.4);
+    // Ground
+    const groundGradient = ctx.createLinearGradient(0, canvas.height - 40, 0, canvas.height);
+    groundGradient.addColorStop(0, '#81c784');
+    groundGradient.addColorStop(1, '#66bb6a');
+    ctx.fillStyle = groundGradient;
+    ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
 
-    if (treeSize > 50) {
-        drawTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 10, 0);
+    // Tree
+    const treeSize = 70 + (STATE.energy * 1.5);
+
+    if (treeSize > 60) {
+        drawEnhancedTree(canvas.width / 2, canvas.height - 40, treeSize, 0, treeSize / 8, 0);
     } else {
+        // Seed
         ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height - 10, 5, 0, Math.PI * 2);
+        ctx.arc(canvas.width / 2, canvas.height - 30, 8, 0, Math.PI * 2);
         ctx.fillStyle = '#5d4037';
         ctx.fill();
+        ctx.strokeStyle = '#3e2723';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // Update and draw leaves
+    for (let i = leaves.length - 1; i >= 0; i--) {
+        if (!leaves[i].update()) {
+            leaves.splice(i, 1);
+        } else {
+            leaves[i].draw();
+        }
     }
 
     if (STATE.isListening) {
@@ -335,7 +497,13 @@ function loop() {
 
 /* --- Event Listeners --- */
 micBtn.onclick = toggleMic;
-$('reset-btn').onclick = () => { STATE.energy = 0; STATE.isSuperMode = false; };
+$('reset-btn').onclick = () => {
+    STATE.energy = 0;
+    STATE.isSuperMode = false;
+    STATE.remainingTime = STATE.sessionDuration * 60;
+    updateTimerDisplay();
+    leaves.length = 0;
+};
 $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };
 
 // Init

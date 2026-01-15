@@ -50,6 +50,12 @@
                 <div class="energy-container">
                     <div id="energy-fill"></div>
                 </div>
+
+                <!-- Timer Display -->
+                <div class="timer-display">
+                    <div id="countdown-time">--:--</div>
+                    <div class="timer-label">剩余时间</div>
+                </div>
             </div>
 
             <!-- Toast / Notifications Center -->
@@ -61,6 +67,18 @@
                 <button id="mic-toggle-btn" class="icon-btn" title="开始/停止监听">
                     🎤
                 </button>
+
+                <!-- Timer Settings -->
+                <div class="control-group">
+                    <label class="control-label">早读时长</label>
+                    <select id="duration-select" class="duration-select">
+                        <option value="30">30分钟</option>
+                        <option value="40">40分钟</option>
+                        <option value="custom">自定义</option>
+                    </select>
+                    <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
+                        placeholder="分钟">
+                </div>
 
                 <!-- Sensitivity Slider -->
                 <div class="control-group">

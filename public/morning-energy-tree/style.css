@@ -51,32 +51,68 @@ body {
     top: 20px;
     right: 20px;
     z-index: 10000;
-    width: 80px;
-    height: 80px;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(30, 30, 30, 0.5));
+    backdrop-filter: blur(15px);
+    border: 3px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     color: #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.1s;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    transition: all 0.2s;
+}
+
+.db-display::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #4caf50, #f1c40f, #e74c3c, #4caf50);
+    opacity: 0;
+    z-index: -1;
+    animation: rotateBorder 3s linear infinite;
+}
+
+.db-display.active::before {
+    opacity: 0.6;
+}
+
+@keyframes rotateBorder {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 #db-value {
-    font-size: 2rem;
-    font-weight: 800;
+    font-size: 3rem;
+    font-weight: 900;
     line-height: 1;
-    font-family: monospace;
-    /* Fixed width prevents jitter */
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 10px currentColor;
+    animation: dbPulse 1s ease-in-out infinite;
+}
+
+@keyframes dbPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 .db-label {
-    font-size: 0.8rem;
-    opacity: 0.8;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 600;
+    margin-top: 4px;
 }
 
 /* --- Gatekeeper Screen --- */
@@ -166,6 +202,62 @@ canvas {
 }
 
 /* Top Bar: Energy Bar */
+.timer-display {
+    margin-top: 15px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px 20px;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#countdown-time {
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    color: #f1c40f;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+}
+
+.timer-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 5px;
+}
+
+.duration-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.duration-select option {
+    background: #1a1a1a;
+    color: white;
+}
+
+.custom-input {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.9rem;
+    width: 80px;
+    text-align: center;
+    outline: none;
+}
+
+.custom-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 .top-bar {
     display: flex;
     flex-direction: column;

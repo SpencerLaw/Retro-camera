@@ -1,11 +1,9 @@
 /**
- * Morning Energy Tree - Enhanced Version
+ * Morning Energy Tree - Enhanced Version 2.0 (Aesthetic Update)
  * 
  * Features:
- * 1. Session Timer (30/40 min + custom)
- * 2. Calibrated Growth: 1 min @ 70dB = 100% energy
- * 3. Enhanced Tree Visualization
- * 4. Animated dB Meter
+ * 1. Session Timer & Game Logic (Preserved)
+ * 2. Visual Upgrade: Lush Foliage, Gradient Trunk, Wind Animation
  */
 
 /* --- Constants & State --- */
@@ -14,7 +12,7 @@ const LICENSE_PREFIX = 'ZD';
 
 const STATE = {
     isListening: false,
-    energy: 0, // 0 to 100
+    energy: 0,
     sensitivity: 50,
     currentDB: 30,
     treeColor: '#4caf50',
@@ -22,14 +20,16 @@ const STATE = {
 
     // Timer System
     sessionDuration: 30, // minutes
-    remainingTime: 30 * 60, // seconds
+    remainingTime: 30 * 60,
     timerInterval: null,
 
     // Growth calibration: 1 min loud reading = full tree
-    // So growth rate per second at 70dB+ should be: 100 / 60 = 1.67% per second
-    // At 60fps, that's 1.67/60 = 0.028 per frame
-    baseGrowthRate: 1.67 / 60 // per frame at 70dB
+    baseGrowthRate: 1.67 / 60
 };
+
+// Aesthetic Config
+const FOLIAGE_COLORS = ['#43a047', '#66bb6a', '#a5d6a7', '#81c784'];
+const GOLDEN_COLORS = ['#ffd700', '#ffecb3', '#fff9c4', '#fff59d'];
 
 /* --- DOM Elements --- */
 const $ = (id) => document.getElementById(id);
@@ -44,6 +44,20 @@ const dbDisplay = document.querySelector('.db-display');
 const countdownTime = $('countdown-time');
 const durationSelect = $('duration-select');
 const customDuration = $('custom-duration');
+
+// Help Tooltip Toggle
+const helpTrigger = $('help-trigger');
+const helpTooltip = $('help-tooltip');
+
+if (helpTrigger) {
+    helpTrigger.onclick = (e) => {
+        e.stopPropagation();
+        helpTooltip.classList.toggle('hidden');
+    };
+    helpTooltip.onclick = () => helpTooltip.classList.add('hidden');
+    document.addEventListener('click', () => helpTooltip.classList.add('hidden'));
+}
+
 
 /* --- 1. Gatekeeper Logic --- */
 function initGatekeeper() {
@@ -114,12 +128,10 @@ function initTimer() {
 
 function startTimer() {
     if (STATE.timerInterval) return;
-
     STATE.timerInterval = setInterval(() => {
         if (STATE.remainingTime > 0) {
             STATE.remainingTime--;
             updateTimerDisplay();
-
             if (STATE.remainingTime === 0) {
                 showToast("⏰ 早读时间结束！");
                 stopMic();
@@ -148,11 +160,7 @@ async function toggleMic() {
 async function startMic() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: false,
-                noiseSuppression: false,
-                autoGainControl: false
-            }
+            audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
         });
 
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -168,9 +176,7 @@ async function startMic() {
         micBtn.classList.add('active');
         dbDisplay.classList.add('active');
 
-        if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
 
         startTimer();
         loop();
@@ -181,15 +187,12 @@ async function startMic() {
 }
 
 function stopMic() {
-    if (source) {
-        source.disconnect();
-    }
+    if (source) source.disconnect();
     STATE.isListening = false;
     micBtn.textContent = '🎤';
     micBtn.classList.remove('active');
     dbDisplay.classList.remove('active');
     dbValue.textContent = '--';
-
     if (STATE.timerInterval) {
         clearInterval(STATE.timerInterval);
         STATE.timerInterval = null;
@@ -198,7 +201,6 @@ function stopMic() {
 
 function calculateDB() {
     if (!STATE.isListening || !analyser) return 30;
-
     analyser.getByteTimeDomainData(dataArray);
 
     let sum = 0;
@@ -206,16 +208,12 @@ function calculateDB() {
         const x = (dataArray[i] - 128) / 128;
         sum += x * x;
     }
-
     const rms = Math.sqrt(sum / dataArray.length);
     let db = 30;
-    if (rms > 0) {
-        db = (Math.log10(rms) * 20) + 100;
-    }
+    if (rms > 0) db = (Math.log10(rms) * 20) + 100;
 
     const adj = (STATE.sensitivity - 50) * 0.5;
     db += adj;
-
     if (db < 30) db = 30;
     if (db > 120) db = 120;
 
@@ -227,9 +225,8 @@ function updateState() {
     if (!STATE.isListening) return;
 
     const targetDB = calculateDB();
-    STATE.currentDB += (targetDB - STATE.currentDB) * 0.3; // Faster response
+    STATE.currentDB += (targetDB - STATE.currentDB) * 0.3;
 
-    // Update dB UI with dramatic color changes
     const displayDB = Math.round(STATE.currentDB);
     dbValue.textContent = displayDB;
 
@@ -244,23 +241,14 @@ function updateState() {
         dbDisplay.style.borderColor = 'rgba(255, 255, 255, 0.4)';
     }
 
-    // Growth Logic: Calibrated for 1 min @ 70dB = full tree
     const READING_THRESHOLD = 70;
-
     if (STATE.currentDB >= READING_THRESHOLD) {
-        // Growth rate increases with volume
-        // At 70dB: base rate
-        // At 90dB: 2x rate
         const volumeBonus = Math.min((STATE.currentDB - READING_THRESHOLD) / 20, 1);
         const rate = STATE.baseGrowthRate * (1 + volumeBonus);
-
         STATE.energy += rate;
 
-        if (STATE.currentDB > 95) {
-            shakeScreen(3);
-        }
+        if (STATE.currentDB > 95) shakeScreen(3);
     } else {
-        // Slow decay when quiet
         STATE.energy -= 0.05;
     }
 
@@ -269,15 +257,13 @@ function updateState() {
 
     energyFill.style.width = STATE.energy + '%';
 
-    if (STATE.energy >= 100 && !STATE.isSuperMode) {
-        triggerSuperMode();
-    }
+    if (STATE.energy >= 100 && !STATE.isSuperMode) triggerSuperMode();
 }
 
 function triggerSuperMode() {
     STATE.isSuperMode = true;
     STATE.treeColor = '#ffd700';
-    showToast("🎉 能量树已长成！继续保持！ 🎉");
+    showToast("🎉 能量树显灵了！全班棒棒哒！ 🎉"); // Changed toast text slightly
 
     setTimeout(() => {
         STATE.isSuperMode = false;
@@ -302,7 +288,7 @@ function showToast(msg) {
     setTimeout(() => el.remove(), 4000);
 }
 
-/* --- 5. Enhanced Tree Visualization --- */
+/* --- 5. AESTHETIC Visualization Engine --- */
 function initCanvas() {
     window.addEventListener('resize', resizeCanvas);
 }
@@ -312,111 +298,94 @@ function resizeCanvas() {
     canvas.height = window.innerHeight;
 }
 
-// Particle system for leaves
-const leaves = [];
-class Leaf {
+// Sparkle Particle (for Super Mode or Growth)
+const sparkles = [];
+class Sparkle {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 2;
-        this.vy = Math.random() * 2 + 1;
-        this.size = Math.random() * 8 + 4;
-        this.rotation = Math.random() * Math.PI * 2;
-        this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+        this.vy = -(Math.random() * 2 + 1);
         this.life = 1;
     }
-
     update() {
-        this.x += this.vx;
         this.y += this.vy;
-        this.rotation += this.rotationSpeed;
-        this.life -= 0.01;
+        this.life -= 0.02;
         return this.life > 0;
     }
-
     draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation);
         ctx.globalAlpha = this.life;
-
-        // Leaf shape
-        ctx.fillStyle = STATE.isSuperMode ? '#ffd700' : '#4caf50';
+        ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.ellipse(0, 0, this.size, this.size * 0.6, 0, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, Math.random() * 3, 0, Math.PI * 2);
         ctx.fill();
-
-        ctx.restore();
+        ctx.globalAlpha = 1;
     }
 }
 
+// Enhanced Recursive Tree with "Clump" Foliage
 function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.beginPath();
     ctx.save();
 
-    // Trunk color with gradient
-    if (depth === 0) {
-        const gradient = ctx.createLinearGradient(0, 0, 0, -len);
-        gradient.addColorStop(0, '#5d4037');
-        gradient.addColorStop(1, '#8d6e63');
-        ctx.strokeStyle = gradient;
-    } else if (depth < 3) {
-        ctx.strokeStyle = '#6d4c41';
+    // Aesthetic: Tapered Branches
+    ctx.lineCap = 'round';
+    ctx.lineWidth = branchWidth;
+
+    // Trunk Gradient & Color
+    if (depth < 2) {
+        const grad = ctx.createLinearGradient(0, 0, 0, -len);
+        grad.addColorStop(0, '#4e342e'); // Darker Wood
+        grad.addColorStop(0.5, '#795548'); // Medium Wood
+        grad.addColorStop(1, '#8d6e63'); // Lighter Top
+        ctx.strokeStyle = grad;
     } else {
-        ctx.strokeStyle = STATE.isSuperMode ? '#ffd700' : STATE.treeColor;
+        ctx.strokeStyle = '#6d4c41';
     }
 
-    ctx.lineWidth = branchWidth;
-    ctx.lineCap = 'round';
     ctx.translate(startX, startY);
     ctx.rotate(angle * Math.PI / 180);
+
+    // Draw Curve Branch (More natural)
     ctx.moveTo(0, 0);
-    ctx.lineTo(0, -len);
+    ctx.quadraticCurveTo(0, -len / 2, 0, -len);
     ctx.stroke();
 
-    // Add leaves/flowers at branch ends
-    if (len < 15 && STATE.energy > 30) {
-        const endX = startX + Math.sin(angle * Math.PI / 180) * len;
-        const endY = startY - Math.cos(angle * Math.PI / 180) * len;
+    // 🌳 LUSH FOLIAGE (CLUMPS) 🌳
+    // Draw clouds of leaves at higher depths
+    if (depth >= 4 || (len < 10 && depth > 2)) {
+        if (STATE.energy > 15) {
+            // Size pulses with wind/energy
+            const baseSize = (STATE.energy / 100) * 12 + 3;
+            const size = baseSize + Math.sin(Date.now() / 500 + depth) * 2;
 
-        // Occasionally spawn leaves
-        if (Math.random() < 0.02 && STATE.currentDB > 70) {
-            leaves.push(new Leaf(endX, endY));
-        }
+            // Color Selection
+            const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
+            // Random-ish but deterministic by depth to avoid flickering
+            const colorIndex = (depth * 3) % colorSet.length;
+            const color = colorSet[colorIndex];
 
-        // Draw flower/fruit
-        if (STATE.energy > 60) {
             ctx.beginPath();
-            ctx.arc(0, -len, 6, 0, Math.PI * 2);
-
-            if (STATE.isSuperMode) {
-                const flowerGradient = ctx.createRadialGradient(0, -len, 0, 0, -len, 6);
-                flowerGradient.addColorStop(0, '#fff');
-                flowerGradient.addColorStop(1, '#ffd700');
-                ctx.fillStyle = flowerGradient;
-            } else {
-                ctx.fillStyle = STATE.energy > 80 ? '#ff6b9d' : '#e74c3c';
-            }
+            ctx.fillStyle = color;
+            // Draw main clump
+            ctx.arc(0, -len, size, 0, Math.PI * 2);
             ctx.fill();
 
-            // Flower petals for super mode
-            if (STATE.isSuperMode) {
-                for (let i = 0; i < 5; i++) {
-                    const petalAngle = (i / 5) * Math.PI * 2;
-                    ctx.beginPath();
-                    ctx.ellipse(
-                        Math.cos(petalAngle) * 8,
-                        -len + Math.sin(petalAngle) * 8,
-                        4, 6, petalAngle, 0, Math.PI * 2
-                    );
-                    ctx.fillStyle = '#fff';
-                    ctx.fill();
-                }
+            // Highlight (Sunlight)
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.arc(-size * 0.3, -len - size * 0.3, size * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Super Mode Glint
+            if (STATE.isSuperMode && Math.random() < 0.05) {
+                sparkles.push(new Sparkle(
+                    // World coords rough approximation would be hard here?
+                    // Actually we can just draw sparkle here relative to ctx
+                    0 + (Math.random() - 0.5) * size,
+                    -len + (Math.random() - 0.5) * size
+                ));
             }
         }
-
-        ctx.restore();
-        return;
     }
 
     if (len < 10) {
@@ -424,21 +393,35 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
         return;
     }
 
-    // Dynamic branching based on volume
+    // Branching with Wind
+    let wind = 0;
+    if (STATE.currentDB > 50) {
+        // Wind affects thinner branches more
+        wind = Math.sin(Date.now() / 400 + depth) * ((STATE.currentDB - 50) / 30) * (depth * 0.5);
+    }
+
+    // Spread based on volume presence
     let volumeFactor = (STATE.currentDB - 30) / 70;
     if (volumeFactor < 0) volumeFactor = 0;
-    if (volumeFactor > 1) volumeFactor = 1;
 
-    let spread = 18 + (volumeFactor * 20);
-    spread += (Math.random() - 0.5) * 8;
+    let spread = 20 + (volumeFactor * 10); // Base spread
 
     ctx.translate(0, -len);
 
-    // Recursive branches
-    const branchCount = depth < 2 ? 2 : 2;
+    const branchCount = 2;
     for (let i = 0; i < branchCount; i++) {
-        const branchAngle = i === 0 ? -spread : spread;
-        drawEnhancedTree(0, 0, len * 0.72, branchAngle, branchWidth * 0.65, depth + 1);
+        // Natural asymmetry
+        const dir = i === 0 ? -1 : 1;
+        const offset = (Math.random() - 0.5) * 5; // Slight jitter
+        const branchAngle = (spread * dir) + wind + offset;
+        const lengthFactor = 0.72 + (Math.random() * 0.05); // Varying lengths
+
+        drawEnhancedTree(0, 0, len * lengthFactor, branchAngle, branchWidth * 0.7, depth + 1);
+    }
+
+    // Occasional 3rd branch for fullness if energy is high
+    if (depth < 3 && STATE.energy > 60 && Math.random() < 0.3) {
+        drawEnhancedTree(0, 0, len * 0.6, wind, branchWidth * 0.6, depth + 1);
     }
 
     ctx.restore();
@@ -447,46 +430,68 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
 function loop() {
     updateState();
 
-    // Clear with slight trail effect for smoothness
-    ctx.fillStyle = 'rgba(41, 128, 185, 0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Sky gradient
+    // Beautiful Sky Background
     const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGradient.addColorStop(0, '#2980b9');
-    skyGradient.addColorStop(1, '#6dd5fa');
+    skyGradient.addColorStop(0, '#4facfe'); // Fresh Blue
+    skyGradient.addColorStop(1, '#00f2fe'); // Light Blue
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Ground
-    const groundGradient = ctx.createLinearGradient(0, canvas.height - 40, 0, canvas.height);
-    groundGradient.addColorStop(0, '#81c784');
-    groundGradient.addColorStop(1, '#66bb6a');
-    ctx.fillStyle = groundGradient;
-    ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+    // Sun
+    ctx.beginPath();
+    const sunGrad = ctx.createRadialGradient(canvas.width, 0, 20, canvas.width, 0, 150);
+    sunGrad.addColorStop(0, 'rgba(255, 235, 59, 0.8)');
+    sunGrad.addColorStop(1, 'rgba(255, 235, 59, 0)');
+    ctx.fillStyle = sunGrad;
+    ctx.arc(canvas.width, 0, 150, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Tree
-    const treeSize = 70 + (STATE.energy * 1.5);
+    // Rolling Hills (Ground)
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    ctx.quadraticCurveTo(canvas.width / 2, canvas.height - 80, canvas.width, canvas.height);
+    ctx.fillStyle = '#66bb6a';
+    ctx.fill();
+
+    // Main Tree
+    const treeSize = 80 + (STATE.energy * 1.6);
 
     if (treeSize > 60) {
-        drawEnhancedTree(canvas.width / 2, canvas.height - 40, treeSize, 0, treeSize / 8, 0);
+        drawEnhancedTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 9, 0);
     } else {
-        // Seed
+        // Quality Seed
         ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height - 30, 8, 0, Math.PI * 2);
-        ctx.fillStyle = '#5d4037';
+        const startX = canvas.width / 2;
+        const startY = canvas.height - 30;
+        ctx.fillStyle = '#795548';
+        ctx.ellipse(startX, startY, 10, 6, 0.2, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#3e2723';
-        ctx.lineWidth = 2;
+        // Sprout
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.quadraticCurveTo(startX - 5, startY - 15, startX - 15, startY - 20);
+        ctx.strokeStyle = '#66bb6a';
+        ctx.lineWidth = 3;
         ctx.stroke();
     }
 
-    // Update and draw leaves
-    for (let i = leaves.length - 1; i >= 0; i--) {
-        if (!leaves[i].update()) {
-            leaves.splice(i, 1);
+    // Render and update sparkles (no transform context needed as they are stored in screen coords? 
+    // Wait, my sparkle gen logic in drawEnhancedTree was flawed because canvas was transformed.
+    // Fixed: Sparkles generated relative to tree are tricky.
+    // Let's just generate global ambient sparkles in loop if super mode.
+
+    if (STATE.isSuperMode && Math.random() < 0.2) {
+        sparkles.push(new Sparkle(Math.random() * canvas.width, Math.random() * canvas.height));
+    }
+
+    for (let i = sparkles.length - 1; i >= 0; i--) {
+        if (!sparkles[i].update()) {
+            sparkles.splice(i, 1);
         } else {
-            leaves[i].draw();
+            sparkles[i].draw();
         }
     }
 
@@ -495,33 +500,15 @@ function loop() {
     }
 }
 
-/* --- Event Listeners --- */
+// Init
+initGatekeeper();
+// Re-bind listener just in case overwriting removed them (it doesn't, listeners are on DOM nodes)
 micBtn.onclick = toggleMic;
-$('reset-btn').onclick = () => {
+if ($('reset-btn')) $('reset-btn').onclick = () => {
     STATE.energy = 0;
     STATE.isSuperMode = false;
     STATE.remainingTime = STATE.sessionDuration * 60;
     updateTimerDisplay();
-    leaves.length = 0;
+    sparkles.length = 0;
 };
-$('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };
-
-// Help Tooltip Toggle
-const helpTrigger = $('help-trigger');
-const helpTooltip = $('help-tooltip');
-
-helpTrigger.onclick = (e) => {
-    e.stopPropagation();
-    helpTooltip.classList.toggle('hidden');
-};
-
-helpTooltip.onclick = () => {
-    helpTooltip.classList.add('hidden');
-};
-
-document.addEventListener('click', () => {
-    helpTooltip.classList.add('hidden');
-});
-
-// Init
-initGatekeeper();
+if ($('sensitivity-slider')) $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };

@@ -10,7 +10,7 @@ import { isBCVerified, verifyLicense, clearBCLicense, getBCLicense } from './uti
 import { useTranslations } from '../hooks/useTranslations';
 
 const GlassContainer = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-black/60 border border-white/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.05)] rounded-[2rem] ${className}`}>
+    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] rounded-[2rem] ${className}`}>
         {children}
     </div>
 );
@@ -119,7 +119,7 @@ const BroadcastApp: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#000] text-white' : 'bg-white text-[#1D1D1F]'} font-sans`}>
+        <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-white text-[#1D1D1F]'} font-sans`}>
             {/* iOS 26 极简背景氛围 */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className={`absolute top-0 right-0 w-[50%] h-[50%] rounded-full blur-[120px] opacity-[0.03] transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-200'}`}></div>

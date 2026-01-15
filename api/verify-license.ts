@@ -58,8 +58,8 @@ function extractDateFromCode(code: string): Date | null {
   try {
     let cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
 
-    // 支持多种前缀 (ZY 或 DM 或 ZD)
-    if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD')) {
+    // 支持多种前缀 (ZY 或 DM 或 ZD 或 GB)
+    if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD') || cleanCode.startsWith('GB')) {
       cleanCode = cleanCode.substring(2);
     }
 

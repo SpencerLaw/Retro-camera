@@ -352,6 +352,7 @@
             (ZY)</button>
           <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
           <button onclick="generateCodes('tree')" class="btn-primary" style="background: #eab308;">生成早读码 (ZD)</button>
+          <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
         </div>
 
         <div class="gen-list" id="genList"></div>
@@ -586,6 +587,13 @@
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
           code = 'ZD' + datePart + random;
+        } else if (type === 'gb') {
+          // GB + YYYYMMDD (8) + Random (6) = 16 chars
+          let random = '';
+          for (let j = 0; j < 6; j++) {
+            random += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          code = 'GB' + datePart + random;
         } else {
           // YYYYMMDD (8) + Random (8) = 16 chars
           let random = '';

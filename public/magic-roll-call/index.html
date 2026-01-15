@@ -401,10 +401,53 @@
 
     <div id="app-screen" class="screen">
         <!-- Mobile Settings Toggle Button -->
-        <button class="mobile-settings-toggle" id="mobile-settings-btn" aria-label="打开设置">⚙️</button>
+        <button class="mobile-settings-toggle" id="mobile-settings-btn" aria-label="打开设置">📝</button>
 
-        <!-- Mobile Sidebar Overlay -->
-        <div class="sidebar-mobile-overlay" id="sidebar-overlay"></div>
+        <!-- Independent Mobile Settings Modal -->
+        <div id="mobile-settings-modal" class="hidden"
+            style="position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; justify-content:flex-end;">
+            <!-- Backdrop -->
+            <div id="mobile-modal-backdrop"
+                style="position:absolute; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px);"></div>
+
+            <!-- Modal Content (Bottom Sheet style) -->
+            <div class="glass-panel"
+                style="position:relative; width:100%; max-height:85vh; border-radius:20px 20px 0 0; border:1px solid rgba(255,255,255,0.2); border-bottom:none; padding:25px; display:flex; flex-direction:column; animation: slideUp 0.3s ease-out; background:linear-gradient(to bottom, #1a1a2e, #16213e);">
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 style="margin:0; color:var(--primary-neon); font-size:1.5rem;">📋 名单设置</h2>
+                    <button id="close-mobile-modal"
+                        style="background:rgba(255,255,255,0.1); border:none; color:white; width:36px; height:36px; border-radius:50%; font-size:1.2rem; display:flex; justify-content:center; align-items:center;">✕</button>
+                </div>
+
+                <div style="flex:1; overflow-y:auto; margin-bottom:20px;">
+                    <label style="display:block; margin-bottom:10px; font-weight:bold; color:var(--accent-gold);">✨ 输入名字
+                        (每行一个)</label>
+                    <textarea id="mobile-student-input"
+                        style="width:100%; height:180px; font-size:18px; padding:15px; border-radius:12px; border:2px solid rgba(255,255,255,0.3); background:rgba(0,0,0,0.4); color:white; resize:none; line-height:1.5;"
+                        placeholder="例如：
+孙悟空
+猪八戒
+沙和尚"></textarea>
+
+                    <div style="margin-top:20px; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
+                        <label
+                            style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+                            <span style="font-size:1.1rem;">🎲 抽取人数</span>
+                            <span id="mobile-pick-val"
+                                style="color:var(--secondary-neon); font-weight:bold; font-size:1.5rem;">1</span>
+                        </label>
+                        <input type="range" id="mobile-pick-range" min="1" max="10" value="1"
+                            style="width:100%; height:8px; border-radius:4px;">
+                    </div>
+                </div>
+
+                <button id="mobile-save-btn" class="magic-btn"
+                    style="width:100%; padding:15px; font-size:1.3rem; margin-bottom:10px; display:flex; justify-content:center; align-items:center; gap:10px; box-shadow:0 4px 15px rgba(0,242,96,0.3);">
+                    💾 保存名单 (<span id="mobile-total-count">0</span>人)
+                </button>
+            </div>
+        </div>
 
         <aside class="sidebar glass-panel" id="settings-sidebar">
             <h2 id="sidebar-title">🎓 点名魔法师</h2>

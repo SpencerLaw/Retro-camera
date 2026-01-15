@@ -314,53 +314,84 @@ function bindAllEvents() {
         };
     }
 
-    // Mobile sidebar toggle functionality
-    const mobileSettingsBtn = get('mobile-settings-btn');
-    const sidebar = get('settings-sidebar');
-    const sidebarOverlay = get('sidebar-overlay');
+    // Mobile Settings Modal Logic
+    const mobileBtn = get('mobile-settings-btn');
+    const mobileModal = get('mobile-settings-modal');
+    const mobileBackdrop = get('mobile-modal-backdrop');
+    const closeMobileModal = get('close-mobile-modal');
+    const mobileSaveBtn = get('mobile-save-btn');
+    const mobileInput = get('mobile-student-input');
+    const mobilePickRange = get('mobile-pick-range');
+    const mobilePickVal = get('mobile-pick-val');
+    const mobileTotalCount = get('mobile-total-count');
 
-    const openMobileSidebar = () => {
-        if (sidebar) sidebar.classList.add('mobile-open');
-        if (sidebarOverlay) {
-            sidebarOverlay.style.display = 'block';
-            setTimeout(() => sidebarOverlay.classList.add('active'), 10);
+    const openModal = () => {
+        if (!mobileModal) return;
+
+        // Sync Data FROM State TO Modal
+        if (mobileInput) {
+            mobileInput.value = STATE.students.join('\n');
+            if (mobileTotalCount) mobileTotalCount.textContent = STATE.students.length;
         }
+
+        if (mobilePickRange) {
+            mobilePickRange.value = STATE.pickCount;
+            if (mobilePickVal) mobilePickVal.textContent = STATE.pickCount;
+        }
+
+        mobileModal.classList.remove('hidden');
     };
 
-    const closeMobileSidebar = () => {
-        if (sidebar) sidebar.classList.remove('mobile-open');
-        if (sidebarOverlay) {
-            sidebarOverlay.classList.remove('active');
-            setTimeout(() => sidebarOverlay.style.display = 'none', 300);
-        }
+    const closeModal = () => {
+        if (mobileModal) mobileModal.classList.add('hidden');
     };
 
-    if (mobileSettingsBtn) {
-        mobileSettingsBtn.onclick = openMobileSidebar;
+    if (mobileBtn) mobileBtn.onclick = openModal;
+    if (closeMobileModal) closeMobileModal.onclick = closeModal;
+    if (mobileBackdrop) mobileBackdrop.onclick = closeModal;
+
+    // Real-time updates
+    if (mobileInput) {
+        mobileInput.oninput = () => {
+            const lines = mobileInput.value.split('\n').filter(l => l.trim());
+            if (mobileTotalCount) mobileTotalCount.textContent = lines.length;
+        };
     }
 
-    if (sidebarOverlay) {
-        sidebarOverlay.onclick = closeMobileSidebar;
+    if (mobilePickRange) {
+        mobilePickRange.oninput = (e) => {
+            if (mobilePickVal) mobilePickVal.textContent = e.target.value;
+        };
     }
 
-    // Close sidebar when clicking the X (handled by CSS ::before pseudo-element)
-    if (sidebar) {
-        sidebar.addEventListener('click', (e) => {
-            const rect = sidebar.getBoundingClientRect();
-            const closeButtonArea = {
-                left: rect.right - 50,
-                right: rect.right - 10,
-                top: rect.top + 10,
-                bottom: rect.top + 50
-            };
+    // Save Logic
+    if (mobileSaveBtn) {
+        mobileSaveBtn.onclick = () => {
+            if (mobileInput) {
+                const lines = mobileInput.value.split('\n');
+                let finalNames = [];
+                lines.forEach(l => {
+                    const n = l.trim();
+                    if (n) finalNames.push(n);
+                });
 
-            if (e.clientX >= closeButtonArea.left &&
-                e.clientX <= closeButtonArea.right &&
-                e.clientY >= closeButtonArea.top &&
-                e.clientY <= closeButtonArea.bottom) {
-                closeMobileSidebar();
+                STATE.students = finalNames;
+                localStorage.setItem('magic_rc_students', JSON.stringify(STATE.students));
+
+                // Update PC Pick Count if changed here
+                if (mobilePickRange) {
+                    STATE.pickCount = parseInt(mobilePickRange.value);
+                    const pcRange = get('pick-range');
+                    const pcVal = get('pick-val');
+                    if (pcRange) pcRange.value = STATE.pickCount;
+                    if (pcVal) pcVal.textContent = STATE.pickCount;
+                }
+
+                renderStudentPreview();
+                closeModal();
+                alert(t('saveSuccess', { n: finalNames.length }));
             }
-        });
+        };
     }
 }
 

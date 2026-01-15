@@ -526,62 +526,41 @@ textarea#student-input {
         display: flex !important;
     }
 
+    /* COMPLETE HIDE SIDEBAR ON MOBILE */
+    #settings-sidebar {
+        display: none !important;
+    }
+
     /* App screen layout changes */
     #app-screen {
         flex-direction: column;
         padding: 10px;
     }
 
-    /* Sidebar becomes a slide-in drawer */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        /* Hidden off-screen */
-        width: 85%;
-        max-width: 350px;
-        height: 100vh;
-        margin: 0;
-        padding: 20px;
-        z-index: 95;
-        transition: left 0.3s ease;
-        overflow-y: auto;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
-    }
-
-    .sidebar.mobile-open {
-        left: 0;
-        /* Slide in */
-    }
-
-    /* Close button for mobile sidebar */
-    .sidebar::before {
-        content: '✕';
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        font-size: 1.5rem;
-        cursor: pointer;
-        z-index: 100;
-        transition: all 0.2s;
-    }
-
-    .sidebar::before:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: rotate(90deg);
-    }
-
     /* Stage takes full width */
     .stage {
         width: 100%;
         padding: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Fix Result Overlay on Mobile */
+    #result-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 10000 !important;
+        background: rgba(0, 0, 0, 0.95) !important;
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #result-overlay.hidden {
+        display: none !important;
     }
 
     /* Reduce magic circle size */
@@ -602,6 +581,22 @@ textarea#student-input {
         min-height: 48px;
         /* Touch-friendly */
     }
+
+
+    /* Animations for Mobile Modal */
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+
 
     /* Improve textarea for mobile */
     textarea#student-input {

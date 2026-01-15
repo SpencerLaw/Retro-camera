@@ -112,7 +112,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
 
 
     const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-        <div className={`bg-white/98 dark:bg-black/90 border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] ${className}`}>
+        <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-2xl ${className}`}>
             {children}
         </div>
     );
@@ -159,8 +159,15 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
             ? 'bg-red-600 text-white'
-            : (isDark ? 'bg-black text-white' : 'bg-gradient-to-br from-[#667eea] to-[#764ba2] text-black')
+            : (isDark ? 'bg-[#000] text-white' : 'bg-[#E5E5EA] text-black')
             }`}>
+            {/* Background Ambience */}
+            {!currentMsg?.isEmergency && (
+                <div className="absolute inset-0 z-0 opacity-20 transition-all duration-1000">
+                    <div className={`absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-blue-900/40' : 'bg-blue-100'}`}></div>
+                    <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-pink-100'}`}></div>
+                </div>
+            )}
             {/* HUD Header */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-20">
                 <div className="flex items-center gap-6">

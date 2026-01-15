@@ -82,8 +82,21 @@
 
                 <!-- Sensitivity Slider -->
                 <div class="control-group">
-                    <label class="control-label">灵敏度</label>
+                    <label class="control-label">
+                        灵敏度
+                        <span id="help-trigger" class="help-icon" title="点击查看校准建议">❓</span>
+                    </label>
                     <input type="range" id="sensitivity-slider" min="1" max="100" value="50">
+
+                    <!-- Tooltip Content -->
+                    <div id="help-tooltip" class="help-tooltip hidden">
+                        <strong>📏 校准建议：</strong>
+                        <ul>
+                            <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请<strong>调低</strong>灵敏度。</li>
+                            <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请<strong>调高</strong>灵敏度。</li>
+                        </ul>
+                        <p class="tap-close">点击此处关闭</p>
+                    </div>
                 </div>
 
                 <!-- Reset Button -->

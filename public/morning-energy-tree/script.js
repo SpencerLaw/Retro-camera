@@ -506,5 +506,22 @@ $('reset-btn').onclick = () => {
 };
 $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };
 
+// Help Tooltip Toggle
+const helpTrigger = $('help-trigger');
+const helpTooltip = $('help-tooltip');
+
+helpTrigger.onclick = (e) => {
+    e.stopPropagation();
+    helpTooltip.classList.toggle('hidden');
+};
+
+helpTooltip.onclick = () => {
+    helpTooltip.classList.add('hidden');
+};
+
+document.addEventListener('click', () => {
+    helpTooltip.classList.add('hidden');
+});
+
 // Init
 initGatekeeper();

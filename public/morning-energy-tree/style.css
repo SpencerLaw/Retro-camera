@@ -312,6 +312,79 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    position: relative;
+    /* For tooltip positioning */
+}
+
+.help-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: background 0.3s;
+}
+
+.help-icon:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.help-tooltip {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    left: 0;
+    width: 250px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: white;
+    z-index: 10001;
+    pointer-events: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: fadeInSlide 0.3s ease-out;
+}
+
+.help-tooltip strong {
+    color: #f1c40f;
+}
+
+.help-tooltip ul {
+    margin: 10px 0;
+    padding-left: 18px;
+}
+
+.help-tooltip li {
+    margin-bottom: 8px;
+}
+
+.tap-close {
+    text-align: center;
+    font-size: 0.7rem;
+    opacity: 0.5;
+    margin-top: 5px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .control-label {

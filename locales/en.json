@@ -118,5 +118,58 @@
       "noMicFound": "\n🔌 No microphone device detected. Please check connection.",
       "unknownError": "\n❓ "
     }
+  },
+  "broadcast": {
+    "appTitle": "Broadcast Assistant",
+    "appleEco": "Apple Eco Ecosystem",
+    "modeSelection": "Mode Selection",
+    "teacherMode": "Teacher Mode",
+    "teacherSubtitle": "Control Room",
+    "teacherDesc": "Launch professional broadcasts with real-time feedback and state monitoring.",
+    "classroomMode": "Classroom Mode",
+    "classroomSubtitle": "Live Station",
+    "classroomDesc": "Immersive display with zero-latency audio sync and fullscreen experience.",
+    "licenseTitle": "Active Product",
+    "licenseSubtitle": "Enter your license code to release the magic.",
+    "licensePlaceholder": "XXXX-XXXX-XXXX-XXXX",
+    "verify": "Continue",
+    "verifying": "Verifying...",
+    "returnDashboard": "Return to Dashboard",
+    "logoutConfirm": "Sign out from this license?",
+    "systemInfrastructure": "System Infrastructure",
+    "enterpriseSecurity": "Enterprise Security",
+    "enterpriseSecurityDesc": "Multi-tenant isolation powered by license key hashing and end-to-end channel segregation.",
+    "globalProximity": "Global Proximity",
+    "globalProximityDesc": "Seamlessly operating through Vercel Global Edge Network with zero-config accessibility in China.",
+    "audioSynthesis": "Audio Synthesis",
+    "audioSynthesisDesc": "Smart text-to-speech engine with emergency bypass and repetitive broadcast logic.",
+    "sender": {
+      "currentChannel": "Current Channel",
+      "broadcastPlaceholder": "What do you want to broadcast today?",
+      "emergencyMode": "Emergency Mode",
+      "launch": "Launch",
+      "broadcasting": "Broadcasting...",
+      "broadcastDelivered": "Broadcast Delivered",
+      "missingField": "Missing channel or content",
+      "failedToSend": "Failed to Send",
+      "timeline": "Timeline",
+      "last30Sessions": "Last 30 Sessions",
+      "wipeLogs": "Wipe Logs",
+      "clearHistoryConfirm": "Clear all local broadcast history?",
+      "silentAirwaves": "Your airwaves are currently silent."
+    },
+    "receiver": {
+      "joinChannel": "Join Channel",
+      "joinDesc": "Enter the persistent channel ID assigned by your instructor to begin syncing.",
+      "channelPlaceholder": "E.G. 8859",
+      "initializeLive": "Initialize Live",
+      "missingChannel": "Missing Channel Code",
+      "online": "Online",
+      "signalLost": "Signal Lost",
+      "criticalBroadcast": "CRITICAL BROADCAST",
+      "downlinkSync": "Downlink Synchronizing",
+      "standbySource": "Standby for broadcast source",
+      "realtimeDecryption": "Real-time Decryption Active // Buffer Optimized"
+    }
   }
 }

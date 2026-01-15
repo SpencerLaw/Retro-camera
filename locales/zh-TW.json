@@ -46,6 +46,11 @@
       "downloadFileName": "分組結果_{time}.txt",
       "membersCount": "({count}人):"
     },
+    "broadcast": {
+      "title": "班級廣播",
+      "subtitle": "極輕量 • 即發即焚",
+      "description": "老師隨刻發送通知，教室內自動朗讀顯示，支持緊急模式與隔離"
+    },
     "backHome": "返回首頁",
     "contactMerchant": "聯繫商家",
     "restricted": "地區限制 🔒",
@@ -110,6 +115,59 @@
       "permissionDenied": "\n⛔ 您剛才點擊了\"禁止\"麥克風。\n\n✅ 解決方法：\n1. 點擊瀏覽器地址欄左側的\"鎖\"或\"設置\"圖標。\n2. 找到\"麥克风\"並點擊\"重置\"或\"允許\"。\n3. 刷新頁面或點擊下方按鈕重試。",
       "noMicFound": "\n🔌 未檢測到麥克風設備，請檢查連接。",
       "unknownError": "\n❓ "
+    }
+  },
+  "broadcast": {
+    "appTitle": "廣播小助手",
+    "appleEco": "Apple 級教學生態",
+    "modeSelection": "模式選擇",
+    "teacherMode": "老師模組",
+    "teacherSubtitle": "控制中樞",
+    "teacherDesc": "實時發布專業播報，支持遠程反饋與狀態監測。",
+    "classroomMode": "教室模組",
+    "classroomSubtitle": "實時接收站",
+    "classroomDesc": "零延遲音頻同步，沈浸式全屏播報顯示。",
+    "licenseTitle": "激活產品",
+    "licenseSubtitle": "請輸入您的授權碼以開啟魔法",
+    "licensePlaceholder": "請輸入授權碼...",
+    "verify": "繼續",
+    "verifying": "正在驗證...",
+    "returnDashboard": "返回儀表盤",
+    "logoutConfirm": "確定要退出當前授權碼嗎？",
+    "systemInfrastructure": "系統基礎設施",
+    "enterpriseSecurity": "企業級安全",
+    "enterpriseSecurityDesc": "基於授權碼哈希的多租戶隔離設計，確保端到端數據安全。",
+    "globalProximity": "全球加速",
+    "globalProximityDesc": "基於 Vercel Global Edge 網絡，在中國地區可實現零配置極速訪問。",
+    "audioSynthesis": "音頻合成",
+    "audioSynthesisDesc": "智能語音合成引擎，支持緊急插播與自動化重復播報邏輯。",
+    "sender": {
+      "currentChannel": "當前通道",
+      "broadcastPlaceholder": "今天要播報什麼內容？",
+      "emergencyMode": "緊急模式",
+      "launch": "發射",
+      "broadcasting": "播報中...",
+      "broadcastDelivered": "播報已送達",
+      "missingField": "請輸入內容或頻道號",
+      "failedToSend": "發送失敗",
+      "timeline": "播報時間軸",
+      "last30Sessions": "最近 30 條記錄",
+      "wipeLogs": "清除日誌",
+      "clearHistoryConfirm": "確定要清空本地播報記錄嗎？",
+      "silentAirwaves": "當前電波處於靜默狀態。"
+    },
+    "receiver": {
+      "joinChannel": "進入通道",
+      "joinDesc": "輸入老師分配的固定通道 ID 以開始同步。",
+      "channelPlaceholder": "例如: 8859",
+      "initializeLive": "初始化直播",
+      "missingChannel": "請輸入通道號",
+      "online": "在線",
+      "signalLost": "信號丟失",
+      "criticalBroadcast": "緊急播報",
+      "downlinkSync": "下行同步中",
+      "standbySource": "等待播報源接入...",
+      "realtimeDecryption": "實時解密激活 // 緩存優化"
     }
   }
 }

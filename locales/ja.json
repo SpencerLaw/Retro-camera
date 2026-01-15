@@ -46,6 +46,11 @@
       "downloadFileName": "グループ分け結果_{time}.txt",
       "membersCount": "({count}名):"
     },
+    "broadcast": {
+      "title": "クラス内放送",
+      "subtitle": "超軽量 • 即時同期",
+      "description": "先生がいつでも通知を送信でき、教室内で自動的に読み上げ・表示されます。緊急モードをサポート。"
+    },
     "backHome": "ホームに戻る",
     "contactMerchant": "お問い合わせ",
     "restricted": "地域制限 🔒",
@@ -110,6 +115,59 @@
       "permissionDenied": "\n⛔ マイクを\"拒否\"しました。\n\n✅ 解決方法：\n1. ブラウザのアドレスバーの左側にある\"ロック\"または\"設定\"アイコンをクリックします。\n2. \"マイク\"を見つけて\"リセット\"または\"許可\"をクリックします。\n3. ページを更新するか、下のボタンをクリックして再試行します。",
       "noMicFound": "\n🔌 マイクデバイスが検出されませんでした。接続を確認してください。",
       "unknownError": "\n❓ "
+    }
+  },
+  "broadcast": {
+    "appTitle": "放送アシスタント",
+    "appleEco": "Apple 級教育エコシステム",
+    "modeSelection": "モード選択",
+    "teacherMode": "先生モード",
+    "teacherSubtitle": "コントロールルーム",
+    "teacherDesc": "リアルタイムでプロフェッショナルな放送を行い、リモートフィードバックと状態監視をサポートします。",
+    "classroomMode": "教室モード",
+    "classroomSubtitle": "ライブステーション",
+    "classroomDesc": "遅延ゼロのオーディオ同期、没入型フルスクリーン放送表示。",
+    "licenseTitle": "製品のアクティベーション",
+    "licenseSubtitle": "魔法を解放するためにライセンスコードを入力してください",
+    "licensePlaceholder": "ライセンスコードを入力してください...",
+    "verify": "続ける",
+    "verifying": "検証中...",
+    "returnDashboard": "ダッシュボードに戻る",
+    "logoutConfirm": "このライセンスからサインアウトしますか？",
+    "systemInfrastructure": "システムインフラストラクチャ",
+    "enterpriseSecurity": "企業級セキュリティ",
+    "enterpriseSecurityDesc": "ライセンスキーのハッシュ化によるマルチテナント隔離設計で、エンドツーエンドのデータセキュリティを確保します。",
+    "globalProximity": "グローバル近接性",
+    "globalProximityDesc": "Vercel Global Edge ネットワークにより、中国地域でも設定不要で高速アクセスが可能です。",
+    "audioSynthesis": "音声合成",
+    "audioSynthesisDesc": "インテリジェントな音声合成エンジン。緊急割り込みと自動リピート放送ロジックをサポート。",
+    "sender": {
+      "currentChannel": "現在のチャンネル",
+      "broadcastPlaceholder": "今日は何を放送しますか？",
+      "emergencyMode": "緊急モード",
+      "launch": "発射",
+      "broadcasting": "放送中...",
+      "broadcastDelivered": "放送が配信されました",
+      "missingField": "内容またはチャンネル番号を入力してください",
+      "failedToSend": "送信に失敗しました",
+      "timeline": "タイムライン",
+      "last30Sessions": "最近の30セッション",
+      "wipeLogs": "ログを消去",
+      "clearHistoryConfirm": "ローカルの放送履歴をすべて消去しますか？",
+      "silentAirwaves": "現在、電波は静止しています。"
+    },
+    "receiver": {
+      "joinChannel": "チャンネルに入る",
+      "joinDesc": "同期を開始するために、先生から割り当てられた固定チャンネル ID を入力してください。",
+      "channelPlaceholder": "例: 8859",
+      "initializeLive": "ライブを初期化",
+      "missingChannel": "チャンネル番号を入力してください",
+      "online": "オンライン",
+      "signalLost": "信号を失いました",
+      "criticalBroadcast": "緊急放送",
+      "downlinkSync": "下り同期中",
+      "standbySource": "放送ソースの待機中...",
+      "realtimeDecryption": "リアルタイム復号化がアクティブ // バッファを最適化"
     }
   }
 }

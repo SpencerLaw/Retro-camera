@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, Send, Tv, Info, Key, CheckCircle2, AlertCircle,
+    ArrowLeft, Send, Tv, Key, CheckCircle2, AlertCircle,
     Loader2, LogOut, Sun, Moon, LayoutGrid, Radio
 } from 'lucide-react';
 import Sender from './Sender';
 import Receiver from './Receiver';
 import { isBCVerified, verifyLicense, clearBCLicense, getBCLicense } from './utils/licenseManager';
+import { useTranslations } from '../hooks/useTranslations';
 
 const BroadcastApp: React.FC = () => {
     const navigate = useNavigate();
+    const t = useTranslations();
     const [mode, setMode] = useState<'selection' | 'sender' | 'receiver' | 'license'>('selection');
     const [theme, setTheme] = useState<'light' | 'dark'>(
         localStorage.getItem('bc_theme') as 'light' | 'dark' ||
@@ -29,33 +31,34 @@ const BroadcastApp: React.FC = () => {
         localStorage.setItem('bc_theme', theme);
     }, [theme]);
 
-    useEffect(() => {
-        if (!isBCVerified()) {
-            setMode('license');
-        }
-    }, []);
-
     const handleVerify = async () => {
         if (!licenseInput.trim()) return;
         setVerifying(true);
         setError('');
         const result = await verifyLicense(licenseInput);
         if (result.success) {
-            setMode('selection');
+            setMode('sender');
         } else {
-            setError(result.message || 'Verification Failed');
+            setError(result.message || t('broadcast.license.invalidCode'));
         }
         setVerifying(false);
     };
 
     const handleLogout = () => {
-        if (window.confirm('Sign out from this license?')) {
+        if (window.confirm(t('broadcast.logoutConfirm'))) {
             clearBCLicense();
+            setMode('selection');
+        }
+    };
+
+    const handleTeacherMode = () => {
+        if (isBCVerified()) {
+            setMode('sender');
+        } else {
             setMode('license');
         }
     };
 
-    // Apple 风格的高级毛玻璃背景
     const GlassContainer = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
         <div className={`backdrop-blur-2xl bg-white/70 dark:bg-black/60 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] ${className}`}>
             {children}
@@ -71,13 +74,16 @@ const BroadcastApp: React.FC = () => {
                 </div>
 
                 <GlassContainer className="max-w-md w-full p-10 rounded-[2.5rem] relative">
+                    <button onClick={() => setMode('selection')} className="absolute top-6 left-6 text-gray-400 hover:text-gray-600 transition-colors">
+                        <ArrowLeft size={20} />
+                    </button>
                     <div className="flex flex-col items-center text-center space-y-8">
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
                             <Key size={36} />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-3xl font-extrabold tracking-tight dark:text-white">Active Product</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Enter your license code to release the magic.</p>
+                            <h2 className="text-3xl font-extrabold tracking-tight dark:text-white">{t('broadcast.licenseTitle')}</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('broadcast.licenseSubtitle')}</p>
                         </div>
 
                         <div className="w-full space-y-4">
@@ -85,7 +91,7 @@ const BroadcastApp: React.FC = () => {
                                 type="text"
                                 value={licenseInput}
                                 onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
-                                placeholder="XXXX-XXXX-XXXX-XXXX"
+                                placeholder={t('broadcast.licensePlaceholder')}
                                 className="w-full h-14 bg-gray-100 dark:bg-white/5 border-none rounded-2xl px-6 text-center font-mono text-lg tracking-widest focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all"
                             />
                             {error && <p className="text-red-500 text-xs font-medium flex items-center justify-center gap-1"><AlertCircle size={14} /> {error}</p>}
@@ -97,14 +103,14 @@ const BroadcastApp: React.FC = () => {
                             className="w-full h-14 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                         >
                             {verifying ? <Loader2 size={24} className="animate-spin" /> : <CheckCircle2 size={22} className="group-hover:scale-110 transition-transform" />}
-                            {verifying ? 'Verifying...' : 'Continue'}
+                            {verifying ? t('broadcast.verifying') : t('broadcast.verify')}
                         </button>
 
                         <button
                             onClick={() => navigate('/')}
                             className="text-sm font-medium text-gray-400 hover:text-blue-500 transition-colors"
                         >
-                            Return to Dashboard
+                            {t('broadcast.returnDashboard')}
                         </button>
                     </div>
                 </GlassContainer>
@@ -130,9 +136,9 @@ const BroadcastApp: React.FC = () => {
                     </button>
 
                     <div className="flex flex-col items-center">
-                        <span className="text-[10px] uppercase tracking-[0.3em] font-black opacity-40 mb-1">Apple Eco Ecosystem</span>
+                        <span className="text-[10px] uppercase tracking-[0.3em] font-black opacity-40 mb-1">{t('broadcast.appleEco')}</span>
                         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tighter flex items-center gap-2">
-                            Broadcast <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">Assistant</span>
+                            {t('home.broadcast.title').split(' ')[0]} <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">{t('home.broadcast.title').split(' ').slice(1).join(' ') || 'Assistant'}</span>
                         </h1>
                     </div>
 
@@ -143,12 +149,14 @@ const BroadcastApp: React.FC = () => {
                         >
                             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
-                        <button
-                            onClick={handleLogout}
-                            className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-all"
-                        >
-                            <LogOut size={20} />
-                        </button>
+                        {isBCVerified() && (
+                            <button
+                                onClick={handleLogout}
+                                className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-all"
+                            >
+                                <LogOut size={20} />
+                            </button>
+                        )}
                     </div>
                 </header>
 
@@ -159,24 +167,26 @@ const BroadcastApp: React.FC = () => {
                             {[
                                 {
                                     m: 'sender' as const,
-                                    title: 'Teacher Mode',
-                                    sub: 'Control Room',
-                                    desc: 'Launch professional broadcasts with real-time feedback.',
+                                    title: t('broadcast.teacherMode'),
+                                    sub: t('broadcast.teacherSubtitle'),
+                                    desc: t('broadcast.teacherDesc'),
                                     icon: <Radio size={56} />,
-                                    color: 'from-blue-500 to-indigo-600'
+                                    color: 'from-blue-500 to-indigo-600',
+                                    handler: handleTeacherMode
                                 },
                                 {
                                     m: 'receiver' as const,
-                                    title: 'Classroom Mode',
-                                    sub: 'Live Station',
-                                    desc: 'Immersive display with zero-latency audio sync.',
+                                    title: t('broadcast.classroomMode'),
+                                    sub: t('broadcast.classroomSubtitle'),
+                                    desc: t('broadcast.classroomDesc'),
                                     icon: <Tv size={56} />,
-                                    color: 'from-purple-500 to-pink-600'
+                                    color: 'from-purple-500 to-pink-600',
+                                    handler: () => setMode('receiver')
                                 }
                             ].map((item) => (
                                 <button
                                     key={item.m}
-                                    onClick={() => setMode(item.m)}
+                                    onClick={item.handler}
                                     className="group relative h-[380px] p-12 rounded-[3.5rem] overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col text-left border border-white/10"
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-[0.03] group-hover:opacity-10 dark:opacity-[0.08] dark:group-hover:opacity-20 transition-opacity`}></div>
@@ -198,27 +208,27 @@ const BroadcastApp: React.FC = () => {
                         </div>
                     )}
 
-                    {mode === 'sender' && <Sender license={getBCLicense() || ''} isDark={theme === 'dark'} />}
-                    {mode === 'receiver' && <Receiver license={getBCLicense() || ''} isDark={theme === 'dark'} />}
+                    {mode === 'sender' && <Sender license={getBCLicense() || 'DEMO-ONLY'} isDark={theme === 'dark'} />}
+                    {mode === 'receiver' && <Receiver isDark={theme === 'dark'} />}
                 </main>
 
                 {mode === 'selection' && (
                     <footer className="mt-24 text-center space-y-8 animate-in fade-in duration-1000 delay-300 px-4">
                         <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-gray-200 dark:border-white/10 text-xs font-bold text-gray-500">
-                            <LayoutGrid size={14} /> System Infrastructure
+                            <LayoutGrid size={14} /> {t('broadcast.systemInfrastructure')}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left opacity-60 hover:opacity-100 transition-opacity px-10">
                             <div className="space-y-3">
-                                <h4 className="font-bold text-sm tracking-tight">Enterprise Security</h4>
-                                <p className="text-[13px] leading-relaxed">Multi-tenant isolation powered by license key hashing and end-to-end channel segregation.</p>
+                                <h4 className="font-bold text-sm tracking-tight">{t('broadcast.enterpriseSecurity')}</h4>
+                                <p className="text-[13px] leading-relaxed">{t('broadcast.enterpriseSecurityDesc')}</p>
                             </div>
                             <div className="space-y-3 border-x border-gray-100 dark:border-white/5 md:px-10">
-                                <h4 className="font-bold text-sm tracking-tight">Global Proximity</h4>
-                                <p className="text-[13px] leading-relaxed">Seamlessly operating through Vercel Global Edge Network with zero-config accessibility in China.</p>
+                                <h4 className="font-bold text-sm tracking-tight">{t('broadcast.globalProximity')}</h4>
+                                <p className="text-[13px] leading-relaxed">{t('broadcast.globalProximityDesc')}</p>
                             </div>
                             <div className="space-y-3 md:pl-10">
-                                <h4 className="font-bold text-sm tracking-tight">Audio Synthesis</h4>
-                                <p className="text-[13px] leading-relaxed">Smart text-to-speech engine with emergency bypass and repetitive broadcast logic.</p>
+                                <h4 className="font-bold text-sm tracking-tight">{t('broadcast.audioSynthesis')}</h4>
+                                <p className="text-[13px] leading-relaxed">{t('broadcast.audioSynthesisDesc')}</p>
                             </div>
                         </div>
                     </footer>

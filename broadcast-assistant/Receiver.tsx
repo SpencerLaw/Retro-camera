@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, Loader2, AlertCircle, Tv, Signal, Wifi, WifiOff, X } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info } from 'lucide-react';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface Message {
     id: string;
@@ -8,8 +9,9 @@ interface Message {
     timestamp: string;
 }
 
-const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
-    const [channelCode, setChannelCode] = useState(localStorage.getItem('br_last_channel_rx') || '');
+const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
+    const t = useTranslations();
+    const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
     const [isJoined, setIsJoined] = useState(false);
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
     const [isListening, setIsListening] = useState(false);
@@ -31,10 +33,6 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
         };
     }, []);
 
-    useEffect(() => {
-        if (channelCode) localStorage.setItem('br_last_channel_rx', channelCode);
-    }, [channelCode]);
-
     const speak = useCallback((text: string, isEmergency: boolean) => {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
@@ -54,10 +52,15 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
     }, []);
 
     const fetchMessage = useCallback(async () => {
-        if (!channelCode || !license) return;
+        if (!fullRoomId.includes('-')) return;
+
+        const [licensePart, channelPart] = fullRoomId.split('-').map(s => s.trim().toUpperCase());
+        if (!licensePart || !channelPart) return;
 
         try {
-            const resp = await fetch(`/api/broadcast/fetch?code=${channelCode.toUpperCase()}&license=${license}`);
+            // For receivers we use truncated license prefix (first 8 chars) or full license
+            const prefix = licensePart.substring(0, 8);
+            const resp = await fetch(`/api/broadcast/fetch?code=${channelPart}&license=${prefix}`);
             const data = await resp.json();
 
             if (data.message) {
@@ -74,7 +77,7 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
         } catch (err: any) {
             console.error('Polling error:', err);
         }
-    }, [channelCode, license, isListening, speak]);
+    }, [fullRoomId, isListening, speak]);
 
     useEffect(() => {
         if (isJoined) {
@@ -95,13 +98,14 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
     };
 
     const handleStart = () => {
-        if (!channelCode.trim()) {
-            setError('Missing Channel Code');
+        if (!fullRoomId.trim() || !fullRoomId.includes('-')) {
+            setError(t('broadcast.receiver.missingChannel'));
             return;
         }
+        localStorage.setItem('br_last_full_room_rx', fullRoomId);
         setIsJoined(true);
         setIsListening(true);
-        // iOS/Safari 唤醒语音引擎的 Hack
+        // Wake up TTS for iOS
         const wakeUp = new SpeechSynthesisUtterance('');
         window.speechSynthesis.speak(wakeUp);
     };
@@ -119,18 +123,18 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
                     <Tv size={48} />
                 </div>
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black tracking-tight dark:text-white">Join Channel</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-6">Enter the persistent channel ID assigned by your instructor to begin syncing.</p>
+                    <h2 className="text-3xl font-black tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-6">{t('broadcast.receiver.joinDesc')}</p>
                 </div>
 
                 <div className="space-y-6">
                     <div className="relative group">
                         <input
                             type="text"
-                            value={channelCode}
-                            onChange={(e) => setChannelCode(e.target.value.toUpperCase())}
-                            placeholder="E.G. 8859"
-                            className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-3xl font-black italic tracking-[0.4em] focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600"
+                            value={fullRoomId}
+                            onChange={(e) => setFullRoomId(e.target.value.toUpperCase())}
+                            placeholder={t('broadcast.receiver.channelPlaceholder')}
+                            className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600"
                         />
                         <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                     </div>
@@ -142,8 +146,12 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
                         className="w-full h-16 rounded-[1.5rem] bg-black dark:bg-white text-white dark:text-black font-extrabold text-xl shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3 group"
                     >
                         <Volume2 size={24} className="group-hover:scale-110 transition-transform" />
-                        Initialize Live
+                        {t('broadcast.receiver.initializeLive')}
                     </button>
+                </div>
+
+                <div className="flex items-center gap-2 justify-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    <Info size={12} /> Format: GBXXXXXX-XXXX
                 </div>
             </GlassCard>
         );
@@ -160,7 +168,7 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
                     <div className="flex items-center gap-3 px-6 py-2 rounded-full GlassContainer border border-white/20">
                         <div className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
-                            CH-{channelCode} // {isOnline ? 'Online' : 'Signal Lost'}
+                            {fullRoomId} // {isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost')}
                         </span>
                     </div>
                     <button
@@ -199,7 +207,7 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
                                     <AlertCircle size={64} className="text-white" />
                                 </div>
                                 <div className="text-3xl md:text-5xl font-black tracking-[0.5em] uppercase text-white drop-shadow-lg">
-                                    CRITICAL BROADCAST
+                                    {t('broadcast.receiver.criticalBroadcast')}
                                 </div>
                             </div>
                         )}
@@ -217,9 +225,9 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
                             </div>
                         </div>
                         <div className="space-y-3">
-                            <p className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic opacity-10">Downlink Synchronizing</p>
+                            <p className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic opacity-10">{t('broadcast.receiver.downlinkSync')}</p>
                             <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.4em] opacity-30">
-                                <Wifi size={14} /> Standby for broadcast source
+                                <Wifi size={14} /> {t('broadcast.receiver.standbySource')}
                             </div>
                         </div>
                     </div>
@@ -232,7 +240,7 @@ const Receiver: React.FC<{ license: string, isDark: boolean }> = ({ license, isD
                     <span className="flex gap-1">
                         {[...Array(4)].map((_, i) => <div key={i} className="w-1 h-3 bg-current opacity-40 rounded-full"></div>)}
                     </span>
-                    Real-time Decryption Active // Buffer Optmized
+                    {t('broadcast.receiver.realtimeDecryption')}
                 </div>
             </div>
         </div>

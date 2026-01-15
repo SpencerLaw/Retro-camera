@@ -54,7 +54,7 @@
     "broadcast": {
       "title": "班级广播",
       "subtitle": "极轻量 • 即发即焚",
-      "description": "老师随时发送通知，教室内自动朗读显示，支持紧急模式和房间隔离"
+      "description": "老师随时发送通知，教室内自动朗读显示，支持紧急模式和隔离"
     },
     "backHome": "返回首页",
     "contactMerchant": "联系商家",
@@ -122,6 +122,59 @@
       "permissionDenied": "\n⛔ 您刚才点击了\"禁止\"麦克风。\n\n✅ 解决方法：\n1. 点击浏览器地址栏左侧的\"锁\"或\"设置\"图标。\n2. 找到\"麦克风\"并点击\"重置\"或\"允许\"。\n3. 刷新页面或点击下方按钮重试。",
       "noMicFound": "\n🔌 未检测到麦克风设备，请检查连接。",
       "unknownError": "\n❓ "
+    }
+  },
+  "broadcast": {
+    "appTitle": "广播小助手",
+    "appleEco": "Apple 级教学生态",
+    "modeSelection": "模式选择",
+    "teacherMode": "老师模块",
+    "teacherSubtitle": "控制中枢",
+    "teacherDesc": "实时发布专业播报，支持远程反馈与状态监测。",
+    "classroomMode": "教室模块",
+    "classroomSubtitle": "实时接收站",
+    "classroomDesc": "零延迟音频同步，沉浸式全屏播报显示。",
+    "licenseTitle": "激活产品",
+    "licenseSubtitle": "请输入您的授权码以开启魔法",
+    "licensePlaceholder": "请输入授权码...",
+    "verify": "继续",
+    "verifying": "正在验证...",
+    "returnDashboard": "返回仪表盘",
+    "logoutConfirm": "确定要退出当前授权码吗？",
+    "systemInfrastructure": "系统基础设施",
+    "enterpriseSecurity": "企业级安全",
+    "enterpriseSecurityDesc": "基于授权码哈希的多租户隔离设计，确保端到端的数据安全。",
+    "globalProximity": "全球加速",
+    "globalProximityDesc": "基于 Vercel Global Edge 网络，在中国地区可实现零配置极速访问。",
+    "audioSynthesis": "音频合成",
+    "audioSynthesisDesc": "智能语音合成引擎，支持紧急插播与自动化重复播报逻辑。",
+    "sender": {
+      "currentChannel": "当前通道",
+      "broadcastPlaceholder": "今天要播报什么内容？",
+      "emergencyMode": "紧急模式",
+      "launch": "发射",
+      "broadcasting": "播报中...",
+      "broadcastDelivered": "播报已送达",
+      "missingField": "请输入内容或频道号",
+      "failedToSend": "发送失败",
+      "timeline": "播报时间线",
+      "last30Sessions": "最近 30 条记录",
+      "wipeLogs": "清除日志",
+      "clearHistoryConfirm": "确定要清空本地播报记录吗？",
+      "silentAirwaves": "当前电波处于静默状态。"
+    },
+    "receiver": {
+      "joinChannel": "进入通道",
+      "joinDesc": "输入老师分配的固定通道 ID 以开始同步。",
+      "channelPlaceholder": "例如: 8859",
+      "initializeLive": "初始化直播",
+      "missingChannel": "请输入通道号",
+      "online": "在线",
+      "signalLost": "信号丢失",
+      "criticalBroadcast": "紧急播报",
+      "downlinkSync": "下行同步中",
+      "standbySource": "等待播报源接入...",
+      "realtimeDecryption": "实时解密激活 // 缓存优化"
     }
   }
 }

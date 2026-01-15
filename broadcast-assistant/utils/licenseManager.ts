@@ -22,22 +22,36 @@ export const clearBCLicense = () => {
     localStorage.removeItem(BC_VERIFIED_KEY);
 };
 
-export const verifyLicense = async (code: string) => {
+// Helper to extract prefix (first 8 chars of a clean GB license)
+export const getLicensePrefix = (license: string): string => {
+    const clean = license.replace(/[-\s]/g, '').toUpperCase();
+    if (clean.startsWith('GB')) {
+        return clean.substring(0, 8);
+    }
+    return '';
+};
+
+export const verifyLicense = async (code: string): Promise<{ success: boolean; message?: string }> => {
+    const cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
+
+    // Only allow GB prefix for Broadcast Assistant
+    if (!cleanCode.startsWith('GB')) {
+        return { success: false, message: 'Invalid Broadcast License (Must start with GB)' };
+    }
+
     try {
         const response = await fetch('/api/verify-license', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                licenseCode: code,
-                deviceId: 'bc-device-' + Math.random().toString(36).substring(2), // 广播端简单处理
-            }),
+            body: JSON.stringify({ code: cleanCode }),
         });
-        const result = await response.json();
-        if (result.success) {
-            saveBCLicense(code);
+        const data = await response.json();
+        if (data.success) {
+            localStorage.setItem(BC_LICENSE_KEY, cleanCode);
+            return { success: true };
         }
-        return result;
-    } catch (e) {
-        return { success: false, message: '网络请求失败' };
+        return { success: false, message: data.message || 'Verification Failed' };
+    } catch (error) {
+        return { success: false, message: 'Network Error' };
     }
 };

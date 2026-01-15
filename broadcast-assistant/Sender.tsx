@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight } from 'lucide-react';
+import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy } from 'lucide-react';
+import { getLicensePrefix } from './utils/licenseManager';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface Message {
     id: string;
@@ -9,6 +11,9 @@ interface Message {
 }
 
 const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
+    const t = useTranslations();
+    const licensePrefix = getLicensePrefix(license);
+
     const [channelCode, setChannelCode] = useState(() => {
         return localStorage.getItem('br_last_channel') || Math.floor(1000 + Math.random() * 9000).toString();
     });
@@ -40,11 +45,11 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
     const handleSend = async () => {
         if (!channelCode.trim() || !inputText.trim()) {
-            setStatus({ type: 'error', msg: 'Missing channel or content' });
+            setStatus({ type: 'error', msg: t('broadcast.sender.missingField') });
             return;
         }
 
-        setStatus({ type: 'loading', msg: 'Broadcasting...' });
+        setStatus({ type: 'loading', msg: t('broadcast.sender.broadcasting') });
 
         try {
             const resp = await fetch('/api/broadcast/send', {
@@ -65,7 +70,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     id: data.messageId,
                     text: inputText.trim(),
                     isEmergency,
-                    timestamp: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+                    timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
                 };
 
                 const newHistory = [newMessage, ...history].slice(0, 30);
@@ -74,22 +79,29 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
                 setInputText('');
                 setIsEmergency(false);
-                setStatus({ type: 'success', msg: 'Broadcast Delivered' });
+                setStatus({ type: 'success', msg: t('broadcast.sender.broadcastDelivered') });
 
                 setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
             } else {
                 throw new Error(data.error || 'Server Error');
             }
         } catch (err: any) {
-            setStatus({ type: 'error', msg: 'Failed to Send' });
+            setStatus({ type: 'error', msg: t('broadcast.sender.failedToSend') });
         }
     };
 
     const clearHistory = () => {
-        if (window.confirm('Clear all local broadcast history?')) {
+        if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
             setHistory([]);
             localStorage.removeItem('br_sender_history');
         }
+    };
+
+    const copyRoomId = () => {
+        const roomId = `${licensePrefix}-${channelCode}`;
+        navigator.clipboard.writeText(roomId);
+        setStatus({ type: 'success', msg: 'Room ID Copied' });
+        setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
     };
 
     const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -101,13 +113,18 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     return (
         <div className="space-y-8 max-w-2xl mx-auto px-4">
             {/* Channel Section */}
-            <GlassCard className="p-8 flex items-center justify-between">
+            <GlassCard className="p-8 flex items-center justify-between group">
                 <div className="space-y-1">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40">
-                        <Radio size={12} className="text-blue-500" /> Current Channel
+                        <Radio size={12} className="text-blue-500" /> {t('broadcast.sender.currentChannel')}
                     </div>
-                    <div className="text-5xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1">
-                        {channelCode}
+                    <div className="flex items-center gap-3">
+                        <div className="text-5xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1">
+                            {licensePrefix}-{channelCode}
+                        </div>
+                        <button onClick={copyRoomId} className="p-2 text-gray-400 hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100">
+                            <Copy size={20} />
+                        </button>
                     </div>
                 </div>
                 <button
@@ -124,7 +141,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <textarea
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder="What do you want to broadcast today?"
+                        placeholder={t('broadcast.sender.broadcastPlaceholder')}
                         rows={4}
                         className="w-full bg-transparent border-none text-2xl font-bold tracking-tight outline-none resize-none placeholder:opacity-20 transition-all min-h-[140px]"
                     />
@@ -139,7 +156,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
                             }`}
                     >
-                        <AlertTriangle size={18} /> Emergency Mode
+                        <AlertTriangle size={18} /> {t('broadcast.sender.emergencyMode')}
                     </button>
 
                     <button
@@ -148,7 +165,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         className="px-10 py-5 bg-black dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-lg hover:opacity-90 shadow-xl active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center gap-3"
                     >
                         {status.type === 'loading' ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
-                        Launch
+                        {t('broadcast.sender.launch')}
                     </button>
                 </div>
 
@@ -170,14 +187,14 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                             <History size={18} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold tracking-tight">Timeline</h3>
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">Last 30 Sessions</p>
+                            <h3 className="text-lg font-bold tracking-tight">{t('broadcast.sender.timeline')}</h3>
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">{t('broadcast.sender.last30Sessions')}</p>
                         </div>
                     </div>
                     <button
                         onClick={clearHistory}
                         className="p-3 text-gray-300 hover:text-red-500 transition-colors"
-                        title="Wipe Logs"
+                        title={t('broadcast.sender.wipeLogs')}
                     >
                         <Trash2 size={20} />
                     </button>
@@ -187,7 +204,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     {history.length === 0 ? (
                         <div className="text-center py-12 opacity-20">
                             <Send size={48} className="mx-auto mb-4" />
-                            <p className="text-sm font-bold tracking-tighter">Your airwaves are currently silent.</p>
+                            <p className="text-sm font-bold tracking-tighter">{t('broadcast.sender.silentAirwaves')}</p>
                         </div>
                     ) : (
                         history.map((msg) => (

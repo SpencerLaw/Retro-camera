@@ -488,12 +488,14 @@
                 <button id="start-btn" class="magic-btn">⚡ 开始点名</button>
             </div>
         </main>
-        <div id="result-overlay" class="hidden">
-            <h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉
-            </h1>
-            <div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div>
-            <button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button>
-        </div>
+    </div>
+
+    <!-- Moved Result Overlay to ensure full screen positioning -->
+    <div id="result-overlay" class="hidden">
+        <h1 style="font-size:3rem; color:var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold)">🎉 天选之子 🎉
+        </h1>
+        <div id="result-cards" style="display:flex; flex-wrap:wrap; justify-content:center"></div>
+        <button id="retry-btn" class="magic-btn" style="margin-top:30px">✨ 再来一次</button>
     </div>
 
     <script src="translations.js"></script>

@@ -160,7 +160,13 @@
       "last30Sessions": "最近 30 条记录",
       "wipeLogs": "清除日志",
       "clearHistoryConfirm": "确定要清空本地播报记录吗？",
-      "silentAirwaves": "当前电波处于静默状态。"
+      "silentAirwaves": "当前电波处于静默状态。",
+      "addClass": "添加班级",
+      "editClass": "编辑班级",
+      "deleteClass": "删除班级",
+      "className": "班级名称",
+      "roomCode": "房间码",
+      "manageClasses": "班级管理"
     },
     "receiver": {
       "joinChannel": "进入通道",

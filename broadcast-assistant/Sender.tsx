@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy } from 'lucide-react';
+import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy, Plus, MoreHorizontal, Check, Edit2 } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -8,6 +8,12 @@ interface Message {
     text: string;
     isEmergency: boolean;
     timestamp: string;
+}
+
+interface Channel {
+    id: string;
+    name: string;
+    code: string;
 }
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -20,14 +26,33 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const t = useTranslations();
     const licensePrefix = getLicensePrefix(license);
 
-    const [channelCode, setChannelCode] = useState(() => {
-        return localStorage.getItem('br_last_channel') || Math.floor(1000 + Math.random() * 9000).toString();
+    const [channels, setChannels] = useState<Channel[]>(() => {
+        const saved = localStorage.getItem('br_channels');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                return [];
+            }
+        }
+        return [{ id: 'default', name: '默认班级', code: Math.floor(1000 + Math.random() * 9000).toString() }];
     });
+
+    const [activeChannelId, setActiveChannelId] = useState(() => {
+        return localStorage.getItem('br_active_channel_id') || 'default';
+    });
+
+    const [editingChannel, setEditingChannel] = useState<string | null>(null);
+    const [editName, setEditName] = useState('');
+    const [editCode, setEditCode] = useState('');
 
     const [inputText, setInputText] = useState('');
     const [isEmergency, setIsEmergency] = useState(false);
     const [history, setHistory] = useState<Message[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'loading' | null; msg: string }>({ type: null, msg: '' });
+
+    const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0];
+    const channelCode = activeChannel?.code || '';
 
     useEffect(() => {
         const savedHistory = localStorage.getItem('br_sender_history');
@@ -41,12 +66,55 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('br_last_channel', channelCode);
-    }, [channelCode]);
+        localStorage.setItem('br_channels', JSON.stringify(channels));
+    }, [channels]);
 
-    const generateRandomChannel = () => {
+    useEffect(() => {
+        localStorage.setItem('br_active_channel_id', activeChannelId);
+    }, [activeChannelId]);
+
+    const addChannel = () => {
+        const newId = Date.now().toString();
+        const newChannel: Channel = {
+            id: newId,
+            name: `${t('broadcast.sender.addClass')} ${channels.length + 1}`,
+            code: Math.floor(1000 + Math.random() * 9000).toString()
+        };
+        setChannels([...channels, newChannel]);
+        setActiveChannelId(newId);
+    };
+
+    const deleteChannel = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (channels.length <= 1) return;
+        if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
+            const nextChannels = channels.filter(c => c.id !== id);
+            setChannels(nextChannels);
+            if (activeChannelId === id) {
+                setActiveChannelId(nextChannels[0].id);
+            }
+        }
+    };
+
+    const startEditing = (channel: Channel, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingChannel(channel.id);
+        setEditName(channel.name);
+        setEditCode(channel.code);
+    };
+
+    const saveEdit = () => {
+        if (!editingChannel) return;
+        setChannels(channels.map(c =>
+            c.id === editingChannel ? { ...c, name: editName, code: editCode.toUpperCase() } : c
+        ));
+        setEditingChannel(null);
+    };
+
+    const generateRandomChannel = (e: React.MouseEvent) => {
+        e.stopPropagation();
         const newCode = Math.floor(1000 + Math.random() * 9000).toString();
-        setChannelCode(newCode);
+        setEditCode(newCode);
     };
 
     const handleSend = async () => {
@@ -103,37 +171,132 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         }
     };
 
-    const copyRoomId = () => {
-        const roomId = channelCode;
-        navigator.clipboard.writeText(roomId);
+    const copyRoomId = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(channelCode);
         setStatus({ type: 'success', msg: 'Room ID Copied' });
         setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
     };
 
     return (
-        <div className="space-y-8 max-w-2xl mx-auto px-4">
-            {/* Channel Section */}
-            <GlassCard className="p-8 flex items-center justify-between group">
-                <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40">
-                        <Radio size={12} className="text-blue-500" /> {t('broadcast.sender.currentChannel')}
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="text-6xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1">
-                            {channelCode}
+        <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20">
+            {/* Channel Management Section */}
+            <div className="space-y-4">
+                <div className="flex items-center justify-between px-2">
+                    <h3 className="text-sm font-black uppercase tracking-[0.2em] opacity-30">{t('broadcast.sender.manageClasses')}</h3>
+                    <button
+                        onClick={addChannel}
+                        className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all active:scale-90"
+                    >
+                        <Plus size={20} />
+                    </button>
+                </div>
+
+                <div className="flex flex-nowrap overflow-x-auto gap-4 py-2 px-1 no-scrollbar scroll-smooth">
+                    {channels.map((channel) => (
+                        <button
+                            key={channel.id}
+                            onClick={() => setActiveChannelId(channel.id)}
+                            className={`flex-none px-6 py-4 rounded-3xl border transition-all duration-300 flex items-center gap-3 relative group ${activeChannelId === channel.id
+                                ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-xl scale-105'
+                                : 'bg-white/50 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-400 hover:bg-white/80 dark:hover:bg-white/10'
+                                }`}
+                        >
+                            <div className="text-left">
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">ROOM {channel.code}</p>
+                                <p className="text-sm font-bold truncate max-w-[120px]">{channel.name}</p>
+                            </div>
+                            <div className={`flex items-center gap-1 ${activeChannelId === channel.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-opacity'}`}>
+                                <div
+                                    onClick={(e) => startEditing(channel, e)}
+                                    className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+                                >
+                                    <Edit2 size={14} />
+                                </div>
+                                {channels.length > 1 && (
+                                    <div
+                                        onClick={(e) => deleteChannel(channel.id, e)}
+                                        className="p-1.5 rounded-lg hover:bg-red-500/20 text-red-500/60 hover:text-red-500 transition-colors"
+                                    >
+                                        <Trash2 size={14} />
+                                    </div>
+                                )}
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Active Channel Details / Editor */}
+            {editingChannel ? (
+                <GlassCard className="p-8 space-y-6 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.className')}</label>
+                            <input
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white"
+                                placeholder="输入班级名称"
+                            />
                         </div>
-                        <button onClick={copyRoomId} className="p-2 text-gray-400 hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100">
-                            <Copy size={20} />
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.roomCode')}</label>
+                            <div className="relative">
+                                <input
+                                    value={editCode}
+                                    onChange={(e) => setEditCode(e.target.value.toUpperCase())}
+                                    className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white uppercase tracking-widest"
+                                    placeholder="4位数字"
+                                    maxLength={8}
+                                />
+                                <button
+                                    onClick={generateRandomChannel}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                                >
+                                    <RefreshCw size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => setEditingChannel(null)}
+                            className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 transition-all"
+                        >
+                            取消
+                        </button>
+                        <button
+                            onClick={saveEdit}
+                            className="flex-1 py-4 rounded-2xl bg-blue-500 text-white font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                        >
+                            保存
                         </button>
                     </div>
-                </div>
-                <button
-                    onClick={generateRandomChannel}
-                    className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-white/10 flex items-center justify-center hover:rotate-180 transition-all duration-700 active:scale-90"
-                >
-                    <RefreshCw size={24} className="text-gray-500" />
-                </button>
-            </GlassCard>
+                </GlassCard>
+            ) : (
+                <GlassCard className="p-8 flex items-center justify-between group relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40">
+                            <Radio size={12} className="text-blue-500" /> {activeChannel?.name}
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="text-6xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1">
+                                {channelCode}
+                            </div>
+                            <button onClick={copyRoomId} className="p-2 text-gray-400 hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100">
+                                <Copy size={20} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                        <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black tracking-widest uppercase">
+                            Active
+                        </div>
+                    </div>
+                </GlassCard>
+            )}
 
             {/* Input Section */}
             <GlassCard className="p-10 space-y-8">

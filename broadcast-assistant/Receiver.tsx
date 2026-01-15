@@ -159,13 +159,13 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
             ? 'bg-red-600 text-white'
-            : (isDark ? 'bg-[#000] text-white' : 'bg-[#E5E5EA] text-black')
+            : (isDark ? 'bg-[#000] text-white' : 'bg-gradient-to-br from-white via-pink-50/20 to-[#fdf2f8] text-black')
             }`}>
             {/* Background Ambience */}
             {!currentMsg?.isEmergency && (
-                <div className="absolute inset-0 z-0 opacity-20 transition-all duration-1000">
-                    <div className={`absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-blue-900/40' : 'bg-blue-100'}`}></div>
-                    <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-pink-100'}`}></div>
+                <div className="absolute inset-0 z-0 opacity-[0.15] transition-all duration-1000">
+                    <div className={`absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-blue-900/40' : 'bg-pink-100'}`}></div>
+                    <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-rose-100'}`}></div>
                 </div>
             )}
             {/* HUD Header */}

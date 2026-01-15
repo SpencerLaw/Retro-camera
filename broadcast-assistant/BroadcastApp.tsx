@@ -119,11 +119,11 @@ const BroadcastApp: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#000] text-white' : 'bg-[#E5E5EA] text-[#1D1D1F]'} font-sans`}>
-            {/* Apple 风格流光背景 */}
+        <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#000] text-white' : 'bg-gradient-to-br from-white via-pink-50/30 to-[#fdf2f8] text-[#1D1D1F]'} font-sans`}>
+            {/* Apple 风格流光背景 - 稍微调整颜色以配合粉色主题 */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                <div className={`absolute top-0 left-1/4 w-[60%] h-[40%] rounded-full blur-[150px] opacity-10 transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-200'}`}></div>
-                <div className={`absolute bottom-0 right-1/4 w-[60%] h-[40%] rounded-full blur-[150px] opacity-10 transition-colors ${theme === 'dark' ? 'bg-purple-600' : 'bg-indigo-200'}`}></div>
+                <div className={`absolute top-0 left-1/4 w-[60%] h-[40%] rounded-full blur-[150px] opacity-[0.08] transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-pink-200'}`}></div>
+                <div className={`absolute bottom-0 right-1/4 w-[60%] h-[40%] rounded-full blur-[150px] opacity-[0.08] transition-colors ${theme === 'dark' ? 'bg-purple-600' : 'bg-rose-200'}`}></div>
             </div>
 
             <div className="relative z-10 max-w-5xl mx-auto px-6 py-10 lg:py-16">

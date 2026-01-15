@@ -157,18 +157,20 @@ function updateState() {
     // Ideal range: 0.1 to 0.8.
     // > 0.9 is noise (penalty).
 
-    if (STATE.volume > 0.05) {
+    const THRESHOLD = 0.2;
+    if (STATE.volume > THRESHOLD) {
         if (STATE.volume > 0.9) {
             // Noise penalty
             STATE.energy -= 0.5;
             shakeScreen();
         } else {
             // Growth
-            STATE.energy += 0.05 * (STATE.volume * 2);
+            const growth = (STATE.volume - THRESHOLD) * 0.5;
+            STATE.energy += growth;
         }
     } else {
         // Decay if silent
-        STATE.energy -= 0.02;
+        STATE.energy -= 0.08;
     }
 
     // Clamp energy

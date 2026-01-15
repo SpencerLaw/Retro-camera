@@ -54,7 +54,7 @@ function applyTranslations() {
     }
     setText('retry-btn', t('retryBtn'));
     setText('win-title', t('winTitle'));
-    
+
     const toggleBtn = document.getElementById('toggle-names-btn');
     if (toggleBtn) {
         const sidebar = document.querySelector('.sidebar');
@@ -85,12 +85,12 @@ const initCosmos = () => {
     const animate = () => {
         ctx.fillStyle = window.isWarpSpeed ? 'rgba(5, 5, 25, 0.4)' : '#0f0c29';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         stars.forEach(s => {
             s.y += window.isWarpSpeed ? 40 : s.speed;
             if (s.y > canvas.height) s.y = 0;
             ctx.beginPath();
-            if(window.isWarpSpeed) {
+            if (window.isWarpSpeed) {
                 ctx.moveTo(s.x, s.y);
                 ctx.lineTo(s.x, s.y + 40);
                 ctx.strokeStyle = '#00f260';
@@ -127,7 +127,7 @@ function finishRollCall() {
     const count = Math.min(STATE.pickCount, STATE.students.length);
     let winners = [];
     let pool = [...STATE.students];
-    for(let i=0; i<count; i++) {
+    for (let i = 0; i < count; i++) {
         const idx = Math.floor(Math.random() * pool.length);
         winners.push(pool.splice(idx, 1)[0]);
     }
@@ -157,12 +157,12 @@ const forceExit = (msg) => {
     document.body.innerHTML = `<div style="background:#000;color:#ff416c;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;font-family:sans-serif;">
         <h1 style="font-size:3.3rem">${t('authExpired')}</h1>
         <p style="font-size:1.65rem; margin:20px 0;">${msg}</p>
-        <div id="countdown-timer" style="font-size:1.32rem; color:#666">${t('returnHome', {n: timeLeft})}</div>
+        <div id="countdown-timer" style="font-size:1.32rem; color:#666">${t('returnHome', { n: timeLeft })}</div>
     </div>`;
     const timer = setInterval(() => {
         timeLeft--;
         const el = document.getElementById('countdown-timer');
-        if (el) el.textContent = t('returnHome', {n: timeLeft});
+        if (el) el.textContent = t('returnHome', { n: timeLeft });
         if (timeLeft <= 0) {
             clearInterval(timer);
             window.location.replace('/');
@@ -235,7 +235,7 @@ function bindAllEvents() {
                     STATE.students = finalNames;
                     localStorage.setItem('magic_rc_students', JSON.stringify(STATE.students));
                     renderStudentPreview();
-                    alert(t('saveSuccess', {n: finalNames.length}));
+                    alert(t('saveSuccess', { n: finalNames.length }));
                 } else { alert(t('listEmpty')); }
             }
         };
@@ -258,13 +258,13 @@ function bindAllEvents() {
             const input = get('license-input');
             const code = input ? input.value.trim() : "";
             if (!code) { alert(t('authError')); return; }
-            
+
             let deviceId = localStorage.getItem('magic_rc_device_id');
             if (!deviceId) {
                 deviceId = 'rc-' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('magic_rc_device_id', deviceId);
             }
-            
+
             verifyBtn.disabled = true;
             try {
                 const res = await fetch('/api/verify-license', {
@@ -290,7 +290,7 @@ function bindAllEvents() {
             } finally { verifyBtn.disabled = false; }
         };
     }
-    
+
     const toggleBtn = get('toggle-names-btn');
     if (toggleBtn) {
         toggleBtn.onclick = () => {
@@ -312,6 +312,55 @@ function bindAllEvents() {
             const display = get('pick-val');
             if (display) display.textContent = STATE.pickCount;
         };
+    }
+
+    // Mobile sidebar toggle functionality
+    const mobileSettingsBtn = get('mobile-settings-btn');
+    const sidebar = get('settings-sidebar');
+    const sidebarOverlay = get('sidebar-overlay');
+
+    const openMobileSidebar = () => {
+        if (sidebar) sidebar.classList.add('mobile-open');
+        if (sidebarOverlay) {
+            sidebarOverlay.style.display = 'block';
+            setTimeout(() => sidebarOverlay.classList.add('active'), 10);
+        }
+    };
+
+    const closeMobileSidebar = () => {
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (sidebarOverlay) {
+            sidebarOverlay.classList.remove('active');
+            setTimeout(() => sidebarOverlay.style.display = 'none', 300);
+        }
+    };
+
+    if (mobileSettingsBtn) {
+        mobileSettingsBtn.onclick = openMobileSidebar;
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.onclick = closeMobileSidebar;
+    }
+
+    // Close sidebar when clicking the X (handled by CSS ::before pseudo-element)
+    if (sidebar) {
+        sidebar.addEventListener('click', (e) => {
+            const rect = sidebar.getBoundingClientRect();
+            const closeButtonArea = {
+                left: rect.right - 50,
+                right: rect.right - 10,
+                top: rect.top + 10,
+                bottom: rect.top + 50
+            };
+
+            if (e.clientX >= closeButtonArea.left &&
+                e.clientX <= closeButtonArea.right &&
+                e.clientY >= closeButtonArea.top &&
+                e.clientY <= closeButtonArea.bottom) {
+                closeMobileSidebar();
+            }
+        });
     }
 }
 
@@ -353,7 +402,7 @@ function updateClock() {
     const date = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
     const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
     const el = document.getElementById('clock-display');
-    if(el) el.textContent = `${date} ${time}`;
+    if (el) el.textContent = `${date} ${time}`;
 }
 
 window.addEventListener('DOMContentLoaded', () => {

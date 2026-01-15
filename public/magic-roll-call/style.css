@@ -35,8 +35,10 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; /* Lowest layer */
-    pointer-events: none !important; /* Never block interaction */
+    z-index: 0;
+    /* Lowest layer */
+    pointer-events: none !important;
+    /* Never block interaction */
 }
 
 /* --- Layer 1: Application Screens --- */
@@ -52,13 +54,15 @@ body {
     align-items: center;
     transition: opacity 0.3s ease;
     opacity: 1;
-    pointer-events: auto; /* Ensure children are interactive */
+    pointer-events: auto;
+    /* Ensure children are interactive */
 }
 
 .screen.hidden {
     opacity: 0;
     pointer-events: none;
-    display: none !important; /* Remove from flow completely */
+    display: none !important;
+    /* Remove from flow completely */
 }
 
 /* --- Layer 2: Glass Panels & Cards --- */
@@ -82,7 +86,8 @@ body {
     width: 400px;
     max-width: 90%;
     position: relative;
-    z-index: 20; /* Above screen base */
+    z-index: 20;
+    /* Above screen base */
 }
 
 /* CRITICAL: Input Styles */
@@ -91,19 +96,20 @@ body {
     padding: 15px;
     margin: 20px 0;
     border-radius: 8px;
-    border: 2px solid rgba(255,255,255,0.5);
-    background: rgba(255,255,255,0.9);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.9);
     font-size: 1.5rem;
     text-align: center;
     color: #333;
-    
+
     /* Interaction Enforcers */
     cursor: text !important;
     pointer-events: auto !important;
     user-select: text !important;
     -webkit-user-select: text !important;
     position: relative;
-    z-index: 100; /* Highest in card */
+    z-index: 100;
+    /* Highest in card */
 }
 
 .auth-card input:focus {
@@ -126,7 +132,7 @@ body {
     box-shadow: 0 0 15px var(--secondary-neon);
     font-size: 1.2rem;
     padding: 10px 30px;
-    
+
     /* Ensure clickable */
     pointer-events: auto;
     z-index: 20;
@@ -146,7 +152,7 @@ body {
     font-size: 2rem;
     letter-spacing: 2px;
     background: linear-gradient(45deg, #ff00cc, #333399);
-    border: 2px solid rgba(255,255,255,0.5);
+    border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .magic-btn.pulsate {
@@ -162,9 +168,18 @@ body {
     font-size: 0.9rem;
     color: white;
 }
-.btn-small.primary { background: var(--secondary-neon); }
-.btn-small.danger { background: #ff416c; }
-.btn-small.secondary { background: rgba(255,255,255,0.2); }
+
+.btn-small.primary {
+    background: var(--secondary-neon);
+}
+
+.btn-small.danger {
+    background: #ff416c;
+}
+
+.btn-small.secondary {
+    background: rgba(255, 255, 255, 0.2);
+}
 
 /* --- App Layout --- */
 #app-screen {
@@ -196,21 +211,21 @@ body {
 /* --- Controls --- */
 .control-group h3 {
     margin-top: 0;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     padding-bottom: 5px;
 }
 
 textarea#student-input {
     width: 100%;
     height: 100px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     color: white;
     border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 10px;
     resize: none;
     font-family: sans-serif;
-    
+
     /* Interaction */
     cursor: text !important;
     pointer-events: auto !important;
@@ -220,7 +235,7 @@ textarea#student-input {
 .student-list-preview {
     flex: 1;
     overflow-y: auto;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     padding: 5px;
     display: flex;
@@ -230,11 +245,11 @@ textarea#student-input {
 }
 
 .mini-tag {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     padding: 2px 8px;
     border-radius: 10px;
     font-size: 0.8rem;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .range-selector {
@@ -287,7 +302,7 @@ textarea#student-input {
 .ring-3 {
     width: 40%;
     height: 40%;
-    border: 2px dashed rgba(255,255,255,0.5);
+    border: 2px dashed rgba(255, 255, 255, 0.5);
     animation: spin 20s linear infinite;
 }
 
@@ -323,13 +338,15 @@ textarea#student-input {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 30; /* Highest priority */
+    z-index: 30;
+    /* Highest priority */
     pointer-events: auto;
 }
 
 .result-title {
     font-size: 4rem;
     background: linear-gradient(to right, #f7971e, #ffd200);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 40px;
@@ -355,35 +372,72 @@ textarea#student-input {
     font-weight: bold;
     color: #fff;
     box-shadow: 0 0 30px rgba(247, 151, 30, 0.6);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     animation: cardEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 /* --- Animations Keyframes --- */
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 204, 0.7); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 0, 204, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 204, 0); }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 0, 204, 0.7);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 20px rgba(255, 0, 204, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 0, 204, 0);
+    }
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 @keyframes popIn {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes cardEntrance {
-    0% { transform: translateY(100px) rotate(-10deg) scale(0.5); opacity: 0; }
-    100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+    0% {
+        transform: translateY(100px) rotate(-10deg) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
 }
 
 /* Fast spin for rolling state */
@@ -398,7 +452,286 @@ textarea#student-input {
 }
 
 /* Scrollbar Style */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   🎯 MOBILE RESPONSIVE DESIGN
+   ======================================== */
+
+/* Mobile Settings Toggle Button - Only visible on mobile */
+.mobile-settings-toggle {
+    display: none;
+    /* Hidden on desktop */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 242, 96, 0.5);
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-settings-toggle:active {
+    transform: scale(0.9);
+}
+
+/* Mobile Sidebar Overlay */
+.sidebar-mobile-overlay {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 90;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-mobile-overlay.active {
+    opacity: 1;
+}
+
+/* Tablet and Mobile Devices (< 1024px) */
+@media (max-width: 1024px) {
+
+    /* Show mobile settings button */
+    .mobile-settings-toggle {
+        display: flex !important;
+    }
+
+    /* App screen layout changes */
+    #app-screen {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    /* Sidebar becomes a slide-in drawer */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        /* Hidden off-screen */
+        width: 85%;
+        max-width: 350px;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+        z-index: 95;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.mobile-open {
+        left: 0;
+        /* Slide in */
+    }
+
+    /* Close button for mobile sidebar */
+    .sidebar::before {
+        content: '✕';
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 100;
+        transition: all 0.2s;
+    }
+
+    .sidebar::before:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+    /* Stage takes full width */
+    .stage {
+        width: 100%;
+        padding: 10px;
+    }
+
+    /* Reduce magic circle size */
+    #magic-circle-container {
+        width: 280px;
+        height: 280px;
+    }
+
+    .core-orb {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Adjust button sizes for touch */
+    .magic-btn {
+        padding: 14px 32px;
+        font-size: 1.1rem;
+        min-height: 48px;
+        /* Touch-friendly */
+    }
+
+    /* Improve textarea for mobile */
+    textarea#student-input {
+        height: 120px;
+        font-size: 16px;
+        /* Prevent zoom on iOS */
+        -webkit-text-size-adjust: 100%;
+    }
+
+    /* Larger touch targets for buttons */
+    .btn-small {
+        padding: 10px 16px;
+        font-size: 1rem;
+        min-height: 44px;
+        min-width: 80px;
+    }
+
+    /* Adjust result cards */
+    .name-card {
+        font-size: 2rem;
+        padding: 15px 30px;
+    }
+
+    /* Clock position adjustment */
+    #clock-display {
+        font-size: 1rem !important;
+        left: 60px !important;
+        top: 25px !important;
+    }
+}
+
+/* Small Mobile Devices (< 600px) */
+@media (max-width: 600px) {
+
+    /* Sidebar full width on small screens */
+    .sidebar {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Further reduce magic circle */
+    #magic-circle-container {
+        width: 220px;
+        height: 220px;
+    }
+
+    .core-orb {
+        width: 60px;
+        height: 60px;
+    }
+
+    #orb-text {
+        font-size: 1.2rem;
+    }
+
+    /* Smaller result cards */
+    .name-card {
+        font-size: 1.5rem;
+        padding: 12px 24px;
+    }
+
+    .result-title {
+        font-size: 2.5rem !important;
+    }
+
+    /* Adjust auth card */
+    .auth-card {
+        width: 95%;
+        padding: 30px 20px;
+    }
+
+    .auth-card input {
+        font-size: 1.2rem;
+        padding: 12px;
+    }
+
+    /* Hide clock on very small screens */
+    #clock-display {
+        display: none !important;
+    }
+
+    /* Adjust global back button */
+    .global-back-btn {
+        font-size: 1.5rem !important;
+        top: 15px !important;
+        left: 15px !important;
+    }
+
+    /* Fullscreen button */
+    .fullscreen-btn {
+        top: 15px !important;
+        right: 15px !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    /* Mobile settings button adjustment */
+    .mobile-settings-toggle {
+        width: 56px;
+        height: 56px;
+        bottom: 16px;
+        right: 16px;
+        font-size: 1.6rem;
+    }
+}
+
+/* Landscape mode on mobile */
+@media (max-width: 900px) and (orientation: landscape) {
+    #magic-circle-container {
+        width: 200px;
+        height: 200px;
+    }
+
+    .stage {
+        padding: 5px;
+    }
+
+    #app-screen {
+        padding: 5px;
+    }
+}
+
+/* Safe area support for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .mobile-settings-toggle {
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        right: calc(20px + env(safe-area-inset-right));
+    }
+
+    .sidebar {
+        padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+}

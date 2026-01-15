@@ -10,7 +10,7 @@ interface Message {
 }
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div className={`backdrop-blur-3xl bg-white/95 dark:bg-black/80 border border-white/60 dark:border-white/20 shadow-2xl ${className}`}>
+    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-black/60 border border-white/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.05)] ${className}`}>
         {children}
     </div>
 );
@@ -166,13 +166,13 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
             ? 'bg-red-600 text-white'
-            : (isDark ? 'bg-[#000] text-white' : 'bg-gradient-to-br from-white via-pink-50/20 to-[#fdf2f8] text-black')
+            : (isDark ? 'bg-[#000] text-white' : 'bg-white text-black')
             }`}>
-            {/* Background Ambience */}
+            {/* Background Ambience - iOS 26 Style (Extremely subtle) */}
             {!currentMsg?.isEmergency && (
-                <div className="absolute inset-0 z-0 opacity-[0.15] transition-all duration-1000">
-                    <div className={`absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-blue-900/40' : 'bg-pink-100'}`}></div>
-                    <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-rose-100'}`}></div>
+                <div className="absolute inset-0 z-0 opacity-[0.05] transition-all duration-1000">
+                    <div className={`absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-blue-900/40' : 'bg-blue-100'}`}></div>
+                    <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-purple-100'}`}></div>
                 </div>
             )}
             {/* HUD Header */}

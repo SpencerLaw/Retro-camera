@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌳 早读能量树 | Morning Energy Tree</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- 1. Security Gatekeeper -->
+    <div id="gatekeeper-screen">
+        <div class="auth-card">
+            <h1>🔒 班级早读系统</h1>
+            <p style="opacity: 0.8; margin-bottom: 20px;">请输入授权码以启动</p>
+            <input type="text" id="license-input" class="auth-input" placeholder="ZD-xxxx-xxxx" autocomplete="off">
+            <button id="verify-btn" class="auth-btn">开启能量树</button>
+            <p id="auth-error" style="color: #ff6b6b; margin-top: 10px; display: none;">无效的授权码 (需以 ZD 开头)</p>
+        </div>
+    </div>
+
+    <!-- 2. Main Application -->
+    <div id="app-container" class="hidden">
+        <!-- Visualization Canvas -->
+        <canvas id="tree-canvas"></canvas>
+
+        <!-- UI Overlay -->
+        <div class="ui-layer">
+
+            <!-- Top: Energy Bar -->
+            <div class="top-bar">
+                <div class="energy-label">🍃 早读能量值</div>
+                <div class="energy-container">
+                    <div id="energy-fill"></div>
+                </div>
+            </div>
+
+            <!-- Toast / Notifications Center -->
+            <div id="toast-container"></div>
+
+            <!-- Bottom: Controls -->
+            <div class="bottom-controls">
+                <!-- Mic Toggle -->
+                <button id="mic-toggle-btn" class="icon-btn" title="开始/停止监听">
+                    🎤
+                </button>
+
+                <!-- Sensitivity Slider -->
+                <div class="control-group">
+                    <label class="control-label">灵敏度</label>
+                    <input type="range" id="sensitivity-slider" min="1" max="100" value="50">
+                </div>
+
+                <!-- Reset Button -->
+                <button id="reset-btn" class="icon-btn" title="重置树木" style="font-size: 1.2rem;">
+                    🔄
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

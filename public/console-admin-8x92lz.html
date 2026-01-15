@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,8 +27,12 @@
       --border: #334155;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; } 
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
@@ -36,7 +41,10 @@
       transition: background 0.3s, color 0.3s;
     }
 
-    .container { max-width: 1000px; margin: 0 auto; }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
 
     /* Header & Auth */
     .header {
@@ -47,10 +55,14 @@
       background: var(--surface);
       padding: 15px 25px;
       border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
-    .header h1 { font-size: 20px; color: var(--text); }
-    
+
+    .header h1 {
+      font-size: 20px;
+      color: var(--text);
+    }
+
     .btn-primary {
       background: var(--primary);
       color: white;
@@ -62,7 +74,11 @@
       font-size: 14px;
       transition: background 0.2s;
     }
-    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
     .btn-secondary {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -72,7 +88,7 @@
       cursor: pointer;
       font-size: 12px;
     }
-    
+
     .theme-toggle {
       background: none;
       border: 1px solid var(--border);
@@ -85,7 +101,13 @@
     }
 
     /* Tabs */
-    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
     .tab {
       padding: 10px 20px;
       cursor: pointer;
@@ -93,28 +115,35 @@
       color: var(--text-light);
       font-weight: 500;
     }
+
     .tab.active {
       color: var(--primary);
       border-bottom-color: var(--primary);
     }
 
     /* Content Area */
-    .view-section { display: none; }
-    .view-section.active { display: block; }
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+    }
 
     /* Monitor List */
     .monitor-list {
       background: var(--surface);
       border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       overflow: hidden;
     }
-    
+
     .monitor-header {
       display: grid;
       grid-template-columns: 40px 2fr 1fr 1fr;
       padding: 15px 20px;
-      background: var(--bg); /* Use bg var instead of hardcoded */
+      background: var(--bg);
+      /* Use bg var instead of hardcoded */
       font-size: 12px;
       font-weight: 600;
       color: var(--text-light);
@@ -124,7 +153,10 @@
     .monitor-item {
       border-bottom: 1px solid var(--border);
     }
-    .monitor-item:last-child { border-bottom: none; }
+
+    .monitor-item:last-child {
+      border-bottom: none;
+    }
 
     .item-summary {
       display: grid;
@@ -134,7 +166,10 @@
       cursor: pointer;
       transition: background 0.1s;
     }
-    .item-summary:hover { background: var(--bg); }
+
+    .item-summary:hover {
+      background: var(--bg);
+    }
 
     .toggle-btn {
       width: 24px;
@@ -147,10 +182,18 @@
       font-weight: bold;
       transition: transform 0.2s;
     }
-    .monitor-item.expanded .toggle-btn { transform: rotate(90deg); color: var(--primary); }
 
-    .code-display { font-family: monospace; font-weight: 600; color: var(--text); }
-    
+    .monitor-item.expanded .toggle-btn {
+      transform: rotate(90deg);
+      color: var(--primary);
+    }
+
+    .code-display {
+      font-family: monospace;
+      font-weight: 600;
+      color: var(--text);
+    }
+
     .status-badge {
       display: inline-block;
       padding: 2px 8px;
@@ -158,9 +201,21 @@
       font-size: 11px;
       font-weight: 600;
     }
-    .status-good { background: #dcfce7; color: #166534; }
-    .status-warn { background: #fef3c7; color: #92400e; }
-    .status-full { background: #fee2e2; color: #991b1b; }
+
+    .status-good {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-warn {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-full {
+      background: #fee2e2;
+      color: #991b1b;
+    }
 
     /* Item Details (Expanded) */
     .item-details {
@@ -169,14 +224,17 @@
       background: var(--bg);
       border-top: 1px solid var(--border);
     }
-    .monitor-item.expanded .item-details { display: block; }
+
+    .monitor-item.expanded .item-details {
+      display: block;
+    }
 
     .details-grid {
       padding: 20px;
       display: grid;
       gap: 20px;
     }
-    
+
     .device-table {
       width: 100%;
       border-collapse: collapse;
@@ -186,27 +244,35 @@
       border-radius: 6px;
       color: var(--text);
     }
-    .device-table th, .device-table td {
+
+    .device-table th,
+    .device-table td {
       padding: 8px 12px;
       text-align: left;
       border-bottom: 1px solid var(--border);
     }
-    .device-table th { background: var(--bg); color: var(--text-light); font-weight: 500; }
-    
+
+    .device-table th {
+      background: var(--bg);
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
     .tooltip {
       position: relative;
       cursor: help;
       border-bottom: 1px dashed #999;
     }
-    
+
     /* Generator Styles */
     .gen-card {
       background: var(--surface);
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       text-align: center;
     }
+
     .gen-list {
       margin-top: 20px;
       text-align: left;
@@ -215,6 +281,7 @@
       border: 1px solid var(--border);
       border-radius: 8px;
     }
+
     .gen-item {
       padding: 10px 15px;
       border-bottom: 1px solid var(--border);
@@ -222,7 +289,7 @@
       justify-content: space-between;
       font-family: monospace;
     }
-    
+
     /* Auth Input (Hidden by default in this version, but kept style just in case) */
     .auth-input {
       padding: 8px 12px;
@@ -234,184 +301,186 @@
       background: var(--surface);
       color: var(--text);
     }
-
   </style>
 </head>
+
 <body>
 
-<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <div style="display: flex; align-items: center;">
-      <div>
-        <h1>🚀 Anypok Admin</h1>
-        <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div style="display: flex; align-items: center;">
+        <div>
+          <h1>🚀 Anypok Admin</h1>
+          <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
+        </div>
+        <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
       </div>
-      <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
     </div>
-  </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
-    <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
-  </div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
+      <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
+    </div>
 
-  <!-- SECTION 1: MONITOR -->
-  <div id="monitorSection" class="view-section active">
-    <div class="monitor-list">
-      <div class="monitor-header">
-        <div></div>
-        <div>授权码</div>
-        <div>设备数</div>
-        <div>最后活跃</div>
-      </div>
-      <div id="monitorContent">
-        <div style="padding: 40px; text-align: center; color: var(--text-light);">
-          加载中...
+    <!-- SECTION 1: MONITOR -->
+    <div id="monitorSection" class="view-section active">
+      <div class="monitor-list">
+        <div class="monitor-header">
+          <div></div>
+          <div>授权码</div>
+          <div>设备数</div>
+          <div>最后活跃</div>
+        </div>
+        <div id="monitorContent">
+          <div style="padding: 40px; text-align: center; color: var(--text-light);">
+            加载中...
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- SECTION 2: GENERATOR -->
-  <div id="generateSection" class="view-section">
-    <div class="gen-card">
-      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
-      <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-        <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
-        <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
-        <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
-        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
-      </div>
-      
-      <div class="gen-list" id="genList"></div>
-      
-      <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-        <button onclick="exportEnv()" class="btn-secondary">📥 导出 ENV 文件</button>
-        <button onclick="copyAllGenerated()" class="btn-secondary">📋 复制全部</button>
+    <!-- SECTION 2: GENERATOR -->
+    <div id="generateSection" class="view-section">
+      <div class="gen-card">
+        <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+          <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+          <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
+          <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码
+            (ZY)</button>
+          <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
+          <button onclick="generateCodes('tree')" class="btn-primary" style="background: #eab308;">生成早读码 (ZD)</button>
+        </div>
+
+        <div class="gen-list" id="genList"></div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+          <button onclick="exportEnv()" class="btn-secondary">📥 导出 ENV 文件</button>
+          <button onclick="copyAllGenerated()" class="btn-secondary">📋 复制全部</button>
+        </div>
       </div>
     </div>
+
   </div>
 
-</div>
+  <script>
+    // 配置
+    const API_URL = '/api/verify-license';
+    // Hardcoded key for "passwordless" access via this secret file
+    const SECRET_KEY = 'spencer';
+    let currentData = [];
+    let generatedCodes = [];
 
-<script>
-  // 配置
-  const API_URL = '/api/verify-license'; 
-  // Hardcoded key for "passwordless" access via this secret file
-  const SECRET_KEY = 'spencer'; 
-  let currentData = [];
-  let generatedCodes = [];
-
-  // === 初始化：自动登录 ===
-  window.addEventListener('load', () => {
-    // 检查主题
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.getElementById('themeBtn').textContent = '🌞';
-    } else {
-      document.getElementById('themeBtn').textContent = '🌙';
-    }
-
-    // 自动登录
-    login();
-  });
-
-  // === 登录 & 加载数据 ===
-  async function login() {
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'list_all',
-          adminKey: SECRET_KEY
-        })
-      });
-
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message || '未知错误');
+    // === 初始化：自动登录 ===
+    window.addEventListener('load', () => {
+      // 检查主题
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('themeBtn').textContent = '🌞';
+      } else {
+        document.getElementById('themeBtn').textContent = '🌙';
       }
 
-      // 登录成功
-      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
-      document.getElementById('connectionStatus').style.color = 'var(--success)';
+      // 自动登录
+      login();
+    });
 
-      currentData = json.data;
-      renderMonitorList();
+    // === 登录 & 加载数据 ===
+    async function login() {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'list_all',
+            adminKey: SECRET_KEY
+          })
+        });
 
-    } catch (err) {
-      document.getElementById('connectionStatus').textContent = `🔴 连接失败: ${err.message}`;
-      document.getElementById('connectionStatus').style.color = 'var(--danger)';
-      document.getElementById('monitorContent').innerHTML = `<div style="padding: 20px; color: var(--danger); text-align: center;">加载失败: ${err.message}</div>`;
-    }
-  }
+        const json = await res.json();
 
-  function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    if (current === 'dark') {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-      document.getElementById('themeBtn').textContent = '🌙';
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-      document.getElementById('themeBtn').textContent = '🌞';
-    }
-  }
+        if (!json.success) {
+          throw new Error(json.message || '未知错误');
+        }
 
-  // === 辅助：解析 User Agent ===
-  function parseUA(ua) {
-    if (!ua) return '未知设备';
-    if (ua.includes('iPhone')) return 'iPhone (iOS)';
-    if (ua.includes('iPad')) return 'iPad (iOS)';
-    if (ua.includes('Android')) return 'Android 设备';
-    if (ua.includes('Windows')) return 'Windows PC';
-    if (ua.includes('Macintosh')) return 'Mac PC';
-    if (ua.includes('Linux')) return 'Linux PC';
-    return ua.length > 20 ? ua.substring(0, 20) + '...' : ua;
-  }
+        // 登录成功
+        document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+        document.getElementById('connectionStatus').style.color = 'var(--success)';
 
-  // === 渲染监控列表 ===
-  function renderMonitorList() {
-    const container = document.getElementById('monitorContent');
-    
-    if (currentData.length === 0) {
-      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
-      return;
+        currentData = json.data;
+        renderMonitorList();
+
+      } catch (err) {
+        document.getElementById('connectionStatus').textContent = `🔴 连接失败: ${err.message}`;
+        document.getElementById('connectionStatus').style.color = 'var(--danger)';
+        document.getElementById('monitorContent').innerHTML = `<div style="padding: 20px; color: var(--danger); text-align: center;">加载失败: ${err.message}</div>`;
+      }
     }
 
-    container.innerHTML = currentData.map((item, index) => {
-      // 检查是否失效
-      const isRevoked = item.status === 'revoked';
-      
-      // 计算状态颜色
-      const usage = item.totalDevices;
-      const max = item.maxDevices || 3;
-      let badgeClass = 'status-good';
-      let statusText = '正常';
-      
-      if (isRevoked) {
-        badgeClass = 'status-full'; // 用红色表示失效
-        statusText = '🚫 已删除';
-      } else if (usage >= max) {
-        badgeClass = 'status-full';
-        statusText = '已满';
-      } else if (usage > max * 0.8) {
-        badgeClass = 'status-warn';
-        statusText = '即将满';
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      if (current === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        document.getElementById('themeBtn').textContent = '🌙';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        document.getElementById('themeBtn').textContent = '🌞';
+      }
+    }
+
+    // === 辅助：解析 User Agent ===
+    function parseUA(ua) {
+      if (!ua) return '未知设备';
+      if (ua.includes('iPhone')) return 'iPhone (iOS)';
+      if (ua.includes('iPad')) return 'iPad (iOS)';
+      if (ua.includes('Android')) return 'Android 设备';
+      if (ua.includes('Windows')) return 'Windows PC';
+      if (ua.includes('Macintosh')) return 'Mac PC';
+      if (ua.includes('Linux')) return 'Linux PC';
+      return ua.length > 20 ? ua.substring(0, 20) + '...' : ua;
+    }
+
+    // === 渲染监控列表 ===
+    function renderMonitorList() {
+      const container = document.getElementById('monitorContent');
+
+      if (currentData.length === 0) {
+        container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
+        return;
       }
 
-      // 构建设备详情行 (略微调整样式)
-      const deviceRows = item.devices.map((dev, i) => {
-        const deviceName = parseUA(dev.ua);
-        const fullUA = dev.ua.replace(/"/g, '&quot;');
-          
-        return `
+      container.innerHTML = currentData.map((item, index) => {
+        // 检查是否失效
+        const isRevoked = item.status === 'revoked';
+
+        // 计算状态颜色
+        const usage = item.totalDevices;
+        const max = item.maxDevices || 3;
+        let badgeClass = 'status-good';
+        let statusText = '正常';
+
+        if (isRevoked) {
+          badgeClass = 'status-full'; // 用红色表示失效
+          statusText = '🚫 已删除';
+        } else if (usage >= max) {
+          badgeClass = 'status-full';
+          statusText = '已满';
+        } else if (usage > max * 0.8) {
+          badgeClass = 'status-warn';
+          statusText = '即将满';
+        }
+
+        // 构建设备详情行 (略微调整样式)
+        const deviceRows = item.devices.map((dev, i) => {
+          const deviceName = parseUA(dev.ua);
+          const fullUA = dev.ua.replace(/"/g, '&quot;');
+
+          return `
         <tr>
           <td>${i + 1}</td>
           <td>
@@ -427,7 +496,7 @@
         </tr>
       `}).join('');
 
-      return `
+        return `
         <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
           <div class="item-summary" onclick="toggleItem(${index})">
             <div class="toggle-btn">▶</div>
@@ -467,116 +536,124 @@
           </div>
         </div>
       `;
-    }).join('');
-  }
-
-  function toggleItem(index) {
-    const el = document.getElementById(`item-${index}`);
-    const isExpanded = el.classList.contains('expanded');
-    
-    // 关闭所有其他的 (可选，如果想保持手风琴效果)
-    // document.querySelectorAll('.monitor-item').forEach(e => e.classList.remove('expanded'));
-
-    if (!isExpanded) {
-      el.classList.add('expanded');
-    } else {
-      el.classList.remove('expanded');
+      }).join('');
     }
-  }
 
-  // === 生成器功能 ===
-  function generateCodes(type = 'doraemon') {
-    const count = document.getElementById('genCount').value;
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    const now = new Date();
-    const datePart = now.getFullYear() + 
-                    String(now.getMonth() + 1).padStart(2, '0') + 
-                    String(now.getDate()).padStart(2, '0');
-    
-    const newBatch = [];
-    for (let i = 0; i < count; i++) {
-      let code = '';
-      if (type === 'homework') {
-        // ZY + YYYYMMDD (8) + Random (6) = 16 chars
-        let random = '';
-        for (let j = 0; j < 6; j++) {
-          random += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        code = 'ZY' + datePart + random;
-      } else if (type === 'magic') {
-        // DM + YYYYMMDD (8) + Random (6) = 16 chars
-        let random = '';
-        for (let j = 0; j < 6; j++) {
-          random += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        code = 'DM' + datePart + random;
+    function toggleItem(index) {
+      const el = document.getElementById(`item-${index}`);
+      const isExpanded = el.classList.contains('expanded');
+
+      // 关闭所有其他的 (可选，如果想保持手风琴效果)
+      // document.querySelectorAll('.monitor-item').forEach(e => e.classList.remove('expanded'));
+
+      if (!isExpanded) {
+        el.classList.add('expanded');
       } else {
-        // YYYYMMDD (8) + Random (8) = 16 chars
-        let random = '';
-        for (let j = 0; j < 8; j++) {
-          random += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        code = datePart + random;
+        el.classList.remove('expanded');
       }
-      // Format with dashes for display
-      newBatch.push(code.match(/.{1,4}/g).join('-'));
     }
 
-    generatedCodes = [...newBatch, ...generatedCodes];
-    
-    const listEl = document.getElementById('genList');
-    listEl.innerHTML = generatedCodes.map(c => `
+    // === 生成器功能 ===
+    function generateCodes(type = 'doraemon') {
+      const count = document.getElementById('genCount').value;
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const now = new Date();
+      const datePart = now.getFullYear() +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getDate()).padStart(2, '0');
+
+      const newBatch = [];
+      for (let i = 0; i < count; i++) {
+        let code = '';
+        if (type === 'homework') {
+          // ZY + YYYYMMDD (8) + Random (6) = 16 chars
+          let random = '';
+          for (let j = 0; j < 6; j++) {
+            random += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          code = 'ZY' + datePart + random;
+        } else if (type === 'magic') {
+          // DM + YYYYMMDD (8) + Random (6) = 16 chars
+          let random = '';
+          for (let j = 0; j < 6; j++) {
+            random += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          code = 'DM' + datePart + random;
+        } else if (type === 'tree') {
+          // ZD + YYYYMMDD (8) + Random (6) = 16 chars
+          let random = '';
+          for (let j = 0; j < 6; j++) {
+            random += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          code = 'ZD' + datePart + random;
+        } else {
+          // YYYYMMDD (8) + Random (8) = 16 chars
+          let random = '';
+          for (let j = 0; j < 8; j++) {
+            random += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          code = datePart + random;
+        }
+        // Format with dashes for display
+        newBatch.push(code.match(/.{1,4}/g).join('-'));
+      }
+
+      generatedCodes = [...newBatch, ...generatedCodes];
+
+      const listEl = document.getElementById('genList');
+      listEl.innerHTML = generatedCodes.map(c => `
       <div class="gen-item">
         <span>${c}</span>
         <span style="color:var(--text-light); font-size:12px;">未激活</span>
       </div>
     `).join('');
-  }
-
-  function exportEnv() {
-    if(!generatedCodes.length) return alert('没有生成的代码');
-    const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], {type: 'text/plain'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'LICENSE_CODES.env';
-    a.click();
-  }
-  
-  function copyAllGenerated() {
-    if(!generatedCodes.length) return;
-    navigator.clipboard.writeText(generatedCodes.join('\n'));
-    alert(`已复制 ${generatedCodes.length} 个授权码`);
-  }
-  
-  function copy(text) {
-    navigator.clipboard.writeText(text);
-    alert('已复制 ID: ' + text);
-  }
-
-  // === 工具函数 ===
-  function switchTab(tabName) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-    
-    if (tabName === 'monitor') {
-      document.querySelector('.tab:nth-child(1)').classList.add('active');
-      document.getElementById('monitorSection').classList.add('active');
-    } else {
-      document.querySelector('.tab:nth-child(2)').classList.add('active');
-      document.getElementById('generateSection').classList.add('active');
     }
-  }
 
-  function timeAgo(date) {
-    const seconds = Math.floor((new Date() - date) / 1000);
-    if (seconds < 60) return '刚刚';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}分钟前`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}小时前`;
-    return `${Math.floor(hours / 24)}天前`;
-  }
-</script>
+    function exportEnv() {
+      if (!generatedCodes.length) return alert('没有生成的代码');
+      const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'LICENSE_CODES.env';
+      a.click();
+    }
+
+    function copyAllGenerated() {
+      if (!generatedCodes.length) return;
+      navigator.clipboard.writeText(generatedCodes.join('\n'));
+      alert(`已复制 ${generatedCodes.length} 个授权码`);
+    }
+
+    function copy(text) {
+      navigator.clipboard.writeText(text);
+      alert('已复制 ID: ' + text);
+    }
+
+    // === 工具函数 ===
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+
+      if (tabName === 'monitor') {
+        document.querySelector('.tab:nth-child(1)').classList.add('active');
+        document.getElementById('monitorSection').classList.add('active');
+      } else {
+        document.querySelector('.tab:nth-child(2)').classList.add('active');
+        document.getElementById('generateSection').classList.add('active');
+      }
+    }
+
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return '刚刚';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}分钟前`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}小时前`;
+      return `${Math.floor(hours / 24)}天前`;
+    }
+  </script>
 
 </body>
+
 </html>

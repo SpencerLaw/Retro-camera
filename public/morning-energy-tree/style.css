@@ -1,0 +1,260 @@
+:root {
+    --sky-top: #2980b9;
+    --sky-bottom: #6dd5fa;
+    --grass-color: #4caf50;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --text-color: #fff;
+    --primary-btn: #f1c40f;
+    --danger: #e74c3c;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+    color: var(--text-color);
+    width: 100vw;
+    height: 100vh;
+    user-select: none;
+}
+
+/* --- Gatekeeper Screen --- */
+#gatekeeper-screen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 400px;
+}
+
+.auth-card h1 {
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #ffd700;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.1rem;
+    text-align: center;
+    outline: none;
+    text-transform: uppercase;
+}
+
+.auth-btn {
+    padding: 12px 30px;
+    border-radius: 30px;
+    border: none;
+    background: linear-gradient(45deg, #f1c40f, #e67e22);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.auth-btn:active {
+    transform: scale(0.95);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Main App --- */
+#app-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    display: block;
+}
+
+/* --- UI Controls --- */
+.ui-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* Let clicks pass through to canvas if needed */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* Top Bar: Energy Bar */
+.top-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    pointer-events: auto;
+}
+
+.energy-label {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 8px;
+}
+
+.energy-container {
+    width: 100%;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+#energy-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f1c40f, #2ecc71);
+    transition: width 0.3s ease-out;
+    box-shadow: 0 0 10px #f1c40f;
+}
+
+/* Bottom Bar: Controls */
+.bottom-controls {
+    pointer-events: auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    align-self: flex-start;
+    /* Left align */
+    margin-bottom: 20px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+input[type="range"] {
+    width: 120px;
+    cursor: pointer;
+}
+
+button.icon-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+    color: white;
+}
+
+button.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+button.icon-btn.active {
+    background: var(--danger);
+    animation: pulse 2s infinite;
+}
+
+/* --- Notifications --- */
+#toast-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    text-align: center;
+}
+
+.achievement-text {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 20px gold;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .bottom-controls {
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 0;
+    }
+
+    .auth-card {
+        padding: 20px;
+    }
+
+    .achievement-text {
+        font-size: 2.5rem;
+    }
+}

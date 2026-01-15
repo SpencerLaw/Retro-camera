@@ -57,12 +57,12 @@ function getDeviceType(ua: string): string {
 function extractDateFromCode(code: string): Date | null {
   try {
     let cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
-    
-    // 支持多种前缀 (ZY 或 DM)
-    if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM')) {
+
+    // 支持多种前缀 (ZY 或 DM 或 ZD)
+    if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD')) {
       cleanCode = cleanCode.substring(2);
     }
-    
+
     const dateStr = cleanCode.substring(0, 8);
     const year = parseInt(dateStr.substring(0, 4));
     const month = parseInt(dateStr.substring(4, 6)) - 1;
@@ -159,7 +159,7 @@ export default async function handler(
   try {
     const { licenseCode, deviceId, deviceInfo: rawDeviceInfo, action, adminKey } = req.body;
     const ua = req.headers['user-agent'] || 'unknown';
-    
+
     // === 管理员查询 ===
     if (action === 'query') {
       if (!adminKey || adminKey.trim() !== 'spencer') {
@@ -192,7 +192,7 @@ export default async function handler(
       if (keys.length === 0) return res.status(200).json({ success: true, data: [] });
 
       const values = await Promise.all(keys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key)));
-        
+
       // 获取当前白名单
       const envCodes = process.env.LICENSE_CODES || '';
       const validCodeSet = new Set(
@@ -206,7 +206,7 @@ export default async function handler(
           if (!v) return null;
           const code = keys[index].replace('license:', '');
           const meta = decompressMetadata(v, code);
-            
+
           // 注入状态字段：检查是否在白名单中
           return {
             ...meta,
@@ -228,7 +228,7 @@ export default async function handler(
     }
 
     const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
-    
+
     // 1. 基础检查
     if (!isCodeInWhitelist(cleanCode)) {
       return res.status(401).json({ success: false, message: '授权码不存在或已被禁用，请联系管理员购买' });
@@ -236,7 +236,7 @@ export default async function handler(
 
     const generatedDate = extractDateFromCode(cleanCode);
     if (!generatedDate) return res.status(401).json({ success: false, message: '授权码格式异常' });
-    
+
     const expiryDate = new Date(generatedDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
     if (new Date() > expiryDate) {
@@ -272,30 +272,30 @@ export default async function handler(
     } else {
       // 解压旧数据
       metadata = decompressMetadata(rawData, cleanCode);
-      
+
       const deviceIndex = metadata.devices.findIndex(d => d.deviceId === deviceId);
-      
+
       if (deviceIndex > -1) {
         // 更新现有设备
         console.log(`[License] Update Device: ${cleanCode} Device: ${deviceId}`);
         metadata.devices[deviceIndex].lastSeen = nowISO;
-        
+
         // 更新 UserAgent，以防用户更新了浏览器
         metadata.devices[deviceIndex].ua = rawDeviceInfo || getDeviceType(ua);
-        
+
         // 确保 License 的最后使用时间也更新
         metadata.lastUsedTime = nowISO;
       } else {
         // 添加新设备
         console.log(`[License] New Device: ${cleanCode} Device: ${deviceId}`);
         if (metadata.devices.length >= metadata.maxDevices) {
-          return res.status(403).json({ 
-            success: false, 
+          return res.status(403).json({
+            success: false,
             message: `绑定失败：设备已满 (${metadata.devices.length}/${metadata.maxDevices})`,
             data: { totalDevices: metadata.devices.length }
           });
         }
-        
+
         metadata.devices.push({
           deviceId,
           firstSeen: nowISO,
@@ -327,9 +327,9 @@ export default async function handler(
   } catch (error) {
     console.error('API Error:', error);
     return res.status(200).json({ // 降级处理
-      success: true, 
-      message: '验证成功(离线)', 
-      data: { validFor: '1年' } 
+      success: true,
+      message: '验证成功(离线)',
+      data: { validFor: '1年' }
     });
   }
 }

@@ -23,10 +23,7 @@ export default async function handler(
     }
 
     try {
-        // 简单的安全性：只取授权码前8位或哈希，避免直接在 Key 中暴露全码
-        const licPrefix = license.replace(/[-\s]/g, '').substring(0, 8).toUpperCase();
         const messageId = Date.now().toString();
-
         const messageData = {
             id: messageId,
             text,
@@ -34,8 +31,9 @@ export default async function handler(
             timestamp: messageId,
         };
 
-        // 格式: br:lic:{授权码前缀}:rm:{房间码}:act
-        const key = `br:lic:${licPrefix}:rm:${code.toUpperCase()}:act`;
+        // V2: Global Shared Pool for 4-digit codes
+        // Key format: br:v2:room:{CODE}
+        const key = `br:v2:room:${code.toUpperCase().trim()}`;
         await kv.set(key, messageData, { ex: 60 });
 
         return response.status(200).json({ success: true, messageId });

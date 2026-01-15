@@ -98,7 +98,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     };
 
     const copyRoomId = () => {
-        const roomId = `${licensePrefix}-${channelCode}`;
+        const roomId = channelCode;
         navigator.clipboard.writeText(roomId);
         setStatus({ type: 'success', msg: 'Room ID Copied' });
         setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
@@ -119,8 +119,8 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         <Radio size={12} className="text-blue-500" /> {t('broadcast.sender.currentChannel')}
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="text-5xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1">
-                            {licensePrefix}-{channelCode}
+                        <div className="text-6xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1">
+                            {channelCode}
                         </div>
                         <button onClick={copyRoomId} className="p-2 text-gray-400 hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100">
                             <Copy size={20} />

@@ -52,15 +52,10 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     }, []);
 
     const fetchMessage = useCallback(async () => {
-        if (!fullRoomId.includes('-')) return;
-
-        const [licensePart, channelPart] = fullRoomId.split('-').map(s => s.trim().toUpperCase());
-        if (!licensePart || !channelPart) return;
+        if (!fullRoomId.trim()) return;
 
         try {
-            // For receivers we use truncated license prefix (first 8 chars) or full license
-            const prefix = licensePart.substring(0, 8);
-            const resp = await fetch(`/api/broadcast/fetch?code=${channelPart}&license=${prefix}`);
+            const resp = await fetch(`/api/broadcast/fetch?code=${fullRoomId.trim().toUpperCase()}`);
             const data = await resp.json();
 
             if (data.message) {
@@ -98,7 +93,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
     };
 
     const handleStart = () => {
-        if (!fullRoomId.trim() || !fullRoomId.includes('-')) {
+        if (!fullRoomId.trim()) {
             setError(t('broadcast.receiver.missingChannel'));
             return;
         }
@@ -133,7 +128,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
                             type="text"
                             value={fullRoomId}
                             onChange={(e) => setFullRoomId(e.target.value.toUpperCase())}
-                            placeholder={t('broadcast.receiver.channelPlaceholder')}
+                            placeholder="例如: 8859"
                             className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600"
                         />
                         <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
@@ -151,7 +146,7 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
                 </div>
 
                 <div className="flex items-center gap-2 justify-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    <Info size={12} /> Format: GBXXXXXX-XXXX
+                    <Info size={12} /> Format: 4-Digit Number
                 </div>
             </GlassCard>
         );
@@ -159,8 +154,8 @@ const Receiver: React.FC<{ isDark: boolean }> = ({ isDark }) => {
 
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
-                ? 'bg-red-600 text-white'
-                : (isDark ? 'bg-black text-white' : 'bg-white text-black')
+            ? 'bg-red-600 text-white'
+            : (isDark ? 'bg-black text-white' : 'bg-white text-black')
             }`}>
             {/* HUD Header */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-20">

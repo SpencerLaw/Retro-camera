@@ -11,19 +11,21 @@ export default async function handler(
     const code = (request.query.code as string)?.toUpperCase();
     const license = request.query.license as string;
 
-    if (!license) {
-        return response.status(401).json({ error: '权限不足' });
-    }
-
     if (!code) {
         return response.status(400).json({ error: '房间码不能为空' });
     }
 
     try {
-        const licPrefix = license.replace(/[-\s]/g, '').substring(0, 8).toUpperCase();
-        const key = `br:lic:${licPrefix}:rm:${code}:act`;
+        // V2: Try Global Pool First
+        let key = `br:v2:room:${code}`;
+        let message = await kv.get(key);
 
-        const message = await kv.get(key);
+        // Fallback for V1 (in case some old sessions are still using it)
+        if (!message && license) {
+            const licPrefix = license.replace(/[-\s]/g, '').substring(0, 8).toUpperCase();
+            const oldKey = `br:lic:${licPrefix}:rm:${code}:act`;
+            message = await kv.get(oldKey);
+        }
 
         return response.status(200).json({ message: message || null });
     } catch (error: any) {

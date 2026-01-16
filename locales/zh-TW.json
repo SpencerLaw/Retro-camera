@@ -163,6 +163,7 @@
       "channelPlaceholder": "例如: 8859",
       "initializeLive": "進入通信",
       "missingChannel": "請輸入通道號",
+      "invalidRoom": "無效的房間號",
       "online": "在線",
       "signalLost": "信號丟失",
       "criticalBroadcast": "緊急播報",

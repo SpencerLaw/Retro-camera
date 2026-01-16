@@ -175,6 +175,7 @@
       "channelPlaceholder": "例如: 8859",
       "initializeLive": "进入通信",
       "missingChannel": "请输入通道号",
+      "invalidRoom": "无效的房间号",
       "online": "在线",
       "signalLost": "信号丢失",
       "criticalBroadcast": "紧急播报",

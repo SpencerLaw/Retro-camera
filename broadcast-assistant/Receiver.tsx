@@ -149,7 +149,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
     if (!isJoined) {
         return (
             <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
-                <GlassCard className="max-w-md w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500">
+                <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500">
                     <div className="flex flex-col items-center text-center space-y-8">
                         {/* Icon */}
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white shadow-lg">

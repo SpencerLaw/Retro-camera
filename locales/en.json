@@ -164,6 +164,7 @@
       "channelPlaceholder": "E.G. 8859",
       "initializeLive": "Initialize Live",
       "missingChannel": "Missing Channel Code",
+      "invalidRoom": "Invalid room code",
       "online": "Online",
       "signalLost": "Signal Lost",
       "criticalBroadcast": "Emergency Broadcast",

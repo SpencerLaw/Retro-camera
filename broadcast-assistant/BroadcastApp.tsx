@@ -186,7 +186,7 @@ const BroadcastApp: React.FC = () => {
                                 <button
                                     key={item.m}
                                     onClick={item.handler}
-                                    className="group relative h-[500px] p-16 rounded-[4rem] overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col text-left border border-white/10"
+                                    className="group relative h-[550px] p-16 rounded-[4rem] overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col text-left border border-white/10"
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-[0.03] group-hover:opacity-10 dark:opacity-[0.08] dark:group-hover:opacity-20 transition-opacity`}></div>
                                     <div className="relative z-10 flex-1">

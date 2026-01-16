@@ -127,16 +127,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
     if (!isJoined) {
         return (
             <div className="flex flex-col items-center">
-                <GlassCard className="max-w-md mx-auto p-12 rounded-[3rem] text-center space-y-10 animate-in zoom-in duration-500 mt-10">
-                    <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-[2rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-purple-500/20">
-                        <Tv size={48} />
+                <GlassCard className="max-w-lg mx-auto p-12 rounded-[3.5rem] text-center space-y-12 animate-in zoom-in duration-500 mt-10">
+                    <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-600 rounded-[2.5rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-purple-500/20">
+                        <Tv size={60} />
                     </div>
-                    <div className="space-y-2">
-                        <h2 className="text-3xl font-black tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-6">{t('broadcast.receiver.joinDesc')}</p>
+                    <div className="space-y-4">
+                        <h2 className="text-4xl font-black tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
+                        <p className="text-lg text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-6">{t('broadcast.receiver.joinDesc')}</p>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         <div className="relative group">
                             <input
                                 type="text"
@@ -150,19 +150,19 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
                                         if (e.target) e.target.setSelectionRange(start, end);
                                     });
                                 }}
-                                placeholder="例如: 8859"
-                                className="w-full h-16 bg-gray-100 dark:bg-white/5 border-none rounded-2xl text-center text-xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600 shadow-inner uppercase"
+                                placeholder={t('broadcast.receiver.channelPlaceholder')}
+                                className="w-full h-20 bg-gray-100 dark:bg-white/5 border-none rounded-3xl text-center text-3xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600 shadow-inner uppercase"
                             />
                             <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                         </div>
 
-                        {error && <p className="text-red-500 text-xs font-black uppercase tracking-widest">{error}</p>}
+                        {error && <p className="text-red-500 text-sm font-black uppercase tracking-widest">{error}</p>}
 
                         <button
                             onClick={handleStart}
-                            className="w-full h-16 rounded-[1.5rem] bg-black dark:bg-white text-white dark:text-black font-extrabold text-xl shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3 group"
+                            className="w-full h-20 rounded-[2rem] bg-black dark:bg-white text-white dark:text-black font-extrabold text-2xl shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3 group"
                         >
-                            <Volume2 size={24} className="group-hover:scale-110 transition-transform" />
+                            <Volume2 size={32} className="group-hover:scale-110 transition-transform" />
                             {t('broadcast.receiver.initializeLive')}
                         </button>
                     </div>

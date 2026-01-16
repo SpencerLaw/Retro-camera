@@ -57,9 +57,26 @@ const BroadcastApp: React.FC = () => {
         }
     };
 
-    const handleTeacherMode = () => {
+    const handleTeacherMode = async () => {
         if (isBCVerified()) {
-            setMode('sender');
+            // Re-validate license to ensure it's still active
+            const currentLicense = getBCLicense();
+            if (currentLicense) {
+                setVerifying(true);
+                const result = await verifyLicense(currentLicense);
+                setVerifying(false);
+
+                if (result.success) {
+                    setMode('sender');
+                } else {
+                    // License is no longer valid, clear it and show license screen
+                    await clearBCLicense();
+                    setError(result.message || 'License is no longer valid');
+                    setMode('license');
+                }
+            } else {
+                setMode('license');
+            }
         } else {
             setMode('license');
         }

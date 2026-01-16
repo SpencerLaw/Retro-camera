@@ -159,7 +159,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     {/* Top Controls inside Card */}
                     <button
                         onClick={onExit}
-                        className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all active:scale-95 cursor-pointer z-50 relative"
+                        className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all active:scale-95 cursor-pointer z-50"
                     >
                         <ArrowLeft size={24} />
                     </button>

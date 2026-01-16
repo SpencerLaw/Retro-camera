@@ -26,8 +26,10 @@ export default async function handler(
         // Expiration: 30 days (teacher just needs to open the app once a month to keep it alive)
         const key = `br:v2:active:${cleanCode}`;
 
+        const cleanLicense = license.replace(/[-\s]/g, '').toUpperCase();
+
         await kv.set(key, {
-            license: license.substring(0, 8),
+            license: cleanLicense,
             updatedAt: Date.now()
         }, { ex: 60 * 60 * 24 * 30 });
 

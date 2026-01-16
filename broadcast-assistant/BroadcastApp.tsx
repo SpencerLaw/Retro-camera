@@ -149,7 +149,7 @@ const BroadcastApp: React.FC = () => {
     }
 
     if (mode === 'receiver') {
-        return <Receiver isDark={theme === 'dark'} toggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')} />;
+        return <Receiver isDark={theme === 'dark'} toggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')} onExit={() => setMode('selection')} />;
     }
 
     return (

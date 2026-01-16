@@ -1,22 +1,133 @@
-// ... (imports remain same)
+import React, { useState, useEffect } from 'react';
+import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy, Plus, Edit2 } from 'lucide-react';
+import { getLicensePrefix } from './utils/licenseManager';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface Message {
     id: string;
     text: string;
     isEmergency: boolean;
     timestamp: string;
-    channelName?: string; // Add channelName to Message interface
+    channelName?: string;
 }
 
-// ... (other interfaces and components remain same)
+interface Channel {
+    id: string;
+    name: string;
+    code: string;
+}
+
+const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.05)] ${className}`}>
+        {children}
+    </div>
+);
 
 const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
-    // ... (state initialization remains same)
+    const t = useTranslations();
+    const licensePrefix = getLicensePrefix(license);
+
+    const [channels, setChannels] = useState<Channel[]>(() => {
+        const saved = localStorage.getItem('br_channels');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                return [];
+            }
+        }
+        return [{ id: 'default', name: '默认班级', code: Math.floor(1000 + Math.random() * 9000).toString() }];
+    });
+
+    const [activeChannelId, setActiveChannelId] = useState(() => {
+        return localStorage.getItem('br_active_channel_id') || 'default';
+    });
+
+    const [editingChannel, setEditingChannel] = useState<string | null>(null);
+    const [editName, setEditName] = useState('');
+    const [editCode, setEditCode] = useState('');
+
+    const [inputText, setInputText] = useState('');
+    const [isEmergency, setIsEmergency] = useState(false);
+    const [history, setHistory] = useState<Message[]>([]);
+    const [status, setStatus] = useState<{ type: 'success' | 'error' | 'loading' | null; msg: string }>({ type: null, msg: '' });
 
     const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0];
     const channelCode = activeChannel?.code || '';
 
-    // ... (effects remain same)
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('br_sender_history');
+        if (savedHistory) {
+            try {
+                setHistory(JSON.parse(savedHistory));
+            } catch (e) {
+                setHistory([]);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('br_channels', JSON.stringify(channels));
+    }, [channels]);
+
+    useEffect(() => {
+        localStorage.setItem('br_active_channel_id', activeChannelId);
+    }, [activeChannelId]);
+
+    // Auto-activate room on server
+    useEffect(() => {
+        if (channelCode && license) {
+            fetch('/api/broadcast/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: channelCode, license })
+            }).catch(console.error);
+        }
+    }, [channelCode, license]);
+
+    const addChannel = () => {
+        const newId = Date.now().toString();
+        const newChannel: Channel = {
+            id: newId,
+            name: `${t('broadcast.sender.addClass')} ${channels.length + 1}`,
+            code: Math.floor(1000 + Math.random() * 9000).toString()
+        };
+        setChannels([...channels, newChannel]);
+        setActiveChannelId(newId);
+    };
+
+    const deleteChannel = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (channels.length <= 1) return;
+        if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
+            const nextChannels = channels.filter(c => c.id !== id);
+            setChannels(nextChannels);
+            if (activeChannelId === id) {
+                setActiveChannelId(nextChannels[0].id);
+            }
+        }
+    };
+
+    const startEditing = (channel: Channel, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingChannel(channel.id);
+        setEditName(channel.name);
+        setEditCode(channel.code);
+    };
+
+    const saveEdit = () => {
+        if (!editingChannel) return;
+        setChannels(channels.map(c =>
+            c.id === editingChannel ? { ...c, name: editName, code: editCode.toUpperCase() } : c
+        ));
+        setEditingChannel(null);
+    };
+
+    const generateRandomChannel = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+        setEditCode(newCode);
+    };
 
     const handleSend = async () => {
         if (!channelCode.trim() || !inputText.trim()) {
@@ -46,7 +157,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     text: inputText.trim(),
                     isEmergency,
                     timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
-                    channelName: activeChannel.name // Capture current channel name
+                    channelName: activeChannel.name
                 };
 
                 const newHistory = [newMessage, ...history].slice(0, 30);
@@ -66,7 +177,19 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         }
     };
 
-    // ... (other functions remain same)
+    const clearHistory = () => {
+        if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
+            setHistory([]);
+            localStorage.removeItem('br_sender_history');
+        }
+    };
+
+    const copyRoomId = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(channelCode);
+        setStatus({ type: 'success', msg: 'Room ID Copied' });
+        setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
+    };
 
     return (
         <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20">

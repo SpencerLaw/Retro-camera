@@ -148,6 +148,10 @@ const BroadcastApp: React.FC = () => {
         );
     }
 
+    if (mode === 'receiver') {
+        return <Receiver isDark={theme === 'dark'} toggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')} />;
+    }
+
     return (
         <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-white text-[#1D1D1F]'} font-sans`}>
             {/* iOS 26 极简背景氛围 */}

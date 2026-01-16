@@ -126,43 +126,60 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
 
     if (!isJoined) {
         return (
-            <div className="flex flex-col items-center">
-                <GlassCard className="max-w-lg mx-auto p-12 rounded-[3.5rem] text-center space-y-12 animate-in zoom-in duration-500 mt-10">
-                    <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-600 rounded-[2.5rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-purple-500/20">
-                        <Tv size={60} />
-                    </div>
-                    <div className="space-y-4">
-                        <h2 className="text-4xl font-black tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
-                        <p className="text-lg text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-6">{t('broadcast.receiver.joinDesc')}</p>
-                    </div>
+            <div className={`min-h-screen flex items-center justify-center p-6 transition-colors duration-500 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`}>
+                {/* iOS 26 极简背景氛围 */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className={`absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-[0.03] ${isDark ? 'bg-purple-600' : 'bg-purple-400'}`}></div>
+                    <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-[0.03] ${isDark ? 'bg-pink-600' : 'bg-pink-400'}`}></div>
+                </div>
 
-                    <div className="space-y-8">
-                        <div className="relative group">
-                            <input
-                                type="text"
-                                value={fullRoomId}
-                                onChange={(e) => {
-                                    const start = e.target.selectionStart;
-                                    const end = e.target.selectionEnd;
-                                    const val = e.target.value.toUpperCase();
-                                    setFullRoomId(val);
-                                    requestAnimationFrame(() => {
-                                        if (e.target) e.target.setSelectionRange(start, end);
-                                    });
-                                }}
-                                placeholder={t('broadcast.receiver.channelPlaceholder')}
-                                className="w-full h-20 bg-gray-100 dark:bg-white/5 border-none rounded-3xl text-center text-3xl font-bold tracking-wider focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all text-purple-600 shadow-inner uppercase"
-                            />
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <GlassCard className="max-w-md w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500">
+                    <div className="flex flex-col items-center text-center space-y-8">
+                        {/* Icon */}
+                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white shadow-lg">
+                            <Tv size={36} />
                         </div>
 
-                        {error && <p className="text-red-500 text-sm font-black uppercase tracking-widest">{error}</p>}
+                        {/* Title & Description */}
+                        <div className="space-y-2">
+                            <h2 className="text-3xl font-extrabold tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('broadcast.receiver.joinDesc')}</p>
+                        </div>
 
+                        {/* Input Section */}
+                        <div className="w-full space-y-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={fullRoomId}
+                                    onChange={(e) => {
+                                        const start = e.target.selectionStart;
+                                        const end = e.target.selectionEnd;
+                                        const val = e.target.value.toUpperCase();
+                                        setFullRoomId(val);
+                                        requestAnimationFrame(() => {
+                                            if (e.target) e.target.setSelectionRange(start, end);
+                                        });
+                                    }}
+                                    placeholder={t('broadcast.receiver.channelPlaceholder')}
+                                    className="w-full h-14 bg-gray-100 dark:bg-white/5 border-none rounded-2xl px-6 text-center text-lg font-mono font-bold tracking-widest focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all uppercase"
+                                />
+                            </div>
+
+                            {error && (
+                                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium flex items-center justify-center gap-2">
+                                    <AlertCircle size={14} />
+                                    {error}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Action Button */}
                         <button
                             onClick={handleStart}
-                            className="w-full h-20 rounded-[2rem] bg-black dark:bg-white text-white dark:text-black font-extrabold text-2xl shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3 group"
+                            className="w-full py-4 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-bold text-lg shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3"
                         >
-                            <Volume2 size={32} className="group-hover:scale-110 transition-transform" />
+                            <Volume2 size={20} />
                             {t('broadcast.receiver.initializeLive')}
                         </button>
                     </div>

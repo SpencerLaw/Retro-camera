@@ -219,7 +219,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
             {/* HUD Header */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-20">
                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3 px-6 py-2 rounded-full GlassContainer border border-white/20 bg-white/10 backdrop-blur-md">
+                    <div className="flex items-center gap-3 px-6 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md">
                         <div className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
                             {fullRoomId} // {isOnline ? (currentMsg ? t('broadcast.receiver.online') : t('broadcast.receiver.downlinkSync')) : t('broadcast.receiver.signalLost')}
@@ -227,7 +227,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
                     </div>
                     <button
                         onClick={() => setIsListening(!isListening)}
-                        className={`w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center transition-all bg-white/10 backdrop-blur-md ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}
+                        className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all bg-white/10 backdrop-blur-md hover:scale-110 ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}
                     >
                         {isListening ? <Volume2 size={24} /> : <VolumeX size={24} />}
                     </button>
@@ -236,14 +236,20 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
                 <div className="flex gap-4">
                     <button
                         onClick={toggleTheme}
-                        className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors bg-white/10 backdrop-blur-md text-orange-500"
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all bg-white/10 backdrop-blur-md text-orange-500 cursor-pointer"
                     >
                         {isDark ? <Moon size={24} /> : <Sun size={24} />}
                     </button>
-                    <button onClick={toggleFullscreen} className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors bg-white/10 backdrop-blur-md">
+                    <button
+                        onClick={toggleFullscreen}
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all bg-white/10 backdrop-blur-md cursor-pointer"
+                    >
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>
-                    <button onClick={() => setIsJoined(false)} className="w-12 h-12 rounded-full GlassContainer border border-white/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all bg-white/10 backdrop-blur-md">
+                    <button
+                        onClick={() => setIsJoined(false)}
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500 hover:scale-110 hover:text-white transition-all bg-white/10 backdrop-blur-md cursor-pointer"
+                    >
                         <X size={24} />
                     </button>
                 </div>

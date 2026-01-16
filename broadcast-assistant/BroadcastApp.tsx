@@ -91,10 +91,18 @@ const BroadcastApp: React.FC = () => {
                 </div>
 
                 <GlassContainer className="max-w-2xl w-full p-10 rounded-[2.5rem] relative">
-                    <button onClick={() => setMode('selection')} className="absolute top-6 left-6 text-gray-400 hover:text-gray-600 transition-colors">
-                        <ArrowLeft size={20} />
+                    <button onClick={() => setMode('selection')} className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all active:scale-95">
+                        <ArrowLeft size={24} />
                     </button>
-                    <div className="flex flex-col items-center text-center space-y-8">
+
+                    <button
+                        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                        className="absolute top-8 right-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-orange-500 transition-all active:scale-95"
+                    >
+                        {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
+                    </button>
+
+                    <div className="flex flex-col items-center text-center space-y-8 mt-4">
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
                             <Key size={36} />
                         </div>

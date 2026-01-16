@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface Message {
@@ -150,7 +150,22 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
         return (
             <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
                 <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500">
-                    <div className="flex flex-col items-center text-center space-y-8">
+                    {/* Top Controls inside Card */}
+                    <button
+                        onClick={() => setIsJoined(false)}
+                        className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all active:scale-95"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+
+                    <button
+                        onClick={toggleTheme}
+                        className="absolute top-8 right-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-orange-500 transition-all active:scale-95"
+                    >
+                        {isDark ? <Moon size={24} /> : <Sun size={24} />}
+                    </button>
+
+                    <div className="flex flex-col items-center text-center space-y-8 mt-4">
                         {/* Icon */}
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white shadow-lg">
                             <Tv size={36} />
@@ -216,7 +231,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
                     <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-purple-100'}`}></div>
                 </div>
             )}
-            {/* HUD Header */}
+            {/* HUD Header for Active Room (kept as overlay) */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-50 pointer-events-none">
                 <div className="flex items-center gap-6 pointer-events-auto">
                     <div className="flex items-center gap-3 px-6 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md">
@@ -227,7 +242,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
                     </div>
                     <button
                         onClick={() => setIsListening(!isListening)}
-                        className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all bg-white/10 backdrop-blur-md hover:scale-110 active:scale-95 ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}
+                        className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all bg-white/10 backdrop-blur-md hover:scale-110 active:scale-95 cursor-pointer ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}
                     >
                         {isListening ? <Volume2 size={24} /> : <VolumeX size={24} />}
                     </button>

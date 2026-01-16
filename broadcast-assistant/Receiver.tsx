@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface Message {
@@ -15,7 +15,7 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode, cl
     </div>
 );
 
-const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDark, toggleTheme }) => {
+const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onBack: () => void }> = ({ isDark, toggleTheme, onBack }) => {
     const t = useTranslations();
     const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
     const [isJoined, setIsJoined] = useState(false);
@@ -148,8 +148,20 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
 
     if (!isJoined) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
-                <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500">
+            <div className={`fixed inset-0 flex items-center justify-center overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`}>
+                {/* iOS 26 极简背景氛围 */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className={`absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-[0.03] ${isDark ? 'bg-purple-600' : 'bg-purple-400'}`}></div>
+                    <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-[0.03] ${isDark ? 'bg-pink-600' : 'bg-pink-400'}`}></div>
+                </div>
+
+                <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500 z-10">
+                    <button
+                        onClick={onBack}
+                        className="absolute top-8 left-8 w-12 h-12 rounded-full border border-gray-200 dark:border-white/20 flex items-center justify-center text-gray-500 hover:text-gray-800 dark:hover:text-white transition-all hover:scale-110 active:scale-95 cursor-pointer z-50 bg-white/50 dark:bg-white/5 backdrop-blur-md"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
                     <div className="flex flex-col items-center text-center space-y-8">
                         {/* Icon */}
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white shadow-lg">
@@ -211,7 +223,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
             }`}>
             {/* Background Ambience - iOS 26 Style (Extremely subtle) */}
             {!currentMsg?.isEmergency && (
-                <div className="absolute inset-0 z-0 opacity-[0.05] transition-all duration-1000">
+                <div className="absolute inset-0 z-0 opacity-[0.05] transition-all duration-1000 pointer-events-none">
                     <div className={`absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-blue-900/40' : 'bg-blue-100'}`}></div>
                     <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-purple-100'}`}></div>
                 </div>
@@ -233,22 +245,22 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
                     </button>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex gap-4 relative z-50">
                     <button
-                        onClick={toggleTheme}
-                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all bg-white/10 backdrop-blur-md text-orange-500 cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); toggleTheme(); }}
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/10 backdrop-blur-md text-orange-500 cursor-pointer pointer-events-auto shadow-inner"
                     >
                         {isDark ? <Moon size={24} /> : <Sun size={24} />}
                     </button>
                     <button
-                        onClick={toggleFullscreen}
-                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all bg-white/10 backdrop-blur-md cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/10 backdrop-blur-md cursor-pointer pointer-events-auto "
                     >
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>
                     <button
-                        onClick={() => setIsJoined(false)}
-                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500 hover:scale-110 hover:text-white transition-all bg-white/10 backdrop-blur-md cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); setIsJoined(false); }}
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500 hover:scale-110 active:scale-95 hover:text-white transition-all bg-white/10 backdrop-blur-md cursor-pointer pointer-events-auto"
                     >
                         <X size={24} />
                     </button>

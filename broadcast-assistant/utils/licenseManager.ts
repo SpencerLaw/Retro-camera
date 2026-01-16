@@ -17,9 +17,25 @@ export const isBCVerified = () => {
     return verified && !!code;
 };
 
-export const clearBCLicense = () => {
+export const clearBCLicense = async () => {
+    const license = getBCLicense();
+
+    // Clear local storage
     localStorage.removeItem(BC_LICENSE_KEY);
     localStorage.removeItem(BC_VERIFIED_KEY);
+
+    // Clear room activation records in Vercel KV
+    if (license) {
+        try {
+            await fetch('/api/broadcast/cleanup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ license })
+            });
+        } catch (error) {
+            console.error('Failed to cleanup room records:', error);
+        }
+    }
 };
 
 // Helper to extract prefix (first 8 chars of a clean GB license)

@@ -50,9 +50,9 @@ const BroadcastApp: React.FC = () => {
         setVerifying(false);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         if (window.confirm(t('broadcast.logoutConfirm'))) {
-            clearBCLicense();
+            await clearBCLicense();
             setMode('selection');
         }
     };

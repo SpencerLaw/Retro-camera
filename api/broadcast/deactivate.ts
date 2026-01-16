@@ -13,11 +13,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const licensePrefix = license.replace(/[-\s]/g, '').toUpperCase().substring(0, 8);
-        const fullCode = `${licensePrefix}-${code.toUpperCase()}`;
+        // The code is already the room identifier (e.g., "0001", "0002")
+        // We don't need to combine it with license
+        const cleanCode = code.toUpperCase().trim();
 
         // Delete the v2 active key
-        const activeKey = `br:v2:active:${fullCode}`;
+        const activeKey = `br:v2:active:${cleanCode}`;
         await kv.del(activeKey);
 
         return res.status(200).json({ success: true });

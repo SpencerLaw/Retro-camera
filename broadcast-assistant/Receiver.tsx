@@ -126,13 +126,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
 
     if (!isJoined) {
         return (
-            <div className={`min-h-screen flex items-center justify-center p-6 transition-colors duration-500 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`}>
-                {/* iOS 26 极简背景氛围 */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className={`absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-[0.03] ${isDark ? 'bg-purple-600' : 'bg-purple-400'}`}></div>
-                    <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-[0.03] ${isDark ? 'bg-pink-600' : 'bg-pink-400'}`}></div>
-                </div>
-
+            <div className="flex flex-col items-center justify-center min-h-screen">
                 <GlassCard className="max-w-md w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500">
                     <div className="flex flex-col items-center text-center space-y-8">
                         {/* Icon */}

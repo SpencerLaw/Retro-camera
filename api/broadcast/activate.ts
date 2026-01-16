@@ -27,7 +27,39 @@ export default async function handler(
         const cleanCode = code.toUpperCase().trim();
         const cleanLicense = license.replace(/[-\s]/g, '').toUpperCase();
 
-        // Key format: br:rooms:{LICENSE}
+        // === SECURITY: Validate license before activation ===
+        // 1. Check if license is in whitelist
+        const validCodes = (process.env.LICENSE_CODES || '').split(',')
+            .map(c => c.replace(/[-\s]/g, '').toUpperCase())
+            .filter(c => c.length > 0);
+
+        if (!validCodes.includes(cleanLicense)) {
+            return response.status(401).json({
+                error: 'Invalid or revoked license. Please contact administrator.'
+            });
+        }
+
+        // 2. Check if license is expired
+        const dateStr = cleanLicense.substring(2, 10); // Remove prefix (GB/ZY/etc)
+        const year = parseInt(dateStr.substring(0, 4));
+        const month = parseInt(dateStr.substring(4, 6)) - 1;
+        const day = parseInt(dateStr.substring(6, 8));
+        const generatedDate = new Date(year, month, day);
+
+        if (isNaN(generatedDate.getTime())) {
+            return response.status(401).json({ error: 'Invalid license format' });
+        }
+
+        const expiryDate = new Date(generatedDate);
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+        if (new Date() > expiryDate) {
+            return response.status(401).json({
+                error: `License expired on ${expiryDate.toLocaleDateString()}`
+            });
+        }
+
+        // === License is valid, proceed with activation ===
         const key = `br:rooms:${cleanLicense}`;
 
         // Get existing data

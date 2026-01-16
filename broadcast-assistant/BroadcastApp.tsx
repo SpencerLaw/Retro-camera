@@ -90,7 +90,7 @@ const BroadcastApp: React.FC = () => {
                     <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${theme === 'dark' ? 'bg-purple-600' : 'bg-pink-400'}`}></div>
                 </div>
 
-                <GlassContainer className="max-w-md w-full p-10 rounded-[2.5rem] relative">
+                <GlassContainer className="max-w-2xl w-full p-10 rounded-[2.5rem] relative">
                     <button onClick={() => setMode('selection')} className="absolute top-6 left-6 text-gray-400 hover:text-gray-600 transition-colors">
                         <ArrowLeft size={20} />
                     </button>
@@ -109,15 +109,20 @@ const BroadcastApp: React.FC = () => {
                                 value={licenseInput}
                                 onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
                                 placeholder={t('broadcast.licensePlaceholder')}
-                                className="w-full h-14 bg-gray-100 dark:bg-white/5 border-none rounded-2xl px-6 text-center font-mono text-lg tracking-widest focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all"
+                                className="w-full h-14 bg-gray-100 dark:bg-white/5 border-none rounded-2xl px-6 text-center font-mono text-lg font-bold tracking-widest focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all uppercase"
                             />
-                            {error && <p className="text-red-500 text-xs font-medium flex items-center justify-center gap-1"><AlertCircle size={14} /> {error}</p>}
+                            {error && (
+                                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium flex items-center justify-center gap-2">
+                                    <AlertCircle size={14} />
+                                    {error}
+                                </div>
+                            )}
                         </div>
 
                         <button
                             onClick={handleVerify}
                             disabled={verifying}
-                            className="w-full h-14 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                            className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                         >
                             {verifying ? <Loader2 size={24} className="animate-spin" /> : <CheckCircle2 size={22} className="group-hover:scale-110 transition-transform" />}
                             {verifying ? t('broadcast.verifying') : t('broadcast.verify')}

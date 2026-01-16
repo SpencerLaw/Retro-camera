@@ -111,17 +111,39 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
         }
     };
 
-    const handleStart = () => {
+    const handleStart = async () => {
         if (!fullRoomId.trim()) {
             setError(t('broadcast.receiver.missingChannel'));
             return;
         }
-        localStorage.setItem('br_last_full_room_rx', fullRoomId);
-        setIsJoined(true);
-        setIsListening(true);
-        // Wake up TTS for iOS
-        const wakeUp = new SpeechSynthesisUtterance('');
-        window.speechSynthesis.speak(wakeUp);
+
+        // Clear previous error
+        setError('');
+
+        // Validate room before joining
+        try {
+            const response = await fetch(`/api/broadcast/fetch?code=${encodeURIComponent(fullRoomId.trim())}`);
+
+            if (!response.ok) {
+                // Room is invalid or not active
+                if (response.status === 404) {
+                    setError(t('broadcast.receiver.invalidRoom') || '无效的房间号');
+                } else {
+                    setError('验证失败，请重试');
+                }
+                return;
+            }
+
+            // Room is valid, proceed to join
+            localStorage.setItem('br_last_full_room_rx', fullRoomId);
+            setIsJoined(true);
+            setIsListening(true);
+            // Wake up TTS for iOS
+            const wakeUp = new SpeechSynthesisUtterance('');
+            window.speechSynthesis.speak(wakeUp);
+        } catch (err) {
+            setError('网络错误，请检查连接');
+        }
     };
 
     if (!isJoined) {

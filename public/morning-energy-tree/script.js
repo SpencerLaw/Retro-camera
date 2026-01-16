@@ -26,7 +26,11 @@ const STATE = {
     timerInterval: null,
 
     // Growth calibration: 1 min loud reading = full tree
-    baseGrowthRate: 1.67 / 60
+    baseGrowthRate: 1.67 / 60,
+
+    // Localization context
+    language: localStorage.getItem('global-language') || 'en',
+    translations: null
 };
 
 // Aesthetic Config
@@ -83,8 +87,8 @@ function verifyLicense() {
         showApp();
     } else {
         errorMsg.style.display = 'block';
-        errorMsg.textContent = '无效的授权码：必须以 "ZD" 开头';
-        $('gatekeeper-screen').querySelector('.auth-card').animate([
+        errorMsg.textContent = t('morningTree.authError') || '无效的授权码：必须以 "ZD" 开头';
+        gatekeeper.querySelector('.auth-card').animate([
             { transform: 'translateX(0)' },
             { transform: 'translateX(-10px)' },
             { transform: 'translateX(10px)' },
@@ -136,7 +140,7 @@ function startTimer() {
             STATE.remainingTime--;
             updateTimerDisplay();
             if (STATE.remainingTime === 0) {
-                showToast("⏰ 早读时间结束！");
+                showToast(t('morningTree.timeEndToast') || "⏰ 早读时间结束！");
                 stopMic();
             }
         }
@@ -190,7 +194,7 @@ async function startMic() {
         loop();
     } catch (err) {
         console.error("Mic Error:", err);
-        alert("无法访问麦克风，请检查权限设置。");
+        alert(t('morningTree.micError') || "无法访问麦克风，请检查权限设置。");
     }
 }
 
@@ -280,7 +284,7 @@ function updateState() {
 function triggerSuperMode() {
     STATE.isSuperMode = true;
     STATE.treeColor = '#ffd700';
-    showToast("🎉 能量树显灵了！全班棒棒哒！ 🎉");
+    showToast(t('morningTree.superModeToast') || "🎉 能量树显灵了！全班棒棒哒！ 🎉");
 
     setTimeout(() => {
         STATE.isSuperMode = false;
@@ -588,8 +592,54 @@ function loop() {
     }
 }
 
+
+/* --- 6. Initialization & Localization --- */
+async function initLocalization() {
+    try {
+        const lang = STATE.language;
+        const response = await fetch(`/locales/${lang}.json`);
+        STATE.translations = await response.json();
+        translateUI();
+    } catch (err) {
+        console.error('Failed to load translations:', err);
+    }
+}
+
+function t(key) {
+    if (!STATE.translations) return null;
+    const keys = key.split('.');
+    let value = STATE.translations;
+    for (const k of keys) {
+        if (value[k] === undefined) return null;
+        value = value[k];
+    }
+    return value;
+}
+
+function translateUI() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const translated = t(key);
+        if (translated) el.innerHTML = translated;
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        const translated = t(key);
+        if (translated) el.placeholder = translated;
+    });
+
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        const translated = t(key);
+        if (translated) el.title = translated;
+    });
+}
+
 // Init
-initGatekeeper();
+initLocalization().then(() => {
+    initGatekeeper();
+});
 micBtn.onclick = toggleMic;
 if ($('reset-btn')) $('reset-btn').onclick = resetGame; // FIX: Use shared reset function
 if ($('sensitivity-slider')) $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };

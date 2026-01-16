@@ -22,6 +22,11 @@
       "subtitle": "魔法課堂 • 星際穿越",
       "description": "超炫酷的課堂點名神器，讓被點名成為一種期待"
     },
+    "morningTree": {
+      "title": "早讀能量樹",
+      "subtitle": "聲音生長 • 遊戲化",
+      "description": "用朗讀聲澆灌小樹，見證知識開花結果，早讀也能充滿能量！"
+    },
     "groupMaker": {
       "title": "抓抓樂分組器",
       "subtitle": "爪子選取 • 公平分組",
@@ -170,5 +175,33 @@
       "downlinkSync": "正在接收信息中",
       "standbySource": "等待播報源接入..."
     }
+  },
+  "morningTree": {
+    "backHome": "返回首頁",
+    "dbLabel": "分貝",
+    "gatekeeperTitle": "🔒 班級早讀系統",
+    "gatekeeperSub": "請輸入授權碼以啟動",
+    "licensePlaceholder": "ZD-xxxx-xxxx",
+    "verifyBtn": "開啟能量樹",
+    "authError": "無效的授權碼：必須以 \"ZD\" 開頭",
+    "energyLabel": "🍃 早讀能量值",
+    "remainingTime": "剩余時間",
+    "durationLabel": "早讀時長",
+    "minSuffix": "分鐘",
+    "customOption": "自定義",
+    "customPlaceholder": "分鐘",
+    "sensitivityLabel": "靈敏度",
+    "helpTitle": "點擊查看校準建議",
+    "helpAdviceTitle": "📏 校準建議：",
+    "helpAdviceMute": "靜音測試",
+    "helpAdviceMuteDesc": "：安靜時數值 40-50 為正常；若超過 65dB 請調低靈敏度。",
+    "helpAdviceRead": "朗讀測試",
+    "helpAdviceReadDesc": "：標準音量在 70-75 為佳；若很難達到 70dB 請調高靈敏度。",
+    "tapToClose": "點擊此處關閉",
+    "resetBtnTitle": "重置樹木",
+    "micToggleTitle": "開始/停止監聽",
+    "timeEndToast": "⏰ 早讀時間結束！",
+    "micError": "無法訪問麥克風，請檢查權限設置。",
+    "superModeToast": "🎉 能量樹顯靈了！全班棒棒噠！ 🎉"
   }
 }

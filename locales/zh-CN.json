@@ -182,5 +182,33 @@
       "downlinkSync": "正在接收信息中",
       "standbySource": "等待播报源接入..."
     }
+  },
+  "morningTree": {
+    "backHome": "返回首页",
+    "dbLabel": "分贝",
+    "gatekeeperTitle": "🔒 班级早读系统",
+    "gatekeeperSub": "请输入授权码以启动",
+    "licensePlaceholder": "ZD-xxxx-xxxx",
+    "verifyBtn": "开启能量树",
+    "authError": "无效的授权码：必须以 \"ZD\" 开头",
+    "energyLabel": "🍃 早读能量值",
+    "remainingTime": "剩余时间",
+    "durationLabel": "早读时长",
+    "minSuffix": "分钟",
+    "customOption": "自定义",
+    "customPlaceholder": "分钟",
+    "sensitivityLabel": "灵敏度",
+    "helpTitle": "点击查看校准建议",
+    "helpAdviceTitle": "📏 校准建议：",
+    "helpAdviceMute": "静音测试",
+    "helpAdviceMuteDesc": "：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。",
+    "helpAdviceRead": "朗读测试",
+    "helpAdviceReadDesc": "：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。",
+    "tapToClose": "点击此处关闭",
+    "resetBtnTitle": "重置树木",
+    "micToggleTitle": "开始/停止监听",
+    "timeEndToast": "⏰ 早读时间结束！",
+    "micError": "无法访问麦克风，请检查权限设置。",
+    "superModeToast": "🎉 能量树显灵了！全班棒棒哒！ 🎉"
   }
 }

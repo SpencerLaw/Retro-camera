@@ -22,6 +22,11 @@
       "subtitle": "Magic Classroom • Interstellar",
       "description": "Super cool roll call tool that makes being called on something to look forward to"
     },
+    "morningTree": {
+      "title": "Morning Energy Tree",
+      "subtitle": "Voice Growth • Gamified",
+      "description": "Nourish the little tree with the sound of reading, witness knowledge blossom, and make morning reading full of energy!"
+    },
     "groupMaker": {
       "title": "Claw Machine Group Maker",
       "subtitle": "Claw Grab • Fair Grouping",
@@ -171,5 +176,33 @@
       "downlinkSync": "Receiving messages...",
       "standbySource": "Waiting for broadcast source..."
     }
+  },
+  "morningTree": {
+    "backHome": "Back Home",
+    "dbLabel": "dB",
+    "gatekeeperTitle": "🔒 Class Reading System",
+    "gatekeeperSub": "Please enter license code to start",
+    "licensePlaceholder": "ZD-xxxx-xxxx",
+    "verifyBtn": "Open Energy Tree",
+    "authError": "Invalid Code: Must start with \"ZD\"",
+    "energyLabel": "🍃 Reading Energy",
+    "remainingTime": "Time Left",
+    "durationLabel": "Duration",
+    "minSuffix": "min",
+    "customOption": "Custom",
+    "customPlaceholder": "min",
+    "sensitivityLabel": "Sensitivity",
+    "helpTitle": "Click for calibration advice",
+    "helpAdviceTitle": "📏 Calibration Advice:",
+    "helpAdviceMute": "Mute Test",
+    "helpAdviceMuteDesc": ": 40-50 dB is normal; if over 65dB, lower sensitivity.",
+    "helpAdviceRead": "Reading Test",
+    "helpAdviceReadDesc": ": 70-75 dB is ideal; if hard to reach 70dB, raise sensitivity.",
+    "tapToClose": "Tap to close",
+    "resetBtnTitle": "Reset Tree",
+    "micToggleTitle": "Start/Stop Listening",
+    "timeEndToast": "⏰ Reading session ended!",
+    "micError": "Cannot access microphone, please check permissions.",
+    "superModeToast": "🎉 The Energy Tree is glowing! Great job, class! 🎉"
   }
 }

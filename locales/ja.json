@@ -22,6 +22,11 @@
       "subtitle": "魔法教室 • 星間旅行",
       "description": "指名されるのが待ち遠しくなる、超クールな点呼ツール"
     },
+    "morningTree": {
+      "title": "朝読エネルギー樹",
+      "subtitle": "声で育つ • ゲーム化",
+      "description": "音読の声で小さな木を育て、知識の花が咲くのを見届けよう。朝の読書がエネルギーに満ちあふれます！"
+    },
     "groupMaker": {
       "title": "UFOキャッチャー・グループ分け",
       "subtitle": "アームで狙え！ • 公平なチーム作り",
@@ -169,5 +174,33 @@
       "downlinkSync": "メッセージを受信中...",
       "standbySource": "放送源の接続を待機中..."
     }
+  },
+  "morningTree": {
+    "backHome": "ホームに戻る",
+    "dbLabel": "デシベル",
+    "gatekeeperTitle": "🔒 授業朝読システム",
+    "gatekeeperSub": "ライセンスコードを入力して開始",
+    "licensePlaceholder": "ZD-xxxx-xxxx",
+    "verifyBtn": "エネルギー樹を開く",
+    "authError": "無効なコード：\"ZD\"で始まる必要があります",
+    "energyLabel": "🍃 朝読エネルギー",
+    "remainingTime": "残り時間",
+    "durationLabel": "朝読時間",
+    "minSuffix": "分",
+    "customOption": "カスタム",
+    "customPlaceholder": "分",
+    "sensitivityLabel": "感度",
+    "helpTitle": "校正のアドバイスを表示",
+    "helpAdviceTitle": "📏 校正のアドバイス：",
+    "helpAdviceMute": "静音テスト",
+    "helpAdviceMuteDesc": "：静かな時は40-50が正常です。65dBを超える場合は感度を下げてください。",
+    "helpAdviceRead": "音読テスト",
+    "helpAdviceReadDesc": "：標準的な音量は70-75が理想的です。70dBに届かない場合は感度を上げてください。",
+    "tapToClose": "ここをタップして閉じる",
+    "resetBtnTitle": "樹をリセット",
+    "micToggleTitle": "開始/停止",
+    "timeEndToast": "⏰ 朝読時間が終了しました！",
+    "micError": "マイクにアクセスできません。権限設定を確認してください。",
+    "superModeToast": "🎉 エネルギー樹が現れました！みんな素晴らしい！ 🎉"
   }
 }

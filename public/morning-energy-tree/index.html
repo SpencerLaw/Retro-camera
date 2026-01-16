@@ -4,34 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌳 早读能量树 | Morning Energy Tree</title>
+    <title data-i18n="home.morningTree.title">🌳 早读能量树 | Morning Energy Tree</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
     <!-- Back Button -->
-    <a href="/" class="back-home-btn" title="返回首页">
+    <a href="/" class="back-home-btn" data-i18n-title="morningTree.backHome">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m15 18-6-6 6-6" />
         </svg>
-        返回首页
+        <span data-i18n="morningTree.backHome">返回首页</span>
     </a>
 
     <!-- DB Meter (New) -->
     <div class="db-display">
         <div id="db-value">--</div>
-        <div class="db-label">dB</div>
+        <div class="db-label" data-i18n="morningTree.dbLabel">dB</div>
     </div>
 
     <!-- 1. Security Gatekeeper -->
     <div id="gatekeeper-screen">
         <div class="auth-card">
-            <h1>🔒 班级早读系统</h1>
-            <p style="opacity: 0.8; margin-bottom: 20px;">请输入授权码以启动</p>
-            <input type="text" id="license-input" class="auth-input" placeholder="ZD-xxxx-xxxx" autocomplete="off">
-            <button id="verify-btn" class="auth-btn">开启能量树</button>
+            <h1 data-i18n="morningTree.gatekeeperTitle">🔒 班级早读系统</h1>
+            <p style="opacity: 0.8; margin-bottom: 20px;" data-i18n="morningTree.gatekeeperSub">请输入授权码以启动</p>
+            <input type="text" id="license-input" class="auth-input" data-i18n-placeholder="morningTree.licensePlaceholder" placeholder="ZD-xxxx-xxxx" autocomplete="off">
+            <button id="verify-btn" class="auth-btn" data-i18n="morningTree.verifyBtn">开启能量树</button>
             <p id="auth-error" style="color: #ff6b6b; margin-top: 10px; display: none;">无效的授权码 (需以 ZD 开头)</p>
         </div>
     </div>
@@ -46,7 +46,7 @@
 
             <!-- Top: Energy Bar -->
             <div class="top-bar">
-                <div class="energy-label">🍃 早读能量值</div>
+                <div class="energy-label" data-i18n="morningTree.energyLabel">🍃 早读能量值</div>
                 <div class="energy-container">
                     <div id="energy-fill"></div>
                 </div>
@@ -54,7 +54,7 @@
                 <!-- Timer Display -->
                 <div class="timer-display">
                     <div id="countdown-time">--:--</div>
-                    <div class="timer-label">剩余时间</div>
+                    <div class="timer-label" data-i18n="morningTree.remainingTime">剩余时间</div>
                 </div>
             </div>
 
@@ -64,43 +64,42 @@
             <!-- Bottom: Controls -->
             <div class="bottom-controls">
                 <!-- Mic Toggle -->
-                <button id="mic-toggle-btn" class="icon-btn" title="开始/停止监听">
+                <button id="mic-toggle-btn" class="icon-btn" data-i18n-title="morningTree.micToggleTitle">
                     🎤
                 </button>
 
                 <!-- Timer Settings -->
                 <div class="control-group">
-                    <label class="control-label">早读时长</label>
+                    <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
                     <select id="duration-select" class="duration-select">
-                        <option value="30">30分钟</option>
-                        <option value="40">40分钟</option>
-                        <option value="custom">自定义</option>
+                        <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                        <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                        <option value="custom" data-i18n="morningTree.customOption">自定义</option>
                     </select>
                     <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
-                        placeholder="分钟">
+                        data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
                 </div>
 
                 <!-- Sensitivity Slider -->
                 <div class="control-group">
-                    <label class="control-label">
-                        灵敏度
-                        <span id="help-trigger" class="help-icon" title="点击查看校准建议">❓</span>
+                        <span data-i18n="morningTree.sensitivityLabel">灵敏度</span>
+                        <span id="help-trigger" class="help-icon" data-i18n-title="morningTree.helpTitle">❓</span>
                     </label>
                     <input type="range" id="sensitivity-slider" min="1" max="100" value="50">
 
                     <!-- Tooltip Content -->
                     <div id="help-tooltip" class="help-tooltip hidden">
-                        <strong>📏 校准建议：</strong>
+                        <strong data-i18n="morningTree.helpAdviceTitle">📏 校准建议：</strong>
                         <ul>
-                            <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请<strong>调低</strong>灵敏度。</li>
-                            <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请<strong>调高</strong>灵敏度。</li>
+                            <li><strong data-i18n="morningTree.helpAdviceMute">静音测试</strong><span data-i18n="morningTree.helpAdviceMuteDesc">：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</span></li>
+                            <li><strong data-i18n="morningTree.helpAdviceRead">朗读测试</strong><span data-i18n="morningTree.helpAdviceReadDesc">：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</span></li>
                         </ul>
-                        <p class="tap-close">点击此处关闭</p>
+                        <p class="tap-close" data-i18n="morningTree.tapToClose">点击此处关闭</p>
                     </div>
                 </div>
 
                 <!-- Reset Button -->
-                <button id="reset-btn" class="icon-btn" title="重置树木" style="font-size: 1.2rem;">
+                <button id="reset-btn" class="icon-btn" data-i18n-title="morningTree.resetBtnTitle" style="font-size: 1.2rem;">
                     🔄
                 </button>
             </div>

@@ -168,7 +168,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         onClick={toggleTheme}
                         className="absolute top-8 right-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-orange-500 transition-all active:scale-95"
                     >
-                        {isDark ? <Moon size={24} /> : <Sun size={24} />}
+                        {isDark ? <Sun size={24} /> : <Moon size={24} />}
                     </button>
 
                     <div className="flex flex-col items-center text-center space-y-8 mt-4">
@@ -259,7 +259,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         onClick={toggleTheme}
                         className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/10 backdrop-blur-md text-orange-500 cursor-pointer"
                     >
-                        {isDark ? <Moon size={24} /> : <Sun size={24} />}
+                        {isDark ? <Sun size={24} /> : <Moon size={24} />}
                     </button>
                     <button
                         onClick={toggleFullscreen}

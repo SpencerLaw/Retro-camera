@@ -149,7 +149,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void }> = ({ isDa
     if (!isJoined) {
         return (
             <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
-                <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative animate-in zoom-in duration-500">
+                <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative z-50 animate-in zoom-in duration-500">
                     {/* Top Controls inside Card */}
                     <button
                         onClick={() => setIsJoined(false)}

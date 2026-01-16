@@ -18,17 +18,30 @@ export default async function handler(
     try {
         const cleanCode = code.toUpperCase().trim();
 
-        // 1. Check if room is active/registered
-        const activeKey = `br:v2:active:${cleanCode}`;
-        const isActive = await kv.exists(activeKey);
+        // 1. Check if room is active/registered in new format
+        // Search through all br:rooms:* keys to find if this room exists
+        const roomKeys = await kv.keys('br:rooms:*');
+        let isValidRoom = false;
 
-        if (!isActive) {
-            // Check legacy key just in case
+        for (const key of roomKeys) {
+            const data = await kv.get<{ rooms: string[], updatedAt: number }>(key);
+            if (data && data.rooms && data.rooms.includes(cleanCode)) {
+                isValidRoom = true;
+                break;
+            }
+        }
+
+        // Fallback: Check legacy format for backward compatibility
+        if (!isValidRoom) {
             const legacyKeyPattern = `br:lic:*:rm:${cleanCode}:act`;
             const keys = await kv.keys(legacyKeyPattern);
-            if (keys.length === 0) {
-                return response.status(404).json({ error: 'Room not found or inactive' });
+            if (keys.length > 0) {
+                isValidRoom = true;
             }
+        }
+
+        if (!isValidRoom) {
+            return response.status(404).json({ error: 'Room not found or inactive' });
         }
 
         // 2. Try Global Pool First

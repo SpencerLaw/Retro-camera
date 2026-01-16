@@ -4,6 +4,10 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 /**
  * 激活/报备房间号 API
  * 教师端调用，证明该房间号存在且活跃。
+ * 
+ * 数据结构：
+ * 键：br:rooms:{LICENSE_CODE}
+ * 值：{ rooms: ["0001", "0002"], updatedAt: timestamp }
  */
 export default async function handler(
     request: VercelRequest,
@@ -21,15 +25,27 @@ export default async function handler(
 
     try {
         const cleanCode = code.toUpperCase().trim();
-        // Key format: br:v2:active:{CODE}
-        // Value: License prefix (owner)
-        // Expiration: 30 days (teacher just needs to open the app once a month to keep it alive)
-        const key = `br:v2:active:${cleanCode}`;
-
         const cleanLicense = license.replace(/[-\s]/g, '').toUpperCase();
 
+        // Key format: br:rooms:{LICENSE}
+        const key = `br:rooms:${cleanLicense}`;
+
+        // Get existing data
+        const existing = await kv.get<{ rooms: string[], updatedAt: number }>(key);
+
+        let rooms: string[] = [];
+        if (existing && existing.rooms) {
+            rooms = existing.rooms;
+        }
+
+        // Add room code if not already present
+        if (!rooms.includes(cleanCode)) {
+            rooms.push(cleanCode);
+        }
+
+        // Save with 30-day expiration
         await kv.set(key, {
-            license: cleanLicense,
+            rooms: rooms,
             updatedAt: Date.now()
         }, { ex: 60 * 60 * 24 * 30 });
 

@@ -1,6 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv } from '@vercel/kv';
 
+/**
+ * 停用房间号 API
+ * 当老师删除班级时调用，从该授权码的房间列表中移除对应房间号
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -13,13 +17,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        // The code is already the room identifier (e.g., "0001", "0002")
-        // We don't need to combine it with license
         const cleanCode = code.toUpperCase().trim();
+        const cleanLicense = license.replace(/[-\s]/g, '').toUpperCase();
 
-        // Delete the v2 active key
-        const activeKey = `br:v2:active:${cleanCode}`;
-        await kv.del(activeKey);
+        // Key format: br:rooms:{LICENSE}
+        const key = `br:rooms:${cleanLicense}`;
+
+        // Get existing data
+        const existing = await kv.get<{ rooms: string[], updatedAt: number }>(key);
+
+        if (!existing || !existing.rooms) {
+            // No data found, nothing to delete
+            return res.status(200).json({ success: true, message: 'Room not found in active list' });
+        }
+
+        // Remove the room code from the array
+        const updatedRooms = existing.rooms.filter(r => r !== cleanCode);
+
+        if (updatedRooms.length === 0) {
+            // If no rooms left, delete the entire key
+            await kv.del(key);
+        } else {
+            // Update with remaining rooms
+            await kv.set(key, {
+                rooms: updatedRooms,
+                updatedAt: Date.now()
+            }, { ex: 60 * 60 * 24 * 30 });
+        }
 
         return res.status(200).json({ success: true });
     } catch (error) {

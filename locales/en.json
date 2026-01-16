@@ -155,7 +155,8 @@
       "last30Sessions": "Last 30 Sessions",
       "wipeLogs": "Wipe Logs",
       "clearHistoryConfirm": "Clear all local broadcast history?",
-      "silentAirwaves": "Your airwaves are currently silent."
+      "silentAirwaves": "Your airwaves are currently silent.",
+      "active": "Online"
     },
     "receiver": {
       "joinChannel": "Join Channel",

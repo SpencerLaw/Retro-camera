@@ -166,7 +166,8 @@
       "deleteClass": "删除班级",
       "className": "班级名称",
       "roomCode": "房间码",
-      "manageClasses": "班级管理"
+      "manageClasses": "班级管理",
+      "active": "在线"
     },
     "receiver": {
       "joinChannel": "进入通道",

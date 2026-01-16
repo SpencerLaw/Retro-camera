@@ -153,7 +153,8 @@
       "last30Sessions": "最近の30セッション",
       "wipeLogs": "ログを消去",
       "clearHistoryConfirm": "ローカルの放送履歴をすべて消去しますか？",
-      "silentAirwaves": "現在、電波は静止しています。"
+      "silentAirwaves": "現在、電波は静止しています。",
+      "active": "オンライン"
     },
     "receiver": {
       "joinChannel": "チャンネルに入る",

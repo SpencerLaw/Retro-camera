@@ -153,7 +153,9 @@
       "last30Sessions": "最近 30 條記錄",
       "wipeLogs": "清除日誌",
       "clearHistoryConfirm": "確定要清空本地播報記錄嗎？",
-      "silentAirwaves": "當前電波處於靜默狀態。"
+      "roomCode": "房間碼",
+      "manageClasses": "班級管理",
+      "active": "在線"
     },
     "receiver": {
       "joinChannel": "進入通道",

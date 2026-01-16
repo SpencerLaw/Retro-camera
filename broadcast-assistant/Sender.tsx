@@ -96,10 +96,26 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         setActiveChannelId(newId);
     };
 
-    const deleteChannel = (id: string, e: React.MouseEvent) => {
+    const deleteChannel = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if (channels.length <= 1) return;
         if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
+            // Find the channel to get its room code
+            const channelToDelete = channels.find(c => c.id === id);
+
+            // Deactivate the room in the database
+            if (channelToDelete) {
+                try {
+                    await fetch('/api/broadcast/deactivate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: channelToDelete.code, license })
+                    });
+                } catch (error) {
+                    console.error('Failed to deactivate room:', error);
+                }
+            }
+
             const nextChannels = channels.filter(c => c.id !== id);
             setChannels(nextChannels);
             if (activeChannelId === id) {

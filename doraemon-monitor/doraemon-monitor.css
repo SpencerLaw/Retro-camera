@@ -462,6 +462,99 @@
   box-shadow: 0 6px 16px rgba(0, 150, 225, 0.4);
 }
 
+/* ===== Help Tooltip ===== */
+.help-icon-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+
+.help-icon-btn:hover {
+  background: rgba(0,0,0,0.05);
+  color: var(--accent-blue);
+  opacity: 1;
+}
+.dark-mode .help-icon-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.help-tooltip {
+  position: absolute;
+  top: -160px; /* Adjust based on content height */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  padding: 16px;
+  z-index: 100;
+  border: 1px solid var(--card-border);
+  animation: fade-in-up 0.2s ease-out;
+}
+
+.dark-mode .help-tooltip {
+  background: #1e293b;
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.help-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent-blue);
+}
+
+.close-help-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.help-content {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.help-content p {
+  margin: 0 0 8px 0;
+}
+
+.help-content strong {
+  color: var(--accent-blue);
+}
+
+.help-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border);
+  cursor: pointer;
+}
+
+
 /* ===== 响应式适配 ===== */
 
 /* 笔记本/中等屏幕 (小于 1280px) */

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize, RotateCcw, HelpCircle, X } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
@@ -25,6 +25,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [countdown, setCountdown] = useState(4);
   const [timeStr, setTimeStr] = useState('');
   const [sensitivity, setSensitivity] = useState(50);
+  const [showHelp, setShowHelp] = useState(false);
   const sensitivityRef = useRef(50);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -358,11 +359,39 @@ const DoraemonMonitorApp: React.FC = () => {
             </div>
           </div>
           
-          <div className="controls-box">
+          <div className="controls-box" style={{ position: 'relative' }}>
             <div className="slider-header">
-              <span>{t('doraemon.sensitivity')}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>{t('doraemon.sensitivity')}</span>
+                <button 
+                  onClick={() => setShowHelp(!showHelp)} 
+                  className="help-icon-btn"
+                  title={t('doraemon.helpTitle')}
+                >
+                  <HelpCircle size={16} />
+                </button>
+              </div>
               <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{sensitivity}%</span>
             </div>
+            
+            {showHelp && (
+              <div className="help-tooltip">
+                <div className="help-header">
+                  <span>{t('doraemon.helpAdviceTitle')}</span>
+                  <button onClick={() => setShowHelp(false)} className="close-help-btn">
+                    <X size={14} />
+                  </button>
+                </div>
+                <div className="help-content">
+                  <p><strong>{t('doraemon.helpAdviceMute')}</strong>{t('doraemon.helpAdviceMuteDesc')}</p>
+                  <p><strong>{t('doraemon.helpAdviceRead')}</strong>{t('doraemon.helpAdviceReadDesc')}</p>
+                </div>
+                <div className="help-footer" onClick={() => setShowHelp(false)}>
+                  {t('doraemon.tapToClose')}
+                </div>
+              </div>
+            )}
+
             <input 
               type="range" 
               min="0" 

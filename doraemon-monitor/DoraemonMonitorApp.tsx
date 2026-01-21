@@ -24,11 +24,17 @@ const DoraemonMonitorApp: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(4);
   const [timeStr, setTimeStr] = useState('');
+  const [sensitivity, setSensitivity] = useState(50);
+  const sensitivityRef = useRef(50);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
+
+  useEffect(() => {
+    sensitivityRef.current = sensitivity;
+  }, [sensitivity]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -90,6 +96,11 @@ const DoraemonMonitorApp: React.FC = () => {
     }
     const rms = Math.sqrt(sum / data.length);
     let rawDb = rms > 0 ? (Math.log10(rms) * 20 + 100) : 30;
+    
+    // Apply sensitivity adjustment
+    const adj = (sensitivityRef.current - 50) * 0.5;
+    rawDb += adj;
+
     rawDb = Math.max(35, Math.min(120, rawDb));
     setCurrentDb(prev => {
       const next = prev + (rawDb - prev) * 0.5;
@@ -346,6 +357,22 @@ const DoraemonMonitorApp: React.FC = () => {
               <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
             </div>
           </div>
+          
+          <div className="controls-box">
+            <div className="slider-header">
+              <span>{t('doraemon.sensitivity')}</span>
+              <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{sensitivity}%</span>
+            </div>
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value={sensitivity} 
+              onChange={(e) => setSensitivity(Number(e.target.value))} 
+              className="threshold-slider" 
+            />
+          </div>
+
           <div className="controls-box">
             <div className="slider-header">
               <span>{t('doraemon.threshold')}</span>

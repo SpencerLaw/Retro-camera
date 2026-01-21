@@ -95,6 +95,7 @@
     "warnCount": "⚠️ 警告次数",
     "maxDb": "🔊 最高分贝",
     "threshold": "分贝阈值",
+    "sensitivity": "麦克风灵敏度",
     "authFailed": "授权失败: ",
     "authExpired": "⚠️ 授权失效",
     "returnHome": "{seconds}秒后自动返回首页...",

@@ -149,18 +149,17 @@ const DoraemonMonitorApp: React.FC = () => {
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      // More robust siren-like alarm
-      osc.type = 'sine';
-      // Fast frequency sweep for urgency
-      osc.frequency.setValueAtTime(800, t);
-      osc.frequency.exponentialRampToValueAtTime(1600, t + 0.1);
-      osc.frequency.exponentialRampToValueAtTime(800, t + 0.2);
-      osc.frequency.exponentialRampToValueAtTime(1600, t + 0.3);
-      osc.frequency.exponentialRampToValueAtTime(800, t + 0.4);
+      // More serious beep-style alarm
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, t); // A4, a more authoritative tone
+      osc.frequency.exponentialRampToValueAtTime(554.37, t + 0.1); // C#5
+      osc.frequency.setValueAtTime(440, t + 0.2);
+      osc.frequency.exponentialRampToValueAtTime(554.37, t + 0.3);
+      osc.frequency.setValueAtTime(440, t + 0.4);
 
       gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.3, t + 0.05);
-      gain.gain.linearRampToValueAtTime(0.3, t + 0.35);
+      gain.gain.linearRampToValueAtTime(0.2, t + 0.05);
+      gain.gain.linearRampToValueAtTime(0.2, t + 0.35);
       gain.gain.linearRampToValueAtTime(0, t + 0.4);
 
       osc.start(t);
@@ -171,7 +170,8 @@ const DoraemonMonitorApp: React.FC = () => {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
         msg.lang = 'zh-CN';
-        msg.rate = 1.1; // Slightly faster for urgency
+        msg.rate = 0.9;   // Slower for seriousness
+        msg.pitch = 0.8;  // Deeper voice
         msg.onend = () => {
           // Allow next alarm cycle after speech finishes
           setTimeout(() => {

@@ -32,6 +32,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const workerRef = useRef<Worker | null>(null);
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
+  const isAlarmPlayingRef = useRef(false);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -97,7 +98,7 @@ const DoraemonMonitorApp: React.FC = () => {
     }
     const rms = Math.sqrt(sum / data.length);
     let rawDb = rms > 0 ? (Math.log10(rms) * 20 + 100) : 30;
-    
+
     // Apply sensitivity adjustment
     const adj = (sensitivityRef.current - 50) * 0.5;
     rawDb += adj;
@@ -134,7 +135,9 @@ const DoraemonMonitorApp: React.FC = () => {
   };
 
   const playAlarmSound = () => {
-    if (!audioContextRef.current) return;
+    if (!audioContextRef.current || isAlarmPlayingRef.current) return;
+
+    isAlarmPlayingRef.current = true;
     try {
       const ctx = audioContextRef.current;
       if (ctx.state === 'suspended') ctx.resume();
@@ -146,22 +149,51 @@ const DoraemonMonitorApp: React.FC = () => {
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      // Double beep alarm
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(880, t); // A5
-      osc.frequency.setValueAtTime(880, t + 0.1);
-      osc.frequency.setValueAtTime(0, t + 0.15); // Pause
-      osc.frequency.setValueAtTime(880, t + 0.25);
-      osc.frequency.setValueAtTime(880, t + 0.35);
+      // More robust siren-like alarm
+      osc.type = 'sine';
+      // Fast frequency sweep for urgency
+      osc.frequency.setValueAtTime(800, t);
+      osc.frequency.exponentialRampToValueAtTime(1600, t + 0.1);
+      osc.frequency.exponentialRampToValueAtTime(800, t + 0.2);
+      osc.frequency.exponentialRampToValueAtTime(1600, t + 0.3);
+      osc.frequency.exponentialRampToValueAtTime(800, t + 0.4);
 
-      gain.gain.setValueAtTime(0.1, t);
-      gain.gain.linearRampToValueAtTime(0.1, t + 0.35);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.3, t + 0.05);
+      gain.gain.linearRampToValueAtTime(0.3, t + 0.35);
       gain.gain.linearRampToValueAtTime(0, t + 0.4);
 
       osc.start(t);
       osc.stop(t + 0.4);
+
+      // Speech Synthesis Integration
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
+        msg.lang = 'zh-CN';
+        msg.rate = 1.1; // Slightly faster for urgency
+        msg.onend = () => {
+          // Allow next alarm cycle after speech finishes
+          setTimeout(() => {
+            isAlarmPlayingRef.current = false;
+          }, 500);
+        };
+        window.speechSynthesis.speak(msg);
+      } else {
+        // Fallback if no TTS
+        setTimeout(() => {
+          isAlarmPlayingRef.current = false;
+        }, 1000);
+      }
+
+      // Haptic Feedback
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+      }
+
     } catch (e) {
       console.error("Audio play failed", e);
+      isAlarmPlayingRef.current = false;
     }
   };
 
@@ -176,8 +208,9 @@ const DoraemonMonitorApp: React.FC = () => {
           setState('alarm');
           setWarnCount(prev => prev + 1);
           setQuietTime(0);
-          playAlarmSound();
         }
+        // Always attempt to play if threshold is exceeded and cooldown allows
+        playAlarmSound();
       }
       else if (now - thresholdStartRef.current > 800 && state === 'calm') setState('warning');
     } else {
@@ -358,13 +391,13 @@ const DoraemonMonitorApp: React.FC = () => {
               <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
             </div>
           </div>
-          
+
           <div className="controls-box" style={{ position: 'relative' }}>
             <div className="slider-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>{t('doraemon.sensitivity')}</span>
-                <button 
-                  onClick={() => setShowHelp(!showHelp)} 
+                <button
+                  onClick={() => setShowHelp(!showHelp)}
                   className="help-icon-btn"
                   title={t('doraemon.helpTitle')}
                 >
@@ -373,7 +406,7 @@ const DoraemonMonitorApp: React.FC = () => {
               </div>
               <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{sensitivity}%</span>
             </div>
-            
+
             {showHelp && (
               <div className="help-tooltip">
                 <div className="help-header">
@@ -392,13 +425,13 @@ const DoraemonMonitorApp: React.FC = () => {
               </div>
             )}
 
-            <input 
-              type="range" 
-              min="0" 
-              max="100" 
-              value={sensitivity} 
-              onChange={(e) => setSensitivity(Number(e.target.value))} 
-              className="threshold-slider" 
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={sensitivity}
+              onChange={(e) => setSensitivity(Number(e.target.value))}
+              className="threshold-slider"
             />
           </div>
 

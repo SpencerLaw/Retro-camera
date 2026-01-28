@@ -32,7 +32,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const workerRef = useRef<Worker | null>(null);
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
-  const isAlarmPlayingRef = useRef(false);
+  const alarmIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -135,9 +135,7 @@ const DoraemonMonitorApp: React.FC = () => {
   };
 
   const playAlarmSound = () => {
-    if (!audioContextRef.current || isAlarmPlayingRef.current) return;
-
-    isAlarmPlayingRef.current = true;
+    if (!audioContextRef.current) return;
     try {
       const ctx = audioContextRef.current;
       if (ctx.state === 'suspended') ctx.resume();
@@ -172,18 +170,7 @@ const DoraemonMonitorApp: React.FC = () => {
         msg.lang = 'zh-CN';
         msg.rate = 0.9;   // Slower for seriousness
         msg.pitch = 0.8;  // Deeper voice
-        msg.onend = () => {
-          // Allow next alarm cycle after speech finishes
-          setTimeout(() => {
-            isAlarmPlayingRef.current = false;
-          }, 500);
-        };
         window.speechSynthesis.speak(msg);
-      } else {
-        // Fallback if no TTS
-        setTimeout(() => {
-          isAlarmPlayingRef.current = false;
-        }, 1000);
       }
 
       // Haptic Feedback
@@ -193,7 +180,6 @@ const DoraemonMonitorApp: React.FC = () => {
 
     } catch (e) {
       console.error("Audio play failed", e);
-      isAlarmPlayingRef.current = false;
     }
   };
 
@@ -209,8 +195,6 @@ const DoraemonMonitorApp: React.FC = () => {
           setWarnCount(prev => prev + 1);
           setQuietTime(0);
         }
-        // Always attempt to play if threshold is exceeded and cooldown allows
-        playAlarmSound();
       }
       else if (now - thresholdStartRef.current > 800 && state === 'calm') setState('warning');
     } else {
@@ -219,6 +203,29 @@ const DoraemonMonitorApp: React.FC = () => {
       else if (state !== 'calm') setState('calm');
     }
   }, [currentDb, limit, isStarted]);
+
+  useEffect(() => {
+    if (state === 'alarm') {
+      // Play immediately
+      playAlarmSound();
+      // Start loop
+      if (!alarmIntervalRef.current) {
+        alarmIntervalRef.current = setInterval(playAlarmSound, 2500); // Repeat every 2.5s
+      }
+    } else {
+      if (alarmIntervalRef.current) {
+        clearInterval(alarmIntervalRef.current);
+        alarmIntervalRef.current = null;
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    }
+    return () => {
+      if (alarmIntervalRef.current) {
+        clearInterval(alarmIntervalRef.current);
+        alarmIntervalRef.current = null;
+      }
+    };
+  }, [state]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;

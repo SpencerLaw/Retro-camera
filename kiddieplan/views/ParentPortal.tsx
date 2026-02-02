@@ -472,278 +472,283 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <div className="grid grid-cols-2 gap-8">
                                     <button
                                         onClick={() => setActiveTab('tasks')}
-                                        className="kawaii-button aspect-square flex-col gap-6 bg-white hover:bg-white/95 border-none shadow-xl"
-                                    >
-                                        <div className="w-20 h-20 bg-[#E07A5F]/0 rounded-[35px] flex items-center justify-center shadow-xl border-4 border-white bg-gradient-to-tr from-[#E0C3FC] to-white">
-                                            <Calendar className="text-[#5D4D7A]" size={40} strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-base font-bold text-[#5D4D7A] tracking-wider uppercase">任务分配</span>
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('rewards')}
-                                        className="kawaii-button aspect-square flex-col gap-6 bg-white hover:bg-white/95 border-none shadow-xl"
-                                    >
-                                        <div className="w-20 h-20 bg-[#F2CC8F]/0 rounded-[35px] flex items-center justify-center shadow-xl border-4 border-white bg-gradient-to-tr from-[#FFDEE9] to-white">
-                                            <Gift className="text-[#E07A5F]/0 text-[#5D4D7A]" size={40} strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-base font-bold text-[#5D4D7A] tracking-wider uppercase">奖励愿望</span>
-                                    </button>
-                                </div>
+                                        <div className="w-20 h-20 bg-white rounded-[35px] flex items-center justify-center shadow-xl border-4 border-white bg-gradient-to-tr from-[#E0C3FC] to-[#B5FFFC]">
+                                        <Calendar className="text-[#5D4D7A]" size={40} strokeWidth={2.5} />
+                                    </div>
+                                    <span className="text-base font-bold text-[#5D4D7A] tracking-wider uppercase">任务分配</span>
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('rewards')}
+                                    className="kawaii-button aspect-square flex-col gap-6 bg-white hover:bg-white/95 border-none shadow-xl"
+                                >
+                                    <div className="w-20 h-20 bg-white rounded-[35px] flex items-center justify-center shadow-xl border-4 border-white bg-gradient-to-tr from-[#FFDEE9] to-[#FFF9C4]">
+                                        <Gift className="text-[#5D4D7A]" size={40} strokeWidth={2.5} />
+                                    </div>
+                                    <span className="text-base font-bold text-[#5D4D7A] tracking-wider uppercase">奖励愿望</span>
+                                </button>
                             </div>
-                        )}
-                    </div>
+                            </div>
                 )}
+        </div>
+    )
+}
 
-                {activeTab === 'tasks' && selectedChild && (
-                    <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 pb-10">
-                        <div className="flex justify-between items-end px-2">
-                            <div className="flex flex-col">
-                                <h2 className="text-4xl font-candy text-[#5D4D7A]">任务分配</h2>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <p className="text-[10px] font-bold text-[#E0C3FC] uppercase tracking-[0.3em] leading-none">Space Registry for {selectedChild.name}</p>
-                                    <button onClick={handleEditChild} className="text-[#E0C3FC] opacity-40 hover:opacity-100 transition-all p-1.5 -m-1.5">
-                                        <Edit2 size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                            <button onClick={() => addTask()} className="kawaii-button bg-[#B5FFFC] px-8 py-4 flex items-center gap-2 text-sm text-[#5D4D7A] border-white shadow-xl hover:scale-105 active:scale-90">
-                                <Plus size={20} strokeWidth={4} /> 手动添加
-                            </button>
-                        </div>
-
-                        {/* Template Library - Soft Selection */}
-                        <div className="space-y-6">
-                            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-4 -mx-2 px-2 scroll-smooth">
-                                {Object.values(TaskCategory).map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setSelectedCategory(cat)}
-                                        className={`px-8 py-4 rounded-[30px] text-[11px] font-bold transition-all whitespace-nowrap border-4 ${selectedCategory === cat ? 'bg-[#E0C3FC] text-white border-white shadow-xl scale-105' : 'bg-white text-[#5D4D7A] border-white/50 opacity-60 hover:opacity-100 shadow-sm'}`}
-                                    >
-                                        {cat}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                {TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks.map((tmp, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                        className="kawaii-card bg-white p-6 flex items-center gap-5 hover:bg-[#B5FFFC]/30 transition-all border-white shadow-md group"
-                                    >
-                                        <div className="w-12 h-12 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-inner border-2 border-[#E0C3FC]/10 group-hover:scale-110 transition-transform">
-                                            {tmp.icon}
-                                        </div>
-                                        <div className="text-left">
-                                            <div className="text-base font-bold text-[#5D4D7A]">{tmp.title}</div>
-                                            <div className="text-[10px] font-bold text-[#A2D2FF] opacity-80 uppercase tracking-widest mt-1">{tmp.time} • {tmp.points} 🍭</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="h-px bg-[#4D3A29]/5 my-10 relative">
-                            <div className="absolute left-1/2 -translate-x-1/2 -top-2 bg-[#FFFDF2] px-4 text-[8px] font-bold text-[#4D3A29]/20 uppercase tracking-[0.4em]">Review List</div>
-                        </div>
-
-                        {/* Current Task Session - Cozy Cards */}
-                        <div className="space-y-4">
-                            <h3 className="text-[10px] font-bold text-[#4D3A29] opacity-40 uppercase tracking-[0.2em] px-2 flex items-center gap-2">
-                                <ListTodo size={12} /> 待发布任务 ({currentTasks.length})
-                            </h3>
-                            {currentTasks.map(task => (
-                                <div key={task.id} className="kawaii-card bg-white p-6 flex justify-between items-center group border-white shadow-xl hover:translate-x-3 transition-transform">
-                                    <div className="flex items-center gap-6">
-                                        <div className="w-14 h-14 bg-[#B5FFFC]/20 rounded-[24px] flex items-center justify-center border-2 border-white shadow-inner">
-                                            <Clock size={24} className="text-[#B5FFFC]" />
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-[#5D4D7A] text-lg">{task.title}</div>
-                                            <div className="text-[12px] font-bold text-[#E0C3FC] flex items-center gap-2 mt-1">
-                                                <span>{task.timeSlot}</span>
-                                                <span className="w-1.5 h-1.5 bg-[#E0C3FC] opacity-40 rounded-full"></span>
-                                                <span className="font-bold">{task.points} 🍭</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={() => editTask(task)} className="w-10 h-10 kawaii-button bg-[#FFFDF2] text-[#4D3A29] border-none shadow-sm hover:bg-white active:scale-90 transition-all">
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button onClick={() => removeTask(task.id)} className="w-10 h-10 kawaii-button bg-[#FFFDF2] text-[#D99C52]/40 hover:text-[#D99C52] border-none shadow-sm hover:bg-white active:scale-90 transition-all">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                            {currentTasks.length === 0 && (
-                                <div className="text-center py-12 bg-white/20 rounded-[45px] border-4 border-dashed border-white/60">
-                                    <p className="text-xs text-[#4D3A29] opacity-20 font-bold italic">快去挑选一些充满仪式感的任务吧 ~</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {currentTasks.length > 0 && (
-                            <button
-                                onClick={handleSaveTasks}
-                                disabled={isSaving}
-                                className="w-full kawaii-button bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(224,195,252,0.3)] border-4 border-white"
-                            >
-                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
-                            </button>
-                        )}
+{
+    activeTab === 'tasks' && selectedChild && (
+        <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 pb-10">
+            <div className="flex justify-between items-end px-2">
+                <div className="flex flex-col">
+                    <h2 className="text-4xl font-candy text-[#5D4D7A]">任务分配</h2>
+                    <div className="flex items-center gap-2 mt-2">
+                        <p className="text-[10px] font-bold text-[#E0C3FC] uppercase tracking-[0.3em] leading-none">Space Registry for {selectedChild.name}</p>
+                        <button onClick={handleEditChild} className="text-[#E0C3FC] opacity-40 hover:opacity-100 transition-all p-1.5 -m-1.5">
+                            <Edit2 size={14} />
+                        </button>
                     </div>
-                )}
+                </div>
+                <button onClick={() => addTask()} className="kawaii-button bg-[#B5FFFC] px-8 py-4 flex items-center gap-2 text-sm text-[#5D4D7A] border-white shadow-xl hover:scale-105 active:scale-90">
+                    <Plus size={20} strokeWidth={4} /> 手动添加
+                </button>
+            </div>
 
-                {activeTab === 'rewards' && selectedChild && (
-                    <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 pb-10">
-                        <div className="flex justify-between items-end px-2">
-                            <div>
-                                <h1 className="text-3xl font-candy text-[#4D3A29] uppercase tracking-tighter">成长银行奖励项</h1>
-                                <p className="text-[10px] font-bold text-[#D99C52] mt-1 uppercase tracking-[0.2em] leading-none">Custom Reward Market for {selectedChild.name}</p>
+            {/* Template Library - Soft Selection */}
+            <div className="space-y-6">
+                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-4 -mx-2 px-2 scroll-smooth">
+                    {Object.values(TaskCategory).map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-8 py-4 rounded-[30px] text-[11px] font-bold transition-all whitespace-nowrap border-4 ${selectedCategory === cat ? 'bg-[#E0C3FC] text-white border-white shadow-xl scale-105' : 'bg-white text-[#5D4D7A] border-white/50 opacity-60 hover:opacity-100 shadow-sm'}`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    {TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks.map((tmp, i) => (
+                        <button
+                            key={i}
+                            onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
+                            className="kawaii-card bg-white p-6 flex items-center gap-5 hover:bg-[#B5FFFC]/30 transition-all border-white shadow-md group"
+                        >
+                            <div className="w-12 h-12 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-inner border-2 border-[#E0C3FC]/10 group-hover:scale-110 transition-transform">
+                                {tmp.icon}
                             </div>
-                            <button onClick={handleAddReward} className="kawaii-button bg-[#D99C52] px-6 py-3 flex items-center gap-2 text-xs text-white border-none shadow-lg">
-                                <Plus size={18} strokeWidth={4} /> 新增奖励
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-6">
-                            {rewards.map((reward, i) => (
-                                <div key={i} className="kawaii-card bg-white p-6 flex flex-col items-center gap-4 relative group border-none shadow-md hover:shadow-xl transition-all">
-                                    <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                        <button onClick={() => removeReward(reward.id)} className="w-8 h-8 rounded-full bg-[#D99C52]/10 flex items-center justify-center text-[#D99C52] hover:bg-[#D99C52] hover:text-white transition-all shadow-sm">
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                    <div className="w-20 h-20 bg-white rounded-[30px] flex items-center justify-center text-5xl shadow-inner border-2 border-[#FFDEE9]/30">
-                                        {reward.icon}
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-base font-bold text-[#5D4D7A]">{reward.name}</div>
-                                        <div className="text-[14px] font-bold text-[#FFDEE9] mt-2 flex items-center justify-center gap-1.5">
-                                            {reward.pointsCost} <span className="text-[10px] uppercase opacity-60">candies 🍭</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {rewards.length > 0 && (
-                            <button
-                                onClick={handleSaveRewards}
-                                disabled={isSaving}
-                                className="w-full kawaii-button bg-gradient-to-r from-[#FFDEE9] to-[#E0C3FC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(255,222,233,0.3)] border-4 border-white"
-                            >
-                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
-                            </button>
-                        )}
-                    </div>
-                )}
-            </main>
-
-            {/* Hint Footer */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-xs">
-                <div className="kawaii-card bg-white/90 px-8 py-4 flex items-center gap-4 shadow-2xl animate-float-kawaii border-4 border-white">
-                    <AlertCircle size={22} className="text-[#FFDEE9]" />
-                    <span className="text-[11px] font-bold text-[#5D4D7A] opacity-60">
-                        {[
-                            "给孩子适当的自由，自律会更持久哦 ~",
-                            "每一个小勋章，都是成长的里程碑 ✨",
-                            "多一点耐心，梦幻岛的果实也会更甜 🍬",
-                            "陪伴是最好的奖励，别忘了抱抱TA 💖",
-                            "自律的背后，是宝贝对生活的热爱 🌈"
-                        ][Math.floor(Date.now() / 3600000) % 5]}
-                    </span>
+                            <div className="text-left">
+                                <div className="text-base font-bold text-[#5D4D7A]">{tmp.title}</div>
+                                <div className="text-[10px] font-bold text-[#A2D2FF] opacity-80 uppercase tracking-widest mt-1">{tmp.time} • {tmp.points} 🍭</div>
+                            </div>
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {/* Custom Dialog - Pastel Dream Style */}
-            {dialogConfig.isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
-                    <div className="absolute inset-0 bg-[#5D4D7A]/10 backdrop-blur-xl animate-in fade-in duration-500"
-                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}></div>
-                    <div className="kawaii-card bg-white/95 w-full max-w-sm p-12 space-y-10 shadow-3xl animate-in zoom-in-95 duration-300 relative z-10 border-8 border-white">
-                        <div className="text-center space-y-5">
-                            <h3 className="text-3xl font-candy text-[#5D4D7A]">{dialogConfig.title}</h3>
-                            {dialogConfig.message && (
-                                <p className="text-[12px] font-bold text-[#5D4D7A]/50 leading-relaxed max-w-[280px] mx-auto">
-                                    {dialogConfig.message}
-                                </p>
-                            )}
-                            {dialogConfig.highlight && (
-                                <div className="text-6xl font-candy text-[#E0C3FC] tracking-[0.2em] bg-white px-8 py-6 rounded-[40px] mt-8 animate-float-kawaii shadow-inner border-4 border-[#E0C3FC]/10">
-                                    {dialogConfig.highlight}
+            <div className="h-px bg-[#4D3A29]/5 my-10 relative">
+                <div className="absolute left-1/2 -translate-x-1/2 -top-2 bg-[#FFFDF2] px-4 text-[8px] font-bold text-[#4D3A29]/20 uppercase tracking-[0.4em]">Review List</div>
+            </div>
+
+            {/* Current Task Session - Cozy Cards */}
+            <div className="space-y-4">
+                <h3 className="text-[10px] font-bold text-[#4D3A29] opacity-40 uppercase tracking-[0.2em] px-2 flex items-center gap-2">
+                    <ListTodo size={12} /> 待发布任务 ({currentTasks.length})
+                </h3>
+                {currentTasks.map(task => (
+                    <div key={task.id} className="kawaii-card bg-white p-6 flex justify-between items-center group border-white shadow-xl hover:translate-x-3 transition-transform">
+                        <div className="flex items-center gap-6">
+                            <div className="w-14 h-14 bg-[#B5FFFC]/20 rounded-[24px] flex items-center justify-center border-2 border-white shadow-inner">
+                                <Clock size={24} className="text-[#B5FFFC]" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-[#5D4D7A] text-lg">{task.title}</div>
+                                <div className="text-[12px] font-bold text-[#E0C3FC] flex items-center gap-2 mt-1">
+                                    <span>{task.timeSlot}</span>
+                                    <span className="w-1.5 h-1.5 bg-[#E0C3FC] opacity-40 rounded-full"></span>
+                                    <span className="font-bold">{task.points} 🍭</span>
                                 </div>
-                            )}
+                            </div>
                         </div>
-                        <div className="space-y-4">
-                            {dialogConfig.showAvatarUpload && (
-                                <div className="flex flex-col items-center gap-6 py-4">
-                                    <div
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="w-32 h-32 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group animate-float-kawaii"
-                                    >
-                                        <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
-                                        {uploadingAvatar && (
-                                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                                                <Sparkles className="text-[#E0C3FC] animate-spin" />
-                                            </div>
-                                        )}
-                                        <div className="absolute inset-x-0 bottom-0 bg-[#E0C3FC]/60 text-white text-[9px] font-bold py-2 opacity-0 group-hover:opacity-100 transition-all text-center backdrop-blur-sm">更换照片</div>
-                                    </div>
-                                    <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40">为宝贝选一张梦幻头像吧 ✨</p>
-                                </div>
-                            )}
-                            {!dialogConfig.hideInput && (
-                                <>
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        placeholder={dialogConfig.placeholder}
-                                        defaultValue={dialogConfig.defaultValue || ''}
-                                        id="dialog-title-input"
-                                        className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] placeholder:text-[#5D4D7A]/20 transition-all shadow-inner backdrop-blur-md"
-                                    />
-                                    {dialogConfig.showTime && (
-                                        <div className="space-y-3">
-                                            <p className="text-[11px] font-bold text-[#E0C3FC] opacity-70 ml-5 uppercase tracking-widest">执行时间</p>
-                                            <input
-                                                type="time"
-                                                defaultValue={dialogConfig.defaultExtra || '08:00'}
-                                                id="dialog-time-input"
-                                                className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] transition-all shadow-inner backdrop-blur-md"
-                                            />
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                        <div className="flex gap-4">
-                            {!dialogConfig.hideInput && (
-                                <button
-                                    onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                    className="flex-1 py-5 text-[#4D3A29] opacity-30 font-bold hover:opacity-100 transition-all text-sm uppercase tracking-widest"
-                                >
-                                    取消
-                                </button>
-                            )}
-                            <button
-                                onClick={() => {
-                                    const titleInput = document.getElementById('dialog-title-input') as HTMLInputElement;
-                                    const timeInput = document.getElementById('dialog-time-input') as HTMLInputElement;
-                                    dialogConfig.onConfirm(titleInput?.value || '', timeInput?.value || '');
-                                }}
-                                className="flex-1 py-6 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white rounded-[35px] font-candy text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-white"
-                            >
-                                {dialogConfig.hideInput ? '明白啦 ✨' : '确定'}
+                        <div className="flex gap-2">
+                            <button onClick={() => editTask(task)} className="w-10 h-10 kawaii-button bg-[#FFFDF2] text-[#4D3A29] border-none shadow-sm hover:bg-white active:scale-90 transition-all">
+                                <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => removeTask(task.id)} className="w-10 h-10 kawaii-button bg-[#FFFDF2] text-[#D99C52]/40 hover:text-[#D99C52] border-none shadow-sm hover:bg-white active:scale-90 transition-all">
+                                <Trash2 size={16} />
                             </button>
                         </div>
                     </div>
-                </div>
+                ))}
+                {currentTasks.length === 0 && (
+                    <div className="text-center py-12 bg-white/20 rounded-[45px] border-4 border-dashed border-white/60">
+                        <p className="text-xs text-[#4D3A29] opacity-20 font-bold italic">快去挑选一些充满仪式感的任务吧 ~</p>
+                    </div>
+                )}
+            </div>
+
+            {currentTasks.length > 0 && (
+                <button
+                    onClick={handleSaveTasks}
+                    disabled={isSaving}
+                    className="w-full kawaii-button bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(224,195,252,0.3)] border-4 border-white"
+                >
+                    {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
+                </button>
             )}
         </div>
+    )
+}
+
+{
+    activeTab === 'rewards' && selectedChild && (
+        <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 pb-10">
+            <div className="flex justify-between items-end px-2">
+                <div>
+                    <h1 className="text-3xl font-candy text-[#5D4D7A] uppercase tracking-tighter">成长银行奖励项</h1>
+                    <p className="text-[10px] font-bold text-[#E0C3FC] mt-1 uppercase tracking-[0.2em] leading-none">Custom Reward Market for {selectedChild.name}</p>
+                </div>
+                <button onClick={handleAddReward} className="kawaii-button bg-[#B5FFFC] px-6 py-3 flex items-center gap-2 text-xs text-[#5D4D7A] shadow-lg border-white">
+                    <Plus size={18} strokeWidth={4} /> 新增奖励
+                </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                {rewards.map((reward, i) => (
+                    <div key={i} className="kawaii-card bg-white p-6 flex flex-col items-center gap-4 relative group border-none shadow-md hover:shadow-xl transition-all">
+                        <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <button onClick={() => removeReward(reward.id)} className="w-8 h-8 rounded-full bg-[#D99C52]/10 flex items-center justify-center text-[#D99C52] hover:bg-[#D99C52] hover:text-white transition-all shadow-sm">
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
+                        <div className="w-20 h-20 bg-white rounded-[30px] flex items-center justify-center text-5xl shadow-inner border-2 border-[#FFDEE9]/30">
+                            {reward.icon}
+                        </div>
+                        <div className="text-center">
+                            <div className="text-base font-bold text-[#5D4D7A]">{reward.name}</div>
+                            <div className="text-[14px] font-bold text-[#E0C3FC] mt-2 flex items-center justify-center gap-1.5">
+                                {reward.pointsCost} <span className="text-[10px] uppercase opacity-60">candies 🍭</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {rewards.length > 0 && (
+                <button
+                    onClick={handleSaveRewards}
+                    disabled={isSaving}
+                    className="w-full kawaii-button bg-gradient-to-r from-[#FFDEE9] to-[#E0C3FC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(255,222,233,0.3)] border-4 border-white"
+                >
+                    {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
+                </button>
+            )}
+        </div>
+    )
+}
+            </main >
+
+    {/* Hint Footer */ }
+    < div className = "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-xs" >
+        <div className="kawaii-card bg-white/90 px-8 py-4 flex items-center gap-4 shadow-2xl animate-float-kawaii border-4 border-white">
+            <AlertCircle size={22} className="text-[#FFDEE9]" />
+            <span className="text-[11px] font-bold text-[#5D4D7A] opacity-60">
+                {[
+                    "给孩子适当的自由，自律会更持久哦 ~",
+                    "每一个小勋章，都是成长的里程碑 ✨",
+                    "多一点耐心，梦幻岛的果实也会更甜 🍬",
+                    "陪伴是最好的奖励，别忘了抱抱TA 💖",
+                    "自律的背后，是宝贝对生活的热爱 🌈"
+                ][Math.floor(Date.now() / 3600000) % 5]}
+            </span>
+        </div>
+            </div >
+
+    {/* Custom Dialog - Pastel Dream Style */ }
+{
+    dialogConfig.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+            <div className="absolute inset-0 bg-[#5D4D7A]/10 backdrop-blur-xl animate-in fade-in duration-500"
+                onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}></div>
+            <div className="kawaii-card bg-white/95 w-full max-w-sm p-12 space-y-10 shadow-3xl animate-in zoom-in-95 duration-300 relative z-10 border-8 border-white">
+                <div className="text-center space-y-5">
+                    <h3 className="text-3xl font-candy text-[#5D4D7A]">{dialogConfig.title}</h3>
+                    {dialogConfig.message && (
+                        <p className="text-[12px] font-bold text-[#5D4D7A]/50 leading-relaxed max-w-[280px] mx-auto">
+                            {dialogConfig.message}
+                        </p>
+                    )}
+                    {dialogConfig.highlight && (
+                        <div className="text-6xl font-candy text-[#E0C3FC] tracking-[0.2em] bg-white px-8 py-6 rounded-[40px] mt-8 animate-float-kawaii shadow-inner border-4 border-[#E0C3FC]/10">
+                            {dialogConfig.highlight}
+                        </div>
+                    )}
+                </div>
+                <div className="space-y-4">
+                    {dialogConfig.showAvatarUpload && (
+                        <div className="flex flex-col items-center gap-6 py-4">
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-32 h-32 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group animate-float-kawaii"
+                            >
+                                <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
+                                {uploadingAvatar && (
+                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                        <Sparkles className="text-[#E0C3FC] animate-spin" />
+                                    </div>
+                                )}
+                                <div className="absolute inset-x-0 bottom-0 bg-[#E0C3FC]/60 text-white text-[9px] font-bold py-2 opacity-0 group-hover:opacity-100 transition-all text-center backdrop-blur-sm">更换照片</div>
+                            </div>
+                            <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40">为宝贝选一张梦幻头像吧 ✨</p>
+                        </div>
+                    )}
+                    {!dialogConfig.hideInput && (
+                        <>
+                            <input
+                                autoFocus
+                                type="text"
+                                placeholder={dialogConfig.placeholder}
+                                defaultValue={dialogConfig.defaultValue || ''}
+                                id="dialog-title-input"
+                                className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] placeholder:text-[#5D4D7A]/20 transition-all shadow-inner backdrop-blur-md"
+                            />
+                            {dialogConfig.showTime && (
+                                <div className="space-y-3">
+                                    <p className="text-[11px] font-bold text-[#E0C3FC] opacity-70 ml-5 uppercase tracking-widest">执行时间</p>
+                                    <input
+                                        type="time"
+                                        defaultValue={dialogConfig.defaultExtra || '08:00'}
+                                        id="dialog-time-input"
+                                        className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] transition-all shadow-inner backdrop-blur-md"
+                                    />
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+                <div className="flex gap-4">
+                    {!dialogConfig.hideInput && (
+                        <button
+                            onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                            className="flex-1 py-5 text-[#4D3A29] opacity-30 font-bold hover:opacity-100 transition-all text-sm uppercase tracking-widest"
+                        >
+                            取消
+                        </button>
+                    )}
+                    <button
+                        onClick={() => {
+                            const titleInput = document.getElementById('dialog-title-input') as HTMLInputElement;
+                            const timeInput = document.getElementById('dialog-time-input') as HTMLInputElement;
+                            dialogConfig.onConfirm(titleInput?.value || '', timeInput?.value || '');
+                        }}
+                        className="flex-1 py-6 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white rounded-[35px] font-candy text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-white"
+                    >
+                        {dialogConfig.hideInput ? '明白啦 ✨' : '确定'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+        </div >
     );
 };
 

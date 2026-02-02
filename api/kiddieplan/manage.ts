@@ -32,30 +32,51 @@ export default async function handler(
             const config: any = await kv.get(parentKey) || { children: [] };
 
             const existingChildIdx = config.children.findIndex((c: any) => c.id === id);
-            const newChild = { id: id || `c_${Date.now()}`, name, avatar, roomCode };
+            const childId = id || `c_${Date.now()}`;
+
+            // 获取可能存在的旧点数和成就（兼容旧版本）
+            const oldPoints = await kv.get(`kp:child:${childId}:points`) || 0;
+            const oldStreak = await kv.get(`kp:child:${childId}:streak`) || 0;
+            const oldRewards = await kv.get(`kp:child:${childId}:rewards`) || [];
+
+            const newChild = {
+                id: childId,
+                name,
+                avatar,
+                roomCode,
+                points: oldPoints, // 迁移数据入聚合对象
+                streak: oldStreak,
+                rewards: oldRewards
+            };
 
             if (existingChildIdx > -1) {
-                // 检查房间码是否被修改且是否冲突
                 const oldRoomCode = config.children[existingChildIdx].roomCode;
                 if (oldRoomCode !== roomCode) {
-                    const isTaken = await kv.get(`kp:room:${roomCode}`);
-                    if (isTaken) return response.status(400).json({ success: false, message: '该房间码已被占用' });
-                    await kv.del(`kp:room:${oldRoomCode}`);
+                    const roomInfo: any = await kv.hget('kp:rooms', roomCode);
+                    if (roomInfo) return response.status(400).json({ success: false, message: '该房间码已被占用' });
+                    await kv.hdel('kp:rooms', oldRoomCode);
                 }
+                // 保留聚合后的属性
+                newChild.points = config.children[existingChildIdx].points ?? oldPoints;
+                newChild.streak = config.children[existingChildIdx].streak ?? oldStreak;
+                newChild.rewards = config.children[existingChildIdx].rewards ?? oldRewards;
                 config.children[existingChildIdx] = newChild;
             } else {
                 if (config.children.length >= 3) {
                     return response.status(400).json({ success: false, message: '最多只能添加3个孩子' });
                 }
-                const isTaken = await kv.get(`kp:room:${roomCode}`);
-                if (isTaken) return response.status(400).json({ success: false, message: '该房间码已被占用' });
+                const roomInfo: any = await kv.hget('kp:rooms', roomCode);
+                if (roomInfo) return response.status(400).json({ success: false, message: '该房间码已被占用' });
                 config.children.push(newChild);
             }
 
-            // 更新映射
-            await kv.set(`kp:room:${roomCode}`, { childId: newChild.id, parentCode });
-            await kv.set(`kp:child:${newChild.id}`, newChild);
+            // 更新聚合映射：使用 Hash 存储所有房间映射
+            await kv.hset('kp:rooms', { [roomCode]: `${parentCode}:${childId}` });
             await kv.set(parentKey, config);
+
+            // 清理旧的离散 Key (异步，不阻塞主流程)
+            kv.del(`kp:room:${roomCode}`).catch(() => { });
+            kv.del(`kp:child:${childId}`).catch(() => { });
 
             return response.status(200).json({ success: true, data: config });
         }
@@ -69,16 +90,20 @@ export default async function handler(
 
         if (action === 'save_rewards') {
             const { childId, rewards } = data;
-            const rewardKey = `kp:child:${childId}:rewards`;
-            await kv.set(rewardKey, rewards);
+            const config: any = await kv.get(parentKey) || { children: [] };
+            const idx = config.children.findIndex((c: any) => c.id === childId);
+            if (idx > -1) {
+                config.children[idx].rewards = rewards;
+                await kv.set(parentKey, config);
+            }
             return response.status(200).json({ success: true, message: '奖励规则已保存' });
         }
 
         if (action === 'get_rewards') {
             const { childId } = data;
-            const rewardKey = `kp:child:${childId}:rewards`;
-            const rewards = await kv.get(rewardKey);
-            return response.status(200).json({ success: true, data: { rewards } });
+            const config: any = await kv.get(parentKey) || { children: [] };
+            const child = config.children.find((c: any) => c.id === childId);
+            return response.status(200).json({ success: true, data: { rewards: child?.rewards || [] } });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

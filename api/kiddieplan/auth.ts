@@ -66,17 +66,34 @@ export default async function handler(
                 return response.status(400).json({ success: false, message: '请输入4位房间码' });
             }
 
-            // 从 KV 中查找该房间码关联的孩子信息
-            const roomData = await kv.get<{ childId: string, parentCode: string }>(`kp:room:${cleanCode}`);
+            // 优先从新的全局 Hash 索引查找
+            let roomDataString: any = await kv.hget('kp:rooms', cleanCode);
 
-            if (roomData) {
-                const childInfo = await kv.get(`kp:child:${roomData.childId}`);
-                return response.status(200).json({
-                    success: true,
-                    role: 'child',
-                    child: childInfo,
-                    token: Buffer.from(`child:${roomData.childId}`).toString('base64')
-                });
+            // 兼容性回退：如果 Hash 中没找到，尝试旧的独立 Key
+            if (!roomDataString) {
+                const legacyData = await kv.get<{ childId: string, parentCode: string }>(`kp:room:${cleanCode}`);
+                if (legacyData) {
+                    roomDataString = `${legacyData.parentCode}:${legacyData.childId}`;
+                }
+            }
+
+            if (roomDataString) {
+                const [parentCode, childId] = roomDataString.split(':');
+                const parentKey = `kp:parent:${parentCode}`;
+
+                // 从父对象中获取孩子完整画像
+                const config: any = await kv.get(parentKey);
+                const childInfo = config?.children?.find((c: any) => c.id === childId);
+
+                if (childInfo) {
+                    return response.status(200).json({
+                        success: true,
+                        role: 'child',
+                        child: childInfo,
+                        // Token 增强：包含 parentCode 以便 Client 直接定位父 Key
+                        token: Buffer.from(`child:${childId}:${parentCode}`).toString('base64')
+                    });
+                }
             }
             return response.status(404).json({ success: false, message: '未找到该房间，请检查房间码是否正确' });
         }

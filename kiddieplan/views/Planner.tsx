@@ -18,7 +18,7 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
           <button
             key={v}
             onClick={() => setView(v)}
-            className={`flex-1 py-3 kawaii-button font-candy text-lg transition-all ${view === v ? 'bg-[#D99C52] text-white shadow-lg scale-105' : 'bg-white/60 text-[#4D3A29]/40'}`}
+            className={`flex-1 py-4 kawaii-button font-candy text-xl transition-all shadow-xl ${view === v ? 'bg-[#E0C3FC] text-white border-white scale-110' : 'bg-white/60 text-[#5D4D7A]/40 border-transparent'}`}
           >
             {v === 'week' ? '本周图纸' : '梦想航线'}
           </button>

@@ -385,27 +385,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const selectedChild = children.find(c => c.id === selectedChildId);
 
     return (
-        <div className="flex-1 flex flex-col animate-in fade-in duration-700 h-full overflow-hidden bg-[#FFFDF2]/30">
+        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden mesh-gradient">
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
-            {/* Header - Warm & Soft */}
+            {/* Header - Pastel Floating Style */}
             <div className="p-8 flex justify-between items-center shrink-0">
-                <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-white rounded-[24px] flex items-center justify-center shadow-lg border-2 border-[#D99C52]/10">
-                        <Settings className="text-[#D99C52] animate-spin-slow" size={28} />
+                <div className="flex items-center gap-5">
+                    <div className="w-16 h-16 bg-white rounded-[28px] flex items-center justify-center shadow-xl border-4 border-white animate-float-kawaii">
+                        <Settings className="text-[#E0C3FC] animate-spin-slow" size={32} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-candy text-[#4D3A29] tracking-tight">星梦奇旅</h1>
-                        <p className="text-[9px] font-bold text-[#D99C52]/60 -mt-0.5 tracking-[0.2em] uppercase">Warm Growth Journal</p>
+                        <h1 className="text-4xl font-candy text-[#5D4D7A] tracking-tight">星梦奇旅</h1>
+                        <p className="text-[10px] font-bold text-[#A2D2FF] mt-1 tracking-[0.3em] uppercase">Dream Maker Hub</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     {activeTab !== 'children' && (
-                        <button onClick={() => setActiveTab('children')} className="w-11 h-11 kawaii-button bg-white text-[#4D3A29] border-[#D99C52]/10 shadow-sm">
-                            <ArrowLeft size={20} />
+                        <button onClick={() => setActiveTab('children')} className="w-12 h-12 kawaii-button bg-white text-[#5D4D7A] border-white shadow-lg active:scale-90">
+                            <ArrowLeft size={22} />
                         </button>
                     )}
-                    <button onClick={onLogout} className="w-11 h-11 kawaii-button bg-white text-[#D99C52] border-[#D99C52]/10 shadow-sm hover:bg-[#D99C52] hover:text-white transition-all">
-                        <LogOut size={20} />
+                    <button onClick={onLogout} className="w-12 h-12 kawaii-button bg-[#FFDEE9] text-white border-white shadow-lg hover:scale-105 active:scale-90 transition-all">
+                        <LogOut size={22} />
                     </button>
                 </div>
             </div>
@@ -418,10 +418,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         {/* Children Selector - Organic Card */}
                         <div className="kawaii-card bg-white/60 p-8 space-y-8 border-[#D99C52]/5 shadow-xl">
                             <div className="flex justify-between items-center">
-                                <h3 className="text-[10px] font-bold text-[#4D3A29] opacity-50 uppercase tracking-[0.2em]">我的宝贝们 ({children.length}/3)</h3>
+                                <h3 className="text-[11px] font-bold text-[#5D4D7A] opacity-40 uppercase tracking-[0.3em]">我的宝贝们 ({children.length}/3)</h3>
                                 {children.length < 3 && (
-                                    <button onClick={handleAddChild} className="flex items-center gap-1.5 text-[10px] font-bold text-[#D99C52] bg-white px-4 py-2 rounded-full shadow-md hover:scale-105 active:scale-95 transition-all border border-[#D99C52]/10">
-                                        <Plus size={14} strokeWidth={4} /> 添加成员
+                                    <button onClick={handleAddChild} className="flex items-center gap-2 text-[10px] font-bold text-white bg-[#B5FFFC] px-5 py-2.5 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all border-2 border-white">
+                                        <Plus size={16} strokeWidth={4} /> 添加成员
                                     </button>
                                 )}
                             </div>
@@ -433,10 +433,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         onClick={() => setSelectedChildId(child.id)}
                                         className={`flex flex-col items-center gap-6 min-w-[110px] transition-all transform duration-500 ${selectedChildId === child.id ? 'scale-110' : 'opacity-40 grayscale-[0.3]'}`}
                                     >
-                                        <div className={`w-28 h-28 rounded-[48px] overflow-hidden border-4 shadow-xl transition-all ${selectedChildId === child.id ? 'border-[#D99C52] bg-[#FDF1E1]' : 'border-white bg-white'}`}>
+                                        <div className={`w-28 h-28 rounded-[48px] overflow-hidden border-4 shadow-2xl transition-all ${selectedChildId === child.id ? 'border-[#E0C3FC] scale-105' : 'border-white opacity-40'}`}>
                                             <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
                                         </div>
-                                        <span className={`text-sm font-bold ${selectedChildId === child.id ? 'text-[#D99C52]' : 'text-[#4D3A29]'}`}>{child.name}</span>
+                                        <span className={`text-sm font-bold tracking-wide ${selectedChildId === child.id ? 'text-[#E0C3FC]' : 'text-[#5D4D7A]'}`}>{child.name}</span>
                                     </button>
                                 ))}
                                 {children.length === 0 && (
@@ -450,13 +450,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         {selectedChild && (
                             <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
                                 {/* Kid Stats - Warm Gradient */}
-                                <div className="kawaii-card bg-gradient-to-br from-[#D99C52] to-[#E29578] p-8 flex justify-between items-center relative overflow-hidden group border-none shadow-2xl">
-                                    <div className="absolute -right-8 -bottom-8 opacity-20 blur-sm group-hover:rotate-12 group-hover:scale-110 transition-all duration-1000">
-                                        <Star size={180} className="text-white fill-white" />
+                                <div className="kawaii-card bg-gradient-to-br from-[#E0C3FC] to-[#B5FFFC] p-10 flex justify-between items-center relative overflow-hidden group border-4 border-white shadow-2xl animate-float-kawaii">
+                                    <div className="absolute -right-10 -bottom-10 opacity-30 blur-sm group-hover:rotate-45 group-hover:scale-125 transition-all duration-1000">
+                                        <Star size={200} className="text-white fill-white" />
                                     </div>
-                                    <div className="relative z-10 space-y-2">
-                                        <div className="text-[9px] font-bold text-white/70 uppercase tracking-widest">进入房间码</div>
-                                        <div className="text-5xl font-candy text-white tracking-[0.2em] bg-white/20 px-6 py-3 rounded-[30px] backdrop-blur-md shadow-inner">
+                                    <div className="relative z-10 space-y-3">
+                                        <div className="text-[10px] font-bold text-white uppercase tracking-[0.4em] drop-shadow-md">进入房间码</div>
+                                        <div className="text-6xl font-candy text-white tracking-[0.3em] bg-white/30 px-8 py-5 rounded-[40px] backdrop-blur-xl shadow-inner border-2 border-white/40">
                                             {selectedChild.roomCode}
                                         </div>
                                     </div>
@@ -474,19 +474,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         onClick={() => setActiveTab('tasks')}
                                         className="kawaii-button aspect-square flex-col gap-6 bg-white hover:bg-white/95 border-none shadow-xl"
                                     >
-                                        <div className="w-20 h-20 bg-[#FDF1E1] rounded-[32px] flex items-center justify-center shadow-lg border-2 border-white">
-                                            <Calendar className="text-[#D99C52]" size={40} strokeWidth={2.5} />
+                                        <div className="w-20 h-20 bg-[#E07A5F]/0 rounded-[35px] flex items-center justify-center shadow-xl border-4 border-white bg-gradient-to-tr from-[#E0C3FC] to-white">
+                                            <Calendar className="text-[#5D4D7A]" size={40} strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-base font-bold text-[#4D3A29] tracking-wider uppercase">任务分配</span>
+                                        <span className="text-base font-bold text-[#5D4D7A] tracking-wider uppercase">任务分配</span>
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('rewards')}
                                         className="kawaii-button aspect-square flex-col gap-6 bg-white hover:bg-white/95 border-none shadow-xl"
                                     >
-                                        <div className="w-20 h-20 bg-[#FAF0ED] rounded-[32px] flex items-center justify-center shadow-lg border-2 border-white">
-                                            <Gift className="text-[#E29578]" size={40} strokeWidth={2.5} />
+                                        <div className="w-20 h-20 bg-[#F2CC8F]/0 rounded-[35px] flex items-center justify-center shadow-xl border-4 border-white bg-gradient-to-tr from-[#FFDEE9] to-white">
+                                            <Gift className="text-[#E07A5F]/0 text-[#5D4D7A]" size={40} strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-base font-bold text-[#4D3A29] tracking-wider uppercase">奖励愿望</span>
+                                        <span className="text-base font-bold text-[#5D4D7A] tracking-wider uppercase">奖励愿望</span>
                                     </button>
                                 </div>
                             </div>
@@ -554,17 +554,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <ListTodo size={12} /> 待发布任务 ({currentTasks.length})
                             </h3>
                             {currentTasks.map(task => (
-                                <div key={task.id} className="kawaii-card bg-white p-5 flex justify-between items-center group border-none shadow-md">
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-12 h-12 bg-[#FFFDF2] rounded-[20px] flex items-center justify-center border-2 border-[#D99C52]/10">
-                                            <Clock size={20} className="text-[#D99C52] opacity-50" />
+                                <div key={task.id} className="kawaii-card bg-white p-6 flex justify-between items-center group border-white shadow-xl hover:translate-x-3 transition-transform">
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-14 h-14 bg-[#B5FFFC]/20 rounded-[24px] flex items-center justify-center border-2 border-white shadow-inner">
+                                            <Clock size={24} className="text-[#B5FFFC]" />
                                         </div>
                                         <div>
-                                            <div className="font-bold text-[#4D3A29] text-base">{task.title}</div>
-                                            <div className="text-[11px] font-bold text-[#D99C52] opacity-60 flex items-center gap-2 mt-0.5">
+                                            <div className="font-bold text-[#5D4D7A] text-lg">{task.title}</div>
+                                            <div className="text-[12px] font-bold text-[#E0C3FC] flex items-center gap-2 mt-1">
                                                 <span>{task.timeSlot}</span>
-                                                <span className="w-1 h-1 bg-[#D99C52] opacity-20 rounded-full"></span>
-                                                <span className="font-bold">{task.points} 💰</span>
+                                                <span className="w-1.5 h-1.5 bg-[#E0C3FC] opacity-40 rounded-full"></span>
+                                                <span className="font-bold">{task.points} 🍭</span>
                                             </div>
                                         </div>
                                     </div>
@@ -589,9 +589,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <button
                                 onClick={handleSaveTasks}
                                 disabled={isSaving}
-                                className="w-full kawaii-button bg-gradient-to-r from-[#D99C52] to-[#E29578] py-6 text-white text-xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-12 shadow-[0_15px_30px_rgba(217,156,82,0.3)] border-none"
+                                className="w-full kawaii-button bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(224,195,252,0.3)] border-4 border-white"
                             >
-                                {isSaving ? <Sparkles className="animate-spin" /> : <><Save size={24} className="mr-3" /> 同步给宝贝</>}
+                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
                             </button>
                         )}
                     </div>
@@ -617,13 +617,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <Trash2 size={14} />
                                         </button>
                                     </div>
-                                    <div className="w-16 h-16 bg-[#FFFDF2] rounded-[24px] flex items-center justify-center text-4xl shadow-inner border border-[#D99C52]/5">
+                                    <div className="w-20 h-20 bg-white rounded-[30px] flex items-center justify-center text-5xl shadow-inner border-2 border-[#FFDEE9]/30">
                                         {reward.icon}
                                     </div>
                                     <div className="text-center">
-                                        <div className="text-sm font-bold text-[#4D3A29]">{reward.name}</div>
-                                        <div className="text-[12px] font-bold text-[#D99C52] mt-1.5 flex items-center justify-center gap-1">
-                                            {reward.pointsCost} <span className="text-[9px] font-fredoka opacity-60">COINS</span>
+                                        <div className="text-base font-bold text-[#5D4D7A]">{reward.name}</div>
+                                        <div className="text-[14px] font-bold text-[#FFDEE9] mt-2 flex items-center justify-center gap-1.5">
+                                            {reward.pointsCost} <span className="text-[10px] uppercase opacity-60">candies 🍭</span>
                                         </div>
                                     </div>
                                 </div>
@@ -683,17 +683,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <div className="flex flex-col items-center gap-6 py-4">
                                     <div
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-32 h-32 rounded-[48px] overflow-hidden border-4 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group"
+                                        className="w-32 h-32 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group animate-float-kawaii"
                                     >
                                         <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
                                         {uploadingAvatar && (
-                                            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                                                <Sparkles className="text-[#D99C52] animate-spin" />
+                                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                                <Sparkles className="text-[#E0C3FC] animate-spin" />
                                             </div>
                                         )}
-                                        <div className="absolute inset-x-0 bottom-0 bg-black/40 text-white text-[8px] font-bold py-1.5 opacity-0 group-hover:opacity-100 transition-all text-center">点击更换照片</div>
+                                        <div className="absolute inset-x-0 bottom-0 bg-[#E0C3FC]/60 text-white text-[9px] font-bold py-2 opacity-0 group-hover:opacity-100 transition-all text-center backdrop-blur-sm">更换照片</div>
                                     </div>
-                                    <p className="text-[10px] font-bold text-[#4D3A29] opacity-40">为宝贝选一张漂亮的头像吧</p>
+                                    <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40">为宝贝选一张梦幻头像吧 ✨</p>
                                 </div>
                             )}
                             {!dialogConfig.hideInput && (
@@ -704,16 +704,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         placeholder={dialogConfig.placeholder}
                                         defaultValue={dialogConfig.defaultValue || ''}
                                         id="dialog-title-input"
-                                        className="w-full px-8 py-4 rounded-[24px] bg-white border-2 border-transparent focus:border-[#D99C52] outline-none font-bold text-[#4D3A29] placeholder:text-[#4D3A29]/20 transition-all shadow-inner"
+                                        className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] placeholder:text-[#5D4D7A]/20 transition-all shadow-inner backdrop-blur-md"
                                     />
                                     {dialogConfig.showTime && (
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-bold text-[#D99C52] opacity-70 ml-4">执行时间</p>
+                                        <div className="space-y-3">
+                                            <p className="text-[11px] font-bold text-[#E0C3FC] opacity-70 ml-5 uppercase tracking-widest">执行时间</p>
                                             <input
                                                 type="time"
                                                 defaultValue={dialogConfig.defaultExtra || '08:00'}
                                                 id="dialog-time-input"
-                                                className="w-full px-8 py-4 rounded-[24px] bg-white border-2 border-transparent focus:border-[#D99C52] outline-none font-bold text-[#4D3A29] transition-all shadow-inner"
+                                                className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] transition-all shadow-inner backdrop-blur-md"
                                             />
                                         </div>
                                     )}
@@ -735,9 +735,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     const timeInput = document.getElementById('dialog-time-input') as HTMLInputElement;
                                     dialogConfig.onConfirm(titleInput?.value || '', timeInput?.value || '');
                                 }}
-                                className="flex-1 py-5 bg-[#D99C52] text-white rounded-[28px] font-candy text-xl shadow-xl hover:bg-[#D99C52]/90 active:scale-95 transition-all border-none"
+                                className="flex-1 py-6 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white rounded-[35px] font-candy text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-white"
                             >
-                                {dialogConfig.hideInput ? '知晓了 ✨' : '确定'}
+                                {dialogConfig.hideInput ? '明白啦 ✨' : '确定'}
                             </button>
                         </div>
                     </div>

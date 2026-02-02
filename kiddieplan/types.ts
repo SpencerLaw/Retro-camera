@@ -1,9 +1,10 @@
 
 export enum TaskCategory {
-  LEARNING = '学习自主',
-  LIFESTYLE = '生活自律',
-  HEALTH = '儿童保健',
-  OTHER = '其他'
+  STUDY = '自主学习',
+  DISCIPLINE = '自律习惯',
+  CHORES = '家务探索',
+  HYGIENE = '个人卫生',
+  OTHER = '自定义'
 }
 
 export type UserRole = 'child' | 'parent';
@@ -38,6 +39,7 @@ export interface Child {
   name: string;
   avatar: string;
   points: number;
+  roomCode: string;
   schedules: DailySchedule[];
 }
 

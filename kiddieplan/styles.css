@@ -1,13 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap');
 
 :root {
-    --macaron-pink: #FFDEE9;
-    --macaron-blue: #B5FFFC;
-    --macaron-purple: #E0C3FC;
-    --macaron-yellow: #FFF9C4;
-    --macaron-orange: #FFD2A0;
-    --macaron-text: #6A5D7B;
-    --macaron-bg: #FFFFFF;
+    --warm-cream: #FFF9F3;
+    --warm-peach: #FF8C69;
+    --warm-green: #7BB0A6;
+    --warm-brown: #5D4037;
+    --warm-sand: #E6D5C3;
+    --macaron-pink: #FFB3A7;
+    /* Warmer Pink */
+    --macaron-blue: #A2D2FF;
+    /* Sky Blue */
+    --macaron-purple: #CDB4DB;
+    /* Lavender */
+    --macaron-yellow: #FFEEAD;
+    /* Butter Yellow */
+    --macaron-orange: #FF8C69;
+    /* Peach/Orange */
+    --macaron-text: #5D4037;
+    --macaron-bg: #FFF9F3;
 }
 
 .kiddie-plan-body {
@@ -27,7 +37,7 @@
     font-family: 'ZCOOL KuaiLe', cursive;
 }
 
-/* Mesh Gradient Background */
+/* Cozy Background */
 .mesh-bg {
     position: fixed;
     top: 0;
@@ -36,31 +46,31 @@
     bottom: 0;
     z-index: -1;
     overflow: hidden;
-    background: white;
+    background: var(--warm-cream);
 }
 
 .mesh-blob {
     position: absolute;
     filter: blur(80px);
     border-radius: 50%;
-    opacity: 0.5;
+    opacity: 0.3;
 }
 
-/* Bubble Shapes */
+/* Organic Shapes */
 .kawaii-card {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
-    border-radius: 40px;
-    border: 3px solid white;
-    box-shadow: 0 15px 35px rgba(106, 93, 123, 0.08);
+    border-radius: 45px;
+    border: 4px solid white;
+    box-shadow: 0 20px 40px rgba(93, 64, 55, 0.05);
     position: relative;
 }
 
 .kawaii-button {
-    border-radius: 30px;
+    border-radius: 35px;
     border: 3px solid white;
-    box-shadow: 0 8px 20px rgba(106, 93, 123, 0.1);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(93, 64, 55, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -68,12 +78,12 @@
 }
 
 .kawaii-button:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 12px 25px rgba(106, 93, 123, 0.15);
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 15px 30px rgba(93, 64, 55, 0.12);
 }
 
 .kawaii-button:active {
-    transform: translateY(2px) scale(0.98);
+    transform: translateY(2px) scale(0.97);
 }
 
 /* Floating Animation */
@@ -83,7 +93,7 @@
     }
 
     50% {
-        transform: translateY(-15px) rotate(1deg);
+        transform: translateY(-12px) rotate(0.5deg);
     }
 
     100% {
@@ -92,10 +102,26 @@
 }
 
 .animate-float {
-    animation: floating-animation 4s ease-in-out infinite;
+    animation: floating-animation 5s ease-in-out infinite;
 }
 
 /* Colors Utilities */
+.bg-warm-peach {
+    background-color: var(--warm-peach);
+}
+
+.bg-warm-green {
+    background-color: var(--warm-green);
+}
+
+.bg-warm-sand {
+    background-color: var(--warm-sand);
+}
+
+.text-warm-brown {
+    color: var(--warm-brown);
+}
+
 .bg-pastel-pink {
     background-color: var(--macaron-pink);
 }
@@ -121,9 +147,9 @@
 }
 
 .tab-active-kawaii {
-    background-color: var(--macaron-purple) !important;
+    background-color: var(--warm-peach) !important;
     color: white !important;
-    box-shadow: 0 8px 20px rgba(224, 195, 252, 0.4);
+    box-shadow: 0 10px 25px rgba(255, 140, 105, 0.3);
 }
 
 /* No-scrollbar */

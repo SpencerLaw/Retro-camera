@@ -74,6 +74,13 @@ export default async function handler(
             return response.status(200).json({ success: true, message: '奖励规则已保存' });
         }
 
+        if (action === 'get_rewards') {
+            const { childId } = data;
+            const rewardKey = `kp:child:${childId}:rewards`;
+            const rewards = await kv.get(rewardKey);
+            return response.status(200).json({ success: true, data: { rewards } });
+        }
+
         return response.status(400).json({ success: false, message: '无效的操作' });
 
     } catch (error: any) {

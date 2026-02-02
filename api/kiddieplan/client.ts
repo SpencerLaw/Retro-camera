@@ -23,33 +23,41 @@ export default async function handler(
 
         if (action === 'get_today_data') {
             const tasks = await kv.get(`kp:child:${childId}:tasks:${today}`) || [];
-            const checkins = await kv.get(`kp:child:${childId}:checkins:${today}`) || [];
+            const checkins: string[] = await kv.get(`kp:child:${childId}:checkins:${today}`) || [];
             const rewards = await kv.get(`kp:child:${childId}:rewards`) || [];
             const streak = await kv.get(`kp:child:${childId}:streak`) || 0;
+            const points = await kv.get(`kp:child:${childId}:points`) || 0;
 
             return response.status(200).json({
                 success: true,
-                data: { tasks, checkins, rewards, streak }
+                data: { tasks, checkins, rewards, streak, points }
             });
         }
 
         if (action === 'toggle_checkin') {
             const { taskId } = data;
+            const tasks: any[] = await kv.get(`kp:child:${childId}:tasks:${today}`) || [];
             const checkinKey = `kp:child:${childId}:checkins:${today}`;
+            const pointsKey = `kp:child:${childId}:points`;
+
             let currentCheckins: string[] = (await kv.get(checkinKey)) || [];
+            let currentPoints: number = (await kv.get(pointsKey)) || 0;
+
+            const task = tasks.find(t => t.id === taskId);
+            const pointsDelta = task ? task.points : 0;
 
             if (currentCheckins.includes(taskId)) {
                 currentCheckins = currentCheckins.filter(id => id !== taskId);
+                currentPoints = Math.max(0, currentPoints - pointsDelta);
             } else {
                 currentCheckins.push(taskId);
+                currentPoints += pointsDelta;
             }
 
             await kv.set(checkinKey, currentCheckins);
+            await kv.set(pointsKey, currentPoints);
 
-            // 更新连续打卡天数 (简化版逻辑)
-            // 只有当所有必做任务都完成后，streak 才可能增加
-            // 这里我们先返回当前打卡状态
-            return response.status(200).json({ success: true, checkins: currentCheckins });
+            return response.status(200).json({ success: true, checkins: currentCheckins, points: currentPoints });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

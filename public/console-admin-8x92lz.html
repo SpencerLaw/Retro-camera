@@ -345,7 +345,7 @@
     <div id="generateSection" class="view-section">
       <div class="gen-card">
         <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
           <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
           <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
           <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码
@@ -353,6 +353,8 @@
           <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
           <button onclick="generateCodes('tree')" class="btn-primary" style="background: #eab308;">生成早读码 (ZD)</button>
           <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
+          <button onclick="generateCodes('xm')" class="btn-primary" style="background: #E0C3FC; color: #6A5D7B;">生成星梦码
+            (XXDK)</button>
         </div>
 
         <div class="gen-list" id="genList"></div>
@@ -594,6 +596,13 @@
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
           code = 'GB' + datePart + random;
+        } else if (type === 'xm') {
+          // XXDK + YYYYMMDD (8) + Random (4) = 16 chars
+          let random = '';
+          for (let j = 0; j < 4; j++) {
+            random += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          code = 'XXDK' + datePart + random;
         } else {
           // YYYYMMDD (8) + Random (8) = 16 chars
           let random = '';

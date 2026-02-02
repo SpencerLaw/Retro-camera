@@ -91,21 +91,32 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
-    const addTask = () => {
-        const title = prompt('任务名称？');
-        if (!title) return;
-        const time = prompt('打卡时间点？', '08:30') || '08:30';
+    const addTask = (title?: string, time?: string, points?: number) => {
+        const finalTitle = title || prompt('任务名称？');
+        if (!finalTitle) return;
+        const finalTime = time || prompt('打卡时间点？', '08:30') || '08:30';
+        const finalPoints = points || 10;
+
         const newTask: Task = {
-            id: `t_${Date.now()}`,
-            title,
-            timeSlot: time,
-            points: 10,
+            id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+            title: finalTitle,
+            timeSlot: finalTime,
+            points: finalPoints,
             completed: false,
             isRequired: true,
             date: new Date().toISOString().split('T')[0]
         };
-        setCurrentTasks([...currentTasks, newTask]);
+        setCurrentTasks(prev => [...prev, newTask]);
     };
+
+    const taskTemplates = [
+        { title: '☀️ 早起洗漱', time: '07:30', points: 10, icon: '🦷' },
+        { title: '📖 晨读时间', time: '08:30', points: 20, icon: '📚' },
+        { title: '✍️ 完成作业', time: '14:00', points: 30, icon: '📝' },
+        { title: '🧸 整理玩具', time: '18:00', points: 15, icon: '🧸' },
+        { title: '🥛 睡前牛奶', time: '20:30', points: 10, icon: '🥛' },
+        { title: '🌙 准时睡觉', time: '21:00', points: 20, icon: '🛌' },
+    ];
 
     const removeTask = (id: string) => {
         setCurrentTasks(currentTasks.filter(t => t.id !== id));
@@ -156,8 +167,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         <Settings className="text-[#E0C3FC]" />
                     </div>
                     <div className="flex flex-col">
-                        <h1 className="text-2xl font-candy text-macaron">家长管理端</h1>
-                        <span className="text-[8px] font-bold text-macaron/30 -mt-1 tracking-widest uppercase">Love is Growth</span>
+                        <h1 className="text-2xl font-candy text-macaron">星梦奇旅</h1>
+                        <span className="text-[8px] font-bold text-macaron/30 -mt-1 tracking-widest uppercase">Love & Growth Diary</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -289,12 +300,39 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </button>
                                 </div>
                             ))}
-                            {currentTasks.length === 0 && (
-                                <div className="py-24 text-center space-y-4">
-                                    <div className="w-20 h-20 bg-white/30 rounded-full mx-auto flex items-center justify-center border-2 border-dashed border-white">
-                                        <Sparkles size={32} className="text-macaron opacity-20" />
+                            {currentTasks.length === 0 ? (
+                                <div className="space-y-8 py-10">
+                                    <div className="text-center space-y-4">
+                                        <div className="w-20 h-20 bg-white/30 rounded-full mx-auto flex items-center justify-center border-2 border-dashed border-white">
+                                            <Sparkles size={32} className="text-macaron opacity-20" />
+                                        </div>
+                                        <p className="text-sm text-macaron opacity-30 font-bold italic">点击上方“新增”或使用下方模板：</p>
                                     </div>
-                                    <p className="text-sm text-macaron opacity-30 font-bold italic">点击上方“新增”按钮开始吧 ~</p>
+
+                                    {/* Template Gallery */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {taskTemplates.map((tmp, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
+                                                className="kawaii-card bg-white/60 p-4 flex flex-col items-center gap-2 hover:bg-pastel-yellow/40 transition-all border-none group"
+                                            >
+                                                <span className="text-2xl group-hover:scale-125 transition-transform">{tmp.icon}</span>
+                                                <span className="text-[10px] font-bold text-macaron">{tmp.title}</span>
+                                                <span className="text-[8px] font-bold text-macaron opacity-30">{tmp.time} • {tmp.points}🍬</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4 opacity-50 pointer-events-none mt-10">
+                                    <div className="col-span-2 text-[10px] font-bold text-macaron opacity-30 uppercase tracking-widest text-center">更多灵感模板</div>
+                                    {taskTemplates.slice(0, 4).map((tmp, i) => (
+                                        <div key={i} className="kawaii-card bg-white/20 p-3 flex items-center gap-3 grayscale">
+                                            <span className="text-lg">{tmp.icon}</span>
+                                            <span className="text-[9px] font-bold text-macaron">{tmp.title}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
@@ -326,7 +364,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-xs">
                 <div className="kawaii-card bg-white/90 px-6 py-3 flex items-center gap-3 shadow-xl animate-float border-2 border-white">
                     <AlertCircle size={18} className="text-[#FFDEE9]" />
-                    <span className="text-[10px] font-bold text-macaron opacity-60">给孩子适当的自由，自律会更持久哦 ~</span>
+                    <span className="text-[10px] font-bold text-macaron opacity-60">
+                        {[
+                            "给孩子适当的自由，自律会更持久哦 ~",
+                            "每一个小勋章，都是成长的里程碑 ✨",
+                            "多一点耐心，梦幻岛的果实也会更甜 🍬",
+                            "陪伴是最好的奖励，别忘了抱抱TA 💖",
+                            "自律的背后，是宝贝对生活的热爱 🌈"
+                        ][Math.floor(Date.now() / 3600000) % 5]}
+                    </span>
                 </div>
             </div>
         </div>

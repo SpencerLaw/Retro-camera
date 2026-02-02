@@ -77,11 +77,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${token.substring(0, 8)}`} alt="me" className="w-full h-full object-cover" />
                     </div>
                     <div className="space-y-1">
-                        <h2 className="text-4xl font-candy text-macaron">加油，学霸！</h2>
+                        <h2 className="text-4xl font-candy text-macaron">加油，小旅人！</h2>
                         <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-full text-[10px] font-bold text-macaron shadow-sm">
                                 <Trophy size={14} className="text-[#FFD2A0]" />
-                                {streak} 天连通
+                                {streak} 天奇旅
                             </div>
                             <div className="flex items-center gap-1.5 bg-pastel-pink px-3 py-1 rounded-full text-[10px] font-bold text-white shadow-sm">
                                 <Star size={14} className="fill-white" />

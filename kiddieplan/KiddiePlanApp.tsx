@@ -4,6 +4,7 @@ import './styles.css';
 import { UserRole } from './types';
 import ParentPortal from './views/ParentPortal';
 import ChildPortal from './views/ChildPortal';
+import { getDeviceId, getDeviceInfo } from './utils/licenseManager';
 import { Users, User, Lock, ArrowLeft, Heart, Sparkles, BookOpen } from 'lucide-react';
 
 const KiddiePlanApp: React.FC = () => {
@@ -29,10 +30,17 @@ const KiddiePlanApp: React.FC = () => {
     setError(null);
     try {
       const action = portal === 'parent' ? 'parent_auth' : 'child_auth';
+      const payload: any = { action, code: authCode };
+
+      if (portal === 'parent') {
+        payload.deviceId = getDeviceId();
+        payload.deviceInfo = getDeviceInfo();
+      }
+
       const res = await fetch('/api/kiddieplan/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, code: authCode })
+        body: JSON.stringify(payload)
       });
 
       const result = await res.json();
@@ -78,7 +86,7 @@ const KiddiePlanApp: React.FC = () => {
           <div className="relative inline-block">
             <div className="absolute -top-12 -right-12 text-6xl drop-shadow-sm">🍬</div>
             <h1 className="text-7xl font-candy bg-gradient-to-r from-[#E0C3FC] to-[#FFDEE9] bg-clip-text text-transparent drop-shadow-sm">
-              学霸成长计划
+              星梦奇旅
             </h1>
           </div>
           <p className="text-macaron opacity-40 font-bold tracking-[0.2em] text-xs uppercase">Sweet Dreams & Better Habits</p>
@@ -150,7 +158,7 @@ const KiddiePlanApp: React.FC = () => {
                 type={portal === 'parent' ? 'password' : 'text'}
                 value={authCode}
                 onChange={(e) => setAuthCode(e.target.value.toUpperCase())}
-                placeholder={portal === 'parent' ? '授权码' : '4位房间码'}
+                placeholder={portal === 'parent' ? '授权码 (XM_xxxx)' : '4位房间码'}
                 maxLength={portal === 'parent' ? 20 : 4}
                 className="w-full bg-white/80 rounded-[25px] px-6 py-5 text-center text-3xl font-candy text-macaron focus:ring-4 focus:ring-[#E0C3FC]/20 transition-all border-none shadow-sm outline-none"
                 autoFocus

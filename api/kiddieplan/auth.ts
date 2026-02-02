@@ -17,8 +17,9 @@ export default async function handler(
     try {
         const cleanCode = code.toUpperCase().trim();
 
-        // 1. 家长端验证 (以 DK_ 开头的环境变量)
+        // 1. 家长端验证
         if (action === 'parent_auth') {
+            // 兼容性检查：支持旧的 DK_ 环境变量
             const validCodes = Object.entries(process.env)
                 .filter(([key]) => key.startsWith('DK_'))
                 .map(([_, value]) => value?.toUpperCase());
@@ -30,7 +31,33 @@ export default async function handler(
                     token: Buffer.from(`parent:${cleanCode}`).toString('base64')
                 });
             }
-            return response.status(401).json({ success: false, message: '家长授权码无效' });
+
+            // 新版检查：如果是 XXDK 开头，集成到授权码系统
+            if (cleanCode.startsWith('XXDK')) {
+                // 转发到 verify-license 逻辑
+                const baseUrl = request.headers.origin || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+                const res = await fetch(`${baseUrl}/api/verify-license`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        licenseCode: cleanCode,
+                        deviceId: request.body.deviceId || 'legacy-web',
+                        deviceInfo: request.body.deviceInfo || 'Parent Device',
+                        action: 'verify'
+                    })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    return response.status(200).json({
+                        success: true,
+                        role: 'parent',
+                        token: result.data.token // 使用 verify-license 返回的 token
+                    });
+                }
+                return response.status(401).json({ success: false, message: result.message || '授权码验证失败' });
+            }
+
+            return response.status(401).json({ success: false, message: '家长授权码无效 (须以 XXDK 开头)' });
         }
 
         // 2. 孩子端验证 (4位房间码)

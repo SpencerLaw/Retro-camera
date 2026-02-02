@@ -38,6 +38,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [currentAvatar, setCurrentAvatar] = useState<string>('');
+    // Fix: Ref to track latest avatar for closures
+    const avatarRef = useRef('');
+
+    // Sync ref with state
+    useEffect(() => {
+        avatarRef.current = currentAvatar;
+    }, [currentAvatar]);
 
     // Task/Reward Editor State
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
@@ -304,7 +311,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     };
 
     const handleAddChild = async () => {
-        setCurrentAvatar(`https://api.dicebear.com/7.x/adventurer/svg?seed=${Date.now()}`);
+        // Fix: Use local variable to avoid stale closure state
+        const newAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${Date.now()}`;
+        setCurrentAvatar(newAvatar);
+
         setDialogConfig({
             isOpen: true,
             title: '🌈 欢迎新成员',
@@ -314,13 +324,29 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 if (!name) return;
                 const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
                 try {
+                    // Fix: Use the current image from the Ref if available (for uploaded), otherwise the local default
+                    // But wait, if user uploaded, currentAvatar state WOULDBE updated? 
+                    // No, onConfirm closes over the SCOPE of handleAddChild.
+                    // We need to use a Ref to track the LATEST currentAvatar for the dialog.
+                    // Or better: pass the upload result to a Ref.
+
+                    // Actually, if user Uploads, handleFileChange sets currentAvatar state.
+                    // But onConfirm closure still sees the OLD 'newAvatar' or 'empty'.
+                    // React State in closures is TRICKY.
+
+                    // BEST FIX: Use a ref to track currentAvatar just for the dialog operation
+                    // OR rely on the fact that handleFileChange updates 'currentAvatar' state, 
+                    // AND we can access it via a REF.
+
+                    const finalAvatar = avatarRef.current || newAvatar;
+
                     const res = await fetch('/api/kiddieplan/manage', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             action: 'save_child',
                             token,
-                            data: { name, avatar: currentAvatar, roomCode }
+                            data: { name, avatar: finalAvatar, roomCode }
                         })
                     });
                     const result = await res.json();
@@ -388,45 +414,46 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const selectedChild = children.find(c => c.id === selectedChildId);
 
     return (
-        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden mesh-gradient">
+        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-gradient-to-b from-[#FFC312] to-[#F79F1F] font-sans">
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
-            {/* Header - Pastel Floating Style */}
-            <div className="p-8 flex justify-between items-center shrink-0">
-                <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-white rounded-[28px] flex items-center justify-center shadow-xl border-4 border-white animate-float-kawaii">
-                        <Settings className="text-[#E0C3FC] animate-spin-slow" size={32} />
+
+            {/* Pixar Header - Full Width & High Contrast */}
+            <div className="px-6 py-6 flex justify-between items-center shrink-0 bg-white/20 backdrop-blur-md shadow-lg border-b-4 border-black/5">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_6px_0_rgba(0,0,0,0.1)] border-b-4 border-[#eee] transform transition-transform hover:-translate-y-1">
+                        <Settings className="text-[#EA2027] animate-spin-slow" size={32} strokeWidth={3} />
                     </div>
                     <div>
-                        <h1 className="text-4xl font-candy text-[#5D4D7A] tracking-tight">星梦奇旅</h1>
-                        <p className="text-[10px] font-bold text-[#A2D2FF] mt-1 tracking-[0.3em] uppercase">Dream Maker Hub</p>
+                        <h1 className="text-4xl font-black text-[#2c3e50] tracking-tight drop-shadow-sm" style={{ fontFamily: 'ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, sans-serif' }}>星梦奇旅</h1>
+                        <p className="text-xs font-black text-[#fff] mt-1 tracking-[0.2em] uppercase bg-[#EA2027] px-2 py-1 rounded-full inline-block shadow-sm">Dream Maker Hub</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    <button onClick={() => setActiveTab('registry')} className={`w-12 h-12 kawaii-button bg-white text-[#5D4D7A] shadow-lg border-none active:scale-95 ${activeTab === 'registry' ? 'ring-4 ring-[#E0C3FC]' : ''}`}>
-                        <LayoutGrid size={22} className={activeTab === 'registry' ? 'text-[#E0C3FC]' : ''} />
+                <div className="flex items-center gap-3">
+                    <button onClick={() => setActiveTab('registry')} className={`w-14 h-14 rounded-2xl bg-white border-b-4 border-[#ddd] flex items-center justify-center text-[#2c3e50] shadow-lg active:border-b-0 active:translate-y-1 transition-all ${activeTab === 'registry' ? 'bg-[#12CBC4] text-white border-[#0faba0]' : ''}`}>
+                        <LayoutGrid size={24} strokeWidth={3} />
                     </button>
                     {activeTab !== 'children' && activeTab !== 'registry' && (
-                        <button onClick={() => setActiveTab('children')} className="w-12 h-12 kawaii-button bg-white text-[#5D4D7A] border-white shadow-lg active:scale-90">
-                            <ArrowLeft size={22} />
+                        <button onClick={() => setActiveTab('children')} className="w-14 h-14 rounded-2xl bg-white border-b-4 border-[#ddd] flex items-center justify-center text-[#2c3e50] shadow-lg active:border-b-0 active:translate-y-1 transition-all">
+                            <ArrowLeft size={24} strokeWidth={3} />
                         </button>
                     )}
-                    <button onClick={onLogout} title="切换角色 / 返回首页" className="w-12 h-12 kawaii-button bg-[#FFDEE9] text-white border-white shadow-lg hover:scale-105 active:scale-90 transition-all">
-                        <Home size={22} strokeWidth={2.5} />
+                    <button onClick={onLogout} title="切换角色 / 返回首页" className="w-14 h-14 rounded-2xl bg-[#EA2027] border-b-4 border-[#b33939] flex items-center justify-center text-white shadow-lg hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all">
+                        <Home size={24} strokeWidth={3} />
                     </button>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <main className="flex-1 px-6 pb-28 overflow-y-auto space-y-8 no-scrollbar">
+            {/* Main Content - Full Width Container */}
+            <main className="flex-1 w-full px-4 pt-6 pb-32 overflow-y-auto space-y-8 no-scrollbar">
 
                 {activeTab === 'children' && (
                     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
-                        {/* Children Selector - Organic Card */}
-                        <div className="kawaii-card bg-white/60 p-8 space-y-8 border-[#D99C52]/5 shadow-xl">
+                        {/* Children Selector - Pixar Card */}
+                        <div className="bg-white rounded-[32px] p-6 space-y-6 shadow-[0_8px_0_rgba(0,0,0,0.05)] border-2 border-black/5">
                             <div className="flex justify-between items-center">
-                                <h3 className="text-[11px] font-bold text-[#5D4D7A] opacity-40 uppercase tracking-[0.3em]">我的宝贝们 ({children.length}/3)</h3>
+                                <h3 className="text-sm font-black text-[#2c3e50] opacity-60 uppercase tracking-[0.2em]">我的宝贝们 ({children.length}/3)</h3>
                                 {children.length < 3 && (
-                                    <button onClick={handleAddChild} className="flex items-center gap-2 text-[10px] font-bold text-white bg-[#B5FFFC] px-5 py-2.5 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all border-2 border-white">
+                                    <button onClick={handleAddChild} className="flex items-center gap-2 text-xs font-black text-white bg-[#0652DD] px-5 py-3 rounded-xl shadow-[0_4px_0_#1e3799] hover:translate-y-px hover:shadow-[0_3px_0_#1e3799] active:translate-y-1 active:shadow-none transition-all">
                                         <Plus size={16} strokeWidth={4} /> 添加成员
                                     </button>
                                 )}
@@ -437,18 +464,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <button
                                         key={child.id}
                                         onClick={() => setSelectedChildId(child.id)}
-                                        className={`flex flex-col items-center gap-6 min-w-[110px] transition-all transform duration-500 relative ${selectedChildId === child.id ? 'scale-110' : 'opacity-40 grayscale-[0.3]'}`}
+                                        className={`flex flex-col items-center gap-4 min-w-[100px] transition-all transform duration-300 relative group ${selectedChildId === child.id ? 'scale-105' : 'opacity-60 grayscale-[0.5] hover:opacity-100 hover:grayscale-0'}`}
                                     >
-                                        <div className={`w-28 h-28 rounded-[48px] overflow-hidden border-4 shadow-2xl transition-all relative ${selectedChildId === child.id ? 'border-[#E0C3FC] scale-105' : 'border-white opacity-40'}`}>
-                                            <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
+                                        <div className={`w-28 h-28 rounded-[36px] overflow-hidden border-4 shadow-sm transition-all relative ${selectedChildId === child.id ? 'border-[#EA2027] shadow-[0_8px_0_rgba(234,32,39,0.2)]' : 'border-transparent'}`}>
+                                            <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
+
                                             {/* Plus Icon Overlay for Selected */}
                                             {selectedChildId === child.id && (
-                                                <div className="absolute bottom-1 right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-[#E0C3FC] animate-in zoom-in-50 duration-300">
-                                                    <Plus size={18} className="text-[#E0C3FC]" strokeWidth={4} />
+                                                <div className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md border-2 border-[#EA2027] animate-bounce-slow">
+                                                    <Plus size={18} className="text-[#EA2027]" strokeWidth={4} />
                                                 </div>
                                             )}
                                         </div>
-                                        <span className={`text-sm font-bold tracking-wide ${selectedChildId === child.id ? 'text-[#E0C3FC]' : 'text-[#5D4D7A]'}`}>{child.name}</span>
+                                        <span className={`text-sm font-black tracking-wide ${selectedChildId === child.id ? 'text-[#2c3e50]' : 'text-[#95a5a6]'}`}>{child.name}</span>
                                     </button>
                                 ))}
                                 {children.length === 0 && (
@@ -466,14 +494,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <div className="absolute -right-10 -bottom-10 opacity-30 blur-sm group-hover:rotate-45 group-hover:scale-125 transition-all duration-1000">
                                         <Star size={200} className="text-white fill-white" />
                                     </div>
-                                    <div className="relative z-10 space-y-3">
+                                    <div className="relative z-10 space-y-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="text-[10px] font-bold text-white uppercase tracking-[0.4em] drop-shadow-md">进入房间码</div>
-                                            <button onClick={handleEditChild} className="bg-white/20 hover:bg-white/40 text-white px-3 py-1 rounded-full text-[9px] font-bold transition-all border border-white/30 backdrop-blur-md flex items-center gap-1.5 active:scale-90">
-                                                <Edit2 size={10} /> 修改资料
+                                            <div className="text-[10px] font-black text-white uppercase tracking-[0.2em] bg-black/20 px-3 py-1 rounded-full backdrop-blur-sm">进入房间码</div>
+                                            <button onClick={handleEditChild} className="bg-white text-[#EA2027] px-4 py-1.5 rounded-full text-[10px] font-black shadow-lg hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1.5 border-b-2 border-black/10">
+                                                <Edit2 size={12} strokeWidth={3} /> 修改资料
                                             </button>
                                         </div>
-                                        <div className="text-6xl font-candy text-white tracking-[0.3em] bg-white/30 px-8 py-5 rounded-[40px] backdrop-blur-xl shadow-inner border-2 border-white/40">
+                                        <div className="text-7xl font-black text-white tracking-[0.1em] drop-shadow-md" style={{ fontFamily: 'monospace' }}>
                                             {selectedChild.roomCode}
                                         </div>
                                     </div>
@@ -528,14 +556,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </button>
                         </div>
 
-                        {/* Template Library - Soft Selection */}
+                        {/* Template Library - Pixar Pills */}
                         <div className="space-y-6">
                             <div className="flex gap-3 overflow-x-auto no-scrollbar pb-4 -mx-2 px-2 scroll-smooth">
                                 {Object.values(TaskCategory).map(cat => (
                                     <button
                                         key={cat}
                                         onClick={() => setSelectedCategory(cat)}
-                                        className={`px-8 py-4 rounded-[30px] text-[11px] font-bold transition-all whitespace-nowrap border-4 ${selectedCategory === cat ? 'bg-[#E0C3FC] text-white border-white shadow-xl scale-105' : 'bg-white text-[#5D4D7A] border-white/50 opacity-60 hover:opacity-100 shadow-sm'}`}
+                                        className={`px-6 py-3 rounded-xl text-xs font-black transition-all whitespace-nowrap border-b-4 ${selectedCategory === cat ? 'bg-[#0652DD] text-white border-[#1e3799] shadow-lg translate-y-px' : 'bg-white text-[#2c3e50] border-[#ccc] hover:bg-gray-50'}`}
                                     >
                                         {cat}
                                     </button>
@@ -547,14 +575,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <button
                                         key={i}
                                         onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                        className="kawaii-card bg-white p-6 flex items-center gap-5 hover:bg-[#B5FFFC]/30 transition-all border-white shadow-md group"
+                                        className="bg-white rounded-2xl p-4 flex items-center gap-4 hover:bg-[#fff0f0] transition-all border-b-4 border-[#eee] active:border-b-0 active:translate-y-1 shadow-[0_4px_0_rgba(0,0,0,0.05)] group"
                                     >
-                                        <div className="w-12 h-12 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-inner border-2 border-[#E0C3FC]/10 group-hover:scale-110 transition-transform">
+                                        <div className="w-12 h-12 bg-[#FFC312] rounded-xl flex items-center justify-center text-2xl shadow-inner border-b-4 border-[#F79F1F] group-hover:scale-110 transition-transform">
                                             {tmp.icon}
                                         </div>
                                         <div className="text-left">
-                                            <div className="text-base font-bold text-[#5D4D7A]">{tmp.title}</div>
-                                            <div className="text-[10px] font-bold text-[#B5FFFC] opacity-80 uppercase tracking-widest mt-1">{tmp.time} • {tmp.points} 🍭</div>
+                                            <div className="text-sm font-black text-[#2c3e50]">{tmp.title}</div>
+                                            <div className="text-[10px] font-bold text-[#EA2027] opacity-80 uppercase tracking-widest mt-1">{tmp.time} • {tmp.points} 🍭</div>
                                         </div>
                                     </button>
                                 ))}
@@ -565,39 +593,39 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="absolute left-1/2 -translate-x-1/2 -top-2 bg-white/40 backdrop-blur-sm px-4 text-[8px] font-bold text-[#5D4D7A]/20 uppercase tracking-[0.4em]">Review List</div>
                         </div>
 
-                        {/* Current Task Session - Cozy Cards */}
+                        {/* Current Task Session - Pixar Cards */}
                         <div className="space-y-4">
-                            <h3 className="text-[10px] font-bold text-[#5D4D7A] opacity-40 uppercase tracking-[0.2em] px-2 flex items-center gap-2">
-                                <ListTodo size={12} /> 待发布任务 ({currentTasks.length})
+                            <h3 className="text-xs font-black text-[#2c3e50] opacity-50 uppercase tracking-[0.2em] px-2 flex items-center gap-2">
+                                <ListTodo size={14} strokeWidth={3} /> 待发布任务 ({currentTasks.length})
                             </h3>
                             {currentTasks.map(task => (
-                                <div key={task.id} className="kawaii-card bg-white p-6 flex justify-between items-center group border-white shadow-xl hover:translate-x-3 transition-transform">
-                                    <div className="flex items-center gap-6">
-                                        <div className="w-14 h-14 bg-[#B5FFFC]/20 rounded-[24px] flex items-center justify-center border-2 border-white shadow-inner">
-                                            <Clock size={24} className="text-[#B5FFFC]" />
+                                <div key={task.id} className="bg-white rounded-2xl p-5 flex justify-between items-center group shadow-[0_6px_0_rgba(0,0,0,0.05)] border-2 border-black/5 hover:translate-x-1 transition-transform">
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 bg-[#12CBC4] rounded-xl flex items-center justify-center border-b-4 border-[#0fb9b1] shadow-sm text-white">
+                                            <Clock size={24} strokeWidth={3} />
                                         </div>
                                         <div>
-                                            <div className="font-bold text-[#5D4D7A] text-lg">{task.title}</div>
-                                            <div className="text-[12px] font-bold text-[#E0C3FC] flex items-center gap-2 mt-1">
-                                                <span>{task.timeSlot}</span>
-                                                <span className="w-1.5 h-1.5 bg-[#E0C3FC] opacity-40 rounded-full"></span>
-                                                <span className="font-bold">{task.points} 🍭</span>
+                                            <div className="font-black text-[#2c3e50] text-lg">{task.title}</div>
+                                            <div className="text-xs font-bold text-[#0652DD] flex items-center gap-2 mt-1">
+                                                <span className="bg-[#0652DD]/10 px-2 py-0.5 rounded text-[10px]">{task.timeSlot}</span>
+                                                <span className="w-1.5 h-1.5 bg-[#0652DD] rounded-full"></span>
+                                                <span className="font-black">{task.points} 🍭</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <button onClick={() => editTask(task)} className="w-10 h-10 kawaii-button bg-white text-[#5D4D7A] border-none shadow-sm hover:bg-white active:scale-90 transition-all">
-                                            <Edit2 size={16} />
+                                        <button onClick={() => editTask(task)} className="w-10 h-10 rounded-xl bg-gray-100 text-[#2c3e50] border-b-4 border-[#ddd] flex items-center justify-center hover:bg-white active:border-b-0 active:translate-y-1 transition-all">
+                                            <Edit2 size={16} strokeWidth={2.5} />
                                         </button>
-                                        <button onClick={() => removeTask(task.id)} className="w-10 h-10 kawaii-button bg-white text-[#FFDEE9] hover:text-[#FFDEE9] border-none shadow-sm hover:bg-white active:scale-90 transition-all">
-                                            <Trash2 size={16} />
+                                        <button onClick={() => removeTask(task.id)} className="w-10 h-10 rounded-xl bg-[#FDA7DF]/20 text-[#D980FA] border-b-4 border-[#FDA7DF]/30 flex items-center justify-center hover:bg-[#FDA7DF] hover:text-white active:border-b-0 active:translate-y-1 transition-all">
+                                            <Trash2 size={16} strokeWidth={2.5} />
                                         </button>
                                     </div>
                                 </div>
                             ))}
                             {currentTasks.length === 0 && (
-                                <div className="text-center py-12 bg-white/20 rounded-[45px] border-4 border-dashed border-white/60">
-                                    <p className="text-xs text-[#5D4D7A] opacity-20 font-bold italic">快去挑选一些充满仪式感的任务吧 ~</p>
+                                <div className="text-center py-12 bg-white/20 rounded-3xl border-4 border-dashed border-white/60">
+                                    <p className="text-sm text-[#2c3e50] opacity-40 font-black italic">快去挑选一些充满仪式感的任务吧 ~</p>
                                 </div>
                             )}
                         </div>
@@ -606,9 +634,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <button
                                 onClick={handleSaveTasks}
                                 disabled={isSaving}
-                                className="w-full kawaii-button bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(224,195,252,0.3)] border-4 border-white"
+                                className="w-full bg-[#0652DD] py-6 text-white text-xl font-black rounded-2xl shadow-[0_8px_0_#1e3799] active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 mt-12 border-b-8 border-[#1e3799] active:border-b-0"
                             >
-                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
+                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={24} className="mr-3 inline" strokeWidth={3} /> 同步梦想宇宙</>}
                             </button>
                         )}
                     </div>
@@ -626,21 +654,21 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-4">
                             {rewards.map((reward, i) => (
-                                <div key={i} className="kawaii-card bg-white p-6 flex flex-col items-center gap-4 relative group border-none shadow-md hover:shadow-xl transition-all">
+                                <div key={i} className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 relative group shadow-[0_8px_0_rgba(0,0,0,0.05)] border-2 border-black/5 hover:-translate-y-1 transition-transform">
                                     <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                        <button onClick={() => removeReward(reward.id)} className="w-8 h-8 rounded-full bg-[#FFDEE9]/10 flex items-center justify-center text-[#FFDEE9] hover:bg-[#FFDEE9] hover:text-white transition-all shadow-sm">
-                                            <Trash2 size={14} />
+                                        <button onClick={() => removeReward(reward.id)} className="w-8 h-8 rounded-full bg-[#EA2027]/10 flex items-center justify-center text-[#EA2027] hover:bg-[#EA2027] hover:text-white transition-all shadow-sm">
+                                            <Trash2 size={14} strokeWidth={3} />
                                         </button>
                                     </div>
-                                    <div className="w-20 h-20 bg-white rounded-[30px] flex items-center justify-center text-5xl shadow-inner border-2 border-[#FFDEE9]/30">
+                                    <div className="w-20 h-20 bg-[#FDA7DF] rounded-2xl flex items-center justify-center text-5xl shadow-inner border-b-4 border-[#D980FA]">
                                         {reward.icon}
                                     </div>
                                     <div className="text-center">
-                                        <div className="text-base font-bold text-[#5D4D7A]">{reward.name}</div>
-                                        <div className="text-[14px] font-bold text-[#E0C3FC] mt-2 flex items-center justify-center gap-1.5">
-                                            {reward.pointsCost} <span className="text-[10px] uppercase opacity-60">candies 🍭</span>
+                                        <div className="text-base font-black text-[#2c3e50]">{reward.name}</div>
+                                        <div className="text-xs font-bold text-[#EA2027] mt-2 flex items-center justify-center gap-1.5 bg-[#EA2027]/10 px-3 py-1 rounded-full">
+                                            {reward.pointsCost} <span className="text-[9px] uppercase opacity-60">candies 🍭</span>
                                         </div>
                                     </div>
                                 </div>
@@ -651,9 +679,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <button
                                 onClick={handleSaveRewards}
                                 disabled={isSaving}
-                                className="w-full kawaii-button bg-gradient-to-r from-[#FFDEE9] to-[#E0C3FC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(255,222,233,0.3)] border-4 border-white"
+                                className="w-full bg-[#EA2027] py-6 text-white text-xl font-black rounded-2xl shadow-[0_8px_0_#b33939] active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 mt-12 border-b-8 border-[#b33939] active:border-b-0"
                             >
-                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
+                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={24} className="mr-3 inline" strokeWidth={3} /> 同步梦想宇宙</>}
                             </button>
                         )}
                     </div>
@@ -666,40 +694,42 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <p className="text-[10px] font-bold text-[#A2D2FF] opacity-50 uppercase tracking-[0.4em]">Family License Master Console</p>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {(licenseData.children || []).map((kid: any) => {
                                 const today = new Date().toISOString().split('T')[0];
                                 const daily = licenseData.progress?.[today]?.[kid.id] || { tasks: [], checkins: [] };
                                 const completionRate = daily.tasks.length > 0 ? Math.round((daily.checkins.length / daily.tasks.length) * 100) : 0;
 
                                 return (
-                                    <div key={kid.id} className="kawaii-card bg-white/80 p-6 border-none shadow-xl flex items-center gap-6 group hover:translate-x-2 transition-transform">
-                                        <div className="w-20 h-20 rounded-[30px] border-4 border-white shadow-lg overflow-hidden shrink-0">
+                                    <div key={kid.id} className="bg-white rounded-3xl p-6 shadow-[0_6px_0_rgba(0,0,0,0.05)] border-2 border-black/5 flex items-center gap-6 group hover:translate-x-1 transition-transform">
+                                        <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-md overflow-hidden shrink-0 bg-gray-100">
                                             <img src={kid.avatar} className="w-full h-full object-cover" />
                                         </div>
-                                        <div className="flex-1 space-y-1">
+                                        <div className="flex-1 space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <h4 className="text-xl font-candy text-[#5D4D7A]">{kid.name}</h4>
-                                                <span className="text-[10px] font-bold text-[#E0C3FC] uppercase tracking-widest">RM: {kid.roomCode}</span>
+                                                <h4 className="text-xl font-black text-[#2c3e50]">{kid.name}</h4>
+                                                <span className="text-[10px] font-black text-white bg-[#2c3e50] px-2 py-1 rounded uppercase tracking-widest">RM: {kid.roomCode}</span>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <div className="flex-1 h-3 bg-[#5D4D7A]/5 rounded-full overflow-hidden border border-white">
+                                                <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden border border-black/5 shadow-inner">
                                                     <div
-                                                        className="h-full bg-gradient-to-r from-[#B5FFFC] to-[#E0C3FC] transition-all duration-1000"
+                                                        className="h-full bg-[#0652DD] rounded-full transition-all duration-1000 relative overflow-hidden"
                                                         style={{ width: `${completionRate}%` }}
-                                                    />
+                                                    >
+                                                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                                                    </div>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-[#5D4D7A] opacity-40">{completionRate}%</span>
+                                                <span className="text-xs font-black text-[#0652DD]">{completionRate}%</span>
                                             </div>
                                             <div className="flex gap-4 pt-1">
-                                                <div className="text-[9px] font-bold text-[#5D4D7A]/40 uppercase tracking-tighter">
-                                                    任务: {daily.checkins.length}/{daily.tasks.length}
+                                                <div className="text-[10px] font-bold text-[#95a5a6] uppercase tracking-tighter flex items-center gap-1">
+                                                    <ListTodo size={10} /> 任务: {daily.checkins.length}/{daily.tasks.length}
                                                 </div>
-                                                <div className="text-[9px] font-bold text-[#FFDEE9] uppercase tracking-tighter">
-                                                    积分: {kid.points || 0} 🍭
+                                                <div className="text-[10px] font-bold text-[#EA2027] uppercase tracking-tighter flex items-center gap-1">
+                                                    <Gift size={10} /> 积分: {kid.points || 0}
                                                 </div>
-                                                <div className="text-[9px] font-bold text-[#B5FFFC] uppercase tracking-tighter">
-                                                    连续: {kid.streak || 0}D
+                                                <div className="text-[10px] font-bold text-[#F79F1F] uppercase tracking-tighter flex items-center gap-1">
+                                                    <Trophy size={10} /> 连续: {kid.streak || 0}D
                                                 </div>
                                             </div>
                                         </div>
@@ -708,28 +738,28 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             })}
                         </div>
 
-                        <div className="kawaii-card bg-gradient-to-br from-[#5D4D7A] to-[#2D1B4E] p-10 text-white border-none shadow-2xl relative overflow-hidden group border-4 border-white">
-                            <div className="absolute -top-10 -right-10 opacity-10 animate-spin-slow">
+                        <div className="bg-[#2c3e50] rounded-[40px] p-10 text-white border-b-8 border-[#1e272e] shadow-2xl relative overflow-hidden group">
+                            <div className="absolute -top-10 -right-10 opacity-5 animate-spin-slow">
                                 <Sparkles size={240} fill="white" />
                             </div>
                             <div className="relative z-10 grid grid-cols-2 gap-8">
                                 <div className="space-y-1">
-                                    <div className="text-3xl font-candy font-bold">{licenseData.children?.length || 0}</div>
-                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">注册成员总数</div>
+                                    <div className="text-4xl font-black text-[#F79F1F]">{licenseData.children?.length || 0}</div>
+                                    <div className="text-[10px] font-bold opacity-40 uppercase tracking-widest">注册成员总数</div>
                                 </div>
                                 <div className="space-y-1">
-                                    <div className="text-3xl font-candy font-bold">{Object.keys(licenseData.progress || {}).length}</div>
-                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">已积累梦幻里程</div>
+                                    <div className="text-4xl font-black text-[#12CBC4]">{Object.keys(licenseData.progress || {}).length}</div>
+                                    <div className="text-[10px] font-bold opacity-40 uppercase tracking-widest">已积累梦幻里程</div>
                                 </div>
                                 <div className="space-y-1">
-                                    <div className="text-3xl font-candy font-bold">
+                                    <div className="text-4xl font-black text-[#FDA7DF]">
                                         {(licenseData.children || []).reduce((acc: number, c: any) => acc + (c.points || 0), 0)}
                                     </div>
-                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">全家成就聚宝盆</div>
+                                    <div className="text-[10px] font-bold opacity-40 uppercase tracking-widest">全家成就聚宝盆</div>
                                 </div>
                                 <div className="space-y-1">
-                                    <div className="text-3xl font-candy font-bold">✨</div>
-                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">数据同步实时在线</div>
+                                    <div className="text-4xl font-black">✨</div>
+                                    <div className="text-[10px] font-bold opacity-40 uppercase tracking-widest">数据同步实时在线</div>
                                 </div>
                             </div>
                         </div>
@@ -738,10 +768,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             </main>
 
             {/* Hint Footer */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-xs">
-                <div className="kawaii-card bg-white/90 px-8 py-4 flex items-center gap-4 shadow-2xl animate-float-kawaii border-4 border-white">
-                    <AlertCircle size={22} className="text-[#FFDEE9]" />
-                    <span className="text-[11px] font-bold text-[#5D4D7A] opacity-60">
+            {/* Hint Footer - Pixar Sticky Note */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-sm px-4">
+                <div className="bg-[#fff] px-6 py-4 flex items-center gap-4 shadow-2xl border-b-4 border-l-4 border-black/10 rounded-xl transform -rotate-1 animate-float-kawaii">
+                    <AlertCircle size={24} className="text-[#F79F1F] shrink-0" strokeWidth={3} />
+                    <span className="text-xs font-black text-[#2c3e50] leading-relaxed">
                         {[
                             "给孩子适当的自由，自律会更持久哦 ~",
                             "每一个小勋章，都是成长的里程碑 ✨",
@@ -753,21 +784,21 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 </div>
             </div>
 
-            {/* Custom Dialog - Pastel Dream Style */}
+            {/* Custom Dialog - Pixar Solid Style */}
             {dialogConfig.isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
-                    <div className="absolute inset-0 bg-[#5D4D7A]/10 backdrop-blur-xl animate-in fade-in duration-500"
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+                    <div className="absolute inset-0 bg-[#2c3e50]/80 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}></div>
-                    <div className="kawaii-card bg-white/95 w-full max-sm p-12 space-y-10 shadow-3xl animate-in zoom-in-95 duration-300 relative z-10 border-8 border-white">
-                        <div className="text-center space-y-5">
-                            <h3 className="text-3xl font-candy text-[#5D4D7A]">{dialogConfig.title}</h3>
+                    <div className="bg-white w-full max-w-md p-8 space-y-8 shadow-2xl animate-in zoom-in-95 duration-300 relative z-10 rounded-[40px] border-8 border-white ring-4 ring-black/5">
+                        <div className="text-center space-y-4">
+                            <h3 className="text-3xl font-black text-[#2c3e50] tracking-tight">{dialogConfig.title}</h3>
                             {dialogConfig.message && (
-                                <p className="text-[12px] font-bold text-[#5D4D7A]/50 leading-relaxed max-w-[280px] mx-auto">
+                                <p className="text-sm font-bold text-[#2c3e50]/60 leading-relaxed max-w-[280px] mx-auto">
                                     {dialogConfig.message}
                                 </p>
                             )}
                             {dialogConfig.highlight && (
-                                <div className="text-6xl font-candy text-[#E0C3FC] tracking-[0.2em] bg-white px-8 py-6 rounded-[40px] mt-8 animate-float-kawaii shadow-inner border-4 border-[#E0C3FC]/10">
+                                <div className="text-6xl font-black text-[#0652DD] tracking-[0.2em] bg-gray-50 px-8 py-6 rounded-3xl mt-6 border-4 border-dashed border-[#0652DD]/20 select-all">
                                     {dialogConfig.highlight}
                                 </div>
                             )}
@@ -777,28 +808,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <div className="flex flex-col items-center gap-6 py-4">
                                     <div
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-32 h-32 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group animate-float-kawaii"
+                                        className="w-36 h-36 rounded-[40px] overflow-hidden border-8 border-white shadow-[0_10px_20px_rgba(0,0,0,0.1)] bg-gray-100 cursor-pointer hover:scale-105 active:scale-95 transition-all relative group"
                                     >
                                         <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
                                         {/* Camera/Plus overlay */}
-                                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <div className="bg-white/90 p-3 rounded-full shadow-lg">
-                                                <Plus size={24} className="text-[#E0C3FC]" strokeWidth={3} />
+                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <div className="bg-white p-3 rounded-2xl shadow-lg transform rotate-12">
+                                                <Plus size={28} className="text-[#2c3e50]" strokeWidth={4} />
                                             </div>
                                         </div>
                                         {/* Floating Plus corner icon */}
-                                        <div className="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl border-4 border-[#E0C3FC] group-hover:scale-110 transition-transform">
-                                            <Plus size={20} className="text-[#E0C3FC]" strokeWidth={4} />
+                                        <div className="absolute bottom-3 right-3 w-10 h-10 bg-[#0652DD] rounded-xl flex items-center justify-center shadow-lg border-2 border-white group-hover:scale-110 transition-transform">
+                                            <Plus size={20} className="text-white" strokeWidth={4} />
                                         </div>
                                         {uploadingAvatar && (
-                                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                                                <Sparkles className="text-[#E0C3FC] animate-spin" />
+                                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                                                <Sparkles className="text-[#0652DD] animate-spin" size={32} />
                                             </div>
                                         )}
-                                        <div className="absolute inset-x-0 bottom-0 bg-[#E0C3FC]/60 text-white text-[9px] font-bold py-2 opacity-0 group-hover:opacity-100 transition-all text-center backdrop-blur-sm">更换照片</div>
                                     </div>
-                                    <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40 flex items-center gap-2">
-                                        点击上方头像库 <Plus size={12} strokeWidth={4} /> 定制梦幻头像
+                                    <p className="text-xs font-black text-[#2c3e50]/40 flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full">
+                                        点击上方头像 <Plus size={12} strokeWidth={4} /> 更换照片
                                     </p>
                                 </div>
                             )}
@@ -810,27 +840,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         placeholder={dialogConfig.placeholder}
                                         defaultValue={dialogConfig.defaultValue || ''}
                                         id="dialog-title-input"
-                                        className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] placeholder:text-[#5D4D7A]/20 transition-all shadow-inner backdrop-blur-md"
+                                        className="w-full px-6 py-4 rounded-2xl bg-gray-100 border-b-4 border-transparent focus:border-[#0652DD] outline-none font-black text-[#2c3e50] placeholder:text-[#ccc] transition-all text-lg"
                                     />
                                     {dialogConfig.showTime && (
-                                        <div className="space-y-3">
-                                            <p className="text-[11px] font-bold text-[#E0C3FC] opacity-70 ml-5 uppercase tracking-widest">执行时间</p>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-black text-[#2c3e50]/40 ml-4 uppercase tracking-widest">执行时间</p>
                                             <input
                                                 type="time"
                                                 defaultValue={dialogConfig.defaultExtra || '08:00'}
                                                 id="dialog-time-input"
-                                                className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] transition-all shadow-inner backdrop-blur-md"
+                                                className="w-full px-6 py-4 rounded-2xl bg-gray-100 border-b-4 border-transparent focus:border-[#0652DD] outline-none font-black text-[#2c3e50] transition-all text-lg"
                                             />
                                         </div>
                                     )}
                                 </>
                             )}
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex gap-4 pt-2">
                             {!dialogConfig.hideInput && (
                                 <button
                                     onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                    className="flex-1 py-5 text-[#5D4D7A]/30 font-bold hover:opacity-100 transition-all text-sm uppercase tracking-widest"
+                                    className="flex-1 py-4 text-[#2c3e50]/40 font-black hover:text-[#2c3e50] transition-all text-sm uppercase tracking-widest hover:bg-gray-100 rounded-xl"
                                 >
                                     取消
                                 </button>
@@ -841,7 +871,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     const timeInput = document.getElementById('dialog-time-input') as HTMLInputElement;
                                     dialogConfig.onConfirm(titleInput?.value || '', timeInput?.value || '');
                                 }}
-                                className="flex-1 py-6 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white rounded-[35px] font-candy text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-white"
+                                className="flex-1 py-5 bg-[#0652DD] text-white rounded-2xl font-black text-xl shadow-[0_6px_0_#1e3799] border-b-4 border-[#1e3799] hover:brightness-110 active:border-b-0 active:translate-y-1 transition-all"
                             >
                                 {dialogConfig.hideInput ? '明白啦 ✨' : '确定'}
                             </button>

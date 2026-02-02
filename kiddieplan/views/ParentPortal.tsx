@@ -498,16 +498,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 pb-10">
                         <div className="flex justify-between items-end px-2">
                             <div className="flex flex-col">
-                                <h2 className="text-3xl font-candy text-[#4D3A29]">任务分配</h2>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-[9px] font-bold text-[#D99C52] opacity-60 uppercase tracking-widest leading-none">Allocation for {selectedChild.name}</p>
-                                    <button onClick={handleEditChild} className="text-[#D99C52] opacity-40 hover:opacity-100 transition-all p-1 -m-1">
-                                        <Edit2 size={12} />
+                                <h2 className="text-4xl font-candy text-[#5D4D7A]">任务分配</h2>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <p className="text-[10px] font-bold text-[#E0C3FC] uppercase tracking-[0.3em] leading-none">Space Registry for {selectedChild.name}</p>
+                                    <button onClick={handleEditChild} className="text-[#E0C3FC] opacity-40 hover:opacity-100 transition-all p-1.5 -m-1.5">
+                                        <Edit2 size={14} />
                                     </button>
                                 </div>
                             </div>
-                            <button onClick={() => addTask()} className="kawaii-button bg-[#D99C52] px-6 py-3 flex items-center gap-2 text-xs text-white border-none shadow-lg">
-                                <Plus size={18} strokeWidth={4} /> 手动添加
+                            <button onClick={() => addTask()} className="kawaii-button bg-[#B5FFFC] px-8 py-4 flex items-center gap-2 text-sm text-[#5D4D7A] border-white shadow-xl hover:scale-105 active:scale-90">
+                                <Plus size={20} strokeWidth={4} /> 手动添加
                             </button>
                         </div>
 
@@ -518,7 +518,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <button
                                         key={cat}
                                         onClick={() => setSelectedCategory(cat)}
-                                        className={`px-6 py-3 rounded-[24px] text-[10px] font-bold transition-all whitespace-nowrap border-2 ${selectedCategory === cat ? 'bg-[#D99C52] text-white border-[#D99C52] shadow-md' : 'bg-white text-[#4D3A29] border-white opacity-60 hover:opacity-100 shadow-sm'}`}
+                                        className={`px-8 py-4 rounded-[30px] text-[11px] font-bold transition-all whitespace-nowrap border-4 ${selectedCategory === cat ? 'bg-[#E0C3FC] text-white border-white shadow-xl scale-105' : 'bg-white text-[#5D4D7A] border-white/50 opacity-60 hover:opacity-100 shadow-sm'}`}
                                     >
                                         {cat}
                                     </button>
@@ -530,14 +530,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <button
                                         key={i}
                                         onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                        className="kawaii-card bg-white p-4 flex items-center gap-4 hover:bg-[#FDF1E1]/50 transition-all border-none shadow-sm"
+                                        className="kawaii-card bg-white p-6 flex items-center gap-5 hover:bg-[#B5FFFC]/30 transition-all border-white shadow-md group"
                                     >
-                                        <div className="w-10 h-10 bg-[#FFFDF2] rounded-2xl flex items-center justify-center text-2xl shadow-inner border border-[#D99C52]/5">
+                                        <div className="w-12 h-12 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-inner border-2 border-[#E0C3FC]/10 group-hover:scale-110 transition-transform">
                                             {tmp.icon}
                                         </div>
                                         <div className="text-left">
-                                            <div className="text-[11px] font-bold text-[#4D3A29]">{tmp.title}</div>
-                                            <div className="text-[8px] font-bold text-[#D99C52] opacity-70 tracking-tighter mt-0.5">{tmp.time} • {tmp.points} 💰</div>
+                                            <div className="text-base font-bold text-[#5D4D7A]">{tmp.title}</div>
+                                            <div className="text-[10px] font-bold text-[#A2D2FF] opacity-80 uppercase tracking-widest mt-1">{tmp.time} • {tmp.points} 🍭</div>
                                         </div>
                                     </button>
                                 ))}
@@ -634,9 +634,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <button
                                 onClick={handleSaveRewards}
                                 disabled={isSaving}
-                                className="w-full kawaii-button bg-gradient-to-r from-[#D99C52] to-[#FDF1E1] py-6 text-white text-xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-12 shadow-[0_15px_30px_rgba(217,156,82,0.3)] border-none"
+                                className="w-full kawaii-button bg-gradient-to-r from-[#FFDEE9] to-[#E0C3FC] py-8 text-white text-2xl font-candy active:scale-95 transition-all disabled:opacity-50 mt-16 shadow-[0_20px_40px_rgba(255,222,233,0.3)] border-4 border-white"
                             >
-                                {isSaving ? <Sparkles className="animate-spin" /> : <><Save size={24} className="mr-3" /> 同步给宝贝</>}
+                                {isSaving ? <Sparkles className="animate-spin text-white" /> : <><Save size={28} className="mr-4" /> 同步梦想宇宙</>}
                             </button>
                         )}
                     </div>
@@ -645,9 +645,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
             {/* Hint Footer */}
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-xs">
-                <div className="kawaii-card bg-white/90 px-6 py-3 flex items-center gap-3 shadow-xl animate-float border-2 border-white">
-                    <AlertCircle size={18} className="text-[#FFDEE9]" />
-                    <span className="text-[10px] font-bold text-macaron opacity-60">
+                <div className="kawaii-card bg-white/90 px-8 py-4 flex items-center gap-4 shadow-2xl animate-float-kawaii border-4 border-white">
+                    <AlertCircle size={22} className="text-[#FFDEE9]" />
+                    <span className="text-[11px] font-bold text-[#5D4D7A] opacity-60">
                         {[
                             "给孩子适当的自由，自律会更持久哦 ~",
                             "每一个小勋章，都是成长的里程碑 ✨",
@@ -660,91 +660,5 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             </div>
 
             {/* Custom Dialog - Warm & Cozy Overhaul */}
-            {dialogConfig.isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
-                    <div className="absolute inset-0 bg-[#4D3A29]/20 backdrop-blur-md animate-in fade-in duration-500"
-                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}></div>
-                    <div className="kawaii-card bg-[#FFFDF2] w-full max-w-sm p-10 space-y-8 shadow-3xl animate-in zoom-in-95 duration-300 relative z-10 border-4 border-[#D99C52]/10">
-                        <div className="text-center space-y-4">
-                            <h3 className="text-2xl font-candy text-[#4D3A29]">{dialogConfig.title}</h3>
-                            {dialogConfig.message && (
-                                <p className="text-[11px] font-bold text-[#4D3A29]/50 leading-relaxed max-w-[240px] mx-auto">
-                                    {dialogConfig.message}
-                                </p>
-                            )}
-                            {dialogConfig.highlight && (
-                                <div className="text-5xl font-candy text-[#D99C52] tracking-[0.2em] bg-white px-6 py-5 rounded-[35px] mt-6 animate-float shadow-inner border-2 border-[#D99C52]/5">
-                                    {dialogConfig.highlight}
-                                </div>
-                            )}
-                        </div>
-                        <div className="space-y-4">
-                            {dialogConfig.showAvatarUpload && (
-                                <div className="flex flex-col items-center gap-6 py-4">
-                                    <div
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="w-32 h-32 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group animate-float-kawaii"
-                                    >
-                                        <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
-                                        {uploadingAvatar && (
-                                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                                                <Sparkles className="text-[#E0C3FC] animate-spin" />
-                                            </div>
-                                        )}
-                                        <div className="absolute inset-x-0 bottom-0 bg-[#E0C3FC]/60 text-white text-[9px] font-bold py-2 opacity-0 group-hover:opacity-100 transition-all text-center backdrop-blur-sm">更换照片</div>
-                                    </div>
-                                    <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40">为宝贝选一张梦幻头像吧 ✨</p>
-                                </div>
-                            )}
-                            {!dialogConfig.hideInput && (
-                                <>
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        placeholder={dialogConfig.placeholder}
-                                        defaultValue={dialogConfig.defaultValue || ''}
-                                        id="dialog-title-input"
-                                        className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] placeholder:text-[#5D4D7A]/20 transition-all shadow-inner backdrop-blur-md"
-                                    />
-                                    {dialogConfig.showTime && (
-                                        <div className="space-y-3">
-                                            <p className="text-[11px] font-bold text-[#E0C3FC] opacity-70 ml-5 uppercase tracking-widest">执行时间</p>
-                                            <input
-                                                type="time"
-                                                defaultValue={dialogConfig.defaultExtra || '08:00'}
-                                                id="dialog-time-input"
-                                                className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] transition-all shadow-inner backdrop-blur-md"
-                                            />
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                        <div className="flex gap-4">
-                            {!dialogConfig.hideInput && (
-                                <button
-                                    onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                    className="flex-1 py-5 text-[#4D3A29] opacity-30 font-bold hover:opacity-100 transition-all text-sm uppercase tracking-widest"
-                                >
-                                    取消
-                                </button>
-                            )}
-                            <button
-                                onClick={() => {
-                                    const titleInput = document.getElementById('dialog-title-input') as HTMLInputElement;
-                                    const timeInput = document.getElementById('dialog-time-input') as HTMLInputElement;
-                                    dialogConfig.onConfirm(titleInput?.value || '', timeInput?.value || '');
-                                }}
-                                className="flex-1 py-6 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white rounded-[35px] font-candy text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-white"
-                            >
-                                {dialogConfig.hideInput ? '明白啦 ✨' : '确定'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
 
-export default ParentPortal;
+            export default ParentPortal;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS } from '../constants/templates';
@@ -23,6 +23,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         defaultValue?: string;
         defaultExtra?: string;
         showTime?: boolean;
+        showAvatarUpload?: boolean;
         message?: string;
         highlight?: string;
         hideInput?: boolean;
@@ -32,6 +33,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         placeholder: '',
         onConfirm: () => { }
     });
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [currentAvatar, setCurrentAvatar] = useState<string>('');
 
     // Task/Reward Editor State
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
@@ -248,15 +253,60 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         setRewards(prev => prev.filter(r => r.id !== id));
     };
 
+    const processImage = (file: File): Promise<Blob> => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const size = Math.min(img.width, img.height);
+                    canvas.width = 256;
+                    canvas.height = 256;
+                    const ctx = canvas.getContext('2d')!;
+                    ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 256, 256);
+                    canvas.toBlob((blob) => resolve(blob!), 'image/webp', 0.8);
+                };
+                img.src = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingAvatar(true);
+        try {
+            const webpBlob = await processImage(file);
+            const res = await fetch(`/api/kiddieplan/upload?filename=avatar_${Date.now()}.webp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'image/webp' },
+                body: webpBlob
+            });
+            const result = await res.json();
+            if (result.success) {
+                setCurrentAvatar(result.url);
+            }
+        } catch (err) {
+            alert('头像上传失败');
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
     const removeTask = (id: string) => {
         setCurrentTasks(currentTasks.filter(t => t.id !== id));
     };
 
     const handleAddChild = async () => {
+        setCurrentAvatar(`https://api.dicebear.com/7.x/adventurer/svg?seed=${Date.now()}`);
         setDialogConfig({
             isOpen: true,
             title: '🌈 欢迎新成员',
             placeholder: '请输入小宝贝的昵称',
+            showAvatarUpload: true,
             onConfirm: async (name) => {
                 if (!name) return;
                 const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
@@ -267,7 +317,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         body: JSON.stringify({
                             action: 'save_child',
                             token,
-                            data: { name, avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`, roomCode }
+                            data: { name, avatar: currentAvatar, roomCode }
                         })
                     });
                     const result = await res.json();
@@ -303,6 +353,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     return (
         <div className="flex-1 flex flex-col animate-in fade-in duration-700 h-full overflow-hidden bg-[#FFFDF2]/30">
+            <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
             {/* Header - Warm & Soft */}
             <div className="p-8 flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-4">
@@ -590,6 +641,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             )}
                         </div>
                         <div className="space-y-4">
+                            {dialogConfig.showAvatarUpload && (
+                                <div className="flex flex-col items-center gap-6 py-4">
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="w-32 h-32 rounded-[48px] overflow-hidden border-4 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group"
+                                    >
+                                        <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
+                                        {uploadingAvatar && (
+                                            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                                                <Sparkles className="text-[#D99C52] animate-spin" />
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-x-0 bottom-0 bg-black/40 text-white text-[8px] font-bold py-1.5 opacity-0 group-hover:opacity-100 transition-all text-center">点击更换照片</div>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-[#4D3A29] opacity-40">为宝贝选一张漂亮的头像吧</p>
+                                </div>
+                            )}
                             {!dialogConfig.hideInput && (
                                 <>
                                     <input
@@ -636,10 +704,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </div>
                     </div>
                 </div>
-                </div>
-    )
-}
-        </div >
+            )}
+        </div>
     );
 };
 

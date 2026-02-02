@@ -342,6 +342,39 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         });
     };
 
+    const handleEditChild = () => {
+        if (!selectedChild) return;
+        setCurrentAvatar(selectedChild.avatar);
+        setDialogConfig({
+            isOpen: true,
+            title: '✨ 修改宝贝资料',
+            placeholder: '小宝贝的昵称',
+            defaultValue: selectedChild.name,
+            showAvatarUpload: true,
+            onConfirm: async (name) => {
+                if (!name) return;
+                try {
+                    const res = await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_child',
+                            token,
+                            data: { ...selectedChild, name, avatar: currentAvatar }
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        setChildren(result.data.children);
+                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                    }
+                } catch (err) {
+                    alert('修改失败');
+                }
+            }
+        });
+    };
+
     if (loading) return (
         <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4">
             <div className="w-12 h-12 bg-pastel-purple rounded-full animate-bounce"></div>

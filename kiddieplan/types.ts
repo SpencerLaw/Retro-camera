@@ -12,12 +12,13 @@ export type PlanningView = 'today' | 'week' | 'future';
 export interface Task {
   id: string;
   title: string;
+  description?: string;
+  imageUrl?: string;
   timeSlot: string;
-  period: 'morning' | 'noon' | 'afternoon' | 'evening' | 'night';
   points: number;
   completed: boolean;
-  category: TaskCategory;
-  date?: string; // 用于非今日任务
+  isRequired: boolean;
+  date: string;
 }
 
 export interface DailySchedule {

@@ -1,197 +1,186 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './styles.css';
-import { AppTab, Child, AppState, Task } from './types';
-import { INITIAL_CHILDREN, INITIAL_REWARDS, DEFAULT_TASKS } from './constants';
-import Dashboard from './views/Dashboard';
-import Rewards from './views/Rewards';
-import Profile from './views/Profile';
-import Planner from './views/Planner';
-import {
-  Home,
-  CalendarDays,
-  Gift,
-  User,
-  Lock,
-  Smile,
-  Sparkles
-} from 'lucide-react';
+import { UserRole } from './types';
+import ParentPortal from './views/ParentPortal';
+import ChildPortal from './views/ChildPortal';
+import { Users, User, Lock, ArrowLeft, Heart, Sparkles, BookOpen } from 'lucide-react';
 
 const KiddiePlanApp: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<AppTab>('home');
-  const [showPinGate, setShowPinGate] = useState(false);
-  const [pin, setPin] = useState('');
+  const [portal, setPortal] = useState<'selection' | 'parent' | 'child'>('selection');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('kp_token'));
+  const [role, setRole] = useState<UserRole | null>(localStorage.getItem('kp_role') as UserRole);
+  const [authCode, setAuthCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem('kiddieplan_handdrawn_state');
-    if (saved) return JSON.parse(saved);
-    return {
-      children: INITIAL_CHILDREN,
-      selectedChildId: INITIAL_CHILDREN[0].id,
-      rewards: INITIAL_REWARDS,
-      role: 'child'
-    };
-  });
-
+  // 自动登录逻辑
   useEffect(() => {
-    localStorage.setItem('kiddieplan_handdrawn_state', JSON.stringify(state));
-  }, [state]);
-
-  const selectedChild = useMemo(() =>
-    state.children.find(c => c.id === state.selectedChildId) || state.children[0]
-    , [state]);
-
-  const toggleRole = () => {
-    if (state.role === 'child') {
-      setShowPinGate(true);
-    } else {
-      setState(prev => ({ ...prev, role: 'child' }));
-      setActiveTab('home');
+    if (token && role) {
+      setPortal(role);
+      setIsAuthenticated(true);
     }
-  };
+  }, [token, role]);
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin === '2025') {
-      setState(prev => ({ ...prev, role: 'parent' }));
-      setShowPinGate(false);
-      setPin('');
-    } else {
-      alert('密码不对哦，请家长来开锁～');
-      setPin('');
-    }
-  };
-
-  const updateChild = (childId: string, updates: Partial<Child>) => {
-    setState(prev => ({
-      ...prev,
-      children: prev.children.map(c => c.id === childId ? { ...c, ...updates } : c)
-    }));
-  };
-
-  const toggleTask = (taskId: string) => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const currentSchedule = selectedChild.schedules.find(s => s.date === todayStr);
-    let newSchedules = [...selectedChild.schedules];
-    let pointsChange = 0;
-
-    if (!currentSchedule) {
-      const newTasks: Task[] = DEFAULT_TASKS.map((t, idx) => ({
-        ...t, id: `t-${todayStr}-${idx}`, completed: false
-      } as Task));
-      const taskIndex = newTasks.findIndex(t => t.id === taskId);
-      if (taskIndex > -1) {
-        newTasks[taskIndex].completed = true;
-        pointsChange = newTasks[taskIndex].points;
-      }
-      newSchedules.push({ date: todayStr, tasks: newTasks });
-    } else {
-      const scheduleIndex = newSchedules.findIndex(s => s.date === todayStr);
-      const updatedTasks = currentSchedule.tasks.map(t => {
-        if (t.id === taskId) {
-          const newState = !t.completed;
-          pointsChange = newState ? t.points : -t.points;
-          return { ...t, completed: newState };
-        }
-        return t;
+    setLoading(true);
+    setError(null);
+    try {
+      const action = portal === 'parent' ? 'parent_auth' : 'child_auth';
+      const res = await fetch('/api/kiddieplan/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, code: authCode })
       });
-      newSchedules[scheduleIndex] = { ...currentSchedule, tasks: updatedTasks };
-    }
 
-    updateChild(selectedChild.id, {
-      schedules: newSchedules,
-      points: Math.max(0, selectedChild.points + pointsChange)
-    });
+      const result = await res.json();
+      if (result.success) {
+        localStorage.setItem('kp_token', result.token);
+        localStorage.setItem('kp_role', result.role);
+        setToken(result.token);
+        setRole(result.role);
+        setIsAuthenticated(true);
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError('网络请求失败');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="flex flex-col min-h-screen max-w-md mx-auto relative overflow-hidden">
-      {/* 顶部孩子选择条 - 只有家长模式或特定状态下显示 */}
-      <div className="px-6 pt-10 pb-2 flex justify-between items-end z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-14 h-14 sketch-card overflow-hidden">
-            <img src={selectedChild.avatar} alt="avatar" className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-handwriting text-[#4C3D3D]">
-              {state.role === 'parent' ? '家长大人' : `${selectedChild.name}的本子`}
+  const handleLogout = () => {
+    localStorage.removeItem('kp_token');
+    localStorage.removeItem('kp_role');
+    setToken(null);
+    setRole(null);
+    setIsAuthenticated(false);
+    setPortal('selection');
+    setAuthCode('');
+  };
+
+  // 1. 初始选择界面
+  if (portal === 'selection') {
+    return (
+      <div className="min-h-screen relative flex flex-col items-center justify-center p-6 space-y-12 animate-in fade-in duration-700 overflow-hidden">
+        {/* Mesh Gradient Background */}
+        <div className="mesh-bg">
+          <div className="mesh-blob bg-pastel-pink -top-20 -left-20 w-[400px] h-[400px]"></div>
+          <div className="mesh-blob bg-pastel-blue top-1/4 -right-20 w-[350px] h-[350px]" style={{ animationDelay: '-2s' }}></div>
+          <div className="mesh-blob bg-pastel-yellow -bottom-20 left-1/4 w-[450px] h-[450px]" style={{ animationDelay: '-4s' }}></div>
+          <div className="mesh-blob bg-pastel-purple top-1/2 left-[-100px] w-[300px] h-[300px]" style={{ animationDelay: '-1s' }}></div>
+        </div>
+
+        <div className="text-center space-y-4 animate-float">
+          <div className="relative inline-block">
+            <div className="absolute -top-12 -right-12 text-6xl drop-shadow-sm">🍬</div>
+            <h1 className="text-7xl font-candy bg-gradient-to-r from-[#E0C3FC] to-[#FFDEE9] bg-clip-text text-transparent drop-shadow-sm">
+              学霸成长计划
             </h1>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] bg-[#FFD95A] px-2 py-0.5 rounded-full border border-[#4C3D3D] font-bold">
-                {selectedChild.points.toFixed(1)} CP
-              </span>
-              {state.role === 'parent' && <Sparkles size={14} className="text-indigo-500" />}
-            </div>
           </div>
+          <p className="text-macaron opacity-40 font-bold tracking-[0.2em] text-xs uppercase">Sweet Dreams & Better Habits</p>
         </div>
-        <button
-          onClick={toggleRole}
-          className={`w-12 h-12 sketch-button flex items-center justify-center ${state.role === 'parent' ? 'bg-[#FFB1B1]' : 'bg-white'}`}
-        >
-          {state.role === 'parent' ? <Lock size={20} /> : <Lock size={20} className="opacity-40" />}
-        </button>
-      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-5 pb-32 z-10 mt-4">
-        {activeTab === 'home' && <Dashboard child={selectedChild} onToggleTask={toggleTask} role={state.role} />}
-        {activeTab === 'plan' && <Planner child={selectedChild} />}
-        {activeTab === 'rewards' && <Rewards child={selectedChild} updateChild={updateChild} rewards={state.rewards} role={state.role} />}
-        {activeTab === 'me' && <Profile children={state.children} selectedChildId={state.selectedChildId} onSelectChild={(id) => setState(prev => ({ ...prev, selectedChildId: id }))} role={state.role} />}
-      </main>
-
-      {/* Tab Navigation */}
-      <nav className="fixed bottom-6 left-6 right-6 z-50">
-        <div className="bg-white border-[3px] border-[#4C3D3D] rounded-[25px] p-2 flex justify-around items-center shadow-[0_6px_0px_#4C3D3D]">
+        <div className="grid grid-cols-1 gap-8 w-full max-w-sm relative z-10">
           <button
-            onClick={() => setActiveTab('home')}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'home' ? 'tab-active' : 'text-gray-400'}`}
+            onClick={() => setPortal('parent')}
+            className="kawaii-card bg-pastel-pink/80 group hover:scale-[1.02] transition-all overflow-hidden border-none p-1"
           >
-            <Home size={24} />
-          </button>
-          <button
-            onClick={() => setActiveTab('plan')}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'plan' ? 'tab-active' : 'text-gray-400'}`}
-          >
-            <CalendarDays size={24} />
-          </button>
-          <button
-            onClick={() => setActiveTab('rewards')}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'rewards' ? 'tab-active' : 'text-gray-400'}`}
-          >
-            <Gift size={24} />
-          </button>
-          <button
-            onClick={() => setActiveTab('me')}
-            className={`p-3 rounded-xl transition-all ${activeTab === 'me' ? 'tab-active' : 'text-gray-400'}`}
-          >
-            <User size={24} />
-          </button>
-        </div>
-      </nav>
-
-      {/* PIN GATE */}
-      {showPinGate && (
-        <div className="fixed inset-0 z-[100] bg-[#4C3D3D]/60 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="sketch-card bg-white p-8 w-full max-w-xs flex flex-col items-center">
-            <div className="tape"></div>
-            <h2 className="text-xl font-handwriting mb-4">家长请解锁</h2>
-            <form onSubmit={handlePinSubmit} className="w-full text-center">
-              <input
-                type="password"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                autoFocus
-                className="w-full bg-[#FFF9E1] border-2 border-[#4C3D3D] rounded-xl py-3 text-center text-xl focus:outline-none mb-4"
-                placeholder="密码: 2025"
-                maxLength={4}
-              />
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setShowPinGate(false)} className="flex-1 font-bold text-[#4C3D3D]/60 text-sm">取消</button>
-                <button type="submit" className="flex-1 sketch-button bg-[#FFB1B1] py-2 font-bold">确认</button>
+            <div className="p-10 flex flex-col items-center gap-6 relative z-10">
+              <div className="w-24 h-24 bg-white/90 rounded-[40px] flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform">
+                <Users size={48} className="text-[#FFDEE9]" />
               </div>
-            </form>
-          </div>
+              <span className="text-3xl font-candy text-macaron">家长管理端</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setPortal('child')}
+            className="kawaii-card bg-pastel-yellow/80 group hover:scale-[1.02] transition-all overflow-hidden border-none p-1"
+          >
+            <div className="p-10 flex flex-col items-center gap-6 relative z-10">
+              <div className="w-24 h-24 bg-white/90 rounded-[40px] flex items-center justify-center shadow-lg group-hover:-rotate-6 transition-transform">
+                <User size={48} className="text-[#F9F1A5] drop-shadow-sm" />
+              </div>
+              <span className="text-3xl font-candy text-macaron">孩子执行端</span>
+            </div>
+          </button>
         </div>
+
+        <Link to="/" className="text-macaron opacity-30 text-sm font-bold flex items-center gap-2 hover:opacity-100 transition-opacity mt-8">
+          <ArrowLeft size={16} /> 返回大厅
+        </Link>
+      </div>
+    );
+  }
+
+  // 2. 授权验证界面
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen relative flex flex-col items-center justify-center p-6 space-y-6 animate-in slide-in-from-bottom-8 duration-500 overflow-hidden">
+        <div className="mesh-bg opacity-40">
+          <div className="mesh-blob bg-pastel-purple -top-20 -right-20 w-[400px] h-[400px]"></div>
+          <div className="mesh-blob bg-pastel-pink -bottom-20 -left-20 w-[400px] h-[400px]"></div>
+        </div>
+
+        <button
+          onClick={() => setPortal('selection')}
+          className="absolute top-8 left-8 w-14 h-14 kawaii-button bg-white text-macaron"
+        >
+          <ArrowLeft size={28} />
+        </button>
+
+        <div className="kawaii-card bg-white/60 p-10 w-full max-w-sm space-y-8 relative overflow-hidden">
+          <div className="text-center space-y-2">
+            <div className="w-20 h-20 bg-white rounded-[30px] mx-auto flex items-center justify-center mb-6 shadow-sm border-2 border-white animate-float">
+              {portal === 'parent' ? <Lock size={32} className="text-[#E0C3FC]" /> : <Sparkles size={32} className="text-[#F9F1A5]" />}
+            </div>
+            <h2 className="text-4xl font-candy text-macaron">
+              {portal === 'parent' ? '家长验证' : '输入房间码'}
+            </h2>
+            <p className="text-[10px] text-macaron opacity-30 font-bold tracking-widest uppercase">Secret Entrance Only</p>
+          </div>
+
+          <form onSubmit={handleAuth} className="space-y-6">
+            <div className="relative">
+              <input
+                type={portal === 'parent' ? 'password' : 'text'}
+                value={authCode}
+                onChange={(e) => setAuthCode(e.target.value.toUpperCase())}
+                placeholder={portal === 'parent' ? '授权码' : '4位房间码'}
+                maxLength={portal === 'parent' ? 20 : 4}
+                className="w-full bg-white/80 rounded-[25px] px-6 py-5 text-center text-3xl font-candy text-macaron focus:ring-4 focus:ring-[#E0C3FC]/20 transition-all border-none shadow-sm outline-none"
+                autoFocus
+              />
+            </div>
+            {error && <p className="text-[#FF8BA0] text-xs text-center font-bold px-4">{error}</p>}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full kawaii-button py-5 text-white font-bold text-xl active:scale-95 transition-all disabled:opacity-50 ${portal === 'parent' ? 'bg-pastel-purple text-white' : 'bg-pastel-yellow text-macaron'}`}
+            >
+              {loading ? '梦境传送中...' : '开始奇幻之旅'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. 授权成功后的主体界面
+  return (
+    <div className="min-h-screen relative flex flex-col max-w-md mx-auto overflow-hidden">
+      <div className="mesh-bg opacity-30">
+        <div className="mesh-blob bg-pastel-pink top-[-50px] right-[-50px] w-64 h-64"></div>
+        <div className="mesh-blob bg-pastel-blue bottom-[-50px] left-[-50px] w-80 h-80"></div>
+      </div>
+      {portal === 'parent' ? (
+        <ParentPortal token={token!} onLogout={handleLogout} />
+      ) : (
+        <ChildPortal token={token!} onLogout={handleLogout} />
       )}
     </div>
   );

@@ -51,7 +51,7 @@ export default async function handler(
                     return response.status(200).json({
                         success: true,
                         role: 'parent',
-                        token: result.data.token // 使用 verify-license 返回的 token
+                        token: Buffer.from(`parent:${cleanCode}`).toString('base64')
                     });
                 }
                 return response.status(401).json({ success: false, message: result.message || '授权码验证失败' });

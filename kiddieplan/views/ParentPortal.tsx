@@ -13,6 +13,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
+    // Custom Dialog State
+    const [dialogConfig, setDialogConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        placeholder: string;
+        onConfirm: (val: string) => void;
+        defaultValue?: string;
+        message?: string;
+        highlight?: string;
+        hideInput?: boolean;
+    }>({
+        isOpen: false,
+        title: '',
+        placeholder: '',
+        onConfirm: () => { }
+    });
+
     // Task Editor State
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -82,7 +99,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             });
             const result = await res.json();
             if (result.success) {
-                alert('✨ 任务同步成功！孩子可以开始打卡啦 ~');
+                setDialogConfig({
+                    isOpen: true,
+                    title: '✨ 同步成功！',
+                    placeholder: '',
+                    message: '所有的奇幻任务都已经准备就绪，孩子可以开始打卡啦 ~',
+                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                    hideInput: true
+                });
             }
         } catch (err) {
             alert('保存失败，请检查网络');
@@ -92,21 +116,40 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     };
 
     const addTask = (title?: string, time?: string, points?: number) => {
-        const finalTitle = title || prompt('任务名称？');
-        if (!finalTitle) return;
-        const finalTime = time || prompt('打卡时间点？', '08:30') || '08:30';
-        const finalPoints = points || 10;
-
-        const newTask: Task = {
-            id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-            title: finalTitle,
-            timeSlot: finalTime,
-            points: finalPoints,
-            completed: false,
-            isRequired: true,
-            date: new Date().toISOString().split('T')[0]
-        };
-        setCurrentTasks(prev => [...prev, newTask]);
+        if (title) {
+            // Template usage
+            const newTask: Task = {
+                id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                title,
+                timeSlot: time || '08:30',
+                points: points || 10,
+                completed: false,
+                isRequired: true,
+                date: new Date().toISOString().split('T')[0]
+            };
+            setCurrentTasks(prev => [...prev, newTask]);
+        } else {
+            // Manual add
+            setDialogConfig({
+                isOpen: true,
+                title: '✨ 开启新任务',
+                placeholder: '输入任务名称，例如：阅读30分钟',
+                onConfirm: (val) => {
+                    if (!val) return;
+                    const newTask: Task = {
+                        id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                        title: val,
+                        timeSlot: '08:00',
+                        points: 10,
+                        completed: false,
+                        isRequired: true,
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                    setCurrentTasks(prev => [...prev, newTask]);
+                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                }
+            });
+        }
     };
 
     const taskTemplates = [
@@ -123,30 +166,43 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     };
 
     const handleAddChild = async () => {
-        const name = prompt('请输入小宝贝的妮称：');
-        if (!name) return;
-        const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-
-        try {
-            const res = await fetch('/api/kiddieplan/manage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'save_child',
-                    token,
-                    data: { name, avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`, roomCode }
-                })
-            });
-            const result = await res.json();
-            if (result.success) {
-                setChildren(result.data.children);
-                alert(`🌈 添加成功！记得告诉孩子房间码：${roomCode}`);
-            } else {
-                alert(result.message);
+        setDialogConfig({
+            isOpen: true,
+            title: '🌈 欢迎新成员',
+            placeholder: '请输入小宝贝的昵称',
+            onConfirm: async (name) => {
+                if (!name) return;
+                const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+                try {
+                    const res = await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_child',
+                            token,
+                            data: { name, avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`, roomCode }
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        setChildren(result.data.children);
+                        setDialogConfig({
+                            isOpen: true,
+                            title: '🌈 添加成功！',
+                            placeholder: '',
+                            message: `宝贝的任务日记已开通，记得告诉孩子房间码：`,
+                            highlight: roomCode,
+                            onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                            hideInput: true
+                        });
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (err) {
+                    alert('添加失败');
+                }
             }
-        } catch (err) {
-            alert('添加失败');
-        }
+        });
     };
 
     if (loading) return (
@@ -375,6 +431,63 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </span>
                 </div>
             </div>
+
+            {/* Custom Dialog */}
+            {dialogConfig.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+                    <div className="absolute inset-0 bg-macaron/20 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}></div>
+                    <div className="kawaii-card bg-white w-full max-w-sm p-8 space-y-6 shadow-2xl animate-in zoom-in-95 duration-300 relative z-10 border-4 border-pastel-purple/10">
+                        <div className="text-center">
+                            <h3 className="text-2xl font-candy text-macaron">{dialogConfig.title}</h3>
+                            {dialogConfig.message && (
+                                <p className="text-[10px] font-bold text-macaron/60 mt-2 leading-relaxed">
+                                    {dialogConfig.message}
+                                </p>
+                            )}
+                            {dialogConfig.highlight && (
+                                <div className="text-5xl font-candy text-macaron tracking-widest bg-pastel-yellow/30 px-4 py-3 rounded-2xl mt-4 animate-bounce">
+                                    {dialogConfig.highlight}
+                                </div>
+                            )}
+                        </div>
+                        <div className="space-y-4">
+                            {!dialogConfig.hideInput && (
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    placeholder={dialogConfig.placeholder}
+                                    className="w-full px-6 py-4 rounded-3xl bg-pastel-purple/5 border-2 border-transparent focus:border-pastel-purple outline-none font-bold text-macaron transition-all"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            dialogConfig.onConfirm((e.target as HTMLInputElement).value);
+                                        }
+                                    }}
+                                />
+                            )}
+                            <div className="flex gap-4">
+                                {!dialogConfig.hideInput && (
+                                    <button
+                                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                                        className="flex-1 py-4 text-macaron opacity-40 font-bold hover:opacity-100 transition-all"
+                                    >
+                                        取消
+                                    </button>
+                                )}
+                                <button
+                                    onClick={(e) => {
+                                        const input = (e.currentTarget.parentElement?.previousElementSibling as HTMLInputElement);
+                                        dialogConfig.onConfirm(input?.value || '');
+                                    }}
+                                    className="flex-1 py-4 bg-pastel-purple text-white rounded-2xl font-candy text-lg shadow-lg hover:bg-macaron transition-all"
+                                >
+                                    {dialogConfig.hideInput ? '太棒了!' : '确定'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -134,7 +134,7 @@ const KiddiePlanApp: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto px-5 pb-32 z-10 mt-4">
         {activeTab === 'home' && <Dashboard child={selectedChild} onToggleTask={toggleTask} role={state.role} />}
-        {activeTab === 'plan' && <Planner child={selectedChild} updateChild={updateChild} role={state.role} />}
+        {activeTab === 'plan' && <Planner child={selectedChild} />}
         {activeTab === 'rewards' && <Rewards child={selectedChild} updateChild={updateChild} rewards={state.rewards} role={state.role} />}
         {activeTab === 'me' && <Profile children={state.children} selectedChildId={state.selectedChildId} onSelectChild={(id) => setState(prev => ({ ...prev, selectedChildId: id }))} role={state.role} />}
       </main>

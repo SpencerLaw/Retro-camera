@@ -105,7 +105,6 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         className={`kawaii-card p-5 aspect-square flex flex-col items-center justify-center gap-4 border-none group cursor-pointer hover:scale-105 transition-all shadow-lg active:scale-95`}
                         style={{ backgroundColor: i === 0 ? '#FDF1E1' : i === 1 ? '#F0F7EE' : '#FAF0ED' }}
                     >
-                        {mod.badge && <div className="absolute -top-2 -right-1 bg-[#D99C52] text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-md">{mod.badge}</div>}
                         <div className={`w-14 h-14 bg-white rounded-[22px] shadow-sm flex items-center justify-center transition-all group-hover:rotate-0 ${mod.rot}`}>
                             <mod.icon size={28} style={{ color: mod.color }} strokeWidth={2.5} />
                         </div>

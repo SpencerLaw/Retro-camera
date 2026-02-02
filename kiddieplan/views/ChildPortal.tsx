@@ -299,7 +299,17 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     };
 
     return (
-        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#FFFDF2]/30">
+        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#FFFDF2]/30 relative">
+            {/* Top Right Home Button */}
+            <div className="absolute top-6 right-6 z-50">
+                <button
+                    onClick={onLogout}
+                    className="w-10 h-10 bg-white/60 hover:bg-white rounded-full flex items-center justify-center text-[#5D4D7A] shadow-md border-2 border-white backdrop-blur-sm active:scale-90 transition-all"
+                >
+                    <Home size={18} strokeWidth={2.5} />
+                </button>
+            </div>
+
             {/* Main Content Area */}
             <main className="flex-1 px-8 pt-10 pb-36 overflow-y-auto no-scrollbar">
                 {activeTab === 'home' && <DashboardView />}

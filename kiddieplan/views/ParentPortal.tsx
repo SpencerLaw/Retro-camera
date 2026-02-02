@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo } from 'lucide-react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS } from '../constants/templates';
 
@@ -410,8 +410,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <ArrowLeft size={22} />
                         </button>
                     )}
-                    <button onClick={onLogout} className="w-12 h-12 kawaii-button bg-[#FFDEE9] text-white border-white shadow-lg hover:scale-105 active:scale-90 transition-all">
-                        <LogOut size={22} />
+                    <button onClick={onLogout} title="切换角色 / 返回首页" className="w-12 h-12 kawaii-button bg-[#FFDEE9] text-white border-white shadow-lg hover:scale-105 active:scale-90 transition-all">
+                        <Home size={22} strokeWidth={2.5} />
                     </button>
                 </div>
             </div>

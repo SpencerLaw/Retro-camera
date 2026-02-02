@@ -5,10 +5,16 @@ import { UserRole } from './types';
 import ParentPortal from './views/ParentPortal';
 import ChildPortal from './views/ChildPortal';
 import { getDeviceId, getDeviceInfo } from './utils/licenseManager';
-import { Users, User, Lock, ArrowLeft, Heart, Sparkles, BookOpen } from 'lucide-react';
+import { User, Lock, ArrowLeft, Sparkles, Home } from 'lucide-react';
 
 const KiddiePlanApp: React.FC = () => {
-  const [portal, setPortal] = useState<'selection' | 'parent' | 'child'>('selection');
+  const [portal, setPortal] = useState<'selection' | 'parent' | 'child'>(() => {
+    // Check if we have an active session to restore
+    const savedToken = localStorage.getItem('kp_token');
+    const savedRole = localStorage.getItem('kp_role') as UserRole;
+    return (savedToken && savedRole) ? savedRole : 'selection';
+  });
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState<string | null>(localStorage.getItem('kp_token'));
   const [role, setRole] = useState<UserRole | null>(localStorage.getItem('kp_role') as UserRole);
@@ -70,107 +76,128 @@ const KiddiePlanApp: React.FC = () => {
     setAuthCode('');
   };
 
-  // 1. 初始选择界面
+  const handleSwitchRole = () => {
+    // Just switch view, don't necessarily logout unless needed. 
+    // But for safety and clarity, let's treat "Back to Home" as a full reset to selection
+    // or we can keep session but just show selection. 
+    // User request: "Back to Home button" -> likely wants to switch portals.
+    setPortal('selection');
+
+    // Optional: If they switch to selection, should we clear auth? 
+    // If we don't clear auth, the useEffect will auto-redirect them back.
+    // So we MUST clear auth state to stay on selection screen.
+    handleLogout();
+  };
+
+  // 1. Initial Selection Screen - REBUILT for Full Screen Immersion
   if (portal === 'selection') {
     return (
-      <div className="min-h-screen relative flex flex-col items-center justify-center p-6 space-y-12 animate-in fade-in duration-700 overflow-hidden">
-        {/* Mesh Gradient Background */}
-        <div className="mesh-bg">
-          <div className="mesh-blob bg-pastel-pink -top-20 -left-20 w-[400px] h-[400px]"></div>
-          <div className="mesh-blob bg-pastel-blue top-1/4 -right-20 w-[350px] h-[350px]" style={{ animationDelay: '-2s' }}></div>
-          <div className="mesh-blob bg-pastel-yellow -bottom-20 left-1/4 w-[450px] h-[450px]" style={{ animationDelay: '-4s' }}></div>
-          <div className="mesh-blob bg-pastel-purple top-1/2 left-[-100px] w-[300px] h-[300px]" style={{ animationDelay: '-1s' }}></div>
+      <div className="h-screen w-screen relative flex flex-col items-center justify-center overflow-hidden animate-in fade-in duration-700">
+        {/* Full Screen Mesh Gradient Background */}
+        <div className="absolute inset-0 bg-white">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#FFDEE9] rounded-full blur-[120px] opacity-60 animate-float-slow"></div>
+          <div className="absolute top-[20%] right-[-10%] w-[40%] h-[60%] bg-[#B5FFFC] rounded-full blur-[100px] opacity-60 animate-float-delayed"></div>
+          <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] bg-[#E0C3FC] rounded-full blur-[120px] opacity-50 animate-pulse-slow"></div>
         </div>
 
-        <div className="text-center space-y-4 animate-float">
-          <div className="relative inline-block">
-            <div className="absolute -top-12 -right-12 text-6xl drop-shadow-sm">🍬</div>
-            <h1 className="text-7xl font-candy bg-gradient-to-r from-[#E0C3FC] to-[#FFDEE9] bg-clip-text text-transparent drop-shadow-sm">
-              星梦奇旅
-            </h1>
+        <div className="relative z-10 flex flex-col items-center gap-16 w-full max-w-md px-6">
+          <div className="text-center space-y-4 animate-float">
+            <div className="relative inline-block">
+              <div className="absolute -top-16 -right-16 text-8xl drop-shadow-md animate-bounce-slow">🍬</div>
+              <h1 className="text-8xl font-candy bg-gradient-to-br from-[#E0C3FC] to-[#FFDEE9] bg-clip-text text-transparent drop-shadow-sm select-none">
+                星梦奇旅
+              </h1>
+            </div>
+            <p className="text-[#5D4D7A] opacity-40 font-bold tracking-[0.4em] text-sm uppercase">Sweet Dreams & Better Habits</p>
           </div>
-          <p className="text-macaron opacity-40 font-bold tracking-[0.2em] text-xs uppercase">Sweet Dreams & Better Habits</p>
-        </div>
 
-        <div className="grid grid-cols-1 gap-8 w-full max-w-sm relative z-10">
-          <button
-            onClick={() => setPortal('parent')}
-            className="kawaii-card bg-pastel-pink/80 group hover:scale-[1.02] transition-all overflow-hidden border-none p-1"
-          >
-            <div className="p-10 flex flex-col items-center gap-6 relative z-10">
-              <div className="w-24 h-24 bg-white/90 rounded-[40px] flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform">
-                <Users size={48} className="text-[#FFDEE9]" />
+          <div className="grid grid-cols-2 gap-8 w-full">
+            <button
+              onClick={() => setPortal('parent')}
+              className="group relative aspect-[4/5] perspective-1000"
+            >
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-xl rounded-[48px] shadow-[0_20px_50px_rgba(224,195,252,0.3)] border-4 border-white transition-all duration-500 group-hover:rotate-y-12 group-hover:scale-105 group-hover:bg-white/60"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-[#E0C3FC] to-[#fff] rounded-[36px] flex items-center justify-center shadow-lg border-4 border-white group-hover:animate-bounce-slow">
+                  <Lock size={40} className="text-white" strokeWidth={2.5} />
+                </div>
+                <span className="text-2xl font-candy text-[#5D4D7A] tracking-wider">家长端</span>
               </div>
-              <span className="text-3xl font-candy text-macaron">家长管理端</span>
-            </div>
-          </button>
+            </button>
 
-          <button
-            onClick={() => setPortal('child')}
-            className="kawaii-card bg-pastel-yellow/80 group hover:scale-[1.02] transition-all overflow-hidden border-none p-1"
-          >
-            <div className="p-10 flex flex-col items-center gap-6 relative z-10">
-              <div className="w-24 h-24 bg-white/90 rounded-[40px] flex items-center justify-center shadow-lg group-hover:-rotate-6 transition-transform">
-                <User size={48} className="text-[#F9F1A5] drop-shadow-sm" />
+            <button
+              onClick={() => setPortal('child')}
+              className="group relative aspect-[4/5] perspective-1000"
+            >
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-xl rounded-[48px] shadow-[0_20px_50px_rgba(181,255,252,0.3)] border-4 border-white transition-all duration-500 group-hover:-rotate-y-12 group-hover:scale-105 group-hover:bg-white/60"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-[#B5FFFC] to-[#fff] rounded-[36px] flex items-center justify-center shadow-lg border-4 border-white group-hover:animate-bounce-slow">
+                  <User size={40} className="text-[#5D4D7A]" strokeWidth={2.5} />
+                </div>
+                <span className="text-2xl font-candy text-[#5D4D7A] tracking-wider">孩子端</span>
               </div>
-              <span className="text-3xl font-candy text-macaron">孩子执行端</span>
-            </div>
-          </button>
-        </div>
+            </button>
+          </div>
 
-        <Link to="/" className="text-macaron opacity-30 text-sm font-bold flex items-center gap-2 hover:opacity-100 transition-opacity mt-8">
-          <ArrowLeft size={16} /> 返回大厅
-        </Link>
+          <Link to="/" className="text-[#5D4D7A]/30 text-xs font-bold flex items-center gap-2 hover:text-[#5D4D7A] transition-colors py-4 px-8 rounded-full hover:bg-white/30">
+            <ArrowLeft size={14} /> 返回游戏大厅
+          </Link>
+        </div>
       </div>
     );
   }
 
-  // 2. 授权验证界面
+  // 2. Auth Screen - Refined
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen relative flex flex-col items-center justify-center p-6 space-y-6 animate-in slide-in-from-bottom-8 duration-500 overflow-hidden">
-        <div className="mesh-bg opacity-40">
-          <div className="mesh-blob bg-pastel-purple -top-20 -right-20 w-[400px] h-[400px]"></div>
-          <div className="mesh-blob bg-pastel-pink -bottom-20 -left-20 w-[400px] h-[400px]"></div>
+      <div className="h-screen w-screen relative flex flex-col items-center justify-center overflow-hidden animate-in zoom-in-95 duration-500">
+        {/* Background */}
+        <div className="absolute inset-0 bg-[#Fdfdfd]">
+          <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-gradient-to-bl from-[#E0C3FC]/30 to-transparent blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-gradient-to-tr from-[#B5FFFC]/30 to-transparent blur-3xl"></div>
         </div>
 
         <button
           onClick={() => setPortal('selection')}
-          className="absolute top-8 left-8 w-14 h-14 kawaii-button bg-white text-macaron"
+          className="absolute top-10 left-10 w-14 h-14 bg-white/80 rounded-[20px] flex items-center justify-center text-[#5D4D7A] shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all z-50"
         >
-          <ArrowLeft size={28} />
+          <Home size={24} />
         </button>
 
-        <div className="kawaii-card bg-white/60 p-10 w-full max-w-sm space-y-8 relative overflow-hidden">
-          <div className="text-center space-y-2">
-            <div className="w-20 h-20 bg-white rounded-[30px] mx-auto flex items-center justify-center mb-6 shadow-sm border-2 border-white animate-float">
-              {portal === 'parent' ? <Lock size={32} className="text-[#E0C3FC]" /> : <Sparkles size={32} className="text-[#F9F1A5]" />}
+        <div className="bg-white/60 backdrop-blur-xl p-12 w-full max-w-sm rounded-[60px] shadow-[0_40px_80px_rgba(0,0,0,0.05)] border-8 border-white relative z-10 animate-float-kawaii">
+          <div className="text-center space-y-6 mb-10">
+            <div className={`w-28 h-28 mx-auto rounded-[40px] flex items-center justify-center shadow-xl border-4 border-white ${portal === 'parent' ? 'bg-[#E0C3FC]' : 'bg-[#B5FFFC]'}`}>
+              {portal === 'parent' ? <Lock size={48} className="text-white" /> : <Sparkles size={48} className="text-white" />}
             </div>
-            <h2 className="text-4xl font-candy text-macaron">
-              {portal === 'parent' ? '家长验证' : '输入房间码'}
-            </h2>
-            <p className="text-[10px] text-macaron opacity-30 font-bold tracking-widest uppercase">Secret Entrance Only</p>
+            <div>
+              <h2 className="text-4xl font-candy text-[#5D4D7A]">
+                {portal === 'parent' ? '家长通行证' : '梦境钥匙'}
+              </h2>
+              <p className="text-[10px] text-[#5D4D7A] opacity-40 font-bold tracking-[0.3em] uppercase mt-2">
+                {portal === 'parent' ? 'Parent Access Only' : 'Enter Room Code'}
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleAuth} className="space-y-6">
-            <div className="relative">
+            <div className="relative group">
               <input
                 type={portal === 'parent' ? 'password' : 'text'}
                 value={authCode}
                 onChange={(e) => setAuthCode(e.target.value.toUpperCase())}
-                placeholder={portal === 'parent' ? '授权码 (XM_xxxx)' : '4位房间码'}
+                placeholder={portal === 'parent' ? '输入密码' : '4位号码'}
                 maxLength={portal === 'parent' ? 20 : 4}
-                className="w-full bg-white/80 rounded-[25px] px-6 py-5 text-center text-3xl font-candy text-macaron focus:ring-4 focus:ring-[#E0C3FC]/20 transition-all border-none shadow-sm outline-none"
+                className="w-full bg-white rounded-[30px] px-6 py-6 text-center text-3xl font-candy text-[#5D4D7A] focus:ring-4 focus:ring-[#E0C3FC]/30 transition-all border-4 border-transparent focus:border-[#E0C3FC]/50 shadow-inner outline-none placeholder:text-[#5D4D7A]/20"
                 autoFocus
               />
             </div>
-            {error && <p className="text-[#FF8BA0] text-xs text-center font-bold px-4">{error}</p>}
+            {error && <div className="bg-[#FFDEE9] text-[#D04665] py-3 rounded-2xl text-xs text-center font-bold animate-pulse">{error}</div>}
             <button
               type="submit"
               disabled={loading}
-              className={`w-full kawaii-button py-5 text-white font-bold text-xl active:scale-95 transition-all disabled:opacity-50 ${portal === 'parent' ? 'bg-pastel-purple text-white' : 'bg-pastel-yellow text-macaron'}`}
+              className={`w-full py-6 rounded-[35px] text-white font-candy text-2xl shadow-xl active:scale-95 transition-all disabled:opacity-50 border-4 border-white ${portal === 'parent' ? 'bg-[#E0C3FC] from-[#E0C3FC] to-[#B5FFFC] bg-gradient-to-r' : 'bg-[#B5FFFC] from-[#B5FFFC] to-[#E0C3FC] bg-gradient-to-r'}`}
             >
-              {loading ? '梦境传送中...' : '开始奇幻之旅'}
+              {loading ? '验证中...' : '开启大门'}
             </button>
           </form>
         </div>
@@ -178,18 +205,18 @@ const KiddiePlanApp: React.FC = () => {
     );
   }
 
-  // 3. 授权成功后的主体界面
+  // 3. Main Portal View
   return (
-    <div className="min-h-screen relative flex flex-col max-w-md mx-auto overflow-hidden">
-      <div className="mesh-bg opacity-30">
-        <div className="mesh-blob bg-pastel-pink top-[-50px] right-[-50px] w-64 h-64"></div>
-        <div className="mesh-blob bg-pastel-blue bottom-[-50px] left-[-50px] w-80 h-80"></div>
+    <div className="h-screen w-screen relative overflow-hidden bg-[#Fdfdfd]">
+
+
+      <div className="h-full w-full flex flex-col max-w-md mx-auto relative shadow-2xl bg-white/50 backdrop-blur-sm">
+        {portal === 'parent' ? (
+          <ParentPortal token={token!} onLogout={handleLogout} />
+        ) : (
+          <ChildPortal token={token!} onLogout={handleLogout} />
+        )}
       </div>
-      {portal === 'parent' ? (
-        <ParentPortal token={token!} onLogout={handleLogout} />
-      ) : (
-        <ChildPortal token={token!} onLogout={handleLogout} />
-      )}
     </div>
   );
 };

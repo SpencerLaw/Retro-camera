@@ -18,26 +18,24 @@ export default async function handler(
             return response.status(403).json({ success: false, message: '权限不足' });
         }
         const childId = decodedToken.split(':')[1];
-        const parentCode = decodedToken.split(':')[2]; // 如果 token 中没有，我们可以通过反查 room 映射（见后文）
-        const parentKey = `kp:parent:${parentCode}`;
+        const licenseCode = decodedToken.split(':')[2];
+        const licenseKey = `license:${licenseCode}`;
 
         const today = new Date().toISOString().split('T')[0];
 
         if (action === 'get_today_data') {
-            const config: any = await kv.get(parentKey) || { children: [] };
-            const childData = config.children.find((c: any) => c.id === childId) || {};
+            const license: any = await kv.get(licenseKey) || { children: [], progress: {} };
+            const childData = license.children.find((c: any) => c.id === childId) || {};
 
-            const tasks = await kv.get(`kp:child:${childId}:tasks:${today}`) || [];
-            const checkins: string[] = await kv.get(`kp:child:${childId}:checkins:${today}`) || [];
-
-            // 聚合对象中已包含 streak, points, rewards
+            // 从聚合对象中读取记录
+            const dailyData = license.progress?.[today]?.[childId] || { tasks: [], checkins: [] };
             const { streak = 0, points = 0, rewards = [], name = '宝贝', avatar = '' } = childData;
 
             return response.status(200).json({
                 success: true,
                 data: {
-                    tasks,
-                    checkins,
+                    tasks: dailyData.tasks,
+                    checkins: dailyData.checkins,
                     rewards,
                     streak,
                     points,
@@ -48,36 +46,51 @@ export default async function handler(
 
         if (action === 'toggle_checkin') {
             const { taskId } = data;
-            const config: any = await kv.get(parentKey);
-            const childIdx = config?.children?.findIndex((c: any) => c.id === childId);
+            const license: any = await kv.get(licenseKey);
+            if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
 
+            const childIdx = license.children.findIndex((c: any) => c.id === childId);
             if (childIdx === -1) return response.status(404).json({ success: false, message: '孩子不存在' });
 
-            const tasks: any[] = await kv.get(`kp:child:${childId}:tasks:${today}`) || [];
-            const checkinKey = `kp:child:${childId}:checkins:${today}`;
+            // 获取进度记录
+            if (!license.progress) license.progress = {};
+            if (!license.progress[today]) license.progress[today] = {};
+            if (!license.progress[today][childId]) {
+                // 可能是从旧任务列表初始化
+                license.progress[today][childId] = {
+                    tasks: await kv.get(`kp:child:${childId}:tasks:${today}`) || [],
+                    checkins: await kv.get(`kp:child:${childId}:checkins:${today}`) || []
+                };
+            }
 
-            let currentCheckins: string[] = (await kv.get(checkinKey)) || [];
-            let currentPoints: number = config.children[childIdx].points || 0;
+            const daily = license.progress[today][childId];
+            let currentPoints: number = license.children[childIdx].points || 0;
 
-            const task = tasks.find(t => t.id === taskId);
+            const task = daily.tasks.find((t: any) => t.id === taskId);
             const pointsDelta = task ? task.points : 0;
 
-            if (currentCheckins.includes(taskId)) {
-                currentCheckins = currentCheckins.filter(id => id !== taskId);
+            if (daily.checkins.includes(taskId)) {
+                daily.checkins = daily.checkins.filter((id: string) => id !== taskId);
                 currentPoints = Math.max(0, currentPoints - pointsDelta);
             } else {
-                currentCheckins.push(taskId);
+                daily.checkins.push(taskId);
                 currentPoints += pointsDelta;
             }
 
-            // 更新 checkins (按天存储)
-            await kv.set(checkinKey, currentCheckins);
+            // 更新点数
+            license.children[childIdx].points = currentPoints;
 
-            // 更新聚合中的 points
-            config.children[childIdx].points = currentPoints;
-            await kv.set(parentKey, config);
+            // 记录统计 (Stubs)
+            if (!license.analytics) license.analytics = {};
+            license.analytics[`stats:${today}:${childId}`] = {
+                completed: daily.checkins.length,
+                total: daily.tasks.length,
+                points: currentPoints
+            };
 
-            return response.status(200).json({ success: true, checkins: currentCheckins, points: currentPoints });
+            await kv.set(licenseKey, license);
+
+            return response.status(200).json({ success: true, checkins: daily.checkins, points: currentPoints });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

@@ -66,32 +66,29 @@ export default async function handler(
                 return response.status(400).json({ success: false, message: '请输入4位房间码' });
             }
 
-            // 优先从新的全局 Hash 索引查找
-            let roomDataString: any = await kv.hget('kp:rooms', cleanCode);
+            // 优先从新的全局授权索引查找
+            let roomDataString: any = await kv.hget('license:registry', cleanCode);
 
-            // 兼容性回退：如果 Hash 中没找到，尝试旧的独立 Key
+            // 兼容性回退：如果索引中没找到，尝试旧的索引
             if (!roomDataString) {
-                const legacyData = await kv.get<{ childId: string, parentCode: string }>(`kp:room:${cleanCode}`);
-                if (legacyData) {
-                    roomDataString = `${legacyData.parentCode}:${legacyData.childId}`;
-                }
+                roomDataString = await kv.hget('kp:rooms', cleanCode);
             }
 
             if (roomDataString) {
-                const [parentCode, childId] = roomDataString.split(':');
-                const parentKey = `kp:parent:${parentCode}`;
+                const [licenseCode, childId] = roomDataString.split(':');
+                const licenseKey = `license:${licenseCode}`;
 
-                // 从父对象中获取孩子完整画像
-                const config: any = await kv.get(parentKey);
-                const childInfo = config?.children?.find((c: any) => c.id === childId);
+                // 从授权对象中获取孩子完整画像
+                const license: any = await kv.get(licenseKey);
+                const childInfo = license?.children?.find((c: any) => c.id === childId);
 
                 if (childInfo) {
                     return response.status(200).json({
                         success: true,
                         role: 'child',
                         child: childInfo,
-                        // Token 增强：包含 parentCode 以便 Client 直接定位父 Key
-                        token: Buffer.from(`child:${childId}:${parentCode}`).toString('base64')
+                        // Token 增强：包含 licenseCode 以便 Client 直接定位授权 Key
+                        token: Buffer.from(`child:${childId}:${licenseCode}`).toString('base64')
                     });
                 }
             }

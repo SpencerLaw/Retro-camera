@@ -10,8 +10,9 @@ interface ParentPortalProps {
 
 const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [children, setChildren] = useState<Child[]>([]);
+    const [licenseData, setLicenseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards'>('children');
+    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
     // Custom Dialog State
@@ -65,9 +66,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             });
             const result = await res.json();
             if (result.success) {
-                setChildren(result.data.children || []);
-                if (result.data.children?.length > 0 && !selectedChildId) {
-                    setSelectedChildId(result.data.children[0].id);
+                setLicenseData(result.data);
+                const childrenList = result.data.children || [];
+                setChildren(childrenList);
+                if (childrenList.length > 0 && !selectedChildId) {
+                    setSelectedChildId(childrenList[0].id);
                 }
             }
         } catch (err) {
@@ -399,7 +402,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    {activeTab !== 'children' && (
+                    <button onClick={() => setActiveTab('registry')} className={`w-12 h-12 kawaii-button bg-white text-[#5D4D7A] shadow-lg border-none active:scale-95 ${activeTab === 'registry' ? 'ring-4 ring-[#E0C3FC]' : ''}`}>
+                        <LayoutGrid size={22} className={activeTab === 'registry' ? 'text-[#E0C3FC]' : ''} />
+                    </button>
+                    {activeTab !== 'children' && activeTab !== 'registry' && (
                         <button onClick={() => setActiveTab('children')} className="w-12 h-12 kawaii-button bg-white text-[#5D4D7A] border-white shadow-lg active:scale-90">
                             <ArrowLeft size={22} />
                         </button>
@@ -431,10 +437,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <button
                                         key={child.id}
                                         onClick={() => setSelectedChildId(child.id)}
-                                        className={`flex flex-col items-center gap-6 min-w-[110px] transition-all transform duration-500 ${selectedChildId === child.id ? 'scale-110' : 'opacity-40 grayscale-[0.3]'}`}
+                                        className={`flex flex-col items-center gap-6 min-w-[110px] transition-all transform duration-500 relative ${selectedChildId === child.id ? 'scale-110' : 'opacity-40 grayscale-[0.3]'}`}
                                     >
-                                        <div className={`w-28 h-28 rounded-[48px] overflow-hidden border-4 shadow-2xl transition-all ${selectedChildId === child.id ? 'border-[#E0C3FC] scale-105' : 'border-white opacity-40'}`}>
+                                        <div className={`w-28 h-28 rounded-[48px] overflow-hidden border-4 shadow-2xl transition-all relative ${selectedChildId === child.id ? 'border-[#E0C3FC] scale-105' : 'border-white opacity-40'}`}>
                                             <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
+                                            {/* Plus Icon Overlay for Selected */}
+                                            {selectedChildId === child.id && (
+                                                <div className="absolute bottom-1 right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-[#E0C3FC] animate-in zoom-in-50 duration-300">
+                                                    <Plus size={18} className="text-[#E0C3FC]" strokeWidth={4} />
+                                                </div>
+                                            )}
                                         </div>
                                         <span className={`text-sm font-bold tracking-wide ${selectedChildId === child.id ? 'text-[#E0C3FC]' : 'text-[#5D4D7A]'}`}>{child.name}</span>
                                     </button>
@@ -455,7 +467,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <Star size={200} className="text-white fill-white" />
                                     </div>
                                     <div className="relative z-10 space-y-3">
-                                        <div className="text-[10px] font-bold text-white uppercase tracking-[0.4em] drop-shadow-md">进入房间码</div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-[10px] font-bold text-white uppercase tracking-[0.4em] drop-shadow-md">进入房间码</div>
+                                            <button onClick={handleEditChild} className="bg-white/20 hover:bg-white/40 text-white px-3 py-1 rounded-full text-[9px] font-bold transition-all border border-white/30 backdrop-blur-md flex items-center gap-1.5 active:scale-90">
+                                                <Edit2 size={10} /> 修改资料
+                                            </button>
+                                        </div>
                                         <div className="text-6xl font-candy text-white tracking-[0.3em] bg-white/30 px-8 py-5 rounded-[40px] backdrop-blur-xl shadow-inner border-2 border-white/40">
                                             {selectedChild.roomCode}
                                         </div>
@@ -641,6 +658,83 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         )}
                     </div>
                 )}
+
+                {activeTab === 'registry' && licenseData && (
+                    <div className="space-y-8 animate-in slide-in-from-top-8 duration-500 pb-20">
+                        <div className="text-center space-y-2">
+                            <h2 className="text-4xl font-candy text-[#5D4D7A]">全权注册大盘</h2>
+                            <p className="text-[10px] font-bold text-[#A2D2FF] opacity-50 uppercase tracking-[0.4em]">Family License Master Console</p>
+                        </div>
+
+                        <div className="space-y-6">
+                            {(licenseData.children || []).map((kid: any) => {
+                                const today = new Date().toISOString().split('T')[0];
+                                const daily = licenseData.progress?.[today]?.[kid.id] || { tasks: [], checkins: [] };
+                                const completionRate = daily.tasks.length > 0 ? Math.round((daily.checkins.length / daily.tasks.length) * 100) : 0;
+
+                                return (
+                                    <div key={kid.id} className="kawaii-card bg-white/80 p-6 border-none shadow-xl flex items-center gap-6 group hover:translate-x-2 transition-transform">
+                                        <div className="w-20 h-20 rounded-[30px] border-4 border-white shadow-lg overflow-hidden shrink-0">
+                                            <img src={kid.avatar} className="w-full h-full object-cover" />
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-xl font-candy text-[#5D4D7A]">{kid.name}</h4>
+                                                <span className="text-[10px] font-bold text-[#E0C3FC] uppercase tracking-widest">RM: {kid.roomCode}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 h-3 bg-[#5D4D7A]/5 rounded-full overflow-hidden border border-white">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-[#B5FFFC] to-[#E0C3FC] transition-all duration-1000"
+                                                        style={{ width: `${completionRate}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-[10px] font-bold text-[#5D4D7A] opacity-40">{completionRate}%</span>
+                                            </div>
+                                            <div className="flex gap-4 pt-1">
+                                                <div className="text-[9px] font-bold text-[#5D4D7A]/40 uppercase tracking-tighter">
+                                                    任务: {daily.checkins.length}/{daily.tasks.length}
+                                                </div>
+                                                <div className="text-[9px] font-bold text-[#FFDEE9] uppercase tracking-tighter">
+                                                    积分: {kid.points || 0} 🍭
+                                                </div>
+                                                <div className="text-[9px] font-bold text-[#B5FFFC] uppercase tracking-tighter">
+                                                    连续: {kid.streak || 0}D
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="kawaii-card bg-gradient-to-br from-[#5D4D7A] to-[#2D1B4E] p-10 text-white border-none shadow-2xl relative overflow-hidden group border-4 border-white">
+                            <div className="absolute -top-10 -right-10 opacity-10 animate-spin-slow">
+                                <Sparkles size={240} fill="white" />
+                            </div>
+                            <div className="relative z-10 grid grid-cols-2 gap-8">
+                                <div className="space-y-1">
+                                    <div className="text-3xl font-candy font-bold">{licenseData.children?.length || 0}</div>
+                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">注册成员总数</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-3xl font-candy font-bold">{Object.keys(licenseData.progress || {}).length}</div>
+                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">已积累梦幻里程</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-3xl font-candy font-bold">
+                                        {(licenseData.children || []).reduce((acc: number, c: any) => acc + (c.points || 0), 0)}
+                                    </div>
+                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">全家成就聚宝盆</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-3xl font-candy font-bold">✨</div>
+                                    <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">数据同步实时在线</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
 
             {/* Hint Footer */}
@@ -664,7 +758,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
                     <div className="absolute inset-0 bg-[#5D4D7A]/10 backdrop-blur-xl animate-in fade-in duration-500"
                         onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}></div>
-                    <div className="kawaii-card bg-white/95 w-full max-w-sm p-12 space-y-10 shadow-3xl animate-in zoom-in-95 duration-300 relative z-10 border-8 border-white">
+                    <div className="kawaii-card bg-white/95 w-full max-sm p-12 space-y-10 shadow-3xl animate-in zoom-in-95 duration-300 relative z-10 border-8 border-white">
                         <div className="text-center space-y-5">
                             <h3 className="text-3xl font-candy text-[#5D4D7A]">{dialogConfig.title}</h3>
                             {dialogConfig.message && (
@@ -686,6 +780,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         className="w-32 h-32 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group animate-float-kawaii"
                                     >
                                         <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
+                                        {/* Camera/Plus overlay */}
+                                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <div className="bg-white/90 p-3 rounded-full shadow-lg">
+                                                <Plus size={24} className="text-[#E0C3FC]" strokeWidth={3} />
+                                            </div>
+                                        </div>
+                                        {/* Floating Plus corner icon */}
+                                        <div className="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl border-4 border-[#E0C3FC] group-hover:scale-110 transition-transform">
+                                            <Plus size={20} className="text-[#E0C3FC]" strokeWidth={4} />
+                                        </div>
                                         {uploadingAvatar && (
                                             <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                                                 <Sparkles className="text-[#E0C3FC] animate-spin" />
@@ -693,7 +797,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         )}
                                         <div className="absolute inset-x-0 bottom-0 bg-[#E0C3FC]/60 text-white text-[9px] font-bold py-2 opacity-0 group-hover:opacity-100 transition-all text-center backdrop-blur-sm">更换照片</div>
                                     </div>
-                                    <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40">为宝贝选一张梦幻头像吧 ✨</p>
+                                    <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40 flex items-center gap-2">
+                                        点击上方头像库 <Plus size={12} strokeWidth={4} /> 定制梦幻头像
+                                    </p>
                                 </div>
                             )}
                             {!dialogConfig.hideInput && (

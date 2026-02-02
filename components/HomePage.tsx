@@ -355,6 +355,49 @@ export const HomePage: React.FC = () => {
             </div>
           </a>
 
+          {/* Kiddie Plan - Hand-drawn Style */}
+          <Link
+            to="/kiddie-plan"
+            className="group relative bg-gradient-to-br from-[#FFF9E1] via-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,217,90,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,217,90,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Cute heart decoration */}
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💝</div>
+
+            {/* Kawaii Glow Effect */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            {/* Icon */}
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,177,177,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFD95A]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Heart size={72} className="text-[#FFB1B1] drop-shadow-lg" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#4C3D3D] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.kiddiePlan.title')}</h2>
+              <p className="text-base text-[#4C3D3D] mb-4 font-semibold opacity-80">
+                {t('home.kiddiePlan.subtitle')}
+              </p>
+              <p className="text-sm text-[#4C3D3D] leading-relaxed font-medium opacity-70">
+                {t('home.kiddiePlan.description')}
+              </p>
+
+              {/* Decorative Border */}
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#FFB1B1] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(255,217,90,0.4)] border-[3px] border-[#FFD95A] hover:bg-gradient-to-r hover:from-[#FFD95A] hover:to-white">
+                  Enter → 📖
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Morning Energy Tree - Sky Blue/Green */}
           <a
             href="/morning-energy-tree/index.html"

@@ -1,0 +1,7 @@
+{
+  "name": "KiddiePlan - 寒假成长助手",
+  "description": "专为家长设计的寒假每日打卡与规划工具，支持多孩子管理，科学安排每日作息，建立积分激励制度。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

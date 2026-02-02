@@ -7,6 +7,7 @@ import AdventureGameEdit from './adventure-game/AdventureGameEdit';
 import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
 import { GroupMakerApp } from './components/GroupMakerApp';
 import BroadcastApp from './broadcast-assistant/BroadcastApp';
+import KiddiePlanApp from './kiddieplan/KiddiePlanApp';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
           <Route path="/doraemon" element={<DoraemonMonitorApp />} />
           <Route path="/group-maker" element={<GroupMakerApp />} />
           <Route path="/broadcast" element={<BroadcastApp />} />
+          <Route path="/kiddie-plan" element={<KiddiePlanApp />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

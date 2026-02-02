@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KiddiePlan - 绘本成长笔记</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-yellow: #FFD95A;
+            --soft-pink: #FFB1B1;
+            --warm-bg: #FFF9E1;
+            --text-main: #4C3D3D;
+            --border-width: 3px;
+        }
+
+        body {
+            font-family: 'Noto+Sans+SC', sans-serif;
+            background-color: var(--warm-bg);
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-handwriting {
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+
+        /* 模拟手绘卡片 */
+        .sketch-card {
+            background: white;
+            border: var(--border-width) solid var(--text-main);
+            border-radius: 25px 35px 20px 30px; /* 不规则圆角更像手绘 */
+            box-shadow: 6px 6px 0px var(--text-main);
+            position: relative;
+        }
+
+        .sketch-button {
+            border: var(--border-width) solid var(--text-main);
+            border-radius: 15px 12px 18px 10px;
+            box-shadow: 4px 4px 0px var(--text-main);
+            transition: all 0.1s ease;
+        }
+
+        .sketch-button:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--text-main);
+        }
+
+        /* 模拟纸张纹理背景 */
+        .paper-texture {
+            background-image: radial-gradient(#4C3D3D11 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+
+        .tab-active {
+            background-color: var(--primary-yellow) !important;
+            transform: translateY(-4px);
+        }
+
+        /* 模拟胶带效果 */
+        .tape {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 80px;
+            height: 25px;
+            background: rgba(255, 217, 90, 0.6);
+            border: 1px border dashed var(--text-main);
+            z-index: 5;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="paper-texture">
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

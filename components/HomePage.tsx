@@ -375,7 +375,7 @@ export const HomePage: React.FC = () => {
                 className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,177,177,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFD95A]"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <Heart size={72} className="text-[#FFB1B1] drop-shadow-lg" />
+                <BookOpen size={72} className="text-[#FFB1B1] drop-shadow-lg" />
               </div>
             </div>
 

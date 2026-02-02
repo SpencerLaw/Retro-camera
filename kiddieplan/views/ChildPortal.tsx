@@ -76,21 +76,34 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
     const DashboardView = () => (
         <div className="space-y-12 animate-in fade-in zoom-in-95 duration-1000 pb-28">
-            {/* Pastel Profile Header */}
-            <div className="kawaii-card bg-white/40 p-10 flex items-center justify-between border-4 border-white shadow-2xl animate-float-kawaii">
-                <div className="flex items-center gap-8">
-                    <div className="w-24 h-24 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl">
-                        <img src={childProfile.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="space-y-2">
-                        <h1 className="text-5xl font-candy text-[#5D4D7A] tracking-tight">{childProfile.name}的梦想岛</h1>
-                        <div className="flex items-center gap-4">
-                            <div className="bg-white/60 px-6 py-3 rounded-full flex items-center gap-4 shadow-sm border-4 border-white/50">
-                                <span className="text-2xl">🍭</span>
-                                <span className="text-3xl font-candy text-[#E0C3FC]">{coins.toFixed(0)}</span>
-                            </div>
+            {/* Pro Summary Dashboard - Inspired by 好学伴 */}
+            <div className="kawaii-card bg-white/40 p-8 border-4 border-white shadow-3xl overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-6">
+                        <div className="w-20 h-20 rounded-[35px] overflow-hidden border-4 border-white shadow-xl">
+                            <img src={childProfile.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-candy text-[#5D4D7A]">{childProfile.name}的星梦基地</h1>
+                            <p className="text-[10px] font-bold text-[#A2D2FF] tracking-[0.2em] uppercase mt-1">Voyage Day {streak}</p>
                         </div>
                     </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4">
+                    {[
+                        { label: '今日专注', val: '1.2h', icon: '⏱️', color: '#E0C3FC' },
+                        { label: '今日任务', val: `${checkins.length}/${tasks.length}`, icon: '📝', color: '#B5FFFC' },
+                        { label: '完成进度', val: `${progress}%`, icon: '📈', color: '#FFDEE9' },
+                        { label: '成就奖牌', val: '12', icon: '🏆', color: '#FFF9C4' }
+                    ].map((item, i) => (
+                        <div key={i} className="bg-white/60 p-4 rounded-[28px] flex flex-col items-center gap-2 border-2 border-white/50">
+                            <span className="text-xl">{item.icon}</span>
+                            <div className="text-[14px] font-candy text-[#5D4D7A]">{item.val}</div>
+                            <div className="text-[8px] font-bold text-[#5D4D7A]/40 uppercase tracking-widest">{item.label}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
@@ -140,26 +153,48 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         <Plus size={24} strokeWidth={4} />
                     </div>
                 </div>
-                <div className="space-y-4">
-                    {tasks.slice(0, 3).map(task => (
-                        <div key={task.id} className="kawaii-card bg-white p-8 flex justify-between items-center border-white shadow-xl group hover:translate-x-3 transition-all relative overflow-hidden">
-                            <div className="flex items-center gap-8">
-                                <div className="w-16 h-16 bg-[#B5FFFC]/20 rounded-[28px] flex items-center justify-center border-4 border-white shadow-inner">
-                                    <Clock size={28} className="text-[#B5FFFC]" />
+                <div className="space-y-6">
+                    {tasks.slice(0, 4).map((task, idx) => {
+                        const colors = ['#FFDEE9', '#B5FFFC', '#E0C3FC', '#FFF9C4'];
+                        const isCompleted = checkins.includes(task.id);
+                        return (
+                            <div key={task.id} className="kawaii-card bg-white p-6 flex items-center justify-between border-white shadow-2xl group hover:translate-x-3 transition-all relative overflow-hidden pl-10">
+                                {/* Left Side Tag - inspired by 好学伴 */}
+                                <div className="absolute left-0 top-0 bottom-0 w-3 shadow-inner" style={{ backgroundColor: colors[idx % 4] }}></div>
+
+                                <div className="flex items-center gap-6">
+                                    <div className="w-14 h-14 bg-white/80 rounded-[24px] flex items-center justify-center border-4 border-white shadow-inner">
+                                        {isCompleted ? <CheckCircle2 className="text-[#8DB580]" size={28} /> : <BookOpen className="text-[#5D4D7A]/20" size={24} />}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-lg font-bold text-[#5D4D7A]">{task.title}</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[9px] font-bold text-[#E0C3FC] uppercase tracking-[0.2em]">{task.timeSlot}</span>
+                                            <span className="w-1 h-1 bg-[#5D4D7A]/10 rounded-full"></span>
+                                            <span className="text-[9px] font-bold text-[#5D4D7A]/40 uppercase tracking-[0.1em]">计划: 20分钟</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div className="text-xl font-bold text-[#5D4D7A]">{task.title}</div>
-                                    <div className="text-[11px] font-bold text-[#E0C3FC] tracking-[0.2em] mt-2 uppercase">{task.timeSlot}</div>
+
+                                <div className="flex items-center gap-4">
+                                    {/* Mini Timer Control */}
+                                    <div className="bg-[#5D4D7A]/5 px-5 py-2.5 rounded-full flex items-center gap-4 border-4 border-white shadow-inner">
+                                        <div className="text-[12px] font-mono font-bold text-[#5D4D7A] opacity-60">00:00:00</div>
+                                        <div className="flex gap-2">
+                                            <div className="w-7 h-7 bg-[#8DB580] rounded-lg flex items-center justify-center text-white scale-90 hover:scale-100 transition-all cursor-pointer"><Timer size={14} /></div>
+                                            <div className="w-7 h-7 bg-[#EA6B66] rounded-lg flex items-center justify-center text-white scale-90 hover:scale-100 transition-all cursor-pointer"><CheckCircle2 size={14} /></div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleToggleTask(task.id)}
+                                        className={`px-8 py-3 rounded-full text-xs font-bold transition-all shadow-xl border-4 border-white ${isCompleted ? 'bg-gray-100 text-gray-400' : 'bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white hover:scale-105'}`}
+                                    >
+                                        {isCompleted ? '已探索' : '发射'}
+                                    </button>
                                 </div>
                             </div>
-                            <button className="px-10 py-3 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white text-sm font-bold rounded-full shadow-[0_10px_25px_rgba(224,195,252,0.3)] hover:scale-105 active:scale-95 transition-all">发射</button>
-                        </div>
-                    ))}
-                    {tasks.length === 0 && (
-                        <div className="text-center py-16 bg-white/30 rounded-[45px] border-4 border-dashed border-white/60">
-                            <p className="text-sm text-[#4D3A29] opacity-20 font-bold italic">还没收到家长的密令哦 ~</p>
-                        </div>
-                    )}
+                        );
+                    })}
                 </div>
             </div>
         </div>
@@ -345,29 +380,31 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 )}
             </main>
 
-            {/* Bottom Tab Navigation - Elegant & Warm */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl shadow-[0_-20px_50px_rgba(93,64,55,0.08)] px-12 py-8 flex justify-between items-center rounded-t-[50px] z-[100] border-t-2 border-white/10">
+            {/* Bottom Tab Navigation - Pastel Bubble */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-3xl shadow-[0_-25px_60px_rgba(93,77,122,0.1)] px-14 py-10 flex justify-between items-center rounded-t-[60px] z-[120] border-t-8 border-white">
                 {[
-                    { id: 'home', icon: Home, label: '主页' },
-                    { id: 'plan', icon: ListTodo, label: '规划' },
-                    { id: 'rewards', icon: Sparkles, label: '成长' },
-                    { id: 'me', icon: User, label: '我' },
+                    { id: 'home', icon: Home, label: '主岛' },
+                    { id: 'plan', icon: ListTodo, label: '航线' },
+                    { id: 'rewards', icon: Sparkles, label: '宝库' },
+                    { id: 'me', icon: User, label: '档案' },
                 ].map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as AppTab)}
-                        className={`flex flex-col items-center gap-2 transition-all duration-300 relative ${activeTab === tab.id ? 'text-[#D99C52] scale-110' : 'text-[#4D3A29] opacity-30 group hover:opacity-100'}`}
+                        className={`flex flex-col items-center gap-3 transition-all duration-500 relative ${activeTab === tab.id ? 'text-[#E0C3FC] scale-125' : 'text-[#5D4D7A] opacity-20 hover:opacity-50'}`}
                     >
-                        <tab.icon size={26} strokeWidth={activeTab === tab.id ? 3 : 2} />
-                        <span className="text-[9px] font-bold uppercase tracking-[0.2em]">{tab.label}</span>
-                        {activeTab === tab.id && <div className="absolute -bottom-2 w-1 h-1 bg-[#D99C52] rounded-full"></div>}
+                        <tab.icon size={28} strokeWidth={activeTab === tab.id ? 4 : 2} />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{tab.label}</span>
+                        {activeTab === tab.id && (
+                            <div className="absolute -bottom-4 w-2 h-2 bg-[#E0C3FC] rounded-full shadow-[0_0_10px_#E0C3FC]"></div>
+                        )}
                     </button>
                 ))}
 
-                {/* Floating Action Button Overhaul */}
-                <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 group">
-                    <div className="w-16 h-16 bg-gradient-to-tr from-[#D99C52] to-[#E29578] rounded-full shadow-[0_10px_30px_rgba(217,156,82,0.4)] flex items-center justify-center text-white border-[6px] border-[#FFFDF2] active:scale-90 transition-all cursor-pointer group-hover:scale-110">
-                        <Plus size={32} strokeWidth={4} />
+                {/* Floating Action Button - Bubble Center */}
+                <div className="absolute top-[-40px] left-1/2 -translate-x-1/2 group">
+                    <div className="w-20 h-20 bg-gradient-to-tr from-[#E0C3FC] to-[#B5FFFC] rounded-full shadow-[0_15px_35px_rgba(224,195,252,0.6)] flex items-center justify-center text-white border-[8px] border-white active:scale-90 transition-all cursor-pointer group-hover:scale-110 group-hover:rotate-12">
+                        <Plus size={36} strokeWidth={4} />
                     </div>
                 </div>
             </nav>

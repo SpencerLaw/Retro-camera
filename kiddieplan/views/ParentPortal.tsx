@@ -464,9 +464,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 {activeTab === 'tasks' && selectedChild && (
                     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 pb-10">
                         <div className="flex justify-between items-end px-2">
-                            <div>
+                            <div className="flex flex-col">
                                 <h2 className="text-3xl font-candy text-[#4D3A29]">任务分配</h2>
-                                <p className="text-[9px] font-bold text-[#D99C52] opacity-60 uppercase mt-1 tracking-widest">Allocation for {selectedChild.name}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-[9px] font-bold text-[#D99C52] opacity-60 uppercase tracking-widest leading-none">Allocation for {selectedChild.name}</p>
+                                    <button onClick={handleEditChild} className="text-[#D99C52] opacity-40 hover:opacity-100 transition-all p-1 -m-1">
+                                        <Edit2 size={12} />
+                                    </button>
+                                </div>
                             </div>
                             <button onClick={() => addTask()} className="kawaii-button bg-[#D99C52] px-6 py-3 flex items-center gap-2 text-xs text-white border-none shadow-lg">
                                 <Plus size={18} strokeWidth={4} /> 手动添加

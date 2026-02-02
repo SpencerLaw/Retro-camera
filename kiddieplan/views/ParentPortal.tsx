@@ -659,6 +659,92 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 </div>
             </div>
 
-            {/* Custom Dialog - Warm & Cozy Overhaul */}
+            {/* Custom Dialog - Pastel Dream Style */}
+            {dialogConfig.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+                    <div className="absolute inset-0 bg-[#5D4D7A]/10 backdrop-blur-xl animate-in fade-in duration-500"
+                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}></div>
+                    <div className="kawaii-card bg-white/95 w-full max-w-sm p-12 space-y-10 shadow-3xl animate-in zoom-in-95 duration-300 relative z-10 border-8 border-white">
+                        <div className="text-center space-y-5">
+                            <h3 className="text-3xl font-candy text-[#5D4D7A]">{dialogConfig.title}</h3>
+                            {dialogConfig.message && (
+                                <p className="text-[12px] font-bold text-[#5D4D7A]/50 leading-relaxed max-w-[280px] mx-auto">
+                                    {dialogConfig.message}
+                                </p>
+                            )}
+                            {dialogConfig.highlight && (
+                                <div className="text-6xl font-candy text-[#E0C3FC] tracking-[0.2em] bg-white px-8 py-6 rounded-[40px] mt-8 animate-float-kawaii shadow-inner border-4 border-[#E0C3FC]/10">
+                                    {dialogConfig.highlight}
+                                </div>
+                            )}
+                        </div>
+                        <div className="space-y-4">
+                            {dialogConfig.showAvatarUpload && (
+                                <div className="flex flex-col items-center gap-6 py-4">
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="w-32 h-32 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl bg-white cursor-pointer hover:scale-105 active:scale-95 transition-all relative group animate-float-kawaii"
+                                    >
+                                        <img src={currentAvatar} alt="preview" className="w-full h-full object-cover" />
+                                        {uploadingAvatar && (
+                                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                                <Sparkles className="text-[#E0C3FC] animate-spin" />
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-x-0 bottom-0 bg-[#E0C3FC]/60 text-white text-[9px] font-bold py-2 opacity-0 group-hover:opacity-100 transition-all text-center backdrop-blur-sm">更换照片</div>
+                                    </div>
+                                    <p className="text-[11px] font-bold text-[#5D4D7A] opacity-40">为宝贝选一张梦幻头像吧 ✨</p>
+                                </div>
+                            )}
+                            {!dialogConfig.hideInput && (
+                                <>
+                                    <input
+                                        autoFocus
+                                        type="text"
+                                        placeholder={dialogConfig.placeholder}
+                                        defaultValue={dialogConfig.defaultValue || ''}
+                                        id="dialog-title-input"
+                                        className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] placeholder:text-[#5D4D7A]/20 transition-all shadow-inner backdrop-blur-md"
+                                    />
+                                    {dialogConfig.showTime && (
+                                        <div className="space-y-3">
+                                            <p className="text-[11px] font-bold text-[#E0C3FC] opacity-70 ml-5 uppercase tracking-widest">执行时间</p>
+                                            <input
+                                                type="time"
+                                                defaultValue={dialogConfig.defaultExtra || '08:00'}
+                                                id="dialog-time-input"
+                                                className="w-full px-8 py-5 rounded-[30px] bg-white/80 border-4 border-transparent focus:border-[#E0C3FC] outline-none font-bold text-[#5D4D7A] transition-all shadow-inner backdrop-blur-md"
+                                            />
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                        <div className="flex gap-4">
+                            {!dialogConfig.hideInput && (
+                                <button
+                                    onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                                    className="flex-1 py-5 text-[#4D3A29] opacity-30 font-bold hover:opacity-100 transition-all text-sm uppercase tracking-widest"
+                                >
+                                    取消
+                                </button>
+                            )}
+                            <button
+                                onClick={() => {
+                                    const titleInput = document.getElementById('dialog-title-input') as HTMLInputElement;
+                                    const timeInput = document.getElementById('dialog-time-input') as HTMLInputElement;
+                                    dialogConfig.onConfirm(titleInput?.value || '', timeInput?.value || '');
+                                }}
+                                className="flex-1 py-6 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white rounded-[35px] font-candy text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-white"
+                            >
+                                {dialogConfig.hideInput ? '明白啦 ✨' : '确定'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
-            export default ParentPortal;
+export default ParentPortal;

@@ -27,64 +27,64 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
 
       {
         view === 'week' ? (
-          <div className="kawaii-card p-6 bg-white/60">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#D99C52] rounded-[15px] flex items-center justify-center shadow-sm">
-                <Calendar size={20} className="text-white" />
+          <div className="kawaii-card p-10 bg-white/40 border-white shadow-2xl">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-14 h-14 bg-[#B5FFFC] rounded-[28px] flex items-center justify-center shadow-xl border-4 border-white animate-float-kawaii">
+                <Calendar size={28} className="text-[#5D4D7A]" />
               </div>
               <div>
-                <h3 className="font-candy text-2xl text-[#4D3A29]">七日成长周刊</h3>
-                <p className="text-[8px] font-bold text-[#D99C52] opacity-30 uppercase tracking-widest">Weekly Growth Map</p>
+                <h3 className="font-candy text-4xl text-[#5D4D7A] tracking-tight">七日梦想航志</h3>
+                <p className="text-[11px] font-bold text-[#A2D2FF] opacity-80 uppercase tracking-[0.4em]">Weekly Magic Tracker</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
               {weekDays.map((day, idx) => (
-                <div key={day} className="kawaii-card bg-white p-4 flex justify-between items-center group cursor-pointer hover:bg-pastel-yellow/30 border-none shadow-sm transition-all hover:translate-x-1">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-[15px] flex items-center justify-center font-candy text-white shadow-sm ${idx < 3 ? 'bg-[#E29578]' : 'bg-[#D99C52]'}`}>
+                <div key={day} className="kawaii-card bg-white p-6 flex justify-between items-center group cursor-pointer hover:bg-[#FFF9C4]/30 border-white shadow-lg transition-all hover:translate-x-3">
+                  <div className="flex items-center gap-6">
+                    <div className={`w-14 h-14 rounded-[28px] flex items-center justify-center font-candy text-white shadow-xl border-4 border-white ${idx < 3 ? 'bg-[#FFDEE9]' : 'bg-[#E0C3FC]'}`}>
                       {idx + 1}
                     </div>
                     <div>
-                      <div className="text-[10px] font-bold text-[#4D3A29] opacity-30 uppercase tracking-widest">{day}</div>
-                      <div className="font-bold text-[#4D3A29] text-sm">
+                      <div className="text-[12px] font-bold text-[#5D4D7A] opacity-30 uppercase tracking-[0.3em]">{day}</div>
+                      <div className="font-bold text-[#5D4D7A] text-xl">
                         {idx === 0 ? '重点：奇幻作业挑战' : idx === 6 ? '重点：梦幻岛远足' : '常规探索日'}
                       </div>
                     </div>
                   </div>
-                  <ChevronRight size={18} className="text-macaron opacity-10 group-hover:opacity-100 group-hover:text-pastel-purple transition-all" />
+                  <ChevronRight size={22} className="text-[#5D4D7A] opacity-10 group-hover:opacity-100 group-hover:text-[#E0C3FC] transition-all" />
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="kawaii-card p-8 bg-white/60 relative overflow-hidden">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-[#E29578] rounded-[15px] flex items-center justify-center shadow-sm">
-                <Map size={20} className="text-white" />
+          <div className="kawaii-card p-12 bg-white/40 border-white shadow-2xl relative overflow-hidden">
+            <div className="flex items-center gap-4 mb-10">
+              <div className="w-14 h-14 bg-[#FFDEE9] rounded-[28px] flex items-center justify-center shadow-xl border-4 border-white animate-float-kawaii">
+                <Map size={28} className="text-[#5D4D7A]" />
               </div>
               <div>
-                <h3 className="font-candy text-2xl text-[#4D3A29]">梦想进阶航线</h3>
-                <p className="text-[8px] font-bold text-[#D99C52] opacity-30 uppercase tracking-widest">Future Roadmap</p>
+                <h3 className="font-candy text-4xl text-[#5D4D7A] tracking-tight">梦想进阶航线</h3>
+                <p className="text-[11px] font-bold text-[#FFDEE9] opacity-80 uppercase tracking-[0.4em]">Future Magic Roadmap</p>
               </div>
             </div>
 
-            {/* Connection Line */}
-            <div className="absolute top-24 bottom-16 left-[51px] w-2 bg-[#D99C52]/5 rounded-full"></div>
+            {/* Connection Line - Neon Glow */}
+            <div className="absolute top-32 bottom-20 left-[67px] w-3 bg-[#E0C3FC]/10 rounded-full shadow-inner"></div>
 
             <div className="space-y-12 relative">
               {[
-                { title: '阶段一：奇才萌动', detail: '完成所有寒假作业第一阶段', icon: <Flag size={14} />, color: 'bg-pastel-yellow' },
-                { title: '阶段二：梦想起飞', detail: '每日增加30分钟英语听力', icon: <Sparkles size={14} />, color: 'bg-pastel-pink' },
-                { title: '阶段三：全能旅人', detail: '如果坚持打卡，周末去游乐园！', icon: <Gift size={14} />, color: 'bg-pastel-blue' },
+                { title: '阶段一：奇才萌动', detail: '完成所有寒假作业第一阶段', icon: <Flag size={18} />, color: 'bg-[#FFF9C4]' },
+                { title: '阶段二：梦想起飞', detail: '每日增加30分钟英语听力', icon: <Sparkles size={18} />, color: '#FFDEE9' },
+                { title: '阶段三：全能旅人', detail: '如果坚持打卡，周末去游乐园！', icon: <Gift size={18} />, color: '#B5FFFC' },
               ].map((milestone, idx) => (
-                <div key={idx} className="flex gap-6 items-start relative z-10">
-                  <div className={`w-14 h-14 kawaii-card ${milestone.color} flex items-center justify-center shrink-0 shadow-lg border-4 border-white animate-float`} style={{ animationDelay: `${idx * 0.2}s` }}>
-                    <div className="text-white">{milestone.icon}</div>
+                <div key={idx} className="flex gap-8 items-start relative z-10">
+                  <div className={`w-16 h-16 kawaii-card ${idx === 0 ? milestone.color : 'bg-white'} flex items-center justify-center shrink-0 shadow-2xl border-4 border-white animate-float-kawaii translate-x-[-4px]`} style={{ backgroundColor: idx === 0 ? '' : milestone.color as string, animationDelay: `${idx * 0.3}s` }}>
+                    <div className="text-[#5D4D7A]">{milestone.icon}</div>
                   </div>
-                  <div className="pt-2">
-                    <h4 className="font-candy text-lg text-[#4D3A29]">{milestone.title}</h4>
-                    <p className="text-[10px] text-[#4D3A29]/60 mt-1 font-bold leading-relaxed">{milestone.detail}</p>
+                  <div className="pt-3 space-y-1">
+                    <h4 className="font-candy text-2xl text-[#5D4D7A]">{milestone.title}</h4>
+                    <p className="text-[11px] text-[#A2D2FF] font-bold leading-relaxed uppercase tracking-wider">{milestone.detail}</p>
                   </div>
                 </div>
               ))}

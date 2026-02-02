@@ -61,96 +61,98 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     };
 
     if (loading) return (
-        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-8 bg-[#FFFDF2]">
+        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-10 mesh-gradient">
             <div className="relative">
-                <div className="w-20 h-20 bg-[#D99C52]/10 rounded-full animate-ping opacity-30"></div>
-                <div className="w-20 h-20 bg-[#D99C52] rounded-[24px] absolute inset-0 animate-bounce flex items-center justify-center shadow-xl">
-                    <Sparkles className="text-white" size={36} />
+                <div className="w-24 h-24 bg-white/40 rounded-full animate-ping opacity-30"></div>
+                <div className="w-24 h-24 bg-white rounded-[32px] absolute inset-0 animate-float-kawaii flex items-center justify-center shadow-2xl border-4 border-white">
+                    <Sparkles className="text-[#E0C3FC] animate-spin-slow" size={40} />
                 </div>
             </div>
-            <p className="text-2xl text-[#4D3A29] opacity-40">正在加载你的星梦基地...</p>
+            <p className="text-3xl text-[#5D4D7A] opacity-50">开启梦幻星岛...</p>
         </div>
     );
 
     const progress = tasks.length > 0 ? Math.round((checkins.length / tasks.length) * 100) : 0;
 
     const DashboardView = () => (
-        <div className="space-y-10 animate-in fade-in zoom-in-95 duration-700 pb-20">
-            {/* Warm Profile Header */}
-            <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                    <h1 className="text-4xl font-candy text-[#4D3A29]">{childProfile.name}的小窝</h1>
-                    <div className="flex items-center gap-3">
-                        <div className="bg-white/80 px-5 py-2 rounded-full flex items-center gap-3 shadow-sm border border-[#D99C52]/5">
-                            <span className="text-[#D99C52] text-lg">☀️</span>
-                            <span className="text-[12px] font-bold text-[#4D3A29]">成长币: {coins.toFixed(0)}</span>
+        <div className="space-y-12 animate-in fade-in zoom-in-95 duration-1000 pb-28">
+            {/* Pastel Profile Header */}
+            <div className="kawaii-card bg-white/40 p-10 flex items-center justify-between border-4 border-white shadow-2xl animate-float-kawaii">
+                <div className="flex items-center gap-8">
+                    <div className="w-24 h-24 rounded-[48px] overflow-hidden border-8 border-white shadow-2xl">
+                        <img src={childProfile.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-5xl font-candy text-[#5D4D7A] tracking-tight">{childProfile.name}的梦想岛</h1>
+                        <div className="flex items-center gap-4">
+                            <div className="bg-white/60 px-6 py-3 rounded-full flex items-center gap-4 shadow-sm border-4 border-white/50">
+                                <span className="text-2xl">🍭</span>
+                                <span className="text-3xl font-candy text-[#E0C3FC]">{coins.toFixed(0)}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="w-20 h-20 bg-white rounded-[32px] p-1 shadow-2xl border-4 border-white overflow-hidden transform rotate-3">
-                    <img src={childProfile.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full" />
                 </div>
             </div>
 
             {/* Core Modules Matrix - Warm Colors */}
             <div className="grid grid-cols-3 gap-5">
                 {[
-                    { id: 'tools', icon: Timer, label: '效率工具', color: '#D99C52', bg: '#D99C52/10', rot: '-rotate-6' },
-                    { id: 'plan', icon: LayoutGrid, label: '规划矩阵', color: '#8DB580', bg: '#8DB580/15', rot: 'rotate-3' },
-                    { id: 'medals', icon: ShieldCheck, label: '成就中心', color: '#E29578', bg: '#E29578/15', rot: '-rotate-3' }
+                    { id: 'tools', icon: Timer, label: '效率工具', color: '#E0C3FC', bg: '#E0C3FC20', rot: '-rotate-6' },
+                    { id: 'plan', icon: LayoutGrid, label: '规划矩阵', color: '#B5FFFC', bg: '#B5FFFC30', rot: 'rotate-3' },
+                    { id: 'medals', icon: ShieldCheck, label: '成就中心', color: '#FFDEE9', bg: '#FFDEE940', rot: '-rotate-3' }
                 ].map((mod, i) => (
                     <div
                         key={i}
                         onClick={() => mod.id === 'plan' && setActiveTab('plan')}
-                        className={`kawaii-card p-5 aspect-square flex flex-col items-center justify-center gap-4 border-none group cursor-pointer hover:scale-105 transition-all shadow-lg active:scale-95`}
-                        style={{ backgroundColor: i === 0 ? '#FDF1E1' : i === 1 ? '#F0F7EE' : '#FAF0ED' }}
+                        className={`kawaii-card p-8 aspect-square flex flex-col items-center justify-center gap-6 border-white group cursor-pointer hover:scale-110 active:scale-90 transition-all shadow-[0_20px_45px_rgba(93,77,122,0.1)]`}
+                        style={{ backgroundColor: mod.bg.replace('/20', '20').replace('/25', '30').replace('/15', '40').replace('/10', '20') }}
                     >
-                        <div className={`w-14 h-14 bg-white rounded-[22px] shadow-sm flex items-center justify-center transition-all group-hover:rotate-0 ${mod.rot}`}>
-                            <mod.icon size={28} style={{ color: mod.color }} strokeWidth={2.5} />
+                        <div className={`w-20 h-20 bg-white rounded-[32px] shadow-sm flex items-center justify-center transition-all group-hover:rotate-0 ${mod.rot} border-4 border-white/50`}>
+                            <mod.icon size={36} style={{ color: mod.color }} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[12px] font-bold text-[#4D3A29] tracking-tight">{mod.label}</span>
+                        <span className="text-base font-bold text-[#5D4D7A] tracking-wider">{mod.label}</span>
                     </div>
                 ))}
             </div>
 
             {/* Sub Tools Row - Soft & Healing */}
-            <div className="kawaii-card bg-white/70 p-8 flex justify-between items-center border-none shadow-xl">
+            <div className="kawaii-card bg-white/70 p-10 flex justify-between items-center border-white shadow-2xl backdrop-blur-md">
                 {[
-                    { icon: Smile, label: '沟通' },
-                    { icon: Gift, label: '奖励' },
-                    { icon: Star, label: '商场' },
-                    { icon: Clock, label: '计时' },
+                    { icon: Smile, label: '沟通', color: '#E0C3FC' },
+                    { icon: Gift, label: '奖励', color: '#FFDEE9' },
+                    { icon: Star, label: '商场', color: '#B5FFFC' },
+                    { icon: Clock, label: '计时', color: '#FFF9C4' },
                 ].map((tool, i) => (
-                    <div key={i} className="flex flex-col items-center gap-3 group cursor-pointer">
-                        <div className="w-11 h-11 bg-[#FFFDF2] rounded-2xl flex items-center justify-center text-[#4D3A29]/30 group-hover:text-[#D99C52] group-hover:bg-white transition-all shadow-inner">
-                            <tool.icon size={22} strokeWidth={2.5} />
+                    <div key={i} className="flex flex-col items-center gap-4 group cursor-pointer">
+                        <div className="w-14 h-14 bg-white rounded-[24px] flex items-center justify-center text-[#5D4D7A]/20 group-hover:shadow-lg transition-all border-4 border-transparent group-hover:border-white shadow-inner">
+                            <tool.icon size={28} style={{ color: tool.color }} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[9px] font-bold text-[#4D3A29] opacity-40 uppercase tracking-widest">{tool.label}</span>
+                        <span className="text-[10px] font-bold text-[#5D4D7A] opacity-40 uppercase tracking-[0.3em]">{tool.label}</span>
                     </div>
                 ))}
             </div>
 
             {/* Mini Tasks Section */}
             <div className="space-y-6">
-                <div className="flex justify-between items-center px-2">
-                    <h3 className="text-2xl font-candy text-[#4D3A29]">今日自律挑战</h3>
-                    <div className="w-10 h-10 rounded-[15px] bg-[#D99C52]/10 flex items-center justify-center text-[#D99C52] shadow-sm">
-                        <Plus size={20} strokeWidth={3} />
+                <div className="flex justify-between items-center px-4">
+                    <h3 className="text-4xl font-candy text-[#5D4D7A]">梦想挑战</h3>
+                    <div className="w-12 h-12 rounded-[22px] bg-white flex items-center justify-center text-[#E0C3FC] shadow-xl border-4 border-white animate-float-kawaii">
+                        <Plus size={24} strokeWidth={4} />
                     </div>
                 </div>
                 <div className="space-y-4">
                     {tasks.slice(0, 3).map(task => (
-                        <div key={task.id} className="kawaii-card bg-white p-6 flex justify-between items-center border-none shadow-md group hover:shadow-xl transition-all">
-                            <div className="flex items-center gap-5">
-                                <div className="w-12 h-12 bg-[#FFFDF2] rounded-[22px] flex items-center justify-center border-2 border-[#D99C52]/5 shadow-inner">
-                                    <Clock size={20} className="text-[#D99C52] opacity-40" />
+                        <div key={task.id} className="kawaii-card bg-white p-8 flex justify-between items-center border-white shadow-xl group hover:translate-x-3 transition-all relative overflow-hidden">
+                            <div className="flex items-center gap-8">
+                                <div className="w-16 h-16 bg-[#B5FFFC]/20 rounded-[28px] flex items-center justify-center border-4 border-white shadow-inner">
+                                    <Clock size={28} className="text-[#B5FFFC]" />
                                 </div>
                                 <div>
-                                    <div className="text-base font-bold text-[#4D3A29]">{task.title}</div>
-                                    <div className="text-[10px] font-bold text-[#D99C52] opacity-50 tracking-wider mt-0.5 uppercase">{task.timeSlot}</div>
+                                    <div className="text-xl font-bold text-[#5D4D7A]">{task.title}</div>
+                                    <div className="text-[11px] font-bold text-[#E0C3FC] tracking-[0.2em] mt-2 uppercase">{task.timeSlot}</div>
                                 </div>
                             </div>
-                            <button className="px-6 py-2 bg-[#8DB580] text-white text-xs font-bold rounded-full shadow-lg hover:bg-[#8DB580]/90 active:scale-90 transition-all">提交</button>
+                            <button className="px-10 py-3 bg-gradient-to-r from-[#E0C3FC] to-[#B5FFFC] text-white text-sm font-bold rounded-full shadow-[0_10px_25px_rgba(224,195,252,0.3)] hover:scale-105 active:scale-95 transition-all">发射</button>
                         </div>
                     ))}
                     {tasks.length === 0 && (
@@ -268,33 +270,33 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {activeTab === 'home' && <DashboardView />}
                 {activeTab === 'plan' && <PlannerView />}
                 {activeTab === 'rewards' && (
-                    <div className="space-y-10 animate-in slide-in-from-right-10 duration-700 pb-20">
-                        <div className="flex justify-between items-end px-2">
+                    <div className="space-y-12 animate-in slide-in-from-right-10 duration-1000 pb-20">
+                        <div className="flex justify-between items-end px-4">
                             <div>
-                                <h1 className="text-4xl font-candy text-[#4D3A29]">成长银行</h1>
-                                <p className="text-[11px] font-bold text-[#D99C52] opacity-60 uppercase tracking-[0.3em] mt-1 leading-none">Sweet Coin Market</p>
+                                <h1 className="text-5xl font-candy text-[#5D4D7A]">梦想宝库</h1>
+                                <p className="text-[12px] font-bold text-[#A2D2FF] opacity-60 uppercase tracking-[0.4em] mt-2 leading-none">Magic Reward Hub</p>
                             </div>
-                            <div className="bg-white/80 px-5 py-2.5 rounded-[22px] flex items-center gap-3 shadow-xl border-2 border-white">
-                                <span className="text-xl">☀️</span>
-                                <span className="text-sm font-bold text-[#4D3A29]">{coins.toFixed(0)}</span>
+                            <div className="bg-white/80 px-8 py-4 rounded-[32px] flex items-center gap-4 shadow-2xl border-4 border-white">
+                                <span className="text-2xl">🍭</span>
+                                <span className="text-2xl font-candy text-[#5D4D7A]">{coins.toFixed(0)}</span>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-8">
                             {[
-                                { name: '周末电影之夜', cost: 500, icon: '🍿', color: '#D99C52' },
-                                { name: '额外游戏时间', cost: 200, icon: '🎮', color: '#8DB580' },
-                                { name: '自选美味晚餐', cost: 300, icon: '🍕', color: '#E29578' },
-                                { name: '睡前故事延长', cost: 100, icon: '📚', color: '#FDF1E1' }
+                                { name: '周末电影之夜', cost: 500, icon: '🍿', color: '#E0C3FC' },
+                                { name: '额外游戏时间', cost: 200, icon: '🎮', color: '#B5FFFC' },
+                                { name: '自选美味晚餐', cost: 300, icon: '🍕', color: '#FFDEE9' },
+                                { name: '睡前故事延长', cost: 100, icon: '📚', color: '#FFF9C4' }
                             ].map((reward, i) => (
-                                <div key={i} className="kawaii-card bg-white p-6 flex flex-col items-center gap-4 relative group border-none shadow-xl hover:translate-y-[-5px] transition-all">
-                                    <div className="w-16 h-16 bg-[#FFFDF2] rounded-[24px] flex items-center justify-center shadow-inner border border-[#D99C52]/5 group-hover:scale-110 transition-all">
-                                        <span className="text-4xl">{reward.icon}</span>
+                                <div key={i} className="kawaii-card bg-white p-8 flex flex-col items-center gap-6 relative group border-white shadow-2xl hover:translate-y-[-10px] transition-all">
+                                    <div className="w-20 h-20 bg-white rounded-[35px] flex items-center justify-center shadow-inner border-4 border-transparent group-hover:border-white transition-all group-hover:scale-110">
+                                        <span className="text-5xl">{reward.icon}</span>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="text-sm font-bold text-[#4D3A29]">{reward.name}</div>
-                                        <button className={`mt-4 px-5 py-2 rounded-full text-[10px] font-bold transition-all shadow-lg ${coins >= reward.cost ? 'bg-[#D99C52] text-white' : 'bg-[#4D3A29]/5 text-[#4D3A29] opacity-20'}`}>
-                                            {reward.cost} ☀️ 兑换
+                                    <div className="text-center space-y-4">
+                                        <div className="text-base font-bold text-[#5D4D7A]">{reward.name}</div>
+                                        <button className={`w-full py-3 rounded-full text-[11px] font-bold transition-all shadow-xl border-4 border-white ${coins >= reward.cost ? 'bg-[#E0C3FC] text-white' : 'bg-gray-100/50 text-gray-300 opacity-50 cursor-not-allowed'}`}>
+                                            {reward.cost} 🍭 兑换
                                         </button>
                                     </div>
                                 </div>

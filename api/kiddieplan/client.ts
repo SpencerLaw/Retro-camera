@@ -22,6 +22,7 @@ export default async function handler(
         const today = new Date().toISOString().split('T')[0];
 
         if (action === 'get_today_data') {
+            const profile: any = await kv.get(`kp:child:${childId}`) || {};
             const tasks = await kv.get(`kp:child:${childId}:tasks:${today}`) || [];
             const checkins: string[] = await kv.get(`kp:child:${childId}:checkins:${today}`) || [];
             const rewards = await kv.get(`kp:child:${childId}:rewards`) || [];
@@ -30,7 +31,17 @@ export default async function handler(
 
             return response.status(200).json({
                 success: true,
-                data: { tasks, checkins, rewards, streak, points }
+                data: {
+                    tasks,
+                    checkins,
+                    rewards,
+                    streak,
+                    points,
+                    profile: {
+                        name: profile.name || '宝贝',
+                        avatar: profile.avatar || ''
+                    }
+                }
             });
         }
 

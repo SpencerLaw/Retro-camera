@@ -14,6 +14,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [coins, setCoins] = useState(0);
     const [activeTab, setActiveTab] = useState<AppTab>('home');
     const [loading, setLoading] = useState(true);
+    const [childProfile, setChildProfile] = useState<{ name: string; avatar: string }>({ name: '宝贝', avatar: '' });
 
     useEffect(() => {
         fetchTodayData();
@@ -33,6 +34,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 setCheckins(result.data.checkins || []);
                 setStreak(result.data.streak || 0);
                 setCoins(result.data.points || 0);
+                if (result.data.profile) setChildProfile(result.data.profile);
             }
         } catch (err) {
             console.error('Fetch failed');
@@ -59,14 +61,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     };
 
     if (loading) return (
-        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-8 bg-[#FFF9F3]">
+        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-8 bg-[#FFFDF2]">
             <div className="relative">
-                <div className="w-20 h-20 bg-[#FF8C69]/20 rounded-full animate-ping opacity-30"></div>
-                <div className="w-20 h-20 bg-[#FF8C69] rounded-[24px] absolute inset-0 animate-bounce flex items-center justify-center shadow-xl">
+                <div className="w-20 h-20 bg-[#D99C52]/10 rounded-full animate-ping opacity-30"></div>
+                <div className="w-20 h-20 bg-[#D99C52] rounded-[24px] absolute inset-0 animate-bounce flex items-center justify-center shadow-xl">
                     <Sparkles className="text-white" size={36} />
                 </div>
             </div>
-            <p className="text-2xl text-[#5D4037] opacity-40">正在加载你的星梦基地...</p>
+            <p className="text-2xl text-[#4D3A29] opacity-40">正在加载你的星梦基地...</p>
         </div>
     );
 
@@ -77,37 +79,37 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             {/* Warm Profile Header */}
             <div className="flex items-center justify-between">
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-candy text-[#5D4037]">{token.substring(0, 4)}的小窝</h1>
+                    <h1 className="text-4xl font-candy text-[#4D3A29]">{childProfile.name}的小窝</h1>
                     <div className="flex items-center gap-3">
-                        <div className="bg-white/80 px-5 py-2 rounded-full flex items-center gap-3 shadow-sm border border-[#FF8C69]/5">
-                            <span className="text-[#FF8C69] text-lg">☀️</span>
-                            <span className="text-[12px] font-bold text-[#5D4037]">成长币: {coins.toFixed(0)}</span>
+                        <div className="bg-white/80 px-5 py-2 rounded-full flex items-center gap-3 shadow-sm border border-[#D99C52]/5">
+                            <span className="text-[#D99C52] text-lg">☀️</span>
+                            <span className="text-[12px] font-bold text-[#4D3A29]">成长币: {coins.toFixed(0)}</span>
                         </div>
                     </div>
                 </div>
                 <div className="w-20 h-20 bg-white rounded-[32px] p-1 shadow-2xl border-4 border-white overflow-hidden transform rotate-3">
-                    <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full" />
+                    <img src={childProfile.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full" />
                 </div>
             </div>
 
             {/* Core Modules Matrix - Warm Colors */}
             <div className="grid grid-cols-3 gap-5">
                 {[
-                    { id: 'tools', icon: Timer, label: '效率工具', color: '#FF8C69', bg: '#FF8C69/10', rot: '-rotate-6' },
-                    { id: 'plan', icon: LayoutGrid, label: '规划矩阵', color: '#7BB0A6', bg: '#7BB0A6/15', rot: 'rotate-3' },
-                    { id: 'medals', icon: ShieldCheck, label: '成就中心', color: '#FFB3A7', bg: '#FFB3A7/15', rot: '-rotate-3', badge: '未打卡' }
+                    { id: 'tools', icon: Timer, label: '效率工具', color: '#D99C52', bg: '#D99C52/10', rot: '-rotate-6' },
+                    { id: 'plan', icon: LayoutGrid, label: '规划矩阵', color: '#8DB580', bg: '#8DB580/15', rot: 'rotate-3' },
+                    { id: 'medals', icon: ShieldCheck, label: '成就中心', color: '#E29578', bg: '#E29578/15', rot: '-rotate-3' }
                 ].map((mod, i) => (
                     <div
                         key={i}
                         onClick={() => mod.id === 'plan' && setActiveTab('plan')}
                         className={`kawaii-card p-5 aspect-square flex flex-col items-center justify-center gap-4 border-none group cursor-pointer hover:scale-105 transition-all shadow-lg active:scale-95`}
-                        style={{ backgroundColor: `rgba(${i === 0 ? '255,140,105' : i === 1 ? '123,176,166' : '255,179,167'}, 0.1)` }}
+                        style={{ backgroundColor: i === 0 ? '#FDF1E1' : i === 1 ? '#F0F7EE' : '#FAF0ED' }}
                     >
-                        {mod.badge && <div className="absolute -top-2 -right-1 bg-[#FF8C69] text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-md">{mod.badge}</div>}
+                        {mod.badge && <div className="absolute -top-2 -right-1 bg-[#D99C52] text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-md">{mod.badge}</div>}
                         <div className={`w-14 h-14 bg-white rounded-[22px] shadow-sm flex items-center justify-center transition-all group-hover:rotate-0 ${mod.rot}`}>
                             <mod.icon size={28} style={{ color: mod.color }} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[11px] font-bold text-[#5D4037] tracking-tight">{mod.label}</span>
+                        <span className="text-[12px] font-bold text-[#4D3A29] tracking-tight">{mod.label}</span>
                     </div>
                 ))}
             </div>
@@ -121,10 +123,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     { icon: Clock, label: '计时' },
                 ].map((tool, i) => (
                     <div key={i} className="flex flex-col items-center gap-3 group cursor-pointer">
-                        <div className="w-11 h-11 bg-[#FFF9F3] rounded-2xl flex items-center justify-center text-[#5D4037]/30 group-hover:text-[#FF8C69] group-hover:bg-white transition-all shadow-inner">
+                        <div className="w-11 h-11 bg-[#FFFDF2] rounded-2xl flex items-center justify-center text-[#4D3A29]/30 group-hover:text-[#D99C52] group-hover:bg-white transition-all shadow-inner">
                             <tool.icon size={22} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[9px] font-bold text-[#5D4037] opacity-40 uppercase tracking-widest">{tool.label}</span>
+                        <span className="text-[9px] font-bold text-[#4D3A29] opacity-40 uppercase tracking-widest">{tool.label}</span>
                     </div>
                 ))}
             </div>
@@ -132,8 +134,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             {/* Mini Tasks Section */}
             <div className="space-y-6">
                 <div className="flex justify-between items-center px-2">
-                    <h3 className="text-2xl font-candy text-[#5D4037]">今日自律挑战</h3>
-                    <div className="w-10 h-10 rounded-[15px] bg-[#FF8C69]/10 flex items-center justify-center text-[#FF8C69] shadow-sm">
+                    <h3 className="text-2xl font-candy text-[#4D3A29]">今日自律挑战</h3>
+                    <div className="w-10 h-10 rounded-[15px] bg-[#D99C52]/10 flex items-center justify-center text-[#D99C52] shadow-sm">
                         <Plus size={20} strokeWidth={3} />
                     </div>
                 </div>
@@ -141,20 +143,20 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     {tasks.slice(0, 3).map(task => (
                         <div key={task.id} className="kawaii-card bg-white p-6 flex justify-between items-center border-none shadow-md group hover:shadow-xl transition-all">
                             <div className="flex items-center gap-5">
-                                <div className="w-12 h-12 bg-[#FFF9F3] rounded-[22px] flex items-center justify-center border-2 border-[#FF8C69]/5 shadow-inner">
-                                    <Clock size={20} className="text-[#FF8C69] opacity-40" />
+                                <div className="w-12 h-12 bg-[#FFFDF2] rounded-[22px] flex items-center justify-center border-2 border-[#D99C52]/5 shadow-inner">
+                                    <Clock size={20} className="text-[#D99C52] opacity-40" />
                                 </div>
                                 <div>
-                                    <div className="text-base font-bold text-[#5D4037]">{task.title}</div>
-                                    <div className="text-[10px] font-bold text-[#FF8C69] opacity-50 tracking-wider mt-0.5 uppercase">{task.timeSlot}</div>
+                                    <div className="text-base font-bold text-[#4D3A29]">{task.title}</div>
+                                    <div className="text-[10px] font-bold text-[#D99C52] opacity-50 tracking-wider mt-0.5 uppercase">{task.timeSlot}</div>
                                 </div>
                             </div>
-                            <button className="px-6 py-2 bg-[#7BB0A6] text-white text-xs font-bold rounded-full shadow-lg hover:bg-[#7BB0A6]/90 active:scale-90 transition-all">提交</button>
+                            <button className="px-6 py-2 bg-[#8DB580] text-white text-xs font-bold rounded-full shadow-lg hover:bg-[#8DB580]/90 active:scale-90 transition-all">提交</button>
                         </div>
                     ))}
                     {tasks.length === 0 && (
                         <div className="text-center py-16 bg-white/30 rounded-[45px] border-4 border-dashed border-white/60">
-                            <p className="text-sm text-[#5D4037] opacity-20 font-bold italic">还没收到家长的密令哦 ~</p>
+                            <p className="text-sm text-[#4D3A29] opacity-20 font-bold italic">还没收到家长的密令哦 ~</p>
                         </div>
                     )}
                 </div>
@@ -171,7 +173,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {/* View Tabs - Warm Selection */}
                 <div className="flex bg-white/60 p-1.5 rounded-[22px] gap-2 shadow-inner">
                     {['今日安排', '本周规划', '成就记录'].map((t, i) => (
-                        <button key={i} className={`flex-1 py-3 text-[11px] font-bold rounded-[18px] transition-all ${i === 1 ? 'bg-[#FF8C69] text-white shadow-lg' : 'text-[#5D4037] opacity-40'}`}>
+                        <button key={i} className={`flex-1 py-3 text-[11px] font-bold rounded-[18px] transition-all ${i === 1 ? 'bg-[#D99C52] text-white shadow-lg' : 'text-[#4D3A29] opacity-40'}`}>
                             {t}
                         </button>
                     ))}
@@ -179,11 +181,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
                 {/* 7x5 Grid Overhaul */}
                 <div className="kawaii-card bg-white p-6 overflow-hidden border-none shadow-2xl relative">
-                    <div className="flex border-b border-[#5D4037]/5 pb-4 mb-4">
+                    <div className="flex border-b border-[#4D3A29]/5 pb-4 mb-4">
                         <div className="w-14 shrink-0"></div>
                         <div className="flex-1 flex justify-around">
                             {days.map(d => (
-                                <span key={d} className="text-[10px] font-bold text-[#5D4037] opacity-40">{d}</span>
+                                <span key={d} className="text-[10px] font-bold text-[#4D3A29] opacity-40">{d}</span>
                             ))}
                         </div>
                     </div>
@@ -192,12 +194,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         {timeSlots.map(slot => (
                             <div key={slot} className="flex gap-4 items-center">
                                 <div className="w-14 shrink-0 flex flex-col items-center justify-center">
-                                    <div className="text-[11px] font-bold text-[#5D4037]">{slot}</div>
-                                    <div className="text-[7px] font-bold text-[#FF8C69]/40 uppercase tracking-widest mt-0.5">Time</div>
+                                    <div className="text-[11px] font-bold text-[#4D3A29]">{slot}</div>
+                                    <div className="text-[7px] font-bold text-[#D99C52]/40 uppercase tracking-widest mt-0.5">Time</div>
                                 </div>
                                 <div className="flex-1 grid grid-cols-7 gap-2">
                                     {days.map((_, i) => (
-                                        <div key={i} className={`aspect-[4/5] rounded-xl transition-all ${i % 2 === 0 ? 'bg-[#FFEEAD]/20' : 'bg-[#FFB3A7]/10'} flex items-center justify-center border-2 border-transparent hover:border-[#FF8C69]/10`}>
+                                        <div key={i} className={`aspect-[4/5] rounded-xl transition-all ${i % 2 === 0 ? 'bg-[#FDF1E1]/50' : 'bg-[#FAF0ED]/50'} flex items-center justify-center border-2 border-transparent hover:border-[#D99C52]/10`}>
                                             <div className="w-2 h-2 rounded-full bg-white shadow-inner"></div>
                                         </div>
                                     ))}
@@ -207,8 +209,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     </div>
                 </div>
 
-                {/* Countdown Card - Warm Pink */}
-                <div className="bg-gradient-to-r from-[#FF8C69] to-[#FFB3A7] p-6 rounded-[35px] flex items-center justify-between text-white shadow-[0_15px_35px_rgba(255,140,105,0.3)]">
+                {/* Countdown Card - Honey Wood Style */}
+                <div className="bg-gradient-to-r from-[#D99C52] to-[#E29578] p-8 rounded-[40px] flex items-center justify-between text-white shadow-[0_15px_35px_rgba(217,156,82,0.3)] border-b-4 border-black/10">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center animate-pulse border-2 border-white/30">
                             <Timer size={24} strokeWidth={2.5} />
@@ -225,8 +227,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
                 {/* Task Checklist - Warm Detailed Cards */}
                 <div className="space-y-6">
-                    <h3 className="text-2xl font-candy text-[#5D4037] px-2 flex items-center gap-3">
-                        <ListTodo className="text-[#FF8C69]" size={24} /> 今日详情 ({checkins.length}/{tasks.length})
+                    <h3 className="text-2xl font-candy text-[#4D3A29] px-2 flex items-center gap-3">
+                        <ListTodo className="text-[#D99C52]" size={24} /> 今日详情 ({checkins.length}/{tasks.length})
                     </h3>
                     <div className="space-y-4">
                         {tasks.map(task => {
@@ -235,19 +237,19 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                 <div
                                     key={task.id}
                                     onClick={() => handleToggleTask(task.id)}
-                                    className={`kawaii-card p-5 flex justify-between items-center border-none transition-all duration-500 ${isCompleted ? 'bg-[#FFF9F3]/80 opacity-40 grayscale-[0.3]' : 'bg-white shadow-lg'}`}
+                                    className={`kawaii-card p-5 flex justify-between items-center border-none transition-all duration-500 ${isCompleted ? 'bg-[#FFFDF2]/80 opacity-40 grayscale-[0.3]' : 'bg-white shadow-lg'}`}
                                 >
                                     <div className="flex items-center gap-5">
-                                        <div className={`w-12 h-12 rounded-[22px] flex items-center justify-center transition-all ${isCompleted ? 'bg-[#7BB0A6]/20' : 'bg-[#FFF9F3]'}`}>
-                                            {isCompleted ? <CheckCircle2 size={28} className="text-[#7BB0A6]" /> : <div className="w-3 h-3 rounded-full bg-[#FF8C69] animate-pulse"></div>}
+                                        <div className={`w-12 h-12 rounded-[22px] flex items-center justify-center transition-all ${isCompleted ? 'bg-[#8DB580]/20' : 'bg-[#FFFDF2]'}`}>
+                                            {isCompleted ? <CheckCircle2 size={28} className="text-[#8DB580]" /> : <div className="w-3 h-3 rounded-full bg-[#D99C52] animate-pulse"></div>}
                                         </div>
                                         <div>
-                                            <div className={`text-base font-bold ${isCompleted ? 'line-through text-[#5D4037]' : 'text-[#5D4037]'}`}>{task.title}</div>
-                                            <div className="text-[11px] font-bold text-[#FF8C69] opacity-50 tracking-wide mt-0.5">{task.timeSlot}</div>
+                                            <div className={`text-base font-bold ${isCompleted ? 'line-through text-[#4D3A29]' : 'text-[#4D3A29]'}`}>{task.title}</div>
+                                            <div className="text-[11px] font-bold text-[#D99C52] opacity-50 tracking-wide mt-0.5">{task.timeSlot}</div>
                                         </div>
                                     </div>
                                     {!isCompleted && (
-                                        <div className="bg-[#FFEEAD] px-3 py-1.5 rounded-full text-[10px] font-bold text-[#FF8C69] shadow-sm flex items-center gap-1">
+                                        <div className="bg-[#FDF1E1] px-3 py-1.5 rounded-full text-[10px] font-bold text-[#D99C52] shadow-sm flex items-center gap-1">
                                             +{task.points} ☀️
                                         </div>
                                     )}
@@ -261,7 +263,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     };
 
     return (
-        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#FFF9F3]/30">
+        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#FFFDF2]/30">
             {/* Main Content Area */}
             <main className="flex-1 px-8 pt-10 pb-36 overflow-y-auto no-scrollbar">
                 {activeTab === 'home' && <DashboardView />}
@@ -270,29 +272,29 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <div className="space-y-10 animate-in slide-in-from-right-10 duration-700 pb-20">
                         <div className="flex justify-between items-end px-2">
                             <div>
-                                <h1 className="text-4xl font-candy text-[#5D4037]">成长银行</h1>
-                                <p className="text-[11px] font-bold text-[#FF8C69] opacity-60 uppercase tracking-[0.3em] mt-1 leading-none">Sweet Coin Market</p>
+                                <h1 className="text-4xl font-candy text-[#4D3A29]">成长银行</h1>
+                                <p className="text-[11px] font-bold text-[#D99C52] opacity-60 uppercase tracking-[0.3em] mt-1 leading-none">Sweet Coin Market</p>
                             </div>
                             <div className="bg-white/80 px-5 py-2.5 rounded-[22px] flex items-center gap-3 shadow-xl border-2 border-white">
                                 <span className="text-xl">☀️</span>
-                                <span className="text-sm font-bold text-[#5D4037]">{coins.toFixed(0)}</span>
+                                <span className="text-sm font-bold text-[#4D3A29]">{coins.toFixed(0)}</span>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
                             {[
-                                { name: '周末电影之夜', cost: 500, icon: '🎬', color: '#FF8C69' },
-                                { name: '额外游戏时间', cost: 200, icon: '🎮', color: '#7BB0A6' },
-                                { name: '自选美味晚餐', cost: 300, icon: '🍕', color: '#FFB3A7' },
-                                { name: '睡前故事延长', cost: 100, icon: '📚', color: '#FFEEAD' }
+                                { name: '周末电影之夜', cost: 500, icon: '🍿', color: '#D99C52' },
+                                { name: '额外游戏时间', cost: 200, icon: '🎮', color: '#8DB580' },
+                                { name: '自选美味晚餐', cost: 300, icon: '🍕', color: '#E29578' },
+                                { name: '睡前故事延长', cost: 100, icon: '📚', color: '#FDF1E1' }
                             ].map((reward, i) => (
                                 <div key={i} className="kawaii-card bg-white p-6 flex flex-col items-center gap-4 relative group border-none shadow-xl hover:translate-y-[-5px] transition-all">
-                                    <div className="w-16 h-16 bg-[#FFF9F3] rounded-[24px] flex items-center justify-center shadow-inner border border-[#FF8C69]/5 group-hover:scale-110 transition-all">
+                                    <div className="w-16 h-16 bg-[#FFFDF2] rounded-[24px] flex items-center justify-center shadow-inner border border-[#D99C52]/5 group-hover:scale-110 transition-all">
                                         <span className="text-4xl">{reward.icon}</span>
                                     </div>
                                     <div className="text-center">
-                                        <div className="text-sm font-bold text-[#5D4037]">{reward.name}</div>
-                                        <button className={`mt-4 px-5 py-2 rounded-full text-[10px] font-bold transition-all shadow-lg ${coins >= reward.cost ? 'bg-[#FF8C69] text-white' : 'bg-[#5D4037]/5 text-[#5D4037] opacity-20'}`}>
+                                        <div className="text-sm font-bold text-[#4D3A29]">{reward.name}</div>
+                                        <button className={`mt-4 px-5 py-2 rounded-full text-[10px] font-bold transition-all shadow-lg ${coins >= reward.cost ? 'bg-[#D99C52] text-white' : 'bg-[#4D3A29]/5 text-[#4D3A29] opacity-20'}`}>
                                             {reward.cost} ☀️ 兑换
                                         </button>
                                     </div>
@@ -320,22 +322,22 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
                         <div className="grid grid-cols-2 gap-6">
                             <div className="kawaii-card bg-white p-8 flex flex-col items-center gap-4 border-none shadow-xl">
-                                <div className="w-16 h-16 bg-[#FF8C69]/10 rounded-[24px] flex items-center justify-center text-5xl">🏆</div>
+                                <div className="w-16 h-16 bg-[#D99C52]/10 rounded-[24px] flex items-center justify-center text-5xl">🏆</div>
                                 <div className="text-center">
-                                    <div className="text-sm font-bold text-[#5D4037]">任务之星</div>
-                                    <div className="text-[9px] font-bold text-[#5D4037] opacity-30 mt-1 uppercase tracking-tighter">100+ Tasks Done</div>
+                                    <div className="text-sm font-bold text-[#4D3A29]">任务之星</div>
+                                    <div className="text-[9px] font-bold text-[#4D3A29] opacity-30 mt-1 uppercase tracking-tighter">100+ Tasks Done</div>
                                 </div>
                             </div>
                             <div className="kawaii-card bg-white p-8 flex flex-col items-center gap-4 border-none shadow-xl opacity-30">
                                 <div className="w-16 h-16 bg-gray-100 rounded-[24px] flex items-center justify-center text-5xl grayscale">💎</div>
                                 <div className="text-center">
-                                    <div className="text-sm font-bold text-[#5D4037] opacity-60">自律大师</div>
-                                    <div className="text-[9px] font-bold text-[#5D4037] opacity-30 mt-1 uppercase tracking-tighter">30 Days Slam</div>
+                                    <div className="text-sm font-bold text-[#4D3A29] opacity-60">自律大师</div>
+                                    <div className="text-[9px] font-bold text-[#4D3A29] opacity-30 mt-1 uppercase tracking-tighter">30 Days Slam</div>
                                 </div>
                             </div>
                         </div>
 
-                        <button onClick={onLogout} className="w-full py-5 rounded-[28px] bg-white text-[#FF8C69] font-bold text-xs flex items-center justify-center gap-3 shadow-md hover:bg-[#FF8C69] hover:text-white transition-all border-none">
+                        <button onClick={onLogout} className="w-full py-5 rounded-[28px] bg-white text-[#D99C52] font-bold text-xs flex items-center justify-center gap-3 shadow-md hover:bg-[#D99C52] hover:text-white transition-all border-none">
                             <LogOut size={18} /> 登出星梦之旅
                         </button>
                     </div>
@@ -353,17 +355,17 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as AppTab)}
-                        className={`flex flex-col items-center gap-2 transition-all duration-300 relative ${activeTab === tab.id ? 'text-[#FF8C69] scale-110' : 'text-[#5D4037] opacity-30 group hover:opacity-100'}`}
+                        className={`flex flex-col items-center gap-2 transition-all duration-300 relative ${activeTab === tab.id ? 'text-[#D99C52] scale-110' : 'text-[#4D3A29] opacity-30 group hover:opacity-100'}`}
                     >
                         <tab.icon size={26} strokeWidth={activeTab === tab.id ? 3 : 2} />
                         <span className="text-[9px] font-bold uppercase tracking-[0.2em]">{tab.label}</span>
-                        {activeTab === tab.id && <div className="absolute -bottom-2 w-1 h-1 bg-[#FF8C69] rounded-full"></div>}
+                        {activeTab === tab.id && <div className="absolute -bottom-2 w-1 h-1 bg-[#D99C52] rounded-full"></div>}
                     </button>
                 ))}
 
                 {/* Floating Action Button Overhaul */}
                 <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 group">
-                    <div className="w-16 h-16 bg-gradient-to-tr from-[#FF8C69] to-[#FFB3A7] rounded-full shadow-[0_10px_30px_rgba(255,140,105,0.4)] flex items-center justify-center text-white border-[6px] border-[#FFF9F3] active:scale-90 transition-all cursor-pointer group-hover:scale-110">
+                    <div className="w-16 h-16 bg-gradient-to-tr from-[#D99C52] to-[#E29578] rounded-full shadow-[0_10px_30px_rgba(217,156,82,0.4)] flex items-center justify-center text-white border-[6px] border-[#FFFDF2] active:scale-90 transition-all cursor-pointer group-hover:scale-110">
                         <Plus size={32} strokeWidth={4} />
                     </div>
                 </div>

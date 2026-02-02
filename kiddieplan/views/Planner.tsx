@@ -34,7 +34,7 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
               </div>
               <div>
                 <h3 className="font-candy text-4xl text-[#5D4D7A] tracking-tight">七日梦想航志</h3>
-                <p className="text-[11px] font-bold text-[#A2D2FF] opacity-80 uppercase tracking-[0.4em]">Weekly Magic Tracker</p>
+                <p className="text-[11px] font-bold text-[#FFDEE9] opacity-80 uppercase tracking-[0.4em]">Weekly Magic Tracker</p>
               </div>
             </div>
 
@@ -74,7 +74,7 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
 
             <div className="space-y-12 relative">
               {[
-                { title: '阶段一：奇才萌动', detail: '完成所有寒假作业第一阶段', icon: <Flag size={18} />, color: 'bg-[#FFF9C4]' },
+                { title: '阶段一：奇才萌动', detail: '完成所有寒假作业第一阶段', icon: <Flag size={18} />, color: '#FFF9C4' },
                 { title: '阶段二：梦想起飞', detail: '每日增加30分钟英语听力', icon: <Sparkles size={18} />, color: '#FFDEE9' },
                 { title: '阶段三：全能旅人', detail: '如果坚持打卡，周末去游乐园！', icon: <Gift size={18} />, color: '#B5FFFC' },
               ].map((milestone, idx) => (
@@ -84,7 +84,7 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
                   </div>
                   <div className="pt-3 space-y-1">
                     <h4 className="font-candy text-2xl text-[#5D4D7A]">{milestone.title}</h4>
-                    <p className="text-[11px] text-[#A2D2FF] font-bold leading-relaxed uppercase tracking-wider">{milestone.detail}</p>
+                    <p className="text-[11px] text-[#E0C3FC] font-bold leading-relaxed uppercase tracking-wider">{milestone.detail}</p>
                   </div>
                 </div>
               ))}

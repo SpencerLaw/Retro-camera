@@ -75,7 +75,21 @@ export default async function handler(
             }
 
             if (roomDataString) {
-                const [licenseCode, childId] = roomDataString.split(':');
+                let licenseCode, childId;
+                try {
+                    // 尝试解析新版 JSON 格式
+                    const data = typeof roomDataString === 'object' ? roomDataString : JSON.parse(roomDataString);
+                    licenseCode = data.licenseCode;
+                    childId = data.childId;
+                } catch (e) {
+                    // 兼容旧版 "code:childId" 格式
+                    [licenseCode, childId] = roomDataString.split(':');
+                }
+
+                if (!licenseCode || !childId) {
+                    return response.status(500).json({ success: false, message: '房间数据格式错误' });
+                }
+
                 const licenseKey = `license:${licenseCode}`;
 
                 // 从授权对象中获取孩子完整画像

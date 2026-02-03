@@ -255,8 +255,11 @@ const DoraemonMonitorApp: React.FC = () => {
     ];
     const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
 
-    // 移除内联颜色逻辑，依赖 CSS 类
-    const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
+    // 恢复内联颜色逻辑
+    // const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
+    // const textColor = isDarkMode ? '#94a3b8' : '#475569';
+    // 改回这里
+    const activeTextColor = '#0096E1';
     const textColor = isDarkMode ? '#94a3b8' : '#475569';
 
     return (
@@ -273,7 +276,7 @@ const DoraemonMonitorApp: React.FC = () => {
                 bottom: `${pointerPos}%`
               }}
             >
-              <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid ${isDarkMode ? '#00d4ff' : '#0575e6'}` }} />
+              <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid #0096E1` }} />
             </div>
           </div>
           <div className="level-nodes">

@@ -59,8 +59,14 @@ export default async function handler(
                 license.children.push(newChild);
             }
 
-            // 更新授权注册索引
-            await kv.hset(registryKey, { [roomCode]: `${licenseCode}:${childId}` });
+            // 更新授权注册索引 - 包含显式的 licenseKey 以便维护
+            const registryValue = JSON.stringify({
+                licenseCode, // 授权码
+                childId,     // 孩子ID
+                childName: name, // 方便识别
+                updatedAt: Date.now()
+            });
+            await kv.hset(registryKey, { [roomCode]: registryValue });
             await kv.set(licenseKey, license);
 
             return response.status(200).json({ success: true, data: license });

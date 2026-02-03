@@ -1,23 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap');
 
 :root {
-    /* 温馨家居风 Material Color 调色板 - 加深版 */
-    --primary: #E8B298;
-    /* 焦糖奶茶 - 主色（加深） */
-    --secondary: #F4A460;
-    /* 南瓜橙 - 副色（加深） */
-    --background: #FFF4E0;
-    /* 蜂蜜黄 - 页面背景（加深） */
-    --accent-mint: #A8D5BA;
-    /* 森林薄荷 - 已完成任务背景（加深） */
-    --accent-blue: #9DBCD4;
-    /* 雾霾蓝 - 星星奖励、图标点缀（加深） */
+    /* Wooly家居风 配色方案 - 模拟Crochet项目 */
+    --primary: #FF8095;
+    /* 鲜艳粉色 - 主色 */
+    --secondary: #FFDAB9;
+    /* 桃色 - 副色 */
+    --background: #FFF5E1;
+    /* 奶油色 - 页面背景 */
+    --accent-mint: #D8BFD8;
+    /* 鼠尾草紫 - 已完成任务背景 */
+    --accent-blue: #E6E6FA;
+    /* 薰衣草 - 星星奖励、图标点缀 */
     --text-primary: #5D4E37;
     /* 咖啡棕 - 主要文字（加深） */
-    --text-secondary: #8B7355;
-    /* 榛果棕 - 次要文字（加深） */
-    --border-color: #F5E6D3;
-    /* 米色边框（加深） */
+    --text-secondary: #FFB6C1;
+    /* 浅粉色 - 次要文字/装饰 */
+    --border-color: #FFFFFF;
+    /* 白色边框 */
 
     /* 兼容旧变量名（逐步替换） */
     --pastel-pink: var(--secondary);

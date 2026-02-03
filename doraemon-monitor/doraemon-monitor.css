@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-:root {
+.doraemon-app {
   --bg-light: #f8fafc;
   --bg-dark: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
   --text-primary: #1e293b;
@@ -898,7 +898,7 @@
   align-items: center;
   gap: 8px;
   padding: 28px 64px;
-  background: white;
+  background: var(--accent-blue);
   border: none;
   border-radius: 24px;
   cursor: pointer;
@@ -915,17 +915,16 @@
   transform: scale(0.98);
 }
 
-.btn-main-text {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--accent-blue);
-  letter-spacing: 2px;
+font-size: 1.8rem;
+font-weight: 800;
+color: white;
+letter-spacing: 2px;
 }
 
 .btn-sub-text {
   font-size: 1.1rem;
   font-weight: 500;
-  color: rgba(0, 150, 225, 0.85);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .doraemon-error-box {

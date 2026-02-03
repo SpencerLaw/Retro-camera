@@ -48,22 +48,22 @@
 }
 
 /* Cozy Background */
-/* Mesh Gradient Background - 温馨家居风（加深版） */
+/* Mesh Gradient Background - Wooly家居风 */
 .mesh-gradient {
-    background: radial-gradient(at 0% 0%, #F4A460 0px, transparent 50%),
-        radial-gradient(at 50% 0%, #9DBCD4 0px, transparent 50%),
-        radial-gradient(at 100% 0%, #E8B298 0px, transparent 50%),
-        radial-gradient(at 50% 50%, #FFF4E0 0px, transparent 50%);
+    background: radial-gradient(at 0% 0%, #FFDAB9 0px, transparent 50%),
+        radial-gradient(at 50% 0%, #E6E6FA 0px, transparent 50%),
+        radial-gradient(at 100% 0%, #FF8095 0px, transparent 50%),
+        radial-gradient(at 50% 50%, #FFF5E1 0px, transparent 50%);
     background-color: var(--background);
 }
 
-/* Organic Shapes - 温馨圆角卡片（加深版） */
+/* Organic Shapes - Wooly圆角卡片 */
 .kawaii-card {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(20px);
     border-radius: 48px;
     border: 3px solid var(--border-color);
-    box-shadow: 0 15px 35px rgba(93, 78, 55, 0.15);
+    box-shadow: 0 4px 20px -2px rgba(255, 182, 193, 0.4);
     position: relative;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -137,9 +137,9 @@
 }
 
 .tab-active-kawaii {
-    background-color: var(--primary) !important;
+    background-color: #FF8095 !important;
     color: white !important;
-    box-shadow: 0 8px 20px rgba(248, 228, 217, 0.4);
+    box-shadow: 0 8px 20px rgba(255, 128, 149, 0.5);
 }
 
 /* No-scrollbar */

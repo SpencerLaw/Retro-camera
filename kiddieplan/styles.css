@@ -151,3 +151,32 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* Responsive Design - 响应式设计 */
+@media (min-width: 1024px) {
+
+    /* PC端：增大卡片圆角和间距 */
+    .kawaii-card {
+        border-radius: 56px;
+    }
+
+    .kawaii-button {
+        border-radius: 42px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* 移动端：优化触摸目标大小 */
+    .kawaii-button {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 640px) {
+
+    /* 小屏幕：减小padding */
+    .kawaii-card {
+        border-radius: 36px;
+    }
+}

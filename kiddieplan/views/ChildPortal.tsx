@@ -311,7 +311,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             </div>
 
             {/* Main Content Area */}
-            <main className="flex-1 px-8 pt-10 pb-36 overflow-y-auto no-scrollbar">
+            <main className="flex-1 px-4 md:px-8 lg:px-12 pt-10 pb-36 overflow-y-auto no-scrollbar">
                 {activeTab === 'home' && <DashboardView />}
                 {activeTab === 'plan' && <PlannerView />}
                 {activeTab === 'rewards' && (
@@ -391,7 +391,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             </main>
 
             {/* Bottom Tab Navigation - Pastel Bubble */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-3xl shadow-[0_-25px_60px_rgba(93,77,122,0.1)] px-14 py-10 flex justify-between items-center rounded-t-[60px] z-[120] border-t-8 border-white">
+            <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-3xl shadow-[0_-25px_60px_rgba(93,77,122,0.1)] px-8 md:px-14 lg:px-20 py-8 md:py-10 flex justify-between items-center rounded-t-[60px] z-[120] border-t-8 border-white">
                 {[
                     { id: 'home', icon: Home, label: '主岛' },
                     { id: 'plan', icon: ListTodo, label: '航线' },

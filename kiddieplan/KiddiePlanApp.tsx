@@ -210,7 +210,7 @@ const KiddiePlanApp: React.FC = () => {
     <div className="h-screen w-screen relative overflow-hidden bg-[#FFF0D9]">
 
 
-      <div className="h-full w-full flex flex-col max-w-md mx-auto relative shadow-2xl bg-white/50 backdrop-blur-sm">
+      <div className="h-full w-full flex flex-col lg:max-w-none md:max-w-2xl sm:max-w-md mx-auto relative shadow-2xl bg-white/50 backdrop-blur-sm">
         {portal === 'parent' ? (
           <ParentPortal token={token!} onLogout={handleLogout} />
         ) : (

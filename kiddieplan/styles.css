@@ -1,23 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap');
 
 :root {
-    /* 温馨家居风 Material Color 调色板 */
-    --primary: #F8E4D9;
-    /* 奶油杏仁 - 主色 */
-    --secondary: #FADAD1;
-    /* 浅蜜桃粉 - 副色 */
-    --background: #FFF0D9;
-    /* 淡香草黄 - 页面背景 */
-    --accent-mint: #E0F2E9;
-    /* 薄荷奶绿 - 已完成任务背景 */
-    --accent-blue: #D6E6F2;
-    /* 柔雾蓝 - 星星奖励、图标点缀 */
-    --text-primary: #8B6F47;
-    /* 深咖啡棕 - 主要文字 */
-    --text-secondary: #B8A89A;
-    /* 灰杏仁 - 次要文字 */
-    --border-color: #FFFFFF;
-    /* 白色边框 */
+    /* 温馨家居风 Material Color 调色板 - 加深版 */
+    --primary: #E8B298;
+    /* 焦糖奶茶 - 主色（加深） */
+    --secondary: #F4A460;
+    /* 南瓜橙 - 副色（加深） */
+    --background: #FFF4E0;
+    /* 蜂蜜黄 - 页面背景（加深） */
+    --accent-mint: #A8D5BA;
+    /* 森林薄荷 - 已完成任务背景（加深） */
+    --accent-blue: #9DBCD4;
+    /* 雾霾蓝 - 星星奖励、图标点缀（加深） */
+    --text-primary: #5D4E37;
+    /* 咖啡棕 - 主要文字（加深） */
+    --text-secondary: #8B7355;
+    /* 榛果棕 - 次要文字（加深） */
+    --border-color: #F5E6D3;
+    /* 米色边框（加深） */
 
     /* 兼容旧变量名（逐步替换） */
     --pastel-pink: var(--secondary);

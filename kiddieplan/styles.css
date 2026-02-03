@@ -1,14 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap');
 
 :root {
-    --pastel-pink: #FFDEE9;
-    --pastel-blue: #B5FFFC;
-    --pastel-purple: #E0C3FC;
-    --pastel-yellow: #FFF9C4;
-    --pastel-green: #C1F1D5;
-    --pastel-bg: #FDFCFB;
-    --pastel-text: #5D4D7A;
-    --pastel-border: #FFFFFF;
+    /* 温馨家居风 Material Color 调色板 */
+    --primary: #F8E4D9;
+    /* 奶油杏仁 - 主色 */
+    --secondary: #FADAD1;
+    /* 浅蜜桃粉 - 副色 */
+    --background: #FFF0D9;
+    /* 淡香草黄 - 页面背景 */
+    --accent-mint: #E0F2E9;
+    /* 薄荷奶绿 - 已完成任务背景 */
+    --accent-blue: #D6E6F2;
+    /* 柔雾蓝 - 星星奖励、图标点缀 */
+    --text-primary: #8B6F47;
+    /* 深咖啡棕 - 主要文字 */
+    --text-secondary: #B8A89A;
+    /* 灰杏仁 - 次要文字 */
+    --border-color: #FFFFFF;
+    /* 白色边框 */
+
+    /* 兼容旧变量名（逐步替换） */
+    --pastel-pink: var(--secondary);
+    --pastel-blue: var(--accent-blue);
+    --pastel-purple: var(--primary);
+    --pastel-yellow: var(--background);
+    --pastel-green: var(--accent-mint);
+    --pastel-bg: var(--background);
+    --pastel-text: var(--text-primary);
+    --pastel-border: var(--border-color);
 }
 
 .kiddie-plan-body {
@@ -29,22 +48,22 @@
 }
 
 /* Cozy Background */
-/* Mesh Gradient Background */
+/* Mesh Gradient Background - 温馨家居风 */
 .mesh-gradient {
-    background: radial-gradient(at 0% 0%, var(--pastel-pink) 0px, transparent 50%),
-        radial-gradient(at 50% 0%, var(--pastel-blue) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, var(--pastel-purple) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, var(--pastel-yellow) 0px, transparent 50%);
-    background-color: var(--pastel-bg);
+    background: radial-gradient(at 0% 0%, var(--secondary) 0px, transparent 50%),
+        radial-gradient(at 50% 0%, var(--accent-blue) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, var(--primary) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, var(--background) 0px, transparent 50%);
+    background-color: var(--background);
 }
 
-/* Organic Shapes */
+/* Organic Shapes - 温馨圆角卡片 */
 .kawaii-card {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(20px);
     border-radius: 48px;
-    border: 3px solid var(--pastel-border);
-    box-shadow: 0 15px 35px rgba(93, 77, 122, 0.05);
+    border: 3px solid var(--border-color);
+    box-shadow: 0 15px 35px rgba(139, 111, 71, 0.08);
     position: relative;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -88,39 +107,39 @@
     animation: floating-animation 4s ease-in-out infinite;
 }
 
-/* Colors Utilities Map */
+/* Colors Utilities Map - 温馨家居风 */
 .bg-warm-peach,
 .bg-pastel-pink {
-    background-color: var(--pastel-pink);
+    background-color: var(--secondary);
 }
 
 .bg-warm-green,
 .bg-pastel-green {
-    background-color: var(--pastel-green);
+    background-color: var(--accent-mint);
 }
 
 .bg-warm-sand,
 .bg-pastel-blue {
-    background-color: var(--pastel-blue);
+    background-color: var(--accent-blue);
 }
 
 .bg-pastel-purple {
-    background-color: var(--pastel-purple);
+    background-color: var(--primary);
 }
 
 .bg-pastel-yellow {
-    background-color: var(--pastel-yellow);
+    background-color: var(--background);
 }
 
 .text-warm-brown,
 .text-macaron {
-    color: var(--pastel-text);
+    color: var(--text-primary);
 }
 
 .tab-active-kawaii {
-    background-color: var(--pastel-purple) !important;
+    background-color: var(--primary) !important;
     color: white !important;
-    box-shadow: 0 8px 20px rgba(224, 195, 252, 0.4);
+    box-shadow: 0 8px 20px rgba(248, 228, 217, 0.4);
 }
 
 /* No-scrollbar */

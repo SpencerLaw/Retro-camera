@@ -13,7 +13,7 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ child, onToggleTask }) => {
   const todayStr = new Date().toISOString().split('T')[0];
   const todaySchedule = child.schedules.find(s => s.date === todayStr);
-  
+
   const tasks = useMemo(() => {
     if (todaySchedule) return todaySchedule.tasks;
     return DEFAULT_TASKS.map((t, idx) => ({
@@ -26,51 +26,51 @@ const Dashboard: React.FC<DashboardProps> = ({ child, onToggleTask }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="sketch-card p-5 bg-[#FFE5E5]">
+      <div className="sketch-card p-5 bg-[#FFF0D9]">
         <div className="flex justify-between items-center mb-4">
-           <h3 className="font-handwriting text-2xl flex items-center gap-2">
-             <Clock size={20} /> 今日时刻表
-           </h3>
-           <span className="text-xs font-bold text-[#4C3D3D]/50 italic">
-             {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })}
-           </span>
+          <h3 className="font-handwriting text-2xl flex items-center gap-2">
+            <Clock size={20} /> 今日时刻表
+          </h3>
+          <span className="text-xs font-bold text-[#4C3D3D]/50 italic">
+            {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })}
+          </span>
         </div>
 
         {/* 纵向时间轴 */}
         <div className="relative pl-8 space-y-6 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-[#4C3D3D] before:border-dashed before:border-l">
-           {sortedTasks.map((task, idx) => (
-             <div key={task.id} className="relative">
-                {/* 节点图标 */}
-                <div className={`absolute left-[-31px] top-1 w-6 h-6 rounded-full border-2 border-[#4C3D3D] flex items-center justify-center bg-white z-10 transition-colors ${task.completed ? 'bg-[#FFD95A]' : ''}`}>
-                   {task.completed ? <CheckCircle2 size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 bg-[#4C3D3D] rounded-full"></div>}
+          {sortedTasks.map((task, idx) => (
+            <div key={task.id} className="relative">
+              {/* 节点图标 */}
+              <div className={`absolute left-[-31px] top-1 w-6 h-6 rounded-full border-2 border-[#8B6F47] flex items-center justify-center bg-white z-10 transition-colors ${task.completed ? 'bg-[#E0F2E9]' : ''}`}>
+                {task.completed ? <CheckCircle2 size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 bg-[#8B6F47] rounded-full"></div>}
+              </div>
+
+              {/* 任务内容卡片 */}
+              <div
+                onClick={() => onToggleTask(task.id)}
+                className={`sketch-card p-3 cursor-pointer hover:bg-[#FFF9E1] transition-all active:scale-95 ${task.completed ? 'opacity-60 bg-gray-50' : 'bg-white'}`}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="text-[10px] font-black opacity-40 mb-1">{task.timeSlot}</div>
+                  <div className="text-[10px] font-bold bg-[#FFF0D9] px-1.5 py-0.5 rounded border border-[#8B6F47]">+{task.points} CP</div>
                 </div>
-                
-                {/* 任务内容卡片 */}
-                <div 
-                  onClick={() => onToggleTask(task.id)}
-                  className={`sketch-card p-3 cursor-pointer hover:bg-[#FFF9E1] transition-all active:scale-95 ${task.completed ? 'opacity-60 bg-gray-50' : 'bg-white'}`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="text-[10px] font-black opacity-40 mb-1">{task.timeSlot}</div>
-                    <div className="text-[10px] font-bold bg-[#FFD95A] px-1.5 py-0.5 rounded border border-[#4C3D3D]">+{task.points} CP</div>
-                  </div>
-                  <h4 className={`font-bold text-sm ${task.completed ? 'line-through' : ''}`}>{task.title}</h4>
-                  <div className="mt-1 flex gap-2">
-                     <span className={`text-[8px] font-bold px-1 rounded border border-[#4C3D3D]/20 ${PERIOD_COLORS[task.period as keyof typeof PERIOD_COLORS]}`}>
-                       {PERIOD_LABELS[task.period as keyof typeof PERIOD_LABELS]}
-                     </span>
-                  </div>
+                <h4 className={`font-bold text-sm ${task.completed ? 'line-through' : ''}`}>{task.title}</h4>
+                <div className="mt-1 flex gap-2">
+                  <span className={`text-[8px] font-bold px-1 rounded border border-[#8B6F47]/20 ${PERIOD_COLORS[task.period as keyof typeof PERIOD_COLORS]}`}>
+                    {PERIOD_LABELS[task.period as keyof typeof PERIOD_LABELS]}
+                  </span>
                 </div>
-             </div>
-           ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       <div className="sketch-card p-4 border-dashed bg-white/50 text-center italic text-xs font-bold">
-         <div className="flex items-center justify-center gap-1">
-            <AlertCircle size={14} className="text-[#FFB1B1]" />
-            坚持就是胜利，加油哦！
-         </div>
+        <div className="flex items-center justify-center gap-1">
+          <AlertCircle size={14} className="text-[#FFB1B1]" />
+          坚持就是胜利，加油哦！
+        </div>
       </div>
     </div>
   );

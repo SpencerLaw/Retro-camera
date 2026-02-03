@@ -31,36 +31,36 @@ const Rewards: React.FC<RewardsProps> = ({ child, updateChild, rewards, role }) 
       <div className="sketch-card p-6 bg-[#FFD95A] relative">
         <div className="tape"></div>
         <div className="flex flex-col items-center">
-           <div className="text-[10px] font-black opacity-50 mb-1">我的成长积分池</div>
-           <div className="flex items-center gap-2">
-              <Star className="text-white fill-white" size={24} />
-              <div className="text-5xl font-handwriting text-[#4C3D3D]">{child.points.toFixed(1)}</div>
-           </div>
-           <div className="mt-3 text-[10px] font-bold bg-white/40 px-3 py-1 rounded-full border border-[#4C3D3D]/20">
-              继续加油，解锁更多惊喜！
-           </div>
+          <div className="text-[10px] font-black opacity-50 mb-1">我的成长积分池</div>
+          <div className="flex items-center gap-2">
+            <Star className="text-white fill-white" size={24} />
+            <div className="text-5xl font-handwriting text-[#8B6F47]">{child.points.toFixed(1)}</div>
+          </div>
+          <div className="mt-3 text-[10px] font-bold bg-white/40 px-3 py-1 rounded-full border border-[#8B6F47]/20">
+            继续加油，解锁更多惊喜！
+          </div>
         </div>
       </div>
 
       <div className="space-y-4">
         <h3 className="font-handwriting text-2xl flex items-center gap-2">
-           <Gift size={24} className="text-[#FFB1B1]" /> 梦想兑换站
+          <Gift size={24} className="text-[#FADAD1]" /> 梦想兑换站
         </h3>
 
         <div className="grid grid-cols-2 gap-4">
           {rewards.map(reward => (
-            <div 
-              key={reward.id} 
+            <div
+              key={reward.id}
               onClick={() => handleRedeem(reward)}
-              className="sketch-card p-4 bg-white flex flex-col items-center gap-3 cursor-pointer group hover:bg-[#FFF9E1]"
+              className="sketch-card p-4 bg-white flex flex-col items-center gap-3 cursor-pointer group hover:bg-[#FFF0D9]"
             >
               <div className="text-5xl group-hover:scale-110 transition-transform">{reward.icon}</div>
               <div className="text-center">
-                 <div className="font-bold text-xs line-clamp-1">{reward.name}</div>
-                 <div className="text-[10px] font-black text-red-500 mt-1">{reward.pointsCost} CP</div>
+                <div className="font-bold text-xs line-clamp-1">{reward.name}</div>
+                <div className="text-[10px] font-black text-red-500 mt-1">{reward.pointsCost} CP</div>
               </div>
-              <button className={`w-full py-1.5 sketch-button text-[10px] font-bold ${child.points >= reward.pointsCost ? 'bg-[#FFB1B1]' : 'bg-gray-100 text-gray-400 opacity-50'}`}>
-                 {child.points >= reward.pointsCost ? '立即换取' : '分不够哟'}
+              <button className={`w-full py-1.5 sketch-button text-[10px] font-bold ${child.points >= reward.pointsCost ? 'bg-[#FADAD1]' : 'bg-gray-100 text-gray-400 opacity-50'}`}>
+                {child.points >= reward.pointsCost ? '立即换取' : '分不够哟'}
               </button>
             </div>
           ))}

@@ -65,10 +65,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             <div className="relative">
                 <div className="w-24 h-24 bg-white/40 rounded-full animate-ping opacity-30"></div>
                 <div className="w-24 h-24 bg-white rounded-[32px] absolute inset-0 animate-float-kawaii flex items-center justify-center shadow-2xl border-4 border-white">
-                    <Sparkles className="text-[#F8E4D9] animate-spin-slow" size={40} />
+                    <Sparkles className="text-[#FF8095] animate-spin-slow" size={40} />
                 </div>
             </div>
-            <p className="text-3xl text-[#8B6F47] opacity-50">开启梦幻星岛...</p>
+            <p className="text-3xl text-[#5D4037] opacity-50">开启梦幻星岛...</p>
         </div>
     );
 
@@ -85,23 +85,23 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             <img src={childProfile.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full object-cover" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-candy text-[#8B6F47]">{childProfile.name}的星梦基地</h1>
-                            <p className="text-[10px] font-bold text-[#B8A89A] tracking-[0.2em] uppercase mt-1">Voyage Day {streak}</p>
+                            <h1 className="text-3xl font-candy text-[#5D4037]">{childProfile.name}的星梦基地</h1>
+                            <p className="text-[10px] font-bold text-[#5D4037/40] tracking-[0.2em] uppercase mt-1">Voyage Day {streak}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-4">
                     {[
-                        { label: '今日专注', val: '1.2h', icon: '⏱️', color: '#F8E4D9' },
-                        { label: '今日任务', val: `${checkins.length}/${tasks.length}`, icon: '📝', color: '#D6E6F2' },
-                        { label: '完成进度', val: `${progress}%`, icon: '📈', color: '#FADAD1' },
-                        { label: '成就奖牌', val: '12', icon: '🏆', color: '#FFF0D9' }
+                        { label: '今日专注', val: '1.2h', icon: '⏱️', color: '#FF8095' },
+                        { label: '今日任务', val: `${checkins.length}/${tasks.length}`, icon: '📝', color: '#E6E6FA' },
+                        { label: '完成进度', val: `${progress}%`, icon: '📈', color: '#FFB6C1' },
+                        { label: '成就奖牌', val: '12', icon: '🏆', color: '#FFF5E1' }
                     ].map((item, i) => (
                         <div key={i} className="bg-white/60 p-4 rounded-[28px] flex flex-col items-center gap-2 border-2 border-white/50">
                             <span className="text-xl">{item.icon}</span>
-                            <div className="text-[14px] font-candy text-[#8B6F47]">{item.val}</div>
-                            <div className="text-[8px] font-bold text-[#8B6F47]/40 uppercase tracking-widest">{item.label}</div>
+                            <div className="text-[14px] font-candy text-[#5D4037]">{item.val}</div>
+                            <div className="text-[8px] font-bold text-[#5D4037]/40 uppercase tracking-widest">{item.label}</div>
                         </div>
                     ))}
                 </div>
@@ -110,9 +110,9 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             {/* Core Modules Matrix - Warm Colors */}
             <div className="grid grid-cols-3 gap-5">
                 {[
-                    { id: 'tools', icon: Timer, label: '效率工具', color: '#F8E4D9', bg: '#F8E4D920', rot: '-rotate-6' },
-                    { id: 'plan', icon: LayoutGrid, label: '规划矩阵', color: '#D6E6F2', bg: '#D6E6F230', rot: 'rotate-3' },
-                    { id: 'medals', icon: ShieldCheck, label: '成就中心', color: '#FADAD1', bg: '#FADAD140', rot: '-rotate-3' }
+                    { id: 'tools', icon: Timer, label: '效率工具', color: '#FF8095', bg: '#FF809520', rot: '-rotate-6' },
+                    { id: 'plan', icon: LayoutGrid, label: '规划矩阵', color: '#E6E6FA', bg: '#E6E6FA30', rot: 'rotate-3' },
+                    { id: 'medals', icon: ShieldCheck, label: '成就中心', color: '#FFB6C1', bg: '#FFB6C140', rot: '-rotate-3' }
                 ].map((mod, i) => (
                     <div
                         key={i}
@@ -131,10 +131,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             {/* Sub Tools Row - Soft & Healing */}
             <div className="kawaii-card bg-white/70 p-10 flex justify-between items-center border-white shadow-2xl backdrop-blur-md">
                 {[
-                    { icon: Smile, label: '沟通', color: '#F8E4D9' },
-                    { icon: Gift, label: '奖励', color: '#FADAD1' },
-                    { icon: Star, label: '商场', color: '#D6E6F2' },
-                    { icon: Clock, label: '计时', color: '#FFF0D9' },
+                    { icon: Smile, label: '沟通', color: '#FF8095' },
+                    { icon: Gift, label: '奖励', color: '#FFB6C1' },
+                    { icon: Star, label: '商场', color: '#E6E6FA' },
+                    { icon: Clock, label: '计时', color: '#FFF5E1' },
                 ].map((tool, i) => (
                     <div key={i} className="flex flex-col items-center gap-4 group cursor-pointer">
                         <div className="w-14 h-14 bg-white rounded-[24px] flex items-center justify-center text-[#5D4D7A]/20 group-hover:shadow-lg transition-all border-4 border-transparent group-hover:border-white shadow-inner">
@@ -148,14 +148,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             {/* Mini Tasks Section */}
             <div className="space-y-6">
                 <div className="flex justify-between items-center px-4">
-                    <h3 className="text-4xl font-candy text-[#8B6F47]">梦想挑战</h3>
-                    <div className="w-12 h-12 rounded-[22px] bg-white flex items-center justify-center text-[#F8E4D9] shadow-xl border-4 border-white animate-float-kawaii">
+                    <h3 className="text-4xl font-candy text-[#5D4037]">梦想挑战</h3>
+                    <div className="w-12 h-12 rounded-[22px] bg-white flex items-center justify-center text-[#FF8095] shadow-xl border-4 border-white animate-float-kawaii">
                         <Plus size={24} strokeWidth={4} />
                     </div>
                 </div>
                 <div className="space-y-6">
                     {tasks.slice(0, 4).map((task, idx) => {
-                        const colors = ['#FADAD1', '#D6E6F2', '#F8E4D9', '#FFF0D9'];
+                        const colors = ['#FFB6C1', '#E6E6FA', '#FF8095', '#FFF5E1'];
                         const isCompleted = checkins.includes(task.id);
                         return (
                             <div key={task.id} className="kawaii-card bg-white p-6 flex items-center justify-between border-white shadow-2xl group hover:translate-x-3 transition-all relative overflow-hidden pl-10">
@@ -167,11 +167,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                         {isCompleted ? <CheckCircle2 className="text-[#8DB580]" size={28} /> : <BookOpen className="text-[#5D4D7A]/20" size={24} />}
                                     </div>
                                     <div className="space-y-1">
-                                        <div className="text-lg font-bold text-[#8B6F47]">{task.title}</div>
+                                        <div className="text-lg font-bold text-[#5D4037]">{task.title}</div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[9px] font-bold text-[#F8E4D9] uppercase tracking-[0.2em]">{task.timeSlot}</span>
-                                            <span className="w-1 h-1 bg-[#8B6F47]/10 rounded-full"></span>
-                                            <span className="text-[9px] font-bold text-[#8B6F47]/40 uppercase tracking-[0.1em]">计划: 20分钟</span>
+                                            <span className="text-[9px] font-bold text-[#FF8095] uppercase tracking-[0.2em]">{task.timeSlot}</span>
+                                            <span className="w-1 h-1 bg-[#5D4037]/10 rounded-full"></span>
+                                            <span className="text-[9px] font-bold text-[#5D4037]/40 uppercase tracking-[0.1em]">计划: 20分钟</span>
                                         </div>
                                     </div>
                                 </div>
@@ -187,7 +187,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                     <button
                                         onClick={() => handleToggleTask(task.id)}
-                                        className={`px-8 py-3 rounded-full text-xs font-bold transition-all shadow-xl border-4 border-white ${isCompleted ? 'bg-gray-100 text-gray-400' : 'bg-gradient-to-r from-[#F8E4D9] to-[#D6E6F2] text-white hover:scale-105'}`}
+                                        className={`px-8 py-3 rounded-full text-xs font-bold transition-all shadow-xl border-4 border-white ${isCompleted ? 'bg-gray-100 text-gray-400' : 'bg-gradient-to-r from-[#FF8095] to-[#E6E6FA] text-white hover:scale-105'}`}
                                     >
                                         {isCompleted ? '已探索' : '发射'}
                                     </button>
@@ -209,7 +209,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {/* View Tabs - Warm Selection */}
                 <div className="flex bg-white/60 p-1.5 rounded-[22px] gap-2 shadow-inner">
                     {['今日安排', '本周规划', '成就记录'].map((t, i) => (
-                        <button key={i} className={`flex-1 py-3 text-[11px] font-bold rounded-[18px] transition-all ${i === 1 ? 'bg-[#E0C3FC] text-white shadow-lg' : 'text-[#5D4D7A] opacity-40'}`}>
+                        <button key={i} className={`flex-1 py-3 text-[11px] font-bold rounded-[18px] transition-all ${i === 1 ? 'bg-[#FF8095] text-white shadow-lg' : 'text-[#5D4037] opacity-40'}`}>
                             {t}
                         </button>
                     ))}
@@ -230,8 +230,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         {timeSlots.map(slot => (
                             <div key={slot} className="flex gap-4 items-center">
                                 <div className="w-14 shrink-0 flex flex-col items-center justify-center">
-                                    <div className="text-[11px] font-bold text-[#8B6F47]">{slot}</div>
-                                    <div className="text-[7px] font-bold text-[#D6E6F2] uppercase tracking-widest mt-0.5">Time</div>
+                                    <div className="text-[11px] font-bold text-[#5D4037]">{slot}</div>
+                                    <div className="text-[7px] font-bold text-[#E6E6FA] uppercase tracking-widest mt-0.5">Time</div>
                                 </div>
                                 <div className="flex-1 grid grid-cols-7 gap-2">
                                     {days.map((_, i) => (
@@ -246,7 +246,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 </div>
 
                 {/* Countdown Card - Honey Wood Style */}
-                <div className="bg-gradient-to-r from-[#FADAD1] to-[#F8E4D9] p-8 rounded-[40px] flex items-center justify-between text-white shadow-[0_15px_35px_rgba(250,218,209,0.3)] border-b-4 border-white/20">
+                <div className="bg-gradient-to-r from-[#FFB6C1] to-[#FF8095] p-8 rounded-[40px] flex items-center justify-between text-white shadow-[0_15px_35px_rgba(250,218,209,0.3)] border-b-4 border-white/20">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center animate-pulse border-2 border-white/30">
                             <Timer size={24} strokeWidth={2.5} />
@@ -263,8 +263,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
                 {/* Task Checklist - Warm Detailed Cards */}
                 <div className="space-y-6">
-                    <h3 className="text-2xl font-candy text-[#8B6F47] px-2 flex items-center gap-3">
-                        <ListTodo className="text-[#F8E4D9]" size={24} /> 今日详情 ({checkins.length}/{tasks.length})
+                    <h3 className="text-2xl font-candy text-[#5D4037] px-2 flex items-center gap-3">
+                        <ListTodo className="text-[#FF8095]" size={24} /> 今日详情 ({checkins.length}/{tasks.length})
                     </h3>
                     <div className="space-y-4">
                         {tasks.map(task => {
@@ -273,19 +273,19 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                 <div
                                     key={task.id}
                                     onClick={() => handleToggleTask(task.id)}
-                                    className={`kawaii-card p-5 flex justify-between items-center border-none transition-all duration-500 ${isCompleted ? 'bg-[#FFFDF2]/80 opacity-40 grayscale-[0.3]' : 'bg-white shadow-lg'}`}
+                                    className={`kawaii-card p-5 flex justify-between items-center transition-all duration-300 ${isCompleted ? 'bg-[#D8BFD8]/30 opacity-60' : 'bg-white'}`}
                                 >
                                     <div className="flex items-center gap-5">
-                                        <div className={`w-12 h-12 rounded-[22px] flex items-center justify-center transition-all ${isCompleted ? 'bg-[#E0F2E9]/40' : 'bg-white shadow-sm border-2 border-[#F8E4D920]'}`}>
-                                            {isCompleted ? <CheckCircle2 size={28} className="text-[#8DB580]" /> : <div className="w-3 h-3 rounded-full bg-[#F8E4D9] animate-pulse"></div>}
+                                        <div className={`w-12 h-12 rounded-[22px] flex items-center justify-center transition-all ${isCompleted ? 'bg-[#D8BFD8]/40' : 'bg-white shadow-sm border-2 border-[#FF809520]'}`}>
+                                            {isCompleted ? <CheckCircle2 size={28} className="text-[#8DB580]" /> : <div className="w-3 h-3 rounded-full bg-[#FF8095] animate-pulse"></div>}
                                         </div>
                                         <div>
-                                            <div className={`text-base font-bold ${isCompleted ? 'line-through text-[#8B6F47]/40' : 'text-[#8B6F47]'}`}>{task.title}</div>
-                                            <div className="text-[11px] font-bold text-[#F8E4D9] opacity-70 tracking-wide mt-0.5">{task.timeSlot}</div>
+                                            <div className={`text-base font-bold ${isCompleted ? 'line-through text-[#5D4037]/40' : 'text-[#5D4037]'}`}>{task.title}</div>
+                                            <div className="text-[11px] font-bold text-[#FF8095] opacity-70 tracking-wide mt-0.5">{task.timeSlot}</div>
                                         </div>
                                     </div>
                                     {!isCompleted && (
-                                        <div className="bg-[#FFF0D9] px-3 py-1.5 rounded-full text-[10px] font-bold text-[#8B6F47] shadow-sm flex items-center gap-1 border-2 border-white">
+                                        <div className="bg-[#FFF5E1] px-3 py-1.5 rounded-full text-[10px] font-bold text-[#5D4037] shadow-sm flex items-center gap-1 border-2 border-white">
                                             +{task.points} 🍭
                                         </div>
                                     )}
@@ -299,7 +299,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     };
 
     return (
-        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#FFF0D9]/30 relative">
+        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#FFF5E1]/30 relative">
             {/* Top Right Home Button */}
             <div className="absolute top-6 right-6 z-50">
                 <button
@@ -318,29 +318,29 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <div className="space-y-12 animate-in slide-in-from-right-10 duration-1000 pb-20">
                         <div className="flex justify-between items-end px-4">
                             <div>
-                                <h1 className="text-5xl font-candy text-[#8B6F47]">梦想宝库</h1>
-                                <p className="text-[12px] font-bold text-[#B8A89A] opacity-60 uppercase tracking-[0.4em] mt-2 leading-none">Magic Reward Hub</p>
+                                <h1 className="text-5xl font-candy text-[#5D4037]">梦想宝库</h1>
+                                <p className="text-[12px] font-bold text-[#5D4037/40] opacity-60 uppercase tracking-[0.4em] mt-2 leading-none">Magic Reward Hub</p>
                             </div>
                             <div className="bg-white/80 px-8 py-4 rounded-[32px] flex items-center gap-4 shadow-2xl border-4 border-white">
                                 <span className="text-2xl">🍭</span>
-                                <span className="text-2xl font-candy text-[#8B6F47]">{coins.toFixed(0)}</span>
+                                <span className="text-2xl font-candy text-[#5D4037]">{coins.toFixed(0)}</span>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-8">
                             {[
-                                { name: '周末电影之夜', cost: 500, icon: '🍿', color: '#F8E4D9' },
-                                { name: '额外游戏时间', cost: 200, icon: '🎮', color: '#D6E6F2' },
-                                { name: '自选美味晚餐', cost: 300, icon: '🍕', color: '#FADAD1' },
-                                { name: '睡前故事延长', cost: 100, icon: '📚', color: '#FFF0D9' }
+                                { name: '周末电影之夜', cost: 500, icon: '🍿', color: '#FF8095' },
+                                { name: '额外游戏时间', cost: 200, icon: '🎮', color: '#E6E6FA' },
+                                { name: '自选美味晚餐', cost: 300, icon: '🍕', color: '#FFB6C1' },
+                                { name: '睡前故事延长', cost: 100, icon: '📚', color: '#FFF5E1' }
                             ].map((reward, i) => (
                                 <div key={i} className="kawaii-card bg-white p-8 flex flex-col items-center gap-6 relative group border-white shadow-2xl hover:translate-y-[-10px] transition-all">
                                     <div className="w-20 h-20 bg-white rounded-[35px] flex items-center justify-center shadow-inner border-4 border-transparent group-hover:border-white transition-all group-hover:scale-110">
                                         <span className="text-5xl">{reward.icon}</span>
                                     </div>
                                     <div className="text-center space-y-4">
-                                        <div className="text-base font-bold text-[#8B6F47]">{reward.name}</div>
-                                        <button className={`w-full py-3 rounded-full text-[11px] font-bold transition-all shadow-xl border-4 border-white ${coins >= reward.cost ? 'bg-[#F8E4D9] text-white' : 'bg-gray-100/50 text-gray-300 opacity-50 cursor-not-allowed'}`}>
+                                        <div className="text-base font-bold text-[#5D4037]">{reward.name}</div>
+                                        <button className={`w-full py-3 rounded-full text-[11px] font-bold transition-all shadow-xl border-4 border-white ${coins >= reward.cost ? 'bg-[#FF8095] text-white' : 'bg-gray-100/50 text-gray-300 opacity-50 cursor-not-allowed'}`}>
                                             {reward.cost} 🍭 兑换
                                         </button>
                                     </div>
@@ -401,19 +401,19 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as AppTab)}
-                        className={`flex flex-col items-center gap-3 transition-all duration-500 relative ${activeTab === tab.id ? 'text-[#F8E4D9] scale-125' : 'text-[#8B6F47] opacity-20 hover:opacity-50'}`}
+                        className={`flex flex-col items-center gap-3 transition-all duration-500 relative ${activeTab === tab.id ? 'text-[#FF8095] scale-125' : 'text-[#5D4037] opacity-20 hover:opacity-50'}`}
                     >
                         <tab.icon size={28} strokeWidth={activeTab === tab.id ? 4 : 2} />
                         <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{tab.label}</span>
                         {activeTab === tab.id && (
-                            <div className="absolute -bottom-4 w-2 h-2 bg-[#F8E4D9] rounded-full shadow-[0_0_10px_#F8E4D9]"></div>
+                            <div className="absolute -bottom-4 w-2 h-2 bg-[#FF8095] rounded-full shadow-[0_0_10px_#FF8095]"></div>
                         )}
                     </button>
                 ))}
 
                 {/* Floating Action Button - Bubble Center */}
                 <div className="absolute top-[-40px] left-1/2 -translate-x-1/2 group">
-                    <div className="w-20 h-20 bg-gradient-to-tr from-[#F8E4D9] to-[#D6E6F2] rounded-full shadow-[0_15px_35px_rgba(248,228,217,0.6)] flex items-center justify-center text-white border-[8px] border-white active:scale-90 transition-all cursor-pointer group-hover:scale-110 group-hover:rotate-12">
+                    <div className="w-20 h-20 bg-gradient-to-tr from-[#FF8095] to-[#E6E6FA] rounded-full shadow-[0_15px_35px_rgba(248,228,217,0.6)] flex items-center justify-center text-white border-[8px] border-white active:scale-90 transition-all cursor-pointer group-hover:scale-110 group-hover:rotate-12">
                         <Plus size={36} strokeWidth={4} />
                     </div>
                 </div>

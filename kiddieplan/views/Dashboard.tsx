@@ -26,7 +26,7 @@ const Dashboard: React.FC<DashboardProps> = ({ child, onToggleTask }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="sketch-card p-5 bg-[#FFF0D9]">
+      <div className="sketch-card p-5 bg-[#FFF5E1]">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-handwriting text-2xl flex items-center gap-2">
             <Clock size={20} /> 今日时刻表
@@ -41,8 +41,8 @@ const Dashboard: React.FC<DashboardProps> = ({ child, onToggleTask }) => {
           {sortedTasks.map((task, idx) => (
             <div key={task.id} className="relative">
               {/* 节点图标 */}
-              <div className={`absolute left-[-31px] top-1 w-6 h-6 rounded-full border-2 border-[#8B6F47] flex items-center justify-center bg-white z-10 transition-colors ${task.completed ? 'bg-[#E0F2E9]' : ''}`}>
-                {task.completed ? <CheckCircle2 size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 bg-[#8B6F47] rounded-full"></div>}
+              <div className={`absolute left-[-31px] top-1 w-6 h-6 rounded-full border-2 border-[#5D4037] flex items-center justify-center bg-white z-10 transition-colors ${task.completed ? 'bg-[#FF80958]' : ''}`}>
+                {task.completed ? <CheckCircle2 size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 bg-[#5D4037] rounded-full"></div>}
               </div>
 
               {/* 任务内容卡片 */}
@@ -52,11 +52,11 @@ const Dashboard: React.FC<DashboardProps> = ({ child, onToggleTask }) => {
               >
                 <div className="flex justify-between items-start">
                   <div className="text-[10px] font-black opacity-40 mb-1">{task.timeSlot}</div>
-                  <div className="text-[10px] font-bold bg-[#FFF0D9] px-1.5 py-0.5 rounded border border-[#8B6F47]">+{task.points} CP</div>
+                  <div className="text-[10px] font-bold bg-[#FFF5E1] px-1.5 py-0.5 rounded border border-[#5D4037]">+{task.points} CP</div>
                 </div>
                 <h4 className={`font-bold text-sm ${task.completed ? 'line-through' : ''}`}>{task.title}</h4>
                 <div className="mt-1 flex gap-2">
-                  <span className={`text-[8px] font-bold px-1 rounded border border-[#8B6F47]/20 ${PERIOD_COLORS[task.period as keyof typeof PERIOD_COLORS]}`}>
+                  <span className={`text-[8px] font-bold px-1 rounded border border-[#5D4037]/20 ${PERIOD_COLORS[task.period as keyof typeof PERIOD_COLORS]}`}>
                     {PERIOD_LABELS[task.period as keyof typeof PERIOD_LABELS]}
                   </span>
                 </div>

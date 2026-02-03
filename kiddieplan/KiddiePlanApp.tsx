@@ -95,20 +95,20 @@ const KiddiePlanApp: React.FC = () => {
       <div className="h-screen w-screen relative flex flex-col items-center justify-center overflow-hidden animate-in fade-in duration-700">
         {/* Full Screen Mesh Gradient Background */}
         <div className="absolute inset-0 bg-white">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#FADAD1] rounded-full blur-[120px] opacity-60 animate-float-slow"></div>
-          <div className="absolute top-[20%] right-[-10%] w-[40%] h-[60%] bg-[#D6E6F2] rounded-full blur-[100px] opacity-60 animate-float-delayed"></div>
-          <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] bg-[#F8E4D9] rounded-full blur-[120px] opacity-50 animate-pulse-slow"></div>
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#FFB6C1] rounded-full blur-[120px] opacity-60 animate-float-slow"></div>
+          <div className="absolute top-[20%] right-[-10%] w-[40%] h-[60%] bg-[#E6E6FA] rounded-full blur-[100px] opacity-60 animate-float-delayed"></div>
+          <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] bg-[#FF8095] rounded-full blur-[120px] opacity-50 animate-pulse-slow"></div>
         </div>
 
         <div className="relative z-10 flex flex-col items-center gap-16 w-full max-w-md px-6">
           <div className="text-center space-y-4 animate-float">
             <div className="relative inline-block">
               <div className="absolute -top-16 -right-16 text-8xl drop-shadow-md animate-bounce-slow">🍬</div>
-              <h1 className="text-8xl font-candy bg-gradient-to-br from-[#F8E4D9] to-[#FADAD1] bg-clip-text text-transparent drop-shadow-sm select-none">
+              <h1 className="text-8xl font-candy bg-gradient-to-br from-[#FF8095] to-[#FFB6C1] bg-clip-text text-transparent drop-shadow-sm select-none">
                 星梦奇旅
               </h1>
             </div>
-            <p className="text-[#8B6F47] opacity-40 font-bold tracking-[0.4em] text-sm uppercase">Sweet Dreams & Better Habits</p>
+            <p className="text-[#5D4037] opacity-40 font-bold tracking-[0.4em] text-sm uppercase">Sweet Dreams & Better Habits</p>
           </div>
 
           <div className="grid grid-cols-2 gap-8 w-full">
@@ -118,10 +118,10 @@ const KiddiePlanApp: React.FC = () => {
             >
               <div className="absolute inset-0 bg-white/40 backdrop-blur-xl rounded-[48px] shadow-[0_20px_50px_rgba(224,195,252,0.3)] border-4 border-white transition-all duration-500 group-hover:rotate-y-12 group-hover:scale-105 group-hover:bg-white/60"></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#F8E4D9] to-[#fff] rounded-[36px] flex items-center justify-center shadow-lg border-4 border-white group-hover:animate-bounce-slow">
+                <div className="w-24 h-24 bg-gradient-to-br from-[#FF8095] to-[#fff] rounded-[36px] flex items-center justify-center shadow-lg border-4 border-white group-hover:animate-bounce-slow">
                   <Lock size={40} className="text-white" strokeWidth={2.5} />
                 </div>
-                <span className="text-2xl font-candy text-[#8B6F47] tracking-wider">家长端</span>
+                <span className="text-2xl font-candy text-[#5D4037] tracking-wider">家长端</span>
               </div>
             </button>
 
@@ -131,15 +131,15 @@ const KiddiePlanApp: React.FC = () => {
             >
               <div className="absolute inset-0 bg-white/40 backdrop-blur-xl rounded-[48px] shadow-[0_20px_50px_rgba(181,255,252,0.3)] border-4 border-white transition-all duration-500 group-hover:-rotate-y-12 group-hover:scale-105 group-hover:bg-white/60"></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#D6E6F2] to-[#fff] rounded-[36px] flex items-center justify-center shadow-lg border-4 border-white group-hover:animate-bounce-slow">
-                  <User size={40} className="text-[#8B6F47]" strokeWidth={2.5} />
+                <div className="w-24 h-24 bg-gradient-to-br from-[#E6E6FA] to-[#fff] rounded-[36px] flex items-center justify-center shadow-lg border-4 border-white group-hover:animate-bounce-slow">
+                  <User size={40} className="text-[#5D4037]" strokeWidth={2.5} />
                 </div>
-                <span className="text-2xl font-candy text-[#8B6F47] tracking-wider">孩子端</span>
+                <span className="text-2xl font-candy text-[#5D4037] tracking-wider">孩子端</span>
               </div>
             </button>
           </div>
 
-          <Link to="/" className="text-[#8B6F47]/30 text-xs font-bold flex items-center gap-2 hover:text-[#8B6F47] transition-colors py-4 px-8 rounded-full hover:bg-white/30">
+          <Link to="/" className="text-[#5D4037]/30 text-xs font-bold flex items-center gap-2 hover:text-[#5D4037] transition-colors py-4 px-8 rounded-full hover:bg-white/30">
             <ArrowLeft size={14} /> 返回游戏大厅
           </Link>
         </div>
@@ -153,27 +153,27 @@ const KiddiePlanApp: React.FC = () => {
       <div className="h-screen w-screen relative flex flex-col items-center justify-center overflow-hidden animate-in zoom-in-95 duration-500">
         {/* Background */}
         <div className="absolute inset-0 bg-[#Fdfdfd]">
-          <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-gradient-to-bl from-[#F8E4D9]/30 to-transparent blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-gradient-to-tr from-[#D6E6F2]/30 to-transparent blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-gradient-to-bl from-[#FF8095]/30 to-transparent blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-gradient-to-tr from-[#E6E6FA]/30 to-transparent blur-3xl"></div>
         </div>
 
         <button
           onClick={() => setPortal('selection')}
-          className="absolute top-10 left-10 w-14 h-14 bg-white/80 rounded-[20px] flex items-center justify-center text-[#8B6F47] shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all z-50"
+          className="absolute top-10 left-10 w-14 h-14 bg-white/80 rounded-[20px] flex items-center justify-center text-[#5D4037] shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all z-50"
         >
           <Home size={24} />
         </button>
 
         <div className="bg-white/60 backdrop-blur-xl p-12 w-full max-w-sm rounded-[60px] shadow-[0_40px_80px_rgba(0,0,0,0.05)] border-8 border-white relative z-10 animate-float-kawaii">
           <div className="text-center space-y-6 mb-10">
-            <div className={`w-28 h-28 mx-auto rounded-[40px] flex items-center justify-center shadow-xl border-4 border-white ${portal === 'parent' ? 'bg-[#F8E4D9]' : 'bg-[#D6E6F2]'}`}>
+            <div className={`w-28 h-28 mx-auto rounded-[40px] flex items-center justify-center shadow-xl border-4 border-white ${portal === 'parent' ? 'bg-[#FF8095]' : 'bg-[#E6E6FA]'}`}>
               {portal === 'parent' ? <Lock size={48} className="text-white" /> : <Sparkles size={48} className="text-white" />}
             </div>
             <div>
-              <h2 className="text-4xl font-candy text-[#8B6F47]">
+              <h2 className="text-4xl font-candy text-[#5D4037]">
                 {portal === 'parent' ? '家长通行证' : '梦境钥匙'}
               </h2>
-              <p className="text-[10px] text-[#8B6F47] opacity-40 font-bold tracking-[0.3em] uppercase mt-2">
+              <p className="text-[10px] text-[#5D4037] opacity-40 font-bold tracking-[0.3em] uppercase mt-2">
                 {portal === 'parent' ? 'Parent Access Only' : 'Enter Room Code'}
               </p>
             </div>
@@ -187,7 +187,7 @@ const KiddiePlanApp: React.FC = () => {
                 onChange={(e) => setAuthCode(e.target.value.toUpperCase())}
                 placeholder={portal === 'parent' ? '输入密码' : '4位号码'}
                 maxLength={portal === 'parent' ? 20 : 4}
-                className="w-full bg-white rounded-[30px] px-6 py-6 text-center text-3xl font-candy text-[#8B6F47] focus:ring-4 focus:ring-[#F8E4D9]/30 transition-all border-4 border-transparent focus:border-[#F8E4D9]/50 shadow-inner outline-none placeholder:text-[#8B6F47]/20"
+                className="w-full bg-white rounded-[30px] px-6 py-6 text-center text-3xl font-candy text-[#5D4037] focus:ring-4 focus:ring-[#FF8095]/30 transition-all border-4 border-transparent focus:border-[#FF8095]/50 shadow-inner outline-none placeholder:text-[#5D4037]/20"
                 autoFocus
               />
             </div>
@@ -195,7 +195,7 @@ const KiddiePlanApp: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-6 rounded-[35px] text-white font-candy text-2xl shadow-xl active:scale-95 transition-all disabled:opacity-50 border-4 border-white ${portal === 'parent' ? 'bg-[#F8E4D9] from-[#F8E4D9] to-[#D6E6F2] bg-gradient-to-r' : 'bg-[#D6E6F2] from-[#D6E6F2] to-[#F8E4D9] bg-gradient-to-r'}`}
+              className={`w-full py-6 rounded-[35px] text-white font-candy text-2xl shadow-xl active:scale-95 transition-all disabled:opacity-50 border-4 border-white ${portal === 'parent' ? 'bg-[#FF8095] from-[#FF8095] to-[#E6E6FA] bg-gradient-to-r' : 'bg-[#E6E6FA] from-[#E6E6FA] to-[#FF8095] bg-gradient-to-r'}`}
             >
               {loading ? '验证中...' : '开启大门'}
             </button>
@@ -207,7 +207,7 @@ const KiddiePlanApp: React.FC = () => {
 
   // 3. Main Portal View
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-[#FFF0D9]">
+    <div className="h-screen w-screen relative overflow-hidden bg-[#FFF5E1]">
 
 
       <div className="h-full w-full flex flex-col lg:max-w-none md:max-w-2xl sm:max-w-md mx-auto relative shadow-2xl bg-white/50 backdrop-blur-sm">

@@ -1,28 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap');
 
 :root {
-    /* Wooly家居风 配色方案 - 模拟Crochet项目 */
+    /* Wooly (Crochet) 风格调色板 */
     --primary: #FF8095;
-    /* 鲜艳粉色 - 主色 */
+    /* wooly-pink-500 */
     --secondary: #FFDAB9;
-    /* 桃色 - 副色 */
+    /* wooly-peach */
     --background: #FFF5E1;
-    /* 奶油色 - 页面背景 */
+    /* wooly-cream */
     --accent-mint: #D8BFD8;
-    /* 鼠尾草紫 - 已完成任务背景 */
+    /* wooly-sage */
     --accent-blue: #E6E6FA;
-    /* 薰衣草 - 星星奖励、图标点缀 */
-    --text-primary: #5D4E37;
-    /* 咖啡棕 - 主要文字（加深） */
+    /* wooly-lavender */
+    --text-primary: #5D4037;
+    /* wooly-brown */
     --text-secondary: #FFB6C1;
-    /* 浅粉色 - 次要文字/装饰 */
-    --border-color: #FFFFFF;
-    /* 白色边框 */
+    /* wooly-pink-300 */
+    --border-color: #5D4037;
+    /* 深棕色边框，匹配画风 */
 
-    /* 兼容旧变量名（逐步替换） */
-    --pastel-pink: var(--secondary);
+    /* 兼容旧变量名 */
+    --pastel-pink: var(--primary);
     --pastel-blue: var(--accent-blue);
-    --pastel-purple: var(--primary);
+    --pastel-purple: var(--accent-mint);
     --pastel-yellow: var(--background);
     --pastel-green: var(--accent-mint);
     --pastel-bg: var(--background);
@@ -30,25 +30,13 @@
     --pastel-border: var(--border-color);
 }
 
-.kiddie-plan-body {
-    font-family: 'Fredoka', 'Noto Sans SC', sans-serif;
-    background-color: var(--macaron-bg);
-    color: var(--macaron-text);
-    -webkit-tap-highlight-color: transparent;
-    min-height: 100vh;
-    overflow-x: hidden;
+body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    font-family: ' Fredoka', 'ZCOOL KuaiLe', sans-serif;
 }
 
-.font-kawaii {
-    font-family: 'Fredoka', cursive;
-}
-
-.font-candy {
-    font-family: 'ZCOOL KuaiLe', cursive;
-}
-
-/* Cozy Background */
-/* Mesh Gradient Background - Wooly家居风 */
+/* Mesh Gradient Background - Wooly 风格 */
 .mesh-gradient {
     background: radial-gradient(at 0% 0%, #FFDAB9 0px, transparent 50%),
         radial-gradient(at 50% 0%, #E6E6FA 0px, transparent 50%),
@@ -57,15 +45,19 @@
     background-color: var(--background);
 }
 
-/* Organic Shapes - Wooly圆角卡片 */
+/* Organic Shapes - 模拟 Crochet 的卡片样式 */
 .kawaii-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
-    border-radius: 48px;
-    border: 3px solid var(--border-color);
-    box-shadow: 0 4px 20px -2px rgba(255, 182, 193, 0.4);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 36px;
+    border: 3px solid var(--text-primary);
+    box-shadow: 6px 6px 0px var(--text-primary);
     position: relative;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.2s ease-in-out;
+}
+
+.kawaii-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px var(--text-primary);
 }
 
 .kawaii-button {

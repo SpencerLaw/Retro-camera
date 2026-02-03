@@ -24,11 +24,11 @@ const Profile: React.FC<ProfileProps> = ({ children, selectedChildId, onSelectCh
               onClick={() => onSelectChild(child.id)}
               className={`flex flex-col items-center gap-2 transition-all ${selectedChildId === child.id ? 'scale-110' : 'opacity-40 grayscale'}`}
             >
-              <div className={`w-16 h-16 sketch-card overflow-hidden ${selectedChildId === child.id ? 'border-[#F8E4D9]' : ''}`}>
+              <div className={`w-16 h-16 sketch-card overflow-hidden ${selectedChildId === child.id ? 'border-[#FF8095]' : ''}`}>
                 <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
               </div>
               <span className="text-xs font-black">{child.name}</span>
-              {selectedChildId === child.id && <Smile size={12} className="text-[#F8E4D9]" />}
+              {selectedChildId === child.id && <Smile size={12} className="text-[#FF8095]" />}
             </button>
           ))}
           {children.length < 3 && (
@@ -45,7 +45,7 @@ const Profile: React.FC<ProfileProps> = ({ children, selectedChildId, onSelectCh
       <div className="space-y-4">
         {[
           { icon: <Heart className="text-[#FF6969]" />, label: '家长寄语', color: 'bg-[#FFE5E5]' },
-          { icon: <Smile className="text-[#F8E4D9]" />, label: '我的成就记录', color: 'bg-[#FFF0D9]' },
+          { icon: <Smile className="text-[#FF8095]" />, label: '我的成就记录', color: 'bg-[#FFB6C1]' },
           { icon: <LogOut className="text-gray-400" />, label: '退出登录', color: 'bg-gray-50' },
         ].map((item, idx) => (
           <div key={idx} className={`sketch-card p-4 flex items-center justify-between cursor-pointer hover:translate-x-1 transition-all ${item.color}`}>

@@ -2,21 +2,22 @@
 
 :root {
     /* Wooly (Crochet) 风格调色板 */
-    --primary: #FF8095;
-    /* wooly-pink-500 */
-    --secondary: #FFDAB9;
-    /* wooly-peach */
-    --background: #FFF5E1;
-    /* wooly-cream */
-    --accent-mint: #D8BFD8;
-    /* wooly-sage */
-    --accent-blue: #E6E6FA;
-    /* wooly-lavender */
-    --text-primary: #5D4037;
-    /* wooly-brown */
-    --text-secondary: #FFB6C1;
-    /* wooly-pink-300 */
-    --border-color: #5D4037;
+    --primary: #FF6B81;
+    /* 加深毛绒粉 */
+    --secondary: #FFA07A;
+    /* 加深桃色 (Light Salmon) */
+    --background: #F5EDE0;
+    /* 加深背景暖色 (Warm Sand) */
+    --accent-mint: #B19CD9;
+    /* 加深紫薇花色 */
+    --accent-blue: #CBC3E3;
+    /* 加深薰衣草紫 */
+    --text-primary: #3E2723;
+    /* 加深咖啡棕 (Darker Chocolate) */
+    --text-secondary: #FF8095;
+    /* 更显眼的次要文字 */
+    --border-color: #3E2723;
+    /* 对应的边框加深 */
     /* 深棕色边框，匹配画风 */
 
     /* 兼容旧变量名 */
@@ -30,6 +31,10 @@
     --pastel-border: var(--border-color);
 }
 
+html {
+    font-size: 108%;
+}
+
 body {
     background-color: var(--background);
     color: var(--text-primary);
@@ -38,26 +43,26 @@ body {
 
 /* Mesh Gradient Background - Wooly 风格 */
 .mesh-gradient {
-    background: radial-gradient(at 0% 0%, #FFDAB9 0px, transparent 50%),
-        radial-gradient(at 50% 0%, #E6E6FA 0px, transparent 50%),
-        radial-gradient(at 100% 0%, #FF8095 0px, transparent 50%),
-        radial-gradient(at 50% 50%, #FFF5E1 0px, transparent 50%);
+    background: radial-gradient(at 0% 0%, #FFA07A 0px, transparent 50%),
+        radial-gradient(at 50% 0%, #CBC3E3 0px, transparent 50%),
+        radial-gradient(at 100% 0%, #FF6B81 0px, transparent 50%),
+        radial-gradient(at 50% 50%, #F5EDE0 0px, transparent 50%);
     background-color: var(--background);
 }
 
 /* Organic Shapes - 模拟 Crochet 的卡片样式 */
 .kawaii-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     border-radius: 36px;
     border: 3px solid var(--text-primary);
-    box-shadow: 6px 6px 0px var(--text-primary);
+    box-shadow: 8px 8px 0px var(--text-primary);
     position: relative;
     transition: all 0.2s ease-in-out;
 }
 
 .kawaii-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 8px 8px 0px var(--text-primary);
+    transform: translate(-3px, -3px);
+    box-shadow: 12px 12px 0px var(--text-primary);
 }
 
 .kawaii-button {

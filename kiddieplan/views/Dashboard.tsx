@@ -26,7 +26,7 @@ const Dashboard: React.FC<DashboardProps> = ({ child, onToggleTask }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="sketch-card p-5 bg-[#FFF5E1]">
+      <div className="sketch-card p-5 bg-[#F5EDE0]">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-handwriting text-2xl flex items-center gap-2">
             <Clock size={20} /> 今日时刻表
@@ -41,8 +41,8 @@ const Dashboard: React.FC<DashboardProps> = ({ child, onToggleTask }) => {
           {sortedTasks.map((task, idx) => (
             <div key={task.id} className="relative">
               {/* 节点图标 */}
-              <div className={`absolute left-[-31px] top-1 w-6 h-6 rounded-full border-2 border-[#5D4037] flex items-center justify-center bg-white z-10 transition-colors ${task.completed ? 'bg-[#FF80958]' : ''}`}>
-                {task.completed ? <CheckCircle2 size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 bg-[#5D4037] rounded-full"></div>}
+              <div className={`absolute left-[-31px] top-1 w-6 h-6 rounded-full border-2 border-[#3E2723] flex items-center justify-center bg-white z-10 transition-colors ${task.completed ? 'bg-[#FF6B81]' : ''}`}>
+                {task.completed ? <CheckCircle2 size={12} strokeWidth={3} className="text-white" /> : <div className="w-1.5 h-1.5 bg-[#3E2723] rounded-full"></div>}
               </div>
 
               {/* 任务内容卡片 */}

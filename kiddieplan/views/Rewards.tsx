@@ -28,23 +28,23 @@ const Rewards: React.FC<RewardsProps> = ({ child, updateChild, rewards, role }) 
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-500">
-      <div className="sketch-card p-6 bg-[#FF80955A] relative">
+      <div className="sketch-card p-6 bg-[#FF6B81]/60 relative">
         <div className="tape"></div>
         <div className="flex flex-col items-center">
           <div className="text-[10px] font-black opacity-50 mb-1">我的成长积分池</div>
           <div className="flex items-center gap-2">
             <Star className="text-white fill-white" size={24} />
-            <div className="text-5xl font-handwriting text-[#5D4037]">{child.points.toFixed(1)}</div>
+            <div className="text-5xl font-handwriting text-[#3E2723]">{child.points.toFixed(1)}</div>
           </div>
-          <div className="mt-3 text-[10px] font-bold bg-white/40 px-3 py-1 rounded-full border border-[#5D4037]/20">
+          <div className="mt-3 text-[10px] font-bold bg-white/40 px-3 py-1 rounded-full border border-[#3E2723]/20">
             继续加油，解锁更多惊喜！
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-handwriting text-2xl flex items-center gap-2">
-          <Gift size={24} className="text-[#FFB6C1]" /> 梦想兑换站
+        <h3 className="font-handwriting text-2xl flex items-center gap-2 text-[#3E2723]">
+          <Gift size={24} className="text-[#FF8095]" /> 梦想兑换站
         </h3>
 
         <div className="grid grid-cols-2 gap-4">

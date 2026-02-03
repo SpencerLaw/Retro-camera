@@ -15,6 +15,25 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [activeTab, setActiveTab] = useState<AppTab>('home');
     const [loading, setLoading] = useState(true);
     const [childProfile, setChildProfile] = useState<{ name: string; avatar: string }>({ name: '宝贝', avatar: '' });
+    const [plannerTab, setPlannerTab] = useState(0);
+
+    const handleRedeemReward = async (reward: any) => {
+        if (coins < reward.cost) return;
+        try {
+            const res = await fetch('/api/kiddieplan/client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'redeem_reward', token, data: { rewardId: reward.id, cost: reward.cost } })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setCoins(result.points);
+                alert(`🎉 成功兑换 ${reward.name}！快去找爸爸妈妈领取吧。`);
+            }
+        } catch (err) {
+            alert('😭 兑换失败，请稍后再试');
+        }
+    };
 
     useEffect(() => {
         fetchTodayData();
@@ -77,7 +96,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const DashboardView = () => (
         <div className="space-y-12 animate-in fade-in zoom-in-95 duration-1000 pb-28">
             {/* Pro Summary Dashboard - Inspired by 好学伴 */}
-            <div className="kawaii-card bg-white/40 p-8 border-4 border-white shadow-3xl overflow-hidden relative">
+            <div className="kawaii-card bg-white/80 p-8 border-4 border-white shadow-3xl overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-6">
@@ -98,7 +117,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         { label: '完成进度', val: `${progress}%`, icon: '📈', color: '#FFB6C1' },
                         { label: '成就奖牌', val: '12', icon: '🏆', color: '#FFF5E1' }
                     ].map((item, i) => (
-                        <div key={i} className="bg-white/60 p-4 rounded-[28px] flex flex-col items-center gap-2 border-2 border-white/50">
+                        <div key={i} className="bg-white/80 p-4 rounded-[28px] flex flex-col items-center gap-2 border-2 border-white/50">
                             <span className="text-xl">{item.icon}</span>
                             <div className="text-[14px] font-candy text-[#5D4037]">{item.val}</div>
                             <div className="text-[8px] font-bold text-[#5D4037]/40 uppercase tracking-widest">{item.label}</div>
@@ -123,13 +142,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         <div className={`w-20 h-20 bg-white rounded-[32px] shadow-sm flex items-center justify-center transition-all group-hover:rotate-0 ${mod.rot} border-4 border-white/50`}>
                             <mod.icon size={36} style={{ color: mod.color }} strokeWidth={2.5} />
                         </div>
-                        <span className="text-base font-bold text-[#5D4D7A] tracking-wider">{mod.label}</span>
+                        <span className="text-base font-bold text-[#3E2723] tracking-wider">{mod.label}</span>
                     </div>
                 ))}
             </div>
 
             {/* Sub Tools Row - Soft & Healing */}
-            <div className="kawaii-card bg-white/70 p-10 flex justify-between items-center border-white shadow-2xl backdrop-blur-md">
+            <div className="kawaii-card bg-white/90 p-10 flex justify-between items-center border-white shadow-2xl backdrop-blur-md">
                 {[
                     { icon: Smile, label: '沟通', color: '#FF8095' },
                     { icon: Gift, label: '奖励', color: '#FFB6C1' },
@@ -154,7 +173,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     </div>
                 </div>
                 <div className="space-y-6">
-                    {tasks.slice(0, 4).map((task, idx) => {
+                    {tasks.map((task, idx) => {
                         const colors = ['#FFB6C1', '#E6E6FA', '#FF8095', '#FFF5E1'];
                         const isCompleted = checkins.includes(task.id);
                         return (
@@ -181,8 +200,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     <div className="bg-[#5D4D7A]/5 px-5 py-2.5 rounded-full flex items-center gap-4 border-4 border-white shadow-inner">
                                         <div className="text-[12px] font-mono font-bold text-[#5D4D7A] opacity-60">00:00:00</div>
                                         <div className="flex gap-2">
-                                            <div className="w-7 h-7 bg-[#8DB580] rounded-lg flex items-center justify-center text-white scale-90 hover:scale-100 transition-all cursor-pointer"><Timer size={14} /></div>
-                                            <div className="w-7 h-7 bg-[#EA6B66] rounded-lg flex items-center justify-center text-white scale-90 hover:scale-100 transition-all cursor-pointer"><CheckCircle2 size={14} /></div>
+                                            <div onClick={() => alert('⏲️ 专注计时模型正处于试验阶段，即将开启！')} className="w-8 h-8 bg-[#8DB580] rounded-lg flex items-center justify-center text-white scale-90 hover:scale-100 transition-all cursor-pointer shadow-sm"><Timer size={14} /></div>
+                                            <div onClick={() => handleToggleTask(task.id)} className="w-8 h-8 bg-[#FF8095] rounded-lg flex items-center justify-center text-white scale-90 hover:scale-100 transition-all cursor-pointer shadow-sm"><CheckCircle2 size={14} /></div>
                                         </div>
                                     </div>
                                     <button
@@ -209,7 +228,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {/* View Tabs - Warm Selection */}
                 <div className="flex bg-white/60 p-1.5 rounded-[22px] gap-2 shadow-inner">
                     {['今日安排', '本周规划', '成就记录'].map((t, i) => (
-                        <button key={i} className={`flex-1 py-3 text-[11px] font-bold rounded-[18px] transition-all ${i === 1 ? 'bg-[#FF8095] text-white shadow-lg' : 'text-[#5D4037] opacity-40'}`}>
+                        <button
+                            key={i}
+                            onClick={() => setPlannerTab(i)}
+                            className={`flex-1 py-3 text-[12px] font-bold rounded-[18px] transition-all ${plannerTab === i ? 'bg-[#FF8095] text-white shadow-lg' : 'text-[#5D4037] opacity-40'}`}
+                        >
                             {t}
                         </button>
                     ))}
@@ -299,12 +322,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     };
 
     return (
-        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#FFF5E1]/30 relative">
+        <div className="flex-1 flex flex-col animate-in fade-in duration-1000 h-full overflow-hidden bg-[#F5EDE0]/60 relative">
             {/* Top Right Home Button */}
             <div className="absolute top-6 right-6 z-50">
                 <button
                     onClick={onLogout}
-                    className="w-10 h-10 bg-white/60 hover:bg-white rounded-full flex items-center justify-center text-[#5D4D7A] shadow-md border-2 border-white backdrop-blur-sm active:scale-90 transition-all"
+                    className="w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center text-[#3E2723] shadow-md border-2 border-white backdrop-blur-sm active:scale-90 transition-all"
                 >
                     <Home size={18} strokeWidth={2.5} />
                 </button>
@@ -340,7 +363,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                     <div className="text-center space-y-4">
                                         <div className="text-base font-bold text-[#5D4037]">{reward.name}</div>
-                                        <button className={`w-full py-3 rounded-full text-[11px] font-bold transition-all shadow-xl border-4 border-white ${coins >= reward.cost ? 'bg-[#FF8095] text-white' : 'bg-gray-100/50 text-gray-300 opacity-50 cursor-not-allowed'}`}>
+                                        <button
+                                            onClick={() => coins >= reward.cost && handleRedeemReward(reward)}
+                                            className={`w-full py-4 rounded-full text-[12px] font-bold transition-all shadow-xl border-4 border-white ${coins >= reward.cost ? 'bg-[#FF8095] text-white' : 'bg-gray-100/50 text-gray-300 opacity-50 cursor-not-allowed'}`}
+                                        >
                                             {reward.cost} 🍭 兑换
                                         </button>
                                     </div>
@@ -352,7 +378,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {activeTab === 'me' && (
                     <div className="space-y-10 animate-in slide-in-from-bottom-10 duration-700 pb-20">
                         {/* Achievement Summary - Dynamic Warmth */}
-                        <div className="kawaii-card bg-gradient-to-br from-[#7BB0A6] to-[#A2D2FF] p-10 text-white border-none shadow-3xl relative overflow-hidden">
+                        <div className="kawaii-card bg-gradient-to-br from-[#FF8095] to-[#FFB6C1] p-10 text-white border-none shadow-3xl relative overflow-hidden">
                             <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
                             <div className="absolute bottom-[-20%] left-[-10%] w-32 h-32 bg-white/5 rounded-full"></div>
                             <div className="relative z-10 flex flex-col items-center gap-6">
@@ -383,7 +409,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             </div>
                         </div>
 
-                        <button onClick={onLogout} className="w-full py-5 rounded-[28px] bg-white text-[#FFDEE9] font-bold text-xs flex items-center justify-center gap-3 shadow-md hover:bg-[#FFDEE9] hover:text-white transition-all border-4 border-white">
+                        <button onClick={onLogout} className="w-full py-5 rounded-[28px] bg-white text-[#FF8095] font-bold text-xs flex items-center justify-center gap-3 shadow-md hover:bg-[#FF8095] hover:text-white transition-all border-4 border-white">
                             <LogOut size={18} /> 登出星梦之旅
                         </button>
                     </div>

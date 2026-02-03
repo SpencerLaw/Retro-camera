@@ -18,7 +18,7 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
           <button
             key={v}
             onClick={() => setView(v)}
-            className={`flex-1 py-4 kawaii-button font-candy text-xl transition-all shadow-xl ${view === v ? 'bg-[#FF8095] text-[#5D4037] border-white scale-110' : 'bg-white/60 text-[#5D4037]/40 border-transparent'}`}
+            className={`flex-1 py-4 kawaii-button font-candy text-xl transition-all shadow-xl ${view === v ? 'bg-[#FF6B81] text-white border-white scale-110' : 'bg-white/80 text-[#3E2723]/40 border-transparent'}`}
           >
             {v === 'week' ? '本周图纸' : '梦想航线'}
           </button>
@@ -27,9 +27,9 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
 
       {
         view === 'week' ? (
-          <div className="kawaii-card p-10 bg-white/40 border-white shadow-2xl">
+          <div className="kawaii-card p-10 bg-white/80 border-white shadow-2xl">
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-14 h-14 bg-[#E6E6FA] rounded-[28px] flex items-center justify-center shadow-xl border-4 border-white animate-float-kawaii">
+              <div className="w-14 h-14 bg-[#CBC3E3] rounded-[28px] flex items-center justify-center shadow-xl border-4 border-white animate-float-kawaii">
                 <Calendar size={28} className="text-[#5D4037]" />
               </div>
               <div>
@@ -42,7 +42,7 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
               {weekDays.map((day, idx) => (
                 <div key={day} className="kawaii-card bg-white p-6 flex justify-between items-center group cursor-pointer hover:bg-[#FFF9C4]/30 border-white shadow-lg transition-all hover:translate-x-3">
                   <div className="flex items-center gap-6">
-                    <div className={`w-14 h-14 rounded-[28px] flex items-center justify-center font-candy text-white shadow-xl border-4 border-white ${idx < 3 ? 'bg-[#FFB6C1]' : 'bg-[#FF8095]'}`}>
+                    <div className={`w-14 h-14 rounded-[28px] flex items-center justify-center font-candy text-white shadow-xl border-4 border-white ${idx < 3 ? 'bg-[#FF8095]' : 'bg-[#FF6B81]'}`}>
                       {idx + 1}
                     </div>
                     <div>
@@ -74,9 +74,9 @@ const Planner: React.FC<PlannerProps> = ({ child }) => {
 
             <div className="space-y-12 relative">
               {[
-                { title: '阶段一：奇才萌动', detail: '完成所有寒假作业第一阶段', icon: <Flag size={18} />, color: '#FFF5E1' },
-                { title: '阶段二：梦想起飞', detail: '每日增加30分钟英语听力', icon: <Sparkles size={18} />, color: '#FFB6C1' },
-                { title: '阶段三：全能旅人', detail: '如果坚持打卡，周末去游乐园！', icon: <Gift size={18} />, color: '#E6E6FA' },
+                { title: '阶段一：奇才萌动', detail: '完成所有寒假作业第一阶段', icon: <Flag size={18} />, color: '#F5EDE0' },
+                { title: '阶段二：梦想起飞', detail: '每日增加30分钟英语听力', icon: <Sparkles size={18} />, color: '#FF8095' },
+                { title: '阶段三：全能旅人', detail: '如果坚持打卡，周末去游乐园！', icon: <Gift size={18} />, color: '#CBC3E3' },
               ].map((milestone, idx) => (
                 <div key={idx} className="flex gap-8 items-start relative z-10">
                   <div className={`w-16 h-16 kawaii-card ${idx === 0 ? milestone.color : 'bg-white'} flex items-center justify-center shrink-0 shadow-2xl border-4 border-white animate-float-kawaii translate-x-[-4px]`} style={{ backgroundColor: idx === 0 ? '' : milestone.color as string, animationDelay: `${idx * 0.3}s` }}>

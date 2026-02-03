@@ -915,10 +915,11 @@
   transform: scale(0.98);
 }
 
-font-size: 1.8rem;
-font-weight: 800;
-color: white;
-letter-spacing: 2px;
+.btn-main-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 2px;
 }
 
 .btn-sub-text {

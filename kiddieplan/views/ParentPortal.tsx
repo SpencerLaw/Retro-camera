@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home } from 'lucide-react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS } from '../constants/templates';
 
@@ -62,6 +62,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             if (activeTab === 'rewards') fetchRewards();
         }
     }, [selectedChildId, activeTab]);
+
+    // Background polling for Registry/Live Status
+    useEffect(() => {
+        let timer: any;
+        if (activeTab === 'registry' || activeTab === 'children') {
+            timer = setInterval(fetchConfig, 30000); // 30s auto-refresh for live status
+        }
+        return () => clearInterval(timer);
+    }, [activeTab]);
 
     const fetchConfig = async () => {
         setLoading(true);
@@ -469,6 +478,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <div className={`w-28 h-28 rounded-[36px] overflow-hidden border-4 shadow-sm transition-all relative ${selectedChildId === child.id ? 'border-[#FF6B81] shadow-[0_8px_0_rgba(234,32,39,0.2)]' : 'border-transparent'}`}>
                                             <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
 
+                                            {/* Live Status Indicator for Children List */}
+                                            {child.isFocusing && (
+                                                <div className="absolute top-2 left-2 bg-[#FF6B81] px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg animate-pulse border border-white/50">
+                                                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                                    <span className="text-[6px] font-black text-white uppercase">Live</span>
+                                                </div>
+                                            )}
+
                                             {/* Plus Icon Overlay for Selected */}
                                             {selectedChildId === child.id && (
                                                 <div className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md border-2 border-[#FF6B81] animate-bounce-slow">
@@ -490,28 +507,49 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         {selectedChild && (
                             <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
                                 {/* Kid Stats - Warm Gradient */}
-                                <div className="kawaii-card bg-gradient-to-br from-[#CBC3E3] to-[#B19CD9] p-10 flex justify-between items-center relative overflow-hidden group border-4 border-white shadow-2xl animate-float-kawaii">
-                                    <div className="absolute -right-10 -bottom-10 opacity-30 blur-sm group-hover:rotate-45 group-hover:scale-125 transition-all duration-1000">
-                                        <Star size={200} className="text-white fill-white" />
-                                    </div>
-                                    <div className="relative z-10 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="text-[10px] font-black text-white uppercase tracking-[0.2em] bg-black/20 px-3 py-1 rounded-full backdrop-blur-sm">进入房间码</div>
-                                            <button onClick={handleEditChild} className="bg-white text-[#FF6B81] px-4 py-1.5 rounded-full text-[10px] font-black shadow-lg hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1.5 border-b-2 border-black/10">
-                                                <Edit2 size={12} strokeWidth={3} /> 修改资料
-                                            </button>
+                                {selectedChild.isFocusing ? (
+                                    <div className="kawaii-card bg-gradient-to-br from-[#FF6B81] to-[#FFA07A] p-10 flex justify-between items-center relative overflow-hidden group border-4 border-white shadow-2xl animate-pulse">
+                                        <div className="absolute inset-0 bg-white/10 animate-[shimmer_2s_infinite]"></div>
+                                        <div className="relative z-10 space-y-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
+                                                <span className="text-[10px] font-black text-white uppercase tracking-[0.3em]">正在专注挑战中</span>
+                                            </div>
+                                            <h4 className="text-4xl font-candy text-white drop-shadow-md">
+                                                {selectedChild.activeTaskName || '梦想起航'}
+                                            </h4>
+                                            <p className="text-[10px] font-bold text-white/70 uppercase">计时: {Math.floor(selectedChild.focusSeconds / 60)} 分钟 {selectedChild.focusSeconds % 60} 秒</p>
                                         </div>
-                                        <div className="text-7xl font-black text-white tracking-[0.1em] drop-shadow-md" style={{ fontFamily: 'monospace' }}>
-                                            {selectedChild.roomCode}
-                                        </div>
-                                    </div>
-                                    <div className="text-right relative z-10 space-y-2">
-                                        <div className="text-[9px] font-bold text-white/70 uppercase tracking-widest">成长总积分</div>
-                                        <div className="text-4xl font-candy text-white flex items-center justify-end gap-2 drop-shadow-md">
-                                            {selectedChild.points || 0} <span className="text-xl">☀️</span>
+                                        <div className="relative z-10">
+                                            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 backdrop-blur-md">
+                                                <Timer className="text-white animate-spin-slow" size={32} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="kawaii-card bg-gradient-to-br from-[#CBC3E3] to-[#B19CD9] p-10 flex justify-between items-center relative overflow-hidden group border-4 border-white shadow-2xl animate-float-kawaii">
+                                        <div className="absolute -right-10 -bottom-10 opacity-30 blur-sm group-hover:rotate-45 group-hover:scale-125 transition-all duration-1000">
+                                            <Star size={200} className="text-white fill-white" />
+                                        </div>
+                                        <div className="relative z-10 space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="text-[10px] font-black text-white uppercase tracking-[0.2em] bg-black/20 px-3 py-1 rounded-full backdrop-blur-sm">进入房间码</div>
+                                                <button onClick={handleEditChild} className="bg-white text-[#FF6B81] px-4 py-1.5 rounded-full text-[10px] font-black shadow-lg hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1.5 border-b-2 border-black/10">
+                                                    <Edit2 size={12} strokeWidth={3} /> 修改资料
+                                                </button>
+                                            </div>
+                                            <div className="text-7xl font-black text-white tracking-[0.1em] drop-shadow-md" style={{ fontFamily: 'monospace' }}>
+                                                {selectedChild.roomCode}
+                                            </div>
+                                        </div>
+                                        <div className="text-right relative z-10 space-y-2">
+                                            <div className="text-[9px] font-bold text-white/70 uppercase tracking-widest">成长总积分</div>
+                                            <div className="text-4xl font-candy text-white flex items-center justify-end gap-2 drop-shadow-md">
+                                                {selectedChild.points || 0} <span className="text-xl">☀️</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Menu Buttons - High Contrast Warmth */}
                                 <div className="grid grid-cols-2 gap-8">
@@ -577,7 +615,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
                                         className="bg-white rounded-2xl p-4 flex items-center gap-4 hover:bg-[#fff0f0] transition-all border-b-4 border-[#eee] active:border-b-0 active:translate-y-1 shadow-[0_4px_0_rgba(0,0,0,0.05)] group"
                                     >
-                                        <div className="w-12 h-12 bg-[#FFDAB9Base] rounded-xl flex items-center justify-center text-2xl shadow-inner border-b-4 border-[#F4A460] group-hover:scale-110 transition-transform">
+                                        <div className="w-12 h-12 bg-[#F5EDE0] rounded-xl flex items-center justify-center text-2xl shadow-inner border-b-4 border-[#F4A460] group-hover:scale-110 transition-transform">
                                             {tmp.icon}
                                         </div>
                                         <div className="text-left">
@@ -707,7 +745,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         </div>
                                         <div className="flex-1 space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <h4 className="text-xl font-black text-[#5D4037]">{kid.name}</h4>
+                                                <div className="flex items-center gap-3">
+                                                    <h4 className="text-xl font-black text-[#5D4037]">{kid.name}</h4>
+                                                    {kid.isFocusing && (
+                                                        <div className="bg-[#FF6B81] px-3 py-1 rounded-full flex items-center gap-2 shadow-sm animate-pulse border-2 border-white">
+                                                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                                            <span className="text-[8px] font-black text-white uppercase">Focusing</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <span className="text-[10px] font-black text-white bg-[#5D4037] px-2 py-1 rounded uppercase tracking-widest">RM: {kid.roomCode}</span>
                                             </div>
                                             <div className="flex items-center gap-3">

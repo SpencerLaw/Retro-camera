@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
+import { ttsManager } from './utils/ttsManager';
 
 interface Message {
     id: string;
@@ -24,6 +25,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [showSettings, setShowSettings] = useState(false);
 
     const lastPlayedId = useRef<string | null>(null);
     const pollingTimer = useRef<NodeJS.Timeout | null>(null);
@@ -42,24 +44,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     }, []);
 
     const speak = useCallback((text: string, isEmergency: boolean) => {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(text);
-
-        utterance.lang = 'zh-CN';
-        utterance.rate = isEmergency ? 0.85 : 1.0;
-
-        if (isEmergency) {
-            let count = 0;
-            utterance.onend = () => {
-                count++;
-                if (count < 3) {
-                    setTimeout(() => window.speechSynthesis.speak(utterance), 1200);
-                }
-            };
-        }
-        window.speechSynthesis.speak(utterance);
+        ttsManager.speak(text, {
+            engine: 'edge',
+            voice: 'zh-CN-YunxiNeural',
+            rate: isEmergency ? 0.85 : 1.0
+        });
     }, []);
 
     const fetchMessage = useCallback(async () => {
@@ -275,6 +264,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     </button>
                 </div>
             </div>
+
 
             {/* Main Broadcast Area */}
             <div className={`flex-1 flex flex-col items-center justify-center p-10 md:p-24 text-center relative z-10 overflow-hidden`}>

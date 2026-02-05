@@ -378,10 +378,25 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const addTask = (title?: string, time?: string, points?: number) => {
         if (title) {
+            const finalTime = time || '08:30';
+            const isDuplicate = currentTasks.some(t => t.title === title && t.timeSlot === finalTime);
+
+            if (isDuplicate) {
+                setDialogConfig({
+                    isOpen: true,
+                    title: '🚫 任务已重复',
+                    message: `“${title}”已经在 ${finalTime} 的清单里了，不需要重复添加哦~`,
+                    hideInput: true,
+                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                    placeholder: ''
+                });
+                return;
+            }
+
             const newTask: Task = {
                 id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
                 title,
-                timeSlot: time || '08:30',
+                timeSlot: finalTime,
                 points: points || 10,
                 completed: false,
                 isRequired: true,
@@ -399,10 +414,18 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 placeholder: '输入任务名称，例如：阅读30分钟',
                 onConfirm: (val, time) => {
                     if (!val) return;
+                    const finalTime = time || '08:00';
+                    const isDuplicate = currentTasks.some(t => t.title === val && t.timeSlot === finalTime);
+
+                    if (isDuplicate) {
+                        alert(`“${val}”已经存在于 ${finalTime} 了哦~`);
+                        return;
+                    }
+
                     const newTask: Task = {
                         id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
                         title: val,
-                        timeSlot: time || '08:00',
+                        timeSlot: finalTime,
                         points: 10,
                         completed: false,
                         isRequired: true,

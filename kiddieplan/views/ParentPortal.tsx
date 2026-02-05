@@ -480,13 +480,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <Sparkles className="text-blue-500" size={20} />
                         </div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex items-baseline gap-2">
                         <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                            星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span> <span className="text-sm font-bold text-gray-400 ml-1">家长端</span>
+                            星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
                         </h1>
-                        <div className="flex items-center gap-2 mt-0.5">
-                            <Clock size={10} className="text-gray-300" />
-                            <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider">北京时间：{formatBeijingTime(currentTime)}</span>
+                        <div className="flex flex-col">
+                            <span className="text-sm font-bold text-gray-400">家长端</span>
+                            <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-tight">
+                                {formatBeijingTime(currentTime)}
+                            </span>
                         </div>
                     </div>
                 </div>

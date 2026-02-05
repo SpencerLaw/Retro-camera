@@ -38,13 +38,24 @@ const KiddiePlanApp: React.FC = () => {
     setAuthCode('');
     setError(null);
 
-    // PERSISTENCE CHECK: If parent, check for saved token
+    // PERSISTENCE CHECK: If parent, check for saved token and 15-day expiration
     if (selectedRole === 'parent') {
       const savedParentToken = localStorage.getItem('kp_parent_token');
-      if (savedParentToken) {
-        setToken(savedParentToken);
-        setRole('parent');
-        setIsAuthenticated(true);
+      const savedAuthTime = localStorage.getItem('kp_parent_auth_time');
+
+      const now = Date.now();
+      const fifteenDaysInMs = 15 * 24 * 60 * 60 * 1000;
+
+      if (savedParentToken && savedAuthTime) {
+        if (now - parseInt(savedAuthTime) < fifteenDaysInMs) {
+          setToken(savedParentToken);
+          setRole('parent');
+          setIsAuthenticated(true);
+        } else {
+          // Session expired
+          localStorage.removeItem('kp_parent_token');
+          localStorage.removeItem('kp_parent_auth_time');
+        }
       }
     }
   };
@@ -73,6 +84,7 @@ const KiddiePlanApp: React.FC = () => {
         // Save token specifically by role if needed for persistence
         if (portal === 'parent') {
           localStorage.setItem('kp_parent_token', result.token);
+          localStorage.setItem('kp_parent_auth_time', Date.now().toString()); // Set auth timestamp
         } else {
           localStorage.setItem('kp_child_token', result.token);
         }

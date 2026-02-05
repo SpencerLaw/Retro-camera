@@ -410,11 +410,13 @@
         }
 
         // 防御性检查：确保 data 是数组
+        console.log('[Admin Console] API Response:', json);
         if (!Array.isArray(json.data)) {
-          console.warn('API 返回的 data 不是数组:', json.data);
+          console.warn('[Admin Console] API 返回的 data 不是数组:', json.data);
           currentData = [];
         } else {
           currentData = json.data;
+          console.log('[Admin Console] 成功加载', currentData.length, '条记录');
         }
 
         // 登录成功

@@ -5,11 +5,9 @@ export enum TaskCategory {
   EVENING = '晚间习惯',
   SPORTS = '运动健康',
   DISCIPLINE = '自律管理',
-  SOCIAL = '品德社交',
   CHORES = '劳动技能',
   HYGIENE = '个人卫生',
   CREATIVITY = '创意艺术',
-  SAFETY = '安全教育',
   OTHER = '自定义'
 }
 

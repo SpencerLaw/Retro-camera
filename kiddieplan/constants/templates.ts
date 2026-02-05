@@ -46,13 +46,13 @@ export const TASK_TEMPLATES = [
             { title: '🏃 户外活动', time: '16:30', points: 20, icon: '☀️' },
             { title: '🏀 体育锻炼', time: '17:30', points: 30, icon: '👟' },
             { title: '🧘 亲子运动', time: '19:30', points: 25, icon: '👨‍👩‍👧' },
-            { title: '🛹 技能练习', time: '16:00', points: 35, icon: '🛹' },
             { title: '🚶 饭后散步', time: '19:00', points: 15, icon: '🌳' },
             { title: '⚽ 球类运动', time: '17:00', points: 30, icon: '⚽' },
             { title: '🏊 游泳锻炼', time: '16:00', points: 35, icon: '🏊' },
             { title: '🚴 骑行运动', time: '17:30', points: 25, icon: '🚴' },
             { title: '👁️ 眼保健操', time: '10:00', points: 10, icon: '👀' },
             { title: '🏃 广播体操', time: '09:30', points: 15, icon: '🏃' },
+            { title: '🛹 技能练习', time: '16:00', points: 35, icon: '🛹' },
         ]
     },
     {
@@ -65,20 +65,6 @@ export const TASK_TEMPLATES = [
             { title: '📵 无手机时段', time: '18:30', points: 20, icon: '🚫' },
             { title: '🎮 控制游戏时间', time: '17:00', points: 25, icon: '🎮' },
             { title: '📺 限时看电视', time: '19:30', points: 15, icon: '📺' },
-        ]
-    },
-    {
-        category: TaskCategory.SOCIAL,
-        tasks: [
-            { title: '👋 主动打招呼', time: '08:00', points: 10, icon: '🗣️' },
-            { title: '🤝 分享与互助', time: '10:00', points: 15, icon: '🌟' },
-            { title: '🙏 学会感恩', time: '20:00', points: 15, icon: '❤️' },
-            { title: '💎 诚实守信', time: '21:00', points: 20, icon: '💎' },
-            { title: '👂 耐心倾听', time: '10:00', points: 15, icon: '👂' },
-            { title: '🙇 尊敬长辈', time: '08:00', points: 15, icon: '🙇' },
-            { title: '🤗 关心同学', time: '12:00', points: 15, icon: '🤗' },
-            { title: '🗣️ 礼貌用语', time: '08:00', points: 10, icon: '🗣️' },
-            { title: '🚫 不随意打断', time: '09:00', points: 15, icon: '🤫' },
         ]
     },
     {
@@ -116,20 +102,8 @@ export const TASK_TEMPLATES = [
             { title: '🧩 益智游戏', time: '16:00', points: 20, icon: '🧩' },
             { title: '📷 摄影记录', time: '10:00', points: 20, icon: '📷' },
             { title: '✏️ 日记写作', time: '21:00', points: 25, icon: '📔' },
-            { title: '🎭 才艺表演', time: '19:00', points: 30, icon: '🎭' },
             { title: '🔧 手工制作', time: '15:30', points: 25, icon: '🔧' },
             { title: '🧪 科学实验', time: '14:00', points: 35, icon: '🧪' },
-        ]
-    },
-    {
-        category: TaskCategory.SAFETY,
-        tasks: [
-            { title: '🚦 遵守交通规则', time: '08:00', points: 15, icon: '🚦' },
-            { title: '🔥 防火安全知识', time: '19:00', points: 20, icon: '🔥' },
-            { title: '💧 防溺水意识', time: '10:00', points: 20, icon: '💧' },
-            { title: '⚡ 用电安全', time: '20:00', points: 15, icon: '⚡' },
-            { title: '🚫 不玩危险游戏', time: '16:00', points: 15, icon: '🚫' },
-            { title: '🏠 记住家庭地址', time: '09:00', points: 10, icon: '🏠' },
         ]
     }
 ];
@@ -145,4 +119,9 @@ export const DEFAULT_REWARDS = [
     { name: '🛍️ 自选小礼物', pointsCost: 600, icon: '🛍️' },
     { name: '🏕️ 亲子露营', pointsCost: 2500, icon: '🏕️' },
     { name: '🎂 定制蛋糕', pointsCost: 800, icon: '🎂' },
+    { name: '📱 额外手机时间+1h', pointsCost: 400, icon: '📱' },
+    { name: '🎭 才艺表演机会', pointsCost: 300, icon: '🎭' },
+    { name: '🏊 游泳馆/水上乐园', pointsCost: 1500, icon: '🏊' },
+    { name: '🎨 绘画/手工材料包', pointsCost: 450, icon: '🎨' },
+    { name: '🧩 新玩具/桌游', pointsCost: 700, icon: '🧩' },
 ];

@@ -423,14 +423,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setActiveTab('registry')}
-                        className={`p-3 rounded-2xl transition-all shadow-sm ${activeTab === 'registry' ? 'bg-white text-[var(--color-blue-fun)]' : 'bg-white/20 text-white'}`}
-                    >
-                        <LayoutGrid size={24} />
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
                         onClick={onLogout}
                         className="p-3 rounded-2xl bg-[#FF6B81] text-white shadow-sm border-b-4 border-[#e93b58] active:border-b-0 active:translate-y-1"
                     >

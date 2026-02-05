@@ -1,8 +1,10 @@
 
 export enum TaskCategory {
   STUDY = '自主学习',
+  SPORTS = '运动健康',
   DISCIPLINE = '自律习惯',
-  CHORES = '家务探索',
+  SOCIAL = '品德社交',
+  CHORES = '劳动技能',
   HYGIENE = '个人卫生',
   OTHER = '自定义'
 }

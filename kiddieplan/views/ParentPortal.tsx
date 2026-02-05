@@ -485,13 +485,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </h1>
                     </div>
                 </div>
-                <div className="flex items-center gap-6">
-                    <div className="hidden lg:flex flex-col items-end">
-                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none mb-1">BEIJING TIME</span>
-                        <span className="text-sm font-black text-gray-500 font-mono tracking-tight">{formatBeijingTime(currentTime)}</span>
+                <div className="flex items-center gap-4">
+                    <div className="hidden sm:flex flex-col items-end">
+                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none mb-0.5">BEIJING TIME</span>
+                        <span className="text-[12px] font-black text-gray-500 font-mono tracking-tight leading-none">{formatBeijingTime(currentTime)}</span>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3 } from 'lucide-react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,6 +73,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [customCategories, setCustomCategories] = useState<Category[]>([]);
+    const [hiddenPresets, setHiddenPresets] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isManagingCategories, setIsManagingCategories] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
@@ -129,6 +130,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 } else if (!silent) {
                     setCustomCategories(DEFAULT_CATEGORIES);
                 }
+
+                // 加载隐藏的预设
+                if (result.data.hiddenPresets) {
+                    setHiddenPresets(result.data.hiddenPresets);
+                }
             }
         } catch (err) {
             console.error('Fetch failed');
@@ -137,7 +143,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
-    const handleSaveCategories = async (newCategories: Category[]) => {
+    const handleSaveCategories = async (newCategories: Category[], newHiddenPresets?: string[]) => {
         setIsSaving(true);
         try {
             const res = await fetch('/api/kiddieplan/manage', {
@@ -146,12 +152,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 body: JSON.stringify({
                     action: 'save_categories',
                     token,
-                    data: { categories: newCategories }
+                    data: {
+                        categories: newCategories,
+                        hiddenPresets: newHiddenPresets !== undefined ? newHiddenPresets : hiddenPresets
+                    }
                 })
             });
             const result = await res.json();
             if (result.success) {
                 setCustomCategories(newCategories);
+                if (newHiddenPresets !== undefined) setHiddenPresets(newHiddenPresets);
             } else {
                 alert(result.message);
             }
@@ -216,19 +226,37 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         });
     };
 
-    const handleDeleteTemplate = async (catId: string, templateIndex: number) => {
-        if (!window.confirm('确定要删除这个任务模板吗？')) return;
+    const handleDeleteTemplate = async (catId: string, templateTitle: string, isCustom: boolean, templateIndex?: number) => {
+        const msg = isCustom ? '确定要删除这个自定义任务模板吗？' : '确定要隐藏这个预设任务模板吗？之后您可以重置设置来找回它。';
 
-        const newCategories = customCategories.map(c => {
-            if (c.id === catId) {
-                const newTemplates = [...(c.templates || [])];
-                newTemplates.splice(templateIndex, 1);
-                return { ...c, templates: newTemplates };
+        setDialogConfig({
+            isOpen: true,
+            title: isCustom ? '🗑️ 删除模板' : '🙈 隐藏任务',
+            message: msg,
+            hideInput: true,
+            placeholder: '',
+            onConfirm: async () => {
+                if (isCustom && templateIndex !== undefined) {
+                    const newCategories = customCategories.map(c => {
+                        if (c.id === catId) {
+                            const newTemplates = [...(c.templates || [])];
+                            newTemplates.splice(templateIndex, 1);
+                            return { ...c, templates: newTemplates };
+                        }
+                        return c;
+                    });
+                    await handleSaveCategories(newCategories);
+                } else {
+                    // 隐藏预设模板
+                    const presetKey = `${catId}:${templateTitle}`;
+                    if (!hiddenPresets.includes(presetKey)) {
+                        const newHidden = [...hiddenPresets, presetKey];
+                        await handleSaveCategories(customCategories, newHidden);
+                    }
+                }
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
             }
-            return c;
         });
-
-        await handleSaveCategories(newCategories);
     };
 
     const fetchTasks = async () => {
@@ -267,6 +295,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const handleSaveTasks = async () => {
         if (!selectedChildId) return;
+        if (currentTasks.length === 0) {
+            setDialogConfig({
+                isOpen: true,
+                title: '💡 提示',
+                message: '请先添加一些任务再发布哦，给孩子一点动力吧！',
+                hideInput: true,
+                onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                placeholder: ''
+            });
+            return;
+        }
         setIsSaving(true);
         const today = new Date().toISOString().split('T')[0];
         try {
@@ -828,20 +867,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {(() => {
                                 // 1. 获取预设模板
                                 const presetTemplates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
-                                const combinedTemplates = presetTemplates.map(t => ({ ...t, isCustom: false }));
-
-                                // 2. 合并对应的自定义分类模板
                                 const currentCat = customCategories.find(c => c.id === selectedCategory);
-                                if (currentCat?.templates) {
-                                    const customMapped = currentCat.templates.map((t, idx) => ({
+                                const combinedTemplates = [
+                                    ...presetTemplates
+                                        .filter(t => !hiddenPresets.includes(`${selectedCategory}:${t.title}`))
+                                        .map(t => ({ ...t, isCustom: false })),
+                                    ...(currentCat?.templates || []).map((t, idx) => ({
                                         ...t,
                                         time: t.timeSlot,
                                         isCustom: true,
                                         idx
-                                    }));
-                                    combinedTemplates.push(...customMapped);
-                                }
-                                // Combine templates with the "Add Custom" button
+                                    }))
+                                ];
+
                                 return (
                                     <>
                                         {combinedTemplates.map((tmp, i) => (
@@ -858,17 +896,20 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     </div>
                                                 </motion.button>
 
-                                                {tmp.isCustom && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteTemplate(selectedCategory, (tmp as any).idx);
-                                                        }}
-                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
-                                                    >
-                                                        <Trash2 size={12} />
-                                                    </button>
-                                                )}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteTemplate(
+                                                            selectedCategory,
+                                                            tmp.title,
+                                                            tmp.isCustom,
+                                                            (tmp as any).isCustom ? (tmp as any).idx : undefined
+                                                        );
+                                                    }}
+                                                    className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
                                             </div>
                                         ))}
 
@@ -1253,12 +1294,24 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </button>
                             </div>
 
-                            <button
-                                onClick={() => setIsManagingCategories(false)}
-                                className="w-full py-3 text-gray-400 font-bold hover:text-gray-600 transition-colors"
-                            >
-                                关闭
-                            </button>
+                            <div className="flex gap-3 mb-4">
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm('确定要恢复所有隐藏的系统任务吗？')) {
+                                            handleSaveCategories(customCategories, []);
+                                        }
+                                    }}
+                                    className="px-4 py-3 rounded-xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors border-2 border-transparent hover:border-gray-100"
+                                >
+                                    <RotateCcw size={16} /> 恢复预设
+                                </button>
+                                <button
+                                    onClick={() => setIsManagingCategories(false)}
+                                    className="flex-1 py-3 text-[#5D4037] font-black hover:text-blue-500 transition-colors bg-blue-50 rounded-xl"
+                                >
+                                    完成
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}

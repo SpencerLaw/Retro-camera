@@ -136,11 +136,12 @@ export default async function handler(
         }
 
         if (action === 'save_categories') {
-            const { categories } = data;
+            const { categories, hiddenPresets } = data;
             const license: any = await kv.get(licenseKey) || { children: [] };
-            license.categories = categories;
+            if (categories) license.categories = categories;
+            if (hiddenPresets !== undefined) license.hiddenPresets = hiddenPresets;
             await kv.set(licenseKey, license);
-            return response.status(200).json({ success: true, message: '分类已更新', data: { categories } });
+            return response.status(200).json({ success: true, message: '设置已更新', data: { categories: license.categories, hiddenPresets: license.hiddenPresets } });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

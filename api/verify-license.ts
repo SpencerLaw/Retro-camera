@@ -128,6 +128,11 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
   const expDate = new Date(genDate);
   expDate.setFullYear(expDate.getFullYear() + 1);
 
+  // 保留原始数据中的额外字段（如星梦奇缘的 children, progress 等）
+  const extra: any = {};
+  if ((c as any).children) extra.children = (c as any).children;
+  if ((c as any).progress) extra.progress = (c as any).progress;
+
   return {
     code: code,
     totalDevices: c.d.length,
@@ -141,7 +146,8 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
       firstSeen: new Date(dev.f).toISOString(),
       lastSeen: new Date(dev.l).toISOString(),
       ua: dev.u
-    }))
+    })),
+    ...extra
   };
 }
 

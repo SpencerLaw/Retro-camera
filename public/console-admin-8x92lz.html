@@ -473,6 +473,70 @@
       return date.toLocaleDateString();
     }
 
+    // === 渲染星梦奇缘数据区域 ===
+    function renderKiddiePlanSection(item) {
+      // 只对有孩子数据的授权码显示
+      if (!item.children || item.children.length === 0) {
+        return '';
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const progress = item.progress || {};
+      const todayProgress = progress[today] || {};
+
+      const childrenRows = item.children.map((child, i) => {
+        const childProgress = todayProgress[child.id] || { tasks: [], checkins: [] };
+        const tasks = childProgress.tasks || [];
+        const checkins = childProgress.checkins || [];
+        const completedCount = checkins.length;
+        const totalCount = tasks.length;
+        const rewards = child.rewards || [];
+
+        return `
+          <div style="background: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                  ${child.avatar || '👧'}
+                </div>
+                <div>
+                  <div style="font-weight: bold; color: #4A1D96;">${child.name}</div>
+                  <div style="font-size: 11px; color: #6B21A8;">房间码: ${child.roomCode}</div>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 20px; font-weight: bold; color: #4A1D96;">${child.points || 0} 🍭</div>
+                <div style="font-size: 10px; color: #6B21A8;">累计积分</div>
+              </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-size: 11px; font-weight: bold; color: #4A1D96; margin-bottom: 8px;">📋 今日任务 (${completedCount}/${totalCount})</div>
+              ${tasks.length > 0 ? tasks.map(task => {
+          const isDone = checkins.some(c => c.taskId === task.id);
+          return `<div style="font-size: 11px; padding: 4px 0; color: ${isDone ? '#16A34A' : '#64748B'};">${isDone ? '✅' : '⬜'} ${task.title} (+${task.points})</div>`;
+        }).join('') : '<div style="font-size: 11px; color: #94A3B8;">暂无任务</div>'}
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 12px;">
+              <div style="font-size: 11px; font-weight: bold; color: #4A1D96; margin-bottom: 8px;">🎁 奖励商店 (${rewards.length}个)</div>
+              ${rewards.length > 0 ? rewards.slice(0, 5).map(r =>
+          `<span style="display: inline-block; font-size: 10px; background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 12px; margin: 2px;">${r.icon || '🎁'} ${r.name} (${r.pointsCost}分)</span>`
+        ).join('') + (rewards.length > 5 ? `<span style="font-size: 10px; color: #94A3B8;"> +${rewards.length - 5} more</span>` : '') : '<div style="font-size: 11px; color: #94A3B8;">暂无奖励</div>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div style="margin-top: 16px; border-top: 1px dashed #E2E8F0; padding-top: 16px;">
+          <div style="font-size: 12px; font-weight: bold; color: var(--primary); margin-bottom: 12px;">
+            ⭐ 星梦奇缘数据 (${item.children.length} 个孩子)
+          </div>
+          ${childrenRows}
+        </div>
+      `;
+    }
 
     // === 渲染监控列表 ===
     function renderMonitorList() {
@@ -561,6 +625,8 @@
                   ${deviceRows}
                 </tbody>
               </table>
+              
+              ${renderKiddiePlanSection(item)}
             </div>
           </div>
         </div>

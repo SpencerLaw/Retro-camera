@@ -658,21 +658,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </div>
 
                         {/* Templates */}
-                        <div className="overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-                            <div className="flex gap-3 w-max">
-                                {Object.values(TaskCategory).map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setSelectedCategory(cat)}
-                                        className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2
+                        <div className="flex flex-wrap gap-2">
+                            {Object.values(TaskCategory).map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2
                                     ${selectedCategory === cat
-                                                ? 'bg-[var(--color-blue-fun)] text-white border-[var(--color-blue-fun)] shadow-md'
-                                                : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
-                                    >
-                                        {cat}
-                                    </button>
-                                ))}
-                            </div>
+                                            ? 'bg-[var(--color-blue-fun)] text-white border-[var(--color-blue-fun)] shadow-md'
+                                            : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

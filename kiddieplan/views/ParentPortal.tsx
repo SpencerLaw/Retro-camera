@@ -486,7 +486,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 )}
                             </div>
 
-                            <div className="flex gap-6 overflow-x-auto pb-4 no-scrollbar">
+                            <div className="flex gap-6 overflow-x-auto pb-6 pt-2 px-2 -mx-2 no-scrollbar">
                                 {children.map(child => (
                                     <motion.div
                                         key={child.id}
@@ -626,7 +626,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 {activeTab === 'tasks' && selectedChild && (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-2xl font-black text-[#5D4037]">今日任务清单</h2>
+                            <div className="flex items-center gap-4">
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setActiveTab('children')}
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                >
+                                    <ArrowLeft size={20} />
+                                </motion.button>
+                                <h2 className="text-2xl font-black text-[#5D4037]">今日任务清单</h2>
+                            </div>
                             <motion.button whileTap={{ scale: 0.9 }} onClick={() => addTask()} className="bg-[var(--color-blue-fun)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
                                 <Plus size={24} />
                             </motion.button>
@@ -716,7 +725,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 {activeTab === 'rewards' && selectedChild && (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-2xl font-black text-[#5D4037]">奖励商店</h2>
+                            <div className="flex items-center gap-4">
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setActiveTab('children')}
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                >
+                                    <ArrowLeft size={20} />
+                                </motion.button>
+                                <h2 className="text-2xl font-black text-[#5D4037]">奖励商店</h2>
+                            </div>
                             <motion.button whileTap={{ scale: 0.9 }} onClick={handleAddReward} className="bg-[var(--color-yellow-reward)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
                                 <Plus size={24} />
                             </motion.button>
@@ -759,7 +777,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 {activeTab === 'checkins' && selectedChild && (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-2xl font-black text-[#5D4037]">打卡历史</h2>
+                            <div className="flex items-center gap-4">
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setActiveTab('children')}
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                >
+                                    <ArrowLeft size={20} />
+                                </motion.button>
+                                <h2 className="text-2xl font-black text-[#5D4037]">打卡历史</h2>
+                            </div>
                             <div className="flex items-center gap-2 text-purple-400 bg-purple-50 px-4 py-2 rounded-full text-sm font-bold">
                                 <CalendarCheck size={18} />
                                 记录近30天
@@ -790,7 +817,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                 {activeTab === 'stats' && selectedChild && (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
-                        <h2 className="text-2xl font-black text-[#5D4037]">统计分析</h2>
+                        <div className="flex items-center gap-4">
+                            <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setActiveTab('children')}
+                                className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                            >
+                                <ArrowLeft size={20} />
+                            </motion.button>
+                            <h2 className="text-2xl font-black text-[#5D4037]">统计分析</h2>
+                        </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-gradient-to-br from-blue-400 to-blue-500 p-5 rounded-[32px] text-white shadow-lg">
@@ -853,14 +889,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             )}
 
                             {dialogConfig.showAvatarUpload && (
-                                <div className="flex justify-center mb-6">
+                                <div className="flex flex-col items-center mb-6">
                                     <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                                        <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-24 h-24 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover" />
-                                        <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold">
-                                            更换头像
+                                        <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
+                                        <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
+                                            <Settings size={24} className="mb-1" />
+                                            <span className="text-[10px] font-black">更换头像</span>
                                         </div>
                                         {uploadingAvatar && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full"><Sparkles className="animate-spin text-blue-400" /></div>}
+                                        <div className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[var(--color-blue-fun)] border-2 border-[var(--color-blue-fun)]">
+                                            <Edit2 size={14} fill="currentColor" />
+                                        </div>
                                     </div>
+                                    <p className="mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest">点击上方头像修改图片</p>
                                 </div>
                             )}
 

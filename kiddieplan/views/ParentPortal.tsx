@@ -274,10 +274,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const fetchTasks = async () => {
         if (!selectedChildId) return;
+        setIsSaving(true);
         try {
             // 从家长 token 中解析出授权码 (licenseCode)
             const decodedParentToken = atob(token);
             const licenseCode = decodedParentToken.split(':')[1];
+            const today = new Date().toISOString().split('T')[0];
 
             // 构造符合 client.ts 预期的 token: child:id:licenseCode
             const childToken = btoa(`child:${selectedChildId}:${licenseCode}`);
@@ -285,7 +287,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_today_data', token: childToken })
+                body: JSON.stringify({ action: 'get_today_data', token: childToken, data: { date: today } })
             });
             const result = await res.json();
             if (result.success) {
@@ -293,6 +295,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             }
         } catch (err) {
             console.error('Fetch tasks failed');
+        } finally {
+            setIsSaving(false);
         }
     };
 

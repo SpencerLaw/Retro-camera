@@ -21,7 +21,7 @@ export default async function handler(
         const licenseCode = decodedToken.split(':')[2];
         const licenseKey = `license:${licenseCode}`;
 
-        const today = new Date().toISOString().split('T')[0];
+        const today = data?.date || new Date().toISOString().split('T')[0];
 
         if (action === 'get_today_data') {
             const license: any = await kv.get(licenseKey) || { children: [], progress: {} };

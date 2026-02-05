@@ -114,10 +114,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const fetchTodayData = async () => {
         setLoading(true);
         try {
+            const today = new Date().toISOString().split('T')[0];
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_today_data', token })
+                body: JSON.stringify({ action: 'get_today_data', token, data: { date: today } })
             });
             const result = await res.json();
             if (result.success) {
@@ -253,7 +254,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 <h3 className="text-lg font-bold text-gray-700 pl-1 flex items-center gap-2">
                     <BookOpen size={18} className="text-pink-400" /> 待办事项
                 </h3>
-                {tasks.slice(0, 3).map((task) => {
+                {tasks.map((task) => {
                     const isCompleted = checkins.includes(task.id);
                     return (
                         <motion.div

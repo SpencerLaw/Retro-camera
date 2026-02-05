@@ -719,6 +719,76 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         )}
                     </motion.div>
                 )}
+
+                {activeTab === 'checkins' && selectedChild && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl font-black text-[#5D4037]">打卡历史</h2>
+                            <div className="flex items-center gap-2 text-purple-400 bg-purple-50 px-4 py-2 rounded-full text-sm font-bold">
+                                <CalendarCheck size={18} />
+                                记录近30天
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-black text-gray-400">2026-02-0{5 - i}</span>
+                                        <span className="bg-green-100 text-green-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">已完成</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-400">
+                                            <Trophy size={20} />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-[#5D4037]">全天任务达成</div>
+                                            <div className="text-xs text-gray-400 font-bold">获得奖励: 🍭 +50</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+
+                {activeTab === 'stats' && selectedChild && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                        <h2 className="text-2xl font-black text-[#5D4037]">统计分析</h2>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-gradient-to-br from-blue-400 to-blue-500 p-5 rounded-[32px] text-white shadow-lg">
+                                <div className="text-xs font-bold opacity-80 mb-1">本周平均专注</div>
+                                <div className="text-3xl font-black">4.5h</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-emerald-400 to-emerald-500 p-5 rounded-[32px] text-white shadow-lg">
+                                <div className="text-xs font-bold opacity-80 mb-1">任务成功率</div>
+                                <div className="text-3xl font-black">92%</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
+                            <h3 className="font-black text-[#5D4037] mb-4 flex items-center gap-2">
+                                <BarChart3 size={18} className="text-emerald-400" />
+                                积分趋势 (近7天)
+                            </h3>
+                            <div className="h-40 flex items-end justify-between gap-2 px-2">
+                                {[30, 45, 25, 60, 80, 50, 70].map((val, i) => (
+                                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                                        <motion.div
+                                            initial={{ height: 0 }}
+                                            animate={{ height: `${val}%` }}
+                                            className="w-full bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors relative"
+                                        >
+                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-emerald-500">{val}</div>
+                                        </motion.div>
+                                        <span className="text-[10px] font-bold text-gray-400">周{['一', '二', '三', '四', '五', '六', '日'][i]}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
             </main>
 
             {/* Dialog Overlay */}

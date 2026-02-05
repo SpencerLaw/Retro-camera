@@ -409,11 +409,18 @@
           throw new Error(json.message || '未知错误');
         }
 
+        // 防御性检查：确保 data 是数组
+        if (!Array.isArray(json.data)) {
+          console.warn('API 返回的 data 不是数组:', json.data);
+          currentData = [];
+        } else {
+          currentData = json.data;
+        }
+
         // 登录成功
-        document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+        document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${currentData.length} 条记录)`;
         document.getElementById('connectionStatus').style.color = 'var(--success)';
 
-        currentData = json.data;
         renderMonitorList();
 
       } catch (err) {

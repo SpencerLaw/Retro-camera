@@ -415,12 +415,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             {/* Header */}
             <header className="px-6 py-5 flex justify-between items-center bg-gradient-to-r from-[var(--color-blue-fun)] to-blue-500 shadow-md z-20">
                 <div className="flex items-center gap-4">
-                    <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm border-2 border-white/30">
-                        <Settings className="text-white" size={28} />
-                    </div>
                     <div>
-                        <h1 className="text-3xl font-black text-white tracking-wide drop-shadow-sm" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>星梦奇旅</h1>
-                        <p className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full inline-block font-bold">Parent Console</p>
+                        <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-sm" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>星梦奇旅 (家长端)</h1>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -527,8 +523,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </div>
 
                                     <div className="mt-8 flex gap-3">
-                                        <button onClick={handleEditChild} className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors">
-                                            <Edit2 size={14} /> 编辑资料
+                                        <button onClick={handleEditChild} className="bg-white text-[var(--color-blue-fun)] px-6 py-3 rounded-xl text-sm font-black flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 transition-all">
+                                            <Edit2 size={16} /> 修改宝贝资料
                                         </button>
                                     </div>
                                 </div>

@@ -464,21 +464,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5 }}
                                         className={`flex flex-col items-center gap-3 min-w-[100px] cursor-pointer relative ${selectedChildId === child.id ? 'opacity-100' : 'opacity-60 grayscale-[0.3]'}`}
                                     >
-                                        <div className={`w-24 h-24 rounded-[32px] overflow-hidden border-4 shadow-sm transition-all relative ${selectedChildId === child.id ? 'border-[var(--color-blue-fun)] shadow-[0_8px_15px_rgba(96,165,250,0.3)]' : 'border-transparent'}`}>
-                                            <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
-                                            {selectedChildId === child.id && (
-                                                <>
+                                        <div className="relative">
+                                            <div className={`w-24 h-24 rounded-[32px] overflow-hidden border-4 shadow-sm transition-all ${selectedChildId === child.id ? 'border-[var(--color-blue-fun)] shadow-[0_8px_15px_rgba(96,165,250,0.3)]' : 'border-transparent'}`}>
+                                                <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
+                                                {selectedChildId === child.id && (
                                                     <div className="absolute inset-0 border-4 border-white rounded-[28px] pointer-events-none"></div>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEditChild();
-                                                        }}
-                                                        className="absolute -bottom-2 -right-2 bg-white text-[var(--color-blue-fun)] p-2 rounded-full shadow-md hover:scale-110 active:scale-95 transition-transform z-10"
-                                                    >
-                                                        <Edit2 size={14} fill="currentColor" />
-                                                    </button>
-                                                </>
+                                                )}
+                                            </div>
+
+                                            {/* Edit Button Overlay - Moved outside overflow-hidden */}
+                                            {selectedChildId === child.id && (
+                                                <motion.button
+                                                    initial={{ scale: 0, opacity: 0 }}
+                                                    animate={{ scale: 1, opacity: 1 }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEditChild();
+                                                    }}
+                                                    className="absolute -bottom-1 -right-1 bg-[var(--color-blue-fun)] text-white p-2.5 rounded-full shadow-xl border-4 border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                                >
+                                                    <Edit2 size={18} fill="currentColor" />
+                                                </motion.button>
                                             )}
                                         </div>
                                         <span className="text-sm font-black text-[#5D4037]">{child.name}</span>

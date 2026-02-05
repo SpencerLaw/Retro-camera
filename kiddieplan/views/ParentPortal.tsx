@@ -71,7 +71,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     // Task/Reward Editor State
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
     const [rewards, setRewards] = useState<Reward[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [customCategories, setCustomCategories] = useState<Category[]>([]);
     const [hiddenPresets, setHiddenPresets] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -125,10 +125,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 }
 
                 // 加载分类
-                if (result.data.categories && result.data.categories.length > 0) {
-                    setCustomCategories(result.data.categories);
-                } else if (!silent) {
-                    setCustomCategories(DEFAULT_CATEGORIES);
+                let activeCats = result.data.categories || [];
+                if (activeCats.length === 0) {
+                    activeCats = DEFAULT_CATEGORIES;
+                }
+                setCustomCategories(activeCats);
+
+                // 如果当前没选中或选中的分类不存在了，默认选第一个
+                if (!selectedCategory || !activeCats.find((c: any) => c.id === selectedCategory)) {
+                    if (activeCats.length > 0) setSelectedCategory(activeCats[0].id);
                 }
 
                 // 加载隐藏的预设
@@ -184,6 +189,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         if (window.confirm('确定要删除这个分类吗？')) {
             const newCats = customCategories.filter(c => c.id !== id);
             await handleSaveCategories(newCats);
+            // 如果删掉的是当前选中的，切换到第一个
+            if (id === selectedCategory && newCats.length > 0) {
+                setSelectedCategory(newCats[0].id);
+            }
         }
     };
 
@@ -833,15 +842,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         {/* Templates */}
                         <div className="flex flex-wrap gap-2 items-center">
-                            <button
-                                onClick={() => setSelectedCategory('all')}
-                                className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
-                                ${selectedCategory === 'all'
-                                        ? 'bg-[var(--color-blue-fun)] text-white border-[var(--color-blue-fun)] shadow-md'
-                                        : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
-                            >
-                                <span>🌟</span> 全部
-                            </button>
+                            {/* Category buttons list */}
                             {customCategories.map(cat => (
                                 <button
                                     key={cat.id}
@@ -913,15 +914,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             </div>
                                         ))}
 
-                                        {/* Always show Add Custom Task button at the end */}
                                         <motion.button
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => {
-                                                if (selectedCategory === 'all') {
-                                                    addTask();
-                                                } else {
-                                                    handleAddTemplate(selectedCategory);
-                                                }
+                                                handleAddTemplate(selectedCategory);
                                             }}
                                             className="bg-blue-50 p-4 rounded-2xl text-left border-2 border-dashed border-blue-200 hover:bg-blue-100 flex items-center gap-3 justify-center group min-h-[80px]"
                                         >
@@ -939,10 +935,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         <div className="h-px bg-gray-200 my-4" />
 
-                        {/* Current Tasks */}
                         <div className="space-y-3">
                             {currentTasks
-                                .filter(t => selectedCategory === 'all' || t.category === selectedCategory)
+                                .filter(t => t.category === selectedCategory)
                                 .map(task => (
                                     <motion.div
                                         layout
@@ -967,9 +962,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         </div>
                                     </motion.div>
                                 ))}
-                            {currentTasks.filter(t => selectedCategory === 'all' || t.category === selectedCategory).length === 0 && (
+                            {currentTasks.filter(t => t.category === selectedCategory).length === 0 && (
                                 <div className="text-center py-10 opacity-50">
-                                    <p className="font-bold text-gray-500">该分类下暂无已选待办</p>
+                                    <p className="font-bold text-gray-500">该分类下暂称无已选待办</p>
                                 </div>
                             )}
                         </div>

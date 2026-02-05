@@ -465,7 +465,18 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <div className={`w-24 h-24 rounded-[32px] overflow-hidden border-4 shadow-sm transition-all relative ${selectedChildId === child.id ? 'border-[var(--color-blue-fun)] shadow-[0_8px_15px_rgba(96,165,250,0.3)]' : 'border-transparent'}`}>
                                             <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
                                             {selectedChildId === child.id && (
-                                                <div className="absolute inset-0 border-4 border-white rounded-[28px] pointer-events-none"></div>
+                                                <>
+                                                    <div className="absolute inset-0 border-4 border-white rounded-[28px] pointer-events-none"></div>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEditChild();
+                                                        }}
+                                                        className="absolute -bottom-2 -right-2 bg-white text-[var(--color-blue-fun)] p-2 rounded-full shadow-md hover:scale-110 active:scale-95 transition-transform z-10"
+                                                    >
+                                                        <Edit2 size={14} fill="currentColor" />
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
                                         <span className="text-sm font-black text-[#5D4037]">{child.name}</span>
@@ -497,27 +508,21 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <div className="flex items-center gap-2 mb-2">
                                                 {selectedChild.isFocusing ? (
                                                     <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1">
-                                                        <div className="w-2 h-2 bg-white rounded-full"></div> Focusing
+                                                        <div className="w-2 h-2 bg-white rounded-full"></div> 专注中
                                                     </span>
                                                 ) : (
                                                     <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
-                                                        Idle Mode
+                                                        休息中
                                                     </span>
                                                 )}
                                             </div>
                                             <h2 className="text-4xl font-black">{selectedChild.roomCode}</h2>
-                                            <p className="text-xs opacity-70 font-bold uppercase mt-1 tracking-widest">Room Access Code</p>
+                                            <p className="text-xs opacity-70 font-bold uppercase mt-1 tracking-widest">房间访问码 (Room Code)</p>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-4xl font-black drop-shadow-md">{selectedChild.points || 0} 🍭</div>
-                                            <p className="text-xs opacity-70 font-bold uppercase mt-1 tracking-widest">Total Points</p>
+                                            <p className="text-xs opacity-70 font-bold uppercase mt-1 tracking-widest">累计积分</p>
                                         </div>
-                                    </div>
-
-                                    <div className="mt-8 flex gap-3">
-                                        <button onClick={handleEditChild} className="bg-white text-[var(--color-blue-fun)] px-6 py-3 rounded-xl text-sm font-black flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 transition-all">
-                                            <Edit2 size={16} /> 修改宝贝资料
-                                        </button>
                                     </div>
                                 </div>
 

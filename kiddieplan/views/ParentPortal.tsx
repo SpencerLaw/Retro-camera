@@ -934,7 +934,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                             {dialogConfig.showAvatarUpload && (
                                 <div className="flex flex-col items-center mb-6">
-                                    <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                    <div className="relative group cursor-pointer" onClick={() => {
+                                        // 重置 file input value 以允许重选相同图片
+                                        if (fileInputRef.current) fileInputRef.current.value = '';
+                                        fileInputRef.current?.click();
+                                    }}>
                                         <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
                                         <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
                                             <Settings size={24} className="mb-1" />
@@ -992,13 +996,18 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </button>
                                 <button
                                     onClick={() => {
+                                        if (uploadingAvatar) {
+                                            alert('请等待头像上传完成');
+                                            return;
+                                        }
                                         const input = document.getElementById('dialogInput') as HTMLInputElement;
                                         const time = document.getElementById('dialogTime') as HTMLInputElement;
                                         dialogConfig.onConfirm(input?.value, time?.value);
                                     }}
-                                    className="flex-1 bg-[var(--color-blue-fun)] text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-transform"
+                                    disabled={uploadingAvatar}
+                                    className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
                                 >
-                                    确定
+                                    {uploadingAvatar ? '上传中...' : '确定'}
                                 </button>
                             </div>
                         </motion.div>

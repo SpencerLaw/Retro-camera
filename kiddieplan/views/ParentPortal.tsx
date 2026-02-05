@@ -935,38 +935,51 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         <div className="h-px bg-gray-200 my-4" />
 
-                        <div className="space-y-3">
-                            {[...currentTasks]
-                                .sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
-                                .map(task => (
-                                    <motion.div
-                                        layout
-                                        key={task.id}
-                                        className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-[var(--color-blue-fun)]">
-                                                <Clock size={18} strokeWidth={3} />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-[#5D4037]">{task.title}</h4>
-                                                <div className="text-xs text-gray-400 font-bold flex gap-2">
-                                                    <span>{task.timeSlot}</span>
-                                                    <span className="text-[var(--color-blue-fun)]">+{task.points} pts</span>
+                        <div className="relative">
+                            {/* Vertical Timeline Axis */}
+                            {currentTasks.length > 0 && (
+                                <div className="absolute left-[20px] top-6 bottom-6 w-0.5 border-l-2 border-dashed border-blue-200 z-0" />
+                            )}
+
+                            <div className="space-y-6 relative z-10">
+                                {[...currentTasks]
+                                    .sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
+                                    .map((task, idx) => (
+                                        <motion.div
+                                            layout
+                                            key={task.id}
+                                            className="flex items-center gap-6"
+                                        >
+                                            {/* Timeline Node */}
+                                            <div className="relative flex-shrink-0">
+                                                <div className="w-10 h-10 bg-white rounded-full border-2 border-[var(--color-blue-fun)] flex items-center justify-center text-[var(--color-blue-fun)] shadow-sm z-10 relative">
+                                                    <Clock size={18} strokeWidth={3} />
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button onClick={() => editTask(task)} className="p-2 text-gray-400 hover:text-blue-500"><Edit2 size={16} /></button>
-                                            <button onClick={() => removeTask(task.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={16} /></button>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            {currentTasks.length === 0 && (
-                                <div className="text-center py-10 opacity-50">
-                                    <p className="font-bold text-gray-500">今日尚未添加待办任务</p>
-                                </div>
-                            )}
+
+                                            {/* Task Card */}
+                                            <div className="flex-1 bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-blue-100 transition-colors">
+                                                <div>
+                                                    <h4 className="font-bold text-[#5D4037]">{task.title}</h4>
+                                                    <div className="text-xs text-gray-400 font-bold flex gap-2">
+                                                        <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
+                                                        <span className="text-emerald-400">+{task.points} pts</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => editTask(task)} className="p-2 text-gray-300 hover:text-blue-500 transition-colors"><Edit2 size={16} /></button>
+                                                    <button onClick={() => removeTask(task.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                {currentTasks.length === 0 && (
+                                    <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
+                                        <p className="font-bold text-gray-500">今日尚未添加待办任务</p>
+                                        <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">Waiting for your plan</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {

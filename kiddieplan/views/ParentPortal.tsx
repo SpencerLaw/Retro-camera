@@ -17,11 +17,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
 
-    // Update time every minute
+    // Update time EVERY SECOND
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date());
-        }, 60000);
+        }, 1000);
         return () => clearInterval(timer);
     }, []);
 
@@ -32,7 +32,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         const d = pad(date.getDate());
         const hh = pad(date.getHours());
         const mm = pad(date.getMinutes());
-        return `${y}-${m}-${d} ${hh}-${mm}`;
+        const ss = pad(date.getSeconds());
+        return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
     };
 
     // Custom Dialog State
@@ -479,18 +480,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <Sparkles className="text-blue-500" size={20} />
                         </div>
                     </div>
-                    <div>
-                        <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                    <div className="flex flex-col">
+                        <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                             星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span> <span className="text-sm font-bold text-gray-400 ml-1">家长端</span>
                         </h1>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <Clock size={10} className="text-gray-300" />
+                            <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider">北京时间：{formatBeijingTime(currentTime)}</span>
+                        </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="hidden sm:flex flex-col items-end">
-                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none mb-0.5">BEIJING TIME</span>
-                        <span className="text-[12px] font-black text-gray-500 font-mono tracking-tight leading-none">{formatBeijingTime(currentTime)}</span>
-                    </div>
-
                     <div className="flex gap-2">
                         <motion.button
                             whileHover={{ scale: 1.05 }}

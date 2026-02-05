@@ -67,13 +67,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     useEffect(() => {
         let timer: any;
         if (activeTab === 'registry' || activeTab === 'children') {
-            timer = setInterval(fetchConfig, 30000); // 30s auto-refresh for live status
+            timer = setInterval(() => fetchConfig(true), 30000); // 30s silent auto-refresh
         }
         return () => clearInterval(timer);
     }, [activeTab]);
 
-    const fetchConfig = async () => {
-        setLoading(true);
+    const fetchConfig = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const res = await fetch('/api/kiddieplan/manage', {
                 method: 'POST',
@@ -84,7 +84,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             if (result.success) {
                 setLicenseData(result.data);
                 const childrenList = result.data.children || [];
-                setChildren(childrenList);
+                // Only update children if the data has actually changed to avoid unnecessary re-renders
+                setChildren(prev => JSON.stringify(prev) !== JSON.stringify(childrenList) ? childrenList : prev);
+
                 if (childrenList.length > 0 && !selectedChildId) {
                     setSelectedChildId(childrenList[0].id);
                 }
@@ -92,7 +94,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         } catch (err) {
             console.error('Fetch failed');
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 

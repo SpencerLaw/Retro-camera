@@ -675,17 +675,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks.map((tmp, i) => (
                                 <motion.button
                                     key={i}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                    className="bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm"
+                                    className="bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
                                 >
-                                    <div className="text-2xl mb-2">{tmp.icon}</div>
-                                    <div className="font-bold text-[#5D4037] text-sm">{tmp.title}</div>
-                                    <div className="text-[10px] text-gray-400 font-bold mt-1">+{tmp.points} 🍭</div>
+                                    <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
+                                        <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
+                                    </div>
                                 </motion.button>
                             ))}
                         </div>

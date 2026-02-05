@@ -1,9 +1,17 @@
 
+export interface CategoryTemplate {
+  title: string;
+  points: number;
+  timeSlot: string;
+  icon: string;
+}
+
 // 动态分类接口
 export interface Category {
   id: string;
   name: string;
   icon: string;
+  templates?: CategoryTemplate[];
 }
 
 // 保持 TaskCategory 类型兼容性（逐步迁移）

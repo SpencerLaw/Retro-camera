@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3 } from 'lucide-react';
-import { Child, Task, Reward, TaskCategory, Category } from '../types';
+import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -179,9 +179,41 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const handleAddInlineCategory = async () => {
         if (!newCategoryName.trim()) return;
-        const newCat = { id: `cat_${Date.now()}`, name: newCategoryName.trim(), icon: '✨' };
+        const newCat: Category = { id: `cat_${Date.now()}`, name: newCategoryName.trim(), icon: '✨', templates: [] };
         await handleSaveCategories([...customCategories, newCat]);
         setNewCategoryName('');
+    };
+
+    const handleAddTemplate = (catId: string) => {
+        const cat = customCategories.find(c => c.id === catId);
+        if (!cat) return;
+
+        setDialogConfig({
+            isOpen: true,
+            title: `✨ 为 [${cat.name}] 创建模板`,
+            placeholder: '任务名称，如：练习踢腿',
+            showTime: true,
+            defaultExtra: '09:00',
+            onConfirm: async (title, time) => {
+                if (!title) return;
+                const newTemplate: CategoryTemplate = {
+                    title,
+                    points: 10,
+                    timeSlot: time || '08:00',
+                    icon: '🎯' // 用户自定义模板默认图标
+                };
+
+                const newCategories = customCategories.map(c => {
+                    if (c.id === catId) {
+                        return { ...c, templates: [...(c.templates || []), newTemplate] };
+                    }
+                    return c;
+                });
+
+                await handleSaveCategories(newCategories);
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+            }
+        });
     };
 
     const fetchTasks = async () => {
@@ -779,7 +811,20 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
                             {(() => {
-                                const templates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
+                                // 1. 获取预设模板
+                                let templates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
+
+                                // 2. 合并对应的自定义分类模板
+                                const currentCat = customCategories.find(c => c.id === selectedCategory);
+                                if (currentCat?.templates) {
+                                    const customMapped = currentCat.templates.map(t => ({
+                                        title: t.title,
+                                        points: t.points,
+                                        time: t.timeSlot,
+                                        icon: t.icon
+                                    }));
+                                    templates = [...templates, ...customMapped];
+                                }
                                 // Combine templates with the "Add Custom" button
                                 return (
                                     <>
@@ -801,14 +846,20 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         {/* Always show Add Custom Task button at the end */}
                                         <motion.button
                                             whileTap={{ scale: 0.95 }}
-                                            onClick={() => addTask()}
+                                            onClick={() => {
+                                                if (selectedCategory === 'all') {
+                                                    addTask();
+                                                } else {
+                                                    handleAddTemplate(selectedCategory);
+                                                }
+                                            }}
                                             className="bg-blue-50 p-4 rounded-2xl text-left border-2 border-dashed border-blue-200 hover:bg-blue-100 flex items-center gap-3 justify-center group min-h-[80px]"
                                         >
                                             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[var(--color-blue-fun)] shadow-sm group-hover:scale-110 transition-transform">
                                                 <Plus size={24} />
                                             </div>
                                             <span className="font-bold text-[var(--color-blue-fun)]">
-                                                {selectedCategory === 'all' ? '添加自定义任务' : '添加本类任务'}
+                                                {selectedCategory === 'all' ? '添加自定义待办' : '定义分类模板'}
                                             </span>
                                         </motion.button>
                                     </>
@@ -846,9 +897,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         </div>
                                     </motion.div>
                                 ))}
-                            {currentTasks.length === 0 && (
+                            {currentTasks.filter(t => selectedCategory === 'all' || t.category === selectedCategory).length === 0 && (
                                 <div className="text-center py-10 opacity-50">
-                                    <p className="font-bold text-gray-500">空空如也，快添加任务吧！</p>
+                                    <p className="font-bold text-gray-500">该分类下暂无已选待办</p>
                                 </div>
                             )}
                         </div>

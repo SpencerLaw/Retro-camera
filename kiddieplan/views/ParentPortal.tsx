@@ -74,6 +74,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [selectedCategory, setSelectedCategory] = useState<string>('study');
     const [customCategories, setCustomCategories] = useState<Category[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+    const [isManagingCategories, setIsManagingCategories] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
     const mainScrollRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
@@ -161,10 +163,25 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
-    const handleSaveCategory = (name: string, icon: string) => {
+    const handleSaveCategory = async (name: string, icon: string) => {
         if (!name) return;
         const newCat = { id: `cat_${Date.now()}`, name, icon };
-        handleSaveCategories([...customCategories, newCat]);
+        await handleSaveCategories([...customCategories, newCat]);
+        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+    };
+
+    const handleDeleteCategory = async (id: string) => {
+        if (window.confirm('确定要删除这个分类吗？')) {
+            const newCats = customCategories.filter(c => c.id !== id);
+            await handleSaveCategories(newCats);
+        }
+    };
+
+    const handleAddInlineCategory = async () => {
+        if (!newCategoryName.trim()) return;
+        const newCat = { id: `cat_${Date.now()}`, name: newCategoryName.trim(), icon: '✨' };
+        await handleSaveCategories([...customCategories, newCat]);
+        setNewCategoryName('');
     };
 
     const fetchTasks = async () => {
@@ -743,18 +760,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </button>
                             ))}
                             <button
-                                onClick={() => setDialogConfig({
-                                    isOpen: true,
-                                    title: '管理分类',
-                                    placeholder: '分类名称 (如: 钢琴课)',
-                                    defaultValue: '',
-                                    defaultExtra: '🎹', // Icon placeholder
-                                    showAvatarUpload: false,
-                                    showTime: false,
-                                    showDelete: false,
-                                    message: '这里可以添加自定义分类，方便归纳任务。',
-                                    onConfirm: (name, icon) => handleSaveCategory(name, icon || '✨')
-                                })}
+                                onClick={() => setIsManagingCategories(true)}
                                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200"
                             >
                                 <Settings size={16} />
@@ -1081,12 +1087,79 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         const time = document.getElementById('dialogTime') as HTMLInputElement;
                                         dialogConfig.onConfirm(input?.value, time?.value);
                                     }}
-                                    disabled={uploadingAvatar}
-                                    className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
+                                    disabled={uploadingAvatar || isSaving}
+                                    className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
                                 >
-                                    {uploadingAvatar ? '上传中...' : '确定'}
+                                    {uploadingAvatar ? '上传中...' : (isSaving ? '处理中...' : '确定')}
                                 </button>
                             </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {isManagingCategories && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            onClick={() => setIsManagingCategories(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                            className="bg-white p-6 rounded-[32px] w-full max-w-sm shadow-2xl relative z-60"
+                        >
+                            <h3 className="text-xl font-black text-[#5D4037] mb-4 text-center">管理任务分类</h3>
+
+                            <div className="max-h-[50vh] overflow-y-auto space-y-2 mb-4 pr-1 no-scrollbar">
+                                {customCategories.map(cat => (
+                                    <div key={cat.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-transparent hover:border-blue-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{cat.icon}</span>
+                                            <span className="font-bold text-[#5D4037]">{cat.name}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteCategory(cat.id)}
+                                            disabled={isSaving}
+                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                ))}
+                                {customCategories.length === 0 && (
+                                    <div className="text-center text-gray-400 py-4 text-xs font-bold">暂无分类</div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-2 mb-4">
+                                <input
+                                    value={newCategoryName}
+                                    onChange={e => setNewCategoryName(e.target.value)}
+                                    placeholder="新分类名称 (如: 围棋)"
+                                    className="flex-1 bg-gray-50 px-4 py-3 rounded-xl font-bold text-[#5D4037] outline-none border-2 border-transparent focus:border-blue-200 transition-colors placeholder:text-gray-300 placeholder:font-normal"
+                                    onKeyDown={e => e.key === 'Enter' && handleAddInlineCategory()}
+                                />
+                                <button
+                                    onClick={handleAddInlineCategory}
+                                    disabled={isSaving || !newCategoryName.trim()}
+                                    className="bg-[var(--color-blue-fun)] text-white w-12 rounded-xl font-bold shadow-md disabled:opacity-50 disabled:shadow-none flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                                >
+                                    {isSaving ? <Sparkles className="animate-spin" size={20} /> : <Plus size={24} />}
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setIsManagingCategories(false)}
+                                className="w-full py-3 text-gray-400 font-bold hover:text-gray-600 transition-colors"
+                            >
+                                关闭
+                            </button>
                         </motion.div>
                     </div>
                 )}

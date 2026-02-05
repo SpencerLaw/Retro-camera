@@ -50,413 +50,407 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
 
 
-    let timer: any;
-    if (activeTab === 'registry' || activeTab === 'children') {
-        timer = setInterval(() => fetchConfig(true), 30000); // 30s silent auto-refresh
-    }
-    return () => clearInterval(timer);
-}, [activeTab]);
 
-const fetchConfig = async (silent = false) => {
-    if (!silent) setLoading(true);
-    try {
-        const res = await fetch('/api/kiddieplan/manage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'get_config', token })
-        });
-        const result = await res.json();
-        if (result.success) {
-            setLicenseData(result.data);
-            const childrenList = result.data.children || [];
-            // Only update children if the data has actually changed to avoid unnecessary re-renders
-            setChildren(prev => JSON.stringify(prev) !== JSON.stringify(childrenList) ? childrenList : prev);
+    const fetchConfig = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_config', token })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setLicenseData(result.data);
+                const childrenList = result.data.children || [];
+                // Only update children if the data has actually changed to avoid unnecessary re-renders
+                setChildren(prev => JSON.stringify(prev) !== JSON.stringify(childrenList) ? childrenList : prev);
 
-            if (childrenList.length > 0 && !selectedChildId) {
-                setSelectedChildId(childrenList[0].id);
+                if (childrenList.length > 0 && !selectedChildId) {
+                    setSelectedChildId(childrenList[0].id);
+                }
             }
+        } catch (err) {
+            console.error('Fetch failed');
+        } finally {
+            if (!silent) setLoading(false);
         }
-    } catch (err) {
-        console.error('Fetch failed');
-    } finally {
-        if (!silent) setLoading(false);
-    }
-};
+    };
 
-const fetchTasks = async () => {
-    if (!selectedChildId) return;
-    try {
-        const res = await fetch('/api/kiddieplan/client', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'get_today_data', token: btoa(`child:${selectedChildId}`) })
-        });
-        const result = await res.json();
-        if (result.success) {
-            setCurrentTasks(result.data.tasks || []);
+    const fetchTasks = async () => {
+        if (!selectedChildId) return;
+        try {
+            const res = await fetch('/api/kiddieplan/client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_today_data', token: btoa(`child:${selectedChildId}`) })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setCurrentTasks(result.data.tasks || []);
+            }
+        } catch (err) {
+            console.error('Fetch tasks failed');
         }
-    } catch (err) {
-        console.error('Fetch tasks failed');
-    }
-};
+    };
 
-const fetchRewards = async () => {
-    if (!selectedChildId) return;
-    try {
-        const res = await fetch('/api/kiddieplan/manage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'get_rewards', token, data: { childId: selectedChildId } })
-        });
-        const result = await res.json();
-        if (result.success) {
-            setRewards(result.data.rewards || DEFAULT_REWARDS);
+    const fetchRewards = async () => {
+        if (!selectedChildId) return;
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_rewards', token, data: { childId: selectedChildId } })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setRewards(result.data.rewards || DEFAULT_REWARDS);
+            }
+        } catch (err) {
+            console.error('Fetch rewards failed');
         }
-    } catch (err) {
-        console.error('Fetch rewards failed');
-    }
-};
+    };
 
-const handleSaveTasks = async () => {
-    if (!selectedChildId) return;
-    setIsSaving(true);
-    const today = new Date().toISOString().split('T')[0];
-    try {
-        const res = await fetch('/api/kiddieplan/manage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'publish_tasks',
-                token,
-                data: { childId: selectedChildId, tasks: currentTasks, date: today }
-            })
-        });
-        const result = await res.json();
-        if (result.success) {
+    const handleSaveTasks = async () => {
+        if (!selectedChildId) return;
+        setIsSaving(true);
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'publish_tasks',
+                    token,
+                    data: { childId: selectedChildId, tasks: currentTasks, date: today }
+                })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setDialogConfig({
+                    isOpen: true,
+                    title: '✨ 同步成功！',
+                    placeholder: '',
+                    message: '所有的奇律任务都已经准备就绪，孩子可以开始挑战啦 ~',
+                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                    hideInput: true
+                });
+            }
+        } catch (err) {
+            alert('保存失败，请检查网络');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleSaveRewards = async () => {
+        if (!selectedChildId) return;
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_rewards',
+                    token,
+                    data: { childId: selectedChildId, rewards }
+                })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setDialogConfig({
+                    isOpen: true,
+                    title: '🎁 奖励已同步',
+                    placeholder: '',
+                    message: '你设定的“成长银行”奖励项已更新，快去鼓励孩子吧！',
+                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                    hideInput: true
+                });
+            }
+        } catch (err) {
+            alert('同步失败');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const addTask = (title?: string, time?: string, points?: number) => {
+        if (title) {
+            const newTask: Task = {
+                id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                title,
+                timeSlot: time || '08:30',
+                points: points || 10,
+                completed: false,
+                isRequired: true,
+                date: new Date().toISOString().split('T')[0]
+            };
+            setCurrentTasks(prev => [...prev, newTask]);
+        } else {
             setDialogConfig({
                 isOpen: true,
-                title: '✨ 同步成功！',
-                placeholder: '',
-                message: '所有的奇律任务都已经准备就绪，孩子可以开始挑战啦 ~',
-                onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
-                hideInput: true
+                title: '✨ 开启新任务',
+                placeholder: '输入任务名称，例如：阅读30分钟',
+                onConfirm: (val, time) => {
+                    if (!val) return;
+                    const newTask: Task = {
+                        id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                        title: val,
+                        timeSlot: time || '08:00',
+                        points: 10,
+                        completed: false,
+                        isRequired: true,
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                    setCurrentTasks(prev => [...prev, newTask]);
+                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                }
             });
         }
-    } catch (err) {
-        alert('保存失败，请检查网络');
-    } finally {
-        setIsSaving(false);
-    }
-};
+    };
 
-const handleSaveRewards = async () => {
-    if (!selectedChildId) return;
-    setIsSaving(true);
-    try {
-        const res = await fetch('/api/kiddieplan/manage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'save_rewards',
-                token,
-                data: { childId: selectedChildId, rewards }
-            })
-        });
-        const result = await res.json();
-        if (result.success) {
-            setDialogConfig({
-                isOpen: true,
-                title: '🎁 奖励已同步',
-                placeholder: '',
-                message: '你设定的“成长银行”奖励项已更新，快去鼓励孩子吧！',
-                onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
-                hideInput: true
-            });
-        }
-    } catch (err) {
-        alert('同步失败');
-    } finally {
-        setIsSaving(false);
-    }
-};
-
-const addTask = (title?: string, time?: string, points?: number) => {
-    if (title) {
-        const newTask: Task = {
-            id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-            title,
-            timeSlot: time || '08:30',
-            points: points || 10,
-            completed: false,
-            isRequired: true,
-            date: new Date().toISOString().split('T')[0]
-        };
-        setCurrentTasks(prev => [...prev, newTask]);
-    } else {
+    const handleAddReward = () => {
         setDialogConfig({
             isOpen: true,
-            title: '✨ 开启新任务',
-            placeholder: '输入任务名称，例如：阅读30分钟',
-            onConfirm: (val, time) => {
-                if (!val) return;
-                const newTask: Task = {
-                    id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                    title: val,
-                    timeSlot: time || '08:00',
-                    points: 10,
-                    completed: false,
-                    isRequired: true,
-                    date: new Date().toISOString().split('T')[0]
+            title: '🎁 新增奖励项',
+            placeholder: '输入奖励名称',
+            onConfirm: (name) => {
+                if (!name) return;
+                const costStr = prompt('所需成长币？', '500');
+                if (!costStr) return;
+                const newReward: Reward = {
+                    id: `r_${Date.now()}`,
+                    name,
+                    pointsCost: parseInt(costStr) || 100,
+                    icon: '🎁'
                 };
-                setCurrentTasks(prev => [...prev, newTask]);
+                setRewards(prev => [...prev, newReward]);
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
             }
         });
-    }
-};
+    };
 
-const handleAddReward = () => {
-    setDialogConfig({
-        isOpen: true,
-        title: '🎁 新增奖励项',
-        placeholder: '输入奖励名称',
-        onConfirm: (name) => {
-            if (!name) return;
-            const costStr = prompt('所需成长币？', '500');
-            if (!costStr) return;
-            const newReward: Reward = {
-                id: `r_${Date.now()}`,
-                name,
-                pointsCost: parseInt(costStr) || 100,
-                icon: '🎁'
-            };
-            setRewards(prev => [...prev, newReward]);
-            setDialogConfig(prev => ({ ...prev, isOpen: false }));
-        }
-    });
-};
-
-const editTask = (task: Task) => {
-    setDialogConfig({
-        isOpen: true,
-        title: '📝 编辑任务',
-        message: `修改“${task.title}”`,
-        placeholder: '任务名称',
-        defaultValue: task.title,
-        defaultExtra: task.timeSlot,
-        showTime: true,
-        onConfirm: (newTitle, newTime) => {
-            if (!newTitle) return;
-            setCurrentTasks(prev => prev.map(t => t.id === task.id ? { ...t, title: newTitle, timeSlot: newTime || t.timeSlot } : t));
-            setDialogConfig(prev => ({ ...prev, isOpen: false }));
-        }
-    });
-};
-
-const removeReward = (id: string) => {
-    setRewards(prev => prev.filter(r => r.id !== id));
-};
-
-const processImage = (file: File): Promise<Blob> => {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const size = Math.min(img.width, img.height);
-                canvas.width = 256;
-                canvas.height = 256;
-                const ctx = canvas.getContext('2d')!;
-                ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 256, 256);
-                canvas.toBlob((blob) => resolve(blob!), 'image/webp', 0.8);
-            };
-            img.src = e.target?.result as string;
-        };
-        reader.readAsDataURL(file);
-    });
-};
-
-const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingAvatar(true);
-    try {
-        const webpBlob = await processImage(file);
-        const res = await fetch(`/api/kiddieplan/upload?filename=avatar_${Date.now()}.webp`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'image/webp' },
-            body: webpBlob
-        });
-        const result = await res.json();
-        if (result.success) {
-            setCurrentAvatar(result.url);
-        }
-    } catch (err) {
-        alert('头像上传失败');
-    } finally {
-        setUploadingAvatar(false);
-    }
-};
-
-const removeTask = (id: string) => {
-    setCurrentTasks(currentTasks.filter(t => t.id !== id));
-};
-
-const handleAddChild = async () => {
-    const newAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${Date.now()}`;
-    setCurrentAvatar(newAvatar);
-
-    setDialogConfig({
-        isOpen: true,
-        title: '🌈 欢迎新成员',
-        placeholder: '请输入小宝贝的昵称',
-        showAvatarUpload: true,
-        onConfirm: async (name) => {
-            if (!name) return;
-            const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-            try {
-                const finalAvatar = avatarRef.current || newAvatar;
-                const res = await fetch('/api/kiddieplan/manage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'save_child',
-                        token,
-                        data: { name, avatar: finalAvatar, roomCode }
-                    })
-                });
-                const result = await res.json();
-                if (result.success) {
-                    setChildren(result.data.children);
-                    setDialogConfig({
-                        isOpen: true,
-                        title: '🌈 添加成功！',
-                        placeholder: '',
-                        message: `宝贝的任务日记已开通，记得告诉孩子房间码：`,
-                        highlight: roomCode,
-                        onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
-                        hideInput: true
-                    });
-                } else {
-                    alert(result.message);
-                }
-            } catch (err) {
-                alert('添加失败');
+    const editTask = (task: Task) => {
+        setDialogConfig({
+            isOpen: true,
+            title: '📝 编辑任务',
+            message: `修改“${task.title}”`,
+            placeholder: '任务名称',
+            defaultValue: task.title,
+            defaultExtra: task.timeSlot,
+            showTime: true,
+            onConfirm: (newTitle, newTime) => {
+                if (!newTitle) return;
+                setCurrentTasks(prev => prev.map(t => t.id === task.id ? { ...t, title: newTitle, timeSlot: newTime || t.timeSlot } : t));
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
             }
-        }
-    });
-};
+        });
+    };
 
-const handleEditChild = () => {
-    if (!selectedChild) return;
-    setCurrentAvatar(selectedChild.avatar);
-    setDialogConfig({
-        isOpen: true,
-        title: '✨ 修改宝贝资料',
-        placeholder: '小宝贝的昵称',
-        defaultValue: selectedChild.name,
-        showAvatarUpload: true,
-        showDelete: true,
-        onDelete: async () => {
-            if (window.confirm(`确定要删除宝贝 ${selectedChild.name} 吗？此操作不可恢复。`)) {
+    const removeReward = (id: string) => {
+        setRewards(prev => prev.filter(r => r.id !== id));
+    };
+
+    const processImage = (file: File): Promise<Blob> => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const size = Math.min(img.width, img.height);
+                    canvas.width = 256;
+                    canvas.height = 256;
+                    const ctx = canvas.getContext('2d')!;
+                    ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 256, 256);
+                    canvas.toBlob((blob) => resolve(blob!), 'image/webp', 0.8);
+                };
+                img.src = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingAvatar(true);
+        try {
+            const webpBlob = await processImage(file);
+            const res = await fetch(`/api/kiddieplan/upload?filename=avatar_${Date.now()}.webp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'image/webp' },
+                body: webpBlob
+            });
+            const result = await res.json();
+            if (result.success) {
+                setCurrentAvatar(result.url);
+            }
+        } catch (err) {
+            alert('头像上传失败');
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
+    const removeTask = (id: string) => {
+        setCurrentTasks(currentTasks.filter(t => t.id !== id));
+    };
+
+    const handleAddChild = async () => {
+        const newAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${Date.now()}`;
+        setCurrentAvatar(newAvatar);
+
+        setDialogConfig({
+            isOpen: true,
+            title: '🌈 欢迎新成员',
+            placeholder: '请输入小宝贝的昵称',
+            showAvatarUpload: true,
+            onConfirm: async (name) => {
+                if (!name) return;
+                const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
                 try {
+                    const finalAvatar = avatarRef.current || newAvatar;
                     const res = await fetch('/api/kiddieplan/manage', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            action: 'remove_child',
+                            action: 'save_child',
                             token,
-                            childId: selectedChild.id
+                            data: { name, avatar: finalAvatar, roomCode }
                         })
                     });
                     const result = await res.json();
                     if (result.success) {
                         setChildren(result.data.children);
-                        if (result.data.children.length > 0) {
-                            setSelectedChildId(result.data.children[0].id);
-                        } else {
-                            setSelectedChildId(null);
+                        setDialogConfig({
+                            isOpen: true,
+                            title: '🌈 添加成功！',
+                            placeholder: '',
+                            message: `宝贝的任务日记已开通，记得告诉孩子房间码：`,
+                            highlight: roomCode,
+                            onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                            hideInput: true
+                        });
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (err) {
+                    alert('添加失败');
+                }
+            }
+        });
+    };
+
+    const handleEditChild = () => {
+        if (!selectedChild) return;
+        setCurrentAvatar(selectedChild.avatar);
+        setDialogConfig({
+            isOpen: true,
+            title: '✨ 修改宝贝资料',
+            placeholder: '小宝贝的昵称',
+            defaultValue: selectedChild.name,
+            showAvatarUpload: true,
+            showDelete: true,
+            onDelete: async () => {
+                if (window.confirm(`确定要删除宝贝 ${selectedChild.name} 吗？此操作不可恢复。`)) {
+                    try {
+                        const res = await fetch('/api/kiddieplan/manage', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'remove_child',
+                                token,
+                                childId: selectedChild.id
+                            })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            setChildren(result.data.children);
+                            if (result.data.children.length > 0) {
+                                setSelectedChildId(result.data.children[0].id);
+                            } else {
+                                setSelectedChildId(null);
+                            }
+                            setDialogConfig(prev => ({ ...prev, isOpen: false }));
                         }
+                    } catch (err) {
+                        alert('删除失败');
+                    }
+                }
+            },
+            onConfirm: async (name) => {
+                if (!name) return;
+                try {
+                    const res = await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_child',
+                            token,
+                            data: { ...selectedChild, name, avatar: avatarRef.current || selectedChild.avatar }
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        setChildren(result.data.children);
                         setDialogConfig(prev => ({ ...prev, isOpen: false }));
                     }
                 } catch (err) {
-                    alert('删除失败');
+                    alert('修改失败');
                 }
             }
-        },
-        onConfirm: async (name) => {
-            if (!name) return;
-            try {
-                const res = await fetch('/api/kiddieplan/manage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'save_child',
-                        token,
-                        data: { ...selectedChild, name, avatar: avatarRef.current || selectedChild.avatar }
-                    })
-                });
-                const result = await res.json();
-                if (result.success) {
-                    setChildren(result.data.children);
-                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                }
-            } catch (err) {
-                alert('修改失败');
-            }
-        }
-    });
-};
+        });
+    };
 
-if (loading) return (
-    <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4">
-        <motion.div
-            animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-16 h-16 bg-[var(--color-blue-fun)] rounded-3xl"
-        ></motion.div>
-        <p className="text-xl text-[#5D4037] opacity-60 font-bold">载入中...</p>
-    </div>
-);
+    if (loading) return (
+        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4">
+            <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-16 h-16 bg-[var(--color-blue-fun)] rounded-3xl"
+            ></motion.div>
+            <p className="text-xl text-[#5D4037] opacity-60 font-bold">载入中...</p>
+        </div>
+    );
 
-const selectedChild = children.find(c => c.id === selectedChildId);
+    const selectedChild = children.find(c => c.id === selectedChildId);
 
-return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--color-bg-light-blue)] font-sans relative">
-        <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
+    return (
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--color-bg-light-blue)] font-sans relative">
+            <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
-        {/* Header */}
-        <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)] z-40">
-            <div className="flex items-center gap-3">
-                <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                        <Sparkles className="text-blue-500" size={20} />
+            {/* Header */}
+            <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)] z-40">
+                <div className="flex items-center gap-3">
+                    <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                        <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                            <Sparkles className="text-blue-500" size={20} />
+                        </div>
+                    </div>
+                    <div>
+                        <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                            星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span> <span className="text-sm font-bold text-gray-400 ml-1">家长端</span>
+                        </h1>
                     </div>
                 </div>
-                <div>
-                    <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                        星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span> <span className="text-sm font-bold text-gray-400 ml-1">家长端</span>
-                    </h1>
+                <div className="flex gap-3">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={onLogout}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-gray-500 font-bold text-sm shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
+                    >
+                        <Home size={18} />
+                        <span className="hidden md:inline">返回首页</span>
+                    </motion.button>
                 </div>
-            </div>
-            <div className="flex gap-3">
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={onLogout}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-gray-500 font-bold text-sm shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
-                >
-                    <Home size={18} />
-                    <span className="hidden md:inline">返回首页</span>
-                </motion.button>
-            </div>
-        </header>
+            </header>
 
-        {/* Main Content */}
-        <main className="flex-1 w-full px-4 pt-6 pb-20 overflow-y-auto no-scrollbar space-y-6">
+            {/* Main Content */}
+
 
             {activeTab === 'children' && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -855,106 +849,106 @@ return (
             )}
         </main>
 
-        {/* Dialog Overlay */}
-        <AnimatePresence>
-            {dialogConfig.isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                    />
-                    <motion.div
-                        initial={{ scale: 0.9, y: 20 }}
-                        animate={{ scale: 1, y: 0 }}
-                        exit={{ scale: 0.9, y: 20, opacity: 0 }}
-                        className="bg-white p-8 rounded-[40px] w-full max-w-sm shadow-2xl relative z-60 border-8 border-[var(--color-bg-light-blue)]"
-                    >
-                        <h3 className="text-2xl font-black text-center text-[#5D4037] mb-2">{dialogConfig.title}</h3>
-                        {dialogConfig.message && <p className="text-center text-gray-500 text-sm mb-6">{dialogConfig.message}</p>}
-                        {dialogConfig.highlight && (
-                            <div className="text-center text-5xl font-black text-[var(--color-blue-fun)] mb-6 font-mono tracking-widest bg-blue-50 py-4 rounded-2xl border-2 border-blue-100">
-                                {dialogConfig.highlight}
-                            </div>
-                        )}
+            {/* Dialog Overlay */ }
+    <AnimatePresence>
+        {dialogConfig.isOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                    onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                />
+                <motion.div
+                    initial={{ scale: 0.9, y: 20 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                    className="bg-white p-8 rounded-[40px] w-full max-w-sm shadow-2xl relative z-60 border-8 border-[var(--color-bg-light-blue)]"
+                >
+                    <h3 className="text-2xl font-black text-center text-[#5D4037] mb-2">{dialogConfig.title}</h3>
+                    {dialogConfig.message && <p className="text-center text-gray-500 text-sm mb-6">{dialogConfig.message}</p>}
+                    {dialogConfig.highlight && (
+                        <div className="text-center text-5xl font-black text-[var(--color-blue-fun)] mb-6 font-mono tracking-widest bg-blue-50 py-4 rounded-2xl border-2 border-blue-100">
+                            {dialogConfig.highlight}
+                        </div>
+                    )}
 
-                        {dialogConfig.showAvatarUpload && (
-                            <div className="flex flex-col items-center mb-6">
-                                <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                                    <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
-                                    <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
-                                        <Settings size={24} className="mb-1" />
-                                        <span className="text-[10px] font-black">更换头像</span>
-                                    </div>
-                                    {uploadingAvatar && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full"><Sparkles className="animate-spin text-blue-400" /></div>}
-                                    <div className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[var(--color-blue-fun)] border-2 border-[var(--color-blue-fun)]">
-                                        <Edit2 size={14} fill="currentColor" />
-                                    </div>
+                    {dialogConfig.showAvatarUpload && (
+                        <div className="flex flex-col items-center mb-6">
+                            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
+                                <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
+                                    <Settings size={24} className="mb-1" />
+                                    <span className="text-[10px] font-black">更换头像</span>
                                 </div>
-                                <p className="mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest">点击上方头像修改图片</p>
+                                {uploadingAvatar && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full"><Sparkles className="animate-spin text-blue-400" /></div>}
+                                <div className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[var(--color-blue-fun)] border-2 border-[var(--color-blue-fun)]">
+                                    <Edit2 size={14} fill="currentColor" />
+                                </div>
                             </div>
-                        )}
+                            <p className="mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest">点击上方头像修改图片</p>
+                        </div>
+                    )}
 
-                        {!dialogConfig.hideInput && (
-                            <div className="space-y-4">
-                                <input
-                                    autoFocus
-                                    className="w-full bg-[#F5F7FA] border-2 border-transparent focus:border-[var(--color-blue-fun)] px-6 py-4 rounded-2xl text-lg font-bold text-center outline-none transition-all"
-                                    placeholder={dialogConfig.placeholder}
-                                    defaultValue={dialogConfig.defaultValue}
-                                    id="dialogInput"
-                                />
-                                {dialogConfig.showTime && (
-                                    <div className="flex items-center gap-2 bg-[#F5F7FA] px-4 py-3 rounded-2xl">
-                                        <Clock size={18} className="text-gray-400" />
-                                        <input
-                                            type="time"
-                                            defaultValue={dialogConfig.defaultExtra || '08:00'}
-                                            className="bg-transparent font-bold text-[#5D4037] outline-none flex-1"
-                                            id="dialogTime"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                    {!dialogConfig.hideInput && (
+                        <div className="space-y-4">
+                            <input
+                                autoFocus
+                                className="w-full bg-[#F5F7FA] border-2 border-transparent focus:border-[var(--color-blue-fun)] px-6 py-4 rounded-2xl text-lg font-bold text-center outline-none transition-all"
+                                placeholder={dialogConfig.placeholder}
+                                defaultValue={dialogConfig.defaultValue}
+                                id="dialogInput"
+                            />
+                            {dialogConfig.showTime && (
+                                <div className="flex items-center gap-2 bg-[#F5F7FA] px-4 py-3 rounded-2xl">
+                                    <Clock size={18} className="text-gray-400" />
+                                    <input
+                                        type="time"
+                                        defaultValue={dialogConfig.defaultExtra || '08:00'}
+                                        className="bg-transparent font-bold text-[#5D4037] outline-none flex-1"
+                                        id="dialogTime"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-                        {dialogConfig.showDelete && (
-                            <div className="mt-4">
-                                <button
-                                    onClick={dialogConfig.onDelete}
-                                    className="w-full py-3 rounded-2xl text-red-500 font-bold text-sm bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <Trash2 size={16} /> 删除此宝贝
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="mt-8 flex gap-3">
+                    {dialogConfig.showDelete && (
+                        <div className="mt-4">
                             <button
-                                onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
+                                onClick={dialogConfig.onDelete}
+                                className="w-full py-3 rounded-2xl text-red-500 font-bold text-sm bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                             >
-                                取消
-                            </button>
-                            <button
-                                onClick={() => {
-                                    const input = document.getElementById('dialogInput') as HTMLInputElement;
-                                    const time = document.getElementById('dialogTime') as HTMLInputElement;
-                                    dialogConfig.onConfirm(input?.value, time?.value);
-                                }}
-                                className="flex-1 bg-[var(--color-blue-fun)] text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-transform"
-                            >
-                                确定
+                                <Trash2 size={16} /> 删除此宝贝
                             </button>
                         </div>
-                    </motion.div>
-                </div>
-            )}
-        </AnimatePresence>
-    </div>
-);
+                    )}
+
+                    <div className="mt-8 flex gap-3">
+                        <button
+                            onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                            className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
+                        >
+                            取消
+                        </button>
+                        <button
+                            onClick={() => {
+                                const input = document.getElementById('dialogInput') as HTMLInputElement;
+                                const time = document.getElementById('dialogTime') as HTMLInputElement;
+                                dialogConfig.onConfirm(input?.value, time?.value);
+                            }}
+                            className="flex-1 bg-[var(--color-blue-fun)] text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-transform"
+                        >
+                            确定
+                        </button>
+                    </div>
+                </motion.div>
+            </div>
+        )}
+    </AnimatePresence>
+        </div >
+    );
 };
 
 export default ParentPortal;

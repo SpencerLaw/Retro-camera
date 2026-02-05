@@ -109,19 +109,36 @@ export const TASK_TEMPLATES = [
 ];
 
 export const DEFAULT_REWARDS = [
-    { name: '🍿 电影之夜', pointsCost: 500, icon: '🎬' },
-    { name: '🍦 冰淇淋自由', pointsCost: 200, icon: '🍨' },
+    // --- 低分值奖励 (50-200) ---
+    { name: '🍦 冰淇淋自由', pointsCost: 100, icon: '🍨' },
+    { name: '🍭 额外挑选零食', pointsCost: 150, icon: '🍬' },
+    { name: '🧸 获得一张贴纸', pointsCost: 50, icon: '✨' },
+    { name: '📖 睡前多读一个故事', pointsCost: 80, icon: '🌙' },
+    { name: '🎨 挑选一套彩色粘土', pointsCost: 200, icon: '🎨' },
+
+    // --- 中分值奖励 (300-600) ---
     { name: '🎮 游戏时间+30min', pointsCost: 300, icon: '🎮' },
-    { name: '📚 挑选一本心仪书籍', pointsCost: 400, icon: '📗' },
-    { name: '🧸 心愿礼物盲盒', pointsCost: 1000, icon: '🎁' },
-    { name: '🎡 周末游乐园', pointsCost: 2000, icon: '🎡' },
-    { name: '🍕 最爱美食餐', pointsCost: 350, icon: '🍕' },
-    { name: '🛍️ 自选小礼物', pointsCost: 600, icon: '🛍️' },
-    { name: '🏕️ 亲子露营', pointsCost: 2500, icon: '🏕️' },
-    { name: '🎂 定制蛋糕', pointsCost: 800, icon: '🎂' },
-    { name: '📱 额外手机时间+1h', pointsCost: 400, icon: '📱' },
-    { name: '🎭 才艺表演机会', pointsCost: 300, icon: '🎭' },
-    { name: '🏊 游泳馆/水上乐园', pointsCost: 1500, icon: '🏊' },
-    { name: '🎨 绘画/手工材料包', pointsCost: 450, icon: '🎨' },
-    { name: '🧩 新玩具/桌游', pointsCost: 700, icon: '🧩' },
+    { name: '📱 手机时间+1h', pointsCost: 500, icon: '📱' },
+    { name: '🍕 晚餐菜单决定权', pointsCost: 400, icon: '🍕' },
+    { name: '📚 挑选一本心仪书籍', pointsCost: 450, icon: '📗' },
+    { name: '🎬 电影之夜(含爆米花)', pointsCost: 600, icon: '🍿' },
+    { name: '🧹 免除一次家务(扫地/倒垃圾)', pointsCost: 350, icon: '🛡️' },
+    { name: '🎭 邀请好朋友来家里玩', pointsCost: 550, icon: '🤝' },
+
+    // --- 高分值奖励 (800-2000) ---
+    { name: '🧸 乐高/大型玩具盲盒', pointsCost: 1200, icon: '🎁' },
+    { name: '🎡 周末游乐园门票', pointsCost: 2000, icon: '🎡' },
+    { name: '🏞️ 全家郊游/露营一次', pointsCost: 1500, icon: '🏕️' },
+    { name: '🛹 获得一套新运动装备', pointsCost: 1000, icon: '🛹' },
+    { name: '🎂 私人定制生日蛋糕', pointsCost: 800, icon: '🎂' },
+    { name: '🎢 科技馆/水族馆一游', pointsCost: 1800, icon: '🐠' },
+    { name: '🎤 体验一节感兴趣的才艺课', pointsCost: 900, icon: '🎸' },
+
+    // --- 特权/愿望类 ---
+    { name: '🌟 获得一个"心愿币"(兑换任意小愿望)', pointsCost: 1000, icon: '💎' },
+    { name: '🏖️ 海边/度假旅行决定权', pointsCost: 5000, icon: '✈️' },
+    { name: '🚲 获得一辆新自行车/平衡车', pointsCost: 3000, icon: '🚲' },
+    { name: '💻 电子产品升级/新耳机', pointsCost: 2500, icon: '🎧' },
+    { name: '🛌 周末"懒觉"特权(不限量)', pointsCost: 300, icon: '🛌' },
+    { name: '👗 挑选一套新衣服/新鞋', pointsCost: 700, icon: '👟' },
 ];

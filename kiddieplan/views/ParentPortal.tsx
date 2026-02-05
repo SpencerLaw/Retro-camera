@@ -937,7 +937,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         <div className="space-y-3">
                             {currentTasks
-                                .filter(t => t.category === selectedCategory)
                                 .map(task => (
                                     <motion.div
                                         layout
@@ -962,9 +961,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         </div>
                                     </motion.div>
                                 ))}
-                            {currentTasks.filter(t => t.category === selectedCategory).length === 0 && (
+                            {currentTasks.length === 0 && (
                                 <div className="text-center py-10 opacity-50">
-                                    <p className="font-bold text-gray-500">该分类下暂称无已选待办</p>
+                                    <p className="font-bold text-gray-500">今日尚未添加待办任务</p>
                                 </div>
                             )}
                         </div>

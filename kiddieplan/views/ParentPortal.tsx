@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check } from 'lucide-react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3 } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [children, setChildren] = useState<Child[]>([]);
     const [licenseData, setLicenseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry'>('children');
+    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'checkins' | 'stats'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
     // Custom Dialog State
@@ -552,6 +552,32 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         </div>
                                         <span className="font-black text-[#5D4037] text-lg">奖励中心</span>
                                         <span className="text-xs text-gray-400 font-bold">设定心愿清单</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: -1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveTab('checkins')}
+                                        className="bg-white p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.1)] border-2 border-purple-50 hover:border-purple-400 transition-colors"
+                                    >
+                                        <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
+                                            <CalendarCheck size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">查看打卡</span>
+                                        <span className="text-xs text-gray-400 font-bold">查看历史记录</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: 1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveTab('stats')}
+                                        className="bg-white p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.1)] border-2 border-emerald-50 hover:border-emerald-400 transition-colors"
+                                    >
+                                        <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
+                                            <BarChart3 size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">详情统计</span>
+                                        <span className="text-xs text-gray-400 font-bold">数据报表分析</span>
                                     </motion.button>
                                 </div>
                             </motion.div>

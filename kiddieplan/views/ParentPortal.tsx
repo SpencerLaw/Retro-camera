@@ -15,6 +15,25 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'checkins' | 'stats'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Update time every minute
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatBeijingTime = (date: Date) => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const y = date.getFullYear();
+        const m = pad(date.getMonth() + 1);
+        const d = pad(date.getDate());
+        const hh = pad(date.getHours());
+        const mm = pad(date.getMinutes());
+        return `${y}-${m}-${d} ${hh}-${mm}`;
+    };
 
     // Custom Dialog State
     const [dialogConfig, setDialogConfig] = useState<{
@@ -466,16 +485,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </h1>
                     </div>
                 </div>
-                <div className="flex gap-3">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={onLogout}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-gray-500 font-bold text-sm shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
-                    >
-                        <Home size={18} />
-                        <span className="hidden md:inline">返回首页</span>
-                    </motion.button>
+                <div className="flex items-center gap-6">
+                    <div className="hidden lg:flex flex-col items-end">
+                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none mb-1">BEIJING TIME</span>
+                        <span className="text-sm font-black text-gray-500 font-mono tracking-tight">{formatBeijingTime(currentTime)}</span>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={onLogout}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-gray-500 font-bold text-sm shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
+                        >
+                            <Home size={18} />
+                            <span className="hidden md:inline">返回首页</span>
+                        </motion.button>
+                    </div>
                 </div>
             </header>
 
@@ -561,21 +587,21 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <div>
                                             <div className="flex items-center gap-2 mb-2">
                                                 {selectedChild.isFocusing ? (
-                                                    <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1">
-                                                        <div className="w-2 h-2 bg-white rounded-full"></div> 专注中
+                                                    <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider animate-pulse flex items-center gap-1">
+                                                        <div className="w-2 h-2 bg-white rounded-full"></div> {selectedChild.currentTaskName || '专注'} (进行中)
                                                     </span>
                                                 ) : (
-                                                    <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                                    <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider">
                                                         休息中
                                                     </span>
                                                 )}
                                             </div>
                                             <h2 className="text-4xl font-black">{selectedChild.roomCode}</h2>
-                                            <p className="text-xs opacity-70 font-bold uppercase mt-1 tracking-widest">房间访问码 (Room Code)</p>
+                                            <p className="text-xs opacity-70 font-bold mt-1 tracking-widest underline decoration-white/30 underline-offset-4">房间访问码</p>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-4xl font-black drop-shadow-md">{selectedChild.points || 0} 🍭</div>
-                                            <p className="text-xs opacity-70 font-bold uppercase mt-1 tracking-widest">累计积分</p>
+                                            <p className="text-xs opacity-70 font-bold mt-1 tracking-widest">累计积分</p>
                                         </div>
                                     </div>
                                 </div>

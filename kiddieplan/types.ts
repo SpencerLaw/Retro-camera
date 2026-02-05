@@ -45,6 +45,8 @@ export interface Child {
   points: number;
   roomCode: string;
   schedules: DailySchedule[];
+  isFocusing?: boolean;
+  currentTaskName?: string;
 }
 
 export type AppTab = 'home' | 'plan' | 'rewards' | 'me';

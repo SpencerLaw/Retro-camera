@@ -69,6 +69,18 @@ export default async function handler(
             }
 
             await kv.set(licenseKey, license);
+            await kv.set(licenseKey, license);
+            return response.status(200).json({ success: true, data: license });
+        }
+
+        if (action === 'remove_child') {
+            const { childId } = request.body;
+            const license: any = await kv.get(licenseKey) || { children: [] };
+
+            // 过滤掉该孩子，无需操作 registry，因为下一次 save_child 或 auth 都会基于新的 children 列表
+            license.children = license.children.filter((c: any) => c.id !== childId);
+
+            await kv.set(licenseKey, license);
             return response.status(200).json({ success: true, data: license });
         }
 

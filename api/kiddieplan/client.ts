@@ -57,9 +57,10 @@ export default async function handler(
             if (!license.progress[today]) license.progress[today] = {};
             if (!license.progress[today][childId]) {
                 // 可能是从旧任务列表初始化
+                // 可能是从旧任务列表初始化
                 license.progress[today][childId] = {
-                    tasks: await kv.get(`kp:child:${childId}:tasks:${today}`) || [],
-                    checkins: await kv.get(`kp:child:${childId}:checkins:${today}`) || []
+                    tasks: [],
+                    checkins: []
                 };
             }
 

@@ -936,7 +936,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         <div className="h-px bg-gray-200 my-4" />
 
                         <div className="space-y-3">
-                            {currentTasks
+                            {[...currentTasks]
+                                .sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
                                 .map(task => (
                                     <motion.div
                                         layout

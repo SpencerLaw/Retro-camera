@@ -742,9 +742,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </motion.button>
                                 <h2 className="text-2xl font-black text-[#5D4037]">今日任务清单</h2>
                             </div>
-                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => addTask()} className="bg-[var(--color-blue-fun)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
-                                <Plus size={24} />
-                            </motion.button>
+                            {/* Removed global add button as per user request */}
                         </div>
 
                         {/* Templates */}
@@ -782,34 +780,39 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
                             {(() => {
                                 const templates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
-                                if (templates.length === 0) {
-                                    return (
-                                        <div className="col-span-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50 text-gray-400 gap-2">
-                                            <Sparkles size={24} className="text-yellow-400" />
-                                            <p className="font-bold text-sm">该分类下暂无预设任务</p>
-                                            <button
-                                                onClick={() => addTask()}
-                                                className="text-[var(--color-blue-fun)] font-black text-sm underline mt-1"
+                                // Combine templates with the "Add Custom" button
+                                return (
+                                    <>
+                                        {templates.map((tmp, i) => (
+                                            <motion.button
+                                                key={i}
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
+                                                className="bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
                                             >
-                                                手动添加一个自定义任务
-                                            </button>
-                                        </div>
-                                    );
-                                }
-                                return templates.map((tmp, i) => (
-                                    <motion.button
-                                        key={i}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                        className="bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
-                                    >
-                                        <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
-                                            <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
-                                        </div>
-                                    </motion.button>
-                                ));
+                                                <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
+                                                    <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
+                                                </div>
+                                            </motion.button>
+                                        ))}
+
+                                        {/* Always show Add Custom Task button at the end */}
+                                        <motion.button
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => addTask()}
+                                            className="bg-blue-50 p-4 rounded-2xl text-left border-2 border-dashed border-blue-200 hover:bg-blue-100 flex items-center gap-3 justify-center group min-h-[80px]"
+                                        >
+                                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[var(--color-blue-fun)] shadow-sm group-hover:scale-110 transition-transform">
+                                                <Plus size={24} />
+                                            </div>
+                                            <span className="font-bold text-[var(--color-blue-fun)]">
+                                                {selectedCategory === 'all' ? '添加自定义任务' : '添加本类任务'}
+                                            </span>
+                                        </motion.button>
+                                    </>
+                                );
                             })()}
                         </div>
 

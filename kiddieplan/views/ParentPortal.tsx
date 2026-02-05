@@ -29,6 +29,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         message?: string;
         highlight?: string;
         hideInput?: boolean;
+        showDelete?: boolean;
+        onDelete?: () => void;
     }>({
         isOpen: false,
         title: '',
@@ -373,6 +375,34 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             placeholder: '小宝贝的昵称',
             defaultValue: selectedChild.name,
             showAvatarUpload: true,
+            showDelete: true,
+            onDelete: async () => {
+                if (window.confirm(`确定要删除宝贝 ${selectedChild.name} 吗？此操作不可恢复。`)) {
+                    try {
+                        const res = await fetch('/api/kiddieplan/manage', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'remove_child',
+                                token,
+                                childId: selectedChild.id
+                            })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            setChildren(result.data.children);
+                            if (result.data.children.length > 0) {
+                                setSelectedChildId(result.data.children[0].id);
+                            } else {
+                                setSelectedChildId(null);
+                            }
+                            setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                        }
+                    } catch (err) {
+                        alert('删除失败');
+                    }
+                }
+            },
             onConfirm: async (name) => {
                 if (!name) return;
                 try {
@@ -382,7 +412,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         body: JSON.stringify({
                             action: 'save_child',
                             token,
-                            data: { ...selectedChild, name, avatar: currentAvatar || selectedChild.avatar }
+                            data: { ...selectedChild, name, avatar: avatarRef.current || selectedChild.avatar }
                         })
                     });
                     const result = await res.json();
@@ -854,6 +884,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             />
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {dialogConfig.showDelete && (
+                                <div className="mt-4">
+                                    <button
+                                        onClick={dialogConfig.onDelete}
+                                        className="w-full py-3 rounded-2xl text-red-500 font-bold text-sm bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 size={16} /> 删除此宝贝
+                                    </button>
                                 </div>
                             )}
 

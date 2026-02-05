@@ -25,11 +25,29 @@ const KiddiePlanApp: React.FC = () => {
 
   // 自动登录逻辑
   useEffect(() => {
+    // Parent auto-restore is handled when clicking the 'Parent Zone' button
+    // for immediate redirect if token exists.
     if (token && role) {
       setPortal(role);
       setIsAuthenticated(true);
     }
   }, [token, role]);
+
+  const handleRoleSelect = (selectedRole: UserRole) => {
+    setPortal(selectedRole);
+    setAuthCode('');
+    setError(null);
+
+    // PERSISTENCE CHECK: If parent, check for saved token
+    if (selectedRole === 'parent') {
+      const savedParentToken = localStorage.getItem('kp_parent_token');
+      if (savedParentToken) {
+        setToken(savedParentToken);
+        setRole('parent');
+        setIsAuthenticated(true);
+      }
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,8 +70,17 @@ const KiddiePlanApp: React.FC = () => {
 
       const result = await res.json();
       if (result.success) {
+        // Save token specifically by role if needed for persistence
+        if (portal === 'parent') {
+          localStorage.setItem('kp_parent_token', result.token);
+        } else {
+          localStorage.setItem('kp_child_token', result.token);
+        }
+
+        // Also set 'last session' for initialization
         localStorage.setItem('kp_token', result.token);
         localStorage.setItem('kp_role', result.role);
+
         setToken(result.token);
         setRole(result.role);
         setIsAuthenticated(true);
@@ -68,8 +95,18 @@ const KiddiePlanApp: React.FC = () => {
   };
 
   const handleLogout = () => {
+    // If it's a parent returning to selection, we DON'T clear kp_parent_token
+    // so they don't have to re-enter the code.
+    // We only clear the current session state.
+
+    if (portal === 'child') {
+      localStorage.removeItem('kp_child_token');
+    }
+
+    // Clear the "current session" markers but keep the parent persistent one
     localStorage.removeItem('kp_token');
     localStorage.removeItem('kp_role');
+
     setToken(null);
     setRole(null);
     setIsAuthenticated(false);
@@ -150,7 +187,7 @@ const KiddiePlanApp: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
             <motion.button
-              onClick={() => setPortal('parent')}
+              onClick={() => handleRoleSelect('parent')}
               whileHover={buttonHover}
               whileTap={buttonTap}
               className="bg-white/80 backdrop-blur-md rounded-[40px] p-8 shadow-[0_15px_30px_rgba(96,165,250,0.2)] border-4 border-white flex flex-col items-center gap-4 group relative overflow-hidden"
@@ -164,7 +201,7 @@ const KiddiePlanApp: React.FC = () => {
             </motion.button>
 
             <motion.button
-              onClick={() => setPortal('child')}
+              onClick={() => handleRoleSelect('child')}
               whileHover={buttonHover}
               whileTap={buttonTap}
               className="bg-white/80 backdrop-blur-md rounded-[40px] p-8 shadow-[0_15px_30px_rgba(236,72,153,0.2)] border-4 border-white flex flex-col items-center gap-4 group relative overflow-hidden"

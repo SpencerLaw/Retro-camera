@@ -445,10 +445,18 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
             {/* Header */}
-            <header className="px-6 py-5 flex justify-between items-center bg-gradient-to-r from-[var(--color-blue-fun)] to-blue-500 shadow-md z-20">
-                <div className="flex items-center gap-4">
+            <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)] z-40">
+                <div className="flex items-center gap-3">
+                    <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                        <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                            <Sparkles className="text-blue-500" size={20} />
+                        </div>
+                    </div>
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-sm" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>星梦奇旅 (家长端)</h1>
+                        <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                            星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span> <span className="text-sm font-bold text-gray-400 ml-1">家长端</span>
+                        </h1>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -456,9 +464,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={onLogout}
-                        className="p-3 rounded-2xl bg-[#FF6B81] text-white shadow-sm border-b-4 border-[#e93b58] active:border-b-0 active:translate-y-1"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-gray-500 font-bold text-sm shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
                     >
-                        <Home size={24} />
+                        <Home size={18} />
+                        <span className="hidden md:inline">返回首页</span>
                     </motion.button>
                 </div>
             </header>

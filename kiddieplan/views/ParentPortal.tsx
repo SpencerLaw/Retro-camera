@@ -91,7 +91,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     useEffect(() => {
         if (selectedChildId) {
-            if (activeTab === 'tasks') fetchTasks();
+            // 即时清空旧任务，防止数据串屏
+            if (activeTab === 'tasks') {
+                setCurrentTasks([]);
+                fetchTasks();
+            }
             if (activeTab === 'rewards') fetchRewards();
         }
     }, [selectedChildId, activeTab]);
@@ -271,10 +275,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const fetchTasks = async () => {
         if (!selectedChildId) return;
         try {
+            // 从家长 token 中解析出授权码 (licenseCode)
+            const decodedParentToken = atob(token);
+            const licenseCode = decodedParentToken.split(':')[1];
+
+            // 构造符合 client.ts 预期的 token: child:id:licenseCode
+            const childToken = btoa(`child:${selectedChildId}:${licenseCode}`);
+
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_today_data', token: btoa(`child:${selectedChildId}`) })
+                body: JSON.stringify({ action: 'get_today_data', token: childToken })
             });
             const result = await res.json();
             if (result.success) {

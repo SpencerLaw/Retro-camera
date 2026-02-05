@@ -1,15 +1,13 @@
 
-export enum TaskCategory {
-  STUDY = '自主学习',
-  MORNING = '晨间习惯',
-  EVENING = '晚间习惯',
-  SPORTS = '运动健康',
-  DISCIPLINE = '自律管理',
-  CHORES = '劳动技能',
-  HYGIENE = '个人卫生',
-  CREATIVITY = '创意艺术',
-  OTHER = '自定义'
+// 动态分类接口
+export interface Category {
+  id: string;
+  name: string;
+  icon: string;
 }
+
+// 保持 TaskCategory 类型兼容性（逐步迁移）
+export type TaskCategory = string; // 现在是动态 ID
 
 export type UserRole = 'child' | 'parent';
 export type PlanningView = 'today' | 'week' | 'future';
@@ -24,6 +22,7 @@ export interface Task {
   completed: boolean;
   isRequired: boolean;
   date: string;
+  category?: string;
 }
 
 export interface DailySchedule {

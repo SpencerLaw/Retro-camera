@@ -10,6 +10,19 @@ export default async function handler(
 ) {
     const { action, token, data } = request.body;
 
+    // 默认分类配置
+    const DEFAULT_CATEGORIES = [
+        { id: 'study', name: '自主学习', icon: '📚' },
+        { id: 'morning', name: '晨间习惯', icon: '☀️' },
+        { id: 'evening', name: '晚间习惯', icon: '🌙' },
+        { id: 'sports', name: '运动健康', icon: '🏃' },
+        { id: 'discipline', name: '自律管理', icon: '🎯' },
+        { id: 'chores', name: '劳动技能', icon: '🧹' },
+        { id: 'hygiene', name: '个人卫生', icon: '🧼' },
+        { id: 'creativity', name: '创意艺术', icon: '🎨' },
+        { id: 'other', name: '自定义', icon: '✨' }
+    ];
+
     if (!token) return response.status(401).json({ success: false, message: '未授权' });
 
     try {
@@ -20,7 +33,12 @@ export default async function handler(
         const licenseKey = `license:${licenseCode}`;
 
         if (action === 'get_config') {
-            const license = await kv.get(licenseKey) || { children: [], tasks: [], rewards: [], analytics: {}, progress: {} };
+            const license: any = await kv.get(licenseKey) || { children: [], tasks: [], rewards: [], analytics: {}, progress: {} };
+            // 初始化默认分类
+            if (!license.categories || license.categories.length === 0) {
+                license.categories = DEFAULT_CATEGORIES;
+                await kv.set(licenseKey, license);
+            }
             return response.status(200).json({ success: true, data: license });
         }
 
@@ -115,6 +133,14 @@ export default async function handler(
             const license: any = await kv.get(licenseKey) || { children: [] };
             const child = license.children.find((c: any) => c.id === childId);
             return response.status(200).json({ success: true, data: { rewards: child?.rewards || [] } });
+        }
+
+        if (action === 'save_categories') {
+            const { categories } = data;
+            const license: any = await kv.get(licenseKey) || { children: [] };
+            license.categories = categories;
+            await kv.set(licenseKey, license);
+            return response.status(200).json({ success: true, message: '分类已更新', data: { categories } });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

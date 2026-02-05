@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3 } from 'lucide-react';
-import { Child, Task, Reward, TaskCategory } from '../types';
-import { TASK_TEMPLATES, DEFAULT_REWARDS } from '../constants/templates';
+import { Child, Task, Reward, TaskCategory, Category } from '../types';
+import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ParentPortalProps {
@@ -71,7 +71,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     // Task/Reward Editor State
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
     const [rewards, setRewards] = useState<Reward[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<TaskCategory>(TaskCategory.STUDY);
+    const [selectedCategory, setSelectedCategory] = useState<string>('study');
+    const [customCategories, setCustomCategories] = useState<Category[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const mainScrollRef = useRef<HTMLElement>(null);
 
@@ -119,12 +120,51 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 if (childrenList.length > 0 && !selectedChildId) {
                     setSelectedChildId(childrenList[0].id);
                 }
+
+                // 加载分类
+                if (result.data.categories && result.data.categories.length > 0) {
+                    setCustomCategories(result.data.categories);
+                } else if (!silent) {
+                    setCustomCategories(DEFAULT_CATEGORIES);
+                }
             }
         } catch (err) {
             console.error('Fetch failed');
         } finally {
             if (!silent) setLoading(false);
         }
+    };
+
+    const handleSaveCategories = async (newCategories: Category[]) => {
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_categories',
+                    token,
+                    data: { categories: newCategories }
+                })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setCustomCategories(newCategories);
+            } else {
+                alert(result.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('保存失败');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleSaveCategory = (name: string, icon: string) => {
+        if (!name) return;
+        const newCat = { id: `cat_${Date.now()}`, name, icon };
+        handleSaveCategories([...customCategories, newCat]);
     };
 
     const fetchTasks = async () => {
@@ -233,7 +273,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 points: points || 10,
                 completed: false,
                 isRequired: true,
-                date: new Date().toISOString().split('T')[0]
+                date: new Date().toISOString().split('T')[0],
+                category: selectedCategory
             };
             setCurrentTasks(prev => [...prev, newTask]);
         } else {
@@ -250,7 +291,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         points: 10,
                         completed: false,
                         isRequired: true,
-                        date: new Date().toISOString().split('T')[0]
+                        date: new Date().toISOString().split('T')[0],
+                        category: selectedCategory
                     };
                     setCurrentTasks(prev => [...prev, newTask]);
                     setDialogConfig(prev => ({ ...prev, isOpen: false }));
@@ -686,36 +728,71 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </div>
 
                         {/* Templates */}
-                        <div className="flex flex-wrap gap-2">
-                            {Object.values(TaskCategory).map(cat => (
+                        <div className="flex flex-wrap gap-2 items-center">
+                            {customCategories.map(cat => (
                                 <button
-                                    key={cat}
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2
-                                    ${selectedCategory === cat
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
+                                    ${selectedCategory === cat.id
                                             ? 'bg-[var(--color-blue-fun)] text-white border-[var(--color-blue-fun)] shadow-md'
                                             : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
                                 >
-                                    {cat}
+                                    <span>{cat.icon}</span>
+                                    {cat.name}
                                 </button>
                             ))}
+                            <button
+                                onClick={() => setDialogConfig({
+                                    isOpen: true,
+                                    title: '管理分类',
+                                    placeholder: '分类名称 (如: 钢琴课)',
+                                    defaultValue: '',
+                                    defaultExtra: '🎹', // Icon placeholder
+                                    showAvatarUpload: false,
+                                    showTime: false,
+                                    showDelete: false,
+                                    message: '这里可以添加自定义分类，方便归纳任务。',
+                                    onConfirm: (name, icon) => handleSaveCategory(name, icon || '✨')
+                                })}
+                                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200"
+                            >
+                                <Settings size={16} />
+                            </button>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks.map((tmp, i) => (
-                                <motion.button
-                                    key={i}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                    className="bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
-                                >
-                                    <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
-                                        <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
-                                    </div>
-                                </motion.button>
-                            ))}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
+                            {(() => {
+                                const templates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
+                                if (templates.length === 0) {
+                                    return (
+                                        <div className="col-span-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50 text-gray-400 gap-2">
+                                            <Sparkles size={24} className="text-yellow-400" />
+                                            <p className="font-bold text-sm">该分类下暂无预设任务</p>
+                                            <button
+                                                onClick={() => addTask()}
+                                                className="text-[var(--color-blue-fun)] font-black text-sm underline mt-1"
+                                            >
+                                                手动添加一个自定义任务
+                                            </button>
+                                        </div>
+                                    );
+                                }
+                                return templates.map((tmp, i) => (
+                                    <motion.button
+                                        key={i}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
+                                        className="bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
+                                    >
+                                        <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
+                                            <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
+                                        </div>
+                                    </motion.button>
+                                ));
+                            })()}
                         </div>
 
                         <div className="h-px bg-gray-200 my-4" />

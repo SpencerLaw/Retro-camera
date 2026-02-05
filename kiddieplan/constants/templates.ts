@@ -1,8 +1,19 @@
-import { TaskCategory } from '../types';
+// 默认分类配置
+export const DEFAULT_CATEGORIES = [
+    { id: 'study', name: '自主学习', icon: '📚' },
+    { id: 'morning', name: '晨间习惯', icon: '☀️' },
+    { id: 'evening', name: '晚间习惯', icon: '🌙' },
+    { id: 'sports', name: '运动健康', icon: '🏃' },
+    { id: 'discipline', name: '自律管理', icon: '🎯' },
+    { id: 'chores', name: '劳动技能', icon: '🧹' },
+    { id: 'hygiene', name: '个人卫生', icon: '🧼' },
+    { id: 'creativity', name: '创意艺术', icon: '🎨' },
+    { id: 'other', name: '自定义', icon: '✨' }
+];
 
 export const TASK_TEMPLATES = [
     {
-        category: TaskCategory.STUDY,
+        category: 'study',
         tasks: [
             { title: '📖 课前预习', time: '18:30', points: 15, icon: '📚' },
             { title: '✍️ 专注作业', time: '19:00', points: 30, icon: '📝' },
@@ -19,7 +30,7 @@ export const TASK_TEMPLATES = [
         ]
     },
     {
-        category: TaskCategory.MORNING,
+        category: 'morning',
         tasks: [
             { title: '⏰ 准时起床', time: '06:30', points: 10, icon: '⚡' },
             { title: '🛏️ 整理床铺', time: '06:35', points: 10, icon: '🛏️' },
@@ -30,7 +41,7 @@ export const TASK_TEMPLATES = [
         ]
     },
     {
-        category: TaskCategory.EVENING,
+        category: 'evening',
         tasks: [
             { title: '📚 完成作业', time: '18:30', points: 30, icon: '✍️' },
             { title: '🔍 整理错题', time: '20:00', points: 20, icon: '📋' },
@@ -41,7 +52,7 @@ export const TASK_TEMPLATES = [
         ]
     },
     {
-        category: TaskCategory.SPORTS,
+        category: 'sports',
         tasks: [
             { title: '🏃 户外活动', time: '16:30', points: 20, icon: '☀️' },
             { title: '🏀 体育锻炼', time: '17:30', points: 30, icon: '👟' },
@@ -56,7 +67,7 @@ export const TASK_TEMPLATES = [
         ]
     },
     {
-        category: TaskCategory.DISCIPLINE,
+        category: 'discipline',
         tasks: [
             { title: '📱 限时使用电子产品', time: '20:00', points: 25, icon: '📵' },
             { title: '🎯 制定明日计划', time: '21:30', points: 15, icon: '📋' },
@@ -68,7 +79,7 @@ export const TASK_TEMPLATES = [
         ]
     },
     {
-        category: TaskCategory.CHORES,
+        category: 'chores',
         tasks: [
             { title: '🍽️ 整理餐具', time: '18:15', points: 10, icon: '🥣' },
             { title: '🧺 收纳衣物', time: '19:45', points: 15, icon: '👕' },
@@ -82,7 +93,7 @@ export const TASK_TEMPLATES = [
         ]
     },
     {
-        category: TaskCategory.HYGIENE,
+        category: 'hygiene',
         tasks: [
             { title: '🦷 认真刷牙', time: '07:15', points: 10, icon: '🪥' },
             { title: '💦 洗脸护肤', time: '21:50', points: 10, icon: '🧼' },
@@ -95,7 +106,7 @@ export const TASK_TEMPLATES = [
         ]
     },
     {
-        category: TaskCategory.CREATIVITY,
+        category: 'creativity',
         tasks: [
             { title: '🎨 绘画创作', time: '15:00', points: 30, icon: '🖌️' },
             { title: '🎹 乐器练习', time: '17:00', points: 35, icon: '🎵' },

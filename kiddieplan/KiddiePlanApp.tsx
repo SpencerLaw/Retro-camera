@@ -106,10 +106,10 @@ const KiddiePlanApp: React.FC = () => {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="h-screen w-screen relative flex flex-col items-center justify-center overflow-hidden bg-[var(--color-bg-light-pink)]"
+        className="min-h-screen w-full relative flex flex-col items-center justify-center bg-[var(--color-bg-light-pink)] py-10"
       >
-        {/* Kawaii Background Accents */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Kawaii Background Accents - Fixed Position */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <motion.div
             className="absolute top-[10%] left-[10%] w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-[80px] opacity-60"
             animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
@@ -127,7 +127,7 @@ const KiddiePlanApp: React.FC = () => {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center gap-12 w-full max-w-lg px-6">
+        <div className="relative z-10 flex flex-col items-center gap-12 w-full max-w-lg px-6 my-auto">
           <motion.div
             className="text-center space-y-4"
             animate={floatAnimation}
@@ -179,7 +179,7 @@ const KiddiePlanApp: React.FC = () => {
           </div>
 
           <Link to="/" className="text-[#5D4037]/50 text-sm font-bold flex items-center gap-2 hover:text-[var(--color-blue-fun)] transition-colors py-3 px-6 rounded-full hover:bg-white/40">
-            <ArrowLeft size={18} /> 返回游戏大厅
+            <ArrowLeft size={18} /> 返回首页
           </Link>
         </div>
       </motion.div>

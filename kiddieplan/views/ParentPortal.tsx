@@ -71,7 +71,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     // Task/Reward Editor State
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
     const [rewards, setRewards] = useState<Reward[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string>('study');
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [customCategories, setCustomCategories] = useState<Category[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isManagingCategories, setIsManagingCategories] = useState(false);
@@ -295,9 +295,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             };
             setCurrentTasks(prev => [...prev, newTask]);
         } else {
+            const currentCatName = customCategories.find(c => c.id === selectedCategory)?.name || '自定义';
+            const dialogTitle = selectedCategory === 'all' ? '✨ 开启新任务' : `✨ 新增任务 [${currentCatName}]`;
+
             setDialogConfig({
                 isOpen: true,
-                title: '✨ 开启新任务',
+                title: dialogTitle,
                 placeholder: '输入任务名称，例如：阅读30分钟',
                 onConfirm: (val, time) => {
                     if (!val) return;
@@ -746,6 +749,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         {/* Templates */}
                         <div className="flex flex-wrap gap-2 items-center">
+                            <button
+                                onClick={() => setSelectedCategory('all')}
+                                className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
+                                ${selectedCategory === 'all'
+                                        ? 'bg-[var(--color-blue-fun)] text-white border-[var(--color-blue-fun)] shadow-md'
+                                        : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+                            >
+                                <span>🌟</span> 全部
+                            </button>
                             {customCategories.map(cat => (
                                 <button
                                     key={cat.id}
@@ -805,30 +817,32 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         {/* Current Tasks */}
                         <div className="space-y-3">
-                            {currentTasks.map(task => (
-                                <motion.div
-                                    layout
-                                    key={task.id}
-                                    className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-[var(--color-blue-fun)]">
-                                            <Clock size={18} strokeWidth={3} />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-[#5D4037]">{task.title}</h4>
-                                            <div className="text-xs text-gray-400 font-bold flex gap-2">
-                                                <span>{task.timeSlot}</span>
-                                                <span className="text-[var(--color-blue-fun)]">+{task.points} pts</span>
+                            {currentTasks
+                                .filter(t => selectedCategory === 'all' || t.category === selectedCategory)
+                                .map(task => (
+                                    <motion.div
+                                        layout
+                                        key={task.id}
+                                        className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-[var(--color-blue-fun)]">
+                                                <Clock size={18} strokeWidth={3} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-[#5D4037]">{task.title}</h4>
+                                                <div className="text-xs text-gray-400 font-bold flex gap-2">
+                                                    <span>{task.timeSlot}</span>
+                                                    <span className="text-[var(--color-blue-fun)]">+{task.points} pts</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={() => editTask(task)} className="p-2 text-gray-400 hover:text-blue-500"><Edit2 size={16} /></button>
-                                        <button onClick={() => removeTask(task.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={16} /></button>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                        <div className="flex gap-2">
+                                            <button onClick={() => editTask(task)} className="p-2 text-gray-400 hover:text-blue-500"><Edit2 size={16} /></button>
+                                            <button onClick={() => removeTask(task.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={16} /></button>
+                                        </div>
+                                    </motion.div>
+                                ))}
                             {currentTasks.length === 0 && (
                                 <div className="text-center py-10 opacity-50">
                                     <p className="font-bold text-gray-500">空空如也，快添加任务吧！</p>

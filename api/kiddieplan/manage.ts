@@ -18,7 +18,6 @@ export default async function handler(
 
         // 1. 获取授权许可聚合对象
         const licenseKey = `license:${licenseCode}`;
-        const registryKey = 'roomcode:registry'; // 独立命名空间，避免与 license:* 冲突
 
         if (action === 'get_config') {
             const license = await kv.get(licenseKey) || { children: [], tasks: [], rewards: [], analytics: {}, progress: {} };
@@ -31,6 +30,24 @@ export default async function handler(
 
             const childId = id || `c_${Date.now()}`;
             const existingChildIdx = license.children.findIndex((c: any) => c.id === childId);
+            const oldRoomCode = existingChildIdx > -1 ? license.children[existingChildIdx].roomCode : null;
+
+            // 检查房间码冲突（遍历所有授权码）
+            if (roomCode !== oldRoomCode) {
+                const allKeys = await kv.keys('license:*');
+                for (const key of allKeys) {
+                    try {
+                        const otherLicense: any = await kv.get(key);
+                        if (!otherLicense?.children) continue;
+                        const conflict = otherLicense.children.find((c: any) => c.roomCode === roomCode);
+                        if (conflict) {
+                            return response.status(400).json({ success: false, message: '该房间码已被占用' });
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
 
             const newChild = {
                 id: childId,
@@ -43,32 +60,15 @@ export default async function handler(
             };
 
             if (existingChildIdx > -1) {
-                const oldRoomCode = license.children[existingChildIdx].roomCode;
-                if (oldRoomCode !== roomCode) {
-                    const roomInfo: any = await kv.hget(registryKey, roomCode);
-                    if (roomInfo) return response.status(400).json({ success: false, message: '该房间码已被占用' });
-                    await kv.hdel(registryKey, oldRoomCode);
-                }
                 license.children[existingChildIdx] = { ...license.children[existingChildIdx], ...newChild };
             } else {
                 if (license.children.length >= 3) {
                     return response.status(400).json({ success: false, message: '最多只能添加3个孩子' });
                 }
-                const roomInfo: any = await kv.hget(registryKey, roomCode);
-                if (roomInfo) return response.status(400).json({ success: false, message: '该房间码已被占用' });
                 license.children.push(newChild);
             }
 
-            // 更新授权注册索引 - 包含显式的 licenseKey 以便维护
-            const registryValue = JSON.stringify({
-                licenseCode, // 授权码
-                childId,     // 孩子ID
-                childName: name, // 方便识别
-                updatedAt: Date.now()
-            });
-            await kv.hset(registryKey, { [roomCode]: registryValue });
             await kv.set(licenseKey, license);
-
             return response.status(200).json({ success: true, data: license });
         }
 

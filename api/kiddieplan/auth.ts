@@ -60,52 +60,36 @@ export default async function handler(
             return response.status(401).json({ success: false, message: '家长授权码无效 (须以 XXDK 开头)' });
         }
 
-        // 2. 孩子端验证 (4位房间码)
+        // 2. 孩子端验证 (4位房间码) - 遍历所有授权码查找
         if (action === 'child_auth') {
             if (cleanCode.length !== 4) {
                 return response.status(400).json({ success: false, message: '请输入4位房间码' });
             }
 
-            // 优先从房间码注册表查找（使用独立命名空间）
-            let roomDataString: any = await kv.hget('roomcode:registry', cleanCode);
+            // 遍历所有授权码，查找匹配房间码的孩子
+            const keys = await kv.keys('license:*');
 
-            // 兼容性回退：如果索引中没找到，尝试旧的索引
-            if (!roomDataString) {
-                roomDataString = await kv.hget('kp:rooms', cleanCode);
-            }
-
-            if (roomDataString) {
-                let licenseCode, childId;
+            for (const key of keys) {
                 try {
-                    // 尝试解析新版 JSON 格式
-                    const data = typeof roomDataString === 'object' ? roomDataString : JSON.parse(roomDataString);
-                    licenseCode = data.licenseCode;
-                    childId = data.childId;
+                    const license: any = await kv.get(key);
+                    if (!license?.children) continue;
+
+                    const child = license.children.find((c: any) => c.roomCode === cleanCode);
+                    if (child) {
+                        const licenseCode = key.replace('license:', '');
+                        return response.status(200).json({
+                            success: true,
+                            role: 'child',
+                            child: child,
+                            token: Buffer.from(`child:${child.id}:${licenseCode}`).toString('base64')
+                        });
+                    }
                 } catch (e) {
-                    // 兼容旧版 "code:childId" 格式
-                    [licenseCode, childId] = roomDataString.split(':');
-                }
-
-                if (!licenseCode || !childId) {
-                    return response.status(500).json({ success: false, message: '房间数据格式错误' });
-                }
-
-                const licenseKey = `license:${licenseCode}`;
-
-                // 从授权对象中获取孩子完整画像
-                const license: any = await kv.get(licenseKey);
-                const childInfo = license?.children?.find((c: any) => c.id === childId);
-
-                if (childInfo) {
-                    return response.status(200).json({
-                        success: true,
-                        role: 'child',
-                        child: childInfo,
-                        // Token 增强：包含 licenseCode 以便 Client 直接定位授权 Key
-                        token: Buffer.from(`child:${childId}:${licenseCode}`).toString('base64')
-                    });
+                    // 跳过无法解析的数据
+                    continue;
                 }
             }
+
             return response.status(404).json({ success: false, message: '未找到该房间，请检查房间码是否正确' });
         }
 

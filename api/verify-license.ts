@@ -328,7 +328,21 @@ export default async function handler(
 
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(200).json({ // 降级处理
+
+    // 获取 action 以区分请求类型
+    const { action } = req.body || {};
+
+    // 管理员请求不应降级，应返回明确的错误
+    if (action === 'list_all' || action === 'query') {
+      return res.status(500).json({
+        success: false,
+        message: `服务器错误: ${(error as Error).message || '连接 Redis 失败'}`,
+        data: []
+      });
+    }
+
+    // 普通验证请求可降级处理
+    return res.status(200).json({
       success: true,
       message: '验证成功(离线)',
       data: { validFor: '1年' }

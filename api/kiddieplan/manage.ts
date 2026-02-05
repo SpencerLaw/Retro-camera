@@ -18,7 +18,7 @@ export default async function handler(
 
         // 1. 获取授权许可聚合对象
         const licenseKey = `license:${licenseCode}`;
-        const registryKey = 'license:registry';
+        const registryKey = 'roomcode:registry'; // 独立命名空间，避免与 license:* 冲突
 
         if (action === 'get_config') {
             const license = await kv.get(licenseKey) || { children: [], tasks: [], rewards: [], analytics: {}, progress: {} };

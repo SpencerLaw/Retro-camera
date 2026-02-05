@@ -190,9 +190,7 @@ export default async function handler(
         return res.status(401).json({ success: false, message: '密码错误' });
       }
 
-      const allKeys = await kv.keys('license:*');
-      // 过滤掉 Hash 类型的 registry 键，只保留授权码记录
-      const keys = allKeys.filter(key => key !== 'license:registry');
+      const keys = await kv.keys('license:*');
       if (keys.length === 0) return res.status(200).json({ success: true, data: [] });
 
       const values = await Promise.all(keys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key)));

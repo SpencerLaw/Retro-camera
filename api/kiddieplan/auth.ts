@@ -66,8 +66,8 @@ export default async function handler(
                 return response.status(400).json({ success: false, message: '请输入4位房间码' });
             }
 
-            // 优先从新的全局授权索引查找
-            let roomDataString: any = await kv.hget('license:registry', cleanCode);
+            // 优先从房间码注册表查找（使用独立命名空间）
+            let roomDataString: any = await kv.hget('roomcode:registry', cleanCode);
 
             // 兼容性回退：如果索引中没找到，尝试旧的索引
             if (!roomDataString) {

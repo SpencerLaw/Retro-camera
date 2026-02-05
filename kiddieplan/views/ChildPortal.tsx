@@ -24,54 +24,28 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     // Timer state
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [timerSeconds, setTimerSeconds] = useState(0);
+    const [startTime, setStartTime] = useState<string | null>(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
-    // Dynamic Tracking Sync
+    // Update real-time EVERY SECOND
     useEffect(() => {
-        if (!isTimerRunning) return;
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
-        const syncTimer = async () => {
-            try {
-                await fetch('/api/kiddieplan/client', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'sync_timer',
-                        token,
-                        data: { seconds: timerSeconds, activeTaskId, isRunning: true }
-                    })
-                });
-            } catch (e) {
-                console.error('Sync failed');
-            }
-        };
-
-        const interval = setInterval(syncTimer, 10000); // Pulse every 10s
-        return () => clearInterval(interval);
-    }, [isTimerRunning, timerSeconds, activeTaskId, token]);
-
-    // Handle session end sync
+    // Polling for new tasks from parent
     useEffect(() => {
-        if (!isTimerRunning && timerSeconds > 0) {
-            fetch('/api/kiddieplan/client', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'sync_timer',
-                    token,
-                    data: { seconds: timerSeconds, activeTaskId, isRunning: false }
-                })
-            });
-        }
-    }, [isTimerRunning]);
+        const poll = setInterval(() => fetchTodayData(true), 20000); // 20s auto refresh
+        return () => clearInterval(poll);
+    }, []);
 
+    // Handle timer state
     useEffect(() => {
         let interval: any;
         if (isTimerRunning) {
             interval = setInterval(() => {
                 setTimerSeconds(s => s + 1);
             }, 1000);
-        } else {
-            clearInterval(interval);
         }
         return () => clearInterval(interval);
     }, [isTimerRunning]);
@@ -111,14 +85,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         fetchTodayData();
     }, []);
 
-    const fetchTodayData = async () => {
-        setLoading(true);
+    const fetchTodayData = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
-            const today = new Date().toISOString().split('T')[0];
+            const dateStr = new Date().toISOString().split('T')[0];
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_today_data', token, data: { date: today } })
+                body: JSON.stringify({ action: 'get_today_data', token, data: { date: dateStr } })
             });
             const result = await res.json();
             if (result.success) {
@@ -132,7 +106,48 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         } catch (err) {
             console.error('Fetch failed');
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
+        }
+    };
+
+    const toggleTimer = async (task: Task) => {
+        if (isTimerRunning) {
+            // STOP TIMER: Record log
+            if (activeTaskId !== task.id) {
+                alert('请先停止当前正在进行的任务哦~');
+                return;
+            }
+
+            const endTime = new Date().toISOString();
+            const log = {
+                taskId: task.id,
+                taskTitle: task.title,
+                startTime: startTime!,
+                endTime: endTime,
+                duration: timerSeconds
+            };
+
+            // Sync with backend
+            try {
+                await fetch('/api/kiddieplan/client', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'record_focus', token, data: { log } })
+                });
+            } catch (e) {
+                console.error('Record focus log failed');
+            }
+
+            setIsTimerRunning(false);
+            setActiveTaskId(null);
+            setTimerSeconds(0);
+            setStartTime(null);
+        } else {
+            // START TIMER
+            setActiveTaskId(task.id);
+            setTimerSeconds(0);
+            setStartTime(new Date().toISOString());
+            setIsTimerRunning(true);
         }
     };
 
@@ -189,87 +204,47 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             transition={{ duration: 0.5 }}
             className="space-y-6 pb-32"
         >
-            {/* Hero Card */}
+            {/* Real-time Clock & Hero */}
             <div className="bg-white/70 backdrop-blur-xl rounded-[32px] p-6 border border-white/50 shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-pink-100 to-transparent rounded-full -mr-10 -mt-10 blur-2xl opacity-80"></div>
 
-                <div className="flex items-center gap-5 relative z-10">
-                    <motion.div
-                        whileHover={{ scale: 1.08, rotate: 3 }}
-                        className="w-20 h-20 rounded-full overflow-hidden border-4 border-pink-200 shadow-lg ring-4 ring-pink-50"
-                    >
-                        <img src={childProfile.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${token}`} alt="avatar" className="w-full h-full object-cover" />
-                    </motion.div>
-                    <div>
-                        <h1 className="text-2xl font-black text-gray-700 mb-1">{childProfile.name}<span className="text-gray-300"> 的星梦基地</span></h1>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-gray-400">积极充电中...</span>
+                <div className="flex flex-col items-center text-center relative z-10 py-2">
+                    <div className="text-5xl font-black text-gray-700 mb-2 font-mono">
+                        {currentTime.toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <p className="text-gray-400 font-bold text-sm tracking-widest uppercase mb-4">
+                        {currentTime.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}
+                    </p>
+
+                    <div className="flex items-center gap-4 mt-2">
+                        <div className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 flex flex-col items-center">
+                            <span className="text-2xl font-black text-blue-500">{tasks.length}</span>
+                            <span className="text-[10px] font-bold text-blue-300 uppercase">今日任务</span>
+                        </div>
+                        <div className="bg-pink-50 px-4 py-2 rounded-2xl border border-pink-100 flex flex-col items-center">
+                            <span className="text-2xl font-black text-pink-500">+{tasks.reduce((acc, t) => acc + t.points, 0)}</span>
+                            <span className="text-[10px] font-bold text-pink-300 uppercase">可获能量</span>
                         </div>
                     </div>
                 </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3 mt-6 relative z-10">
-                    <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 rounded-2xl flex flex-col items-center gap-1 border border-blue-100/50">
-                        <Timer className="text-blue-500 mb-1" size={22} />
-                        <span className="text-xl font-black text-gray-700">{formatTime(timerSeconds)}</span>
-                        <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">今日专注</span>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.03 }} className="bg-gradient-to-br from-purple-50 to-purple-100/50 p-4 rounded-2xl flex flex-col items-center gap-1 border border-purple-100/50">
-                        <div className="relative">
-                            <Star className="text-purple-500 mb-1" size={22} />
-                            {progress === 100 && <motion.div className="absolute -top-1 -right-2 w-3 h-3 bg-yellow-400 rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ repeat: Infinity }} />}
-                        </div>
-                        <span className="text-xl font-black text-gray-700">{progress}%</span>
-                        <span className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">任务能量</span>
-                    </motion.div>
-                </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-3">
-                <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => setActiveTab('plan')}
-                    className="bg-gradient-to-br from-pink-400 to-rose-500 p-5 rounded-3xl text-white shadow-lg flex flex-col items-center gap-2 group"
-                >
-                    <LayoutGrid size={28} strokeWidth={2.5} className="group-hover:rotate-12 transition-transform" />
-                    <span className="font-bold text-sm">我的任务板</span>
-                </motion.button>
-                <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => setIsTimerRunning(!isTimerRunning)}
-                    className={`p-5 rounded-3xl shadow-lg flex flex-col items-center gap-2 group transition-all
-                     ${isTimerRunning ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white' : 'bg-white text-orange-400 border border-orange-100'}`}
-                >
-                    <Timer size={28} strokeWidth={2.5} className={`group-hover:scale-110 transition-transform ${isTimerRunning ? 'animate-spin-slow' : ''}`} />
-                    <span className="font-bold text-sm">{isTimerRunning ? '专注中...' : '开始专注'}</span>
-                </motion.button>
-            </div>
-
-            {/* Mini Task List */}
+            {/* Quick Summary Section */}
             <div className="space-y-3">
                 <h3 className="text-lg font-bold text-gray-700 pl-1 flex items-center gap-2">
-                    <BookOpen size={18} className="text-pink-400" /> 待办事项
+                    <BookOpen size={18} className="text-pink-400" /> 今日任务概览 (只读)
                 </h3>
                 {tasks.map((task) => {
                     const isCompleted = checkins.includes(task.id);
                     return (
-                        <motion.div
-                            layout
+                        <div
                             key={task.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => handleToggleTask(task.id)}
-                            className={`p-4 rounded-2xl flex items-center justify-between border transition-all cursor-pointer relative overflow-hidden
-                            ${isCompleted ? 'bg-gray-50 border-transparent opacity-60' : 'bg-white border-white/50 shadow-sm hover:shadow-md'}`}
+                            className={`p-4 rounded-2xl flex items-center justify-between border transition-all relative overflow-hidden
+                            ${isCompleted ? 'bg-gray-50 border-transparent opacity-60' : 'bg-white border-white/50 shadow-sm'}`}
                         >
                             <div className="flex items-center gap-3 relative z-10">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-green-100 text-green-500' : 'bg-pink-50 text-pink-400'}`}>
-                                    {isCompleted ? <CheckCircle2 size={22} /> : <div className="w-3.5 h-3.5 rounded-full border-[3px] border-pink-300" />}
+                                    {isCompleted ? <CheckCircle2 size={22} /> : <Clock size={20} />}
                                 </div>
                                 <div>
                                     <div className={`font-bold ${isCompleted ? 'line-through text-gray-400' : 'text-gray-700'}`}>{task.title}</div>
@@ -277,13 +252,16 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                 </div>
                             </div>
                             {!isCompleted && (
-                                <div className="bg-yellow-100 text-yellow-600 px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm relative z-10">
-                                    +{task.points}
+                                <div className="text-[11px] font-bold text-gray-300">
+                                    待完成
                                 </div>
                             )}
-                        </motion.div>
+                        </div>
                     );
                 })}
+                {tasks.length === 0 && (
+                    <div className="text-center py-10 text-gray-300 font-bold">今天还没有任务哦，快叫爸爸妈妈发布吧！</div>
+                )}
             </div>
         </motion.div>
     );
@@ -291,44 +269,91 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const PlannerView = () => (
         <motion.div
             initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }}
-            className="space-y-5 pb-32"
+            className="space-y-6 pb-32 relative"
         >
-            <div className="flex bg-white/70 backdrop-blur-sm p-1.5 rounded-2xl shadow-sm border border-white/50">
-                {['任务', '周历', '成就'].map((t, i) => (
-                    <button key={i} onClick={() => setPlannerTab(i)} className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${plannerTab === i ? 'bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-sm' : 'text-gray-400'}`}>
-                        {t}
-                    </button>
-                ))}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-black text-gray-700">任务规划时间轴</h2>
+                {isTimerRunning && (
+                    <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs font-black animate-pulse flex items-center gap-2">
+                        <Zap size={14} fill="currentColor" /> 专注中: {formatTime(timerSeconds)}
+                    </div>
+                )}
             </div>
 
-            <div className="space-y-3">
-                {tasks.map(task => {
+            <div className="relative pl-8 space-y-8">
+                {/* Timeline Axis */}
+                <div className="absolute left-3.5 top-2 bottom-2 w-0.5 border-l-2 border-dashed border-blue-200"></div>
+
+                {tasks.sort((a, b) => a.timeSlot.localeCompare(b.timeSlot)).map((task, idx) => {
                     const isCompleted = checkins.includes(task.id);
+                    const isCurrentFocus = activeTaskId === task.id;
+
                     return (
                         <motion.div
                             layout
                             key={task.id}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => handleToggleTask(task.id)}
-                            className={`bg-white/80 backdrop-blur-sm p-4 rounded-2xl flex items-center justify-between border transition-all cursor-pointer ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-sm hover:shadow-md'}`}
+                            className="relative"
                         >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${isCompleted ? 'bg-green-100 text-green-500' : 'bg-pink-50 text-pink-400'}`}>
-                                    {isCompleted ? <CheckCircle2 size={24} /> :
-                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="w-3 h-3 bg-pink-400 rounded-full" />}
-                                </div>
-                                <div>
-                                    <h3 className={`font-bold ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.title}</h3>
-                                    <p className="text-[11px] font-medium text-gray-400">{task.timeSlot} • {task.points} 🍭</p>
-                                </div>
+                            {/* Node Dot */}
+                            <div className={`absolute -left-8 top-5 w-7 h-7 rounded-full border-4 bg-white z-10 flex items-center justify-center shadow-sm transition-colors
+                                ${isCompleted ? 'border-green-400 text-green-400' : isCurrentFocus ? 'border-orange-400 text-orange-400 animate-pulse' : 'border-blue-200 text-gray-300'}`}>
+                                {isCompleted ? <CheckCircle2 size={14} /> : <div className="w-2 h-2 rounded-full bg-current" />}
                             </div>
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 ${isCompleted ? 'border-green-200 bg-green-50 text-green-500' : 'border-gray-100 text-gray-200'}`}>
-                                <CheckCircle2 size={18} />
-                            </div>
+
+                            <motion.div
+                                whileTap={{ scale: 0.98 }}
+                                className={`bg-white/80 backdrop-blur-sm p-4 rounded-[28px] border transition-all ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-md hover:shadow-lg'}`}
+                            >
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isCompleted ? 'bg-green-50 text-green-500' : 'bg-blue-50 text-blue-400'}`}>
+                                                {task.category?.includes('学') ? '📚' : task.category?.includes('玩') ? '🎮' : '🌟'}
+                                            </div>
+                                            <div>
+                                                <h3 className={`font-black text-lg ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.title}</h3>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
+                                                    <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div onClick={() => handleToggleTask(task.id)} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 cursor-pointer transition-all ${isCompleted ? 'border-green-200 bg-green-50 text-green-500' : 'border-gray-100 text-gray-200 hover:border-green-200 hover:text-green-400'}`}>
+                                            <CheckCircle2 size={24} />
+                                        </div>
+                                    </div>
+
+                                    {!isCompleted && (
+                                        <div className="flex items-center gap-2 pt-1 border-t border-gray-50 mt-1">
+                                            <button
+                                                onClick={() => toggleTimer(task)}
+                                                disabled={isTimerRunning && !isCurrentFocus}
+                                                className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2
+                                                    ${isCurrentFocus
+                                                        ? 'bg-red-500 text-white shadow-[0_4px_0_#991b1b]'
+                                                        : 'bg-orange-400 text-white shadow-[0_4px_0_#c2410c] hover:translate-y-0.5 active:shadow-none'}
+                                                    ${isTimerRunning && !isCurrentFocus ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
+                                            >
+                                                {isCurrentFocus ? (
+                                                    <>结束专注 ({formatTime(timerSeconds)})</>
+                                                ) : (
+                                                    <>开始专注计时的</>
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
                         </motion.div>
                     )
                 })}
             </div>
+            {tasks.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 text-gray-300 font-bold space-y-4">
+                    <div className="text-6xl">🗓️</div>
+                    <div>今天暂时没有任务计划哦</div>
+                </div>
+            )}
         </motion.div>
     );
 

@@ -36,6 +36,7 @@ export default async function handler(
                 data: {
                     tasks: dailyData.tasks,
                     checkins: dailyData.checkins,
+                    focusLogs: dailyData.focusLogs || [],
                     rewards,
                     streak,
                     points,
@@ -92,6 +93,28 @@ export default async function handler(
             await kv.set(licenseKey, license);
 
             return response.status(200).json({ success: true, checkins: daily.checkins, points: currentPoints });
+        }
+
+        if (action === 'record_focus') {
+            const { log } = data; // { taskId, taskTitle, startTime, endTime, duration }
+            const license: any = await kv.get(licenseKey);
+            if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
+
+            if (!license.progress) license.progress = {};
+            if (!license.progress[today]) license.progress[today] = {};
+            if (!license.progress[today][childId]) {
+                license.progress[today][childId] = { tasks: [], checkins: [], focusLogs: [] };
+            }
+
+            const daily = license.progress[today][childId];
+            if (!daily.focusLogs) daily.focusLogs = [];
+            daily.focusLogs.push({
+                ...log,
+                recordedAt: new Date().toISOString()
+            });
+
+            await kv.set(licenseKey, license);
+            return response.status(200).json({ success: true, message: '专注日志已归档' });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

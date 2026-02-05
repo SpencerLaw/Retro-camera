@@ -64,3 +64,11 @@ export interface AppState {
   rewards: Reward[];
   role: UserRole;
 }
+
+export interface FocusLog {
+  taskId: string;
+  taskTitle: string;
+  startTime: string; // ISO String
+  endTime: string;   // ISO String
+  duration: number;  // Seconds
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw } from 'lucide-react';
-import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate } from '../types';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target } from 'lucide-react';
+import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -70,6 +70,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     // Task/Reward Editor State
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
+    const [focusLogs, setFocusLogs] = useState<FocusLog[]>([]);
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [customCategories, setCustomCategories] = useState<Category[]>([]);
@@ -292,6 +293,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             const result = await res.json();
             if (result.success) {
                 setCurrentTasks(result.data.tasks || []);
+                setFocusLogs(result.data.focusLogs || []);
             }
         } catch (err) {
             console.error('Fetch tasks failed');
@@ -1098,32 +1100,66 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 >
                                     <ArrowLeft size={20} />
                                 </motion.button>
-                                <h2 className="text-2xl font-black text-[#5D4037]">打卡历史</h2>
+                                <div>
+                                    <h2 className="text-2xl font-black text-[#5D4037]">今日专注记录</h2>
+                                    <p className="text-xs text-gray-400 font-bold mt-1">记录孩子每一次努力的时光</p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 text-purple-400 bg-purple-50 px-4 py-2 rounded-full text-sm font-bold">
-                                <CalendarCheck size={18} />
-                                记录近30天
+                            <div className="flex flex-col items-end">
+                                <span className="text-3xl font-black text-orange-500">
+                                    {Math.round(focusLogs.reduce((acc, log) => acc + log.duration, 0) / 60)} <span className="text-sm text-gray-400 font-bold">分钟</span>
+                                </span>
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm font-black text-gray-400">2026-02-0{5 - i}</span>
-                                        <span className="bg-green-100 text-green-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">已完成</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-400">
-                                            <Trophy size={20} />
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-[#5D4037]">全天任务达成</div>
-                                            <div className="text-xs text-gray-400 font-bold">获得奖励: 🍭 +50</div>
-                                        </div>
-                                    </div>
+                        <div className="space-y-4 relative pl-4">
+                            {/* Timeline Axis */}
+                            <div className="absolute left-[27px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-gray-200"></div>
+
+                            {focusLogs.length > 0 ? (
+                                focusLogs.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).map((log, i) => {
+                                    const startTime = new Date(log.startTime);
+                                    const endTime = new Date(log.endTime);
+                                    return (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.1 }}
+                                            className="relative flex gap-4"
+                                        >
+                                            <div className="relative z-10 w-6 h-6 rounded-full bg-orange-100 border-2 border-orange-400 flex items-center justify-center text-orange-500 mt-4 shadow-sm">
+                                                <Zap size={10} fill="currentColor" />
+                                            </div>
+                                            <div className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h4 className="font-bold text-[#5D4037]">{log.taskTitle}</h4>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <span className="bg-orange-50 text-orange-500 px-2 py-0.5 rounded-md text-[10px] font-black flex items-center gap-1">
+                                                                <Timer size={10} /> 专注 {Math.floor(log.duration / 60)} 分 {log.duration % 60} 秒
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-xs font-bold text-gray-400">
+                                                            {startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                            <span className="mx-1">-</span>
+                                                            {endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })
+                            ) : (
+                                <div className="ml-8 py-10 text-center bg-white rounded-3xl border-2 border-dashed border-gray-100">
+                                    <Target className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                                    <p className="text-gray-400 font-bold text-sm">今天还没有专注记录哦</p>
+                                    <p className="text-gray-300 text-xs mt-1">快去提醒宝贝开始任务吧！</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </motion.div>
                 )}

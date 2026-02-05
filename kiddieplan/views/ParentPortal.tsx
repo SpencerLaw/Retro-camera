@@ -216,6 +216,21 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         });
     };
 
+    const handleDeleteTemplate = async (catId: string, templateIndex: number) => {
+        if (!window.confirm('确定要删除这个任务模板吗？')) return;
+
+        const newCategories = customCategories.map(c => {
+            if (c.id === catId) {
+                const newTemplates = [...(c.templates || [])];
+                newTemplates.splice(templateIndex, 1);
+                return { ...c, templates: newTemplates };
+            }
+            return c;
+        });
+
+        await handleSaveCategories(newCategories);
+    };
+
     const fetchTasks = async () => {
         if (!selectedChildId) return;
         try {
@@ -812,35 +827,49 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
                             {(() => {
                                 // 1. 获取预设模板
-                                let templates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
+                                const presetTemplates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
+                                const combinedTemplates = presetTemplates.map(t => ({ ...t, isCustom: false }));
 
                                 // 2. 合并对应的自定义分类模板
                                 const currentCat = customCategories.find(c => c.id === selectedCategory);
                                 if (currentCat?.templates) {
-                                    const customMapped = currentCat.templates.map(t => ({
-                                        title: t.title,
-                                        points: t.points,
+                                    const customMapped = currentCat.templates.map((t, idx) => ({
+                                        ...t,
                                         time: t.timeSlot,
-                                        icon: t.icon
+                                        isCustom: true,
+                                        idx
                                     }));
-                                    templates = [...templates, ...customMapped];
+                                    combinedTemplates.push(...customMapped);
                                 }
                                 // Combine templates with the "Add Custom" button
                                 return (
                                     <>
-                                        {templates.map((tmp, i) => (
-                                            <motion.button
-                                                key={i}
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                                className="bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
-                                            >
-                                                <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
-                                                    <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
-                                                </div>
-                                            </motion.button>
+                                        {combinedTemplates.map((tmp, i) => (
+                                            <div key={`tmp_${i}`} className="relative group">
+                                                <motion.button
+                                                    whileTap={{ scale: 0.95 }}
+                                                    onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
+                                                    className="w-full bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
+                                                >
+                                                    <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
+                                                        <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
+                                                    </div>
+                                                </motion.button>
+
+                                                {tmp.isCustom && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteTemplate(selectedCategory, (tmp as any).idx);
+                                                        }}
+                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         ))}
 
                                         {/* Always show Add Custom Task button at the end */}
@@ -865,7 +894,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </>
                                 );
                             })()}
-                        </div>
+                        </div >
 
                         <div className="h-px bg-gray-200 my-4" />
 
@@ -904,16 +933,18 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             )}
                         </div>
 
-                        {currentTasks.length > 0 && (
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleSaveTasks}
-                                disabled={isSaving}
-                                className="w-full bg-[#34D399] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#059669] active:shadow-none active:translate-y-2 transition-all"
-                            >
-                                {isSaving ? '同步中...' : '发布任务'}
-                            </motion.button>
-                        )}
+                        {
+                            currentTasks.length > 0 && (
+                                <motion.button
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleSaveTasks}
+                                    disabled={isSaving}
+                                    className="w-full bg-[#34D399] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#059669] active:shadow-none active:translate-y-2 transition-all"
+                                >
+                                    {isSaving ? '同步中...' : '发布任务'}
+                                </motion.button>
+                            )
+                        }
                     </motion.div>
                 )}
 

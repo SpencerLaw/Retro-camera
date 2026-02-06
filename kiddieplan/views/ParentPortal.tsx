@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -101,14 +101,52 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     }, [selectedChildId, activeTab]);
 
-    // Background polling for Registry/Live Status
+    // Smart Polling Logic
+    const [isIdle, setIsIdle] = useState(false);
+    const lastActivityRef = useRef(Date.now());
+
+    // Activity Detection
     useEffect(() => {
+        const handleActivity = () => {
+            lastActivityRef.current = Date.now();
+            if (isIdle) setIsIdle(false);
+        };
+        window.addEventListener('mousemove', handleActivity);
+        window.addEventListener('click', handleActivity);
+        window.addEventListener('keydown', handleActivity);
+
+        const idleChecker = setInterval(() => {
+            if (Date.now() - lastActivityRef.current > 60000) { // 1 min idle
+                setIsIdle(true);
+            }
+        }, 5000);
+
+        return () => {
+            window.removeEventListener('mousemove', handleActivity);
+            window.removeEventListener('click', handleActivity);
+            window.removeEventListener('keydown', handleActivity);
+            clearInterval(idleChecker);
+        };
+    }, [isIdle]);
+
+    // Adaptive Polling
+    useEffect(() => {
+        let intervalTime = 60000; // Default Idle: 1 min
+
+        if (document.hidden) {
+            intervalTime = 300000; // Hidden: 5 min
+        } else if (!isIdle) {
+            intervalTime = 5000; // Active: 5 sec
+        }
+
+        console.log(`Polling interval set to: ${intervalTime}ms (${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
+
         let timer: any;
         if (activeTab === 'registry' || activeTab === 'children') {
-            timer = setInterval(() => fetchConfig(true), 5000); // 5s silent auto-refresh
+            timer = setInterval(() => fetchConfig(true), intervalTime);
         }
         return () => clearInterval(timer);
-    }, [activeTab]);
+    }, [activeTab, isIdle]);
 
     const fetchConfig = async (silent = false) => {
         if (!silent) setLoading(true);
@@ -691,6 +729,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex gap-2">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => fetchConfig()}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--color-bg-light-blue)] text-gray-500 font-bold text-sm shadow-sm border border-white hover:bg-white hover:text-[var(--color-blue-fun)] transition-colors"
+                            title="手动同步数据"
+                        >
+                            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+                            <span className="hidden md:inline">同步</span>
+                        </motion.button>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}

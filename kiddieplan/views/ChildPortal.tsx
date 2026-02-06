@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw } from 'lucide-react';
 import { Task, AppTab } from '../types';
 import confettis from 'canvas-confetti';
@@ -33,9 +33,9 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         return () => clearInterval(timer);
     }, []);
 
-    // Smart Adaptive Polling
+    // Smart Polling Logic for ChildPortal
     const [isIdle, setIsIdle] = useState(false);
-    const lastActivityRef = React.useRef(Date.now());
+    const lastActivityRef = useRef(Date.now());
 
     // Activity Detection
     useEffect(() => {
@@ -44,8 +44,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             if (isIdle) setIsIdle(false);
         };
         window.addEventListener('mousemove', handleActivity);
-        window.addEventListener('touchstart', handleActivity);
         window.addEventListener('click', handleActivity);
+        window.addEventListener('touchstart', handleActivity);
 
         const idleChecker = setInterval(() => {
             if (Date.now() - lastActivityRef.current > 60000) { // 1 min idle
@@ -55,21 +55,23 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
         return () => {
             window.removeEventListener('mousemove', handleActivity);
-            window.removeEventListener('touchstart', handleActivity);
             window.removeEventListener('click', handleActivity);
+            window.removeEventListener('touchstart', handleActivity);
             clearInterval(idleChecker);
         };
     }, [isIdle]);
 
-    // Adaptive Polling for new tasks
+    // Adaptive Polling for new tasks/data
     useEffect(() => {
         let intervalTime = 60000; // Default Idle: 1 min
 
         if (document.hidden) {
             intervalTime = 300000; // Hidden: 5 min
         } else if (!isIdle) {
-            intervalTime = 10000; // Active: 10 sec (slightly slower than parent for balance)
+            intervalTime = 10000; // Active: 10 sec
         }
+
+        console.log(`Child Polling interval set to: ${intervalTime}ms (${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
 
         const poll = setInterval(() => fetchTodayData(true), intervalTime);
         return () => clearInterval(poll);
@@ -412,12 +414,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 </div>
                 <div className="flex items-center gap-2">
                     <motion.button
-                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => fetchTodayData()}
-                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-gray-100 hover:text-blue-400 transition-colors"
-                        title="刷新任务"
+                        className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/80 text-gray-400 font-bold text-xs shadow-sm border border-white/50 hover:text-blue-400 transition-colors"
+                        title="手动同步数据"
                     >
-                        <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+                        <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                        <span className="hidden xs:inline">同步</span>
                     </motion.button>
                     <motion.button
                         whileTap={{ scale: 0.9 }}

@@ -105,7 +105,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     useEffect(() => {
         let timer: any;
         if (activeTab === 'registry' || activeTab === 'children') {
-            timer = setInterval(() => fetchConfig(true), 30000); // 30s silent auto-refresh
+            timer = setInterval(() => fetchConfig(true), 5000); // 5s silent auto-refresh
         }
         return () => clearInterval(timer);
     }, [activeTab]);

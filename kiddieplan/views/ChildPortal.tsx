@@ -197,7 +197,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
     const progress = tasks.length > 0 ? Math.round((checkins.length / tasks.length) * 100) : 0;
 
-    const DashboardView = () => (
+    const renderDashboardView = () => (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -266,7 +266,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         </motion.div>
     );
 
-    const PlannerView = () => (
+    const renderPlannerView = () => (
         <motion.div
             initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }}
             className="space-y-6 pb-32 relative"
@@ -386,8 +386,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             {/* Main Area */}
             <main className="flex-1 px-5 overflow-y-auto no-scrollbar pt-2">
                 <AnimatePresence mode='wait'>
-                    {activeTab === 'home' && <DashboardView />}
-                    {activeTab === 'plan' && <PlannerView />}
+                    {activeTab === 'home' && renderDashboardView()}
+                    {activeTab === 'plan' && renderPlannerView()}
                     {activeTab === 'rewards' && (
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5 pb-32">
                             <h2 className="text-2xl font-black text-gray-700 text-center">🎁 梦幻宝库</h2>

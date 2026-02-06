@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap } from 'lucide-react';
+import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw } from 'lucide-react';
 import { Task, AppTab } from '../types';
 import confettis from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,11 +33,47 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         return () => clearInterval(timer);
     }, []);
 
-    // Polling for new tasks from parent
+    // Smart Adaptive Polling
+    const [isIdle, setIsIdle] = useState(false);
+    const lastActivityRef = React.useRef(Date.now());
+
+    // Activity Detection
     useEffect(() => {
-        const poll = setInterval(() => fetchTodayData(true), 20000); // 20s auto refresh
+        const handleActivity = () => {
+            lastActivityRef.current = Date.now();
+            if (isIdle) setIsIdle(false);
+        };
+        window.addEventListener('mousemove', handleActivity);
+        window.addEventListener('touchstart', handleActivity);
+        window.addEventListener('click', handleActivity);
+
+        const idleChecker = setInterval(() => {
+            if (Date.now() - lastActivityRef.current > 60000) { // 1 min idle
+                setIsIdle(true);
+            }
+        }, 5000);
+
+        return () => {
+            window.removeEventListener('mousemove', handleActivity);
+            window.removeEventListener('touchstart', handleActivity);
+            window.removeEventListener('click', handleActivity);
+            clearInterval(idleChecker);
+        };
+    }, [isIdle]);
+
+    // Adaptive Polling for new tasks
+    useEffect(() => {
+        let intervalTime = 60000; // Default Idle: 1 min
+
+        if (document.hidden) {
+            intervalTime = 300000; // Hidden: 5 min
+        } else if (!isIdle) {
+            intervalTime = 10000; // Active: 10 sec (slightly slower than parent for balance)
+        }
+
+        const poll = setInterval(() => fetchTodayData(true), intervalTime);
         return () => clearInterval(poll);
-    }, []);
+    }, [isIdle]);
 
     // Handle timer state
     useEffect(() => {
@@ -374,13 +410,23 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         🔥 {streak} 天连续
                     </span>
                 </div>
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={onLogout}
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
-                >
-                    <LogOut size={18} />
-                </motion.button>
+                <div className="flex items-center gap-2">
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => fetchTodayData()}
+                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-gray-100 hover:text-blue-400 transition-colors"
+                        title="刷新任务"
+                    >
+                        <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+                    </motion.button>
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={onLogout}
+                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
+                    >
+                        <LogOut size={18} />
+                    </motion.button>
+                </div>
             </header>
 
             {/* Main Area */}

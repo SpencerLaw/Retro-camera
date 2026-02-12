@@ -810,10 +810,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     {activeTab === 'children' && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                             {/* Children List */}
-                            <div
-                                className="bg-white/35 rounded-[32px] p-6 shadow-[0_8px_20px_rgba(0,0,0,0.02)] border-2 border-white/30 relative overflow-hidden"
-                                style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-                            >
+                            <div className="bg-white/80 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_8px_20px_rgba(0,0,0,0.03)] border-2 border-white/50 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-3xl opacity-40"></div>
 
                                 <div className="flex justify-between items-center mb-6">
@@ -930,8 +927,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             whileHover={{ y: -5, rotate: -1 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setActiveTab('tasks')}
-                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.02)] border-2 border-white/30 hover:border-yellow-200/50 transition-all"
-                                            style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.05)] border-2 border-white/50 hover:border-yellow-200 transition-all"
                                         >
                                             <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
                                                 <ListTodo size={32} strokeWidth={3} />
@@ -944,8 +940,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             whileHover={{ y: -5, rotate: 1 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setActiveTab('rewards')}
-                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.02)] border-2 border-white/30 hover:border-red-200/50 transition-all"
-                                            style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.05)] border-2 border-white/50 hover:border-red-200 transition-all"
                                         >
                                             <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
                                                 <Gift size={32} strokeWidth={3} />
@@ -958,8 +953,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             whileHover={{ y: -5, rotate: -1 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setActiveTab('checkins')}
-                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.02)] border-2 border-white/30 hover:border-purple-200/50 transition-all"
-                                            style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.05)] border-2 border-white/50 hover:border-purple-200 transition-all"
                                         >
                                             <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
                                                 <CalendarCheck size={32} strokeWidth={3} />
@@ -972,8 +966,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             whileHover={{ y: -5, rotate: 1 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setActiveTab('stats')}
-                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.02)] border-2 border-white/30 hover:border-emerald-200/50 transition-all"
-                                            style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.05)] border-2 border-white/50 hover:border-emerald-200 transition-all"
                                         >
                                             <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
                                                 <BarChart3 size={32} strokeWidth={3} />

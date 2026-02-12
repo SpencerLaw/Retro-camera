@@ -27,6 +27,17 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [startTime, setStartTime] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
 
+    const formatBeijingTime = (date: Date) => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const y = date.getFullYear();
+        const m = pad(date.getMonth() + 1);
+        const d = pad(date.getDate());
+        const hh = pad(date.getHours());
+        const mm = pad(date.getMinutes());
+        const ss = pad(date.getSeconds());
+        return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+    };
+
     // Update real-time EVERY SECOND
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -403,49 +414,64 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
             {/* Main Area - Everything scrolls under the glassy header */}
             <main className="flex-1 w-full overflow-y-auto no-scrollbar relative scroll-smooth" style={{ scrollBehavior: 'smooth' }}>
-                {/* Top Bar - Glassmorphism Moved Inside */}
-                <div className="sticky top-0 z-40 px-5 py-4">
+                {/* Top Bar - Glassmorphism aligned with Parent Portal */}
+                <div className="sticky top-0 p-4 z-40">
                     <header
-                        className="flex justify-between items-center px-5 py-3.5 rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.04)]"
+                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
                         style={{
                             background: 'rgba(255, 255, 255, 0.22)',
-                            backdropFilter: 'blur(24px)',
-                            WebkitBackdropFilter: 'blur(24px)',
+                            backdropFilter: 'blur(30px)',
+                            WebkitBackdropFilter: 'blur(30px)',
                             boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
                         }}
                     >
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-2 rounded-2xl shadow-md text-white">
-                                <span className="text-lg">🍭</span>
-                                <span className="font-black text-lg">{coins}</span>
+                            <div className="relative group">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                                <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                    <Sparkles className="text-yellow-500" size={20} />
+                                </div>
                             </div>
-                            <span
-                                className="text-xs font-bold text-purple-500 px-3 py-1.5 rounded-full flex items-center gap-2"
-                                style={{ background: 'rgba(243, 232, 255, 0.35)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
-                            >
-                                <span className="opacity-60">Hello {childProfile.name}</span>
-                                <span className="w-px h-3 bg-purple-200 mx-0.5"></span>
-                                <span>🔥 {streak} 天连续</span>
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                    星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
+                                </h1>
+                                <div className="flex flex-col justify-center">
+                                    <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">孩子端</span>
+                                    <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
+                                        {formatBeijingTime(currentTime)}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => fetchTodayData()}
-                                className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/30 text-gray-400 font-bold text-xs shadow-sm border border-white/30 hover:text-blue-400 transition-colors"
-                                title="手动同步数据"
-                            >
-                                <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-                                <span className="hidden xs:inline">同步</span>
-                            </motion.button>
-                            <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={onLogout}
-                                className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-white/30 hover:text-red-400 transition-colors"
-                            >
-                                <LogOut size={18} />
-                            </motion.button>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="hidden sm:flex items-center gap-2 bg-white/30 px-3 py-1.5 rounded-full border border-white/20">
+                                    <span className="text-sm">🔥</span>
+                                    <span className="text-[10px] font-black text-purple-500 uppercase tracking-tight">{streak} 天连续</span>
+                                </div>
+                                <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-2 rounded-2xl shadow-md text-white">
+                                    <span className="text-lg">🍭</span>
+                                    <span className="font-black text-lg">{coins}</span>
+                                </div>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => fetchTodayData()}
+                                    className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/30 text-gray-400 font-bold text-xs shadow-sm border border-white/30 hover:text-blue-400 transition-colors"
+                                    title="手动同步数据"
+                                >
+                                    <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                                    <span className="hidden xs:inline">同步</span>
+                                </motion.button>
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={onLogout}
+                                    className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-white/30 hover:text-red-400 transition-colors"
+                                >
+                                    <LogOut size={18} />
+                                </motion.button>
+                            </div>
                         </div>
                     </header>
                 </div>

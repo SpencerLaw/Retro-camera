@@ -443,13 +443,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     >
                         <div className="flex items-center gap-3">
                             <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                                 <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                                    <Sparkles className="text-blue-500" size={20} />
+                                    <Sparkles className="text-yellow-500" size={20} />
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                                     星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
                                 </h1>
                                 <div className="flex flex-col justify-center">
@@ -549,12 +549,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
             {/* Bottom Nav - Floating Pill Bar */}
             <div
-                className="fixed bottom-5 left-5 right-5 h-[68px] border border-white/40 rounded-[24px] shadow-lg flex justify-around items-center z-50 px-3"
+                className="fixed bottom-5 left-5 right-5 h-[68px] border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)] flex justify-around items-center z-50 px-3 rounded-[28px]"
                 style={{
-                    background: 'rgba(255, 255, 255, 0.22)',
+                    background: 'rgba(255, 255, 255, 0.35)',
                     backdropFilter: 'blur(30px)',
                     WebkitBackdropFilter: 'blur(30px)',
-                    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2)'
                 }}
             >
                 {[

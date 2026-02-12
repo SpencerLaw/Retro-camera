@@ -736,11 +736,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const selectedChild = children.find(c => c.id === selectedChildId);
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--color-bg-light-blue)] font-sans relative">
+        <div className="flex-1 flex flex-col h-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(135deg, #E0E7FF 0%, #FDF4FF 50%, #EEF2FF 100%)' }}>
+            {/* Decorative Blurs for Glassmorphism Effect */}
+            <div className="absolute top-0 left-0 w-80 h-80 bg-blue-300 rounded-full -translate-x-1/2 -translate-y-1/2 blur-[100px] opacity-30 pointer-events-none"></div>
+            <div className="absolute top-1/2 right-0 w-64 h-64 bg-purple-300 rounded-full translate-x-1/2 blur-[80px] opacity-20 pointer-events-none"></div>
+
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
-            {/* Header - Enhanced Glassmorphism inspired by Crochet */}
-            <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/10 backdrop-blur-xl border-b border-white/10 ring-1 ring-white/5 shadow-2xl z-40">
+            {/* Floating Header - Enhanced Glassmorphism inspired by Crochet */}
+            <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/40 backdrop-blur-[30px] border-b border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.06)] z-40 ring-1 ring-white/10">
                 <div className="flex items-center gap-3">
                     <div className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
@@ -791,7 +795,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 {activeTab === 'children' && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                         {/* Children List */}
-                        <div className="bg-white rounded-[32px] p-6 shadow-[0_8px_20px_rgba(0,0,0,0.05)] border-2 border-white/50">
+                        <div className="bg-white/70 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_8px_20px_rgba(0,0,0,0.03)] border-2 border-white/50 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-3xl opacity-40"></div>
+
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-lg font-black text-[#5D4037] flex items-center gap-2">
                                     <span className="text-2xl">👶</span> 我的宝贝
@@ -906,7 +912,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('tasks')}
-                                        className="bg-white p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.1)] border-2 border-yellow-50 hover:border-[var(--color-yellow-reward)] transition-colors"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.05)] border-2 border-white/50 hover:border-yellow-200 transition-all"
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
                                             <ListTodo size={32} strokeWidth={3} />
@@ -919,7 +925,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('rewards')}
-                                        className="bg-white p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.1)] border-2 border-red-50 hover:border-[var(--color-red-warning)] transition-colors"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.05)] border-2 border-white/50 hover:border-red-200 transition-all"
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
                                             <Gift size={32} strokeWidth={3} />
@@ -932,7 +938,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('checkins')}
-                                        className="bg-white p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.1)] border-2 border-purple-50 hover:border-purple-400 transition-colors"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.05)] border-2 border-white/50 hover:border-purple-200 transition-all"
                                     >
                                         <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
                                             <CalendarCheck size={32} strokeWidth={3} />
@@ -945,7 +951,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('stats')}
-                                        className="bg-white p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.1)] border-2 border-emerald-50 hover:border-emerald-400 transition-colors"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.05)] border-2 border-white/50 hover:border-emerald-200 transition-all"
                                     >
                                         <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
                                             <BarChart3 size={32} strokeWidth={3} />
@@ -966,7 +972,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => setActiveTab('children')}
-                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                    className="w-10 h-10 bg-white/60 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/50"
                                 >
                                     <ArrowLeft size={20} />
                                 </motion.button>

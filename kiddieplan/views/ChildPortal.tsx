@@ -406,12 +406,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {/* Top Bar - Glassmorphism Moved Inside */}
                 <div className="sticky top-0 z-40 px-5 py-4">
                     <header
-                        className="flex justify-between items-center px-5 py-3.5 rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.05)]"
+                        className="flex justify-between items-center px-5 py-3.5 rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.04)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.45)',
+                            background: 'rgba(255, 255, 255, 0.22)',
                             backdropFilter: 'blur(24px)',
                             WebkitBackdropFilter: 'blur(24px)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2)'
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
                         }}
                     >
                         <div className="flex items-center gap-3">
@@ -421,7 +421,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             </div>
                             <span
                                 className="text-xs font-bold text-purple-500 px-3 py-1.5 rounded-full flex items-center gap-2"
-                                style={{ background: 'rgba(243, 232, 255, 0.65)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+                                style={{ background: 'rgba(243, 232, 255, 0.35)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
                             >
                                 <span className="opacity-60">Hello {childProfile.name}</span>
                                 <span className="w-px h-3 bg-purple-200 mx-0.5"></span>
@@ -433,7 +433,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => fetchTodayData()}
-                                className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/60 text-gray-400 font-bold text-xs shadow-sm border border-white/40 hover:text-blue-400 transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/30 text-gray-400 font-bold text-xs shadow-sm border border-white/30 hover:text-blue-400 transition-colors"
                                 title="手动同步数据"
                             >
                                 <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
@@ -442,7 +442,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
                                 onClick={onLogout}
-                                className="w-10 h-10 bg-white/60 rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-white/40 hover:text-red-400 transition-colors"
+                                className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-white/30 hover:text-red-400 transition-colors"
                             >
                                 <LogOut size={18} />
                             </motion.button>
@@ -514,7 +514,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             </main>
 
             {/* Bottom Nav - Floating Pill Bar */}
-            <div className="fixed bottom-5 left-5 right-5 h-[68px] bg-white/80 backdrop-blur-xl border border-white/50 rounded-[24px] shadow-lg flex justify-around items-center z-50 px-3">
+            <div className="fixed bottom-5 left-5 right-5 h-[68px] bg-white/40 backdrop-blur-xl border border-white/30 rounded-[24px] shadow-lg flex justify-around items-center z-50 px-3">
                 {[
                     { id: 'home', icon: Home, label: '主岛' },
                     { id: 'plan', icon: ListTodo, label: '规划' },

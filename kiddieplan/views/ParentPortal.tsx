@@ -736,62 +736,73 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const selectedChild = children.find(c => c.id === selectedChildId);
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(135deg, #E0E7FF 0%, #FDF4FF 50%, #EEF2FF 100%)' }}>
-            {/* Decorative Blurs for Glassmorphism Effect */}
-            <div className="absolute top-0 left-0 w-80 h-80 bg-blue-300 rounded-full -translate-x-1/2 -translate-y-1/2 blur-[100px] opacity-30 pointer-events-none"></div>
-            <div className="absolute top-1/2 right-0 w-64 h-64 bg-purple-300 rounded-full translate-x-1/2 blur-[80px] opacity-20 pointer-events-none"></div>
+        <div className="flex-1 flex flex-col h-full overflow-hidden font-sans relative" style={{ background: '#F8FAFC' }}>
+            {/* High Contrast Background Shapes for Glass Visibility */}
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#60A5FA]/20 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] bg-[#FBBF24]/10 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute top-[30%] left-[60%] w-[30%] h-[30%] bg-[#F87171]/10 rounded-full blur-[80px] pointer-events-none"></div>
 
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
-            {/* Floating Header - Enhanced Glassmorphism inspired by Crochet */}
-            <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/40 backdrop-blur-[30px] border-b border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.06)] z-40 ring-1 ring-white/10">
-                <div className="flex items-center gap-3">
-                    <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                        <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                            <Sparkles className="text-blue-500" size={20} />
+            {/* Floating Header Wrapper */}
+            <div className="sticky top-0 p-4 z-40">
+                <header
+                    className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
+                    style={{
+                        background: 'rgba(255, 255, 255, 0.45)',
+                        backdropFilter: 'blur(30px)',
+                        WebkitBackdropFilter: 'blur(30px)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2)'
+                    }}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="relative group">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                            <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                <Sparkles className="text-blue-500" size={20} />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
+                            </h1>
+                            <div className="flex flex-col justify-center">
+                                <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">家长端</span>
+                                <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
+                                    {formatBeijingTime(currentTime)}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                            星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
-                        </h1>
-                        <div className="flex flex-col justify-center">
-                            <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">家长端</span>
-                            <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
-                                {formatBeijingTime(currentTime)}
-                            </span>
+                    <div className="flex items-center gap-4">
+                        <div className="flex gap-2">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => fetchConfig()}
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#E0E7FF]/60 text-gray-500 font-bold text-sm shadow-sm border border-white/40 hover:bg-white hover:text-[var(--color-blue-fun)] transition-colors"
+                                title="手动同步数据"
+                            >
+                                <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+                                <span className="hidden md:inline">同步</span>
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={onLogout}
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/60 text-gray-500 font-bold text-sm shadow-sm border border-white/40 hover:text-red-400 transition-colors"
+                            >
+                                <Home size={18} />
+                                <span className="hidden md:inline">返回首页</span>
+                            </motion.button>
                         </div>
                     </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    <div className="flex gap-2">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => fetchConfig()}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--color-bg-light-blue)] text-gray-500 font-bold text-sm shadow-sm border border-white hover:bg-white hover:text-[var(--color-blue-fun)] transition-colors"
-                            title="手动同步数据"
-                        >
-                            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                            <span className="hidden md:inline">同步</span>
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={onLogout}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-gray-500 font-bold text-sm shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
-                        >
-                            <Home size={18} />
-                            <span className="hidden md:inline">返回首页</span>
-                        </motion.button>
-                    </div>
-                </div>
-            </header>
+                </header>
+            </div>
 
 
             {/* Main Content */}
-            <main ref={mainScrollRef} className="flex-1 w-full px-4 pt-6 pb-20 overflow-y-auto no-scrollbar space-y-6">
+            <main ref={mainScrollRef} className="flex-1 w-full px-4 pt-2 pb-20 overflow-y-auto no-scrollbar space-y-6 relative z-10">
                 {activeTab === 'children' && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                         {/* Children List */}
@@ -912,7 +923,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('tasks')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.05)] border-2 border-white/50 hover:border-yellow-200 transition-all"
+                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.05)] border-2 border-white/50 hover:border-yellow-200 transition-all"
+                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
                                             <ListTodo size={32} strokeWidth={3} />
@@ -925,7 +937,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('rewards')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.05)] border-2 border-white/50 hover:border-red-200 transition-all"
+                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.05)] border-2 border-white/50 hover:border-red-200 transition-all"
+                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
                                             <Gift size={32} strokeWidth={3} />
@@ -938,7 +951,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('checkins')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.05)] border-2 border-white/50 hover:border-purple-200 transition-all"
+                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.05)] border-2 border-white/50 hover:border-purple-200 transition-all"
+                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
                                     >
                                         <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
                                             <CalendarCheck size={32} strokeWidth={3} />
@@ -951,7 +965,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('stats')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.05)] border-2 border-white/50 hover:border-emerald-200 transition-all"
+                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.05)] border-2 border-white/50 hover:border-emerald-200 transition-all"
+                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
                                     >
                                         <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
                                             <BarChart3 size={32} strokeWidth={3} />

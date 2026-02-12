@@ -129,26 +129,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         };
     }, [isIdle]);
 
-    // Adaptive Polling
-    useEffect(() => {
-        let intervalTime = 60000; // Default Idle: 1 min
-
-        if (document.hidden) {
-            intervalTime = 300000; // Hidden: 5 min
-        } else if (!isIdle) {
-            intervalTime = 5000; // Active: 5 sec
-        }
-
-        console.log(`Polling interval set to: ${intervalTime}ms (${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
-
-        let timer: any;
-        if (activeTab === 'registry' || activeTab === 'children') {
-            timer = setInterval(() => fetchConfig(true), intervalTime);
-        }
-        return () => clearInterval(timer);
-    }, [activeTab, isIdle]);
-
-    const fetchConfig = async (silent = false) => {
+    const fetchConfig = useCallback(async (silent = false) => {
         if (!silent) setLoading(true);
         try {
             const res = await fetch('/api/kiddieplan/manage', {
@@ -189,7 +170,26 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         } finally {
             if (!silent) setLoading(false);
         }
-    };
+    }, [token, selectedChildId, selectedCategory]); // Memoized for polling dependency
+
+    // Adaptive Polling
+    useEffect(() => {
+        let intervalTime = 60000; // Default Idle: 1 min
+
+        if (document.hidden) {
+            intervalTime = 300000; // Hidden: 5 min
+        } else if (!isIdle) {
+            intervalTime = 5000; // Active: 5 sec
+        }
+
+        console.log(`Polling interval set to: ${intervalTime}ms (${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
+
+        let timer: any;
+        if (activeTab === 'registry' || activeTab === 'children') {
+            timer = setInterval(() => fetchConfig(true), intervalTime);
+        }
+        return () => clearInterval(timer);
+    }, [activeTab, isIdle, fetchConfig]); // Added memoization dependencies
 
     const handleSaveCategories = async (newCategories: Category[], newHiddenPresets?: string[]) => {
         setIsSaving(true);
@@ -628,6 +628,39 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         });
     };
 
+    const handleResetPoints = async () => {
+        if (!selectedChild) return;
+        setDialogConfig({
+            isOpen: true,
+            title: '💣 重置积分确认',
+            message: `确定要清零 ${selectedChild.name} 的所有积分吗？此操作不可撤销哦 ~`,
+            onConfirm: async () => {
+                setIsSaving(true);
+                try {
+                    const res = await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_child',
+                            token,
+                            data: { ...selectedChild, points: 0 }
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        setChildren(result.data.children);
+                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                    }
+                } catch (err) {
+                    alert('重置失败');
+                } finally {
+                    setIsSaving(false);
+                }
+            },
+            hideInput: true
+        });
+    };
+
     const handleEditChild = () => {
         if (!selectedChild) return;
         setCurrentAvatar(selectedChild.avatar);
@@ -846,8 +879,22 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <h2 className="text-4xl font-black">{selectedChild.roomCode}</h2>
                                             <p className="text-xs opacity-70 font-bold mt-1 tracking-widest underline decoration-white/30 underline-offset-4">房间访问码</p>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="text-4xl font-black drop-shadow-md">{selectedChild.points || 0} 🍭</div>
+                                        <div className="text-right flex flex-col items-end">
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-4xl font-black drop-shadow-md">{selectedChild.points || 0} 🍭</div>
+                                                <motion.button
+                                                    whileHover={{ rotate: 180, scale: 1.2 }}
+                                                    whileTap={{ scale: 0.9 }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleResetPoints();
+                                                    }}
+                                                    className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30"
+                                                    title="重置积分"
+                                                >
+                                                    <RotateCcw size={14} />
+                                                </motion.button>
+                                            </div>
                                             <p className="text-xs opacity-70 font-bold mt-1 tracking-widest">累计积分</p>
                                         </div>
                                     </div>

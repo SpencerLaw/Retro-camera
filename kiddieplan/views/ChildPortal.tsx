@@ -408,8 +408,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         <span className="text-lg">🍭</span>
                         <span className="font-black text-lg">{coins}</span>
                     </div>
-                    <span className="text-xs font-bold bg-purple-100 text-purple-500 px-3 py-1.5 rounded-full">
-                        🔥 {streak} 天连续
+                    <span className="text-xs font-bold bg-purple-100/80 backdrop-blur-sm text-purple-500 px-3 py-1.5 rounded-full flex items-center gap-2">
+                        <span className="opacity-60">Hello {childProfile.name}</span>
+                        <span className="w-px h-3 bg-purple-200 mx-0.5"></span>
+                        <span>🔥 {streak} 天连续</span>
                     </span>
                 </div>
                 <div className="flex items-center gap-2">

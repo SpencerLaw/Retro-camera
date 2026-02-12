@@ -739,8 +739,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--color-bg-light-blue)] font-sans relative">
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
-            {/* Header */}
-            <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)] z-40">
+            {/* Header - Enhanced Glassmorphism inspired by Crochet */}
+            <header className="sticky top-0 px-6 py-4 flex justify-between items-center bg-white/10 backdrop-blur-xl border-b border-white/10 ring-1 ring-white/5 shadow-2xl z-40">
                 <div className="flex items-center gap-3">
                     <div className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>

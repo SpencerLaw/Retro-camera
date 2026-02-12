@@ -632,8 +632,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         if (!selectedChild) return;
         setDialogConfig({
             isOpen: true,
-            title: '💣 重置积分确认',
-            message: `确定要清零 ${selectedChild.name} 的所有积分吗？此操作不可撤销哦 ~`,
+            title: '💣 清空糖果确认',
+            message: `确定要将 ${selectedChild.name} 的糖果库清零吗？此操作不可撤销哦 ~`,
             onConfirm: async () => {
                 setIsSaving(true);
                 try {
@@ -911,12 +911,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                             handleResetPoints();
                                                         }}
                                                         className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30"
-                                                        title="重置积分"
+                                                        title="清空糖果"
                                                     >
                                                         <RotateCcw size={14} />
                                                     </motion.button>
                                                 </div>
-                                                <p className="text-xs opacity-70 font-bold mt-1 tracking-widest">累计积分</p>
+                                                <p className="text-xs opacity-70 font-bold mt-1 tracking-widest">累计糖果</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1307,7 +1307,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
                                 <h3 className="font-black text-[#5D4037] mb-4 flex items-center gap-2">
                                     <BarChart3 size={18} className="text-emerald-400" />
-                                    积分趋势 (近7天)
+                                    糖果收益趋势 (近7天)
                                 </h3>
                                 <div className="h-40 flex items-end justify-between gap-2 px-2">
                                     {[30, 45, 25, 60, 80, 50, 70].map((val, i) => (

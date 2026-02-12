@@ -22,7 +22,7 @@ const Rewards: React.FC<RewardsProps> = ({ child, updateChild, rewards, role }) 
         alert('🎉 兑换成功！快去找爸爸妈妈领取奖励吧！');
       }
     } else {
-      alert('积分还没攒够呢，再坚持一下下就好啦！');
+      alert('糖果还没攒够呢，再坚持一下下就好啦！');
     }
   };
 
@@ -31,7 +31,7 @@ const Rewards: React.FC<RewardsProps> = ({ child, updateChild, rewards, role }) 
       <div className="sketch-card p-6 bg-[#FF6B81]/60 relative">
         <div className="tape"></div>
         <div className="flex flex-col items-center">
-          <div className="text-[10px] font-black opacity-50 mb-1">我的成长积分池</div>
+          <div className="text-[10px] font-black opacity-50 mb-1">我的成长糖果库</div>
           <div className="flex items-center gap-2">
             <Star className="text-white fill-white" size={24} />
             <div className="text-5xl font-handwriting text-[#3E2723]">{child.points.toFixed(1)}</div>
@@ -57,7 +57,7 @@ const Rewards: React.FC<RewardsProps> = ({ child, updateChild, rewards, role }) 
               <div className="text-5xl group-hover:scale-110 transition-transform">{reward.icon}</div>
               <div className="text-center">
                 <div className="font-bold text-xs line-clamp-1">{reward.name}</div>
-                <div className="text-[10px] font-black text-red-500 mt-1">{reward.pointsCost} CP</div>
+                <div className="text-[10px] font-black text-red-500 mt-1">{reward.pointsCost} 颗糖果</div>
               </div>
               <button className={`w-full py-1.5 sketch-button text-[10px] font-bold ${child.points >= reward.pointsCost ? 'bg-[#FFB6C1]' : 'bg-gray-100 text-gray-400 opacity-50'}`}>
                 {child.points >= reward.pointsCost ? '立即换取' : '分不够哟'}

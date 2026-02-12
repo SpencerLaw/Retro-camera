@@ -283,12 +283,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         <div className="bg-pink-50/50 p-4 rounded-3xl border border-pink-100/50 flex flex-col items-center gap-1 group/item hover:bg-pink-50 transition-colors">
                             <span className="text-2xl group-hover/item:scale-125 transition-transform">⚡</span>
                             <span className="text-2xl font-black text-pink-600 leading-none">+{tasks.reduce((acc, t) => acc + t.points, 0)}</span>
-                            <span className="text-[10px] font-black text-pink-300 uppercase tracking-widest">可获能量</span>
+                            <span className="text-[10px] font-black text-pink-300 uppercase tracking-widest">预计可得糖果</span>
                         </div>
                         <div className="bg-yellow-50/50 p-4 rounded-3xl border border-yellow-100/50 flex flex-col items-center gap-1 group/item hover:bg-yellow-50 transition-colors">
                             <span className="text-2xl group-hover/item:scale-125 transition-transform">🍭</span>
                             <span className="text-2xl font-black text-yellow-600 leading-none">{coins}</span>
-                            <span className="text-[10px] font-black text-yellow-300 uppercase tracking-widest">我的糖果</span>
+                            <span className="text-[10px] font-black text-yellow-300 uppercase tracking-widest">我的糖果库</span>
                         </div>
                     </div>
                 </div>

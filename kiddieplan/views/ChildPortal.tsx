@@ -20,6 +20,9 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [childProfile, setChildProfile] = useState<{ name: string; avatar: string }>({ name: '宝贝', avatar: '' });
     const [plannerTab, setPlannerTab] = useState(0);
     const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+    const [cloudToast, setCloudToast] = useState<{ show: boolean; count: number }>({ show: false, count: 0 });
+    const prevTasksCount = useRef<number>(0);
+    const isFirstLoad = useRef(true);
 
     // Timer state
     const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -145,7 +148,19 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             });
             const result = await res.json();
             if (result.success) {
-                setTasks(result.data.tasks || []);
+                const newTasks = result.data.tasks || [];
+
+                // Detect NEW tasks (ignore first load/decrease)
+                if (!isFirstLoad.current && newTasks.length > prevTasksCount.current) {
+                    const addedCount = newTasks.length - prevTasksCount.current;
+                    setCloudToast({ show: true, count: addedCount });
+                    setTimeout(() => setCloudToast(prev => ({ ...prev, show: false })), 5000);
+                }
+
+                setTasks(newTasks);
+                prevTasksCount.current = newTasks.length;
+                isFirstLoad.current = false;
+
                 setCheckins(result.data.checkins || []);
                 setStreak(result.data.streak || 0);
                 setCoins(result.data.points || 0);
@@ -299,7 +314,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 <h3 className="text-lg font-bold text-gray-700 pl-1 flex items-center gap-2">
                     <BookOpen size={18} className="text-pink-400" /> 今日任务概览 (只读)
                 </h3>
-                {tasks.map((task) => {
+                {[...tasks].sort((a, b) => a.timeSlot.localeCompare(b.timeSlot)).map((task) => {
                     const isCompleted = checkins.includes(task.id);
                     return (
                         <div
@@ -402,7 +417,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                                 {isCurrentFocus ? (
                                                     <>结束专注 ({formatTime(timerSeconds)})</>
                                                 ) : (
-                                                    <>开始专注计时的</>
+                                                    <>开始专注计时</>
                                                 )}
                                             </button>
                                         </div>
@@ -427,6 +442,39 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             {/* Decorative Blurs */}
             <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
+
+            {/* Cloud Toast Notification */}
+            <AnimatePresence>
+                {cloudToast.show && (
+                    <motion.div
+                        initial={{ y: -100, opacity: 0, scale: 0.8 }}
+                        animate={{ y: 20, opacity: 1, scale: 1 }}
+                        exit={{ y: -100, opacity: 0, scale: 0.8 }}
+                        className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm"
+                    >
+                        <div className="relative">
+                            {/* Cloud Shape Visuals */}
+                            <div className="absolute -top-4 -left-4 w-12 h-12 bg-white rounded-full blur-xl opacity-60"></div>
+                            <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-50 rounded-full blur-xl opacity-60"></div>
+
+                            <div className="bg-white/90 backdrop-blur-xl p-5 rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.1)] border-4 border-blue-50 flex items-center gap-4 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-1 opacity-10">
+                                    <Sparkles size={60} />
+                                </div>
+                                <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-300 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0 animate-bounce">
+                                    <Gift size={28} />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="text-blue-500 font-black text-sm uppercase tracking-wider mb-1">新任务驾到！</h4>
+                                    <p className="text-[#5D4037] font-bold text-base leading-tight">
+                                        爸爸妈妈给你分配了 <span className="text-orange-500 text-lg mx-0.5">{cloudToast.count}</span> 个新任务！
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Main Area - Everything scrolls under the glassy header */}
             <main className="flex-1 w-full overflow-y-auto no-scrollbar relative scroll-smooth" style={{ scrollBehavior: 'smooth' }}>

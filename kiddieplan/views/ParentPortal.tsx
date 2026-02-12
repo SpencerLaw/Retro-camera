@@ -63,6 +63,28 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [currentAvatar, setCurrentAvatar] = useState<string>('');
     const avatarRef = useRef('');
 
+    // Custom Time Picker State
+    const [pickerHour, setPickerHour] = useState('08');
+    const [pickerMinute, setPickerMinute] = useState('00');
+
+    // Sync picker with dialog default extra
+    useEffect(() => {
+        if (dialogConfig.isOpen && dialogConfig.showTime) {
+            const time = dialogConfig.defaultExtra || '08:00';
+            const [h, m] = time.split(':');
+            setPickerHour(h || '08');
+            setPickerMinute(m || '00');
+
+            // Auto-scroll to selected values
+            setTimeout(() => {
+                const hEl = document.getElementById(`hour-${h || '08'}`);
+                const mEl = document.getElementById(`minute-${m || '00'}`);
+                hEl?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                mEl?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }, 100);
+        }
+    }, [dialogConfig.isOpen, dialogConfig.showTime, dialogConfig.defaultExtra]);
+
     // Sync ref with state
     useEffect(() => {
         avatarRef.current = currentAvatar;
@@ -1385,14 +1407,48 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         id="dialogInput"
                                     />
                                     {dialogConfig.showTime && (
-                                        <div className="flex items-center gap-2 bg-[#F5F7FA] px-4 py-3 rounded-2xl">
-                                            <Clock size={18} className="text-gray-400" />
-                                            <input
-                                                type="time"
-                                                defaultValue={dialogConfig.defaultExtra || '08:00'}
-                                                className="bg-transparent font-bold text-[#5D4037] outline-none flex-1"
-                                                id="dialogTime"
-                                            />
+                                        <div className="bg-[#F5F7FA] p-6 rounded-[32px] border-2 border-transparent focus-within:border-blue-100 transition-all">
+                                            <div className="flex items-center justify-center gap-4 relative h-32 overflow-hidden">
+                                                {/* Hidden input for compatibility */}
+                                                <input type="hidden" id="dialogTime" value={`${pickerHour}:${pickerMinute}`} />
+
+                                                {/* Hour Picker */}
+                                                <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="hourScroll">
+                                                    {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                                                        <div
+                                                            key={h}
+                                                            id={`hour-${h}`}
+                                                            onClick={() => setPickerHour(h)}
+                                                            className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerHour === h ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
+                                                        >
+                                                            {h}
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div className="text-2xl font-black text-blue-200">:</div>
+
+                                                {/* Minute Picker */}
+                                                <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="minuteScroll">
+                                                    {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
+                                                        <div
+                                                            key={m}
+                                                            id={`minute-${m}`}
+                                                            onClick={() => setPickerMinute(m)}
+                                                            className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerMinute === m ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
+                                                        >
+                                                            {m}
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Selection Highlight Bar */}
+                                                <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-12 border-y-2 border-blue-50 pointer-events-none bg-blue-50/10 rounded-xl"></div>
+                                            </div>
+                                            <div className="flex justify-between mt-4 px-2">
+                                                <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">小时 (H)</span>
+                                                <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">分钟 (M)</span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

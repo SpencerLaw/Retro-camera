@@ -253,26 +253,42 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             transition={{ duration: 0.5 }}
             className="space-y-6 pb-32"
         >
-            {/* Real-time Clock & Hero */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-[32px] p-6 border border-white/50 shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-pink-100 to-transparent rounded-full -mr-10 -mt-10 blur-2xl opacity-80"></div>
+            {/* Candy Island Dashboard Card */}
+            <div className="bg-white/80 backdrop-blur-xl rounded-[40px] p-8 border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative overflow-hidden group">
+                {/* Background Sparkles */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-100/40 to-indigo-100/40 rounded-full -mr-16 -mt-16 blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-pink-100/30 to-purple-100/30 rounded-full -ml-10 -mb-10 blur-2xl"></div>
 
-                <div className="flex flex-col items-center text-center relative z-10 py-2">
-                    <div className="text-5xl font-black text-gray-700 mb-2 font-mono">
-                        {currentTime.toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                    <p className="text-gray-400 font-bold text-sm tracking-widest uppercase mb-4">
-                        {currentTime.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}
-                    </p>
-
-                    <div className="flex items-center gap-4 mt-2">
-                        <div className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 flex flex-col items-center">
-                            <span className="text-2xl font-black text-blue-500">{tasks.length}</span>
-                            <span className="text-[10px] font-bold text-blue-300 uppercase">今日任务</span>
+                <div className="relative z-10 flex flex-col gap-8">
+                    {/* Welcome Text */}
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-3xl flex items-center justify-center text-3xl shadow-lg border-4 border-white rotate-3 group-hover:rotate-0 transition-transform">
+                            👋
                         </div>
-                        <div className="bg-pink-50 px-4 py-2 rounded-2xl border border-pink-100 flex flex-col items-center">
-                            <span className="text-2xl font-black text-pink-500">+{tasks.reduce((acc, t) => acc + t.points, 0)}</span>
-                            <span className="text-[10px] font-bold text-pink-300 uppercase">可获能量</span>
+                        <div>
+                            <h2 className="text-3xl font-black text-gray-800 tracking-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                Hi {childProfile.name} !
+                            </h2>
+                            <p className="text-gray-400 font-bold text-sm mt-1">今天也是充满元气的一天 ~</p>
+                        </div>
+                    </div>
+
+                    {/* Stats Grid - Candy Style */}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-blue-50/50 p-4 rounded-3xl border border-blue-100/50 flex flex-col items-center gap-1 group/item hover:bg-blue-50 transition-colors">
+                            <span className="text-2xl group-hover/item:scale-125 transition-transform">🗓️</span>
+                            <span className="text-2xl font-black text-blue-600 leading-none">{tasks.length}</span>
+                            <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">今日任务</span>
+                        </div>
+                        <div className="bg-pink-50/50 p-4 rounded-3xl border border-pink-100/50 flex flex-col items-center gap-1 group/item hover:bg-pink-50 transition-colors">
+                            <span className="text-2xl group-hover/item:scale-125 transition-transform">⚡</span>
+                            <span className="text-2xl font-black text-pink-600 leading-none">+{tasks.reduce((acc, t) => acc + t.points, 0)}</span>
+                            <span className="text-[10px] font-black text-pink-300 uppercase tracking-widest">可获能量</span>
+                        </div>
+                        <div className="bg-yellow-50/50 p-4 rounded-3xl border border-yellow-100/50 flex flex-col items-center gap-1 group/item hover:bg-yellow-50 transition-colors">
+                            <span className="text-2xl group-hover/item:scale-125 transition-transform">🍭</span>
+                            <span className="text-2xl font-black text-yellow-600 leading-none">{coins}</span>
+                            <span className="text-[10px] font-black text-yellow-300 uppercase tracking-widest">我的糖果</span>
                         </div>
                     </div>
                 </div>
@@ -414,7 +430,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
             {/* Main Area - Everything scrolls under the glassy header */}
             <main className="flex-1 w-full overflow-y-auto no-scrollbar relative scroll-smooth" style={{ scrollBehavior: 'smooth' }}>
-                {/* Top Bar - Glassmorphism aligned with Parent Portal */}
+                {/* Top Bar - Pixel-Perfect Mirror of Parent Portal */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
@@ -427,13 +443,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     >
                         <div className="flex items-center gap-3">
                             <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                                 <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                                    <Sparkles className="text-yellow-500" size={20} />
+                                    <Sparkles className="text-blue-500" size={20} />
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                                     星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
                                 </h1>
                                 <div className="flex flex-col justify-center">
@@ -446,22 +462,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="hidden sm:flex items-center gap-2 bg-white/30 px-3 py-1.5 rounded-full border border-white/20">
-                                    <span className="text-sm">🔥</span>
-                                    <span className="text-[10px] font-black text-purple-500 uppercase tracking-tight">{streak} 天连续</span>
-                                </div>
-                                <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-2 rounded-2xl shadow-md text-white">
-                                    <span className="text-lg">🍭</span>
-                                    <span className="font-black text-lg">{coins}</span>
-                                </div>
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => fetchTodayData()}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/30 text-gray-400 font-bold text-xs shadow-sm border border-white/30 hover:text-blue-400 transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/30 text-gray-400 font-bold text-xs shadow-sm border border-white/30 hover:text-blue-500 transition-colors"
                                     title="手动同步数据"
                                 >
-                                    <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                                    <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
                                     <span className="hidden xs:inline">同步</span>
                                 </motion.button>
                                 <motion.button

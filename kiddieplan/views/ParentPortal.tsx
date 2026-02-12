@@ -744,588 +744,596 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
-            {/* Floating Header Wrapper */}
-            <div className="sticky top-0 p-4 z-40">
-                <header
-                    className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
-                    style={{
-                        background: 'rgba(255, 255, 255, 0.45)',
-                        backdropFilter: 'blur(30px)',
-                        WebkitBackdropFilter: 'blur(30px)',
-                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2)'
-                    }}
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="relative group">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                            <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                                <Sparkles className="text-blue-500" size={20} />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
-                            </h1>
-                            <div className="flex flex-col justify-center">
-                                <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">家长端</span>
-                                <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
-                                    {formatBeijingTime(currentTime)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="flex gap-2">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => fetchConfig()}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#E0E7FF]/60 text-gray-500 font-bold text-sm shadow-sm border border-white/40 hover:bg-white hover:text-[var(--color-blue-fun)] transition-colors"
-                                title="手动同步数据"
-                            >
-                                <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                                <span className="hidden md:inline">同步</span>
-                            </motion.button>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={onLogout}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/60 text-gray-500 font-bold text-sm shadow-sm border border-white/40 hover:text-red-400 transition-colors"
-                            >
-                                <Home size={18} />
-                                <span className="hidden md:inline">返回首页</span>
-                            </motion.button>
-                        </div>
-                    </div>
-                </header>
-            </div>
-
-
-            {/* Main Content */}
-            <main ref={mainScrollRef} className="flex-1 w-full px-4 pt-2 pb-20 overflow-y-auto no-scrollbar space-y-6 relative z-10">
-                {activeTab === 'children' && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                        {/* Children List */}
-                        <div className="bg-white/70 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_8px_20px_rgba(0,0,0,0.03)] border-2 border-white/50 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-3xl opacity-40"></div>
-
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-lg font-black text-[#5D4037] flex items-center gap-2">
-                                    <span className="text-2xl">👶</span> 我的宝贝
-                                </h3>
-                                {children.length < 3 && (
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={handleAddChild}
-                                        className="bg-[var(--color-blue-fun)] text-white px-4 py-2 rounded-full text-xs font-bold shadow-md flex items-center gap-1"
-                                    >
-                                        <Plus size={16} /> 添加
-                                    </motion.button>
-                                )}
-                            </div>
-
-                            <div className="flex gap-6 overflow-x-auto pb-6 pt-2 px-2 -mx-2 no-scrollbar">
-                                {children.map(child => (
-                                    <motion.div
-                                        key={child.id}
-                                        onClick={() => setSelectedChildId(child.id)}
-                                        whileHover={{ y: -5 }}
-                                        className={`flex flex-col items-center gap-3 min-w-[100px] cursor-pointer relative ${selectedChildId === child.id ? 'opacity-100' : 'opacity-60 grayscale-[0.3]'}`}
-                                    >
-                                        <div className="relative">
-                                            <div className={`w-24 h-24 rounded-full overflow-hidden border-4 shadow-sm transition-all ${selectedChildId === child.id ? 'border-[#FF6B81] shadow-[0_8px_15px_rgba(255,107,129,0.3)]' : 'border-transparent'}`}>
-                                                <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
-                                                {selectedChildId === child.id && (
-                                                    <div className="absolute inset-0 border-4 border-white rounded-full pointer-events-none"></div>
-                                                )}
-                                            </div>
-
-                                            {/* Edit Button Overlay - Moved outside overflow-hidden */}
-                                            {selectedChildId === child.id && (
-                                                <motion.button
-                                                    initial={{ scale: 0, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEditChild();
-                                                    }}
-                                                    className="absolute -bottom-1 -right-1 bg-[var(--color-blue-fun)] text-white p-2.5 rounded-full shadow-xl border-4 border-white hover:scale-110 active:scale-95 transition-all z-20"
-                                                >
-                                                    <Edit2 size={18} fill="currentColor" />
-                                                </motion.button>
-                                            )}
-                                        </div>
-                                        <span className="text-sm font-black text-[#5D4037]">{child.name}</span>
-                                    </motion.div>
-                                ))}
-                                {children.length === 0 && (
-                                    <div className="w-full py-10 text-center border-4 border-dashed border-gray-200 rounded-[32px]">
-                                        <p className="text-gray-400 font-bold">还没有添加宝贝哦 ~</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {selectedChild && (
-                            <motion.div
-                                key={selectedChildId}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.4 }}
-                                className="space-y-6"
-                            >
-                                {/* Dashboard Card */}
-                                <div className={`p-8 rounded-[40px] text-white relative overflow-hidden shadow-2xl border-4 border-white
-                                    ${selectedChild.isFocusing ? 'bg-gradient-to-br from-[var(--color-green-success)] to-emerald-400' : 'bg-gradient-to-br from-[#818CF8] to-[#6366F1]'}`}>
-                                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full -mr-10 -mt-10 blur-3xl"></div>
-
-                                    <div className="relative z-10 flex justify-between items-start">
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                {selectedChild.isFocusing ? (
-                                                    <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider animate-pulse flex items-center gap-1">
-                                                        <div className="w-2 h-2 bg-white rounded-full"></div> {selectedChild.currentTaskName || '专注'} (进行中)
-                                                    </span>
-                                                ) : (
-                                                    <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider">
-                                                        休息中
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <h2 className="text-4xl font-black">{selectedChild.roomCode}</h2>
-                                            <p className="text-xs opacity-70 font-bold mt-1 tracking-widest underline decoration-white/30 underline-offset-4">房间访问码</p>
-                                        </div>
-                                        <div className="text-right flex flex-col items-end">
-                                            <div className="flex items-center gap-2">
-                                                <div className="text-4xl font-black drop-shadow-md">{selectedChild.points || 0} 🍭</div>
-                                                <motion.button
-                                                    whileHover={{ rotate: 180, scale: 1.2 }}
-                                                    whileTap={{ scale: 0.9 }}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleResetPoints();
-                                                    }}
-                                                    className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30"
-                                                    title="重置积分"
-                                                >
-                                                    <RotateCcw size={14} />
-                                                </motion.button>
-                                            </div>
-                                            <p className="text-xs opacity-70 font-bold mt-1 tracking-widest">累计积分</p>
-                                        </div>
-                                    </div>
+            {/* Main Content Wrapper - Content scrolls UNDER the floating header */}
+            <main
+                ref={mainScrollRef}
+                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth"
+                style={{ scrollBehavior: 'smooth' }}
+            >
+                {/* Floating Header Wrapper - Inside scroll container for sticky "glass" effect */}
+                <div className="sticky top-0 p-4 z-40">
+                    <header
+                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.45)',
+                            backdropFilter: 'blur(30px)',
+                            WebkitBackdropFilter: 'blur(30px)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2)'
+                        }}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="relative group">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                                <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                    <Sparkles className="text-blue-500" size={20} />
                                 </div>
-
-                                {/* Action Grid */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <motion.button
-                                        whileHover={{ y: -5, rotate: -1 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('tasks')}
-                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.05)] border-2 border-white/50 hover:border-yellow-200 transition-all"
-                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-                                    >
-                                        <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
-                                            <ListTodo size={32} strokeWidth={3} />
-                                        </div>
-                                        <span className="font-black text-[#5D4037] text-lg">任务管理</span>
-                                        <span className="text-xs text-gray-400 font-bold">每日习惯养成</span>
-                                    </motion.button>
-
-                                    <motion.button
-                                        whileHover={{ y: -5, rotate: 1 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('rewards')}
-                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.05)] border-2 border-white/50 hover:border-red-200 transition-all"
-                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-                                    >
-                                        <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
-                                            <Gift size={32} strokeWidth={3} />
-                                        </div>
-                                        <span className="font-black text-[#5D4037] text-lg">奖励中心</span>
-                                        <span className="text-xs text-gray-400 font-bold">设定心愿清单</span>
-                                    </motion.button>
-
-                                    <motion.button
-                                        whileHover={{ y: -5, rotate: -1 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('checkins')}
-                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.05)] border-2 border-white/50 hover:border-purple-200 transition-all"
-                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-                                    >
-                                        <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
-                                            <CalendarCheck size={32} strokeWidth={3} />
-                                        </div>
-                                        <span className="font-black text-[#5D4037] text-lg">查看打卡</span>
-                                        <span className="text-xs text-gray-400 font-bold">查看历史记录</span>
-                                    </motion.button>
-
-                                    <motion.button
-                                        whileHover={{ y: -5, rotate: 1 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('stats')}
-                                        className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.05)] border-2 border-white/50 hover:border-emerald-200 transition-all"
-                                        style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-                                    >
-                                        <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
-                                            <BarChart3 size={32} strokeWidth={3} />
-                                        </div>
-                                        <span className="font-black text-[#5D4037] text-lg">详情统计</span>
-                                        <span className="text-xs text-gray-400 font-bold">数据报表分析</span>
-                                    </motion.button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                    星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
+                                </h1>
+                                <div className="flex flex-col justify-center">
+                                    <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">家长端</span>
+                                    <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
+                                        {formatBeijingTime(currentTime)}
+                                    </span>
                                 </div>
-                            </motion.div>
-                        )}
-                    </motion.div>
-                )}
-
-                {activeTab === 'tasks' && selectedChild && (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-4">
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex gap-2">
                                 <motion.button
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => setActiveTab('children')}
-                                    className="w-10 h-10 bg-white/60 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/50"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => fetchConfig()}
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#E0E7FF]/60 text-gray-500 font-bold text-sm shadow-sm border border-white/40 hover:bg-white hover:text-[var(--color-blue-fun)] transition-colors"
+                                    title="手动同步数据"
                                 >
-                                    <ArrowLeft size={20} />
+                                    <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+                                    <span className="hidden md:inline">同步</span>
                                 </motion.button>
-                                <h2 className="text-2xl font-black text-[#5D4037]">今日任务清单</h2>
-                            </div>
-                            {/* Removed global add button as per user request */}
-                        </div>
-
-                        {/* Templates */}
-                        <div className="flex flex-wrap gap-2 items-center">
-                            {/* Category buttons list */}
-                            {customCategories.map(cat => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
-                                    ${selectedCategory === cat.id
-                                            ? 'bg-[var(--color-blue-fun)] text-white border-[var(--color-blue-fun)] shadow-md'
-                                            : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={onLogout}
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/60 text-gray-500 font-bold text-sm shadow-sm border border-white/40 hover:text-red-400 transition-colors"
                                 >
-                                    <span>{cat.icon}</span>
-                                    {cat.name}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setIsManagingCategories(true)}
-                                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200"
-                            >
-                                <Settings size={16} />
-                            </button>
+                                    <Home size={18} />
+                                    <span className="hidden md:inline">返回首页</span>
+                                </motion.button>
+                            </div>
                         </div>
+                    </header>
+                </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
-                            {(() => {
-                                // 1. 获取预设模板
-                                const presetTemplates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
-                                const currentCat = customCategories.find(c => c.id === selectedCategory);
-                                const combinedTemplates = [
-                                    ...presetTemplates
-                                        .filter(t => !hiddenPresets.includes(`${selectedCategory}:${t.title}`))
-                                        .map(t => ({ ...t, isCustom: false })),
-                                    ...(currentCat?.templates || []).map((t, idx) => ({
-                                        ...t,
-                                        time: t.timeSlot,
-                                        isCustom: true,
-                                        idx
-                                    }))
-                                ];
+                <div className="px-4 pb-20 space-y-6">
+                    {activeTab === 'children' && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                            {/* Children List */}
+                            <div
+                                className="bg-white/70 rounded-[32px] p-6 shadow-[0_8px_20px_rgba(0,0,0,0.03)] border-2 border-white/50 relative overflow-hidden"
+                                style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-3xl opacity-40"></div>
 
-                                return (
-                                    <>
-                                        {combinedTemplates.map((tmp, i) => (
-                                            <div key={`tmp_${i}`} className="relative group">
-                                                <motion.button
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
-                                                    className="w-full bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
-                                                >
-                                                    <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
-                                                        <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
-                                                    </div>
-                                                </motion.button>
-
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteTemplate(
-                                                            selectedCategory,
-                                                            tmp.title,
-                                                            tmp.isCustom,
-                                                            (tmp as any).isCustom ? (tmp as any).idx : undefined
-                                                        );
-                                                    }}
-                                                    className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
-                                                >
-                                                    <Trash2 size={12} />
-                                                </button>
-                                            </div>
-                                        ))}
-
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-lg font-black text-[#5D4037] flex items-center gap-2">
+                                        <span className="text-2xl">👶</span> 我的宝贝
+                                    </h3>
+                                    {children.length < 3 && (
                                         <motion.button
+                                            whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            onClick={() => {
-                                                handleAddTemplate(selectedCategory);
-                                            }}
-                                            className="bg-blue-50 p-4 rounded-2xl text-left border-2 border-dashed border-blue-200 hover:bg-blue-100 flex items-center gap-3 justify-center group min-h-[80px]"
+                                            onClick={handleAddChild}
+                                            className="bg-[var(--color-blue-fun)] text-white px-4 py-2 rounded-full text-xs font-bold shadow-md flex items-center gap-1"
                                         >
-                                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[var(--color-blue-fun)] shadow-sm group-hover:scale-110 transition-transform">
-                                                <Plus size={24} />
-                                            </div>
-                                            <span className="font-bold text-[var(--color-blue-fun)]">
-                                                {selectedCategory === 'all' ? '添加自定义待办' : '定义分类模板'}
-                                            </span>
+                                            <Plus size={16} /> 添加
                                         </motion.button>
-                                    </>
-                                );
-                            })()}
-                        </div >
+                                    )}
+                                </div>
 
-                        <div className="h-px bg-gray-200 my-4" />
-
-                        <div className="relative">
-                            {/* Vertical Timeline Axis */}
-                            {currentTasks.length > 0 && (
-                                <div className="absolute left-[20px] top-6 bottom-6 w-0.5 border-l-2 border-dashed border-blue-200 z-0" />
-                            )}
-
-                            <div className="space-y-6 relative z-10">
-                                {[...currentTasks]
-                                    .sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
-                                    .map((task, idx) => (
+                                <div className="flex gap-6 overflow-x-auto pb-6 pt-2 px-2 -mx-2 no-scrollbar">
+                                    {children.map(child => (
                                         <motion.div
-                                            layout
-                                            key={task.id}
-                                            className="flex items-center gap-6"
+                                            key={child.id}
+                                            onClick={() => setSelectedChildId(child.id)}
+                                            whileHover={{ y: -5 }}
+                                            className={`flex flex-col items-center gap-3 min-w-[100px] cursor-pointer relative ${selectedChildId === child.id ? 'opacity-100' : 'opacity-60 grayscale-[0.3]'}`}
                                         >
-                                            {/* Timeline Node */}
-                                            <div className="relative flex-shrink-0">
-                                                <div className="w-10 h-10 bg-white rounded-full border-2 border-[var(--color-blue-fun)] flex items-center justify-center text-[var(--color-blue-fun)] shadow-sm z-10 relative">
-                                                    <Clock size={18} strokeWidth={3} />
+                                            <div className="relative">
+                                                <div className={`w-24 h-24 rounded-full overflow-hidden border-4 shadow-sm transition-all ${selectedChildId === child.id ? 'border-[#FF6B81] shadow-[0_8px_15px_rgba(255,107,129,0.3)]' : 'border-transparent'}`}>
+                                                    <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
+                                                    {selectedChildId === child.id && (
+                                                        <div className="absolute inset-0 border-4 border-white rounded-full pointer-events-none"></div>
+                                                    )}
                                                 </div>
-                                            </div>
 
-                                            {/* Task Card */}
-                                            <div className="flex-1 bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-blue-100 transition-colors">
-                                                <div>
-                                                    <h4 className="font-bold text-[#5D4037]">{task.title}</h4>
-                                                    <div className="text-xs text-gray-400 font-bold flex gap-2">
-                                                        <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
-                                                        <span className="text-emerald-400">+{task.points} pts</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                    <button onClick={() => editTask(task)} className="p-2 text-gray-300 hover:text-blue-500 transition-colors"><Edit2 size={16} /></button>
-                                                    <button onClick={() => removeTask(task.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
-                                                </div>
+                                                {/* Edit Button Overlay - Moved outside overflow-hidden */}
+                                                {selectedChildId === child.id && (
+                                                    <motion.button
+                                                        initial={{ scale: 0, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEditChild();
+                                                        }}
+                                                        className="absolute -bottom-1 -right-1 bg-[var(--color-blue-fun)] text-white p-2.5 rounded-full shadow-xl border-4 border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                                    >
+                                                        <Edit2 size={18} fill="currentColor" />
+                                                    </motion.button>
+                                                )}
                                             </div>
+                                            <span className="text-sm font-black text-[#5D4037]">{child.name}</span>
                                         </motion.div>
                                     ))}
-                                {currentTasks.length === 0 && (
-                                    <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
-                                        <p className="font-bold text-gray-500">今日尚未添加待办任务</p>
-                                        <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">Waiting for your plan</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {
-                            currentTasks.length > 0 && (
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleSaveTasks}
-                                    disabled={isSaving}
-                                    className="w-full bg-[#34D399] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#059669] active:shadow-none active:translate-y-2 transition-all"
-                                >
-                                    {isSaving ? '同步中...' : '发布任务'}
-                                </motion.button>
-                            )
-                        }
-                    </motion.div>
-                )}
-
-                {activeTab === 'rewards' && selectedChild && (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-4">
-                                <motion.button
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => setActiveTab('children')}
-                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
-                                >
-                                    <ArrowLeft size={20} />
-                                </motion.button>
-                                <h2 className="text-2xl font-black text-[#5D4037]">奖励商店</h2>
-                            </div>
-                            <motion.button whileTap={{ scale: 0.9 }} onClick={handleAddReward} className="bg-[var(--color-yellow-reward)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
-                                <Plus size={24} />
-                            </motion.button>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            {rewards.map((reward, i) => (
-                                <motion.div
-                                    key={i}
-                                    whileHover={{ y: -3 }}
-                                    className="bg-white p-5 rounded-[28px] flex flex-col items-center gap-3 shadow-[0_6px_10px_rgba(0,0,0,0.03)] border-2 border-transparent hover:border-yellow-100 relative group"
-                                >
-                                    <button onClick={() => removeReward(reward.id)} className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 bg-red-50 p-1.5 rounded-full">
-                                        <Trash2 size={14} />
-                                    </button>
-                                    <div className="text-5xl mb-2 filter drop-shadow-sm">{reward.icon}</div>
-                                    <div className="text-center">
-                                        <div className="font-bold text-[#5D4037] text-sm mb-1">{reward.name}</div>
-                                        <div className="bg-yellow-50 text-[var(--color-yellow-reward)] px-3 py-1 rounded-full text-xs font-black">
-                                            {reward.pointsCost} 🍭
+                                    {children.length === 0 && (
+                                        <div className="w-full py-10 text-center border-4 border-dashed border-gray-200 rounded-[32px]">
+                                            <p className="text-gray-400 font-bold">还没有添加宝贝哦 ~</p>
                                         </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        {rewards.length > 0 && (
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleSaveRewards}
-                                disabled={isSaving}
-                                className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#DB2777] active:shadow-none active:translate-y-2 transition-all"
-                            >
-                                {isSaving ? '同步中...' : '更新奖励库'}
-                            </motion.button>
-                        )}
-                    </motion.div>
-                )}
-
-                {activeTab === 'checkins' && selectedChild && (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-4">
-                                <motion.button
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => setActiveTab('children')}
-                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
-                                >
-                                    <ArrowLeft size={20} />
-                                </motion.button>
-                                <div>
-                                    <h2 className="text-2xl font-black text-[#5D4037]">今日专注记录</h2>
-                                    <p className="text-xs text-gray-400 font-bold mt-1">记录孩子每一次努力的时光</p>
+                                    )}
                                 </div>
                             </div>
-                            <div className="flex flex-col items-end">
-                                <span className="text-3xl font-black text-orange-500">
-                                    {Math.round(focusLogs.reduce((acc, log) => acc + log.duration, 0) / 60)} <span className="text-sm text-gray-400 font-bold">分钟</span>
-                                </span>
-                            </div>
-                        </div>
 
-                        <div className="space-y-4 relative pl-4">
-                            {/* Timeline Axis */}
-                            <div className="absolute left-[27px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-gray-200"></div>
+                            {selectedChild && (
+                                <motion.div
+                                    key={selectedChildId}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="space-y-6"
+                                >
+                                    {/* Dashboard Card */}
+                                    <div className={`p-8 rounded-[40px] text-white relative overflow-hidden shadow-2xl border-4 border-white
+                                    ${selectedChild.isFocusing ? 'bg-gradient-to-br from-[var(--color-green-success)] to-emerald-400' : 'bg-gradient-to-br from-[#818CF8] to-[#6366F1]'}`}>
+                                        <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full -mr-10 -mt-10 blur-3xl"></div>
 
-                            {focusLogs.length > 0 ? (
-                                focusLogs.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).map((log, i) => {
-                                    const startTime = new Date(log.startTime);
-                                    const endTime = new Date(log.endTime);
-                                    return (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: i * 0.1 }}
-                                            className="relative flex gap-4"
-                                        >
-                                            <div className="relative z-10 w-6 h-6 rounded-full bg-orange-100 border-2 border-orange-400 flex items-center justify-center text-orange-500 mt-4 shadow-sm">
-                                                <Zap size={10} fill="currentColor" />
+                                        <div className="relative z-10 flex justify-between items-start">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    {selectedChild.isFocusing ? (
+                                                        <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider animate-pulse flex items-center gap-1">
+                                                            <div className="w-2 h-2 bg-white rounded-full"></div> {selectedChild.currentTaskName || '专注'} (进行中)
+                                                        </span>
+                                                    ) : (
+                                                        <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider">
+                                                            休息中
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <h2 className="text-4xl font-black">{selectedChild.roomCode}</h2>
+                                                <p className="text-xs opacity-70 font-bold mt-1 tracking-widest underline decoration-white/30 underline-offset-4">房间访问码</p>
                                             </div>
-                                            <div className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                                <div className="flex justify-between items-start mb-2">
+                                            <div className="text-right flex flex-col items-end">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="text-4xl font-black drop-shadow-md">{selectedChild.points || 0} 🍭</div>
+                                                    <motion.button
+                                                        whileHover={{ rotate: 180, scale: 1.2 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleResetPoints();
+                                                        }}
+                                                        className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30"
+                                                        title="重置积分"
+                                                    >
+                                                        <RotateCcw size={14} />
+                                                    </motion.button>
+                                                </div>
+                                                <p className="text-xs opacity-70 font-bold mt-1 tracking-widest">累计积分</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Grid */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <motion.button
+                                            whileHover={{ y: -5, rotate: -1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setActiveTab('tasks')}
+                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.05)] border-2 border-white/50 hover:border-yellow-200 transition-all"
+                                            style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                        >
+                                            <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
+                                                <ListTodo size={32} strokeWidth={3} />
+                                            </div>
+                                            <span className="font-black text-[#5D4037] text-lg">任务管理</span>
+                                            <span className="text-xs text-gray-400 font-bold">每日习惯养成</span>
+                                        </motion.button>
+
+                                        <motion.button
+                                            whileHover={{ y: -5, rotate: 1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setActiveTab('rewards')}
+                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.05)] border-2 border-white/50 hover:border-red-200 transition-all"
+                                            style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                        >
+                                            <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
+                                                <Gift size={32} strokeWidth={3} />
+                                            </div>
+                                            <span className="font-black text-[#5D4037] text-lg">奖励中心</span>
+                                            <span className="text-xs text-gray-400 font-bold">设定心愿清单</span>
+                                        </motion.button>
+
+                                        <motion.button
+                                            whileHover={{ y: -5, rotate: -1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setActiveTab('checkins')}
+                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.05)] border-2 border-white/50 hover:border-purple-200 transition-all"
+                                            style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                        >
+                                            <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
+                                                <CalendarCheck size={32} strokeWidth={3} />
+                                            </div>
+                                            <span className="font-black text-[#5D4037] text-lg">查看打卡</span>
+                                            <span className="text-xs text-gray-400 font-bold">查看历史记录</span>
+                                        </motion.button>
+
+                                        <motion.button
+                                            whileHover={{ y: -5, rotate: 1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setActiveTab('stats')}
+                                            className="p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.05)] border-2 border-white/50 hover:border-emerald-200 transition-all"
+                                            style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                                        >
+                                            <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
+                                                <BarChart3 size={32} strokeWidth={3} />
+                                            </div>
+                                            <span className="font-black text-[#5D4037] text-lg">详情统计</span>
+                                            <span className="text-xs text-gray-400 font-bold">数据报表分析</span>
+                                        </motion.button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'tasks' && selectedChild && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setActiveTab('children')}
+                                        className="w-10 h-10 bg-white/60 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/50"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </motion.button>
+                                    <h2 className="text-2xl font-black text-[#5D4037]">今日任务清单</h2>
+                                </div>
+                                {/* Removed global add button as per user request */}
+                            </div>
+
+                            {/* Templates */}
+                            <div className="flex flex-wrap gap-2 items-center">
+                                {/* Category buttons list */}
+                                {customCategories.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
+                                    ${selectedCategory === cat.id
+                                                ? 'bg-[var(--color-blue-fun)] text-white border-[var(--color-blue-fun)] shadow-md'
+                                                : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+                                    >
+                                        <span>{cat.icon}</span>
+                                        {cat.name}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => setIsManagingCategories(true)}
+                                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200"
+                                >
+                                    <Settings size={16} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
+                                {(() => {
+                                    // 1. 获取预设模板
+                                    const presetTemplates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
+                                    const currentCat = customCategories.find(c => c.id === selectedCategory);
+                                    const combinedTemplates = [
+                                        ...presetTemplates
+                                            .filter(t => !hiddenPresets.includes(`${selectedCategory}:${t.title}`))
+                                            .map(t => ({ ...t, isCustom: false })),
+                                        ...(currentCat?.templates || []).map((t, idx) => ({
+                                            ...t,
+                                            time: t.timeSlot,
+                                            isCustom: true,
+                                            idx
+                                        }))
+                                    ];
+
+                                    return (
+                                        <>
+                                            {combinedTemplates.map((tmp, i) => (
+                                                <div key={`tmp_${i}`} className="relative group">
+                                                    <motion.button
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={() => addTask(tmp.title, tmp.time, tmp.points)}
+                                                        className="w-full bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-blue-100 shadow-sm flex items-center gap-3"
+                                                    >
+                                                        <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.title}</div>
+                                                            <div className="text-[10px] text-gray-400 font-bold mt-0.5">+{tmp.points} 🍭</div>
+                                                        </div>
+                                                    </motion.button>
+
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteTemplate(
+                                                                selectedCategory,
+                                                                tmp.title,
+                                                                tmp.isCustom,
+                                                                (tmp as any).isCustom ? (tmp as any).idx : undefined
+                                                            );
+                                                        }}
+                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            <motion.button
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={() => {
+                                                    handleAddTemplate(selectedCategory);
+                                                }}
+                                                className="bg-blue-50 p-4 rounded-2xl text-left border-2 border-dashed border-blue-200 hover:bg-blue-100 flex items-center gap-3 justify-center group min-h-[80px]"
+                                            >
+                                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[var(--color-blue-fun)] shadow-sm group-hover:scale-110 transition-transform">
+                                                    <Plus size={24} />
+                                                </div>
+                                                <span className="font-bold text-[var(--color-blue-fun)]">
+                                                    {selectedCategory === 'all' ? '添加自定义待办' : '定义分类模板'}
+                                                </span>
+                                            </motion.button>
+                                        </>
+                                    );
+                                })()}
+                            </div >
+
+                            <div className="h-px bg-gray-200 my-4" />
+
+                            <div className="relative">
+                                {/* Vertical Timeline Axis */}
+                                {currentTasks.length > 0 && (
+                                    <div className="absolute left-[20px] top-6 bottom-6 w-0.5 border-l-2 border-dashed border-blue-200 z-0" />
+                                )}
+
+                                <div className="space-y-6 relative z-10">
+                                    {[...currentTasks]
+                                        .sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
+                                        .map((task, idx) => (
+                                            <motion.div
+                                                layout
+                                                key={task.id}
+                                                className="flex items-center gap-6"
+                                            >
+                                                {/* Timeline Node */}
+                                                <div className="relative flex-shrink-0">
+                                                    <div className="w-10 h-10 bg-white rounded-full border-2 border-[var(--color-blue-fun)] flex items-center justify-center text-[var(--color-blue-fun)] shadow-sm z-10 relative">
+                                                        <Clock size={18} strokeWidth={3} />
+                                                    </div>
+                                                </div>
+
+                                                {/* Task Card */}
+                                                <div className="flex-1 bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-blue-100 transition-colors">
                                                     <div>
-                                                        <h4 className="font-bold text-[#5D4037]">{log.taskTitle}</h4>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <span className="bg-orange-50 text-orange-500 px-2 py-0.5 rounded-md text-[10px] font-black flex items-center gap-1">
-                                                                <Timer size={10} /> 专注 {Math.floor(log.duration / 60)} 分 {log.duration % 60} 秒
-                                                            </span>
+                                                        <h4 className="font-bold text-[#5D4037]">{task.title}</h4>
+                                                        <div className="text-xs text-gray-400 font-bold flex gap-2">
+                                                            <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
+                                                            <span className="text-emerald-400">+{task.points} pts</span>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <div className="text-xs font-bold text-gray-400">
-                                                            {startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                                                            <span className="mx-1">-</span>
-                                                            {endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                    <div className="flex gap-1">
+                                                        <button onClick={() => editTask(task)} className="p-2 text-gray-300 hover:text-blue-500 transition-colors"><Edit2 size={16} /></button>
+                                                        <button onClick={() => removeTask(task.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    {currentTasks.length === 0 && (
+                                        <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
+                                            <p className="font-bold text-gray-500">今日尚未添加待办任务</p>
+                                            <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">Waiting for your plan</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {
+                                currentTasks.length > 0 && (
+                                    <motion.button
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={handleSaveTasks}
+                                        disabled={isSaving}
+                                        className="w-full bg-[#34D399] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#059669] active:shadow-none active:translate-y-2 transition-all"
+                                    >
+                                        {isSaving ? '同步中...' : '发布任务'}
+                                    </motion.button>
+                                )
+                            }
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'rewards' && selectedChild && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setActiveTab('children')}
+                                        className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </motion.button>
+                                    <h2 className="text-2xl font-black text-[#5D4037]">奖励商店</h2>
+                                </div>
+                                <motion.button whileTap={{ scale: 0.9 }} onClick={handleAddReward} className="bg-[var(--color-yellow-reward)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
+                                    <Plus size={24} />
+                                </motion.button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {rewards.map((reward, i) => (
+                                    <motion.div
+                                        key={i}
+                                        whileHover={{ y: -3 }}
+                                        className="bg-white p-5 rounded-[28px] flex flex-col items-center gap-3 shadow-[0_6px_10px_rgba(0,0,0,0.03)] border-2 border-transparent hover:border-yellow-100 relative group"
+                                    >
+                                        <button onClick={() => removeReward(reward.id)} className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 bg-red-50 p-1.5 rounded-full">
+                                            <Trash2 size={14} />
+                                        </button>
+                                        <div className="text-5xl mb-2 filter drop-shadow-sm">{reward.icon}</div>
+                                        <div className="text-center">
+                                            <div className="font-bold text-[#5D4037] text-sm mb-1">{reward.name}</div>
+                                            <div className="bg-yellow-50 text-[var(--color-yellow-reward)] px-3 py-1 rounded-full text-xs font-black">
+                                                {reward.pointsCost} 🍭
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+
+                            {rewards.length > 0 && (
+                                <motion.button
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleSaveRewards}
+                                    disabled={isSaving}
+                                    className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#DB2777] active:shadow-none active:translate-y-2 transition-all"
+                                >
+                                    {isSaving ? '同步中...' : '更新奖励库'}
+                                </motion.button>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'checkins' && selectedChild && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setActiveTab('children')}
+                                        className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </motion.button>
+                                    <div>
+                                        <h2 className="text-2xl font-black text-[#5D4037]">今日专注记录</h2>
+                                        <p className="text-xs text-gray-400 font-bold mt-1">记录孩子每一次努力的时光</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-3xl font-black text-orange-500">
+                                        {Math.round(focusLogs.reduce((acc, log) => acc + log.duration, 0) / 60)} <span className="text-sm text-gray-400 font-bold">分钟</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 relative pl-4">
+                                {/* Timeline Axis */}
+                                <div className="absolute left-[27px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-gray-200"></div>
+
+                                {focusLogs.length > 0 ? (
+                                    focusLogs.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).map((log, i) => {
+                                        const startTime = new Date(log.startTime);
+                                        const endTime = new Date(log.endTime);
+                                        return (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: i * 0.1 }}
+                                                className="relative flex gap-4"
+                                            >
+                                                <div className="relative z-10 w-6 h-6 rounded-full bg-orange-100 border-2 border-orange-400 flex items-center justify-center text-orange-500 mt-4 shadow-sm">
+                                                    <Zap size={10} fill="currentColor" />
+                                                </div>
+                                                <div className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div>
+                                                            <h4 className="font-bold text-[#5D4037]">{log.taskTitle}</h4>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <span className="bg-orange-50 text-orange-500 px-2 py-0.5 rounded-md text-[10px] font-black flex items-center gap-1">
+                                                                    <Timer size={10} /> 专注 {Math.floor(log.duration / 60)} 分 {log.duration % 60} 秒
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-xs font-bold text-gray-400">
+                                                                {startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                                <span className="mx-1">-</span>
+                                                                {endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })
-                            ) : (
-                                <div className="ml-8 py-10 text-center bg-white rounded-3xl border-2 border-dashed border-gray-100">
-                                    <Target className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-                                    <p className="text-gray-400 font-bold text-sm">今天还没有专注记录哦</p>
-                                    <p className="text-gray-300 text-xs mt-1">快去提醒宝贝开始任务吧！</p>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
-                )}
-
-                {activeTab === 'stats' && selectedChild && (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
-                        <div className="flex items-center gap-4">
-                            <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setActiveTab('children')}
-                                className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
-                            >
-                                <ArrowLeft size={20} />
-                            </motion.button>
-                            <h2 className="text-2xl font-black text-[#5D4037]">统计分析</h2>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-gradient-to-br from-blue-400 to-blue-500 p-5 rounded-[32px] text-white shadow-lg">
-                                <div className="text-xs font-bold opacity-80 mb-1">本周平均专注</div>
-                                <div className="text-3xl font-black">4.5h</div>
-                            </div>
-                            <div className="bg-gradient-to-br from-emerald-400 to-emerald-500 p-5 rounded-[32px] text-white shadow-lg">
-                                <div className="text-xs font-bold opacity-80 mb-1">任务成功率</div>
-                                <div className="text-3xl font-black">92%</div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
-                            <h3 className="font-black text-[#5D4037] mb-4 flex items-center gap-2">
-                                <BarChart3 size={18} className="text-emerald-400" />
-                                积分趋势 (近7天)
-                            </h3>
-                            <div className="h-40 flex items-end justify-between gap-2 px-2">
-                                {[30, 45, 25, 60, 80, 50, 70].map((val, i) => (
-                                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                                        <motion.div
-                                            initial={{ height: 0 }}
-                                            animate={{ height: `${val}%` }}
-                                            className="w-full bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors relative"
-                                        >
-                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-emerald-500">{val}</div>
-                                        </motion.div>
-                                        <span className="text-[10px] font-bold text-gray-400">周{['一', '二', '三', '四', '五', '六', '日'][i]}</span>
+                                            </motion.div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="ml-8 py-10 text-center bg-white rounded-3xl border-2 border-dashed border-gray-100">
+                                        <Target className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                                        <p className="text-gray-400 font-bold text-sm">今天还没有专注记录哦</p>
+                                        <p className="text-gray-300 text-xs mt-1">快去提醒宝贝开始任务吧！</p>
                                     </div>
-                                ))}
+                                )}
                             </div>
-                        </div>
-                    </motion.div>
-                )}
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'stats' && selectedChild && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                            <div className="flex items-center gap-4">
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setActiveTab('children')}
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                >
+                                    <ArrowLeft size={20} />
+                                </motion.button>
+                                <h2 className="text-2xl font-black text-[#5D4037]">统计分析</h2>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-gradient-to-br from-blue-400 to-blue-500 p-5 rounded-[32px] text-white shadow-lg">
+                                    <div className="text-xs font-bold opacity-80 mb-1">本周平均专注</div>
+                                    <div className="text-3xl font-black">4.5h</div>
+                                </div>
+                                <div className="bg-gradient-to-br from-emerald-400 to-emerald-500 p-5 rounded-[32px] text-white shadow-lg">
+                                    <div className="text-xs font-bold opacity-80 mb-1">任务成功率</div>
+                                    <div className="text-3xl font-black">92%</div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
+                                <h3 className="font-black text-[#5D4037] mb-4 flex items-center gap-2">
+                                    <BarChart3 size={18} className="text-emerald-400" />
+                                    积分趋势 (近7天)
+                                </h3>
+                                <div className="h-40 flex items-end justify-between gap-2 px-2">
+                                    {[30, 45, 25, 60, 80, 50, 70].map((val, i) => (
+                                        <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                                            <motion.div
+                                                initial={{ height: 0 }}
+                                                animate={{ height: `${val}%` }}
+                                                className="w-full bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors relative"
+                                            >
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-emerald-500">{val}</div>
+                                            </motion.div>
+                                            <span className="text-[10px] font-bold text-gray-400">周{['一', '二', '三', '四', '五', '六', '日'][i]}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </div>
             </main>
 
             {/* Dialog Overlay */}

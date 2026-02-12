@@ -401,101 +401,116 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
 
-            {/* Top Bar - Glassmorphism */}
-            <header className="sticky top-0 px-5 py-4 flex justify-between items-center bg-white/60 backdrop-blur-xl border-b border-white/30 shadow-sm z-40">
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-2 rounded-2xl shadow-md text-white">
-                        <span className="text-lg">🍭</span>
-                        <span className="font-black text-lg">{coins}</span>
-                    </div>
-                    <span className="text-xs font-bold bg-purple-100/80 backdrop-blur-sm text-purple-500 px-3 py-1.5 rounded-full flex items-center gap-2">
-                        <span className="opacity-60">Hello {childProfile.name}</span>
-                        <span className="w-px h-3 bg-purple-200 mx-0.5"></span>
-                        <span>🔥 {streak} 天连续</span>
-                    </span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => fetchTodayData()}
-                        className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/80 text-gray-400 font-bold text-xs shadow-sm border border-white/50 hover:text-blue-400 transition-colors"
-                        title="手动同步数据"
+            {/* Main Area - Everything scrolls under the glassy header */}
+            <main className="flex-1 w-full overflow-y-auto no-scrollbar relative scroll-smooth" style={{ scrollBehavior: 'smooth' }}>
+                {/* Top Bar - Glassmorphism Moved Inside */}
+                <div className="sticky top-0 z-40 px-5 py-4">
+                    <header
+                        className="flex justify-between items-center px-5 py-3.5 rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.05)]"
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.45)',
+                            backdropFilter: 'blur(24px)',
+                            WebkitBackdropFilter: 'blur(24px)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2)'
+                        }}
                     >
-                        <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-                        <span className="hidden xs:inline">同步</span>
-                    </motion.button>
-                    <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onLogout}
-                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-gray-100 hover:text-red-400 transition-colors"
-                    >
-                        <LogOut size={18} />
-                    </motion.button>
-                </div>
-            </header>
-
-            {/* Main Area */}
-            <main className="flex-1 px-5 overflow-y-auto no-scrollbar pt-2">
-                <AnimatePresence mode='wait'>
-                    {activeTab === 'home' && renderDashboardView()}
-                    {activeTab === 'plan' && renderPlannerView()}
-                    {activeTab === 'rewards' && (
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5 pb-32">
-                            <h2 className="text-2xl font-black text-gray-700 text-center">🎁 梦幻宝库</h2>
-                            <div className="grid grid-cols-2 gap-3">
-                                {rewards.map((reward, i) => (
-                                    <motion.div
-                                        key={i}
-                                        whileHover={{ y: -3, scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        onClick={() => handleRedeemReward(reward)}
-                                        className="bg-white/80 backdrop-blur-sm p-5 rounded-3xl flex flex-col items-center gap-3 text-center border border-white/50 shadow-sm cursor-pointer relative overflow-hidden"
-                                    >
-                                        <div className="text-4xl transform hover:scale-110 transition-transform">{reward.icon || '🎁'}</div>
-                                        <div>
-                                            <div className="font-bold text-gray-700 text-sm">{reward.name}</div>
-                                            <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-0.5 rounded-full mt-1.5 inline-block shadow-sm">
-                                                {reward.pointsCost} 🍭
-                                            </div>
-                                        </div>
-                                        {coins < reward.pointsCost && (
-                                            <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-bold text-sm text-gray-400 backdrop-blur-[2px]">
-                                                还差 {reward.pointsCost - coins} 🍭
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                ))}
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-2 rounded-2xl shadow-md text-white">
+                                <span className="text-lg">🍭</span>
+                                <span className="font-black text-lg">{coins}</span>
                             </div>
-                        </motion.div>
-                    )}
-                    {activeTab === 'me' && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-full pb-32 space-y-5 text-center pt-4">
-                            <motion.div
-                                whileHover={{ scale: 1.05, rotate: 3 }}
-                                className="w-28 h-28 bg-white/80 rounded-3xl shadow-lg flex items-center justify-center text-5xl border border-white/50"
+                            <span
+                                className="text-xs font-bold text-purple-500 px-3 py-1.5 rounded-full flex items-center gap-2"
+                                style={{ background: 'rgba(243, 232, 255, 0.65)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
                             >
-                                🏆
+                                <span className="opacity-60">Hello {childProfile.name}</span>
+                                <span className="w-px h-3 bg-purple-200 mx-0.5"></span>
+                                <span>🔥 {streak} 天连续</span>
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => fetchTodayData()}
+                                className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/60 text-gray-400 font-bold text-xs shadow-sm border border-white/40 hover:text-blue-400 transition-colors"
+                                title="手动同步数据"
+                            >
+                                <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                                <span className="hidden xs:inline">同步</span>
+                            </motion.button>
+                            <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                onClick={onLogout}
+                                className="w-10 h-10 bg-white/60 rounded-full flex items-center justify-center text-gray-400 shadow-sm border border-white/40 hover:text-red-400 transition-colors"
+                            >
+                                <LogOut size={18} />
+                            </motion.button>
+                        </div>
+                    </header>
+                </div>
+
+                <div className="px-5 pt-0 pb-20">
+                    <AnimatePresence mode='wait'>
+                        {activeTab === 'home' && renderDashboardView()}
+                        {activeTab === 'plan' && renderPlannerView()}
+                        {activeTab === 'rewards' && (
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5 pb-32">
+                                <h2 className="text-2xl font-black text-gray-700 text-center">🎁 梦幻宝库</h2>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {rewards.map((reward, i) => (
+                                        <motion.div
+                                            key={i}
+                                            whileHover={{ y: -3, scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => handleRedeemReward(reward)}
+                                            className="bg-white/80 backdrop-blur-sm p-5 rounded-3xl flex flex-col items-center gap-3 text-center border border-white/50 shadow-sm cursor-pointer relative overflow-hidden"
+                                        >
+                                            <div className="text-4xl transform hover:scale-110 transition-transform">{reward.icon || '🎁'}</div>
+                                            <div>
+                                                <div className="font-bold text-gray-700 text-sm">{reward.name}</div>
+                                                <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-0.5 rounded-full mt-1.5 inline-block shadow-sm">
+                                                    {reward.pointsCost} 🍭
+                                                </div>
+                                            </div>
+                                            {coins < reward.pointsCost && (
+                                                <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-bold text-sm text-gray-400 backdrop-blur-[2px]">
+                                                    还差 {reward.pointsCost - coins} 🍭
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    ))}
+                                </div>
                             </motion.div>
-                            <div>
-                                <h2 className="text-xl font-black text-gray-700">成就殿堂</h2>
-                                <p className="text-gray-400 font-medium text-sm mt-1">已连续坚持 <span className="font-bold text-pink-500">{streak}</span> 天</p>
-                            </div>
-                            <div className="grid grid-cols-3 gap-2.5 w-full px-4">
-                                {['🌟', '🎮', '🎨', '🚀', '🌈', '🍦'].map((icon, i) => (
-                                    <motion.div
-                                        key={i}
-                                        whileHover={{ scale: 1.1 }}
-                                        className="bg-white/60 p-4 rounded-2xl text-2xl grayscale opacity-60 border border-white/50"
-                                    >
-                                        {icon}
-                                    </motion.div>
-                                ))}
-                            </div>
-                            <p className="text-xs text-gray-300 font-medium px-8">完成更多任务，解锁神秘勋章！</p>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                        )}
+                        {activeTab === 'me' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-full pb-32 space-y-5 text-center pt-4">
+                                <motion.div
+                                    whileHover={{ scale: 1.05, rotate: 3 }}
+                                    className="w-28 h-28 bg-white/80 rounded-3xl shadow-lg flex items-center justify-center text-5xl border border-white/50"
+                                >
+                                    🏆
+                                </motion.div>
+                                <div>
+                                    <h2 className="text-xl font-black text-gray-700">成就殿堂</h2>
+                                    <p className="text-gray-400 font-medium text-sm mt-1">已连续坚持 <span className="font-bold text-pink-500">{streak}</span> 天</p>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2.5 w-full px-4">
+                                    {['🌟', '🎮', '🎨', '🚀', '🌈', '🍦'].map((icon, i) => (
+                                        <motion.div
+                                            key={i}
+                                            whileHover={{ scale: 1.1 }}
+                                            className="bg-white/60 p-4 rounded-2xl text-2xl grayscale opacity-60 border border-white/50"
+                                        >
+                                            {icon}
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-gray-300 font-medium px-8">完成更多任务，解锁神秘勋章！</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </main>
 
             {/* Bottom Nav - Floating Pill Bar */}

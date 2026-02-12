@@ -540,7 +540,15 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             </main>
 
             {/* Bottom Nav - Floating Pill Bar */}
-            <div className="fixed bottom-5 left-5 right-5 h-[68px] bg-white/40 backdrop-blur-xl border border-white/30 rounded-[24px] shadow-lg flex justify-around items-center z-50 px-3">
+            <div
+                className="fixed bottom-5 left-5 right-5 h-[68px] border border-white/40 rounded-[24px] shadow-lg flex justify-around items-center z-50 px-3"
+                style={{
+                    background: 'rgba(255, 255, 255, 0.22)',
+                    backdropFilter: 'blur(30px)',
+                    WebkitBackdropFilter: 'blur(30px)',
+                    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                }}
+            >
                 {[
                     { id: 'home', icon: Home, label: '主岛' },
                     { id: 'plan', icon: ListTodo, label: '规划' },

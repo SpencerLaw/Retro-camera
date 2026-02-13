@@ -495,33 +495,36 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     };
 
     const addTask = (title?: string, time?: string, points?: number) => {
+        const selectedChild = children.find(c => c.id === selectedChildId);
+
         if (title) {
             const finalTime = time || '08:30';
-            const isDuplicate = currentTasks.some(t => t.title === title && t.timeSlot === finalTime);
 
-            if (isDuplicate) {
-                setDialogConfig({
-                    isOpen: true,
-                    title: '🚫 任务已重复',
-                    message: `“${title}”已经在 ${finalTime} 的清单里了，不需要重复添加哦~`,
-                    hideInput: true,
-                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
-                    placeholder: ''
-                });
-                return;
-            }
-
-            const newTask: Task = {
-                id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                title,
-                timeSlot: finalTime,
-                points: points || 10,
-                completed: false,
-                isRequired: true,
-                date: new Date().toISOString().split('T')[0],
-                category: selectedCategory
-            };
-            setCurrentTasks(prev => [...prev, newTask]);
+            setDialogConfig({
+                isOpen: true,
+                title: '📝 确认添加任务',
+                message: `是否要给 ${selectedChild?.name || '宝贝'} 添加“${title}”任务？`,
+                hideInput: true,
+                onConfirm: () => {
+                    const isDuplicate = currentTasks.some(t => t.title === title && t.timeSlot === finalTime);
+                    if (isDuplicate) {
+                        alert(`“${title}”已经在 ${finalTime} 的清单里了~`);
+                    } else {
+                        const newTask: Task = {
+                            id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                            title,
+                            timeSlot: finalTime,
+                            points: points || 10,
+                            completed: false,
+                            isRequired: true,
+                            date: new Date().toISOString().split('T')[0],
+                            category: selectedCategory
+                        };
+                        setCurrentTasks(prev => [...prev, newTask]);
+                    }
+                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                }
+            });
         } else {
             const currentCatName = customCategories.find(c => c.id === selectedCategory)?.name || '自定义';
             const dialogTitle = selectedCategory === 'all' ? '✨ 开启新任务' : `✨ 新增任务 [${currentCatName}]`;

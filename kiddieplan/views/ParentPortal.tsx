@@ -968,7 +968,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     <div className="space-y-1">
                                                         <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
                                                         <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
-                                                        <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">Sleeping Mode</p>
+                                                        <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">能量恢复中</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -1000,7 +1000,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="text-2xl leading-none">🍭</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-tighter opacity-70 mt-0.5">糖果点数</span>
+                                                    <span className="text-[8px] font-bold uppercase tracking-tighter opacity-70 mt-0.5">糖果收益</span>
                                                 </div>
                                             </div>
                                         </div>

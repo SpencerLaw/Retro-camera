@@ -363,7 +363,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         </div>
                         <div>
                             <h2 className="text-3xl font-black text-gray-800 tracking-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                Hi {childProfile.name} !
+                                你好 {childProfile.name} !
                             </h2>
                             <p className="text-gray-400 font-bold text-sm mt-1">今天也是充满元气的一天 ~</p>
                         </div>
@@ -580,7 +580,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             <h1 className="text-[18px] font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                                 星梦奇旅
                             </h1>
-                            <span className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>孩子端</span>
+                            <span className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>宝贝端</span>
                         </div>
 
                         {/* Right: Time & Compact Buttons (Ultra Grouped) */}

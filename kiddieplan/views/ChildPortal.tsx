@@ -190,6 +190,18 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 setCoins(result.data.points || 0);
                 if (result.data.profile) setChildProfile(result.data.profile);
                 if (result.data.rewards) setRewards(result.data.rewards);
+
+                // RESTORE FOCUS STATE: Ensure timer resumes after refresh
+                if (result.data.isFocusing) {
+                    const focusingTask = newTasks.find((t: any) => t.title === result.data.currentTaskName);
+                    if (focusingTask) {
+                        setActiveTaskId(focusingTask.id);
+                        setTimerSeconds(result.data.lastFocusDuration || 0);
+                        setIsTimerRunning(true);
+                        // If we had a startTime, we could calculate precise elapsed time here
+                        // For now, restoring to the last reported duration is a massive improvement
+                    }
+                }
             }
         } catch (err) {
             console.error('Fetch failed');
@@ -650,43 +662,46 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 </div>
             </main>
 
-            {/* Bottom Nav - Anchored Bar with Safe Area Support */}
+            {/* Bottom Nav - Standard Glass Bar (Mirrors Top Style) */}
             <div
-                className="fixed bottom-0 left-0 right-0 border-t border-white/30 shadow-[0_-8px_32px_rgba(0,0,0,0.05)] flex justify-around items-center z-50 px-6 rounded-t-[40px]"
+                className="fixed bottom-0 left-0 right-0 z-[100] px-4 pb-[env(safe-area-inset-bottom,20px)] pt-2"
                 style={{
-                    height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
-                    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    backdropFilter: 'blur(25px) saturate(160%)',
-                    WebkitBackdropFilter: 'blur(25px) saturate(160%)',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    backdropFilter: 'blur(30px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(30px) saturate(180%)',
                 }}
             >
-                {[
-                    { id: 'home', icon: Home, label: '主岛' },
-                    { id: 'plan', icon: ListTodo, label: '规划' },
-                    { id: 'rewards', icon: Gift, label: '宝库' },
-                    { id: 'me', icon: User, label: '档案' },
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as AppTab)}
-                        className="relative flex flex-col items-center justify-center w-14 h-full gap-0.5"
-                    >
-                        {activeTab === tab.id && (
-                            <motion.div
-                                layoutId="nav-pill"
-                                className="absolute inset-1 bg-gradient-to-br from-pink-50 to-pink-100 rounded-[18px]"
-                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            />
-                        )}
-                        <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
-                            <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
-                        </span>
-                        <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
-                            {tab.label}
-                        </span>
-                    </button>
-                ))}
+                <div
+                    className="flex justify-around items-center h-[72px] rounded-[32px] border border-white/20 shadow-lg px-2"
+                    style={{ background: 'rgba(255, 255, 255, 0.08)' }}
+                >
+                    {[
+                        { id: 'home', icon: Home, label: '主岛' },
+                        { id: 'plan', icon: ListTodo, label: '规划' },
+                        { id: 'rewards', icon: Gift, label: '宝库' },
+                        { id: 'me', icon: User, label: '档案' },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as AppTab)}
+                            className="relative flex flex-col items-center justify-center w-14 h-full gap-0.5"
+                        >
+                            {activeTab === tab.id && (
+                                <motion.div
+                                    layoutId="nav-pill"
+                                    className="absolute inset-1 bg-gradient-to-br from-pink-50 to-pink-100 rounded-[18px]"
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                />
+                            )}
+                            <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
+                                <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                            </span>
+                            <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
+                                {tab.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
             </div>
         </div>
     );

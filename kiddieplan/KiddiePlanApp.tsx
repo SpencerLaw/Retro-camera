@@ -244,7 +244,7 @@ const KiddiePlanApp: React.FC = () => {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="h-screen w-screen relative flex flex-col items-center justify-center overflow-hidden bg-[var(--color-bg-light-pink)]"
+        className="h-[100dvh] w-screen relative flex flex-col items-center justify-center overflow-hidden bg-[var(--color-bg-light-pink)]"
       >
         {/* Background Blobs Same as Selection */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -353,9 +353,9 @@ const KiddiePlanApp: React.FC = () => {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 1.05 }}
         transition={{ duration: 0.5 }}
-        className="h-screen w-screen relative overflow-hidden bg-[#F5EDE0]"
+        className="h-[100dvh] w-screen relative overflow-hidden bg-white"
       >
-        <div className="h-full w-full flex flex-col mx-auto relative shadow-2xl bg-white/50 backdrop-blur-sm">
+        <div className="h-full w-full flex flex-col mx-auto relative shadow-2xl bg-transparent">
           {portal === 'parent' ? (
             <ParentPortal token={token!} onLogout={handleLogout} />
           ) : (

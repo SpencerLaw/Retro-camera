@@ -115,7 +115,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     useEffect(() => {
         const selectedChild = children.find(c => c.id === selectedChildId);
         if (selectedChild?.isFocusing) {
-            setLiveFocusDuration(selectedChild.lastFocusDuration || 0);
+            // Only update from backend if we don't have a local timer running
+            // or if the drift is significant (> 30s) to avoid jitter
+            setLiveFocusDuration(prev => {
+                const backendVal = selectedChild.lastFocusDuration || 0;
+                if (prev === 0 || Math.abs(prev - backendVal) > 30) {
+                    return backendVal;
+                }
+                return prev;
+            });
+
             const interval = setInterval(() => {
                 setLiveFocusDuration(prev => prev + 1);
             }, 1000);

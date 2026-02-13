@@ -27,8 +27,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     // Timer state
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [timerSeconds, setTimerSeconds] = useState(0);
+    const timerSecondsRef = useRef(0); // Use ref to avoid sync pulse dependency loop
     const [startTime, setStartTime] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Sync ref with state
+    useEffect(() => {
+        timerSecondsRef.current = timerSeconds;
+    }, [timerSeconds]);
 
     const formatBeijingTime = (date: Date) => {
         const pad = (n: number) => n.toString().padStart(2, '0');
@@ -91,23 +97,29 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         return () => clearInterval(poll);
     }, [isIdle]);
 
-    // Handle timer state
+    // Handle timer state - Improved with absolute time check for stability
     useEffect(() => {
         let interval: any;
         if (isTimerRunning) {
+            const startTick = Date.now() - (timerSeconds * 1000);
             interval = setInterval(() => {
-                setTimerSeconds(s => s + 1);
+                const elapsed = Math.floor((Date.now() - startTick) / 1000);
+                setTimerSeconds(elapsed);
             }, 1000);
         }
         return () => clearInterval(interval);
     }, [isTimerRunning]);
 
     // REAL-TIME SYNC PULSE: Send current focus duration to backend every 15s
+    // Decoupled from timerSeconds to prevent constant effect re-runs
     useEffect(() => {
         if (!isTimerRunning || !activeTaskId) return;
 
+        console.log('Focus Pulse System: Active');
         const syncPulse = setInterval(async () => {
             const task = tasks.find(t => t.id === activeTaskId);
+            if (!task) return;
+
             try {
                 await fetch('/api/kiddieplan/client', {
                     method: 'POST',
@@ -115,7 +127,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     body: JSON.stringify({
                         action: 'update_focus_status',
                         token,
-                        data: { isFocusing: true, taskTitle: task?.title, duration: timerSeconds }
+                        data: { isFocusing: true, taskTitle: task.title, duration: timerSecondsRef.current }
                     })
                 });
             } catch (e) {
@@ -123,8 +135,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             }
         }, 15000);
 
-        return () => clearInterval(syncPulse);
-    }, [isTimerRunning, activeTaskId, timerSeconds, tasks, token]);
+        return () => {
+            console.log('Focus Pulse System: Stopped');
+            clearInterval(syncPulse);
+        };
+    }, [isTimerRunning, activeTaskId, token, tasks]);
 
     const formatTime = (totalSeconds: number) => {
         const hrs = Math.floor(totalSeconds / 3600);
@@ -192,14 +207,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 if (result.data.rewards) setRewards(result.data.rewards);
 
                 // RESTORE FOCUS STATE: Ensure timer resumes after refresh
-                if (result.data.isFocusing) {
+                // Only overwrite if timer is NOT already running locally to prevent poll-resetting
+                if (result.data.isFocusing && !isTimerRunning) {
                     const focusingTask = newTasks.find((t: any) => t.title === result.data.currentTaskName);
                     if (focusingTask) {
                         setActiveTaskId(focusingTask.id);
                         setTimerSeconds(result.data.lastFocusDuration || 0);
                         setIsTimerRunning(true);
-                        // If we had a startTime, we could calculate precise elapsed time here
-                        // For now, restoring to the last reported duration is a massive improvement
                     }
                 }
             }

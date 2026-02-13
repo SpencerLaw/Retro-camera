@@ -682,13 +682,16 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
             {/* Bottom Nav - Moon-Base Style (Pinned, Rounded Top, No gaps) */}
             <div
-                className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px] shadow-none"
+                className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px]"
                 style={{
                     height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
                     paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                     background: 'rgba(255, 255, 255, 0.02)',
                     backdropFilter: 'blur(6px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(6px) saturate(180%)',
+                    border: 'none',
+                    boxShadow: 'none',
+                    outline: 'none'
                 }}
             >
                 <div className="flex justify-around items-center h-[72px]">

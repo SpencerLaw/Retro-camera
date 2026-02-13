@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw } from 'lucide-react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1364,16 +1364,20 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 {/* Timeline Axis */}
                                 <div className="absolute left-[27px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-gray-200"></div>
 
-                                {focusLogs.length > 0 ? (
+                                {(focusLogs.length > 0 || currentTasks.some(t => t.completed)) ? (
                                     (() => {
                                         // Aggregate logs by task title
-                                        const aggregated: { [key: string]: typeof focusLogs[0] } = {};
+                                        const aggregated: { [key: string]: any } = {};
+
+                                        // 1. Process explicit focus logs
                                         focusLogs.forEach(log => {
                                             if (!aggregated[log.taskTitle]) {
-                                                aggregated[log.taskTitle] = { ...log };
+                                                aggregated[log.taskTitle] = {
+                                                    ...log,
+                                                    type: 'log'
+                                                };
                                             } else {
                                                 aggregated[log.taskTitle].duration += log.duration;
-                                                // Keep the earliest start and latest end
                                                 if (new Date(log.startTime) < new Date(aggregated[log.taskTitle].startTime)) {
                                                     aggregated[log.taskTitle].startTime = log.startTime;
                                                 }
@@ -1383,11 +1387,31 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             }
                                         });
 
+                                        // 2. Process tasks marked as completed but no logs found
+                                        currentTasks.filter(t => t.completed).forEach(task => {
+                                            if (!aggregated[task.title]) {
+                                                aggregated[task.title] = {
+                                                    taskTitle: task.title,
+                                                    duration: 0,
+                                                    startTime: null,
+                                                    endTime: null,
+                                                    type: 'silent',
+                                                    timeSlot: task.timeSlot
+                                                };
+                                            }
+                                        });
+
                                         return Object.values(aggregated)
-                                            .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+                                            .sort((a, b) => {
+                                                if (a.startTime && b.startTime) return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
+                                                if (a.startTime) return -1;
+                                                if (b.startTime) return 1;
+                                                return 0;
+                                            })
                                             .map((log, i) => {
-                                                const startTime = new Date(log.startTime);
-                                                const endTime = new Date(log.endTime);
+                                                const startTime = log.startTime ? new Date(log.startTime) : null;
+                                                const endTime = log.endTime ? new Date(log.endTime) : null;
+
                                                 return (
                                                     <motion.div
                                                         key={i}
@@ -1395,21 +1419,29 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         animate={{ opacity: 1, x: 0 }}
                                                         className="flex items-center gap-4 bg-white/60 p-3 rounded-2xl border border-white shadow-sm"
                                                     >
-                                                        <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-400">
-                                                            <Timer size={20} />
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${log.duration > 0 ? 'bg-orange-50 text-orange-400' : 'bg-green-50 text-green-400'}`}>
+                                                            {log.duration > 0 ? <Timer size={20} /> : <CheckCircle2 size={20} />}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <h4 className="font-black text-[#5D4037] text-sm truncate">{log.taskTitle}</h4>
                                                             <div className="flex items-center gap-2 mt-0.5">
                                                                 <span className="text-[10px] font-bold text-gray-400">
-                                                                    {startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                                    {startTime ? (
+                                                                        `${startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} - ${endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+                                                                    ) : (
+                                                                        `执行计划: ${log.timeSlot || '--:--'}`
+                                                                    )}
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        <div className="text-right px-3 py-1 bg-orange-100/50 rounded-xl">
-                                                            <div className="text-[10px] font-black text-orange-500 uppercase tracking-tighter">用时</div>
-                                                            <div className="text-sm font-black text-orange-600 font-mono">
-                                                                {Math.floor(log.duration / 60)}'<span className="text-[10px] opacity-70">{log.duration % 60}"</span>
+                                                        <div className={`text-right px-3 py-1 rounded-xl ${log.duration > 0 ? 'bg-orange-100/50' : 'bg-green-100/50'}`}>
+                                                            <div className={`text-[10px] font-black uppercase tracking-tighter ${log.duration > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                                                                {log.duration > 0 ? '用时' : '状态'}
+                                                            </div>
+                                                            <div className={`text-sm font-black font-mono ${log.duration > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                                                                {log.duration > 0 ? (
+                                                                    <>{Math.floor(log.duration / 60)}'<span className="text-[10px] opacity-70">{log.duration % 60}"</span></>
+                                                                ) : "已完成"}
                                                             </div>
                                                         </div>
                                                     </motion.div>

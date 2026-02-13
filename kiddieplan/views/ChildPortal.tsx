@@ -662,46 +662,42 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 </div>
             </main>
 
-            {/* Bottom Nav - Standard Glass Bar (Mirrors Top Style) */}
+            {/* Bottom Nav - Floating pill capsule (User's favorite style) */}
             <div
-                className="fixed bottom-0 left-0 right-0 z-[100] px-4 pb-[env(safe-area-inset-bottom,20px)] pt-2"
+                className="fixed left-5 right-5 z-[100] h-[72px] rounded-[36px] border border-white/30 shadow-[0_20px_40px_rgba(0,0,0,0.1)] flex justify-around items-center px-4"
                 style={{
-                    background: 'rgba(255, 255, 255, 0.02)',
+                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)',
+                    background: 'rgba(255, 255, 255, 0.18)',
                     backdropFilter: 'blur(30px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(30px) saturate(180%)',
                 }}
             >
-                <div
-                    className="flex justify-around items-center h-[72px] rounded-[32px] border border-white/20 shadow-lg px-2"
-                    style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-                >
-                    {[
-                        { id: 'home', icon: Home, label: '主岛' },
-                        { id: 'plan', icon: ListTodo, label: '规划' },
-                        { id: 'rewards', icon: Gift, label: '宝库' },
-                        { id: 'me', icon: User, label: '档案' },
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as AppTab)}
-                            className="relative flex flex-col items-center justify-center w-14 h-full gap-0.5"
-                        >
-                            {activeTab === tab.id && (
-                                <motion.div
-                                    layoutId="nav-pill"
-                                    className="absolute inset-1 bg-gradient-to-br from-pink-50 to-pink-100 rounded-[18px]"
-                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                />
-                            )}
-                            <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
-                                <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
-                            </span>
-                            <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
-                                {tab.label}
-                            </span>
-                        </button>
-                    ))}
-                </div>
+                {[
+                    { id: 'home', icon: Home, label: '主岛' },
+                    { id: 'plan', icon: ListTodo, label: '规划' },
+                    { id: 'rewards', icon: Gift, label: '宝库' },
+                    { id: 'me', icon: User, label: '档案' },
+                ].map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as AppTab)}
+                        className="relative flex flex-col items-center justify-center w-14 h-full gap-0.5"
+                    >
+                        {activeTab === tab.id && (
+                            <motion.div
+                                layoutId="nav-pill"
+                                className="absolute inset-1 bg-gradient-to-br from-pink-50 to-pink-100 rounded-[18px]"
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            />
+                        )}
+                        <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
+                            <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                        </span>
+                        <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
+                            {tab.label}
+                        </span>
+                    </button>
+                ))}
             </div>
         </div>
     );

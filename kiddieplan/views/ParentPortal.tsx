@@ -805,12 +805,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 {/* Floating Header Wrapper - iOS 26 Extreme Glass Style */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.03)]"
+                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/10"
                         style={{
-                            background: 'transparent',
-                            backdropFilter: 'blur(10px) saturate(250%)',
-                            WebkitBackdropFilter: 'blur(10px) saturate(250%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.02)'
+                            background: 'rgba(255, 255, 255, 0.02)',
+                            backdropFilter: 'blur(6px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(6px) saturate(180%)',
                         }}
                     >
                         {/* Left: Branding & Role (Vertical Stack) */}

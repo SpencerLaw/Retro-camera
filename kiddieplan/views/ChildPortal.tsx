@@ -11,6 +11,12 @@ interface ChildPortalProps {
 
 const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const tasksRef = useRef<Task[]>([]); // Ref to tasks for syncPulse isolation
+
+    // Sync tasksRef with tasks state
+    useEffect(() => {
+        tasksRef.current = tasks;
+    }, [tasks]);
     const [checkins, setCheckins] = useState<string[]>([]);
     const [streak, setStreak] = useState(0);
     const [coins, setCoins] = useState(0);
@@ -117,7 +123,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
         console.log('Focus Pulse System: Active');
         const syncPulse = setInterval(async () => {
-            const task = tasks.find(t => t.id === activeTaskId);
+            const currentTasks = tasksRef.current;
+            const task = currentTasks.find(t => t.id === activeTaskId);
             if (!task) return;
 
             try {
@@ -139,7 +146,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             console.log('Focus Pulse System: Stopped');
             clearInterval(syncPulse);
         };
-    }, [isTimerRunning, activeTaskId, token, tasks]);
+    }, [isTimerRunning, activeTaskId, token]);
 
     const formatTime = (totalSeconds: number) => {
         const hrs = Math.floor(totalSeconds / 3600);
@@ -561,12 +568,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {/* Top Bar - iOS 26 Extreme Glass Header */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.03)]"
+                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/10"
                         style={{
-                            background: 'transparent',
-                            backdropFilter: 'blur(10px) saturate(250%)',
-                            WebkitBackdropFilter: 'blur(10px) saturate(250%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.02)'
+                            background: 'rgba(255, 255, 255, 0.02)',
+                            backdropFilter: 'blur(6px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(6px) saturate(180%)',
                         }}
                     >
                         {/* Left: Branding & Role (Vertical Stack) */}
@@ -676,13 +682,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
             {/* Bottom Nav - Moon-Base Style (Pinned, Rounded Top, No gaps) */}
             <div
-                className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]"
+                className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px] border-t border-white/8 shadow-none"
                 style={{
                     height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
                     paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                    background: 'transparent',
-                    backdropFilter: 'blur(10px) saturate(250%)',
-                    WebkitBackdropFilter: 'blur(10px) saturate(250%)',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    backdropFilter: 'blur(6px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(6px) saturate(180%)',
                 }}
             >
                 <div className="flex justify-around items-center h-[72px]">

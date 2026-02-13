@@ -1526,7 +1526,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                     {startTime ? (
                                                                         `${startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} - ${endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
                                                                     ) : (
-                                                                        `计划时间: ${log.timeSlot || '--:--'}`
+                                                                        <span>&nbsp;</span>
                                                                     )}
                                                                 </span>
                                                             </div>

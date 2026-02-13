@@ -77,9 +77,27 @@ export default async function handler(
             if (daily.checkins.includes(taskId)) {
                 daily.checkins = daily.checkins.filter((id: string) => id !== taskId);
                 currentPoints = Math.max(0, currentPoints - pointsDelta);
+
+                // Remove silent completion log if it exists
+                if (daily.focusLogs) {
+                    daily.focusLogs = daily.focusLogs.filter((log: any) =>
+                        !(log.taskTitle === task.title && log.type === 'silent')
+                    );
+                }
             } else {
                 daily.checkins.push(taskId);
                 currentPoints += pointsDelta;
+
+                // Add silent completion log
+                if (!daily.focusLogs) daily.focusLogs = [];
+                daily.focusLogs.push({
+                    taskId: task.id,
+                    taskTitle: task.title,
+                    startTime: new Date().toISOString(),
+                    endTime: new Date().toISOString(),
+                    duration: 0,
+                    type: 'silent'
+                });
             }
 
             // 更新点数

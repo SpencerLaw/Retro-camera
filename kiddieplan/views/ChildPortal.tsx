@@ -491,7 +491,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     );
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(160deg, #FFF0F5 0%, #E6F2FF 50%, #FFF5E6 100%)' }}>
+        <div className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(160deg, #FFF0F5 0%, #E6F2FF 50%, #FFF5E6 100%)' }}>
             {/* Decorative Blurs */}
             <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
@@ -537,10 +537,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.22)',
-                            backdropFilter: 'blur(30px)',
-                            WebkitBackdropFilter: 'blur(30px)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                            background: 'rgba(255, 255, 255, 0.25)',
+                            backdropFilter: 'blur(40px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.15)'
                         }}
                     >
                         <div className="flex items-center gap-3">
@@ -649,14 +649,15 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 </div>
             </main>
 
-            {/* Bottom Nav - Floating Pill Bar */}
+            {/* Bottom Nav - Floating Pill Bar with Safe Area Support */}
             <div
-                className="fixed bottom-5 left-5 right-5 h-[68px] border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)] flex justify-around items-center z-50 px-3 rounded-[28px]"
+                className="fixed left-5 right-5 h-[72px] border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.1)] flex justify-around items-center z-50 px-3 rounded-[32px]"
                 style={{
-                    background: 'rgba(255, 255, 255, 0.35)',
-                    backdropFilter: 'blur(30px)',
-                    WebkitBackdropFilter: 'blur(30px)',
-                    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2)'
+                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)',
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    backdropFilter: 'blur(40px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.15)'
                 }}
             >
                 {[

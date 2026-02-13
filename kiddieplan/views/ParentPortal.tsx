@@ -779,7 +779,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const selectedChild = children.find(c => c.id === selectedChildId);
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden font-sans relative" style={{ background: '#F8FAFC' }}>
+        <div className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative" style={{ background: '#F8FAFC' }}>
             {/* High Contrast Background Shapes for Glass Visibility */}
             <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#60A5FA]/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] bg-[#FBBF24]/10 rounded-full blur-[100px] pointer-events-none"></div>
@@ -798,10 +798,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.22)',
-                            backdropFilter: 'blur(30px)',
-                            WebkitBackdropFilter: 'blur(30px)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                            background: 'rgba(255, 255, 255, 0.25)',
+                            backdropFilter: 'blur(40px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.15)'
                         }}
                     >
                         <div className="flex items-center gap-3">

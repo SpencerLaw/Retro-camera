@@ -1457,9 +1457,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </div>
                             </div>
 
-                            <div className="space-y-4 relative pl-4">
-                                {/* Timeline Axis */}
-                                <div className="absolute left-[27px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-gray-200"></div>
+                            <div className="relative min-h-[300px]">
+                                {/* Timeline Axis - Continuous Line */}
+                                <div className="absolute left-[24px] top-6 bottom-0 w-0.5 bg-gray-100"></div>
 
                                 {(focusLogs.length > 0 || currentTasks.some(t => t.completed)) ? (
                                     (() => {
@@ -1471,74 +1471,113 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             if (!aggregated[log.taskTitle]) {
                                                 aggregated[log.taskTitle] = {
                                                     ...log,
-                                                    type: 'log'
+                                                    type: 'log',
+                                                    sortTime: new Date(log.startTime).getTime()
                                                 };
                                             } else {
                                                 aggregated[log.taskTitle].duration += log.duration;
-                                                if (new Date(log.startTime) < new Date(aggregated[log.taskTitle].startTime)) {
+                                                // Keep earliest start time
+                                                if (new Date(log.startTime).getTime() < aggregated[log.taskTitle].sortTime) {
+                                                    aggregated[log.taskTitle].sortTime = new Date(log.startTime).getTime();
                                                     aggregated[log.taskTitle].startTime = log.startTime;
                                                 }
+                                                // Update latest end time
                                                 if (new Date(log.endTime) > new Date(aggregated[log.taskTitle].endTime)) {
                                                     aggregated[log.taskTitle].endTime = log.endTime;
                                                 }
                                             }
                                         });
 
-                                        // 2. Process tasks marked as completed but no logs found
+                                        // 2. Process tasks marked as completed (Silent Check-ins)
                                         currentTasks.filter(t => t.completed).forEach(task => {
+                                            // Only add if not already captured by focus logs (avoid duplication)
                                             if (!aggregated[task.title]) {
+                                                // Synthesize a sort time from timeSlot or default to now
+                                                let sortTime = Date.now();
+                                                if (task.timeSlot) {
+                                                    const [h, m] = task.timeSlot.split(':').map(Number);
+                                                    const d = new Date();
+                                                    d.setHours(h, m, 0, 0);
+                                                    sortTime = d.getTime();
+                                                }
+
                                                 aggregated[task.title] = {
                                                     taskTitle: task.title,
                                                     duration: 0,
-                                                    startTime: null,
-                                                    endTime: null,
                                                     type: 'silent',
-                                                    timeSlot: task.timeSlot
+                                                    timeSlot: task.timeSlot,
+                                                    sortTime: sortTime,
+                                                    isSilent: true // Flag for UI distinction
                                                 };
                                             }
                                         });
 
                                         return Object.values(aggregated)
-                                            .sort((a, b) => {
-                                                if (a.startTime && b.startTime) return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
-                                                if (a.startTime) return -1;
-                                                if (b.startTime) return 1;
-                                                return 0;
-                                            })
+                                            .sort((a, b) => b.sortTime - a.sortTime) // Sort desc (latest first)
                                             .map((log, i) => {
                                                 const startTime = log.startTime ? new Date(log.startTime) : null;
                                                 const endTime = log.endTime ? new Date(log.endTime) : null;
+                                                const isSilent = log.duration === 0;
 
                                                 return (
                                                     <motion.div
                                                         key={i}
                                                         initial={{ opacity: 0, x: -10 }}
                                                         animate={{ opacity: 1, x: 0 }}
-                                                        className="flex items-center gap-4 bg-white/60 p-3 rounded-2xl border border-white shadow-sm"
+                                                        transition={{ delay: i * 0.05 }}
+                                                        className="relative pl-16 py-3"
                                                     >
-                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${log.duration > 0 ? 'bg-orange-50 text-orange-400' : 'bg-green-50 text-green-400'}`}>
-                                                            {log.duration > 0 ? <Timer size={20} /> : <CheckCircle2 size={20} />}
+                                                        {/* Timeline Node */}
+                                                        <div className={`absolute left-[14px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-[3px] z-10 
+                                                            ${isSilent ? 'bg-white border-[#34D399]' : 'bg-white border-[#FB923C]'}`}>
                                                         </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="font-black text-[#5D4037] text-sm truncate">{log.taskTitle}</h4>
-                                                            <div className="flex items-center gap-2 mt-0.5">
-                                                                <span className="text-[10px] font-bold text-gray-400">
-                                                                    {startTime ? (
-                                                                        `${startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} - ${endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+
+                                                        {/* Card Content */}
+                                                        <div className={`flex items-center gap-4 p-4 rounded-[24px] border shadow-sm transition-all hover:shadow-md
+                                                            ${isSilent ? 'bg-[#ECFDF5] border-[#D1FAE5]' : 'bg-[#FFF7ED] border-[#FFEDD5]'}`}>
+
+                                                            {/* Icon Box */}
+                                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-white
+                                                                ${isSilent ? 'bg-[#34D399]' : 'bg-[#FB923C]'}`}>
+                                                                {isSilent ? <CheckCircle2 size={24} strokeWidth={3} /> : <Timer size={24} strokeWidth={3} />}
+                                                            </div>
+
+                                                            {/* Text Info */}
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <h4 className={`font-black text-lg truncate ${isSilent ? 'text-[#065F46]' : 'text-[#9A3412]'}`}>
+                                                                        {log.taskTitle}
+                                                                    </h4>
+                                                                    <span className={`text-xs font-black px-2 py-0.5 rounded-md ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
+                                                                        {log.timeSlot || '刚刚'}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-2 text-xs font-bold opacity-80">
+                                                                    {isSilent ? (
+                                                                        <span className="text-[#059669]">已按时完成打卡</span>
                                                                     ) : (
-                                                                        <span>&nbsp;</span>
+                                                                        <span className="text-[#EA580C]">
+                                                                            {startTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                                            {' - '}
+                                                                            {endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                                        </span>
                                                                     )}
-                                                                </span>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div className={`text-right px-3 py-1 rounded-xl ${log.duration > 0 ? 'bg-orange-100/50' : 'bg-green-100/50'}`}>
-                                                            <div className={`text-[10px] font-black uppercase tracking-tighter ${log.duration > 0 ? 'text-orange-500' : 'text-green-500'}`}>
-                                                                {log.duration > 0 ? '用时' : '状态'}
-                                                            </div>
-                                                            <div className={`text-sm font-black font-mono ${log.duration > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                                                                {log.duration > 0 ? (
-                                                                    <>{Math.floor(log.duration / 60)}'<span className="text-[10px] opacity-70">{log.duration % 60}"</span></>
-                                                                ) : "已完成"}
+
+                                                            {/* Right Status */}
+                                                            <div className="text-right pl-2 border-l border-black/5">
+                                                                <div className={`text-[10px] uppercase font-black tracking-wider mb-0.5 ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
+                                                                    {isSilent ? 'DONE' : 'FOCUS'}
+                                                                </div>
+                                                                <div className={`text-xl font-black font-mono leading-none ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
+                                                                    {isSilent ? (
+                                                                        <Check size={20} strokeWidth={4} />
+                                                                    ) : (
+                                                                        <span>{Math.floor(log.duration / 60)}<span className="text-xs ml-0.5">min</span></span>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </motion.div>
@@ -1546,8 +1585,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             });
                                     })()
                                 ) : (
-                                    <div className="ml-8 py-10 text-center bg-white rounded-3xl border-2 border-dashed border-gray-100">
-                                        <Target className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                                    <div className="ml-12 py-12 text-center bg-gray-50 rounded-[32px] border-2 border-dashed border-gray-200">
+                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-gray-300">
+                                            <Target size={32} />
+                                        </div>
                                         <p className="text-gray-400 font-bold text-sm">今天还没有专注记录哦</p>
                                         <p className="text-gray-300 text-xs mt-1">快去提醒宝贝开始任务吧！</p>
                                     </div>

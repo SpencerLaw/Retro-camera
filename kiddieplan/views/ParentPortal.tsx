@@ -900,27 +900,33 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <motion.div
                                                     animate={selectedChildId === child.id ? {
                                                         boxShadow: [
-                                                            "0 0 10px rgba(255,107,129,0.1)",
-                                                            "0 0 25px rgba(255,107,129,0.5)",
-                                                            "0 0 10px rgba(255,107,129,0.1)"
-                                                        ]
-                                                    } : { boxShadow: "0 0 0px rgba(0,0,0,0)" }}
+                                                            "0 0 12px rgba(255,107,129,0.15)",
+                                                            "0 0 30px rgba(255,107,129,0.35)",
+                                                            "0 0 12px rgba(255,107,129,0.15)"
+                                                        ],
+                                                        scale: [1, 1.02, 1]
+                                                    } : { boxShadow: "0 0 0px rgba(0,0,0,0)", scale: 1 }}
                                                     transition={{
-                                                        boxShadow: {
-                                                            repeat: Infinity,
-                                                            duration: 2.5,
-                                                            ease: "easeInOut"
-                                                        }
+                                                        boxShadow: { repeat: Infinity, duration: 3, ease: "easeInOut" },
+                                                        scale: { repeat: Infinity, duration: 3, ease: "easeInOut" }
                                                     }}
-                                                    className={`w-24 h-24 rounded-full overflow-hidden border-4 transition-all ${selectedChildId === child.id ? 'border-[#FF6B81]' : 'border-transparent shadow-sm'}`}
+                                                    className={`w-24 h-24 rounded-full overflow-hidden border-2 relative transition-all duration-500 ${selectedChildId === child.id ? 'border-[#FF6B81]' : 'border-transparent shadow-sm'}`}
                                                 >
                                                     <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
+                                                    {/* Granular Glass Overlay */}
                                                     {selectedChildId === child.id && (
-                                                        <div className="absolute inset-0 border-4 border-white rounded-full pointer-events-none opacity-40"></div>
+                                                        <motion.div
+                                                            initial={{ opacity: 0 }}
+                                                            animate={{ opacity: 0.5 }}
+                                                            className="absolute inset-0 bg-white/10 backdrop-blur-[1.5px] pointer-events-none"
+                                                        />
+                                                    )}
+                                                    {selectedChildId === child.id && (
+                                                        <div className="absolute inset-0 border-2 border-white/30 rounded-full pointer-events-none"></div>
                                                     )}
                                                 </motion.div>
 
-                                                {/* Edit Button Overlay - Use layoutId for seamless transition */}
+                                                {/* Edit Button Overlay - Smaller and more refined */}
                                                 <AnimatePresence>
                                                     {selectedChildId === child.id && (
                                                         <motion.button
@@ -932,9 +938,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 e.stopPropagation();
                                                                 handleEditChild();
                                                             }}
-                                                            className="absolute -bottom-1 -right-1 bg-[var(--color-blue-fun)] text-white p-2.5 rounded-full shadow-xl border-4 border-white hover:scale-110 active:scale-95 z-20"
+                                                            className="absolute bottom-0 right-0 bg-[var(--color-blue-fun)] text-white p-1.5 rounded-full shadow-lg border-2 border-white hover:scale-110 active:scale-95 z-20"
                                                         >
-                                                            <Edit2 size={18} fill="currentColor" />
+                                                            <Edit2 size={11} fill="currentColor" />
                                                         </motion.button>
                                                     )}
                                                 </AnimatePresence>

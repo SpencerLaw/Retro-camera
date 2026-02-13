@@ -146,12 +146,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     useEffect(() => {
         if (selectedChildId) {
-            // 即时清空旧任务，防止数据串屏
+            // 即时清空旧数据，防止数据串屏
             if (activeTab === 'tasks') {
                 setCurrentTasks([]);
                 fetchTasks();
             }
             if (activeTab === 'rewards') fetchRewards();
+            if (activeTab === 'checkins') {
+                setFocusLogs([]); // Clear old logs to show fresh loading
+                fetchTasks();     // Re-use fetchTasks as it fetches logs too
+            }
         }
     }, [selectedChildId, activeTab]);
 
@@ -217,6 +221,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 // 加载隐藏的预设
                 if (result.data.hiddenPresets) {
                     setHiddenPresets(result.data.hiddenPresets);
+                }
+
+                // 核心同步：从 license 聚合对象中提取当前孩子的专注日志
+                const today = new Date().toISOString().split('T')[0];
+                const dailyData = result.data.progress?.[today]?.[selectedChildId];
+                if (dailyData?.focusLogs) {
+                    setFocusLogs(prev => JSON.stringify(prev) !== JSON.stringify(dailyData.focusLogs) ? dailyData.focusLogs : prev);
                 }
             }
         } catch (err) {

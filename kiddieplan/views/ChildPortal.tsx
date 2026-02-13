@@ -503,7 +503,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     );
 
     return (
-        <div className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(160deg, #FFF0F5 0%, #E6F2FF 50%, #FFF5E6 100%)' }}>
+        <div className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(160deg, #FFF0F3 0%, #FFE4E6 50%, #F5F3FF 100%)' }}>
             {/* Decorative Blurs */}
             <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
@@ -549,10 +549,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.03)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.015)',
-                            backdropFilter: 'blur(60px) saturate(210%)',
-                            WebkitBackdropFilter: 'blur(60px) saturate(210%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.01), inset 0 0 0 1px rgba(255, 255, 255, 0.03)'
+                            background: 'transparent',
+                            backdropFilter: 'blur(40px) saturate(210%)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(210%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.02)'
                         }}
                     >
                         {/* Left: Branding & Role (Vertical Stack) */}
@@ -666,9 +666,9 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 style={{
                     height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
                     paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                    background: 'rgba(255, 255, 255, 0.015)',
-                    backdropFilter: 'blur(60px) saturate(210%)',
-                    WebkitBackdropFilter: 'blur(60px) saturate(210%)',
+                    background: 'transparent',
+                    backdropFilter: 'blur(40px) saturate(210%)',
+                    WebkitBackdropFilter: 'blur(40px) saturate(210%)',
                 }}
             >
                 <div className="flex justify-around items-center h-[72px]">

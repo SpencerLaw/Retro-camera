@@ -779,8 +779,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const selectedChild = children.find(c => c.id === selectedChildId);
 
     return (
-        <div className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(160deg, #F8FAFC 0%, #EFF6FF 50%, #F5F3FF 100%)' }}>
-            {/* High Contrast Background Shapes for Glass Visibility */}
+        <div className="h-full flex flex-col relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #F0F4FF 0%, #E0E7FF 50%, #F3E8FF 100%)' }}>
+            {/* Standard Background Decorative elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#60A5FA]/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] bg-[#FBBF24]/10 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute top-[30%] left-[60%] w-[30%] h-[30%] bg-[#F87171]/10 rounded-full blur-[80px] pointer-events-none"></div>
@@ -790,7 +790,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             {/* Main Content Wrapper - Content scrolls UNDER the floating header */}
             <main
                 ref={mainScrollRef}
-                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth pb-48"
+                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth pb-10"
                 style={{ scrollBehavior: 'smooth' }}
             >
                 {/* Floating Header Wrapper - iOS 26 Extreme Glass Style */}
@@ -798,10 +798,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.03)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.015)',
-                            backdropFilter: 'blur(60px) saturate(210%)',
-                            WebkitBackdropFilter: 'blur(60px) saturate(210%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.01), inset 0 0 0 1px rgba(255, 255, 255, 0.03)'
+                            background: 'transparent',
+                            backdropFilter: 'blur(40px) saturate(210%)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(210%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.02)'
                         }}
                     >
                         {/* Left: Branding & Role (Vertical Stack) */}
@@ -1398,49 +1398,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 </div>
             </main>
 
-            {/* Bottom Nav - Moon-Base Style (Pinned, Rounded Top, No gaps) */}
-            <div
-                className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]"
-                style={{
-                    height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
-                    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                    background: 'rgba(255, 255, 255, 0.015)',
-                    backdropFilter: 'blur(60px) saturate(210%)',
-                    WebkitBackdropFilter: 'blur(60px) saturate(210%)',
-                }}
-            >
-                <div className="flex justify-around items-center h-[72px]">
-                    {[
-                        { id: 'children', icon: Home, label: '宝贝' },
-                        { id: 'tasks', icon: ListTodo, label: '任务' },
-                        { id: 'rewards', icon: Gift, label: '奖励' },
-                        { id: 'checkins', icon: CalendarCheck, label: '打卡' },
-                        { id: 'stats', icon: BarChart3, label: '统计' },
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => {
-                                setActiveTab(tab.id as any);
-                            }}
-                            className="relative flex flex-col items-center justify-center min-w-[56px] h-full gap-0.5"
-                        >
-                            {activeTab === tab.id && (
-                                <motion.div
-                                    layoutId="parent-nav-pill"
-                                    className="absolute inset-1 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-[18px]"
-                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                />
-                            )}
-                            <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`}>
-                                <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
-                            </span>
-                            <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`}>
-                                {tab.label}
-                            </span>
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             {/* Dialog Overlay */}
             <AnimatePresence>

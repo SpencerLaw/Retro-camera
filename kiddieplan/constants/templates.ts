@@ -124,17 +124,19 @@ export const DEFAULT_REWARDS = [
     { name: '🍦 冰淇淋自由', pointsCost: 100, icon: '🍨' },
     { name: '🍭 额外挑选零食', pointsCost: 150, icon: '🍬' },
     { name: '🧸 获得一张贴纸', pointsCost: 50, icon: '✨' },
-    { name: '📖 睡前多读一个故事', pointsCost: 80, icon: '🌙' },
-    { name: '🎨 挑选一套彩色粘土', pointsCost: 200, icon: '🎨' },
-
     // --- 中分值奖励 (300-600) ---
-    { name: '🎮 游戏时间+30min', pointsCost: 300, icon: '🎮' },
-    { name: '📱 手机时间+1h', pointsCost: 500, icon: '📱' },
+    { name: '📖 睡前多读一个故事', pointsCost: 300, icon: '🌙' },
     { name: '🍕 晚餐菜单决定权', pointsCost: 400, icon: '🍕' },
     { name: '📚 挑选一本心仪书籍', pointsCost: 450, icon: '📗' },
     { name: '🎬 电影之夜(含爆米花)', pointsCost: 600, icon: '🍿' },
-    { name: '🧹 免除一次家务(扫地/倒垃圾)', pointsCost: 350, icon: '🛡️' },
-    { name: '🎭 邀请好朋友来家里玩', pointsCost: 550, icon: '🤝' },
+    { name: '🛡️ 免除一次扫地任务', pointsCost: 350, icon: '🛡️' },
+    { name: '🤝 邀请好朋友来家里玩', pointsCost: 550, icon: '🤝' },
+
+    // --- 高分值奖励/核销项 (1000+) ---
+    { name: '📺 周末多看30min电视', pointsCost: 1000, icon: '📺' },
+    { name: '🎮 周末多玩30min游戏', pointsCost: 1100, icon: '🎮' },
+    { name: '🎁 乐高/大型玩具盲盒', pointsCost: 1500, icon: '🎁' },
+    { name: '🎡 周末游乐园门票', pointsCost: 2500, icon: '🎡' },
 
     // --- 高分值奖励 (800-2000) ---
     { name: '🧸 乐高/大型玩具盲盒', pointsCost: 1200, icon: '🎁' },

@@ -609,8 +609,80 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         });
     };
 
+    const editReward = (reward: Reward) => {
+        setDialogConfig({
+            isOpen: true,
+            title: '✨ 修改奖励项',
+            defaultValue: reward.name,
+            defaultPoints: reward.pointsCost,
+            showPoints: true,
+            onConfirm: (newName, _, newPoints) => {
+                if (!newName) return;
+                setRewards(prev => prev.map(r => r.id === reward.id ? {
+                    ...r,
+                    name: newName,
+                    pointsCost: newPoints || r.pointsCost
+                } : r));
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    };
+
+    const handleRedeemReward = async (reward: Reward) => {
+        if (!selectedChild) return;
+        if (selectedChild.points < reward.pointsCost) {
+            setDialogConfig({
+                isOpen: true,
+                title: '🍬 糖果不够啦',
+                message: `兑换需 ${reward.pointsCost} 糖果，目前只有 ${selectedChild.points} 颗哦，加油呀！`,
+                onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                hideInput: true
+            });
+            return;
+        }
+
+        setDialogConfig({
+            isOpen: true,
+            title: '🎁 确认核销奖励',
+            message: `确定要消耗 ${reward.pointsCost} 糖果兑换“${reward.name}”吗？`,
+            onConfirm: async () => {
+                setIsSaving(true);
+                try {
+                    const res = await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_child',
+                            token,
+                            data: { ...selectedChild, points: selectedChild.points - reward.pointsCost }
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        setChildren(result.data.children);
+                        setDialogConfig({
+                            isOpen: true,
+                            title: '🎉 兑换成功！',
+                            message: `已扣除 ${reward.pointsCost} 糖果，快带宝贝去享受奖励吧！`,
+                            onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                            hideInput: true,
+                            highlight: 'SUCCESS'
+                        });
+                    }
+                } catch (err) {
+                    alert('核销失败');
+                } finally {
+                    setIsSaving(false);
+                }
+            },
+            hideInput: true
+        });
+    };
+
     const removeReward = (id: string) => {
-        setRewards(prev => prev.filter(r => r.id !== id));
+        if (window.confirm('确定要删除这个奖励项吗？')) {
+            setRewards(prev => prev.filter(r => r.id !== id));
+        }
     };
 
     const processImage = (file: File): Promise<Blob> => {
@@ -1306,20 +1378,37 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="grid grid-cols-2 gap-4">
                                 {rewards.map((reward, i) => (
                                     <motion.div
-                                        key={i}
+                                        key={reward.id || i}
                                         whileHover={{ y: -3 }}
-                                        className="bg-white p-5 rounded-[28px] flex flex-col items-center gap-3 shadow-[0_6px_10px_rgba(0,0,0,0.03)] border-2 border-transparent hover:border-yellow-100 relative group"
+                                        className="bg-white p-5 rounded-[32px] flex flex-col items-center gap-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)] border-2 border-transparent hover:border-yellow-200 relative group overflow-hidden"
                                     >
-                                        <button onClick={() => removeReward(reward.id)} className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 bg-red-50 p-1.5 rounded-full">
-                                            <Trash2 size={14} />
-                                        </button>
-                                        <div className="text-5xl mb-2 filter drop-shadow-sm">{reward.icon}</div>
+                                        <div className="absolute top-2 right-2 flex gap-1">
+                                            <button onClick={(e) => { e.stopPropagation(); editReward(reward); }} className="p-1.5 text-blue-400 bg-blue-50 rounded-full hover:scale-110 transition-transform">
+                                                <Edit2 size={12} />
+                                            </button>
+                                            <button onClick={(e) => { e.stopPropagation(); removeReward(reward.id); }} className="p-1.5 text-red-400 bg-red-50 rounded-full hover:scale-110 transition-transform">
+                                                <Trash2 size={12} />
+                                            </button>
+                                        </div>
+
+                                        <div className="text-5xl mb-2 filter drop-shadow-md">{reward.icon}</div>
                                         <div className="text-center">
                                             <div className="font-bold text-[#5D4037] text-sm mb-1">{reward.name}</div>
                                             <div className="bg-yellow-50 text-[var(--color-yellow-reward)] px-3 py-1 rounded-full text-xs font-black">
                                                 {reward.pointsCost} 🍭
                                             </div>
                                         </div>
+
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
+                                            onClick={() => handleRedeemReward(reward)}
+                                            className={`mt-2 w-full py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1
+                                                ${selectedChild.points >= reward.pointsCost
+                                                    ? 'bg-[var(--color-yellow-reward)] text-white shadow-lg'
+                                                    : 'bg-gray-100 text-gray-400 grayscale cursor-not-allowed'}`}
+                                        >
+                                            核销奖励
+                                        </motion.button>
                                     </motion.div>
                                 ))}
                             </div>

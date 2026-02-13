@@ -231,6 +231,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 if (dailyData?.focusLogs) {
                     setFocusLogs(prev => JSON.stringify(prev) !== JSON.stringify(dailyData.focusLogs) ? dailyData.focusLogs : prev);
                 }
+
+                // 核心修复: 实时同步孩子的任务状态 (包括 completed 标记)
+                if (selectedChildId) {
+                    const currentChild = childrenList.find((c: Child) => c.id === selectedChildId);
+                    if (currentChild && currentChild.tasks) {
+                        setCurrentTasks(prev => JSON.stringify(prev) !== JSON.stringify(currentChild.tasks) ? currentChild.tasks : prev);
+                    }
+                }
             }
         } catch (err) {
             console.error('Fetch failed');
@@ -1518,7 +1526,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                     {startTime ? (
                                                                         `${startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} - ${endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
                                                                     ) : (
-                                                                        `执行计划: ${log.timeSlot || '--:--'}`
+                                                                        `计划时间: ${log.timeSlot || '--:--'}`
                                                                     )}
                                                                 </span>
                                                             </div>

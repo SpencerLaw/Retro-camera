@@ -798,10 +798,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.25)',
-                            backdropFilter: 'blur(40px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.15)'
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            backdropFilter: 'blur(20px) saturate(160%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
                         }}
                     >
                         <div className="flex items-center gap-3">

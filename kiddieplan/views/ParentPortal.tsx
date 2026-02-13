@@ -938,61 +938,70 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     transition={{ duration: 0.4 }}
                                     className="space-y-6"
                                 >
-                                    {/* Dashboard Card */}
-                                    <div className={`p-8 rounded-[40px] text-white relative overflow-hidden shadow-2xl border-4 border-white
-                                    ${selectedChild.isFocusing ? 'bg-gradient-to-br from-[var(--color-green-success)] to-emerald-400' : 'bg-gradient-to-br from-[#818CF8] to-[#6366F1]'}`}>
-                                        <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full -mr-10 -mt-10 blur-3xl"></div>
+                                    {/* Dual Capsule Dashboard - Action & Rewards Separated */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Left Capsule: Real-time Action */}
+                                        <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-4 border-white flex flex-col justify-between min-h-[160px]
+                                            ${selectedChild.isFocusing ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : 'bg-gradient-to-br from-indigo-400 to-blue-500'}`}>
+                                            <div className="absolute top-0 left-0 w-24 h-24 bg-white/20 rounded-full -ml-10 -mt-10 blur-2xl"></div>
 
-                                        <div className="relative z-10 flex justify-between items-end h-full min-h-[140px]">
-                                            <div className="flex flex-col h-full justify-between pb-1">
-                                                {/* Top: Room Info (Smaller now) */}
-                                                <div className="flex items-center gap-2 opacity-90 group cursor-default">
-                                                    <div className="px-2 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-widest leading-none">
-                                                        Room
-                                                    </div>
-                                                    <span className="text-xl font-black font-mono tracking-tighter leading-none">{selectedChild.roomCode}</span>
+                                            <div className="relative z-10 flex items-center gap-2 opacity-90">
+                                                <div className="px-2 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-widest leading-none">
+                                                    Room Code
                                                 </div>
-
-                                                {/* Bottom: Main Action/Dynamic Info (Enhanced Size) */}
-                                                <div className="mt-6">
-                                                    {selectedChild.isFocusing ? (
-                                                        <div className="space-y-2">
-                                                            <h2 className="text-4xl font-black tracking-tight leading-none drop-shadow-md">
-                                                                {selectedChild.currentTaskName || '正在专注'}
-                                                            </h2>
-                                                            <div className="flex items-center gap-2 pt-1">
-                                                                <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse shadow-[0_0_10px_white]"></div>
-                                                                <span className="text-lg font-black font-mono tracking-wider opacity-90">{formatTime(liveFocusDuration)}</span>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex flex-col gap-1">
-                                                            <h2 className="text-4xl font-black tracking-tight opacity-90 drop-shadow-sm">此时在休息</h2>
-                                                            <p className="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em]">Resting Moment</p>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <span className="text-sm font-black font-mono tracking-tighter">{selectedChild.roomCode}</span>
                                             </div>
 
-                                            <div className="text-right flex flex-col items-end gap-1 pb-1">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="text-5xl font-black tracking-tighter drop-shadow-md">
-                                                        {selectedChild.points || 0} <span className="text-2xl align-top mt-1 inline-block">🍭</span>
+                                            <div className="relative z-10 mt-auto">
+                                                {selectedChild.isFocusing ? (
+                                                    <div className="space-y-1">
+                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在任务</div>
+                                                        <h2 className="text-2xl font-black tracking-tight leading-none truncate max-w-full drop-shadow-sm">
+                                                            {selectedChild.currentTaskName}
+                                                        </h2>
+                                                        <div className="flex items-center gap-1.5 pt-1">
+                                                            <div className="w-2 h-2 bg-white rounded-full animate-pulse shadow-[0_0_8px_white]"></div>
+                                                            <span className="text-sm font-black font-mono tracking-wider opacity-90">{formatTime(liveFocusDuration)}</span>
+                                                        </div>
                                                     </div>
-                                                    <motion.button
-                                                        whileHover={{ rotate: 180, scale: 1.2 }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleResetPoints();
-                                                        }}
-                                                        className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30 backdrop-blur-md"
-                                                        title="清空糖果"
-                                                    >
-                                                        <RotateCcw size={16} />
-                                                    </motion.button>
+                                                ) : (
+                                                    <div className="space-y-1">
+                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">宝贝动态</div>
+                                                        <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
+                                                        <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">Resting...</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Right Capsule: Reward Assets */}
+                                        <div className="p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-4 border-white bg-gradient-to-br from-[#F472B6] to-[#FB923C] flex flex-col justify-between min-h-[160px]">
+                                            <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/20 rounded-full -mr-10 -mb-10 blur-2xl"></div>
+
+                                            <div className="relative z-10 flex justify-between items-start">
+                                                <div className="text-[10px] font-black uppercase tracking-widest opacity-80 pt-1">累计收益</div>
+                                                <motion.button
+                                                    whileHover={{ rotate: 180, scale: 1.1 }}
+                                                    whileTap={{ scale: 0.9 }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleResetPoints();
+                                                    }}
+                                                    className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30 backdrop-blur-md"
+                                                    title="清空收益"
+                                                >
+                                                    <RotateCcw size={16} />
+                                                </motion.button>
+                                            </div>
+
+                                            <div className="relative z-10 mt-auto flex items-center gap-2">
+                                                <div className="text-5xl font-black tracking-tighter drop-shadow-md leading-none">
+                                                    {selectedChild.points || 0}
                                                 </div>
-                                                <p className="text-[10px] font-black opacity-70 uppercase tracking-[0.2em] mt-1">累计糖果收益</p>
+                                                <div className="flex flex-col">
+                                                    <span className="text-2xl leading-none">🍭</span>
+                                                    <span className="text-[8px] font-black uppercase tracking-tighter opacity-70 mt-0.5">Points</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

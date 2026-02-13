@@ -229,10 +229,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
         console.log(`Polling interval set to: ${intervalTime}ms (${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
 
-        let timer: any;
-        if (activeTab === 'registry' || activeTab === 'children') {
-            timer = setInterval(() => fetchConfig(true), intervalTime);
-        }
+        // 全局轮询专注状态，不受标签页限制，确保持续实时监控
+        const timer = setInterval(() => fetchConfig(true), intervalTime);
         return () => clearInterval(timer);
     }, [activeTab, isIdle, fetchConfig]); // Added memoization dependencies
 
@@ -1027,6 +1025,30 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                     {activeTab === 'tasks' && selectedChild && (
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                            {/* 实时专注状态监控条 */}
+                            {selectedChild.isFocusing && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="bg-emerald-50/80 backdrop-blur-md border-2 border-emerald-100 p-4 rounded-[32px] flex items-center justify-between shadow-sm overflow-hidden relative"
+                                >
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-200 rounded-full -mr-12 -mt-12 blur-2xl opacity-40"></div>
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg animate-pulse">
+                                            <Timer size={24} />
+                                        </div>
+                                        <div>
+                                            <div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-1">宝贝正在忙碌中...</div>
+                                            <div className="text-base font-black text-[#5D4037]">{selectedChild.currentTaskName}</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right relative z-10">
+                                        <div className="text-2xl font-black text-emerald-600 font-mono tracking-tighter">{formatTime(liveFocusDuration)}</div>
+                                        <div className="text-[10px] font-bold text-emerald-400 uppercase">当前计时</div>
+                                    </div>
+                                </motion.div>
+                            )}
+
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-4">
                                     <motion.button

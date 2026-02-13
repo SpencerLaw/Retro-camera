@@ -1373,42 +1373,57 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <div className="absolute left-[27px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-gray-200"></div>
 
                                 {focusLogs.length > 0 ? (
-                                    focusLogs.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).map((log, i) => {
-                                        const startTime = new Date(log.startTime);
-                                        const endTime = new Date(log.endTime);
-                                        return (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: i * 0.1 }}
-                                                className="relative flex gap-4"
-                                            >
-                                                <div className="relative z-10 w-6 h-6 rounded-full bg-orange-100 border-2 border-orange-400 flex items-center justify-center text-orange-500 mt-4 shadow-sm">
-                                                    <Zap size={10} fill="currentColor" />
-                                                </div>
-                                                <div className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div>
-                                                            <h4 className="font-bold text-[#5D4037]">{log.taskTitle}</h4>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <span className="bg-orange-50 text-orange-500 px-2 py-0.5 rounded-md text-[10px] font-black flex items-center gap-1">
-                                                                    <Timer size={10} /> 专注 {Math.floor(log.duration / 60)} 分 {log.duration % 60} 秒
+                                    (() => {
+                                        // Aggregate logs by task title
+                                        const aggregated: { [key: string]: typeof focusLogs[0] } = {};
+                                        focusLogs.forEach(log => {
+                                            if (!aggregated[log.taskTitle]) {
+                                                aggregated[log.taskTitle] = { ...log };
+                                            } else {
+                                                aggregated[log.taskTitle].duration += log.duration;
+                                                // Keep the earliest start and latest end
+                                                if (new Date(log.startTime) < new Date(aggregated[log.taskTitle].startTime)) {
+                                                    aggregated[log.taskTitle].startTime = log.startTime;
+                                                }
+                                                if (new Date(log.endTime) > new Date(aggregated[log.taskTitle].endTime)) {
+                                                    aggregated[log.taskTitle].endTime = log.endTime;
+                                                }
+                                            }
+                                        });
+
+                                        return Object.values(aggregated)
+                                            .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+                                            .map((log, i) => {
+                                                const startTime = new Date(log.startTime);
+                                                const endTime = new Date(log.endTime);
+                                                return (
+                                                    <motion.div
+                                                        key={i}
+                                                        initial={{ opacity: 0, x: -10 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        className="flex items-center gap-4 bg-white/60 p-3 rounded-2xl border border-white shadow-sm"
+                                                    >
+                                                        <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-400">
+                                                            <Timer size={20} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-black text-[#5D4037] text-sm truncate">{log.taskTitle}</h4>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <span className="text-[10px] font-bold text-gray-400">
+                                                                    {startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        <div className="text-right">
-                                                            <div className="text-xs font-bold text-gray-400">
-                                                                {startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                                                                <span className="mx-1">-</span>
-                                                                {endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                        <div className="text-right px-3 py-1 bg-orange-100/50 rounded-xl">
+                                                            <div className="text-[10px] font-black text-orange-500 uppercase tracking-tighter">用时</div>
+                                                            <div className="text-sm font-black text-orange-600 font-mono">
+                                                                {Math.floor(log.duration / 60)}'<span className="text-[10px] opacity-70">{log.duration % 60}"</span>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })
+                                                    </motion.div>
+                                                );
+                                            });
+                                    })()
                                 ) : (
                                     <div className="ml-8 py-10 text-center bg-white rounded-3xl border-2 border-dashed border-gray-100">
                                         <Target className="w-12 h-12 text-gray-200 mx-auto mb-2" />

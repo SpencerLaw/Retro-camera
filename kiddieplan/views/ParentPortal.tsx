@@ -809,16 +809,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <h1 className="text-[18px] font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                                 星梦奇旅
                             </h1>
-                            <span className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-[0.2em] leading-none">家长端</span>
+                            <span className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>家长端</span>
                         </div>
 
                         {/* Right: Time & Compact Buttons (Ultra Grouped) */}
                         <div className="flex items-center gap-2">
                             <div className="flex flex-col items-end mr-0.5">
-                                <span className="text-[10px] font-black text-gray-400 font-mono tracking-tighter leading-none">
+                                <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
                                     {formatBeijingTime(currentTime).split(' ')[1]}
                                 </span>
-                                <span className="text-[7px] font-bold text-gray-300 leading-none mt-0.5">
+                                <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
                                     {formatBeijingTime(currentTime).split(' ')[0]}
                                 </span>
                             </div>

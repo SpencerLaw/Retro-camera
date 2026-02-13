@@ -102,6 +102,30 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         return () => clearInterval(interval);
     }, [isTimerRunning]);
 
+    // REAL-TIME SYNC PULSE: Send current focus duration to backend every 15s
+    useEffect(() => {
+        if (!isTimerRunning || !activeTaskId) return;
+
+        const syncPulse = setInterval(async () => {
+            const task = tasks.find(t => t.id === activeTaskId);
+            try {
+                await fetch('/api/kiddieplan/client', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update_focus_status',
+                        token,
+                        data: { isFocusing: true, taskTitle: task?.title, duration: timerSeconds }
+                    })
+                });
+            } catch (e) {
+                console.error('Pulse failed');
+            }
+        }, 15000);
+
+        return () => clearInterval(syncPulse);
+    }, [isTimerRunning, activeTaskId, timerSeconds, tasks, token]);
+
     const formatTime = (totalSeconds: number) => {
         const hrs = Math.floor(totalSeconds / 3600);
         const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -191,16 +215,25 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 duration: timerSeconds
             };
 
-            // Sync with backend
+            // Sync with backend: 1. Record Log + 2. Clear Status
             try {
                 await fetch('/api/kiddieplan/client', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'record_focus', token, data: { log } })
                 });
+
+                await fetch('/api/kiddieplan/client', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update_focus_status', token, data: { isFocusing: false } })
+                });
             } catch (e) {
-                console.error('Record focus log failed');
+                console.error('Stop sync failed');
             }
+
+            // 本地更新 tasks 列表中的 accumulatedTime
+            setTasks(prev => prev.map(t => t.id === task.id ? { ...t, accumulatedTime: (t.accumulatedTime || 0) + timerSeconds } : t));
 
             setIsTimerRunning(false);
             setActiveTaskId(null);
@@ -212,6 +245,21 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             setTimerSeconds(0);
             setStartTime(new Date().toISOString());
             setIsTimerRunning(true);
+
+            // Sync status immediately
+            try {
+                await fetch('/api/kiddieplan/client', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update_focus_status',
+                        token,
+                        data: { isFocusing: true, taskTitle: task.title, duration: 0 }
+                    })
+                });
+            } catch (e) {
+                console.error('Start sync failed');
+            }
         }
     };
 
@@ -395,6 +443,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                     <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
+                                                    {((task.accumulatedTime || 0) > 0 || (isCurrentFocus && timerSeconds > 0)) && (
+                                                        <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                            <Timer size={10} /> {formatTime((task.accumulatedTime || 0) + (isCurrentFocus ? timerSeconds : 0))}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

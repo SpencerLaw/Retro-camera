@@ -113,8 +113,32 @@ export default async function handler(
                 recordedAt: new Date().toISOString()
             });
 
+            // 同时累加到具体任务的 accumulatedTime 字段上，方便展示
+            if (daily.tasks) {
+                const taskIdx = daily.tasks.findIndex((t: any) => t.id === log.taskId);
+                if (taskIdx > -1) {
+                    const currentTotal = daily.tasks[taskIdx].accumulatedTime || 0;
+                    daily.tasks[taskIdx].accumulatedTime = currentTotal + log.duration;
+                }
+            }
+
             await kv.set(licenseKey, license);
             return response.status(200).json({ success: true, message: '专注日志已归档' });
+        }
+
+        if (action === 'update_focus_status') {
+            const { isFocusing, taskTitle, duration } = data;
+            const license: any = await kv.get(licenseKey);
+            if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
+
+            const childIdx = license.children.findIndex((c: any) => c.id === childId);
+            if (childIdx > -1) {
+                license.children[childIdx].isFocusing = isFocusing;
+                license.children[childIdx].currentTaskName = isFocusing ? taskTitle : null;
+                license.children[childIdx].lastFocusDuration = isFocusing ? duration : 0;
+                await kv.set(licenseKey, license);
+            }
+            return response.status(200).json({ success: true });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

@@ -36,6 +36,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
     };
 
+    const formatTime = (totalSeconds: number) => {
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
     // Custom Dialog State
     const [dialogConfig, setDialogConfig] = useState<{
         isOpen: boolean;
@@ -101,6 +108,22 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [isManagingCategories, setIsManagingCategories] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
     const mainScrollRef = useRef<HTMLElement>(null);
+
+    // Live Focus Timer State for Parent View
+    const [liveFocusDuration, setLiveFocusDuration] = useState(0);
+
+    useEffect(() => {
+        const selectedChild = children.find(c => c.id === selectedChildId);
+        if (selectedChild?.isFocusing) {
+            setLiveFocusDuration(selectedChild.lastFocusDuration || 0);
+            const interval = setInterval(() => {
+                setLiveFocusDuration(prev => prev + 1);
+            }, 1000);
+            return () => clearInterval(interval);
+        } else {
+            setLiveFocusDuration(0);
+        }
+    }, [children, selectedChildId]);
 
     useEffect(() => {
         if (mainScrollRef.current) {
@@ -911,7 +934,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="flex items-center gap-2 mb-2">
                                                     {selectedChild.isFocusing ? (
                                                         <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider animate-pulse flex items-center gap-1">
-                                                            <div className="w-2 h-2 bg-white rounded-full"></div> {selectedChild.currentTaskName || '专注'} (进行中)
+                                                            <div className="w-2 h-2 bg-white rounded-full"></div> {selectedChild.currentTaskName || '专注'} (进行中 {formatTime(liveFocusDuration)})
                                                         </span>
                                                     ) : (
                                                         <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-wider">
@@ -1142,6 +1165,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         <div className="text-xs text-gray-400 font-bold flex gap-2">
                                                             <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                             <span className="text-emerald-400">+{task.points} pts</span>
+                                                            {(task.accumulatedTime || 0) > 0 && (
+                                                                <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                    <Timer size={10} /> 累计: {formatTime(task.accumulatedTime!)}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-1">

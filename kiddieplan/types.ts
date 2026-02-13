@@ -31,6 +31,7 @@ export interface Task {
   isRequired: boolean;
   date: string;
   category?: string;
+  accumulatedTime?: number; // 秒为单位
 }
 
 export interface DailySchedule {
@@ -54,6 +55,7 @@ export interface Child {
   schedules: DailySchedule[];
   isFocusing?: boolean;
   currentTaskName?: string;
+  lastFocusDuration?: number; // 正在进行的计时
 }
 
 export type AppTab = 'home' | 'plan' | 'rewards' | 'me';

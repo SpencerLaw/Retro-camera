@@ -947,7 +947,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                             <div className="relative z-10 flex items-center gap-2 opacity-90">
                                                 <div className="px-2 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-widest leading-none">
-                                                    Room Code
+                                                    房间号
                                                 </div>
                                                 <span className="text-sm font-black font-mono tracking-tighter">{selectedChild.roomCode}</span>
                                             </div>
@@ -955,8 +955,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <div className="relative z-10 mt-auto">
                                                 {selectedChild.isFocusing ? (
                                                     <div className="space-y-1">
-                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在任务</div>
-                                                        <h2 className="text-2xl font-black tracking-tight leading-none truncate max-w-full drop-shadow-sm">
+                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
+                                                        <h2 className="text-xl font-black tracking-tight leading-snug break-words line-clamp-2 drop-shadow-sm min-h-[3rem] flex items-center">
                                                             {selectedChild.currentTaskName}
                                                         </h2>
                                                         <div className="flex items-center gap-1.5 pt-1">
@@ -966,9 +966,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-1">
-                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">宝贝动态</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
                                                         <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
-                                                        <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">Resting...</p>
+                                                        <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">Sleeping Mode</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -979,7 +979,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/20 rounded-full -mr-10 -mb-10 blur-2xl"></div>
 
                                             <div className="relative z-10 flex justify-between items-start">
-                                                <div className="text-[10px] font-black uppercase tracking-widest opacity-80 pt-1">累计收益</div>
+                                                <div className="text-[10px] font-black uppercase tracking-widest opacity-80 pt-1">糖果收益</div>
                                                 <motion.button
                                                     whileHover={{ rotate: 180, scale: 1.1 }}
                                                     whileTap={{ scale: 0.9 }}
@@ -1000,7 +1000,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="text-2xl leading-none">🍭</span>
-                                                    <span className="text-[8px] font-black uppercase tracking-tighter opacity-70 mt-0.5">Points</span>
+                                                    <span className="text-[8px] font-bold uppercase tracking-tighter opacity-70 mt-0.5">糖果点数</span>
                                                 </div>
                                             </div>
                                         </div>

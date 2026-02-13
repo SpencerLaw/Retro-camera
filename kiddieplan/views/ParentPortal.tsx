@@ -793,57 +793,53 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth pb-48"
                 style={{ scrollBehavior: 'smooth' }}
             >
-                {/* Floating Header Wrapper - Inside scroll container for sticky "glass" effect */}
+                {/* Floating Header Wrapper - iOS 26 Extreme Glass Style */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
+                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.03)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            backdropFilter: 'blur(15px) saturate(160%)',
-                            WebkitBackdropFilter: 'blur(15px) saturate(160%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.05)'
+                            background: 'rgba(255, 255, 255, 0.015)',
+                            backdropFilter: 'blur(60px) saturate(210%)',
+                            WebkitBackdropFilter: 'blur(60px) saturate(210%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.01), inset 0 0 0 1px rgba(255, 255, 255, 0.03)'
                         }}
                     >
-                        <div className="flex items-center gap-3">
-                            <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                                <div className="relative w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                                    <Sparkles className="text-blue-500" size={20} />
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <h1 className="flex flex-col font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-[0.85]" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                    <span className="text-[14px]">星梦</span>
-                                    <span className="text-[22px]">奇旅</span>
-                                </h1>
-                                <div className="flex flex-col justify-center border-l-2 border-gray-200/30 pl-2 ml-1">
-                                    <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">家长端</span>
-                                    <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
-                                        {formatBeijingTime(currentTime)}
-                                    </span>
-                                </div>
-                            </div>
+                        {/* Left: Branding & Role (Vertical Stack) */}
+                        <div className="flex flex-col">
+                            <h1 className="text-[18px] font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                星梦奇旅
+                            </h1>
+                            <span className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-[0.2em] leading-none">家长端</span>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex gap-2">
+
+                        {/* Right: Time & Compact Buttons (Ultra Grouped) */}
+                        <div className="flex items-center gap-2">
+                            <div className="flex flex-col items-end mr-0.5">
+                                <span className="text-[10px] font-black text-gray-400 font-mono tracking-tighter leading-none">
+                                    {formatBeijingTime(currentTime).split(' ')[1]}
+                                </span>
+                                <span className="text-[7px] font-bold text-gray-300 leading-none mt-0.5">
+                                    {formatBeijingTime(currentTime).split(' ')[0]}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-1">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => fetchConfig()}
-                                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#E0E7FF]/30 text-gray-500 font-bold text-sm shadow-sm border border-white/20 hover:bg-white/60 hover:text-[var(--color-blue-fun)] transition-colors"
-                                    title="手动同步数据"
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-gray-400 shadow-sm border border-white/20 hover:text-blue-500 transition-colors"
+                                    title="同步"
                                 >
-                                    <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                                    <span className="hidden md:inline">同步</span>
+                                    <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
                                 </motion.button>
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                                    whileTap={{ scale: 0.9 }}
                                     onClick={onLogout}
-                                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/30 text-gray-500 font-bold text-sm shadow-sm border border-white/20 hover:text-red-400 transition-colors"
+                                    className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center text-gray-400 shadow-sm border border-white/20 hover:text-red-400 transition-colors"
+                                    title="退出系统"
                                 >
-                                    <Home size={18} />
-                                    <span className="hidden md:inline">返回首页</span>
+                                    <LogOut size={14} />
                                 </motion.button>
                             </div>
                         </div>
@@ -1402,45 +1398,48 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 </div>
             </main>
 
-            {/* Bottom Nav - Floating pill capsule (User's favorite style) */}
+            {/* Bottom Nav - Moon-Base Style (Pinned, Rounded Top, No gaps) */}
             <div
-                className="fixed left-5 right-5 z-[100] h-[72px] rounded-[36px] border border-white/30 shadow-[0_20px_40px_rgba(31,38,135,0.1)] flex justify-around items-center px-4"
+                className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]"
                 style={{
-                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)',
-                    background: 'rgba(255, 255, 255, 0.18)',
-                    backdropFilter: 'blur(30px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+                    height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
+                    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                    background: 'rgba(255, 255, 255, 0.015)',
+                    backdropFilter: 'blur(60px) saturate(210%)',
+                    WebkitBackdropFilter: 'blur(60px) saturate(210%)',
                 }}
             >
-                {[
-                    { id: 'children', icon: Home, label: '宝贝' },
-                    { id: 'tasks', icon: ListTodo, label: '任务' },
-                    { id: 'rewards', icon: Gift, label: '奖励' },
-                    { id: 'checkins', icon: CalendarCheck, label: '打卡' },
-                    { id: 'stats', icon: BarChart3, label: '统计' },
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => {
-                            setActiveTab(tab.id as any);
-                        }}
-                        className="relative flex flex-col items-center justify-center min-w-[56px] h-full gap-0.5"
-                    >
-                        {activeTab === tab.id && (
-                            <motion.div
-                                layoutId="parent-nav-pill"
-                                className="absolute inset-1 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-[18px]"
-                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            />
-                        )}
-                        <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`}>
-                            <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
-                        </span>
-                        <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`}>
-                            {tab.label}
-                        </span>
-                    </button>
-                ))}
+                <div className="flex justify-around items-center h-[72px]">
+                    {[
+                        { id: 'children', icon: Home, label: '宝贝' },
+                        { id: 'tasks', icon: ListTodo, label: '任务' },
+                        { id: 'rewards', icon: Gift, label: '奖励' },
+                        { id: 'checkins', icon: CalendarCheck, label: '打卡' },
+                        { id: 'stats', icon: BarChart3, label: '统计' },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => {
+                                setActiveTab(tab.id as any);
+                            }}
+                            className="relative flex flex-col items-center justify-center min-w-[56px] h-full gap-0.5"
+                        >
+                            {activeTab === tab.id && (
+                                <motion.div
+                                    layoutId="parent-nav-pill"
+                                    className="absolute inset-1 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-[18px]"
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                />
+                            )}
+                            <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`}>
+                                <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                            </span>
+                            <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`}>
+                                {tab.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Dialog Overlay */}

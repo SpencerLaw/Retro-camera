@@ -799,7 +799,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const selectedChild = children.find(c => c.id === selectedChildId);
 
     return (
-        <div className="h-full flex flex-col relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #F0F4FF 0%, #E0E7FF 50%, #F3E8FF 100%)' }}>
+        <div className="h-full flex flex-col relative overflow-hidden text-[110%] px-1" style={{ background: 'linear-gradient(160deg, #F0F4FF 0%, #E0E7FF 50%, #F3E8FF 100%)' }}>
             {/* Standard Background Decorative elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#60A5FA]/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] bg-[#FBBF24]/10 rounded-full blur-[100px] pointer-events-none"></div>

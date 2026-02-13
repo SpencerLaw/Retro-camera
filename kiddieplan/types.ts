@@ -44,6 +44,7 @@ export interface Reward {
   name: string;
   pointsCost: number;
   icon: string;
+  category?: string;
 }
 
 export interface Child {
@@ -73,4 +74,12 @@ export interface FocusLog {
   startTime: string; // ISO String
   endTime: string;   // ISO String
   duration: number;  // Seconds
+}
+
+export interface RedemptionLog {
+  id: string;
+  childId: string;
+  rewardName: string;
+  pointsCost: number;
+  redeemedAt: string; // ISO String
 }

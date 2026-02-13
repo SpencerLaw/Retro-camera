@@ -144,6 +144,44 @@ export default async function handler(
             return response.status(200).json({ success: true, message: '设置已更新', data: { categories: license.categories, hiddenPresets: license.hiddenPresets } });
         }
 
+        if (action === 'record_redemption') {
+            const { childId, rewardName, pointsCost } = data;
+            const license: any = await kv.get(licenseKey) || { children: [] };
+
+            // 初始化 redemptionLogs
+            if (!license.redemptionLogs) license.redemptionLogs = [];
+
+            const newLog = {
+                id: `log_${Date.now()}`,
+                childId,
+                rewardName,
+                pointsCost,
+                redeemedAt: new Date().toISOString()
+            };
+
+            license.redemptionLogs.unshift(newLog); // 最新的在前面
+            // 限制日志数量，保留最近100条
+            if (license.redemptionLogs.length > 100) {
+                license.redemptionLogs = license.redemptionLogs.slice(0, 100);
+            }
+
+            await kv.set(licenseKey, license);
+            return response.status(200).json({ success: true, data: newLog });
+        }
+
+        if (action === 'get_redemption_history') {
+            const { childId } = data;
+            const license: any = await kv.get(licenseKey) || {};
+            const logs = license.redemptionLogs || [];
+
+            // 如果指定了 childId，则筛选
+            const filteredLogs = childId
+                ? logs.filter((l: any) => l.childId === childId)
+                : logs;
+
+            return response.status(200).json({ success: true, data: filteredLogs });
+        }
+
         return response.status(400).json({ success: false, message: '无效的操作' });
 
     } catch (error: any) {

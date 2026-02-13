@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2 } from 'lucide-react';
-import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog } from '../types';
-import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES } from '../constants/templates';
+import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog, RedemptionLog } from '../types';
+import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES, REWARD_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ParentPortalProps {
@@ -103,7 +103,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
     const [focusLogs, setFocusLogs] = useState<FocusLog[]>([]);
     const [rewards, setRewards] = useState<Reward[]>([]);
+    const [redemptionLogs, setRedemptionLogs] = useState<RedemptionLog[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [selectedRewardCategory, setSelectedRewardCategory] = useState<string>('family');
     const [customCategories, setCustomCategories] = useState<Category[]>([]);
     const [hiddenPresets, setHiddenPresets] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -423,12 +425,40 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             });
             const result = await res.json();
             if (result.success) {
-                setRewards(result.data.rewards || DEFAULT_REWARDS);
+                const fetchedRewards = result.data.rewards;
+                if (fetchedRewards && fetchedRewards.length > 0) {
+                    setRewards(fetchedRewards);
+                } else {
+                    setRewards(DEFAULT_REWARDS);
+                }
             }
         } catch (err) {
             console.error('Fetch rewards failed');
         }
     };
+
+    const fetchRedemptionHistory = async () => {
+        if (!selectedChildId) return;
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_redemption_history', token, data: { childId: selectedChildId } })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setRedemptionLogs(result.data || []);
+            }
+        } catch (err) {
+            console.error('Fetch history failed');
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'rewards' && selectedChildId) {
+            fetchRedemptionHistory();
+        }
+    }, [activeTab, selectedChildId]);
 
     const handleSaveTasks = async () => {
         if (!selectedChildId) return;
@@ -585,7 +615,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     id: `r_${Date.now()}`,
                     name,
                     pointsCost: pts || 500,
-                    icon: '🎁'
+                    icon: '🎁',
+                    category: selectedRewardCategory
                 };
                 setRewards(prev => [...prev, newReward]);
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
@@ -665,9 +696,26 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             data: { ...selectedChild, points: selectedChild.points - reward.pointsCost }
                         })
                     });
+
+                    // 记录核销历史
+                    await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'record_redemption',
+                            token,
+                            data: {
+                                childId: selectedChildId,
+                                rewardName: reward.name,
+                                pointsCost: reward.pointsCost
+                            }
+                        })
+                    });
+
                     const result = await res.json();
                     if (result.success) {
                         setChildren(result.data.children);
+                        fetchRedemptionHistory(); // Refresh history
                         setDialogConfig({
                             isOpen: true,
                             title: '🎉 兑换成功！',
@@ -1383,42 +1431,61 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </motion.button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                {rewards.map((reward, i) => (
-                                    <motion.div
-                                        key={reward.id || i}
-                                        whileHover={{ y: -3 }}
-                                        className="bg-white p-5 rounded-[32px] flex flex-col items-center gap-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)] border-2 border-transparent hover:border-yellow-200 relative group overflow-hidden"
+                            <div className="flex overflow-x-auto pb-4 gap-3 no-scrollbar mb-4">
+                                {REWARD_CATEGORIES.map(cat => (
+                                    <motion.button
+                                        key={cat.id}
+                                        onClick={() => setSelectedRewardCategory(cat.id)}
+                                        whileTap={{ scale: 0.95 }}
+                                        className={`flex-shrink-0 px-4 py-2.5 rounded-xl border-2 font-bold text-sm flex items-center gap-2 transition-all
+                                            ${selectedRewardCategory === cat.id
+                                                ? 'bg-[var(--color-yellow-reward)] border-[var(--color-yellow-reward)] text-white shadow-lg shadow-orange-100'
+                                                : 'bg-white border-transparent text-gray-400 hover:bg-orange-50'}`}
                                     >
-                                        <div className="absolute top-2 right-2 flex gap-1">
-                                            <button onClick={(e) => { e.stopPropagation(); editReward(reward); }} className="p-1.5 text-blue-400 bg-blue-50 rounded-full hover:scale-110 transition-transform">
-                                                <Edit2 size={12} />
-                                            </button>
-                                            <button onClick={(e) => { e.stopPropagation(); removeReward(reward.id); }} className="p-1.5 text-red-400 bg-red-50 rounded-full hover:scale-110 transition-transform">
-                                                <Trash2 size={12} />
-                                            </button>
-                                        </div>
-
-                                        <div className="text-5xl mb-2 filter drop-shadow-md">{reward.icon}</div>
-                                        <div className="text-center">
-                                            <div className="font-bold text-[#5D4037] text-sm mb-1">{reward.name}</div>
-                                            <div className="bg-yellow-50 text-[var(--color-yellow-reward)] px-3 py-1 rounded-full text-xs font-black">
-                                                {reward.pointsCost} 🍭
-                                            </div>
-                                        </div>
-
-                                        <motion.button
-                                            whileTap={{ scale: 0.9 }}
-                                            onClick={() => handleRedeemReward(reward)}
-                                            className={`mt-2 w-full py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1
-                                                ${selectedChild.points >= reward.pointsCost
-                                                    ? 'bg-[var(--color-yellow-reward)] text-white shadow-lg'
-                                                    : 'bg-gray-100 text-gray-400 grayscale cursor-not-allowed'}`}
-                                        >
-                                            核销奖励
-                                        </motion.button>
-                                    </motion.div>
+                                        <span className="text-lg">{cat.icon}</span>
+                                        {cat.name}
+                                    </motion.button>
                                 ))}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {rewards
+                                    .filter(r => r.category === selectedRewardCategory || (!r.category && selectedRewardCategory === 'other'))
+                                    .map((reward, i) => (
+                                        <motion.div
+                                            key={reward.id || i}
+                                            whileHover={{ y: -3 }}
+                                            className="bg-white p-5 rounded-[32px] flex flex-col items-center gap-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)] border-2 border-transparent hover:border-yellow-200 relative group overflow-hidden"
+                                        >
+                                            <div className="absolute top-2 right-2 flex gap-1">
+                                                <button onClick={(e) => { e.stopPropagation(); editReward(reward); }} className="p-1.5 text-blue-400 bg-blue-50 rounded-full hover:scale-110 transition-transform">
+                                                    <Edit2 size={12} />
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); removeReward(reward.id); }} className="p-1.5 text-red-400 bg-red-50 rounded-full hover:scale-110 transition-transform">
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            </div>
+
+                                            <div className="text-5xl mb-2 filter drop-shadow-md">{reward.icon}</div>
+                                            <div className="text-center">
+                                                <div className="font-bold text-[#5D4037] text-sm mb-1">{reward.name}</div>
+                                                <div className="bg-yellow-50 text-[var(--color-yellow-reward)] px-3 py-1 rounded-full text-xs font-black">
+                                                    {reward.pointsCost} 🍭
+                                                </div>
+                                            </div>
+
+                                            <motion.button
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={() => handleRedeemReward(reward)}
+                                                className={`mt-2 w-full py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1
+                                                ${selectedChild.points >= reward.pointsCost
+                                                        ? 'bg-[var(--color-yellow-reward)] text-white shadow-lg'
+                                                        : 'bg-gray-100 text-gray-400 grayscale cursor-not-allowed'}`}
+                                            >
+                                                核销奖励
+                                            </motion.button>
+                                        </motion.div>
+                                    ))}
                             </div>
 
                             {rewards.length > 0 && (
@@ -1593,6 +1660,35 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <p className="text-gray-300 text-xs mt-1">快去提醒宝贝开始任务吧！</p>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Redemption History Section */}
+                            <div className="mt-8">
+                                <h3 className="text-lg font-black text-[#5D4037] mb-4 flex items-center gap-2">
+                                    <Clock size={18} className="text-gray-400" />
+                                    核销记录
+                                </h3>
+                                <div className="space-y-3">
+                                    {redemptionLogs.length > 0 ? (
+                                        redemptionLogs.map((log) => (
+                                            <div key={log.id} className="bg-gray-50 p-4 rounded-2xl flex items-center justify-between border border-gray-100">
+                                                <div>
+                                                    <div className="font-bold text-gray-700">{log.rewardName}</div>
+                                                    <div className="text-xs text-gray-400 font-mono mt-0.5">
+                                                        {new Date(log.redeemedAt).toLocaleString('zh-CN')}
+                                                    </div>
+                                                </div>
+                                                <div className="bg-red-50 text-red-500 px-3 py-1 rounded-full text-xs font-black">
+                                                    -{log.pointsCost} 🍭
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-6 text-gray-400 text-xs font-bold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                                            暂无核销记录
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
                     )}

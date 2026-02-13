@@ -550,8 +550,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.03)]"
                         style={{
                             background: 'transparent',
-                            backdropFilter: 'blur(40px) saturate(210%)',
-                            WebkitBackdropFilter: 'blur(40px) saturate(210%)',
+                            backdropFilter: 'blur(10px) saturate(250%)',
+                            WebkitBackdropFilter: 'blur(10px) saturate(250%)',
                             boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.02)'
                         }}
                     >
@@ -667,8 +667,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
                     paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                     background: 'transparent',
-                    backdropFilter: 'blur(40px) saturate(210%)',
-                    WebkitBackdropFilter: 'blur(40px) saturate(210%)',
+                    backdropFilter: 'blur(10px) saturate(250%)',
+                    WebkitBackdropFilter: 'blur(10px) saturate(250%)',
                 }}
             >
                 <div className="flex justify-around items-center h-[72px]">

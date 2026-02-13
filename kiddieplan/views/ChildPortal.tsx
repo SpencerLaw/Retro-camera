@@ -82,7 +82,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         if (document.hidden) {
             intervalTime = 300000; // Hidden: 5 min
         } else if (!isIdle) {
-            intervalTime = 10000; // Active: 10 sec
+            intervalTime = 3000; // Active: 3 sec (Optimized for real-time feel)
         }
 
         console.log(`Child Polling interval set to: ${intervalTime}ms (${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
@@ -500,10 +500,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             <AnimatePresence>
                 {cloudToast.show && (
                     <motion.div
-                        initial={{ y: -100, opacity: 0, scale: 0.8 }}
-                        animate={{ y: 20, opacity: 1, scale: 1 }}
-                        exit={{ y: -100, opacity: 0, scale: 0.8 }}
-                        className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm"
+                        initial={{ y: -100, x: "-50%", opacity: 0, scale: 0.8 }}
+                        animate={{ y: 20, x: "-50%", opacity: 1, scale: 1 }}
+                        exit={{ y: -100, x: "-50%", opacity: 0, scale: 0.8 }}
+                        style={{ left: "50%" }}
+                        className="fixed top-12 z-[100] w-[90%] max-w-sm"
                     >
                         <div className="relative">
                             {/* Cloud Shape Visuals */}

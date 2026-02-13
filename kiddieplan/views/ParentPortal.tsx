@@ -897,12 +897,28 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             className={`flex flex-col items-center gap-3 min-w-[100px] cursor-pointer relative ${selectedChildId === child.id ? 'opacity-100' : 'opacity-60 grayscale-[0.3]'}`}
                                         >
                                             <div className="relative">
-                                                <div className={`w-24 h-24 rounded-full overflow-hidden border-4 shadow-sm transition-all ${selectedChildId === child.id ? 'border-[#FF6B81] shadow-[0_8px_15px_rgba(255,107,129,0.3)]' : 'border-transparent'}`}>
+                                                <motion.div
+                                                    animate={selectedChildId === child.id ? {
+                                                        boxShadow: [
+                                                            "0 0 10px rgba(255,107,129,0.1)",
+                                                            "0 0 25px rgba(255,107,129,0.5)",
+                                                            "0 0 10px rgba(255,107,129,0.1)"
+                                                        ]
+                                                    } : { boxShadow: "0 0 0px rgba(0,0,0,0)" }}
+                                                    transition={{
+                                                        boxShadow: {
+                                                            repeat: Infinity,
+                                                            duration: 2.5,
+                                                            ease: "easeInOut"
+                                                        }
+                                                    }}
+                                                    className={`w-24 h-24 rounded-full overflow-hidden border-4 transition-all ${selectedChildId === child.id ? 'border-[#FF6B81]' : 'border-transparent shadow-sm'}`}
+                                                >
                                                     <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
                                                     {selectedChildId === child.id && (
-                                                        <div className="absolute inset-0 border-4 border-white rounded-full pointer-events-none"></div>
+                                                        <div className="absolute inset-0 border-4 border-white rounded-full pointer-events-none opacity-40"></div>
                                                     )}
-                                                </div>
+                                                </motion.div>
 
                                                 {/* Edit Button Overlay - Persistent mount to avoid double flicker */}
                                                 <motion.button

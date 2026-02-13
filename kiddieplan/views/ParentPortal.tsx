@@ -48,10 +48,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         isOpen: boolean;
         title: string;
         placeholder: string;
-        onConfirm: (val: string, extra?: string) => void;
+        onConfirm: (val: string, extra?: string, points?: number) => void;
         defaultValue?: string;
         defaultExtra?: string;
+        defaultPoints?: number;
         showTime?: boolean;
+        showPoints?: boolean;
         showAvatarUpload?: boolean;
         message?: string;
         highlight?: string;
@@ -533,7 +535,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 isOpen: true,
                 title: dialogTitle,
                 placeholder: '输入任务名称，例如：阅读30分钟',
-                onConfirm: (val, time) => {
+                showPoints: true,
+                defaultPoints: 10,
+                onConfirm: (val, time, pts) => {
                     if (!val) return;
                     const finalTime = time || '08:00';
                     const isDuplicate = currentTasks.some(t => t.title === val && t.timeSlot === finalTime);
@@ -547,7 +551,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
                         title: val,
                         timeSlot: finalTime,
-                        points: 10,
+                        points: pts || 10,
                         completed: false,
                         isRequired: true,
                         date: new Date().toISOString().split('T')[0],
@@ -565,14 +569,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             isOpen: true,
             title: '🎁 新增奖励项',
             placeholder: '输入奖励名称',
-            onConfirm: (name) => {
+            showPoints: true,
+            defaultPoints: 500,
+            onConfirm: (name, _, pts) => {
                 if (!name) return;
-                const costStr = prompt('所需成长币？', '500');
-                if (!costStr) return;
                 const newReward: Reward = {
                     id: `r_${Date.now()}`,
                     name,
-                    pointsCost: parseInt(costStr) || 100,
+                    pointsCost: pts || 500,
                     icon: '🎁'
                 };
                 setRewards(prev => [...prev, newReward]);
@@ -589,10 +593,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             placeholder: '任务名称',
             defaultValue: task.title,
             defaultExtra: task.timeSlot,
+            defaultPoints: task.points,
             showTime: true,
-            onConfirm: (newTitle, newTime) => {
+            showPoints: true,
+            onConfirm: (newTitle, newTime, newPoints) => {
                 if (!newTitle) return;
-                setCurrentTasks(prev => prev.map(t => t.id === task.id ? { ...t, title: newTitle, timeSlot: newTime || t.timeSlot } : t));
+                setCurrentTasks(prev => prev.map(t => t.id === task.id ? {
+                    ...t,
+                    title: newTitle,
+                    timeSlot: newTime || t.timeSlot,
+                    points: newPoints || t.points
+                } : t));
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
             }
         });
@@ -789,14 +800,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     };
 
     if (loading) return (
-        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4">
+        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4" >
             <motion.div
                 animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
                 className="w-16 h-16 bg-[var(--color-blue-fun)] rounded-3xl"
             ></motion.div>
             <p className="text-xl text-[#5D4037] opacity-60 font-bold">载入中...</p>
-        </div>
+        </div >
     );
 
     const selectedChild = children.find(c => c.id === selectedChildId);
@@ -900,34 +911,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             className={`flex flex-col items-center gap-3 min-w-[100px] cursor-pointer relative ${selectedChildId === child.id ? 'opacity-100' : 'opacity-60 grayscale-[0.3]'}`}
                                         >
                                             <div className="relative">
-                                                <motion.div
-                                                    animate={selectedChildId === child.id ? {
-                                                        boxShadow: [
-                                                            "0 0 12px rgba(255,107,129,0.15)",
-                                                            "0 0 30px rgba(255,107,129,0.35)",
-                                                            "0 0 12px rgba(255,107,129,0.15)"
-                                                        ],
-                                                        scale: [1, 1.02, 1]
-                                                    } : { boxShadow: "0 0 0px rgba(0,0,0,0)", scale: 1 }}
-                                                    transition={{
-                                                        boxShadow: { repeat: Infinity, duration: 3, ease: "easeInOut" },
-                                                        scale: { repeat: Infinity, duration: 3, ease: "easeInOut" }
-                                                    }}
-                                                    className={`w-24 h-24 rounded-full overflow-hidden border-2 relative transition-all duration-500 ${selectedChildId === child.id ? 'border-[#FF6B81]' : 'border-transparent shadow-sm'}`}
-                                                >
+                                                <div className={`w-24 h-24 rounded-full overflow-hidden border-2 relative shadow-md transition-all duration-300 ${selectedChildId === child.id ? 'border-[#FF6B81] scale-105' : 'border-transparent opacity-100 grayscale-0'}`}>
                                                     <img src={child.avatar} alt={child.name} className="w-full h-full object-cover bg-gray-100" />
-                                                    {/* Granular Glass Overlay */}
                                                     {selectedChildId === child.id && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0 }}
-                                                            animate={{ opacity: 0.5 }}
-                                                            className="absolute inset-0 bg-white/10 backdrop-blur-[1.5px] pointer-events-none"
-                                                        />
+                                                        <div className="absolute inset-0 border-2 border-white/20 rounded-full pointer-events-none"></div>
                                                     )}
-                                                    {selectedChildId === child.id && (
-                                                        <div className="absolute inset-0 border-2 border-white/30 rounded-full pointer-events-none"></div>
-                                                    )}
-                                                </motion.div>
+                                                </div>
 
                                                 {/* Edit Button Overlay - Smaller and more refined */}
                                                 <AnimatePresence>
@@ -1588,6 +1577,20 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             </div>
                                         </div>
                                     )}
+
+                                    {dialogConfig.showPoints && (
+                                        <div className="flex items-center gap-4 bg-[#F5F7FA] px-6 py-4 rounded-2xl border-2 border-transparent focus-within:border-blue-100 transition-all mt-4">
+                                            <span className="text-2xl">🍭</span>
+                                            <input
+                                                type="number"
+                                                id="dialogPoints"
+                                                defaultValue={dialogConfig.defaultPoints || 10}
+                                                className="flex-1 bg-transparent border-none outline-none font-black text-lg text-[#5D4037]"
+                                                placeholder="奖励糖果数"
+                                            />
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">奖励点数</span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -1617,7 +1620,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         }
                                         const input = document.getElementById('dialogInput') as HTMLInputElement;
                                         const time = document.getElementById('dialogTime') as HTMLInputElement;
-                                        dialogConfig.onConfirm(input?.value, time?.value);
+                                        const points = document.getElementById('dialogPoints') as HTMLInputElement;
+                                        dialogConfig.onConfirm(input?.value, time?.value, parseInt(points?.value) || 0);
                                     }}
                                     disabled={uploadingAvatar || isSaving}
                                     className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}

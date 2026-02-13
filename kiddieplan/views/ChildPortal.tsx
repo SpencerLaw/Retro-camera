@@ -537,10 +537,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.15)',
-                            backdropFilter: 'blur(20px) saturate(160%)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            backdropFilter: 'blur(15px) saturate(160%)',
+                            WebkitBackdropFilter: 'blur(15px) saturate(160%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.05)'
                         }}
                     >
                         <div className="flex items-center gap-3">
@@ -551,10 +551,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                    星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
+                                <h1 className="flex flex-col font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-[0.85]" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                    <span className="text-[14px]">星梦</span>
+                                    <span className="text-[22px]">奇旅</span>
                                 </h1>
-                                <div className="flex flex-col justify-center">
+                                <div className="flex flex-col justify-center border-l-2 border-gray-200/30 pl-2 ml-1">
                                     <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">孩子端</span>
                                     <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
                                         {formatBeijingTime(currentTime)}
@@ -586,7 +587,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     </header>
                 </div>
 
-                <div className="px-5 pt-0 pb-40">
+                <div className="px-5 pt-0 pb-60">
                     <AnimatePresence mode='wait'>
                         {activeTab === 'home' && renderDashboardView()}
                         {activeTab === 'plan' && renderPlannerView()}
@@ -655,7 +656,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 style={{
                     height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
                     paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                    background: 'rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.05)',
                     backdropFilter: 'blur(25px) saturate(160%)',
                     WebkitBackdropFilter: 'blur(25px) saturate(160%)',
                 }}

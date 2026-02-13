@@ -790,7 +790,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             {/* Main Content Wrapper - Content scrolls UNDER the floating header */}
             <main
                 ref={mainScrollRef}
-                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth"
+                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth pb-48"
                 style={{ scrollBehavior: 'smooth' }}
             >
                 {/* Floating Header Wrapper - Inside scroll container for sticky "glass" effect */}
@@ -798,10 +798,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.07)]"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.15)',
-                            backdropFilter: 'blur(20px) saturate(160%)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            backdropFilter: 'blur(15px) saturate(160%)',
+                            WebkitBackdropFilter: 'blur(15px) saturate(160%)',
+                            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.05)'
                         }}
                     >
                         <div className="flex items-center gap-3">
@@ -812,10 +812,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                    星梦奇旅 <span className="text-gray-200 font-thin ml-1">|</span>
+                                <h1 className="flex flex-col font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 tracking-tight leading-[0.85]" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                    <span className="text-[14px]">星梦</span>
+                                    <span className="text-[22px]">奇旅</span>
                                 </h1>
-                                <div className="flex flex-col justify-center">
+                                <div className="flex flex-col justify-center border-l-2 border-gray-200/30 pl-2 ml-1">
                                     <span className="text-xs font-bold text-gray-400 leading-none mb-0.5">家长端</span>
                                     <span className="text-[10px] font-black text-gray-400 font-mono tracking-wider leading-none">
                                         {formatBeijingTime(currentTime)}

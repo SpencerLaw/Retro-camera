@@ -920,22 +920,24 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     )}
                                                 </motion.div>
 
-                                                {/* Edit Button Overlay - Persistent mount to avoid double flicker */}
-                                                <motion.button
-                                                    initial={false}
-                                                    animate={{
-                                                        scale: selectedChildId === child.id ? 1 : 0,
-                                                        opacity: selectedChildId === child.id ? 1 : 0,
-                                                        pointerEvents: selectedChildId === child.id ? 'auto' : 'none'
-                                                    }}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEditChild();
-                                                    }}
-                                                    className="absolute -bottom-1 -right-1 bg-[var(--color-blue-fun)] text-white p-2.5 rounded-full shadow-xl border-4 border-white hover:scale-110 active:scale-95 transition-all z-20"
-                                                >
-                                                    <Edit2 size={18} fill="currentColor" />
-                                                </motion.button>
+                                                {/* Edit Button Overlay - Use layoutId for seamless transition */}
+                                                <AnimatePresence>
+                                                    {selectedChildId === child.id && (
+                                                        <motion.button
+                                                            layoutId="active-edit-pen"
+                                                            initial={{ scale: 0.8, opacity: 0 }}
+                                                            animate={{ scale: 1, opacity: 1 }}
+                                                            exit={{ scale: 0.8, opacity: 0 }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEditChild();
+                                                            }}
+                                                            className="absolute -bottom-1 -right-1 bg-[var(--color-blue-fun)] text-white p-2.5 rounded-full shadow-xl border-4 border-white hover:scale-110 active:scale-95 z-20"
+                                                        >
+                                                            <Edit2 size={18} fill="currentColor" />
+                                                        </motion.button>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
                                             <span className="text-sm font-black text-[#5D4037]">{child.name}</span>
                                         </motion.div>

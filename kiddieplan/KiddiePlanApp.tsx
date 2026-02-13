@@ -209,7 +209,7 @@ const KiddiePlanApp: React.FC = () => {
                 <Lock size={40} className="text-[var(--color-blue-fun)]" strokeWidth={3} />
               </div>
               <span className="text-2xl font-bold text-[#5D4037] relative z-10">家长入口</span>
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider relative z-10">Parent Zone</span>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider relative z-10">家长专区</span>
             </motion.button>
 
             <motion.button
@@ -223,7 +223,7 @@ const KiddiePlanApp: React.FC = () => {
                 <User size={40} className="text-pink-400" strokeWidth={3} />
               </div>
               <span className="text-2xl font-bold text-[#5D4037] relative z-10">孩子入口</span>
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider relative z-10">Kid's World</span>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider relative z-10">宝贝世界</span>
             </motion.button>
           </div>
 
@@ -289,7 +289,7 @@ const KiddiePlanApp: React.FC = () => {
                 {portal === 'parent' ? '家长通行证' : '梦境钥匙'}
               </h2>
               <p className="text-xs text-[#5D4037] opacity-40 font-bold tracking-[0.2em] uppercase">
-                {portal === 'parent' ? 'Security • Verification' : 'Enter Secret Code'}
+                {portal === 'parent' ? '安全 • 身份核验' : '输入梦幻密钥'}
               </p>
             </div>
           </div>

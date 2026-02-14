@@ -112,6 +112,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [isManagingCategories, setIsManagingCategories] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
     const mainScrollRef = useRef<HTMLElement>(null);
+    const tabScrollPositions = useRef<Record<string, number>>({});
 
     // Live Focus Timer State for Parent View
     const [liveFocusDuration, setLiveFocusDuration] = useState(0);
@@ -139,9 +140,20 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     }, [children, selectedChildId]);
 
     useEffect(() => {
+        // Restore position for NEW activeTab
+        const prevPos = tabScrollPositions.current[activeTab] || 0;
         if (mainScrollRef.current) {
-            mainScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+            // Use smooth only if it's the first time (top) or specific transition
+            // For restoration, auto is more immediate and less jarring
+            mainScrollRef.current.scrollTo({ top: prevPos, behavior: prevPos === 0 ? 'smooth' : 'auto' });
         }
+
+        return () => {
+            // Save position of PREVIOUS activeTab before it changes
+            if (mainScrollRef.current) {
+                tabScrollPositions.current[activeTab] = mainScrollRef.current.scrollTop;
+            }
+        };
     }, [activeTab]);
 
     useEffect(() => {

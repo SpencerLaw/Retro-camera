@@ -973,21 +973,20 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             {/* Main Content Wrapper - Content scrolls UNDER the floating header */}
             <main
                 ref={mainScrollRef}
-                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth pb-10"
-                style={{ scrollBehavior: 'smooth' }}
+                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
-                    // Hysteresis buffer > 100px to prevent layout shift loop
-                    if (!isScrolled && top > 100) setIsScrolled(true);
-                    else if (isScrolled && top < 20) setIsScrolled(false);
+                    // Tightened hysteresis to prevent layout shift loops
+                    if (!isScrolled && top > 60) setIsScrolled(true);
+                    else if (isScrolled && top < 5) setIsScrolled(false);
                 }}
             >
                 {/* Floating Header Wrapper - Dynamic Theme */}
-                <div className="sticky top-0 p-4 z-40 transition-all duration-500">
+                <div className="sticky top-0 p-4 z-40">
                     <header
                         className={`px-6 rounded-[32px] transition-all duration-500 ease-in-out ${isScrolled
                             ? 'py-3 bg-white/40 border border-white/40 shadow-sm backdrop-blur-xl'
-                            : 'py-4 bg-transparent border border-white/25 shadow-none backdrop-blur-[2px]' // Transparent BG but with border & subtle blur
+                            : 'py-4 bg-white/20 border border-white/30 shadow-none backdrop-blur-md'
                             }`}
                     >
                         {/* Top Row: Brand & Time */}
@@ -1052,7 +1051,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2">
+                                    <div className={`flex items-start gap-2 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 && children.length < 3 ? 'justify-center' : 'justify-around'}`}>
                                         {children.map((child, idx) => {
                                             const isSelected = selectedChildId === child.id;
                                             const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
@@ -1120,7 +1119,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </header>
                 </div>
 
-                <div className="px-4 pb-24 space-y-6">
+                <div className="px-4 pb-4 space-y-6">
                     {(activeTab === 'children' && selectedChild) && (
                         <motion.div
                             key={selectedChildId}

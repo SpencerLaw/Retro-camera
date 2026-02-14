@@ -1632,8 +1632,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </div>
                                 <div className="flex flex-col items-end">
                                     <span className="text-3xl font-black text-orange-500">
-                                        {Math.round(focusLogs.reduce((acc, log) => acc + log.duration, 0) / 60)} <span className="text-sm text-gray-400 font-bold">分钟</span>
+                                        {Math.round(focusLogs.reduce((acc, log) => acc + (log.duration || 0), 0) / 60)} <span className="text-sm text-gray-400 font-bold">分钟</span>
                                     </span>
+                                    <span className="text-[10px] font-black text-orange-300 uppercase tracking-widest">今日累计专注</span>
                                 </div>
                             </div>
 
@@ -1712,50 +1713,50 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                             ${isSilent ? 'bg-white border-[#34D399]' : 'bg-white border-[#FB923C]'}`}>
                                                         </div>
 
-                                                        {/* Card Content */}
-                                                        <div className={`flex items-center gap-4 p-4 rounded-[24px] border shadow-sm transition-all hover:shadow-md
-                                                            ${isSilent ? 'bg-[#ECFDF5] border-[#D1FAE5]' : 'bg-[#FFF7ED] border-[#FFEDD5]'}`}>
+                                                        {/* Card Content (Refined: No large icon, bold task name, Chinese labels) */}
+                                                        <div className={`flex items-center gap-4 p-5 rounded-[28px] border shadow-sm transition-all hover:shadow-md
+                                                            ${isSilent ? 'bg-[#ECFDF5]/80 border-[#D1FAE5]' : 'bg-[#FFF7ED]/80 border-[#FFEDD5]'}`}>
 
-                                                            {/* Icon Box */}
-                                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-white
-                                                                ${isSilent ? 'bg-[#34D399]' : 'bg-[#FB923C]'}`}>
-                                                                {isSilent ? <CheckCircle2 size={24} strokeWidth={3} /> : <Timer size={24} strokeWidth={3} />}
-                                                            </div>
-
-                                                            {/* Text Info */}
+                                                            {/* Text Info (Larger and clearer) */}
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center justify-between mb-1">
-                                                                    <h4 className={`font-black text-lg break-words ${isSilent ? 'text-[#065F46]' : 'text-[#9A3412]'}`}>
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <h4 className={`font-black text-xl break-words ${isSilent ? 'text-[#065F46]' : 'text-[#9A3412]'}`}>
                                                                         {log.taskTitle}
                                                                     </h4>
-                                                                    <span className={`text-xs font-black px-2 py-0.5 rounded-md ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
+                                                                    <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
                                                                         {log.timeSlot || '刚刚'}
-                                                                    </span>
+                                                                    </div>
                                                                 </div>
 
-                                                                <div className="flex items-center gap-2 text-xs font-bold opacity-80">
+                                                                <div className="flex items-center gap-2 text-sm font-bold opacity-80">
                                                                     {isSilent ? (
-                                                                        <span className="text-[#059669]">已按时完成打卡</span>
+                                                                        <span className="text-[#059669]">✅ 计划任务打卡成功</span>
                                                                     ) : (
-                                                                        <span className="text-[#EA580C]">
-                                                                            {startTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                                                                            {' - '}
-                                                                            {endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                                                                        </span>
+                                                                        <div className="flex items-center gap-2 text-[#EA580C]">
+                                                                            <Clock size={14} />
+                                                                            <span>
+                                                                                {startTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                                                {' - '}
+                                                                                {endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                                            </span>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </div>
 
-                                                            {/* Right Status */}
-                                                            <div className="text-right pl-2 border-l border-black/5">
-                                                                <div className={`text-[10px] uppercase font-black tracking-wider mb-0.5 ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
-                                                                    {isSilent ? 'DONE' : 'FOCUS'}
+                                                            {/* Right Status (Localized to Chinese) */}
+                                                            <div className="text-right pl-4 border-l-2 border-black/5 min-w-[100px]">
+                                                                <div className={`text-[10px] font-black tracking-widest mb-1 ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
+                                                                    {isSilent ? '已打卡' : '专注时长'}
                                                                 </div>
-                                                                <div className={`text-xl font-black font-mono leading-none ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
+                                                                <div className={`text-2xl font-black font-mono leading-none ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
                                                                     {isSilent ? (
-                                                                        <Check size={20} strokeWidth={4} />
+                                                                        <CheckCircle2 size={24} strokeWidth={4} />
                                                                     ) : (
-                                                                        <span>{Math.floor(log.duration / 60)}<span className="text-xs ml-0.5">min</span></span>
+                                                                        <div className="flex items-baseline gap-0.5">
+                                                                            {Math.floor(log.duration / 60)}
+                                                                            <span className="text-xs font-bold ml-1">分钟</span>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -1862,7 +1863,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {/* Dashboard Components */}
                             {(() => {
                                 const statsDate = selectedStatsDate;
-                                const dayData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { tasks: [], checkins: [], focusLogs: [] };
+                                const isToday = statsDate === new Date().toISOString().split('T')[0];
+                                const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
+
+                                // Robust Data Merging: Use currentTasks if it's today, otherwise we have no task metadata for past days unless saved
+                                const tasksForStats = isToday ? currentTasks : (baselineData.tasks || []);
+                                const dayData = { ...baselineData, tasks: tasksForStats };
+
                                 const totalPoints = (dayData.tasks || [])
                                     .filter((t: any) => (dayData.checkins || []).includes(t.id))
                                     .reduce((sum: number, t: any) => sum + (t.points || 0), 0);
@@ -1909,8 +1916,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                             </div>
                                             <div className="mt-4 flex justify-around text-xs font-bold">
-                                                <div className="text-blue-500">已用: {Math.floor(totalDuration / 60)}min</div>
-                                                <div className="text-gray-300">剩余: {Math.max(0, 120 - Math.floor(totalDuration / 60))}min</div>
+                                                <div className="text-blue-500">已用: {Math.floor(totalDuration / 60)} 分钟</div>
+                                                <div className="text-gray-300">剩余: {Math.max(0, 120 - Math.floor(totalDuration / 60))} 分钟</div>
                                             </div>
                                         </div>
 
@@ -1974,9 +1981,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     const min = ((i % 4) * 15).toString().padStart(2, '0');
                                                     const timeStr = `${hour}:${min}`;
                                                     const isActive = (dayData.focusLogs || []).some((log: any) => {
-                                                        const start = log.startTime.split('T')[1].slice(0, 5);
-                                                        const end = log.endTime.split('T')[1].slice(0, 5);
-                                                        return timeStr >= start && timeStr <= end;
+                                                        if (!log.startTime || !log.endTime || typeof log.startTime !== 'string') return false;
+                                                        const start = log.startTime.split('T')[1]?.slice(0, 5);
+                                                        const end = log.endTime.split('T')[1]?.slice(0, 5);
+                                                        return start && end && timeStr >= start && timeStr <= end;
                                                     });
                                                     return (
                                                         <div key={i} className={`flex-1 rounded-[2px] transition-colors ${isActive ? 'bg-red-400' : 'bg-gray-100'}`}></div>

@@ -1526,63 +1526,90 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     ))}
                             </div>
 
-                            {rewards.length > 0 && (
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => {
-                                        setDialogConfig({
-                                            isOpen: true,
-                                            title: '🎁 确认派送奖励',
-                                            message: `是否将当前的奖励库派送给 ${selectedChild.name}？`,
-                                            hideInput: true,
-                                            onConfirm: async () => {
-                                                await handleSaveRewards();
-                                                setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                                            }
-                                        });
-                                    }}
-                                    disabled={isSaving}
-                                    className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#DB2777] active:shadow-none active:translate-y-2 transition-all"
-                                >
-                                    {isSaving ? '派送中...' : `派送给 ${selectedChild.name}`}
-                                </motion.button>
-                            )}
+                            <div className="pt-8 space-y-4">
+                                {rewards.length > 0 ? (
+                                    <div className="space-y-4">
+                                        <motion.button
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => {
+                                                setDialogConfig({
+                                                    isOpen: true,
+                                                    title: '🎁 确认派送奖励',
+                                                    message: `是否将当前的奖励库派送给 ${selectedChild.name}？`,
+                                                    hideInput: true,
+                                                    onConfirm: async () => {
+                                                        await handleSaveRewards();
+                                                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                    }
+                                                });
+                                            }}
+                                            disabled={isSaving}
+                                            className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#DB2777] active:shadow-none active:translate-y-2 transition-all"
+                                        >
+                                            {isSaving ? '派送中...' : `派送给 ${selectedChild.name}`}
+                                        </motion.button>
 
-                            {rewards.length === 0 && (
-                                <div className="text-center py-10 space-y-4">
-                                    <div className="text-gray-300 font-bold text-sm">奖励库空空如也</div>
-                                    <div className="flex flex-col items-center gap-2">
+                                        <button
+                                            onClick={() => setRewards([])}
+                                            className="w-full py-2 text-gray-400 font-bold text-xs hover:text-red-400 transition-colors"
+                                        >
+                                            清空当前列表 (本地)
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 space-y-4">
+                                        <div className="text-gray-300 font-bold text-sm">奖励库空空如也</div>
                                         <button
                                             onClick={() => setRewards(DEFAULT_REWARDS)}
                                             className="text-blue-500 font-bold text-sm hover:underline"
                                         >
                                             导入系统预设奖励
                                         </button>
-                                        <div className="text-xs text-gray-400">或者手动点击右上角 + 号添加</div>
                                     </div>
+                                )}
 
-                                    {/* 即使为空也允许派送空列表以覆盖孩子端 */}
+                                <div className="pt-4 border-t border-gray-50">
+                                    <p className="text-[10px] text-gray-300 font-bold text-center mb-4 uppercase tracking-widest">远程同步管理</p>
                                     <motion.button
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => {
                                             setDialogConfig({
                                                 isOpen: true,
-                                                title: '🗑️ 确认清空孩子端奖励',
-                                                message: `这就把孩子端的奖励全部清空吗？此操作将同步覆盖远程服务器。`,
+                                                title: '🗑️ 确认清空远程奖励',
+                                                message: `这就把 ${selectedChild.name} 的远程宝库全部清空吗？此操作将立即覆盖孩子端。`,
                                                 hideInput: true,
                                                 onConfirm: async () => {
-                                                    await handleSaveRewards();
-                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                    // Force empty list to sync
+                                                    const res = await fetch('/api/kiddieplan/manage', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            action: 'save_rewards',
+                                                            token,
+                                                            data: { childId: selectedChildId, rewards: [] }
+                                                        })
+                                                    });
+                                                    const result = await res.json();
+                                                    if (result.success) {
+                                                        setRewards([]);
+                                                        setDialogConfig({
+                                                            isOpen: true,
+                                                            title: '✨ 清理成功',
+                                                            message: `${selectedChild.name} 的远程奖励库已重置为空。`,
+                                                            onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                                                            hideInput: true
+                                                        });
+                                                    }
                                                 }
                                             });
                                         }}
                                         disabled={isSaving}
-                                        className="mt-6 w-full bg-gradient-to-r from-orange-400 to-red-400 py-4 rounded-2xl text-white font-black text-sm shadow-[0_6px_0_#c2410c] active:translate-y-1 active:shadow-none transition-all"
+                                        className="w-full bg-gradient-to-r from-orange-400 to-red-400 py-4 rounded-2xl text-white font-black text-sm shadow-[0_6px_0_#c2410c] active:translate-y-1 active:shadow-none transition-all"
                                     >
                                         {isSaving ? '同步清理中...' : `立即清空 ${selectedChild.name} 的远程奖励`}
                                     </motion.button>
                                 </div>
-                            )}
+                            </div>
                         </motion.div>
                     )}
 
@@ -2069,13 +2096,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     value={newCategoryName}
                                     onChange={e => setNewCategoryName(e.target.value)}
                                     placeholder="新分类名称 (如: 围棋)"
-                                    className="flex-1 bg-gray-50 px-4 py-3 rounded-xl font-bold text-[#5D4037] outline-none border-2 border-transparent focus:border-blue-200 transition-colors placeholder:text-gray-300 placeholder:font-normal"
+                                    className="flex-1 bg-gray-50 px-4 py-3 rounded-xl font-bold text-[#5D4037] outline-none border-2 border-transparent focus:border-blue-200 transition-colors placeholder:text-gray-300 placeholder:font-normal min-w-0"
                                     onKeyDown={e => e.key === 'Enter' && handleAddInlineCategory()}
                                 />
                                 <button
                                     onClick={handleAddInlineCategory}
                                     disabled={isSaving || !newCategoryName.trim()}
-                                    className="bg-[var(--color-blue-fun)] text-white w-12 rounded-xl font-bold shadow-md disabled:opacity-50 disabled:shadow-none flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                                    className="bg-[var(--color-blue-fun)] text-white w-12 flex-shrink-0 rounded-xl font-bold shadow-md disabled:opacity-50 disabled:shadow-none flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
                                 >
                                     {isSaving ? <Sparkles className="animate-spin" size={20} /> : <Plus size={24} />}
                                 </button>

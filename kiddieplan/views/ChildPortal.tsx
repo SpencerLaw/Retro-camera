@@ -650,48 +650,6 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                 </div>
                             </motion.div>
                         )}
-                        {activeTab === 'me' && (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-full space-y-6 text-center pt-8">
-                                <div className="relative">
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        className="w-32 h-32 bg-white/90 rounded-[40px] shadow-xl flex items-center justify-center text-6xl border-4 border-white overflow-hidden"
-                                    >
-                                        {childProfile?.avatar ? (
-                                            <img src={childProfile.avatar} className="w-full h-full object-cover" alt="avatar" />
-                                        ) : '🐙'}
-                                    </motion.div>
-                                    <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-yellow-400 rounded-2xl flex items-center justify-center text-white shadow-lg border-2 border-white">
-                                        <Star size={20} fill="currentColor" />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h2 className="text-2xl font-black text-gray-800">{childProfile?.name || '宝贝'}的档案</h2>
-                                    <div className="flex items-center gap-2 justify-center mt-2">
-                                        <div className="bg-pink-500/10 text-pink-500 px-4 py-1.5 rounded-2xl text-sm font-black flex items-center gap-2">
-                                            <span>🔥 连续打卡</span>
-                                            <span className="text-lg">{streak}</span>
-                                            <span>天</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="w-full max-w-[280px] bg-white/40 backdrop-blur-md rounded-[32px] p-6 border border-white/50">
-                                    <p className="text-sm font-bold text-gray-400 leading-relaxed">
-                                        “每一份小小的努力，<br />
-                                        都是通往宝藏的星光✨”
-                                    </p>
-                                </div>
-
-                                <button
-                                    onClick={() => onLogout()}
-                                    className="mt-4 px-8 py-3 bg-gray-100 text-gray-400 rounded-2xl text-sm font-black transition-all hover:bg-gray-200"
-                                >
-                                    退出登录
-                                </button>
-                            </motion.div>
-                        )}
                     </AnimatePresence>
                 </div>
             </main>
@@ -715,7 +673,6 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         { id: 'home', icon: Home, label: '主岛' },
                         { id: 'plan', icon: ListTodo, label: '规划' },
                         { id: 'rewards', icon: Gift, label: '宝库' },
-                        { id: 'me', icon: User, label: '档案' },
                     ].map((tab) => (
                         <button
                             key={tab.id}

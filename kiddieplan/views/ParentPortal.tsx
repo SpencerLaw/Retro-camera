@@ -982,9 +982,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     <header
                         className="px-6 py-4 rounded-[32px] border border-white/40 shadow-sm transition-all duration-500"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.65)',
-                            backdropFilter: 'blur(12px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                            background: 'rgba(255, 255, 255, 0.30)',
+                            backdropFilter: 'blur(20px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                         }}
                     >
                         {/* Top Row: Brand & Time */}
@@ -1006,7 +1006,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </div>
 
                         {/* Child Selector Row */}
-                        <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pb-2">
+                        <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2">
                             {children.map((child, idx) => {
                                 const isSelected = selectedChildId === child.id;
                                 const theme = CHILD_THEMES[idx % CHILD_THEMES.length];

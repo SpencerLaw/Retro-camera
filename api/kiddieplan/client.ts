@@ -186,6 +186,7 @@ export default async function handler(
                 childId,
                 rewardName: rewardName || '未知奖励',
                 pointsCost: cost,
+                remainingPoints: license.children[childIdx].points,
                 redeemedAt: new Date().toISOString()
             };
 

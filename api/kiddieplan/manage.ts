@@ -156,6 +156,7 @@ export default async function handler(
                 childId,
                 rewardName,
                 pointsCost,
+                remainingPoints: data.remainingPoints || 0,
                 redeemedAt: new Date().toISOString()
             };
 

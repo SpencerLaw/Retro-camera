@@ -13,7 +13,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [children, setChildren] = useState<Child[]>([]);
     const [licenseData, setLicenseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'checkins' | 'stats'>('children');
+    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'checkins' | 'stats' | 'redemption'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -703,7 +703,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             data: {
                                 childId: selectedChildId,
                                 rewardName: reward.name,
-                                pointsCost: reward.pointsCost
+                                pointsCost: reward.pointsCost,
+                                remainingPoints: selectedChild.points - reward.pointsCost
                             }
                         })
                     });
@@ -1154,9 +1155,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             whileHover={{ y: -5, rotate: -1 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setActiveTab('tasks')}
-                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(251,191,36,0.05)] border-2 border-white/50 hover:border-yellow-200 transition-all"
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-yellow-200 transition-all font-candy"
                                         >
-                                            <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
+                                            <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
                                                 <ListTodo size={32} strokeWidth={3} />
                                             </div>
                                             <span className="font-black text-[#5D4037] text-lg">任务管理</span>
@@ -1167,9 +1168,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             whileHover={{ y: -5, rotate: 1 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setActiveTab('rewards')}
-                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(248,113,113,0.05)] border-2 border-white/50 hover:border-red-200 transition-all"
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-red-200 transition-all font-candy"
                                         >
-                                            <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
+                                            <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
                                                 <Gift size={32} strokeWidth={3} />
                                             </div>
                                             <span className="font-black text-[#5D4037] text-lg">奖励中心</span>
@@ -1180,26 +1181,41 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             whileHover={{ y: -5, rotate: -1 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setActiveTab('checkins')}
-                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(167,139,250,0.05)] border-2 border-white/50 hover:border-purple-200 transition-all"
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-purple-200 transition-all font-candy"
                                         >
-                                            <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform">
+                                            <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
                                                 <CalendarCheck size={32} strokeWidth={3} />
                                             </div>
-                                            <span className="font-black text-[#5D4037] text-lg">查看打卡</span>
-                                            <span className="text-xs text-gray-400 font-bold">查看历史记录</span>
+                                            <span className="font-black text-[#5D4037] text-lg">打卡记录</span>
+                                            <span className="text-xs text-gray-400 font-bold">查看成长历史</span>
                                         </motion.button>
 
                                         <motion.button
                                             whileHover={{ y: -5, rotate: 1 }}
                                             whileTap={{ scale: 0.95 }}
-                                            onClick={() => setActiveTab('stats')}
-                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-[0_10px_0_rgba(52,211,153,0.05)] border-2 border-white/50 hover:border-emerald-200 transition-all"
+                                            onClick={() => setActiveTab('redemption')}
+                                            className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-pink-200 transition-all font-candy"
                                         >
-                                            <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 group-hover:-rotate-6 transition-transform">
-                                                <BarChart3 size={32} strokeWidth={3} />
+                                            <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 font-candy">
+                                                <Trophy size={32} strokeWidth={3} />
                                             </div>
-                                            <span className="font-black text-[#5D4037] text-lg">详情统计</span>
-                                            <span className="text-xs text-gray-400 font-bold">数据报表分析</span>
+                                            <span className="font-black text-[#5D4037] text-lg">核销记录</span>
+                                            <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
+                                        </motion.button>
+
+                                        <motion.button
+                                            whileHover={{ y: -5, rotate: 0 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => setActiveTab('stats')}
+                                            className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border-2 border-white/50 hover:border-emerald-200 transition-all font-candy"
+                                        >
+                                            <div className="w-14 h-14 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                                                <BarChart3 size={28} strokeWidth={3} />
+                                            </div>
+                                            <div className="text-left">
+                                                <div className="font-black text-[#5D4037] text-lg">详情统计分析</div>
+                                                <div className="text-xs text-gray-400 font-bold">查看宝贝的成长指数与数据报表</div>
+                                            </div>
                                         </motion.button>
                                     </div>
                                 </motion.div>
@@ -1540,7 +1556,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             setDialogConfig({
                                                 isOpen: true,
                                                 title: '🗑️ 确认清空孩子端奖励',
-                                                message: `这就把孩子端的奖励全部清空吗？`,
+                                                message: `这就把孩子端的奖励全部清空吗？此操作将同步覆盖远程服务器。`,
                                                 hideInput: true,
                                                 onConfirm: async () => {
                                                     await handleSaveRewards();
@@ -1549,9 +1565,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             });
                                         }}
                                         disabled={isSaving}
-                                        className="mt-6 w-full bg-gray-200 py-3 rounded-2xl text-gray-400 font-black text-sm shadow-sm active:translate-y-1 transition-all"
+                                        className="mt-6 w-full bg-gradient-to-r from-orange-400 to-red-400 py-4 rounded-2xl text-white font-black text-sm shadow-[0_6px_0_#c2410c] active:translate-y-1 active:shadow-none transition-all"
                                     >
-                                        {isSaving ? '处理中...' : `清空 ${selectedChild.name} 的奖励`}
+                                        {isSaving ? '同步清理中...' : `立即清空 ${selectedChild.name} 的远程奖励`}
                                     </motion.button>
                                 </div>
                             )}
@@ -1669,7 +1685,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                             {/* Text Info */}
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center justify-between mb-1">
-                                                                    <h4 className={`font-black text-lg truncate ${isSilent ? 'text-[#065F46]' : 'text-[#9A3412]'}`}>
+                                                                    <h4 className={`font-black text-lg break-words ${isSilent ? 'text-[#065F46]' : 'text-[#9A3412]'}`}>
                                                                         {log.taskTitle}
                                                                     </h4>
                                                                     <span className={`text-xs font-black px-2 py-0.5 rounded-md ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
@@ -1719,33 +1735,73 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 )}
                             </div>
 
-                            {/* Redemption History Section */}
-                            <div className="mt-8">
-                                <h3 className="text-lg font-black text-[#5D4037] mb-4 flex items-center gap-2">
-                                    <Clock size={18} className="text-gray-400" />
-                                    核销记录
-                                </h3>
-                                <div className="space-y-3">
-                                    {redemptionLogs.length > 0 ? (
-                                        redemptionLogs.map((log) => (
-                                            <div key={log.id} className="bg-gray-50 p-4 rounded-2xl flex items-center justify-between border border-gray-100">
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'redemption' && selectedChild && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-20">
+                            <div className="flex items-center gap-4">
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setActiveTab('children')}
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                >
+                                    <ArrowLeft size={20} />
+                                </motion.button>
+                                <h2 className="text-2xl font-black text-[#5D4037]">核销历史记录</h2>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-pink-400 to-pink-500 p-6 rounded-[40px] text-white shadow-xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                                <div className="relative z-10 flex justify-between items-center">
+                                    <div className="space-y-1">
+                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-80">当前糖果结余</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-4xl font-black">{selectedChild.points || 0}</span>
+                                            <span className="text-2xl">🍭</span>
+                                        </div>
+                                    </div>
+                                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                                        <Trophy size={24} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {redemptionLogs.length > 0 ? (
+                                    redemptionLogs.map((log) => (
+                                        <div key={log.id} className="bg-white/60 backdrop-blur-sm p-5 rounded-[28px] border border-white/50 shadow-sm relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-2 opacity-5">
+                                                <Gift size={40} />
+                                            </div>
+                                            <div className="flex justify-between items-start mb-2 relative z-10">
                                                 <div>
-                                                    <div className="font-bold text-gray-700">{log.rewardName}</div>
-                                                    <div className="text-xs text-gray-400 font-mono mt-0.5">
-                                                        {new Date(log.redeemedAt).toLocaleString('zh-CN')}
+                                                    <div className="font-black text-[#5D4037] text-base">{log.rewardName}</div>
+                                                    <div className="text-[10px] text-gray-400 font-bold flex items-center gap-1 mt-0.5 uppercase tracking-wider">
+                                                        <Clock size={10} /> {new Date(log.redeemedAt).toLocaleString('zh-CN')}
                                                     </div>
                                                 </div>
-                                                <div className="bg-red-50 text-red-500 px-3 py-1 rounded-full text-xs font-black">
+                                                <div className="bg-red-50 text-red-500 px-3 py-1 rounded-xl text-xs font-black shadow-sm">
                                                     -{log.pointsCost} 🍭
                                                 </div>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center py-6 text-gray-400 text-xs font-bold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                                            暂无核销记录
+                                            <div className="flex items-center justify-between pt-3 border-t border-gray-100/50">
+                                                <span className="text-[10px] font-bold text-gray-400">核销后账单结余</span>
+                                                <span className="text-sm font-black text-orange-400 font-mono">{log.remainingPoints ?? '---'} 🍭</span>
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-20 opacity-50 bg-gray-50/30 rounded-[40px] border-2 border-dashed border-gray-100 flex flex-col items-center gap-4">
+                                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-200 text-3xl">
+                                            📜
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-400 font-black text-sm">还没有核销记录哦</p>
+                                            <p className="text-gray-300 text-[10px] mt-1">达成的小心愿都会记录在这里 ~</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     )}

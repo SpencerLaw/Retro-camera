@@ -1723,14 +1723,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                                                 <div className="flex items-center gap-2 text-sm font-bold opacity-80">
                                                                     {isSilent ? (
-                                                                        <span className="text-[#059669]">✅ 计划任务打卡成功</span>
+                                                                        <span className="text-[#059669]">
+                                                                            ✅ 打卡于 {(() => {
+                                                                                const m = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
+                                                                                return m ? m[1] : '--:--';
+                                                                            })()}
+                                                                        </span>
                                                                     ) : (
                                                                         <div className="flex items-center gap-2 text-[#EA580C]">
                                                                             <Clock size={14} />
                                                                             <span>
                                                                                 {(() => {
-                                                                                    const sm = log.startTime?.match(/T(\d{2}:\d{2})/);
-                                                                                    const em = log.endTime?.match(/T(\d{2}:\d{2})/);
+                                                                                    const sm = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
+                                                                                    const em = log.endTime?.match(/[T\s](\d{2}:\d{2})/);
                                                                                     return `${sm ? sm[1] : '--:--'} - ${em ? em[1] : '--:--'}`;
                                                                                 })()}
                                                                             </span>
@@ -1865,7 +1870,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
 
                                     // Robust Data Merging
-                                    const tasksForStats = isToday ? currentTasks : (baselineData.tasks || []);
+                                    const tasksForStats = (baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks;
                                     const dayData = { ...baselineData, tasks: tasksForStats };
 
                                     const totalPoints = (dayData.tasks || [])

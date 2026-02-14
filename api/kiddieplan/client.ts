@@ -61,9 +61,10 @@ export default async function handler(
             if (!license.progress[today]) license.progress[today] = {};
             if (!license.progress[today][childId]) {
                 // 可能是从旧任务列表初始化
-                // 可能是从旧任务列表初始化
+                // 必须深拷贝当前的任务快照，否则 checkin 无法找到分母
+                const currentTasks = license.children[childIdx].tasks || [];
                 license.progress[today][childId] = {
-                    tasks: [],
+                    tasks: currentTasks,
                     checkins: []
                 };
             }

@@ -982,15 +982,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 {/* Floating Header Wrapper - Dynamic Theme */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className={`px-6 rounded-[32px] border border-white/40 shadow-sm transition-all duration-500 ease-in-out ${isScrolled ? 'py-3' : 'py-4'}`}
+                        layout
+                        className={`px-6 rounded-[32px] border border-white/30 shadow-sm transition-colors duration-500 ease-in-out ${isScrolled ? 'py-2 bg-white/40' : 'py-4'}`}
                         style={{
-                            background: 'rgba(255, 255, 255, 0.30)',
+                            background: isScrolled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.01)', // 100% Transparent when expanded
                             backdropFilter: 'blur(20px) saturate(180%)',
                             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                         }}
                     >
                         {/* Top Row: Brand & Time */}
-                        <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'mb-0' : 'mb-6'}`}>
+                        <motion.div layout className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'mb-0' : 'mb-6'}`}>
                             <div className="flex items-center gap-3">
                                 <div className="flex flex-col">
                                     <h1 className={`text-[20px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
@@ -1039,14 +1040,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     {formatBeijingTime(currentTime).split(' ')[0]}
                                 </span>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Child Selector Row - Collapsible */}
                         <AnimatePresence>
                             {!isScrolled && (
                                 <motion.div
-                                    initial={{ opacity: 1, height: 'auto', marginBottom: 0 }}
-                                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     className="overflow-hidden"
                                 >
                                     <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2">

@@ -1113,35 +1113,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         )}
                                     </div>
 
-                                {/* Mini Avatar when Scrolled */}
-                                <AnimatePresence>
-                                    {isScrolled && selectedChild && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                                            exit={{ opacity: 0, x: -20, scale: 0.8 }}
-                                            className="flex items-center gap-2 bg-white/40 backdrop-blur-sm px-2 py-1 rounded-full border border-white/50"
-                                            onClick={() => {
-                                                // Scroll to top to expand
-                                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                            }}
-                                        >
-                                            <img src={selectedChild.avatar} className="w-6 h-6 rounded-full object-cover border border-white" alt="mini" />
-                                            <span className="text-xs font-bold text-gray-600">{selectedChild.name}</span>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
 
-                            <div className="flex flex-col items-end mr-0.5">
-                                <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[1]}
-                                </span>
-                                <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[0]}
-                                </span>
-                            </div>
-                        </motion.div>
+                                </motion.div>
 
 
                     </header>

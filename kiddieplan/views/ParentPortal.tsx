@@ -953,11 +953,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     // Dynamic Theme System
     const CHILD_THEMES = [
-        { name: 'pink', bg: 'from-pink-50 to-pink-100/30', ring: 'ring-pink-400', text: 'text-pink-500', border: 'border-pink-200', shadow: 'shadow-pink-200', line: 'bg-pink-400' },
-        { name: 'blue', bg: 'from-blue-50 to-blue-100/30', ring: 'ring-blue-400', text: 'text-blue-500', border: 'border-blue-200', shadow: 'shadow-blue-200', line: 'bg-blue-400' },
-        { name: 'amber', bg: 'from-amber-50 to-amber-100/30', ring: 'ring-amber-400', text: 'text-amber-500', border: 'border-amber-200', shadow: 'shadow-amber-200', line: 'bg-amber-400' },
-        { name: 'violet', bg: 'from-violet-50 to-violet-100/30', ring: 'ring-violet-400', text: 'text-violet-500', border: 'border-violet-200', shadow: 'shadow-violet-200', line: 'bg-violet-400' },
-        { name: 'emerald', bg: 'from-emerald-50 to-emerald-100/30', ring: 'ring-emerald-400', text: 'text-emerald-500', border: 'border-emerald-200', shadow: 'shadow-emerald-200', line: 'bg-emerald-400' },
+        { name: 'pink', bg: 'from-pink-100 to-pink-200', ring: 'ring-pink-500', text: 'text-pink-600', border: 'border-pink-300', shadow: 'shadow-pink-300', line: 'bg-pink-500' },
+        { name: 'blue', bg: 'from-blue-100 to-blue-200', ring: 'ring-blue-500', text: 'text-blue-600', border: 'border-blue-300', shadow: 'shadow-blue-300', line: 'bg-blue-500' },
+        { name: 'amber', bg: 'from-amber-100 to-amber-200', ring: 'ring-amber-500', text: 'text-amber-600', border: 'border-amber-300', shadow: 'shadow-amber-300', line: 'bg-amber-500' },
+        { name: 'violet', bg: 'from-violet-100 to-violet-200', ring: 'ring-violet-500', text: 'text-violet-600', border: 'border-violet-300', shadow: 'shadow-violet-300', line: 'bg-violet-500' },
+        { name: 'emerald', bg: 'from-emerald-100 to-emerald-200', ring: 'ring-emerald-500', text: 'text-emerald-600', border: 'border-emerald-300', shadow: 'shadow-emerald-300', line: 'bg-emerald-500' },
     ];
 
     const currentTheme = selectedChild

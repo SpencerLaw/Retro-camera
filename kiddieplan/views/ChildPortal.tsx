@@ -593,7 +593,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <header
                         className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm' : 'py-4 shadow-none'}`}
                         style={{
-                            background: isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.7)',
+                            background: isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)', // Increased transparency (Crystal Glass)
                             backdropFilter: 'blur(20px) saturate(180%)',
                             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                         }}

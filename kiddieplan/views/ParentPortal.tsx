@@ -544,6 +544,51 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
+    const handleDeleteChild = async () => {
+        setDialogConfig({
+            isOpen: true,
+            title: '删除宝贝',
+            message: `确定要删除宝贝 ${selectedChild?.name} 吗?此操作不可恢复。`,
+            onConfirm: async () => {
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                try {
+                    setIsSaving(true);
+                    const res = await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'remove_child',
+                            token,
+                            childId: selectedChildId
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        const updated = children.filter(c => c.id !== selectedChildId);
+                        setChildren(updated);
+                        if (updated.length > 0) {
+                            setSelectedChildId(updated[0].id);
+                        } else {
+                            setSelectedChildId(null);
+                            setActiveTab('children');
+                        }
+                    } else {
+                        throw new Error(result.message || '删除失败');
+                    }
+                } catch (err: any) {
+                    setDialogConfig({
+                        isOpen: true,
+                        title: '删除失败',
+                        message: err.message || '系统繁忙，请稍后再试',
+                        onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false }))
+                    });
+                } finally {
+                    setIsSaving(false);
+                }
+            }
+        });
+    };
+
     const addTask = (title?: string, time?: string, points?: number) => {
         const selectedChild = children.find(c => c.id === selectedChildId);
 
@@ -747,9 +792,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     };
 
     const removeReward = (id: string) => {
-        if (window.confirm('确定要删除这个奖励项吗？')) {
-            setRewards(prev => prev.filter(r => r.id !== id));
-        }
+        setDialogConfig({
+            isOpen: true,
+            title: '删除奖励项',
+            message: '确定要删除这个奖励项吗？',
+            onConfirm: () => {
+                setRewards(prev => prev.filter(r => r.id !== id));
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+            },
+            hideInput: true
+        });
     };
 
     const processImage = (file: File): Promise<Blob> => {
@@ -846,35 +898,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const handleResetPoints = async () => {
         if (!selectedChild) return;
-        setDialogConfig({
-            isOpen: true,
-            title: '💣 清空糖果确认',
-            message: `确定要将 ${selectedChild.name} 的糖果库清零吗？此操作不可撤销哦 ~`,
-            onConfirm: async () => {
-                setIsSaving(true);
-                try {
-                    const res = await fetch('/api/kiddieplan/manage', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'save_child',
-                            token,
-                            data: { ...selectedChild, points: 0 }
-                        })
-                    });
-                    const result = await res.json();
-                    if (result.success) {
-                        setChildren(result.data.children);
-                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                    }
-                } catch (err) {
-                    alert('重置失败');
-                } finally {
-                    setIsSaving(false);
-                }
-            },
-            hideInput: true
-        });
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_child',
+                    token,
+                    data: { ...selectedChild, points: 0 }
+                })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setChildren(result.data.children);
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+            }
+        } catch (err) {
+            alert('重置失败');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleEditChild = () => {
@@ -887,32 +931,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             defaultValue: selectedChild.name,
             showAvatarUpload: true,
             showDelete: true,
-            onDelete: async () => {
-                if (window.confirm(`确定要删除宝贝 ${selectedChild.name} 吗？此操作不可恢复。`)) {
-                    try {
-                        const res = await fetch('/api/kiddieplan/manage', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                action: 'remove_child',
-                                token,
-                                childId: selectedChild.id
-                            })
-                        });
-                        const result = await res.json();
-                        if (result.success) {
-                            setChildren(result.data.children);
-                            if (result.data.children.length > 0) {
-                                setSelectedChildId(result.data.children[0].id);
-                            } else {
-                                setSelectedChildId(null);
-                            }
-                            setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                        }
-                    } catch (err) {
-                        alert('删除失败');
-                    }
-                }
+            onDelete: () => {
+                setDialogConfig(prev => ({ ...prev, isOpen: false })); // Close current dialog
+                handleDeleteChild(); // Open delete confirmation dialog
             },
             onConfirm: async (name) => {
                 if (!name) return;
@@ -985,8 +1006,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 <div className="sticky top-0 p-4 z-40">
                     <header
                         className={`px-6 rounded-[32px] transition-all duration-500 ease-in-out ${isScrolled
-                            ? 'py-3 bg-white/80 border border-white/40 shadow-sm backdrop-blur-2xl'
-                            : 'py-4 bg-white/80 border border-white/40 shadow-none backdrop-blur-2xl'
+                            ? 'py-3 bg-white/20 border border-white/40 shadow-sm backdrop-blur-2xl'
+                            : 'py-4 bg-white/20 border border-white/40 shadow-none backdrop-blur-2xl'
                             }`}
                     >
                         {/* Top Row: Brand & Time */}
@@ -1140,7 +1161,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             key={selectedChildId}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/90 backdrop-blur-2xl p-8 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden"
+                            className="bg-white/20 backdrop-blur-2xl p-8 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden"
                         >
                             {/* Dashboard Content - Z-Index raised to sit on top of glass */}
                             <div className="relative z-10 space-y-6">
@@ -1190,7 +1211,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 whileTap={{ scale: 0.9 }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleResetPoints();
+                                                    setDialogConfig({
+                                                        isOpen: true,
+                                                        title: '重置糖果收益',
+                                                        message: '确定要重置当前宝贝的所有糖果吗？此操作无法撤销。',
+                                                        onConfirm: () => handleResetPoints()
+                                                    });
                                                 }}
                                                 className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30 backdrop-blur-md"
                                                 title="清空收益"
@@ -1485,9 +1511,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => {
-                                            if (confirm('确定要清空所有奖励吗？此操作不可撤销。')) {
-                                                setRewards([]);
-                                            }
+                                            setDialogConfig({
+                                                isOpen: true,
+                                                title: '清空所有奖励',
+                                                message: '确定要清空所有奖励吗？此操作不可撤销。',
+                                                onConfirm: () => {
+                                                    setRewards([]);
+                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                },
+                                                hideInput: true
+                                            });
                                         }}
                                         className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-400 shadow-sm border border-red-100"
                                         title="清空所有奖励"
@@ -1572,13 +1605,24 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 });
                                             }}
                                             disabled={isSaving}
-                                            className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#DB2777] active:shadow-none active:translate-y-2 transition-all"
+                                            className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#059669] active:shadow-none active:translate-y-2 transition-all"
                                         >
                                             {isSaving ? '派送中...' : `派送给 ${selectedChild.name}`}
                                         </motion.button>
 
                                         <button
-                                            onClick={() => setRewards([])}
+                                            onClick={() => {
+                                                setDialogConfig({
+                                                    isOpen: true,
+                                                    title: '清空本地奖励',
+                                                    message: '确定要清空当前本地列表中的所有奖励吗？',
+                                                    onConfirm: () => {
+                                                        setRewards([]);
+                                                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                    },
+                                                    hideInput: true
+                                                });
+                                            }}
                                             className="w-full py-2 text-gray-400 font-bold text-xs hover:text-red-400 transition-colors"
                                         >
                                             清空当前列表 (本地)
@@ -1699,11 +1743,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             if (!aggregated[task.title]) {
                                                 // Synthesize a sort time from timeSlot or default to now
                                                 let sortTime = Date.now();
+                                                let startTime = '';
                                                 if (task.timeSlot) {
                                                     const [h, m] = task.timeSlot.split(':').map(Number);
                                                     const d = new Date();
                                                     d.setHours(h, m, 0, 0);
                                                     sortTime = d.getTime();
+                                                    startTime = d.toISOString();
+                                                } else {
+                                                    startTime = new Date().toISOString();
                                                 }
 
                                                 aggregated[task.title] = {
@@ -1712,6 +1760,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     type: 'silent',
                                                     timeSlot: task.timeSlot,
                                                     sortTime: sortTime,
+                                                    startTime: startTime,
                                                     isSilent: true // Flag for UI distinction
                                                 };
                                             }
@@ -2104,13 +2153,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-50 pb-1">专注时段明细</div>
                                                         <div className="grid grid-cols-2 gap-2">
                                                             {(dayData.focusLogs || [])
-                                                                .filter((log: any) => log.startTime && typeof log.startTime === 'string' && log.endTime && typeof log.endTime === 'string')
+                                                                .filter((log: any) => log.startTime && typeof log.startTime === 'string')
                                                                 .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
                                                                 .map((log: any, idx: number) => {
-                                                                    const sMatch = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
-                                                                    const eMatch = log.endTime?.match(/[T\s](\d{2}:\d{2})/);
-                                                                    const sStr = sMatch ? sMatch[1] : '--:--';
-                                                                    const eStr = eMatch ? eMatch[1] : '--:--';
+                                                                    const sStr = log.startTime ? new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime)) : '--:--';
+                                                                    const eStr = log.endTime ? new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)) : '--:--';
                                                                     const durationDisplay = log.duration > 0 ? Math.floor(log.duration / 60) : '< 1';
 
                                                                     return (
@@ -2418,9 +2465,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="flex gap-3 mb-4">
                                 <button
                                     onClick={() => {
-                                        if (window.confirm('确定要恢复所有隐藏的系统任务吗？')) {
-                                            handleSaveCategories(customCategories, []);
-                                        }
+                                        setDialogConfig({
+                                            isOpen: true,
+                                            title: '恢复预设分类',
+                                            message: '确定要恢复所有隐藏的系统任务吗？',
+                                            onConfirm: () => {
+                                                handleSaveCategories(customCategories, []);
+                                                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                            },
+                                            hideInput: true
+                                        });
                                     }}
                                     className="px-4 py-3 rounded-xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors border-2 border-transparent hover:border-gray-100"
                                 >

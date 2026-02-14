@@ -1872,101 +1872,127 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         .filter((t: any) => (dayData.checkins || []).includes(t.id))
                                         .reduce((sum: number, t: any) => sum + (t.points || 0), 0);
 
-                                    const totalDuration = (dayData.focusLogs || []).reduce((sum: number, log: any) => sum + (log.duration || 0), 0);
-                                    const FOCUS_GOAL_MINUTES = 120;
-                                    const focusGoalSeconds = FOCUS_GOAL_MINUTES * 60;
-                                    const focusPercentage = Math.min(100, (totalDuration / focusGoalSeconds) * 100);
 
-                                    // Category Breakdown
-                                    const categories = ['study', 'morning', 'evening', 'sports', 'discipline', 'chores', 'hygiene', 'creativity', 'other'];
-                                    const catStats = categories.map(catId => {
-                                        const catTasks = (dayData.tasks || []).filter((t: any) => t.category === catId);
-                                        const completed = catTasks.filter((t: any) => (dayData.checkins || []).includes(t.id)).length;
-                                        return { id: catId, total: catTasks.length, completed };
-                                    }).filter(s => s.total > 0);
 
                                     return (
                                         <div className="space-y-6">
-                                            {/* Top Card: Focus Gauge (Gauge Style) */}
-                                            <div className="bg-white/90 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
-                                                <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-4">专注度达成 (分钟)</div>
-                                                <div className="relative w-48 h-24 mx-auto overflow-hidden">
-                                                    {/* Background Arc */}
-                                                    <svg className="w-48 h-48 -rotate-180" viewBox="0 0 100 100">
-                                                        <circle cx="50" cy="50" r="45" fill="none" stroke="#F1F5F9" strokeWidth="10" strokeDasharray="141.37 282.74" />
-                                                        <motion.circle
-                                                            cx="50" cy="50" r="45" fill="none"
-                                                            stroke="url(#blueGradient)" strokeWidth="10"
-                                                            strokeLinecap="round"
-                                                            initial={{ strokeDashoffset: 141.37 }}
-                                                            animate={{ strokeDashoffset: 141.37 - (141.37 * focusPercentage / 100) }}
-                                                            strokeDasharray="141.37 282.74"
-                                                        />
-                                                        <defs>
-                                                            <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                                <stop offset="0%" stopColor="#60A5FA" />
-                                                                <stop offset="100%" stopColor="#3B82F6" />
-                                                            </linearGradient>
-                                                        </defs>
-                                                    </svg>
-                                                    <div className="absolute top-8 left-0 right-0">
-                                                        <div className="text-6xl font-black text-[#5D4037] tracking-tighter">{Math.floor(totalDuration / 60)}</div>
-                                                        <div className="text-xs text-gray-400 font-bold mt-1">目标 {FOCUS_GOAL_MINUTES} 分钟</div>
-                                                    </div>
+                                            {/* 1. Calendar Navigation (Moved to Top) */}
+                                            <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
+                                                {/* Decorative Elements */}
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-2xl opacity-40"></div>
+                                                <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-100 rounded-full -ml-12 -mb-12 blur-2xl opacity-40"></div>
+
+                                                <div className="flex justify-between items-center mb-6 relative z-10">
+                                                    <h3 className="text-lg font-black text-[#5D4037] flex items-center gap-2">
+                                                        <Calendar size={20} className="text-blue-500" />
+                                                        成长日历
+                                                    </h3>
+                                                    <span className="text-xs font-bold text-gray-400 bg-white/50 px-3 py-1 rounded-full border border-white">
+                                                        {new Date().getFullYear()}年{new Date().getMonth() + 1}月
+                                                    </span>
                                                 </div>
-                                                <div className="mt-4 flex justify-around text-sm font-bold font-mono">
-                                                    <div className="text-blue-500">已用: {Math.floor(totalDuration / 60)} / {FOCUS_GOAL_MINUTES} min</div>
-                                                    <div className="text-gray-300">完成度: {Math.round(focusPercentage)}%</div>
+                                                <div className="grid grid-cols-7 gap-2 relative z-10">
+                                                    {['日', '一', '二', '三', '四', '五', '六'].map(d => (
+                                                        <div key={d} className="text-center text-[10px] font-black text-gray-300 pb-2">{d}</div>
+                                                    ))}
+                                                    {(() => {
+                                                        const now = new Date();
+                                                        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+                                                        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                                                        const cells = [];
+                                                        for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} />);
+                                                        for (let d = 1; d <= daysInMonth; d++) {
+                                                            const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+                                                            const isSelected = dateStr === selectedStatsDate;
+                                                            const isTodayActual = dateStr === formatBeijingTime(new Date()).split(' ')[0];
+                                                            const hasData = (licenseData as any)?.progress?.[dateStr]?.[selectedChildId]?.checkins?.length > 0;
+                                                            cells.push(
+                                                                <motion.button
+                                                                    key={d}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    onClick={() => setSelectedStatsDate(dateStr)}
+                                                                    className={`h-11 rounded-2xl flex flex-col items-center justify-center relative transition-all duration-300
+                                                                        ${isSelected
+                                                                            ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg scale-110 z-10 ring-2 ring-white'
+                                                                            : 'bg-white/40 hover:bg-white text-gray-500 border border-white/40'}`}
+                                                                >
+                                                                    <span className="text-xs font-black">{d}</span>
+                                                                    {isTodayActual && (
+                                                                        <div className={`absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase shadow-sm
+                                                                            ${isSelected ? 'bg-white text-blue-500' : 'bg-blue-500 text-white'}`}>
+                                                                            今日
+                                                                        </div>
+                                                                    )}
+                                                                    {hasData && !isSelected && !isTodayActual && (
+                                                                        <div className="absolute bottom-1.5 w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse"></div>
+                                                                    )}
+                                                                </motion.button>
+                                                            );
+                                                        }
+                                                        return cells;
+                                                    })()}
                                                 </div>
                                             </div>
 
-                                            {/* Macros Breakdown (Category Detail rings) */}
-                                            <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
-                                                <div className="flex justify-between items-center mb-6">
-                                                    <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                                                        <div className="w-2 h-2 rounded-full bg-emerald-400"></div> 类目达成看板
-                                                    </div>
-                                                    <ArrowRight size={14} className="text-gray-300" />
-                                                </div>
+                                            {/* 2. Completion Gauge & Summary (Core Metric) */}
+                                            <div className="grid grid-cols-1 gap-6">
+                                                <div className="bg-white/90 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
+                                                    <div className="absolute top-0 right-0 w-40 h-40 bg-orange-100 rounded-full -mr-20 -mt-20 blur-3xl opacity-30"></div>
+                                                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-100 rounded-full -ml-20 -mb-20 blur-3xl opacity-30"></div>
 
-                                                <div className="flex items-center justify-between gap-4">
-                                                    <div className="space-y-4 flex-1">
-                                                        {catStats.slice(0, 3).map((s, i) => (
-                                                            <div key={s.id} className="flex flex-col">
-                                                                <span className="text-xs font-bold text-gray-400 uppercase">{customCategories.find(c => c.id === s.id)?.name || s.id}</span>
-                                                                <div className="flex items-end gap-2">
-                                                                    <span className="text-2xl font-black text-[#5D4037]">{s.completed}</span>
-                                                                    <span className="text-sm font-bold text-gray-300 pb-1">/ {s.total}</span>
-                                                                    <span className={`text-xs font-black ml-auto ${['text-blue-400', 'text-orange-400', 'text-pink-400'][i % 3]}`}>
-                                                                        {Math.round(s.completed / s.total * 100)}%
-                                                                    </span>
+                                                    <div className="relative z-10">
+                                                        <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-6 flex items-center justify-center gap-2 opacity-80">
+                                                            <Target size={14} className="text-orange-400" />
+                                                            今日任务完成率
+                                                        </div>
+
+                                                        <div className="relative w-56 h-56 mx-auto flex items-center justify-center">
+                                                            {/* Base Ring */}
+                                                            <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#F1F5F9" strokeWidth="8" strokeLinecap="round" />
+                                                                {/* Progress Ring */}
+                                                                <motion.circle
+                                                                    cx="50" cy="50" r="42" fill="none"
+                                                                    stroke="url(#orangeGradient)" strokeWidth="8"
+                                                                    strokeLinecap="round"
+                                                                    initial={{ strokeDasharray: "0 264" }}
+                                                                    animate={{ strokeDasharray: `${(dayData.checkins.length / (dayData.tasks.length || 1)) * 263.89} 264` }}
+                                                                    className="drop-shadow-lg"
+                                                                />
+                                                                <defs>
+                                                                    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                                        <stop offset="0%" stopColor="#FBBF24" />
+                                                                        <stop offset="100%" stopColor="#F97316" />
+                                                                    </linearGradient>
+                                                                </defs>
+                                                            </svg>
+
+                                                            {/* Center Content */}
+                                                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                                <div className="text-6xl font-black text-[#5D4037] tracking-tighter flex items-baseline">
+                                                                    {dayData.tasks.length > 0
+                                                                        ? Math.round((dayData.checkins.length / dayData.tasks.length) * 100)
+                                                                        : 0}
+                                                                    <span className="text-2xl ml-1 text-gray-300">%</span>
+                                                                </div>
+                                                                <div className="text-xs font-bold text-gray-400 mt-1 bg-white/60 px-3 py-1 rounded-full border border-white/50">
+                                                                    已完成 {dayData.checkins.length} / {dayData.tasks.length}
                                                                 </div>
                                                             </div>
-                                                        ))}
-                                                        {catStats.length === 0 && <div className="text-gray-300 text-xs font-bold py-4">本日暂无分配任务</div>}
-                                                    </div>
+                                                        </div>
 
-                                                    <div className="relative w-32 h-32 flex items-center justify-center">
-                                                        {catStats.length > 0 && catStats.slice(0, 3).map((s, i) => (
-                                                            <div key={s.id} className="absolute inset-0" style={{ padding: i * 8 }}>
-                                                                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                                                                    <circle cx="50" cy="50" r="40" fill="none" stroke="#F1F5F9" strokeWidth="10" />
-                                                                    <motion.circle
-                                                                        cx="50" cy="50" r="40" fill="none"
-                                                                        stroke={['#60A5FA', '#FB923C', '#F472B6'][i % 3]}
-                                                                        strokeWidth="10" strokeLinecap="round"
-                                                                        initial={{ strokeDasharray: "0 251.32" }}
-                                                                        animate={{ strokeDasharray: `${(s.completed / s.total) * 251.32} 251.32` }}
-                                                                    />
-                                                                </svg>
-                                                            </div>
-                                                        ))}
-                                                        <div className="text-center">
-                                                            <div className="text-2xl font-black text-emerald-500">🏆</div>
+                                                        {/* Motivation Text */}
+                                                        <div className="mt-6 text-sm font-bold text-gray-500">
+                                                            {dayData.tasks.length === 0 ? "今天是个轻松的休息日 ~" :
+                                                                dayData.checkins.length === dayData.tasks.length ? "太棒了！任务全部搞定！🎉" :
+                                                                    dayData.checkins.length > 0 ? "加油！只要开始就是进步 ✨" :
+                                                                        "准备好开始今天的挑战了吗？🚀"}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+
+
 
                                             {/* Active Timeline (High Precision) */}
                                             <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
@@ -1974,7 +2000,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
                                                         <div className="w-2 h-2 rounded-full bg-red-400"></div> 活跃时间分布 (06:00 - 22:00)
                                                     </div>
-                                                    <span className="text-[10px] font-black text-red-300">统计精度: 15min</span>
+                                                    <span className="text-[10px] font-black text-red-300 bg-red-50 px-2 py-0.5 rounded-lg">精度: 15min</span>
                                                 </div>
 
                                                 <div className="h-14 w-full bg-gray-50 rounded-2xl overflow-hidden flex gap-0.5 p-1 relative border border-gray-100">
@@ -2043,86 +2069,58 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 )}
                                             </div>
 
-                                            {/* Calendar Navigation */}
-                                            <div className="bg-white/80 p-6 rounded-[40px] border-2 border-white shadow-sm">
-                                                <div className="flex justify-between items-center mb-6">
-                                                    <h3 className="font-black text-[#5D4037] flex items-center gap-2">
-                                                        <Calendar size={18} className="text-blue-400" />
-                                                        成长日历
-                                                    </h3>
-                                                    <span className="text-xs font-bold text-gray-400">{new Date().getFullYear()}年{new Date().getMonth() + 1}月</span>
-                                                </div>
-                                                <div className="grid grid-cols-7 gap-2">
-                                                    {['日', '一', '二', '三', '四', '五', '六'].map(d => (
-                                                        <div key={d} className="text-center text-[10px] font-black text-gray-300 pb-2">{d}</div>
-                                                    ))}
-                                                    {(() => {
-                                                        const now = new Date();
-                                                        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-                                                        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                                                        const cells = [];
-                                                        for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} />);
-                                                        for (let d = 1; d <= daysInMonth; d++) {
-                                                            const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
-                                                            const isSelected = dateStr === selectedStatsDate;
-                                                            const isTodayActual = dateStr === formatBeijingTime(new Date()).split(' ')[0];
-                                                            const hasData = (licenseData as any)?.progress?.[dateStr]?.[selectedChildId]?.checkins?.length > 0;
-                                                            cells.push(
-                                                                <motion.button
-                                                                    key={d}
-                                                                    whileTap={{ scale: 0.9 }}
-                                                                    onClick={() => setSelectedStatsDate(dateStr)}
-                                                                    className={`h-10 rounded-2xl flex flex-col items-center justify-center relative transition-all
-                                                                    ${isSelected ? 'bg-blue-500 text-white shadow-lg scale-110 z-10' : 'bg-gray-50/50 hover:bg-gray-100 text-gray-500'}`}
-                                                                >
-                                                                    <span className="text-xs font-black">{d}</span>
-                                                                    {isTodayActual && (
-                                                                        <div className={`absolute -top-1 -right-0.5 px-1 py-0.5 rounded-md text-[6px] font-black uppercase
-                                                                        ${isSelected ? 'bg-white text-blue-500' : 'bg-blue-500 text-white'}`}>今日</div>
-                                                                    )}
-                                                                    {hasData && !isSelected && !isTodayActual && (
-                                                                        <div className="absolute bottom-1 w-1 h-1 bg-orange-400 rounded-full"></div>
-                                                                    )}
-                                                                </motion.button>
-                                                            );
-                                                        }
-                                                        return cells;
-                                                    })()}
-                                                </div>
-                                            </div>
 
-                                            {/* Day Detail List */}
-                                            <div className="space-y-4">
-                                                <div className="flex items-center gap-2 px-2">
-                                                    <div className="w-1.5 h-4 bg-blue-400 rounded-full"></div>
-                                                    <h4 className="font-black text-[#5D4037] text-sm">当日任务详情</h4>
-                                                </div>
-                                                {dayData.tasks.length > 0 ? (
-                                                    dayData.tasks.map((task: any) => (
-                                                        <div key={task.id} className="bg-white/60 p-4 rounded-3xl border border-white shadow-sm flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg
-                                                                ${dayData.checkins.includes(task.id) ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 text-gray-300'}`}>
-                                                                    {dayData.checkins.includes(task.id) ? '✅' : '⏳'}
-                                                                </div>
-                                                                <div>
-                                                                    <div className="font-bold text-[#5D4037] text-sm">{task.title}</div>
-                                                                    <div className="text-[10px] text-gray-400 font-bold">{task.timeSlot} · {task.points} 🍭</div>
-                                                                </div>
-                                                            </div>
-                                                            {dayData.checkins.includes(task.id) ? (
-                                                                <span className="text-xs font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">+ {task.points}</span>
-                                                            ) : (
-                                                                <span className="text-[10px] font-bold text-gray-300 px-3 py-1 border border-gray-100 rounded-full italic">未打卡</span>
-                                                            )}
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <div className="py-12 text-center bg-gray-50/50 rounded-[40px] border-2 border-dashed border-gray-100">
-                                                        <div className="text-4xl mb-2 opacity-20">💤</div>
-                                                        <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">该日期暂无数据记录</p>
+
+                                            {/* 4. Day Detail List (Preserved) */}
+                                            <div className="bg-white/80 backdrop-blur-xl p-6 rounded-[40px] shadow-lg border-2 border-white">
+                                                <div className="flex items-center gap-3 mb-6">
+                                                    <div className="p-2 bg-emerald-100 rounded-xl text-emerald-600">
+                                                        <ListTodo size={18} />
                                                     </div>
-                                                )}
+                                                    <h4 className="font-black text-[#5D4037] text-lg">当日任务详情</h4>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    {dayData.tasks.length > 0 ? (
+                                                        dayData.tasks.map((task: any) => (
+                                                            <div key={task.id} className={`p-4 rounded-[24px] border border-white shadow-sm flex items-center justify-between transition-all hover:scale-[1.01]
+                                                                ${dayData.checkins.includes(task.id) ? 'bg-gradient-to-r from-emerald-50/80 to-white/60' : 'bg-white/60'}`}>
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center text-xl shadow-inner
+                                                                    ${dayData.checkins.includes(task.id) ? 'bg-emerald-100 text-emerald-500 ring-2 ring-emerald-200 ring-offset-2 ring-offset-transparent' : 'bg-gray-100 text-gray-300'}`}>
+                                                                        {dayData.checkins.includes(task.id) ? '✅' : '⏳'}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className={`font-black text-base ${dayData.checkins.includes(task.id) ? 'text-[#5D4037]' : 'text-gray-400'}`}>
+                                                                            {task.title}
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 mt-1">
+                                                                            <span className="text-[10px] font-bold text-gray-400 bg-white/50 px-2 py-0.5 rounded-md border border-gray-100">
+                                                                                {task.timeSlot}
+                                                                            </span>
+                                                                            <span className="text-[10px] font-bold text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100">
+                                                                                {task.points} 🍭
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {dayData.checkins.includes(task.id) && (
+                                                                    <div className="mr-2">
+                                                                        <span className="text-xs font-black text-emerald-500 bg-emerald-100/50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                                                                            已完成
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-16 text-center bg-gray-50/30 rounded-[32px] border-2 border-dashed border-gray-200/50">
+                                                            <div className="text-5xl mb-4 opacity-20 filter grayscale">💤</div>
+                                                            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">该日期暂无数据记录</p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     );

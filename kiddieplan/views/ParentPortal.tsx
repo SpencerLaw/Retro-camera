@@ -1713,7 +1713,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                         {log.taskTitle}
                                                                     </h4>
                                                                     <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
-                                                                        {log.timeSlot || '刚刚'}
+                                                                        {log.timeSlot || (() => {
+                                                                            const m = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
+                                                                            return m ? m[1] : '--:--';
+                                                                        })()}
                                                                     </div>
                                                                 </div>
 
@@ -2058,13 +2061,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-50 pb-1">专注时段明细</div>
                                                         <div className="grid grid-cols-2 gap-2">
                                                             {(dayData.focusLogs || [])
-                                                                .filter((log: any) => log.duration > 0 && log.startTime && typeof log.startTime === 'string' && log.endTime && typeof log.endTime === 'string')
+                                                                .filter((log: any) => log.startTime && typeof log.startTime === 'string' && log.endTime && typeof log.endTime === 'string')
                                                                 .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
                                                                 .map((log: any, idx: number) => {
                                                                     const sMatch = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
                                                                     const eMatch = log.endTime?.match(/[T\s](\d{2}:\d{2})/);
                                                                     const sStr = sMatch ? sMatch[1] : '--:--';
                                                                     const eStr = eMatch ? eMatch[1] : '--:--';
+                                                                    const durationDisplay = log.duration > 0 ? Math.floor(log.duration / 60) : '< 1';
 
                                                                     return (
                                                                         <div key={idx} className="bg-gray-50/50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
@@ -2073,7 +2077,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                                 <span className="text-[10px] font-black text-[#5D4037]">
                                                                                     {sStr} - {eStr}
                                                                                 </span>
-                                                                                <span className="text-[8px] font-bold text-gray-400">{Math.floor(log.duration / 60)} 分钟</span>
+                                                                                <span className="text-[8px] font-bold text-gray-400">{durationDisplay} 分钟</span>
                                                                             </div>
                                                                         </div>
                                                                     );
@@ -2096,38 +2100,40 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                                 <div className="space-y-3">
                                                     {dayData.tasks.length > 0 ? (
-                                                        dayData.tasks.map((task: any) => (
-                                                            <div key={task.id} className={`p-4 rounded-[24px] border border-white shadow-sm flex items-center justify-between transition-all hover:scale-[1.01]
+                                                        [...dayData.tasks]
+                                                            .sort((a: any, b: any) => (a.timeSlot || '').localeCompare(b.timeSlot || ''))
+                                                            .map((task: any) => (
+                                                                <div key={task.id} className={`p-4 rounded-[24px] border border-white shadow-sm flex items-center justify-between transition-all hover:scale-[1.01]
                                                                 ${dayData.checkins.includes(task.id) ? 'bg-gradient-to-r from-emerald-50/80 to-white/60' : 'bg-white/60'}`}>
-                                                                <div className="flex items-center gap-4">
-                                                                    <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center text-xl shadow-inner
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center text-xl shadow-inner
                                                                     ${dayData.checkins.includes(task.id) ? 'bg-emerald-100 text-emerald-500 ring-2 ring-emerald-200 ring-offset-2 ring-offset-transparent' : 'bg-gray-100 text-gray-300'}`}>
-                                                                        {dayData.checkins.includes(task.id) ? '✅' : '⏳'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className={`font-black text-base ${dayData.checkins.includes(task.id) ? 'text-[#5D4037]' : 'text-gray-400'}`}>
-                                                                            {task.title}
+                                                                            {dayData.checkins.includes(task.id) ? '✅' : '⏳'}
                                                                         </div>
-                                                                        <div className="flex items-center gap-2 mt-1">
-                                                                            <span className="text-[10px] font-bold text-gray-400 bg-white/50 px-2 py-0.5 rounded-md border border-gray-100">
-                                                                                {task.timeSlot}
-                                                                            </span>
-                                                                            <span className="text-[10px] font-bold text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100">
-                                                                                {task.points} 🍭
-                                                                            </span>
+                                                                        <div>
+                                                                            <div className={`font-black text-base ${dayData.checkins.includes(task.id) ? 'text-[#5D4037]' : 'text-gray-400'}`}>
+                                                                                {task.title}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2 mt-1">
+                                                                                <span className="text-[10px] font-bold text-gray-400 bg-white/50 px-2 py-0.5 rounded-md border border-gray-100">
+                                                                                    {task.timeSlot}
+                                                                                </span>
+                                                                                <span className="text-[10px] font-bold text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100">
+                                                                                    {task.points} 🍭
+                                                                                </span>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
 
-                                                                {dayData.checkins.includes(task.id) && (
-                                                                    <div className="mr-2">
-                                                                        <span className="text-xs font-black text-emerald-500 bg-emerald-100/50 px-3 py-1.5 rounded-xl border border-emerald-100">
-                                                                            已完成
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        ))
+                                                                    {dayData.checkins.includes(task.id) && (
+                                                                        <div className="mr-2">
+                                                                            <span className="text-xs font-black text-emerald-500 bg-emerald-100/50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                                                                                已完成
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ))
                                                     ) : (
                                                         <div className="py-16 text-center bg-gray-50/30 rounded-[32px] border-2 border-dashed border-gray-200/50">
                                                             <div className="text-5xl mb-4 opacity-20 filter grayscale">💤</div>

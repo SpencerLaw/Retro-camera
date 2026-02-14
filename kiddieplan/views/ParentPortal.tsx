@@ -1714,8 +1714,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                     </h4>
                                                                     <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
                                                                         {log.timeSlot || (() => {
-                                                                            const m = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
-                                                                            return m ? m[1] : '--:--';
+                                                                            if (!log.startTime) return '--:--';
+                                                                            const d = new Date(log.startTime);
+                                                                            return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
                                                                         })()}
                                                                     </div>
                                                                 </div>
@@ -1724,8 +1725,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                     {isSilent ? (
                                                                         <span className="text-[#059669]">
                                                                             ✅ 打卡于 {(() => {
-                                                                                const m = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
-                                                                                return m ? m[1] : '--:--';
+                                                                                if (!log.startTime) return '--:--';
+                                                                                const d = new Date(log.startTime);
+                                                                                return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
                                                                             })()}
                                                                         </span>
                                                                     ) : (
@@ -1733,9 +1735,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                             <Clock size={14} />
                                                                             <span>
                                                                                 {(() => {
-                                                                                    const sm = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
-                                                                                    const em = log.endTime?.match(/[T\s](\d{2}:\d{2})/);
-                                                                                    return `${sm ? sm[1] : '--:--'} - ${em ? em[1] : '--:--'}`;
+                                                                                    if (!log.startTime || !log.endTime) return '--:--';
+                                                                                    const d1 = new Date(log.startTime);
+                                                                                    const d2 = new Date(log.endTime);
+                                                                                    const sStr = `${d1.getHours().toString().padStart(2, '0')}:${d1.getMinutes().toString().padStart(2, '0')}`;
+                                                                                    const eStr = `${d2.getHours().toString().padStart(2, '0')}:${d2.getMinutes().toString().padStart(2, '0')}`;
+                                                                                    return `${sStr} - ${eStr}`;
                                                                                 })()}
                                                                             </span>
                                                                         </div>

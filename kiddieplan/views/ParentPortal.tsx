@@ -2007,18 +2007,31 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="h-14 w-full bg-gray-50 rounded-2xl overflow-hidden flex gap-0.5 p-1 relative border border-gray-100">
                                                     {/* Render relevant hours slots (6am to 10pm = 16 hours = 64 slots) */}
                                                     {Array.from({ length: 64 }).map((_, i) => {
-                                                        const totalMins = (6 * 60) + (i * 15);
-                                                        const hour = Math.floor(totalMins / 60).toString().padStart(2, '0');
-                                                        const min = (totalMins % 60).toString().padStart(2, '0');
+                                                        const slotStartMins = (6 * 60) + (i * 15);
+                                                        const slotEndMins = slotStartMins + 15;
+                                                        const hour = Math.floor(slotStartMins / 60).toString().padStart(2, '0');
+                                                        const min = (slotStartMins % 60).toString().padStart(2, '0');
                                                         const timeStr = `${hour}:${min}`;
 
                                                         const isActive = (dayData.focusLogs || []).some((log: any) => {
                                                             if (!log.startTime || !log.endTime || typeof log.startTime !== 'string' || typeof log.endTime !== 'string') return false;
-                                                            const startMatch = log.startTime.match(/T(\d{2}:\d{2})/);
-                                                            const endMatch = log.endTime.match(/T(\d{2}:\d{2})/);
-                                                            const start = startMatch ? startMatch[1] : null;
-                                                            const end = endMatch ? endMatch[1] : null;
-                                                            return start && end && timeStr >= start && timeStr <= end;
+
+                                                            const startMatch = log.startTime.match(/[T\s](\d{2}:\d{2})/);
+                                                            const endMatch = log.endTime.match(/[T\s](\d{2}:\d{2})/);
+                                                            if (!startMatch || !endMatch) return false;
+
+                                                            const [sh, sm] = startMatch[1].split(':').map(Number);
+                                                            const [eh, em] = endMatch[1].split(':').map(Number);
+
+                                                            const logStartMins = sh * 60 + sm;
+                                                            let logEndMins = eh * 60 + em;
+
+                                                            // Treat manual check-ins (0 duration) as taking up at least 1 minute for visibility
+                                                            if (logEndMins <= logStartMins) logEndMins = logStartMins + 5;
+
+                                                            // Check for interval overlap: [logStart, logEnd] overlaps [slotStart, slotEnd]
+                                                            // Logic: not (logEnd <= slotStart || logStart >= slotEnd)
+                                                            return logEndMins > slotStartMins && logStartMins < slotEndMins;
                                                         });
 
                                                         return (
@@ -2048,8 +2061,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 .filter((log: any) => log.duration > 0 && log.startTime && typeof log.startTime === 'string' && log.endTime && typeof log.endTime === 'string')
                                                                 .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
                                                                 .map((log: any, idx: number) => {
-                                                                    const sMatch = log.startTime?.match(/T(\d{2}:\d{2})/);
-                                                                    const eMatch = log.endTime?.match(/T(\d{2}:\d{2})/);
+                                                                    const sMatch = log.startTime?.match(/[T\s](\d{2}:\d{2})/);
+                                                                    const eMatch = log.endTime?.match(/[T\s](\d{2}:\d{2})/);
                                                                     const sStr = sMatch ? sMatch[1] : '--:--';
                                                                     const eStr = eMatch ? eMatch[1] : '--:--';
 

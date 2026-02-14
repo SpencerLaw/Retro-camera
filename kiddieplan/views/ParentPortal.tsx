@@ -2017,8 +2017,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-50 pb-1">专注时段明细</div>
                                                     <div className="grid grid-cols-2 gap-2">
                                                         {(dayData.focusLogs || [])
-                                                            .filter((log: any) => log.duration > 0)
-                                                            .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))
+                                                            .filter((log: any) => log.duration > 0 && log.startTime && typeof log.startTime === 'string' && log.endTime && typeof log.endTime === 'string')
+                                                            .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
                                                             .map((log: any, idx: number) => {
                                                                 const sMatch = log.startTime?.match(/T(\d{2}:\d{2})/);
                                                                 const eMatch = log.endTime?.match(/T(\d{2}:\d{2})/);

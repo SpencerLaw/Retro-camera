@@ -1115,10 +1115,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         <h2 className="text-xl font-black tracking-tight leading-snug break-words line-clamp-2 drop-shadow-sm min-h-[3rem] flex items-center">
                                                             {selectedChild.currentTaskName}
                                                         </h2>
-                                                        <div className="flex items-center gap-1.5 pt-1">
-                                                            <div className="w-2 h-2 bg-white rounded-full animate-pulse shadow-[0_0_8px_white]"></div>
-                                                            <span className="text-sm font-black font-mono tracking-wider opacity-90">{formatTime(liveFocusDuration)}</span>
-                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-1">

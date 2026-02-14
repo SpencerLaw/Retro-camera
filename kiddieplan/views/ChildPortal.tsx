@@ -347,7 +347,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="space-y-6 pb-24"
+            className="space-y-6"
         >
             {/* Candy Island Dashboard Card */}
             <div className="bg-white/80 backdrop-blur-xl rounded-[40px] p-8 border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative overflow-hidden group">
@@ -430,7 +430,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const renderPlannerView = () => (
         <motion.div
             initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }}
-            className="space-y-6 pb-24 relative"
+            className="space-y-6 relative"
         >
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-black text-gray-700">任务规划时间轴</h2>
@@ -617,12 +617,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     </header>
                 </div>
 
-                <div className="px-5 pt-0 pb-32">
+                <div className="px-5 pt-0 pb-24">
                     <AnimatePresence mode='wait'>
                         {activeTab === 'home' && renderDashboardView()}
                         {activeTab === 'plan' && renderPlannerView()}
                         {activeTab === 'rewards' && (
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5 pb-24">
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5">
                                 <h2 className="text-2xl font-black text-gray-700 text-center">🎁 梦幻宝库</h2>
                                 <div className="grid grid-cols-2 gap-3">
                                     {rewards.map((reward, i) => (
@@ -651,7 +651,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             </motion.div>
                         )}
                         {activeTab === 'me' && (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-full pb-24 space-y-5 text-center pt-4">
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-full space-y-5 text-center pt-4">
                                 <motion.div
                                     whileHover={{ scale: 1.05, rotate: 3 }}
                                     className="w-28 h-28 bg-white/80 rounded-3xl shadow-lg flex items-center justify-center text-5xl border border-white/50"

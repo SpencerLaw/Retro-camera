@@ -318,14 +318,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     };
 
     const handleDeleteCategory = async (id: string) => {
-        if (window.confirm('确定要删除这个分类吗？')) {
-            const newCats = customCategories.filter(c => c.id !== id);
-            await handleSaveCategories(newCats);
-            // 如果删掉的是当前选中的，切换到第一个
-            if (id === selectedCategory && newCats.length > 0) {
-                setSelectedCategory(newCats[0].id);
+        setDialogConfig({
+            isOpen: true,
+            title: '删除分类',
+            message: '确定要删除这个任务分类吗？此操作不可恢复。',
+            onConfirm: async () => {
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                const newCats = customCategories.filter(c => c.id !== id);
+                await handleSaveCategories(newCats);
+                if (id === selectedCategory && newCats.length > 0) {
+                    setSelectedCategory(newCats[0].id);
+                }
             }
-        }
+        });
     };
 
     const handleAddInlineCategory = async () => {
@@ -1955,26 +1960,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {(() => {
                                 try {
                                     const statsDate = selectedStatsDate;
-                                    const isToday = statsDate === formatBeijingTime(new Date()).split(' ')[0];
-
-                                    // Explicitly filter by selectedChildId for absolute data isolation
                                     const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
-
-                                    // Robust Data Merging
                                     const tasksForStats = (baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks;
                                     const dayData = { ...baselineData, tasks: tasksForStats };
 
-                                    const totalPoints = (dayData.tasks || [])
-                                        .filter((t: any) => (dayData.checkins || []).includes(t.id))
-                                        .reduce((sum: number, t: any) => sum + (t.points || 0), 0);
-
-
-
                                     return (
                                         <div className="space-y-6">
-                                            {/* 1. Calendar Navigation (Moved to Top) */}
+                                            {/* 1. Calendar Navigation */}
                                             <div className="bg-white/92 backdrop-blur-2xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
-                                                {/* Decorative Elements */}
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-2xl opacity-40"></div>
                                                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-100 rounded-full -ml-12 -mb-12 blur-2xl opacity-40"></div>
 
@@ -2030,144 +2023,123 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                             </div>
 
-                                            {/* 2. Completion Gauge & Summary (Core Metric) */}
-                                            <div className="grid grid-cols-1 gap-6">
-                                                <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
-                                                    <div className="absolute top-0 right-0 w-40 h-40 bg-orange-100 rounded-full -mr-20 -mt-20 blur-3xl opacity-30"></div>
-                                                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-100 rounded-full -ml-20 -mb-20 blur-3xl opacity-30"></div>
+                                            {/* 2. Completion Gauge */}
+                                            <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
+                                                <div className="absolute top-0 right-0 w-40 h-40 bg-orange-100 rounded-full -mr-20 -mt-20 blur-3xl opacity-30"></div>
+                                                <div className="relative z-10">
+                                                    <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-6 flex items-center justify-center gap-2 opacity-80">
+                                                        <Target size={14} className="text-orange-400" />
+                                                        今日任务完成率
+                                                    </div>
 
-                                                    <div className="relative z-10">
-                                                        <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-6 flex items-center justify-center gap-2 opacity-80">
-                                                            <Target size={14} className="text-orange-400" />
-                                                            今日任务完成率
-                                                        </div>
-
-                                                        <div className="relative w-56 h-56 mx-auto flex items-center justify-center">
-                                                            {/* Base Ring */}
-                                                            <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
-                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#F1F5F9" strokeWidth="8" strokeLinecap="round" />
-                                                                {/* Progress Ring */}
-                                                                <motion.circle
-                                                                    cx="50" cy="50" r="42" fill="none"
-                                                                    stroke="url(#orangeGradient)" strokeWidth="8"
-                                                                    strokeLinecap="round"
-                                                                    initial={{ strokeDasharray: "0 264" }}
-                                                                    animate={{ strokeDasharray: `${(dayData.checkins.length / (dayData.tasks.length || 1)) * 263.89} 264` }}
-                                                                    className="drop-shadow-lg"
-                                                                />
-                                                                <defs>
-                                                                    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                                        <stop offset="0%" stopColor="#FBBF24" />
-                                                                        <stop offset="100%" stopColor="#F97316" />
-                                                                    </linearGradient>
-                                                                </defs>
-                                                            </svg>
-
-                                                            {/* Center Content */}
-                                                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                                                <div className="text-6xl font-black text-[#5D4037] tracking-tighter flex items-baseline">
-                                                                    {dayData.tasks.length > 0
-                                                                        ? Math.round((dayData.checkins.length / dayData.tasks.length) * 100)
-                                                                        : 0}
-                                                                    <span className="text-2xl ml-1 text-gray-300">%</span>
-                                                                </div>
-                                                                <div className="text-xs font-bold text-gray-400 mt-1 bg-white/60 px-3 py-1 rounded-full border border-white/50">
-                                                                    已完成 {dayData.checkins.length} / {dayData.tasks.length}
-                                                                </div>
+                                                    <div className="relative w-56 h-56 mx-auto flex items-center justify-center">
+                                                        <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+                                                            <circle cx="50" cy="50" r="42" fill="none" stroke="#F1F5F9" strokeWidth="8" strokeLinecap="round" />
+                                                            <motion.circle
+                                                                cx="50" cy="50" r="42" fill="none"
+                                                                stroke="url(#orangeGradientStats)" strokeWidth="8"
+                                                                strokeLinecap="round"
+                                                                initial={{ strokeDasharray: "0 264" }}
+                                                                animate={{ strokeDasharray: `${(dayData.checkins.length / (dayData.tasks.length || 1)) * 263.89} 264` }}
+                                                            />
+                                                            <defs>
+                                                                <linearGradient id="orangeGradientStats" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                                    <stop offset="0%" stopColor="#FBBF24" />
+                                                                    <stop offset="100%" stopColor="#F97316" />
+                                                                </linearGradient>
+                                                            </defs>
+                                                        </svg>
+                                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                            <div className="text-6xl font-black text-[#5D4037] flex items-baseline">
+                                                                {dayData.tasks.length > 0 ? Math.round((dayData.checkins.length / dayData.tasks.length) * 100) : 0}
+                                                                <span className="text-2xl ml-1 text-gray-300">%</span>
                                                             </div>
-                                                        </div>
-
-                                                        {/* Motivation Text */}
-                                                        <div className="mt-6 text-sm font-bold text-gray-500">
-                                                            {dayData.tasks.length === 0 ? "今天是个轻松的休息日 ~" :
-                                                                dayData.checkins.length === dayData.tasks.length ? "太棒了！任务全部搞定！🎉" :
-                                                                    dayData.checkins.length > 0 ? "加油！只要开始就是进步 ✨" :
-                                                                        "准备好开始今天的挑战了吗？🚀"}
+                                                            <div className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                                                                Done {dayData.checkins.length} / {dayData.tasks.length}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-
-
-                                            {/* Active Timeline (High Precision) */}
-                                            <div className="bg-white/92 backdrop-blur-2xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
-                                                <div className="flex justify-between items-center mb-4">
-                                                    <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                                                        <div className="w-2 h-2 rounded-full bg-red-400"></div> 活跃时间分布 (06:00 - 22:00)
+                                            {/* 3. Active Timeline (High Clarity Redesigned) */}
+                                            <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
+                                                <div className="flex justify-between items-start mb-10">
+                                                    <div>
+                                                        <h4 className="text-xl font-black text-[#5D4037] flex items-center gap-2">
+                                                            <Clock size={20} className="text-red-500" />
+                                                            活跃时间分布
+                                                        </h4>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">记录每日 06:00 - 22:00 专注轨迹</p>
                                                     </div>
-                                                    <span className="text-[10px] font-black text-red-300 bg-red-50 px-2 py-0.5 rounded-lg">精度: 15min</span>
+                                                    <div className="px-3 py-1.5 bg-red-50 rounded-xl border border-red-100 flex flex-col items-end">
+                                                        <span className="text-xs font-black text-red-500">{dayData.focusLogs?.length || 0} 次专注</span>
+                                                        <span className="text-[8px] font-bold text-red-300 uppercase tracking-tighter">打卡频次</span>
+                                                    </div>
                                                 </div>
 
-                                                <div className="h-14 w-full bg-gray-50 rounded-2xl overflow-hidden flex gap-0.5 p-1 relative border border-gray-100">
-                                                    {/* Render relevant hours slots (6am to 10pm = 16 hours = 64 slots) */}
-                                                    {Array.from({ length: 64 }).map((_, i) => {
-                                                        const slotStartMins = (6 * 60) + (i * 15);
-                                                        const slotEndMins = slotStartMins + 15;
-                                                        const hour = Math.floor(slotStartMins / 60).toString().padStart(2, '0');
-                                                        const min = (slotStartMins % 60).toString().padStart(2, '0');
-                                                        const timeStr = `${hour}:${min}`;
+                                                <div className="relative pt-2 pb-12">
+                                                    {/* Legend and Markers */}
+                                                    <div className="absolute inset-x-0 bottom-0 h-full flex justify-between px-1">
+                                                        {[6, 10, 14, 18, 22].map(h => (
+                                                            <div key={h} className="flex flex-col items-center h-full">
+                                                                <div className="w-[1px] h-full bg-gray-100 flex-1 border-dashed border-gray-200"></div>
+                                                                <span className="text-[10px] font-black text-gray-400 mt-2 bg-white px-1.5 py-0.5 rounded-md border border-gray-50 shadow-sm">{h.toString().padStart(2, '0')}:00</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
 
-                                                        const isActive = (dayData.focusLogs || []).some((log: any) => {
-                                                            if (!log.startTime || !log.endTime || typeof log.startTime !== 'string' || typeof log.endTime !== 'string') return false;
+                                                    {/* Data Bar */}
+                                                    <div className="h-6 w-full bg-gray-50 rounded-full relative z-10 p-1 border border-gray-100 shadow-inner mt-4 overflow-hidden">
+                                                        <div className="absolute inset-0 flex gap-0.5 px-1">
+                                                            {Array.from({ length: 64 }).map((_, i) => {
+                                                                const sMins = (6 * 60) + (i * 15);
+                                                                const eMins = sMins + 15;
+                                                                const isActive = (dayData.focusLogs || []).some((log: any) => {
+                                                                    if (!log.startTime) return false;
+                                                                    const [sh, sm] = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime)).split(':').map(Number);
+                                                                    const lStart = sh * 60 + sm;
+                                                                    let lEnd = lStart + 5;
+                                                                    if (log.endTime) {
+                                                                        const [eh, em] = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)).split(':').map(Number);
+                                                                        lEnd = eh * 60 + em;
+                                                                    }
+                                                                    if (lEnd <= lStart) lEnd = lStart + 5;
+                                                                    return lEnd > sMins && lStart < eMins;
+                                                                });
 
-                                                            const startMatch = log.startTime.match(/[T\s](\d{2}:\d{2})/);
-                                                            const endMatch = log.endTime.match(/[T\s](\d{2}:\d{2})/);
-                                                            if (!startMatch || !endMatch) return false;
-
-                                                            const [sh, sm] = startMatch[1].split(':').map(Number);
-                                                            const [eh, em] = endMatch[1].split(':').map(Number);
-
-                                                            const logStartMins = sh * 60 + sm;
-                                                            let logEndMins = eh * 60 + em;
-
-                                                            // Treat manual check-ins (0 duration) as taking up at least 1 minute for visibility
-                                                            if (logEndMins <= logStartMins) logEndMins = logStartMins + 5;
-
-                                                            // Check for interval overlap: [logStart, logEnd] overlaps [slotStart, slotEnd]
-                                                            // Logic: not (logEnd <= slotStart || logStart >= slotEnd)
-                                                            return logEndMins > slotStartMins && logStartMins < slotEndMins;
-                                                        });
-
-                                                        return (
-                                                            <div
-                                                                key={i}
-                                                                title={timeStr}
-                                                                className={`flex-1 rounded-[3px] transition-all duration-300 ${isActive ? 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.4)]' : 'bg-gray-100/50'}`}
-                                                            ></div>
-                                                        );
-                                                    })}
+                                                                return (
+                                                                    <div key={i} className={`flex-1 h-full rounded-md transition-all duration-700 ${isActive ? 'bg-gradient-to-b from-red-400 to-red-600 shadow-[0_0_12px_rgba(239,68,68,0.4)] ring-1 ring-white/20' : 'bg-transparent'}`}></div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
                                                 </div>
 
-                                                <div className="flex justify-between mt-3 text-[10px] font-black text-gray-300 px-1 uppercase tracking-widest">
-                                                    <span>06:00</span>
-                                                    <span>10:00</span>
-                                                    <span>14:00</span>
-                                                    <span>18:00</span>
-                                                    <span>22:00</span>
-                                                </div>
-
-                                                {/* Interval Details List (New: Show specific active periods) */}
+                                                {/* Detailed Log List */}
                                                 {(dayData.focusLogs || []).length > 0 && (
-                                                    <div className="mt-6 space-y-3">
-                                                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-50 pb-1">专注时段明细</div>
-                                                        <div className="grid grid-cols-2 gap-2">
+                                                    <div className="mt-8 space-y-2 border-t border-gray-100 pt-8">
+                                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-4 text-center">专注活动明细</p>
+                                                        <div className="grid grid-cols-1 gap-3">
                                                             {(dayData.focusLogs || [])
-                                                                .filter((log: any) => log.startTime && typeof log.startTime === 'string')
-                                                                .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
+                                                                .filter((log: any) => log.startTime)
+                                                                .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))
                                                                 .map((log: any, idx: number) => {
-                                                                    const sStr = log.startTime ? new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime)) : '--:--';
-                                                                    const eStr = log.endTime ? new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)) : '--:--';
-                                                                    const durationDisplay = log.duration > 0 ? Math.floor(log.duration / 60) : '< 1';
-
+                                                                    const s = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime));
+                                                                    const e = log.endTime ? new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)) : '--:--';
+                                                                    const dur = log.duration > 0 ? Math.floor(log.duration / 60) : 0;
                                                                     return (
-                                                                        <div key={idx} className="bg-gray-50/50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
-                                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
-                                                                            <div className="flex flex-col">
-                                                                                <span className="text-[10px] font-black text-[#5D4037]">
-                                                                                    {sStr} - {eStr}
-                                                                                </span>
-                                                                                <span className="text-[8px] font-bold text-gray-400">{durationDisplay} 分钟</span>
+                                                                        <div key={idx} className="flex items-center justify-between p-5 bg-gray-50/50 rounded-3xl border border-gray-100 ring-1 ring-white/20 hover:bg-white transition-all group hover:shadow-md">
+                                                                            <div className="flex items-center gap-5">
+                                                                                <div className="w-4 h-4 rounded-full bg-red-400 group-hover:scale-125 transition-transform ring-4 ring-red-50"></div>
+                                                                                <div className="flex flex-col">
+                                                                                    <span className="text-base font-black text-[#5D4037]">{log.taskTitle || '专注活动'}</span>
+                                                                                    <span className="text-[11px] font-bold text-gray-400 tracking-wider mt-0.5">{s} — {e}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="text-right flex items-baseline gap-1">
+                                                                                <span className="text-2xl font-black text-red-500 group-hover:scale-110 transition-transform">{dur}</span>
+                                                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">MINS</span>
                                                                             </div>
                                                                         </div>
                                                                     );
@@ -2177,13 +2149,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 )}
                                             </div>
 
-
-
-                                            {/* 4. Day Detail List (Preserved) */}
-                                            <div className="bg-white/80 backdrop-blur-xl p-6 rounded-[40px] shadow-lg border-2 border-white">
-                                                <div className="flex items-center gap-3 mb-6">
-                                                    <div className="p-2 bg-emerald-100 rounded-xl text-emerald-600">
-                                                        <ListTodo size={18} />
+                                            {/* 4. Day Task Detail List */}
+                                            <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white">
+                                                <div className="flex items-center gap-3 mb-8">
+                                                    <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
+                                                        <ListTodo size={20} />
                                                     </div>
                                                     <h4 className="font-black text-[#5D4037] text-lg">当日任务详情</h4>
                                                 </div>
@@ -2192,56 +2162,40 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     {dayData.tasks.length > 0 ? (
                                                         [...dayData.tasks]
                                                             .sort((a: any, b: any) => (a.timeSlot || '').localeCompare(b.timeSlot || ''))
-                                                            .map((task: any) => (
-                                                                <div key={task.id} className={`p-4 rounded-[24px] border border-white shadow-sm flex items-center justify-between transition-all hover:scale-[1.01]
-                                                                ${dayData.checkins.includes(task.id) ? 'bg-gradient-to-r from-emerald-50/80 to-white/60' : 'bg-white/60'}`}>
-                                                                    <div className="flex items-center gap-4">
-                                                                        <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center text-xl shadow-inner
-                                                                    ${dayData.checkins.includes(task.id) ? 'bg-emerald-100 text-emerald-500 ring-2 ring-emerald-200 ring-offset-2 ring-offset-transparent' : 'bg-gray-100 text-gray-300'}`}>
-                                                                            {dayData.checkins.includes(task.id) ? '✅' : '⏳'}
-                                                                        </div>
-                                                                        <div>
-                                                                            <div className={`font-black text-base ${dayData.checkins.includes(task.id) ? 'text-[#5D4037]' : 'text-gray-400'}`}>
-                                                                                {task.title}
+                                                            .map((task: any) => {
+                                                                const isDone = dayData.checkins.includes(task.id);
+                                                                return (
+                                                                    <div key={task.id} className={`p-5 rounded-[32px] border transition-all flex items-center justify-between
+                                                                        ${isDone ? 'bg-emerald-50/50 border-emerald-100 shadow-sm' : 'bg-white/50 border-gray-50 shadow-none'}`}>
+                                                                        <div className="flex items-center gap-5">
+                                                                            <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center text-2xl shadow-inner
+                                                                                ${isDone ? 'bg-white text-emerald-500 ring-4 ring-emerald-50' : 'bg-gray-50 text-gray-200'}`}>
+                                                                                {isDone ? '✨' : '📅'}
                                                                             </div>
-                                                                            <div className="flex items-center gap-2 mt-1">
-                                                                                <span className="text-[10px] font-bold text-gray-400 bg-white/50 px-2 py-0.5 rounded-md border border-gray-100">
-                                                                                    {task.timeSlot}
-                                                                                </span>
-                                                                                <span className="text-[10px] font-bold text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100">
-                                                                                    {task.points} 🍭
-                                                                                </span>
+                                                                            <div>
+                                                                                <div className={`font-black text-lg ${isDone ? 'text-emerald-700' : 'text-gray-400'}`}>{task.title}</div>
+                                                                                <div className="flex items-center gap-2 mt-1">
+                                                                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{task.timeSlot}</span>
+                                                                                    <span className="text-[10px] font-black text-orange-400">{task.points} 🍭糖果</span>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
+                                                                        {isDone && <span className="text-[10px] font-black text-emerald-500 bg-white px-3 py-1.5 rounded-full border border-emerald-50 shadow-sm uppercase tracking-tighter">打卡成功</span>}
                                                                     </div>
-
-                                                                    {dayData.checkins.includes(task.id) && (
-                                                                        <div className="mr-2">
-                                                                            <span className="text-xs font-black text-emerald-500 bg-emerald-100/50 px-3 py-1.5 rounded-xl border border-emerald-100">
-                                                                                已完成
-                                                                            </span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))
+                                                                );
+                                                            })
                                                     ) : (
-                                                        <div className="py-16 text-center bg-gray-50/30 rounded-[32px] border-2 border-dashed border-gray-200/50">
-                                                            <div className="text-5xl mb-4 opacity-20 filter grayscale">💤</div>
-                                                            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">该日期暂无数据记录</p>
+                                                        <div className="py-20 text-center bg-gray-50/20 rounded-[40px] border-2 border-dashed border-gray-100">
+                                                            <div className="text-6xl mb-4 opacity-10">💤</div>
+                                                            <p className="text-gray-300 font-bold text-xs uppercase tracking-[0.2em]">没有任务挑战哦</p>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
                                     );
-                                } catch (error) {
-                                    console.error("Stats render error:", error);
-                                    return (
-                                        <div className="p-8 text-center text-gray-400 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                                            <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                            <p className="text-sm font-bold">数据加载异常，正在尝试自动修复...</p>
-                                        </div>
-                                    );
+                                } catch (err) {
+                                    return <div className="p-8 text-center text-gray-400 bg-white/50 rounded-3xl border-2 border-dashed border-gray-200">加载看板失败</div>;
                                 }
                             })()}
                         </motion.div>
@@ -2251,158 +2205,164 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
             {/* Dialog Overlay */}
             <AnimatePresence>
-                {dialogConfig.isOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                            onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
-                            className="bg-white p-8 rounded-[40px] w-full max-w-sm shadow-2xl relative z-60 border-8 border-[var(--color-bg-light-blue)]"
-                        >
-                            <h3 className="text-2xl font-black text-center text-[#5D4037] mb-2">{dialogConfig.title}</h3>
-                            {dialogConfig.message && <p className="text-center text-gray-500 text-sm mb-6">{dialogConfig.message}</p>}
-                            {dialogConfig.highlight && (
-                                <div className="text-center text-5xl font-black text-[var(--color-blue-fun)] mb-6 font-mono tracking-widest bg-blue-50 py-4 rounded-2xl border-2 border-blue-100">
-                                    {dialogConfig.highlight}
-                                </div>
-                            )}
-
-                            {dialogConfig.showAvatarUpload && (
-                                <div className="flex flex-col items-center mb-6">
-                                    <div className="relative group cursor-pointer" onClick={() => {
-                                        // 重置 file input value 以允许重选相同图片
-                                        if (fileInputRef.current) fileInputRef.current.value = '';
-                                        fileInputRef.current?.click();
-                                    }}>
-                                        <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
-                                        <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
-                                            <Settings size={24} className="mb-1" />
-                                            <span className="text-[10px] font-black">更换头像</span>
-                                        </div>
-                                        {uploadingAvatar && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full"><Sparkles className="animate-spin text-blue-400" /></div>}
-                                        <div className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[var(--color-blue-fun)] border-2 border-[var(--color-blue-fun)]">
-                                            <Edit2 size={14} fill="currentColor" />
-                                        </div>
+                {
+                    dialogConfig.isOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                                onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                            />
+                            <motion.div
+                                initial={{ scale: 0.9, y: 20 }}
+                                animate={{ scale: 1, y: 0 }}
+                                exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                                className="bg-white p-8 rounded-[40px] w-full max-w-sm shadow-2xl relative z-60 border-8 border-[var(--color-bg-light-blue)]"
+                            >
+                                <h3 className="text-2xl font-black text-center text-[#5D4037] mb-2">{dialogConfig.title}</h3>
+                                {dialogConfig.message && <p className="text-center text-gray-500 text-sm mb-6">{dialogConfig.message}</p>}
+                                {dialogConfig.highlight && (
+                                    <div className="text-center text-5xl font-black text-[var(--color-blue-fun)] mb-6 font-mono tracking-widest bg-blue-50 py-4 rounded-2xl border-2 border-blue-100">
+                                        {dialogConfig.highlight}
                                     </div>
-                                    <p className="mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest">点击上方头像修改图片</p>
-                                </div>
-                            )}
+                                )}
 
-                            {!dialogConfig.hideInput && (
-                                <div className="space-y-4">
-                                    <input
-                                        className="w-full bg-[#F5F7FA] border-2 border-transparent focus:border-[var(--color-blue-fun)] px-6 py-4 rounded-2xl text-lg font-bold text-center outline-none transition-all"
-                                        placeholder={dialogConfig.placeholder}
-                                        defaultValue={dialogConfig.defaultValue}
-                                        id="dialogInput"
-                                    />
-                                    {dialogConfig.showTime && (
-                                        <div className="bg-[#F5F7FA] p-6 rounded-[32px] border-2 border-transparent focus-within:border-blue-100 transition-all">
-                                            <div className="flex items-center justify-center gap-4 relative h-32 overflow-hidden">
-                                                {/* Hidden input for compatibility */}
-                                                <input type="hidden" id="dialogTime" value={`${pickerHour}:${pickerMinute}`} />
-
-                                                {/* Hour Picker */}
-                                                <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="hourScroll">
-                                                    {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
-                                                        <div
-                                                            key={h}
-                                                            id={`hour-${h}`}
-                                                            onClick={() => setPickerHour(h)}
-                                                            className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerHour === h ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
-                                                        >
-                                                            {h}
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                <div className="text-2xl font-black text-blue-200">:</div>
-
-                                                {/* Minute Picker */}
-                                                <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="minuteScroll">
-                                                    {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
-                                                        <div
-                                                            key={m}
-                                                            id={`minute-${m}`}
-                                                            onClick={() => setPickerMinute(m)}
-                                                            className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerMinute === m ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
-                                                        >
-                                                            {m}
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                {/* Selection Highlight Bar */}
-                                                <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-12 border-y-2 border-blue-50 pointer-events-none bg-blue-50/10 rounded-xl"></div>
+                                {dialogConfig.showAvatarUpload && (
+                                    <div className="flex flex-col items-center mb-6">
+                                        <div className="relative group cursor-pointer" onClick={() => {
+                                            // 重置 file input value 以允许重选相同图片
+                                            if (fileInputRef.current) fileInputRef.current.value = '';
+                                            fileInputRef.current?.click();
+                                        }}>
+                                            <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
+                                            <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
+                                                <Settings size={24} className="mb-1" />
+                                                <span className="text-[10px] font-black">更换头像</span>
                                             </div>
-                                            <div className="flex justify-between mt-4 px-2">
-                                                <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">小时 (H)</span>
-                                                <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">分钟 (M)</span>
+                                            {uploadingAvatar && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full"><Sparkles className="animate-spin text-blue-400" /></div>}
+                                            <div className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[var(--color-blue-fun)] border-2 border-[var(--color-blue-fun)]">
+                                                <Edit2 size={14} fill="currentColor" />
                                             </div>
                                         </div>
-                                    )}
+                                        <p className="mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest">点击上方头像修改图片</p>
+                                    </div>
+                                )}
 
-                                    {dialogConfig.showPoints && (
-                                        <div className="flex items-center gap-4 bg-[#F5F7FA] px-6 py-4 rounded-2xl border-2 border-transparent focus-within:border-blue-100 transition-all mt-4">
-                                            <span className="text-2xl">🍭</span>
-                                            <input
-                                                type="number"
-                                                id="dialogPoints"
-                                                defaultValue={dialogConfig.defaultPoints || 10}
-                                                className="flex-1 bg-transparent border-none outline-none font-black text-lg text-[#5D4037]"
-                                                placeholder="奖励糖果数"
-                                            />
-                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">奖励点数</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                {!dialogConfig.hideInput && (
+                                    <div className="space-y-4">
+                                        <input
+                                            className="w-full bg-[#F5F7FA] border-2 border-transparent focus:border-[var(--color-blue-fun)] px-6 py-4 rounded-2xl text-lg font-bold text-center outline-none transition-all"
+                                            placeholder={dialogConfig.placeholder}
+                                            defaultValue={dialogConfig.defaultValue}
+                                            id="dialogInput"
+                                        />
+                                        {dialogConfig.showTime && (
+                                            <div className="bg-[#F5F7FA] p-6 rounded-[32px] border-2 border-transparent focus-within:border-blue-100 transition-all">
+                                                <div className="flex items-center justify-center gap-4 relative h-32 overflow-hidden">
+                                                    {/* Hidden input for compatibility */}
+                                                    <input type="hidden" id="dialogTime" value={`${pickerHour}:${pickerMinute}`} />
 
-                            {dialogConfig.showDelete && (
-                                <div className="mt-4">
+                                                    {/* Hour Picker */}
+                                                    <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="hourScroll">
+                                                        {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                                                            <div
+                                                                key={h}
+                                                                id={`hour-${h}`}
+                                                                onClick={() => setPickerHour(h)}
+                                                                className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerHour === h ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
+                                                            >
+                                                                {h}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="text-2xl font-black text-blue-200">:</div>
+
+                                                    {/* Minute Picker */}
+                                                    <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="minuteScroll">
+                                                        {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
+                                                            <div
+                                                                key={m}
+                                                                id={`minute-${m}`}
+                                                                onClick={() => setPickerMinute(m)}
+                                                                className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerMinute === m ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
+                                                            >
+                                                                {m}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Selection Highlight Bar */}
+                                                    <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-12 border-y-2 border-blue-50 pointer-events-none bg-blue-50/10 rounded-xl"></div>
+                                                </div>
+                                                <div className="flex justify-between mt-4 px-2">
+                                                    <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">小时 (H)</span>
+                                                    <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">分钟 (M)</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {dialogConfig.showPoints && (
+                                            <div className="flex items-center gap-4 bg-[#F5F7FA] px-6 py-4 rounded-2xl border-2 border-transparent focus-within:border-blue-100 transition-all mt-4">
+                                                <span className="text-2xl">🍭</span>
+                                                <input
+                                                    type="number"
+                                                    id="dialogPoints"
+                                                    defaultValue={dialogConfig.defaultPoints || 10}
+                                                    className="flex-1 bg-transparent border-none outline-none font-black text-lg text-[#5D4037]"
+                                                    placeholder="奖励糖果数"
+                                                />
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">奖励点数</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {dialogConfig.showDelete && (
+                                    <div className="mt-4">
+                                        <button
+                                            onClick={dialogConfig.onDelete}
+                                            className="w-full py-3 rounded-2xl text-red-500 font-bold text-sm bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Trash2 size={16} /> 删除此宝贝
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="mt-8 flex gap-3">
                                     <button
-                                        onClick={dialogConfig.onDelete}
-                                        className="w-full py-3 rounded-2xl text-red-500 font-bold text-sm bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                                        className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
                                     >
-                                        <Trash2 size={16} /> 删除此宝贝
+                                        取消
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (uploadingAvatar) {
+                                                setDialogConfig({
+                                                    isOpen: true,
+                                                    title: '请稍候',
+                                                    message: '头像正在上传中，请稍后再试。',
+                                                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false }))
+                                                });
+                                                return;
+                                            }
+                                            const input = document.getElementById('dialogInput') as HTMLInputElement;
+                                            const time = document.getElementById('dialogTime') as HTMLInputElement;
+                                            const points = document.getElementById('dialogPoints') as HTMLInputElement;
+                                            dialogConfig.onConfirm(input?.value, time?.value, parseInt(points?.value) || 0);
+                                        }}
+                                        disabled={uploadingAvatar || isSaving}
+                                        className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
+                                    >
+                                        {uploadingAvatar ? '上传中...' : (isSaving ? '处理中...' : '确定')}
                                     </button>
                                 </div>
-                            )}
-
-                            <div className="mt-8 flex gap-3">
-                                <button
-                                    onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                    className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
-                                >
-                                    取消
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        if (uploadingAvatar) {
-                                            alert('请等待头像上传完成');
-                                            return;
-                                        }
-                                        const input = document.getElementById('dialogInput') as HTMLInputElement;
-                                        const time = document.getElementById('dialogTime') as HTMLInputElement;
-                                        const points = document.getElementById('dialogPoints') as HTMLInputElement;
-                                        dialogConfig.onConfirm(input?.value, time?.value, parseInt(points?.value) || 0);
-                                    }}
-                                    disabled={uploadingAvatar || isSaving}
-                                    className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
-                                >
-                                    {uploadingAvatar ? '上传中...' : (isSaving ? '处理中...' : '确定')}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )
+                            </motion.div>
+                        </div>
+                    )
                 }
             </AnimatePresence >
 
@@ -2491,7 +2451,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 };
 

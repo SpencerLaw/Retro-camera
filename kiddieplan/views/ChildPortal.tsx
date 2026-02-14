@@ -253,7 +253,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 await fetch('/api/kiddieplan/client', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'record_focus', token, data: { log } })
+                    body: JSON.stringify({
+                        action: 'record_focus',
+                        token,
+                        data: {
+                            log,
+                            date: formatBeijingTime(new Date()).split(' ')[0]
+                        }
+                    })
                 });
 
                 await fetch('/api/kiddieplan/client', {
@@ -301,7 +308,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'toggle_checkin', token, data: { taskId } })
+                body: JSON.stringify({
+                    action: 'toggle_checkin',
+                    token,
+                    data: {
+                        taskId,
+                        date: formatBeijingTime(new Date()).split(' ')[0]
+                    }
+                })
             });
             const result = await res.json();
             if (result.success) {

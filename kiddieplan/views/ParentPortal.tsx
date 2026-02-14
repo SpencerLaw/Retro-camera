@@ -111,7 +111,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [isManagingCategories, setIsManagingCategories] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
-    const [selectedStatsDate, setSelectedStatsDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedStatsDate, setSelectedStatsDate] = useState(formatBeijingTime(new Date()).split(' ')[0]);
     const mainScrollRef = useRef<HTMLElement>(null);
     const tabScrollPositions = useRef<Record<string, number>>({});
 
@@ -241,7 +241,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 }
 
                 // 核心同步：从 license 聚合对象中提取当前孩子的专注日志
-                const today = new Date().toISOString().split('T')[0];
+                const today = formatBeijingTime(new Date()).split(' ')[0];
                 const dailyData = result.data.progress?.[today]?.[selectedChildId];
                 if (dailyData?.focusLogs) {
                     setFocusLogs(prev => JSON.stringify(prev) !== JSON.stringify(dailyData.focusLogs) ? dailyData.focusLogs : prev);
@@ -1859,7 +1859,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {(() => {
                                 try {
                                     const statsDate = selectedStatsDate;
-                                    const isToday = statsDate === new Date().toISOString().split('T')[0];
+                                    const isToday = statsDate === formatBeijingTime(new Date()).split(' ')[0];
 
                                     // Explicitly filter by selectedChildId for absolute data isolation
                                     const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };

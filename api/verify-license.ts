@@ -296,13 +296,7 @@ export default async function handler(
       } else {
         // 添加新设备
         console.log(`[License] New Device: ${cleanCode} Device: ${deviceId}`);
-        if (metadata.devices.length >= metadata.maxDevices) {
-          return res.status(403).json({
-            success: false,
-            message: `绑定失败：设备已满 (${metadata.devices.length}/${metadata.maxDevices})`,
-            data: { totalDevices: metadata.devices.length }
-          });
-        }
+
 
         metadata.devices.push({
           deviceId,

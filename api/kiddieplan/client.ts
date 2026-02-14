@@ -162,6 +162,43 @@ export default async function handler(
             return response.status(200).json({ success: true });
         }
 
+        if (action === 'redeem_reward') {
+            const { rewardId, rewardName, cost } = data;
+            const license: any = await kv.get(licenseKey);
+            if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
+
+            const childIdx = license.children.findIndex((c: any) => c.id === childId);
+            if (childIdx === -1) return response.status(404).json({ success: false, message: '孩子不存在' });
+
+            const currentPoints = license.children[childIdx].points || 0;
+            if (currentPoints < cost) {
+                return response.status(400).json({ success: false, message: '糖果不足' });
+            }
+
+            // 1. 扣除糖果
+            license.children[childIdx].points = currentPoints - cost;
+
+            // 2. 记录核销日志
+            if (!license.redemptionLogs) license.redemptionLogs = [];
+
+            const newLog = {
+                id: `log_${Date.now()}`,
+                childId,
+                rewardName: rewardName || '未知奖励',
+                pointsCost: cost,
+                redeemedAt: new Date().toISOString()
+            };
+
+            license.redemptionLogs.unshift(newLog); // 最新的在前面
+            // 限制日志数量
+            if (license.redemptionLogs.length > 100) {
+                license.redemptionLogs = license.redemptionLogs.slice(0, 100);
+            }
+
+            await kv.set(licenseKey, license);
+            return response.status(200).json({ success: true, points: license.children[childIdx].points });
+        }
+
         return response.status(400).json({ success: false, message: '无效的操作' });
 
     } catch (error: any) {

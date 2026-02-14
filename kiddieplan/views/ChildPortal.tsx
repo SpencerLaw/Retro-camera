@@ -161,7 +161,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'redeem_reward', token, data: { rewardId: reward.id, cost: reward.pointsCost } })
+                body: JSON.stringify({ action: 'redeem_reward', token, data: { rewardId: reward.id, cost: reward.pointsCost, rewardName: reward.name } })
             });
             const result = await res.json();
             if (result.success) {

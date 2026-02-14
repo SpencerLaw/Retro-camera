@@ -425,12 +425,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             });
             const result = await res.json();
             if (result.success) {
-                const fetchedRewards = result.data.rewards;
-                if (fetchedRewards && fetchedRewards.length > 0) {
-                    setRewards(fetchedRewards);
-                } else {
-                    setRewards(DEFAULT_REWARDS);
-                }
+                // 允许为空数组，不强制加载默认值，防止用户无法清空
+                setRewards(result.data.rewards !== undefined ? result.data.rewards : []);
             }
         } catch (err) {
             console.error('Fetch rewards failed');
@@ -1429,15 +1425,29 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <motion.button whileTap={{ scale: 0.9 }} onClick={handleAddReward} className="bg-[var(--color-yellow-reward)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
                                     <Plus size={24} />
                                 </motion.button>
+                                {rewards.length > 0 && (
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => {
+                                            if (confirm('确定要清空所有奖励吗？此操作不可撤销。')) {
+                                                setRewards([]);
+                                            }
+                                        }}
+                                        className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-400 shadow-sm border border-red-100"
+                                        title="清空所有奖励"
+                                    >
+                                        <Trash2 size={20} />
+                                    </motion.button>
+                                )}
                             </div>
 
-                            <div className="flex overflow-x-auto pb-4 gap-3 no-scrollbar mb-4">
+                            <div className="flex flex-wrap gap-3 mb-4">
                                 {REWARD_CATEGORIES.map(cat => (
                                     <motion.button
                                         key={cat.id}
                                         onClick={() => setSelectedRewardCategory(cat.id)}
                                         whileTap={{ scale: 0.95 }}
-                                        className={`flex-shrink-0 px-4 py-2.5 rounded-xl border-2 font-bold text-sm flex items-center gap-2 transition-all
+                                        className={`px-4 py-2.5 rounded-xl border-2 font-bold text-sm flex items-center gap-2 transition-all
                                             ${selectedRewardCategory === cat.id
                                                 ? 'bg-[var(--color-yellow-reward)] border-[var(--color-yellow-reward)] text-white shadow-lg shadow-orange-100'
                                                 : 'bg-white border-transparent text-gray-400 hover:bg-orange-50'}`}
@@ -1491,12 +1501,59 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {rewards.length > 0 && (
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
-                                    onClick={handleSaveRewards}
+                                    onClick={() => {
+                                        setDialogConfig({
+                                            isOpen: true,
+                                            title: '🎁 确认派送奖励',
+                                            message: `是否将当前的奖励库派送给 ${selectedChild.name}？`,
+                                            hideInput: true,
+                                            onConfirm: async () => {
+                                                await handleSaveRewards();
+                                                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                            }
+                                        });
+                                    }}
                                     disabled={isSaving}
                                     className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#DB2777] active:shadow-none active:translate-y-2 transition-all"
                                 >
-                                    {isSaving ? '同步中...' : '更新奖励库'}
+                                    {isSaving ? '派送中...' : `派送给 ${selectedChild.name}`}
                                 </motion.button>
+                            )}
+
+                            {rewards.length === 0 && (
+                                <div className="text-center py-10 space-y-4">
+                                    <div className="text-gray-300 font-bold text-sm">奖励库空空如也</div>
+                                    <div className="flex flex-col items-center gap-2">
+                                        <button
+                                            onClick={() => setRewards(DEFAULT_REWARDS)}
+                                            className="text-blue-500 font-bold text-sm hover:underline"
+                                        >
+                                            导入系统预设奖励
+                                        </button>
+                                        <div className="text-xs text-gray-400">或者手动点击右上角 + 号添加</div>
+                                    </div>
+
+                                    {/* 即使为空也允许派送空列表以覆盖孩子端 */}
+                                    <motion.button
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                            setDialogConfig({
+                                                isOpen: true,
+                                                title: '🗑️ 确认清空孩子端奖励',
+                                                message: `这就把孩子端的奖励全部清空吗？`,
+                                                hideInput: true,
+                                                onConfirm: async () => {
+                                                    await handleSaveRewards();
+                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                }
+                                            });
+                                        }}
+                                        disabled={isSaving}
+                                        className="mt-6 w-full bg-gray-200 py-3 rounded-2xl text-gray-400 font-black text-sm shadow-sm active:translate-y-1 transition-all"
+                                    >
+                                        {isSaving ? '处理中...' : `清空 ${selectedChild.name} 的奖励`}
+                                    </motion.button>
+                                </div>
                             )}
                         </motion.div>
                     )}

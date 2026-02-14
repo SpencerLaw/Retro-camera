@@ -129,10 +129,23 @@ export default async function handler(
 
             const daily = license.progress[today][childId];
             if (!daily.focusLogs) daily.focusLogs = [];
-            daily.focusLogs.push({
-                ...log,
-                recordedAt: new Date().toISOString()
-            });
+
+            // 优化逻辑：如果当日已存在该任务的专注记录，则合并时间（首次开始，末次结束，时长累加）
+            const existingLogIdx = daily.focusLogs.findIndex((l: any) => l.taskId === log.taskId && l.type !== 'silent');
+
+            if (existingLogIdx > -1) {
+                const existingLog = daily.focusLogs[existingLogIdx];
+                // 保持最初开始时间，更新最后结束时间
+                existingLog.endTime = log.endTime;
+                existingLog.duration = (existingLog.duration || 0) + log.duration;
+                existingLog.recordedAt = new Date().toISOString();
+                daily.focusLogs[existingLogIdx] = existingLog;
+            } else {
+                daily.focusLogs.push({
+                    ...log,
+                    recordedAt: new Date().toISOString()
+                });
+            }
 
             // 同时累加到具体任务的 accumulatedTime 字段上，方便展示
             if (daily.tasks) {
@@ -144,7 +157,7 @@ export default async function handler(
             }
 
             await kv.set(licenseKey, license);
-            return response.status(200).json({ success: true, message: '专注日志已归档' });
+            return response.status(200).json({ success: true, message: '专注日志已更新' });
         }
 
         if (action === 'update_focus_status') {

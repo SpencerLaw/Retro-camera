@@ -1728,9 +1728,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                         <div className="flex items-center gap-2 text-[#EA580C]">
                                                                             <Clock size={14} />
                                                                             <span>
-                                                                                {startTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                                                                                {' - '}
-                                                                                {endTime?.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                                                                                {(() => {
+                                                                                    const sm = log.startTime?.match(/T(\d{2}:\d{2})/);
+                                                                                    const em = log.endTime?.match(/T(\d{2}:\d{2})/);
+                                                                                    return `${sm ? sm[1] : '--:--'} - ${em ? em[1] : '--:--'}`;
+                                                                                })()}
                                                                             </span>
                                                                         </div>
                                                                     )}
@@ -1983,9 +1985,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     const timeStr = `${hour}:${min}`;
 
                                                     const isActive = (dayData.focusLogs || []).some((log: any) => {
-                                                        if (!log.startTime || !log.endTime || typeof log.startTime !== 'string') return false;
-                                                        const start = log.startTime.split('T')[1]?.slice(0, 5);
-                                                        const end = log.endTime.split('T')[1]?.slice(0, 5);
+                                                        if (!log.startTime || !log.endTime || typeof log.startTime !== 'string' || typeof log.endTime !== 'string') return false;
+                                                        const startMatch = log.startTime.match(/T(\d{2}:\d{2})/);
+                                                        const endMatch = log.endTime.match(/T(\d{2}:\d{2})/);
+                                                        const start = startMatch ? startMatch[1] : null;
+                                                        const end = endMatch ? endMatch[1] : null;
                                                         return start && end && timeStr >= start && timeStr <= end;
                                                     });
 
@@ -2015,17 +2019,24 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         {(dayData.focusLogs || [])
                                                             .filter((log: any) => log.duration > 0)
                                                             .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))
-                                                            .map((log: any, idx: number) => (
-                                                                <div key={idx} className="bg-gray-50/50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-[10px] font-black text-[#5D4037]">
-                                                                            {log.startTime.split('T')[1].slice(0, 5)} - {log.endTime.split('T')[1].slice(0, 5)}
-                                                                        </span>
-                                                                        <span className="text-[8px] font-bold text-gray-400">{Math.floor(log.duration / 60)} 分钟</span>
+                                                            .map((log: any, idx: number) => {
+                                                                const sMatch = log.startTime?.match(/T(\d{2}:\d{2})/);
+                                                                const eMatch = log.endTime?.match(/T(\d{2}:\d{2})/);
+                                                                const sStr = sMatch ? sMatch[1] : '--:--';
+                                                                const eStr = eMatch ? eMatch[1] : '--:--';
+
+                                                                return (
+                                                                    <div key={idx} className="bg-gray-50/50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-[10px] font-black text-[#5D4037]">
+                                                                                {sStr} - {eStr}
+                                                                            </span>
+                                                                            <span className="text-[8px] font-bold text-gray-400">{Math.floor(log.duration / 60)} 分钟</span>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            ))}
+                                                                );
+                                                            })}
                                                     </div>
                                                 </div>
                                             )}

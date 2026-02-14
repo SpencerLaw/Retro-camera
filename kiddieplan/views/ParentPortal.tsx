@@ -1143,75 +1143,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </div>
                         </motion.div>
 
-                        {/* Child Selector Row - Collapsible */}
-                        <AnimatePresence>
-                            {!isScrolled && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2">
-                                        {children.map((child, idx) => {
-                                            const isSelected = selectedChildId === child.id;
-                                            const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
 
-                                            return (
-                                                <motion.div
-                                                    key={child.id}
-                                                    className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
-                                                    onClick={() => setSelectedChildId(child.id)}
-                                                    whileTap={{ scale: 0.95 }}
-                                                >
-                                                    <div className="relative">
-                                                        <motion.div
-                                                            className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-300 relative z-10 bg-white
-                                                    ${isSelected ? `${theme.ring} scale-105 shadow-md border-white` : 'border-transparent opacity-60 grayscale-[0.3]'}`}
-                                                        >
-                                                            <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
-                                                        </motion.div>
-
-                                                        {/* Edit Button */}
-                                                        {isSelected && (
-                                                            <motion.button
-                                                                initial={{ scale: 0, opacity: 0 }}
-                                                                animate={{ scale: 1, opacity: 1 }}
-                                                                onClick={(e) => { e.stopPropagation(); handleEditChild(); }}
-                                                                className={`absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-gray-500 shadow-sm flex items-center justify-center border border-gray-100 z-20`}
-                                                            >
-                                                                <Edit2 size={10} />
-                                                            </motion.button>
-                                                        )}
-                                                    </div>
-
-                                                    <span className={`text-[10px] font-black transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-400'}`}>
-                                                        {child.name}
-                                                    </span>
-
-                                                    {/* Simple Active Dot */}
-                                                    {isSelected && (
-                                                        <motion.div
-                                                            layoutId="active-dot"
-                                                            className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('from-', 'bg-').split(' ')[0]}`}
-                                                        />
-                                                    )}
-                                                </motion.div>
-                                            );
-                                        })}
-
-                                        {/* Add Button */}
-                                        <div className="flex flex-col items-center gap-2 min-w-[64px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer p-2" onClick={() => handleAddChild()}>
-                                            <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white/20">
-                                                <Plus className="text-gray-400" size={20} />
-                                            </div>
-                                            <span className="text-[10px] font-bold text-gray-400">添加</span>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
                     </header>
                 </div>
 

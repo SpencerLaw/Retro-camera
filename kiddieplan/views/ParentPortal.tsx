@@ -977,7 +977,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 ref={mainScrollRef}
                 className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth pb-10"
                 style={{ scrollBehavior: 'smooth' }}
-                onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 10)}
+                onScroll={(e) => {
+                    const top = e.currentTarget.scrollTop;
+                    if (!isScrolled && top > 50) setIsScrolled(true);
+                    else if (isScrolled && top < 20) setIsScrolled(false);
+                }}
             >
                 {/* Floating Header Wrapper - Dynamic Theme */}
                 <div className="sticky top-0 p-4 z-40">

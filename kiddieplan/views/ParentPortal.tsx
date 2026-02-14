@@ -1639,9 +1639,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </div>
 
                             <div className="relative min-h-[300px]">
-                                {/* Timeline Axis - Continuous Line */}
-                                <div className="absolute left-[24px] top-6 bottom-0 w-0.5 bg-gray-100"></div>
-
                                 {(focusLogs.length > 0 || currentTasks.some(t => t.completed)) ? (
                                     (() => {
                                         // Aggregate logs by task title
@@ -1706,12 +1703,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         initial={{ opacity: 0, x: -10 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: i * 0.05 }}
-                                                        className="relative pl-16 py-3"
+                                                        className="relative py-2"
                                                     >
-                                                        {/* Timeline Node */}
-                                                        <div className={`absolute left-[14px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-[3px] z-10 
-                                                            ${isSilent ? 'bg-white border-[#34D399]' : 'bg-white border-[#FB923C]'}`}>
-                                                        </div>
 
                                                         {/* Card Content (Refined: No large icon, bold task name, Chinese labels) */}
                                                         <div className={`flex items-center gap-4 p-5 rounded-[28px] border shadow-sm transition-all hover:shadow-md

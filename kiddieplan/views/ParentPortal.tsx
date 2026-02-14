@@ -1072,142 +1072,152 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="space-y-6"
+                            className="relative" // Wrapper for positioning
                         >
-                            {/* Dual Capsule Dashboard - Action & Rewards Separated */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Left Capsule: Real-time Action */}
-                                <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-4 border-white flex flex-col justify-between min-h-[160px] bg-gradient-to-br ${currentTheme.bg.replace('from-', 'from-white/10 to-').replace('50', '500').replace('100/30', '400')}`}>
-                                    {/* Theme-based gradient override for the card */}
-                                    <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : currentTheme.name === 'amber' ? 'from-amber-400 to-orange-500' : currentTheme.name === 'violet' ? 'from-violet-400 to-purple-500' : 'from-emerald-400 to-teal-500'} z-0`}></div>
-
-                                    <div className="absolute top-0 left-0 w-24 h-24 bg-white/20 rounded-full -ml-10 -mt-10 blur-2xl"></div>
-
-                                    <div className="relative z-10 flex items-center gap-2 opacity-90">
-                                        <div className="px-2 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-widest leading-none">
-                                            房间号
-                                        </div>
-                                        <span className="text-sm font-black font-mono tracking-tighter">{selectedChild.roomCode}</span>
-                                    </div>
-
-                                    <div className="relative z-10 mt-auto">
-                                        {selectedChild.isFocusing ? (
-                                            <div className="space-y-1">
-                                                <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
-                                                <h2 className="text-xl font-black tracking-tight leading-snug break-words line-clamp-2 drop-shadow-sm min-h-[3rem] flex items-center">
-                                                    {selectedChild.currentTaskName}
-                                                </h2>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-1">
-                                                <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
-                                                <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
-                                                <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">能量恢复中</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Right Capsule: Reward Assets */}
-                                <div className="p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-4 border-white bg-gradient-to-br from-[#F472B6] to-[#FB923C] flex flex-col justify-between min-h-[160px]">
-                                    <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/20 rounded-full -mr-10 -mb-10 blur-2xl"></div>
-
-                                    <div className="relative z-10 flex justify-between items-start">
-                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-80 pt-1">糖果收益</div>
-                                        <motion.button
-                                            whileHover={{ rotate: 180, scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleResetPoints();
-                                            }}
-                                            className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30 backdrop-blur-md"
-                                            title="清空收益"
-                                        >
-                                            <RotateCcw size={16} />
-                                        </motion.button>
-                                    </div>
-
-                                    <div className="relative z-10 mt-auto flex items-center gap-2">
-                                        <div className="text-5xl font-black tracking-tighter drop-shadow-md leading-none">
-                                            {selectedChild.points || 0}
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-2xl leading-none">🍭</span>
-                                            <span className="text-[8px] font-bold uppercase tracking-tighter opacity-70 mt-0.5">糖果收益</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            {/* Large Dynamic Glass Container */}
+                            <div className="absolute inset-0 bg-white/30 backdrop-blur-xl rounded-[48px] border border-white/50 shadow-xl z-0 overflow-hidden transition-all duration-500">
+                                {/* Dynamic Tint Layer */}
+                                <div className={`absolute inset-0 opacity-20 transition-colors duration-1000 bg-gradient-to-br ${currentTheme.bg}`}></div>
                             </div>
 
-                            {/* Action Grid */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <motion.button
-                                    whileHover={{ y: -5, rotate: -1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => setActiveTab('tasks')}
-                                    className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-yellow-200 transition-all font-candy"
-                                >
-                                    <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
-                                        <ListTodo size={32} strokeWidth={3} />
-                                    </div>
-                                    <span className="font-black text-[#5D4037] text-lg">任务管理</span>
-                                    <span className="text-xs text-gray-400 font-bold">每日习惯养成</span>
-                                </motion.button>
+                            {/* Dashboard Content - Z-Index raised to sit on top of glass */}
+                            <div className="relative z-10 p-6 space-y-6">
 
-                                <motion.button
-                                    whileHover={{ y: -5, rotate: 1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => setActiveTab('rewards')}
-                                    className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-red-200 transition-all font-candy"
-                                >
-                                    <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
-                                        <Gift size={32} strokeWidth={3} />
-                                    </div>
-                                    <span className="font-black text-[#5D4037] text-lg">奖励中心</span>
-                                    <span className="text-xs text-gray-400 font-bold">设定心愿清单</span>
-                                </motion.button>
+                                {/* Dual Capsule Dashboard - Action & Rewards Separated */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Left Capsule: Real-time Action */}
+                                    <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-4 border-white flex flex-col justify-between min-h-[160px] bg-gradient-to-br ${currentTheme.bg.replace('from-', 'from-white/10 to-').replace('50', '500').replace('100/30', '400')}`}>
+                                        {/* Theme-based gradient override for the card */}
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : currentTheme.name === 'amber' ? 'from-amber-400 to-orange-500' : currentTheme.name === 'violet' ? 'from-violet-400 to-purple-500' : 'from-emerald-400 to-teal-500'} z-0`}></div>
 
-                                <motion.button
-                                    whileHover={{ y: -5, rotate: -1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => setActiveTab('checkins')}
-                                    className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-purple-200 transition-all font-candy"
-                                >
-                                    <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
-                                        <CalendarCheck size={32} strokeWidth={3} />
-                                    </div>
-                                    <span className="font-black text-[#5D4037] text-lg">打卡记录</span>
-                                    <span className="text-xs text-gray-400 font-bold">查看成长历史</span>
-                                </motion.button>
+                                        <div className="absolute top-0 left-0 w-24 h-24 bg-white/20 rounded-full -ml-10 -mt-10 blur-2xl"></div>
 
-                                <motion.button
-                                    whileHover={{ y: -5, rotate: 1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => setActiveTab('redemption')}
-                                    className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-pink-200 transition-all font-candy"
-                                >
-                                    <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 font-candy">
-                                        <Trophy size={32} strokeWidth={3} />
-                                    </div>
-                                    <span className="font-black text-[#5D4037] text-lg">核销记录</span>
-                                    <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
-                                </motion.button>
+                                        <div className="relative z-10 flex items-center gap-2 opacity-90">
+                                            <div className="px-2 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-widest leading-none">
+                                                房间号
+                                            </div>
+                                            <span className="text-sm font-black font-mono tracking-tighter">{selectedChild.roomCode}</span>
+                                        </div>
 
-                                <motion.button
-                                    whileHover={{ y: -5, rotate: 0 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={() => setActiveTab('stats')}
-                                    className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border-2 border-white/50 hover:border-emerald-200 transition-all font-candy"
-                                >
-                                    <div className="w-14 h-14 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                                        <BarChart3 size={28} strokeWidth={3} />
+                                        <div className="relative z-10 mt-auto">
+                                            {selectedChild.isFocusing ? (
+                                                <div className="space-y-1">
+                                                    <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
+                                                    <h2 className="text-xl font-black tracking-tight leading-snug break-words line-clamp-2 drop-shadow-sm min-h-[3rem] flex items-center">
+                                                        {selectedChild.currentTaskName}
+                                                    </h2>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
+                                                    <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
+                                                    <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">能量恢复中</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="text-left">
-                                        <div className="font-black text-[#5D4037] text-lg">详情统计分析</div>
-                                        <div className="text-xs text-gray-400 font-bold">查看宝贝的成长指数与数据报表</div>
+
+                                    {/* Right Capsule: Reward Assets */}
+                                    <div className="p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-4 border-white bg-gradient-to-br from-[#F472B6] to-[#FB923C] flex flex-col justify-between min-h-[160px]">
+                                        <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/20 rounded-full -mr-10 -mb-10 blur-2xl"></div>
+
+                                        <div className="relative z-10 flex justify-between items-start">
+                                            <div className="text-[10px] font-black uppercase tracking-widest opacity-80 pt-1">糖果收益</div>
+                                            <motion.button
+                                                whileHover={{ rotate: 180, scale: 1.1 }}
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleResetPoints();
+                                                }}
+                                                className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/40 transition-all border border-white/30 backdrop-blur-md"
+                                                title="清空收益"
+                                            >
+                                                <RotateCcw size={16} />
+                                            </motion.button>
+                                        </div>
+
+                                        <div className="relative z-10 mt-auto flex items-center gap-2">
+                                            <div className="text-5xl font-black tracking-tighter drop-shadow-md leading-none">
+                                                {selectedChild.points || 0}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-2xl leading-none">🍭</span>
+                                                <span className="text-[8px] font-bold uppercase tracking-tighter opacity-70 mt-0.5">糖果收益</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </motion.button>
+                                </div>
+
+                                {/* Action Grid */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: -1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveTab('tasks')}
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-yellow-200 transition-all font-candy"
+                                    >
+                                        <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
+                                            <ListTodo size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">任务管理</span>
+                                        <span className="text-xs text-gray-400 font-bold">每日习惯养成</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: 1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveTab('rewards')}
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-red-200 transition-all font-candy"
+                                    >
+                                        <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
+                                            <Gift size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">奖励中心</span>
+                                        <span className="text-xs text-gray-400 font-bold">设定心愿清单</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: -1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveTab('checkins')}
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-purple-200 transition-all font-candy"
+                                    >
+                                        <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
+                                            <CalendarCheck size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">打卡记录</span>
+                                        <span className="text-xs text-gray-400 font-bold">查看成长历史</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: 1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveTab('redemption')}
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-pink-200 transition-all font-candy"
+                                    >
+                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 font-candy">
+                                            <Trophy size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">核销记录</span>
+                                        <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: 0 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setActiveTab('stats')}
+                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border-2 border-white/50 hover:border-emerald-200 transition-all font-candy"
+                                    >
+                                        <div className="w-14 h-14 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                                            <BarChart3 size={28} strokeWidth={3} />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="font-black text-[#5D4037] text-lg">详情统计分析</div>
+                                            <div className="text-xs text-gray-400 font-bold">查看宝贝的成长指数与数据报表</div>
+                                        </div>
+                                    </motion.button>
+                                </div>
                             </div>
                         </motion.div>
                     )}

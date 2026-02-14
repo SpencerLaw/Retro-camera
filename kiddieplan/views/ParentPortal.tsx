@@ -1115,6 +1115,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
 
                                 </motion.div>
+                            )}
+                        </AnimatePresence>
 
 
                     </header>

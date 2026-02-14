@@ -950,6 +950,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const selectedChild = children.find(c => c.id === selectedChildId);
 
+    // Dynamic Theme System
+    const CHILD_THEMES = [
+        { name: 'pink', bg: 'from-pink-50 to-pink-100/30', ring: 'ring-pink-400', text: 'text-pink-500', border: 'border-pink-200', shadow: 'shadow-pink-200', line: 'bg-pink-400' },
+        { name: 'blue', bg: 'from-blue-50 to-blue-100/30', ring: 'ring-blue-400', text: 'text-blue-500', border: 'border-blue-200', shadow: 'shadow-blue-200', line: 'bg-blue-400' },
+        { name: 'amber', bg: 'from-amber-50 to-amber-100/30', ring: 'ring-amber-400', text: 'text-amber-500', border: 'border-amber-200', shadow: 'shadow-amber-200', line: 'bg-amber-400' },
+        { name: 'violet', bg: 'from-violet-50 to-violet-100/30', ring: 'ring-violet-400', text: 'text-violet-500', border: 'border-violet-200', shadow: 'shadow-violet-200', line: 'bg-violet-400' },
+        { name: 'emerald', bg: 'from-emerald-50 to-emerald-100/30', ring: 'ring-emerald-400', text: 'text-emerald-500', border: 'border-emerald-200', shadow: 'shadow-emerald-200', line: 'bg-emerald-400' },
+    ];
+
+    const currentTheme = selectedChild
+        ? CHILD_THEMES[children.findIndex(c => c.id === selectedChild.id) % CHILD_THEMES.length]
+        : CHILD_THEMES[0];
+
     return (
         <div className="h-full flex flex-col relative overflow-hidden text-[110%] px-1" style={{ background: 'linear-gradient(160deg, #F0F4FF 0%, #E0E7FF 50%, #F3E8FF 100%)' }}>
             {/* Standard Background Decorative elements */}
@@ -1693,8 +1706,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                     <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
                                                                         {log.timeSlot || (() => {
                                                                             if (!log.startTime) return '--:--';
-                                                                            const d = new Date(log.startTime);
-                                                                            return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                                                                            try {
+                                                                                return new Intl.DateTimeFormat('zh-CN', {
+                                                                                    hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
+                                                                                }).format(new Date(log.startTime));
+                                                                            } catch (e) { return '--:--'; }
                                                                         })()}
                                                                     </div>
                                                                 </div>
@@ -1704,8 +1720,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                         <span className="text-[#059669]">
                                                                             ✅ 打卡于 {(() => {
                                                                                 if (!log.startTime) return '--:--';
-                                                                                const d = new Date(log.startTime);
-                                                                                return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                                                                                try {
+                                                                                    return new Intl.DateTimeFormat('zh-CN', {
+                                                                                        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
+                                                                                    }).format(new Date(log.startTime));
+                                                                                } catch (e) { return '--:--'; }
                                                                             })()}
                                                                         </span>
                                                                     ) : (
@@ -1714,11 +1733,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                             <span>
                                                                                 {(() => {
                                                                                     if (!log.startTime || !log.endTime) return '--:--';
-                                                                                    const d1 = new Date(log.startTime);
-                                                                                    const d2 = new Date(log.endTime);
-                                                                                    const sStr = `${d1.getHours().toString().padStart(2, '0')}:${d1.getMinutes().toString().padStart(2, '0')}`;
-                                                                                    const eStr = `${d2.getHours().toString().padStart(2, '0')}:${d2.getMinutes().toString().padStart(2, '0')}`;
-                                                                                    return `${sStr} - ${eStr}`;
+                                                                                    try {
+                                                                                        const fmt = new Intl.DateTimeFormat('zh-CN', {
+                                                                                            hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
+                                                                                        });
+                                                                                        return `${fmt.format(new Date(log.startTime))} - ${fmt.format(new Date(log.endTime))}`;
+                                                                                    } catch (e) { return '--:--'; }
                                                                                 })()}
                                                                             </span>
                                                                         </div>

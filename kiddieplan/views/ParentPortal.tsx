@@ -1857,274 +1857,284 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                             {/* Dashboard Components */}
                             {(() => {
-                                const statsDate = selectedStatsDate;
-                                const isToday = statsDate === new Date().toISOString().split('T')[0];
+                                try {
+                                    const statsDate = selectedStatsDate;
+                                    const isToday = statsDate === new Date().toISOString().split('T')[0];
 
-                                // Explicitly filter by selectedChildId for absolute data isolation
-                                const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
+                                    // Explicitly filter by selectedChildId for absolute data isolation
+                                    const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
 
-                                // Robust Data Merging
-                                const tasksForStats = isToday ? currentTasks : (baselineData.tasks || []);
-                                const dayData = { ...baselineData, tasks: tasksForStats };
+                                    // Robust Data Merging
+                                    const tasksForStats = isToday ? currentTasks : (baselineData.tasks || []);
+                                    const dayData = { ...baselineData, tasks: tasksForStats };
 
-                                const totalPoints = (dayData.tasks || [])
-                                    .filter((t: any) => (dayData.checkins || []).includes(t.id))
-                                    .reduce((sum: number, t: any) => sum + (t.points || 0), 0);
+                                    const totalPoints = (dayData.tasks || [])
+                                        .filter((t: any) => (dayData.checkins || []).includes(t.id))
+                                        .reduce((sum: number, t: any) => sum + (t.points || 0), 0);
 
-                                const totalDuration = (dayData.focusLogs || []).reduce((sum: number, log: any) => sum + (log.duration || 0), 0);
-                                const FOCUS_GOAL_MINUTES = 120;
-                                const focusGoalSeconds = FOCUS_GOAL_MINUTES * 60;
-                                const focusPercentage = Math.min(100, (totalDuration / focusGoalSeconds) * 100);
+                                    const totalDuration = (dayData.focusLogs || []).reduce((sum: number, log: any) => sum + (log.duration || 0), 0);
+                                    const FOCUS_GOAL_MINUTES = 120;
+                                    const focusGoalSeconds = FOCUS_GOAL_MINUTES * 60;
+                                    const focusPercentage = Math.min(100, (totalDuration / focusGoalSeconds) * 100);
 
-                                // Category Breakdown
-                                const categories = ['study', 'morning', 'evening', 'sports', 'discipline', 'chores', 'hygiene', 'creativity', 'other'];
-                                const catStats = categories.map(catId => {
-                                    const catTasks = (dayData.tasks || []).filter((t: any) => t.category === catId);
-                                    const completed = catTasks.filter((t: any) => (dayData.checkins || []).includes(t.id)).length;
-                                    return { id: catId, total: catTasks.length, completed };
-                                }).filter(s => s.total > 0);
+                                    // Category Breakdown
+                                    const categories = ['study', 'morning', 'evening', 'sports', 'discipline', 'chores', 'hygiene', 'creativity', 'other'];
+                                    const catStats = categories.map(catId => {
+                                        const catTasks = (dayData.tasks || []).filter((t: any) => t.category === catId);
+                                        const completed = catTasks.filter((t: any) => (dayData.checkins || []).includes(t.id)).length;
+                                        return { id: catId, total: catTasks.length, completed };
+                                    }).filter(s => s.total > 0);
 
-                                return (
-                                    <div className="space-y-6">
-                                        {/* Top Card: Focus Gauge (Gauge Style) */}
-                                        <div className="bg-white/90 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
-                                            <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-4">专注度达成 (分钟)</div>
-                                            <div className="relative w-48 h-24 mx-auto overflow-hidden">
-                                                {/* Background Arc */}
-                                                <svg className="w-48 h-48 -rotate-180" viewBox="0 0 100 100">
-                                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#F1F5F9" strokeWidth="10" strokeDasharray="141.37 282.74" />
-                                                    <motion.circle
-                                                        cx="50" cy="50" r="45" fill="none"
-                                                        stroke="url(#blueGradient)" strokeWidth="10"
-                                                        strokeLinecap="round"
-                                                        initial={{ strokeDashoffset: 141.37 }}
-                                                        animate={{ strokeDashoffset: 141.37 - (141.37 * focusPercentage / 100) }}
-                                                        strokeDasharray="141.37 282.74"
-                                                    />
-                                                    <defs>
-                                                        <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                            <stop offset="0%" stopColor="#60A5FA" />
-                                                            <stop offset="100%" stopColor="#3B82F6" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                </svg>
-                                                <div className="absolute top-10 left-0 right-0">
-                                                    <div className="text-4xl font-black text-[#5D4037]">{Math.floor(totalDuration / 60)}</div>
-                                                    <div className="text-[10px] text-gray-400 font-bold">目标 {FOCUS_GOAL_MINUTES} 分钟</div>
+                                    return (
+                                        <div className="space-y-6">
+                                            {/* Top Card: Focus Gauge (Gauge Style) */}
+                                            <div className="bg-white/90 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
+                                                <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-4">专注度达成 (分钟)</div>
+                                                <div className="relative w-48 h-24 mx-auto overflow-hidden">
+                                                    {/* Background Arc */}
+                                                    <svg className="w-48 h-48 -rotate-180" viewBox="0 0 100 100">
+                                                        <circle cx="50" cy="50" r="45" fill="none" stroke="#F1F5F9" strokeWidth="10" strokeDasharray="141.37 282.74" />
+                                                        <motion.circle
+                                                            cx="50" cy="50" r="45" fill="none"
+                                                            stroke="url(#blueGradient)" strokeWidth="10"
+                                                            strokeLinecap="round"
+                                                            initial={{ strokeDashoffset: 141.37 }}
+                                                            animate={{ strokeDashoffset: 141.37 - (141.37 * focusPercentage / 100) }}
+                                                            strokeDasharray="141.37 282.74"
+                                                        />
+                                                        <defs>
+                                                            <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                                <stop offset="0%" stopColor="#60A5FA" />
+                                                                <stop offset="100%" stopColor="#3B82F6" />
+                                                            </linearGradient>
+                                                        </defs>
+                                                    </svg>
+                                                    <div className="absolute top-8 left-0 right-0">
+                                                        <div className="text-6xl font-black text-[#5D4037] tracking-tighter">{Math.floor(totalDuration / 60)}</div>
+                                                        <div className="text-xs text-gray-400 font-bold mt-1">目标 {FOCUS_GOAL_MINUTES} 分钟</div>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 flex justify-around text-sm font-bold font-mono">
+                                                    <div className="text-blue-500">已用: {Math.floor(totalDuration / 60)} / {FOCUS_GOAL_MINUTES} min</div>
+                                                    <div className="text-gray-300">完成度: {Math.round(focusPercentage)}%</div>
                                                 </div>
                                             </div>
-                                            <div className="mt-4 flex justify-around text-xs font-bold font-mono">
-                                                <div className="text-blue-500">已用: {Math.floor(totalDuration / 60)} / {FOCUS_GOAL_MINUTES} min</div>
-                                                <div className="text-gray-300">完成度: {Math.round(focusPercentage)}%</div>
-                                            </div>
-                                        </div>
 
-                                        {/* Macros Breakdown (Category Detail rings) */}
-                                        <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-emerald-400"></div> 类目达成看板
+                                            {/* Macros Breakdown (Category Detail rings) */}
+                                            <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
+                                                <div className="flex justify-between items-center mb-6">
+                                                    <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-emerald-400"></div> 类目达成看板
+                                                    </div>
+                                                    <ArrowRight size={14} className="text-gray-300" />
                                                 </div>
-                                                <ArrowRight size={14} className="text-gray-300" />
-                                            </div>
 
-                                            <div className="flex items-center justify-between gap-4">
-                                                <div className="space-y-4 flex-1">
-                                                    {catStats.slice(0, 3).map((s, i) => (
-                                                        <div key={s.id} className="flex flex-col">
-                                                            <span className="text-[10px] font-bold text-gray-400 uppercase">{customCategories.find(c => c.id === s.id)?.name || s.id}</span>
-                                                            <div className="flex items-end gap-2">
-                                                                <span className="text-xl font-black text-[#5D4037]">{s.completed}</span>
-                                                                <span className="text-xs font-bold text-gray-300 pb-1">/ {s.total}</span>
-                                                                <span className={`text-[10px] font-black ml-auto ${['text-blue-400', 'text-orange-400', 'text-pink-400'][i % 3]}`}>
-                                                                    {Math.round(s.completed / s.total * 100)}%
-                                                                </span>
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div className="space-y-4 flex-1">
+                                                        {catStats.slice(0, 3).map((s, i) => (
+                                                            <div key={s.id} className="flex flex-col">
+                                                                <span className="text-xs font-bold text-gray-400 uppercase">{customCategories.find(c => c.id === s.id)?.name || s.id}</span>
+                                                                <div className="flex items-end gap-2">
+                                                                    <span className="text-2xl font-black text-[#5D4037]">{s.completed}</span>
+                                                                    <span className="text-sm font-bold text-gray-300 pb-1">/ {s.total}</span>
+                                                                    <span className={`text-xs font-black ml-auto ${['text-blue-400', 'text-orange-400', 'text-pink-400'][i % 3]}`}>
+                                                                        {Math.round(s.completed / s.total * 100)}%
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
-                                                    {catStats.length === 0 && <div className="text-gray-300 text-xs font-bold py-4">本日暂无分配任务</div>}
-                                                </div>
+                                                        ))}
+                                                        {catStats.length === 0 && <div className="text-gray-300 text-xs font-bold py-4">本日暂无分配任务</div>}
+                                                    </div>
 
-                                                <div className="relative w-32 h-32 flex items-center justify-center">
-                                                    {catStats.length > 0 && catStats.slice(0, 3).map((s, i) => (
-                                                        <div key={s.id} className="absolute inset-0" style={{ padding: i * 8 }}>
-                                                            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                                                                <circle cx="50" cy="50" r="40" fill="none" stroke="#F1F5F9" strokeWidth="10" />
-                                                                <motion.circle
-                                                                    cx="50" cy="50" r="40" fill="none"
-                                                                    stroke={['#60A5FA', '#FB923C', '#F472B6'][i % 3]}
-                                                                    strokeWidth="10" strokeLinecap="round"
-                                                                    initial={{ strokeDasharray: "0 251.32" }}
-                                                                    animate={{ strokeDasharray: `${(s.completed / s.total) * 251.32} 251.32` }}
-                                                                />
-                                                            </svg>
+                                                    <div className="relative w-32 h-32 flex items-center justify-center">
+                                                        {catStats.length > 0 && catStats.slice(0, 3).map((s, i) => (
+                                                            <div key={s.id} className="absolute inset-0" style={{ padding: i * 8 }}>
+                                                                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                                                    <circle cx="50" cy="50" r="40" fill="none" stroke="#F1F5F9" strokeWidth="10" />
+                                                                    <motion.circle
+                                                                        cx="50" cy="50" r="40" fill="none"
+                                                                        stroke={['#60A5FA', '#FB923C', '#F472B6'][i % 3]}
+                                                                        strokeWidth="10" strokeLinecap="round"
+                                                                        initial={{ strokeDasharray: "0 251.32" }}
+                                                                        animate={{ strokeDasharray: `${(s.completed / s.total) * 251.32} 251.32` }}
+                                                                    />
+                                                                </svg>
+                                                            </div>
+                                                        ))}
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-black text-emerald-500">🏆</div>
                                                         </div>
-                                                    ))}
-                                                    <div className="text-center">
-                                                        <div className="text-2xl font-black text-emerald-500">🏆</div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Active Timeline (High Precision) */}
-                                        <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
-                                            <div className="flex justify-between items-center mb-4">
-                                                <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-red-400"></div> 活跃时间分布 (06:00 - 22:00)
-                                                </div>
-                                                <span className="text-[10px] font-black text-red-300">统计精度: 15min</span>
-                                            </div>
-
-                                            <div className="h-14 w-full bg-gray-50 rounded-2xl overflow-hidden flex gap-0.5 p-1 relative border border-gray-100">
-                                                {/* Render relevant hours slots (6am to 10pm = 16 hours = 64 slots) */}
-                                                {Array.from({ length: 64 }).map((_, i) => {
-                                                    const totalMins = (6 * 60) + (i * 15);
-                                                    const hour = Math.floor(totalMins / 60).toString().padStart(2, '0');
-                                                    const min = (totalMins % 60).toString().padStart(2, '0');
-                                                    const timeStr = `${hour}:${min}`;
-
-                                                    const isActive = (dayData.focusLogs || []).some((log: any) => {
-                                                        if (!log.startTime || !log.endTime || typeof log.startTime !== 'string' || typeof log.endTime !== 'string') return false;
-                                                        const startMatch = log.startTime.match(/T(\d{2}:\d{2})/);
-                                                        const endMatch = log.endTime.match(/T(\d{2}:\d{2})/);
-                                                        const start = startMatch ? startMatch[1] : null;
-                                                        const end = endMatch ? endMatch[1] : null;
-                                                        return start && end && timeStr >= start && timeStr <= end;
-                                                    });
-
-                                                    return (
-                                                        <div
-                                                            key={i}
-                                                            title={timeStr}
-                                                            className={`flex-1 rounded-[3px] transition-all duration-300 ${isActive ? 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.4)]' : 'bg-gray-100/50'}`}
-                                                        ></div>
-                                                    );
-                                                })}
-                                            </div>
-
-                                            <div className="flex justify-between mt-3 text-[10px] font-black text-gray-300 px-1 uppercase tracking-widest">
-                                                <span>06:00</span>
-                                                <span>10:00</span>
-                                                <span>14:00</span>
-                                                <span>18:00</span>
-                                                <span>22:00</span>
-                                            </div>
-
-                                            {/* Interval Details List (New: Show specific active periods) */}
-                                            {(dayData.focusLogs || []).length > 0 && (
-                                                <div className="mt-6 space-y-3">
-                                                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-50 pb-1">专注时段明细</div>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        {(dayData.focusLogs || [])
-                                                            .filter((log: any) => log.duration > 0 && log.startTime && typeof log.startTime === 'string' && log.endTime && typeof log.endTime === 'string')
-                                                            .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
-                                                            .map((log: any, idx: number) => {
-                                                                const sMatch = log.startTime?.match(/T(\d{2}:\d{2})/);
-                                                                const eMatch = log.endTime?.match(/T(\d{2}:\d{2})/);
-                                                                const sStr = sMatch ? sMatch[1] : '--:--';
-                                                                const eStr = eMatch ? eMatch[1] : '--:--';
-
-                                                                return (
-                                                                    <div key={idx} className="bg-gray-50/50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
-                                                                        <div className="flex flex-col">
-                                                                            <span className="text-[10px] font-black text-[#5D4037]">
-                                                                                {sStr} - {eStr}
-                                                                            </span>
-                                                                            <span className="text-[8px] font-bold text-gray-400">{Math.floor(log.duration / 60)} 分钟</span>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
+                                            {/* Active Timeline (High Precision) */}
+                                            <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-red-400"></div> 活跃时间分布 (06:00 - 22:00)
                                                     </div>
+                                                    <span className="text-[10px] font-black text-red-300">统计精度: 15min</span>
                                                 </div>
-                                            )}
-                                        </div>
 
-                                        {/* Calendar Navigation */}
-                                        <div className="bg-white/80 p-6 rounded-[40px] border-2 border-white shadow-sm">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <h3 className="font-black text-[#5D4037] flex items-center gap-2">
-                                                    <Calendar size={18} className="text-blue-400" />
-                                                    成长日历
-                                                </h3>
-                                                <span className="text-xs font-bold text-gray-400">{new Date().getFullYear()}年{new Date().getMonth() + 1}月</span>
-                                            </div>
-                                            <div className="grid grid-cols-7 gap-2">
-                                                {['日', '一', '二', '三', '四', '五', '六'].map(d => (
-                                                    <div key={d} className="text-center text-[10px] font-black text-gray-300 pb-2">{d}</div>
-                                                ))}
-                                                {(() => {
-                                                    const now = new Date();
-                                                    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-                                                    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                                                    const cells = [];
-                                                    for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} />);
-                                                    for (let d = 1; d <= daysInMonth; d++) {
-                                                        const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
-                                                        const isSelected = dateStr === selectedStatsDate;
-                                                        const isTodayActual = dateStr === formatBeijingTime(new Date()).split(' ')[0];
-                                                        const hasData = (licenseData as any)?.progress?.[dateStr]?.[selectedChildId]?.checkins?.length > 0;
-                                                        cells.push(
-                                                            <motion.button
-                                                                key={d}
-                                                                whileTap={{ scale: 0.9 }}
-                                                                onClick={() => setSelectedStatsDate(dateStr)}
-                                                                className={`h-10 rounded-2xl flex flex-col items-center justify-center relative transition-all
-                                                                    ${isSelected ? 'bg-blue-500 text-white shadow-lg scale-110 z-10' : 'bg-gray-50/50 hover:bg-gray-100 text-gray-500'}`}
-                                                            >
-                                                                <span className="text-xs font-black">{d}</span>
-                                                                {isTodayActual && (
-                                                                    <div className={`absolute -top-1 -right-0.5 px-1 py-0.5 rounded-md text-[6px] font-black uppercase
-                                                                        ${isSelected ? 'bg-white text-blue-500' : 'bg-blue-500 text-white'}`}>今日</div>
-                                                                )}
-                                                                {hasData && !isSelected && !isTodayActual && (
-                                                                    <div className="absolute bottom-1 w-1 h-1 bg-orange-400 rounded-full"></div>
-                                                                )}
-                                                            </motion.button>
+                                                <div className="h-14 w-full bg-gray-50 rounded-2xl overflow-hidden flex gap-0.5 p-1 relative border border-gray-100">
+                                                    {/* Render relevant hours slots (6am to 10pm = 16 hours = 64 slots) */}
+                                                    {Array.from({ length: 64 }).map((_, i) => {
+                                                        const totalMins = (6 * 60) + (i * 15);
+                                                        const hour = Math.floor(totalMins / 60).toString().padStart(2, '0');
+                                                        const min = (totalMins % 60).toString().padStart(2, '0');
+                                                        const timeStr = `${hour}:${min}`;
+
+                                                        const isActive = (dayData.focusLogs || []).some((log: any) => {
+                                                            if (!log.startTime || !log.endTime || typeof log.startTime !== 'string' || typeof log.endTime !== 'string') return false;
+                                                            const startMatch = log.startTime.match(/T(\d{2}:\d{2})/);
+                                                            const endMatch = log.endTime.match(/T(\d{2}:\d{2})/);
+                                                            const start = startMatch ? startMatch[1] : null;
+                                                            const end = endMatch ? endMatch[1] : null;
+                                                            return start && end && timeStr >= start && timeStr <= end;
+                                                        });
+
+                                                        return (
+                                                            <div
+                                                                key={i}
+                                                                title={timeStr}
+                                                                className={`flex-1 rounded-[3px] transition-all duration-300 ${isActive ? 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.4)]' : 'bg-gray-100/50'}`}
+                                                            ></div>
                                                         );
-                                                    }
-                                                    return cells;
-                                                })()}
-                                            </div>
-                                        </div>
-
-                                        {/* Day Detail List */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2 px-2">
-                                                <div className="w-1.5 h-4 bg-blue-400 rounded-full"></div>
-                                                <h4 className="font-black text-[#5D4037] text-sm">当日任务详情</h4>
-                                            </div>
-                                            {dayData.tasks.length > 0 ? (
-                                                dayData.tasks.map((task: any) => (
-                                                    <div key={task.id} className="bg-white/60 p-4 rounded-3xl border border-white shadow-sm flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg
-                                                                ${dayData.checkins.includes(task.id) ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 text-gray-300'}`}>
-                                                                {dayData.checkins.includes(task.id) ? '✅' : '⏳'}
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-bold text-[#5D4037] text-sm">{task.title}</div>
-                                                                <div className="text-[10px] text-gray-400 font-bold">{task.timeSlot} · {task.points} 🍭</div>
-                                                            </div>
-                                                        </div>
-                                                        {dayData.checkins.includes(task.id) ? (
-                                                            <span className="text-xs font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">+ {task.points}</span>
-                                                        ) : (
-                                                            <span className="text-[10px] font-bold text-gray-300 px-3 py-1 border border-gray-100 rounded-full italic">未打卡</span>
-                                                        )}
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="py-12 text-center bg-gray-50/50 rounded-[40px] border-2 border-dashed border-gray-100">
-                                                    <div className="text-4xl mb-2 opacity-20">💤</div>
-                                                    <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">该日期暂无数据记录</p>
+                                                    })}
                                                 </div>
-                                            )}
+
+                                                <div className="flex justify-between mt-3 text-[10px] font-black text-gray-300 px-1 uppercase tracking-widest">
+                                                    <span>06:00</span>
+                                                    <span>10:00</span>
+                                                    <span>14:00</span>
+                                                    <span>18:00</span>
+                                                    <span>22:00</span>
+                                                </div>
+
+                                                {/* Interval Details List (New: Show specific active periods) */}
+                                                {(dayData.focusLogs || []).length > 0 && (
+                                                    <div className="mt-6 space-y-3">
+                                                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-50 pb-1">专注时段明细</div>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            {(dayData.focusLogs || [])
+                                                                .filter((log: any) => log.duration > 0 && log.startTime && typeof log.startTime === 'string' && log.endTime && typeof log.endTime === 'string')
+                                                                .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
+                                                                .map((log: any, idx: number) => {
+                                                                    const sMatch = log.startTime?.match(/T(\d{2}:\d{2})/);
+                                                                    const eMatch = log.endTime?.match(/T(\d{2}:\d{2})/);
+                                                                    const sStr = sMatch ? sMatch[1] : '--:--';
+                                                                    const eStr = eMatch ? eMatch[1] : '--:--';
+
+                                                                    return (
+                                                                        <div key={idx} className="bg-gray-50/50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
+                                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                                                                            <div className="flex flex-col">
+                                                                                <span className="text-[10px] font-black text-[#5D4037]">
+                                                                                    {sStr} - {eStr}
+                                                                                </span>
+                                                                                <span className="text-[8px] font-bold text-gray-400">{Math.floor(log.duration / 60)} 分钟</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Calendar Navigation */}
+                                            <div className="bg-white/80 p-6 rounded-[40px] border-2 border-white shadow-sm">
+                                                <div className="flex justify-between items-center mb-6">
+                                                    <h3 className="font-black text-[#5D4037] flex items-center gap-2">
+                                                        <Calendar size={18} className="text-blue-400" />
+                                                        成长日历
+                                                    </h3>
+                                                    <span className="text-xs font-bold text-gray-400">{new Date().getFullYear()}年{new Date().getMonth() + 1}月</span>
+                                                </div>
+                                                <div className="grid grid-cols-7 gap-2">
+                                                    {['日', '一', '二', '三', '四', '五', '六'].map(d => (
+                                                        <div key={d} className="text-center text-[10px] font-black text-gray-300 pb-2">{d}</div>
+                                                    ))}
+                                                    {(() => {
+                                                        const now = new Date();
+                                                        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+                                                        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                                                        const cells = [];
+                                                        for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} />);
+                                                        for (let d = 1; d <= daysInMonth; d++) {
+                                                            const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+                                                            const isSelected = dateStr === selectedStatsDate;
+                                                            const isTodayActual = dateStr === formatBeijingTime(new Date()).split(' ')[0];
+                                                            const hasData = (licenseData as any)?.progress?.[dateStr]?.[selectedChildId]?.checkins?.length > 0;
+                                                            cells.push(
+                                                                <motion.button
+                                                                    key={d}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    onClick={() => setSelectedStatsDate(dateStr)}
+                                                                    className={`h-10 rounded-2xl flex flex-col items-center justify-center relative transition-all
+                                                                    ${isSelected ? 'bg-blue-500 text-white shadow-lg scale-110 z-10' : 'bg-gray-50/50 hover:bg-gray-100 text-gray-500'}`}
+                                                                >
+                                                                    <span className="text-xs font-black">{d}</span>
+                                                                    {isTodayActual && (
+                                                                        <div className={`absolute -top-1 -right-0.5 px-1 py-0.5 rounded-md text-[6px] font-black uppercase
+                                                                        ${isSelected ? 'bg-white text-blue-500' : 'bg-blue-500 text-white'}`}>今日</div>
+                                                                    )}
+                                                                    {hasData && !isSelected && !isTodayActual && (
+                                                                        <div className="absolute bottom-1 w-1 h-1 bg-orange-400 rounded-full"></div>
+                                                                    )}
+                                                                </motion.button>
+                                                            );
+                                                        }
+                                                        return cells;
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {/* Day Detail List */}
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-2 px-2">
+                                                    <div className="w-1.5 h-4 bg-blue-400 rounded-full"></div>
+                                                    <h4 className="font-black text-[#5D4037] text-sm">当日任务详情</h4>
+                                                </div>
+                                                {dayData.tasks.length > 0 ? (
+                                                    dayData.tasks.map((task: any) => (
+                                                        <div key={task.id} className="bg-white/60 p-4 rounded-3xl border border-white shadow-sm flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg
+                                                                ${dayData.checkins.includes(task.id) ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 text-gray-300'}`}>
+                                                                    {dayData.checkins.includes(task.id) ? '✅' : '⏳'}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="font-bold text-[#5D4037] text-sm">{task.title}</div>
+                                                                    <div className="text-[10px] text-gray-400 font-bold">{task.timeSlot} · {task.points} 🍭</div>
+                                                                </div>
+                                                            </div>
+                                                            {dayData.checkins.includes(task.id) ? (
+                                                                <span className="text-xs font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">+ {task.points}</span>
+                                                            ) : (
+                                                                <span className="text-[10px] font-bold text-gray-300 px-3 py-1 border border-gray-100 rounded-full italic">未打卡</span>
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="py-12 text-center bg-gray-50/50 rounded-[40px] border-2 border-dashed border-gray-100">
+                                                        <div className="text-4xl mb-2 opacity-20">💤</div>
+                                                        <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">该日期暂无数据记录</p>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
+                                    );
+                                } catch (error) {
+                                    console.error("Stats render error:", error);
+                                    return (
+                                        <div className="p-8 text-center text-gray-400 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                                            <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                            <p className="text-sm font-bold">数据加载异常，正在尝试自动修复...</p>
+                                        </div>
+                                    );
+                                }
                             })()}
                         </motion.div>
                     )}

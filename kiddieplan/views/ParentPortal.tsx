@@ -13,6 +13,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [children, setChildren] = useState<Child[]>([]);
     const [licenseData, setLicenseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isScrolled, setIsScrolled] = useState(false);
     const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'checkins' | 'stats' | 'redemption'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -976,11 +977,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 ref={mainScrollRef}
                 className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10 scroll-smooth pb-10"
                 style={{ scrollBehavior: 'smooth' }}
+                onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 10)}
             >
                 {/* Floating Header Wrapper - Dynamic Theme */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className="px-6 py-4 rounded-[32px] border border-white/40 shadow-sm transition-all duration-500"
+                        className={`px-6 rounded-[32px] border border-white/40 shadow-sm transition-all duration-500 ease-in-out ${isScrolled ? 'py-3' : 'py-4'}`}
                         style={{
                             background: 'rgba(255, 255, 255, 0.30)',
                             backdropFilter: 'blur(20px) saturate(180%)',
@@ -988,13 +990,47 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         }}
                     >
                         {/* Top Row: Brand & Time */}
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex flex-col">
-                                <h1 className={`text-[20px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                    星梦奇旅
-                                </h1>
-                                <span className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>家长端</span>
+                        <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'mb-0' : 'mb-6'}`}>
+                            <div className="flex items-center gap-3">
+                                <div className="flex flex-col">
+                                    <h1 className={`text-[20px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                        星梦奇旅
+                                    </h1>
+                                    <AnimatePresence>
+                                        {!isScrolled && (
+                                            <motion.span
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
+                                                style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
+                                            >
+                                                家长端
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Mini Avatar when Scrolled */}
+                                <AnimatePresence>
+                                    {isScrolled && selectedChild && (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                                            exit={{ opacity: 0, x: -20, scale: 0.8 }}
+                                            className="flex items-center gap-2 bg-white/40 backdrop-blur-sm px-2 py-1 rounded-full border border-white/50"
+                                            onClick={() => {
+                                                // Scroll to top to expand
+                                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                        >
+                                            <img src={selectedChild.avatar} className="w-6 h-6 rounded-full object-cover border border-white" alt="mini" />
+                                            <span className="text-xs font-bold text-gray-600">{selectedChild.name}</span>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
+
                             <div className="flex flex-col items-end mr-0.5">
                                 <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
                                     {formatBeijingTime(currentTime).split(' ')[1]}
@@ -1005,63 +1041,73 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </div>
                         </div>
 
-                        {/* Child Selector Row */}
-                        <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2">
-                            {children.map((child, idx) => {
-                                const isSelected = selectedChildId === child.id;
-                                const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
+                        {/* Child Selector Row - Collapsible */}
+                        <AnimatePresence>
+                            {!isScrolled && (
+                                <motion.div
+                                    initial={{ opacity: 1, height: 'auto', marginBottom: 0 }}
+                                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2">
+                                        {children.map((child, idx) => {
+                                            const isSelected = selectedChildId === child.id;
+                                            const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
 
-                                return (
-                                    <motion.div
-                                        key={child.id}
-                                        className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
-                                        onClick={() => setSelectedChildId(child.id)}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        <div className="relative">
-                                            <motion.div
-                                                className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-300 relative z-10 bg-white
-                                                    ${isSelected ? `${theme.ring} scale-105 shadow-md border-white` : 'border-transparent opacity-60 grayscale-[0.3]'}`}
-                                            >
-                                                <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
-                                            </motion.div>
-
-                                            {/* Edit Button */}
-                                            {isSelected && (
-                                                <motion.button
-                                                    initial={{ scale: 0, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    onClick={(e) => { e.stopPropagation(); handleEditChild(); }}
-                                                    className={`absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-gray-500 shadow-sm flex items-center justify-center border border-gray-100 z-20`}
+                                            return (
+                                                <motion.div
+                                                    key={child.id}
+                                                    className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
+                                                    onClick={() => setSelectedChildId(child.id)}
+                                                    whileTap={{ scale: 0.95 }}
                                                 >
-                                                    <Edit2 size={10} />
-                                                </motion.button>
-                                            )}
+                                                    <div className="relative">
+                                                        <motion.div
+                                                            className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-300 relative z-10 bg-white
+                                                    ${isSelected ? `${theme.ring} scale-105 shadow-md border-white` : 'border-transparent opacity-60 grayscale-[0.3]'}`}
+                                                        >
+                                                            <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
+                                                        </motion.div>
+
+                                                        {/* Edit Button */}
+                                                        {isSelected && (
+                                                            <motion.button
+                                                                initial={{ scale: 0, opacity: 0 }}
+                                                                animate={{ scale: 1, opacity: 1 }}
+                                                                onClick={(e) => { e.stopPropagation(); handleEditChild(); }}
+                                                                className={`absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-gray-500 shadow-sm flex items-center justify-center border border-gray-100 z-20`}
+                                                            >
+                                                                <Edit2 size={10} />
+                                                            </motion.button>
+                                                        )}
+                                                    </div>
+
+                                                    <span className={`text-[10px] font-black transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-400'}`}>
+                                                        {child.name}
+                                                    </span>
+
+                                                    {/* Simple Active Dot */}
+                                                    {isSelected && (
+                                                        <motion.div
+                                                            layoutId="active-dot"
+                                                            className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('from-', 'bg-').split(' ')[0]}`}
+                                                        />
+                                                    )}
+                                                </motion.div>
+                                            );
+                                        })}
+
+                                        {/* Add Button */}
+                                        <div className="flex flex-col items-center gap-2 min-w-[64px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer p-2" onClick={() => handleAddChild()}>
+                                            <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white/20">
+                                                <Plus className="text-gray-400" size={20} />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-gray-400">添加</span>
                                         </div>
-
-                                        <span className={`text-[10px] font-black transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-400'}`}>
-                                            {child.name}
-                                        </span>
-
-                                        {/* Simple Active Dot */}
-                                        {isSelected && (
-                                            <motion.div
-                                                layoutId="active-dot"
-                                                className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('from-', 'bg-').split(' ')[0]}`}
-                                            />
-                                        )}
-                                    </motion.div>
-                                );
-                            })}
-
-                            {/* Add Button */}
-                            <div className="flex flex-col items-center gap-2 min-w-[64px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer" onClick={() => handleAddChild()}>
-                                <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white/20">
-                                    <Plus className="text-gray-400" size={20} />
-                                </div>
-                                <span className="text-[10px] font-bold text-gray-400">添加</span>
-                            </div>
-                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </header>
                 </div>
 

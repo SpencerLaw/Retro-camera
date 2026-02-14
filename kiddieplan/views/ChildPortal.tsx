@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw } from 'lucide-react';
+import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw, Menu } from 'lucide-react';
 import { Task, AppTab } from '../types';
 import confettis from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,6 +36,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const timerSecondsRef = useRef(0); // Use ref to avoid sync pulse dependency loop
     const [startTime, setStartTime] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [isScrolled, setIsScrolled] = useState(false);
+    const mainScrollRef = useRef<HTMLElement>(null);
 
     // Sync ref with state
     useEffect(() => {
@@ -364,7 +366,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             className="space-y-6"
         >
             {/* Candy Island Dashboard Card */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[40px] p-8 border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative overflow-hidden group">
+            <div className="bg-white/92 backdrop-blur-2xl rounded-[40px] p-8 border-2 border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative overflow-hidden group">
                 {/* Background Sparkles */}
                 <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-100/40 to-indigo-100/40 rounded-full -mr-16 -mt-16 blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-pink-100/30 to-purple-100/30 rounded-full -ml-10 -mb-10 blur-2xl"></div>
@@ -415,7 +417,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         <div
                             key={task.id}
                             className={`p-4 rounded-2xl flex items-center justify-between border transition-all relative overflow-hidden
-                            ${isCompleted ? 'bg-gray-50 border-transparent opacity-60' : 'bg-white border-white/50 shadow-sm'}`}
+                            ${isCompleted ? 'bg-gray-50 border-transparent opacity-60' : 'bg-white/85 backdrop-blur-md border-white/50 shadow-sm'}`}
                         >
                             <div className="flex items-center gap-3 relative z-10">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-green-100 text-green-500' : 'bg-pink-50 text-pink-400'}`}>
@@ -477,7 +479,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
                             <motion.div
                                 whileTap={{ scale: 0.98 }}
-                                className={`bg-white/80 backdrop-blur-sm p-4 rounded-[28px] border transition-all ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-md hover:shadow-lg'}`}
+                                className={`bg-white/90 backdrop-blur-md p-4 rounded-[28px] border transition-all ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-md hover:shadow-lg'}`}
                             >
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-start justify-between">
@@ -578,15 +580,22 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             </AnimatePresence>
 
             {/* Main Area - Everything scrolls under the glassy header */}
-            <main className="flex-1 w-full overflow-y-auto no-scrollbar relative scroll-smooth" style={{ scrollBehavior: 'smooth' }}>
+            <main
+                ref={mainScrollRef as any}
+                onScroll={(e) => {
+                    const top = e.currentTarget.scrollTop;
+                    if (!isScrolled && top > 20) setIsScrolled(true);
+                }}
+                className="flex-1 w-full overflow-y-auto no-scrollbar relative"
+            >
                 {/* Top Bar - iOS 26 Extreme Glass Header */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className="px-6 py-4 flex justify-between items-center rounded-3xl border border-white/10"
+                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm' : 'py-4 shadow-none'}`}
                         style={{
-                            background: 'rgba(255, 255, 255, 0.02)',
-                            backdropFilter: 'blur(6px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(6px) saturate(180%)',
+                            background: isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.7)',
+                            backdropFilter: 'blur(20px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                         }}
                     >
                         {/* Left: Branding & Role (Vertical Stack) */}
@@ -598,7 +607,20 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         </div>
 
                         {/* Right: Time & Compact Buttons (Ultra Grouped) */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
+                            {isScrolled && (
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    onClick={() => {
+                                        setIsScrolled(false);
+                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
+                                >
+                                    <Menu size={18} />
+                                </motion.button>
+                            )}
                             <div className="flex flex-col items-end mr-0.5">
                                 <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
                                     {formatBeijingTime(currentTime).split(' ')[1]}

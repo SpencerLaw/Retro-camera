@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2, ArrowRight, Flame } from 'lucide-react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2, ArrowRight, Flame, Menu } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog, RedemptionLog } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES, REWARD_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -976,17 +976,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
-                    // Tightened hysteresis to prevent layout shift loops
-                    if (!isScrolled && top > 60) setIsScrolled(true);
-                    else if (isScrolled && top < 5) setIsScrolled(false);
+                    // Strict collapse logic: if moved down, collapse.
+                    // Manual expand only (via click) to prevent jitter.
+                    if (!isScrolled && top > 20) setIsScrolled(true);
                 }}
             >
                 {/* Floating Header Wrapper - Dynamic Theme */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
                         className={`px-6 rounded-[32px] transition-all duration-500 ease-in-out ${isScrolled
-                            ? 'py-3 bg-white/40 border border-white/40 shadow-sm backdrop-blur-xl'
-                            : 'py-4 bg-white/20 border border-white/30 shadow-none backdrop-blur-md'
+                            ? 'py-3 bg-white/80 border border-white/40 shadow-sm backdrop-blur-2xl'
+                            : 'py-4 bg-white/80 border border-white/40 shadow-none backdrop-blur-2xl'
                             }`}
                     >
                         {/* Top Row: Brand & Time */}
@@ -1031,13 +1031,28 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </AnimatePresence>
                             </div>
 
-                            <div className="flex flex-col items-end mr-0.5">
-                                <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[1]}
-                                </span>
-                                <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[0]}
-                                </span>
+                            <div className="flex items-center gap-3">
+                                {isScrolled && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        onClick={() => {
+                                            setIsScrolled(false);
+                                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
+                                    >
+                                        <Menu size={20} />
+                                    </motion.button>
+                                )}
+                                <div className="flex flex-col items-end mr-0.5">
+                                    <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
+                                        {formatBeijingTime(currentTime).split(' ')[1]}
+                                    </span>
+                                    <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
+                                        {formatBeijingTime(currentTime).split(' ')[0]}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -1051,7 +1066,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className={`flex items-start gap-2 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 && children.length < 3 ? 'justify-center' : 'justify-around'}`}>
+                                    <div className={`flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 ? 'justify-center' : 'justify-around'}`}>
                                         {children.map((child, idx) => {
                                             const isSelected = selectedChildId === child.id;
                                             const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
@@ -1119,23 +1134,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </header>
                 </div>
 
-                <div className="px-4 pb-4 space-y-6">
+                <div className="px-4 pb-0 space-y-6">
                     {(activeTab === 'children' && selectedChild) && (
                         <motion.div
                             key={selectedChildId}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="relative" // Wrapper for positioning
+                            className="bg-white/90 backdrop-blur-2xl p-8 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden"
                         >
-                            {/* Large Dynamic Glass Container */}
-                            <div className="absolute inset-0 bg-white/30 backdrop-blur-xl rounded-[48px] border border-white/50 shadow-xl z-0 overflow-hidden transition-all duration-500">
-                                {/* Dynamic Tint Layer */}
-                                <div className={`absolute inset-0 opacity-20 transition-colors duration-1000 bg-gradient-to-br ${currentTheme.bg}`}></div>
-                            </div>
-
                             {/* Dashboard Content - Z-Index raised to sit on top of glass */}
-                            <div className="relative z-10 p-6 space-y-6">
+                            <div className="relative z-10 space-y-6">
 
                                 {/* Dual Capsule Dashboard - Action & Rewards Separated */}
                                 <div className="grid grid-cols-2 gap-4">
@@ -1845,7 +1853,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="space-y-4">
                                 {redemptionLogs.length > 0 ? (
                                     redemptionLogs.map((log) => (
-                                        <div key={log.id} className="bg-white/60 backdrop-blur-sm p-5 rounded-[28px] border border-white/50 shadow-sm relative overflow-hidden group">
+                                        <div key={log.id} className="bg-white/85 backdrop-blur-md p-5 rounded-[28px] border border-white/50 shadow-sm relative overflow-hidden group">
                                             <div className="absolute top-0 right-0 p-2 opacity-5">
                                                 <Gift size={40} />
                                             </div>
@@ -1916,7 +1924,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     return (
                                         <div className="space-y-6">
                                             {/* 1. Calendar Navigation (Moved to Top) */}
-                                            <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
+                                            <div className="bg-white/92 backdrop-blur-2xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
                                                 {/* Decorative Elements */}
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-2xl opacity-40"></div>
                                                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-100 rounded-full -ml-12 -mb-12 blur-2xl opacity-40"></div>
@@ -1975,7 +1983,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                             {/* 2. Completion Gauge & Summary (Core Metric) */}
                                             <div className="grid grid-cols-1 gap-6">
-                                                <div className="bg-white/90 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
+                                                <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
                                                     <div className="absolute top-0 right-0 w-40 h-40 bg-orange-100 rounded-full -mr-20 -mt-20 blur-3xl opacity-30"></div>
                                                     <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-100 rounded-full -ml-20 -mb-20 blur-3xl opacity-30"></div>
 
@@ -2034,7 +2042,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
 
                                             {/* Active Timeline (High Precision) */}
-                                            <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
+                                            <div className="bg-white/92 backdrop-blur-2xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
                                                 <div className="flex justify-between items-center mb-4">
                                                     <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
                                                         <div className="w-2 h-2 rounded-full bg-red-400"></div> 活跃时间分布 (06:00 - 22:00)
@@ -2192,165 +2200,162 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </motion.div>
                     )}
                 </div>
-            </main >
-
+            </main>
 
             {/* Dialog Overlay */}
             <AnimatePresence>
-                {
-                    dialogConfig.isOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                                onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                            />
-                            <motion.div
-                                initial={{ scale: 0.9, y: 20 }}
-                                animate={{ scale: 1, y: 0 }}
-                                exit={{ scale: 0.9, y: 20, opacity: 0 }}
-                                className="bg-white p-8 rounded-[40px] w-full max-w-sm shadow-2xl relative z-60 border-8 border-[var(--color-bg-light-blue)]"
-                            >
-                                <h3 className="text-2xl font-black text-center text-[#5D4037] mb-2">{dialogConfig.title}</h3>
-                                {dialogConfig.message && <p className="text-center text-gray-500 text-sm mb-6">{dialogConfig.message}</p>}
-                                {dialogConfig.highlight && (
-                                    <div className="text-center text-5xl font-black text-[var(--color-blue-fun)] mb-6 font-mono tracking-widest bg-blue-50 py-4 rounded-2xl border-2 border-blue-100">
-                                        {dialogConfig.highlight}
-                                    </div>
-                                )}
+                {dialogConfig.isOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                            className="bg-white p-8 rounded-[40px] w-full max-w-sm shadow-2xl relative z-60 border-8 border-[var(--color-bg-light-blue)]"
+                        >
+                            <h3 className="text-2xl font-black text-center text-[#5D4037] mb-2">{dialogConfig.title}</h3>
+                            {dialogConfig.message && <p className="text-center text-gray-500 text-sm mb-6">{dialogConfig.message}</p>}
+                            {dialogConfig.highlight && (
+                                <div className="text-center text-5xl font-black text-[var(--color-blue-fun)] mb-6 font-mono tracking-widest bg-blue-50 py-4 rounded-2xl border-2 border-blue-100">
+                                    {dialogConfig.highlight}
+                                </div>
+                            )}
 
-                                {dialogConfig.showAvatarUpload && (
-                                    <div className="flex flex-col items-center mb-6">
-                                        <div className="relative group cursor-pointer" onClick={() => {
-                                            // 重置 file input value 以允许重选相同图片
-                                            if (fileInputRef.current) fileInputRef.current.value = '';
-                                            fileInputRef.current?.click();
-                                        }}>
-                                            <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
-                                            <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
-                                                <Settings size={24} className="mb-1" />
-                                                <span className="text-[10px] font-black">更换头像</span>
+                            {dialogConfig.showAvatarUpload && (
+                                <div className="flex flex-col items-center mb-6">
+                                    <div className="relative group cursor-pointer" onClick={() => {
+                                        // 重置 file input value 以允许重选相同图片
+                                        if (fileInputRef.current) fileInputRef.current.value = '';
+                                        fileInputRef.current?.click();
+                                    }}>
+                                        <img src={currentAvatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=new`} className="w-28 h-28 rounded-full border-4 border-[var(--color-blue-fun)] bg-gray-100 object-cover shadow-lg" />
+                                        <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
+                                            <Settings size={24} className="mb-1" />
+                                            <span className="text-[10px] font-black">更换头像</span>
+                                        </div>
+                                        {uploadingAvatar && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full"><Sparkles className="animate-spin text-blue-400" /></div>}
+                                        <div className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[var(--color-blue-fun)] border-2 border-[var(--color-blue-fun)]">
+                                            <Edit2 size={14} fill="currentColor" />
+                                        </div>
+                                    </div>
+                                    <p className="mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest">点击上方头像修改图片</p>
+                                </div>
+                            )}
+
+                            {!dialogConfig.hideInput && (
+                                <div className="space-y-4">
+                                    <input
+                                        className="w-full bg-[#F5F7FA] border-2 border-transparent focus:border-[var(--color-blue-fun)] px-6 py-4 rounded-2xl text-lg font-bold text-center outline-none transition-all"
+                                        placeholder={dialogConfig.placeholder}
+                                        defaultValue={dialogConfig.defaultValue}
+                                        id="dialogInput"
+                                    />
+                                    {dialogConfig.showTime && (
+                                        <div className="bg-[#F5F7FA] p-6 rounded-[32px] border-2 border-transparent focus-within:border-blue-100 transition-all">
+                                            <div className="flex items-center justify-center gap-4 relative h-32 overflow-hidden">
+                                                {/* Hidden input for compatibility */}
+                                                <input type="hidden" id="dialogTime" value={`${pickerHour}:${pickerMinute}`} />
+
+                                                {/* Hour Picker */}
+                                                <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="hourScroll">
+                                                    {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                                                        <div
+                                                            key={h}
+                                                            id={`hour-${h}`}
+                                                            onClick={() => setPickerHour(h)}
+                                                            className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerHour === h ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
+                                                        >
+                                                            {h}
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div className="text-2xl font-black text-blue-200">:</div>
+
+                                                {/* Minute Picker */}
+                                                <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="minuteScroll">
+                                                    {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
+                                                        <div
+                                                            key={m}
+                                                            id={`minute-${m}`}
+                                                            onClick={() => setPickerMinute(m)}
+                                                            className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerMinute === m ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
+                                                        >
+                                                            {m}
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Selection Highlight Bar */}
+                                                <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-12 border-y-2 border-blue-50 pointer-events-none bg-blue-50/10 rounded-xl"></div>
                                             </div>
-                                            {uploadingAvatar && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full"><Sparkles className="animate-spin text-blue-400" /></div>}
-                                            <div className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[var(--color-blue-fun)] border-2 border-[var(--color-blue-fun)]">
-                                                <Edit2 size={14} fill="currentColor" />
+                                            <div className="flex justify-between mt-4 px-2">
+                                                <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">小时 (H)</span>
+                                                <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">分钟 (M)</span>
                                             </div>
                                         </div>
-                                        <p className="mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest">点击上方头像修改图片</p>
-                                    </div>
-                                )}
+                                    )}
 
-                                {!dialogConfig.hideInput && (
-                                    <div className="space-y-4">
-                                        <input
-                                            autoFocus
-                                            className="w-full bg-[#F5F7FA] border-2 border-transparent focus:border-[var(--color-blue-fun)] px-6 py-4 rounded-2xl text-lg font-bold text-center outline-none transition-all"
-                                            placeholder={dialogConfig.placeholder}
-                                            defaultValue={dialogConfig.defaultValue}
-                                            id="dialogInput"
-                                        />
-                                        {dialogConfig.showTime && (
-                                            <div className="bg-[#F5F7FA] p-6 rounded-[32px] border-2 border-transparent focus-within:border-blue-100 transition-all">
-                                                <div className="flex items-center justify-center gap-4 relative h-32 overflow-hidden">
-                                                    {/* Hidden input for compatibility */}
-                                                    <input type="hidden" id="dialogTime" value={`${pickerHour}:${pickerMinute}`} />
+                                    {dialogConfig.showPoints && (
+                                        <div className="flex items-center gap-4 bg-[#F5F7FA] px-6 py-4 rounded-2xl border-2 border-transparent focus-within:border-blue-100 transition-all mt-4">
+                                            <span className="text-2xl">🍭</span>
+                                            <input
+                                                type="number"
+                                                id="dialogPoints"
+                                                defaultValue={dialogConfig.defaultPoints || 10}
+                                                className="flex-1 bg-transparent border-none outline-none font-black text-lg text-[#5D4037]"
+                                                placeholder="奖励糖果数"
+                                            />
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">奖励点数</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
-                                                    {/* Hour Picker */}
-                                                    <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="hourScroll">
-                                                        {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
-                                                            <div
-                                                                key={h}
-                                                                id={`hour-${h}`}
-                                                                onClick={() => setPickerHour(h)}
-                                                                className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerHour === h ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
-                                                            >
-                                                                {h}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    <div className="text-2xl font-black text-blue-200">:</div>
-
-                                                    {/* Minute Picker */}
-                                                    <div className="flex-1 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth py-12" id="minuteScroll">
-                                                        {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
-                                                            <div
-                                                                key={m}
-                                                                id={`minute-${m}`}
-                                                                onClick={() => setPickerMinute(m)}
-                                                                className={`h-10 flex items-center justify-center snap-center cursor-pointer transition-all ${pickerMinute === m ? 'text-2xl font-black text-blue-500' : 'text-lg font-bold text-gray-300 opacity-50'}`}
-                                                            >
-                                                                {m}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    {/* Selection Highlight Bar */}
-                                                    <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-12 border-y-2 border-blue-50 pointer-events-none bg-blue-50/10 rounded-xl"></div>
-                                                </div>
-                                                <div className="flex justify-between mt-4 px-2">
-                                                    <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">小时 (H)</span>
-                                                    <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest">分钟 (M)</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {dialogConfig.showPoints && (
-                                            <div className="flex items-center gap-4 bg-[#F5F7FA] px-6 py-4 rounded-2xl border-2 border-transparent focus-within:border-blue-100 transition-all mt-4">
-                                                <span className="text-2xl">🍭</span>
-                                                <input
-                                                    type="number"
-                                                    id="dialogPoints"
-                                                    defaultValue={dialogConfig.defaultPoints || 10}
-                                                    className="flex-1 bg-transparent border-none outline-none font-black text-lg text-[#5D4037]"
-                                                    placeholder="奖励糖果数"
-                                                />
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">奖励点数</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {dialogConfig.showDelete && (
-                                    <div className="mt-4">
-                                        <button
-                                            onClick={dialogConfig.onDelete}
-                                            className="w-full py-3 rounded-2xl text-red-500 font-bold text-sm bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <Trash2 size={16} /> 删除此宝贝
-                                        </button>
-                                    </div>
-                                )}
-
-                                <div className="mt-8 flex gap-3">
+                            {dialogConfig.showDelete && (
+                                <div className="mt-4">
                                     <button
-                                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                        className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
+                                        onClick={dialogConfig.onDelete}
+                                        className="w-full py-3 rounded-2xl text-red-500 font-bold text-sm bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                                     >
-                                        取消
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            if (uploadingAvatar) {
-                                                alert('请等待头像上传完成');
-                                                return;
-                                            }
-                                            const input = document.getElementById('dialogInput') as HTMLInputElement;
-                                            const time = document.getElementById('dialogTime') as HTMLInputElement;
-                                            const points = document.getElementById('dialogPoints') as HTMLInputElement;
-                                            dialogConfig.onConfirm(input?.value, time?.value, parseInt(points?.value) || 0);
-                                        }}
-                                        disabled={uploadingAvatar || isSaving}
-                                        className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
-                                    >
-                                        {uploadingAvatar ? '上传中...' : (isSaving ? '处理中...' : '确定')}
+                                        <Trash2 size={16} /> 删除此宝贝
                                     </button>
                                 </div>
-                            </motion.div>
-                        </div>
-                    )
+                            )}
+
+                            <div className="mt-8 flex gap-3">
+                                <button
+                                    onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                                    className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (uploadingAvatar) {
+                                            alert('请等待头像上传完成');
+                                            return;
+                                        }
+                                        const input = document.getElementById('dialogInput') as HTMLInputElement;
+                                        const time = document.getElementById('dialogTime') as HTMLInputElement;
+                                        const points = document.getElementById('dialogPoints') as HTMLInputElement;
+                                        dialogConfig.onConfirm(input?.value, time?.value, parseInt(points?.value) || 0);
+                                    }}
+                                    disabled={uploadingAvatar || isSaving}
+                                    className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
+                                >
+                                    {uploadingAvatar ? '上传中...' : (isSaving ? '处理中...' : '确定')}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )
                 }
             </AnimatePresence >
 
@@ -2432,7 +2437,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </div>
                 )}
             </AnimatePresence>
-        </div >
+        </div>
     );
 };
 

@@ -651,29 +651,45 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             </motion.div>
                         )}
                         {activeTab === 'me' && (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-full space-y-5 text-center pt-4">
-                                <motion.div
-                                    whileHover={{ scale: 1.05, rotate: 3 }}
-                                    className="w-28 h-28 bg-white/80 rounded-3xl shadow-lg flex items-center justify-center text-5xl border border-white/50"
-                                >
-                                    🏆
-                                </motion.div>
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-full space-y-6 text-center pt-8">
+                                <div className="relative">
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        className="w-32 h-32 bg-white/90 rounded-[40px] shadow-xl flex items-center justify-center text-6xl border-4 border-white overflow-hidden"
+                                    >
+                                        {childProfile?.avatar ? (
+                                            <img src={childProfile.avatar} className="w-full h-full object-cover" alt="avatar" />
+                                        ) : '🐙'}
+                                    </motion.div>
+                                    <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-yellow-400 rounded-2xl flex items-center justify-center text-white shadow-lg border-2 border-white">
+                                        <Star size={20} fill="currentColor" />
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <h2 className="text-xl font-black text-gray-700">成就殿堂</h2>
-                                    <p className="text-gray-400 font-medium text-sm mt-1">已连续坚持 <span className="font-bold text-pink-500">{streak}</span> 天</p>
+                                    <h2 className="text-2xl font-black text-gray-800">{childProfile?.name || '宝贝'}的档案</h2>
+                                    <div className="flex items-center gap-2 justify-center mt-2">
+                                        <div className="bg-pink-500/10 text-pink-500 px-4 py-1.5 rounded-2xl text-sm font-black flex items-center gap-2">
+                                            <span>🔥 连续打卡</span>
+                                            <span className="text-lg">{streak}</span>
+                                            <span>天</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-2.5 w-full px-4">
-                                    {['🌟', '🎮', '🎨', '🚀', '🌈', '🍦'].map((icon, i) => (
-                                        <motion.div
-                                            key={i}
-                                            whileHover={{ scale: 1.1 }}
-                                            className="bg-white/60 p-4 rounded-2xl text-2xl grayscale opacity-60 border border-white/50"
-                                        >
-                                            {icon}
-                                        </motion.div>
-                                    ))}
+
+                                <div className="w-full max-w-[280px] bg-white/40 backdrop-blur-md rounded-[32px] p-6 border border-white/50">
+                                    <p className="text-sm font-bold text-gray-400 leading-relaxed">
+                                        “每一份小小的努力，<br />
+                                        都是通往宝藏的星光✨”
+                                    </p>
                                 </div>
-                                <p className="text-xs text-gray-300 font-medium px-8">完成更多任务，解锁神秘勋章！</p>
+
+                                <button
+                                    onClick={() => onLogout()}
+                                    className="mt-4 px-8 py-3 bg-gray-100 text-gray-400 rounded-2xl text-sm font-black transition-all hover:bg-gray-200"
+                                >
+                                    退出登录
+                                </button>
                             </motion.div>
                         )}
                     </AnimatePresence>

@@ -1857,9 +1857,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {(() => {
                                 const statsDate = selectedStatsDate;
                                 const isToday = statsDate === new Date().toISOString().split('T')[0];
+
+                                // Explicitly filter by selectedChildId for absolute data isolation
                                 const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
 
-                                // Robust Data Merging: Use currentTasks if it's today, otherwise we have no task metadata for past days unless saved
+                                // Robust Data Merging
                                 const tasksForStats = isToday ? currentTasks : (baselineData.tasks || []);
                                 const dayData = { ...baselineData, tasks: tasksForStats };
 
@@ -1868,8 +1870,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     .reduce((sum: number, t: any) => sum + (t.points || 0), 0);
 
                                 const totalDuration = (dayData.focusLogs || []).reduce((sum: number, log: any) => sum + (log.duration || 0), 0);
-                                const focusGoal = 120 * 60; // 2 hours in seconds
-                                const focusPercentage = Math.min(100, (totalDuration / focusGoal) * 100);
+                                const FOCUS_GOAL_MINUTES = 120;
+                                const focusGoalSeconds = FOCUS_GOAL_MINUTES * 60;
+                                const focusPercentage = Math.min(100, (totalDuration / focusGoalSeconds) * 100);
 
                                 // Category Breakdown
                                 const categories = ['study', 'morning', 'evening', 'sports', 'discipline', 'chores', 'hygiene', 'creativity', 'other'];
@@ -1905,12 +1908,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 </svg>
                                                 <div className="absolute top-10 left-0 right-0">
                                                     <div className="text-4xl font-black text-[#5D4037]">{Math.floor(totalDuration / 60)}</div>
-                                                    <div className="text-[10px] text-gray-400 font-bold">目标 120min</div>
+                                                    <div className="text-[10px] text-gray-400 font-bold">目标 {FOCUS_GOAL_MINUTES} 分钟</div>
                                                 </div>
                                             </div>
-                                            <div className="mt-4 flex justify-around text-xs font-bold">
-                                                <div className="text-blue-500">已用: {Math.floor(totalDuration / 60)} 分钟</div>
-                                                <div className="text-gray-300">剩余: {Math.max(0, 120 - Math.floor(totalDuration / 60))} 分钟</div>
+                                            <div className="mt-4 flex justify-around text-xs font-bold font-mono">
+                                                <div className="text-blue-500">已用: {Math.floor(totalDuration / 60)} / {FOCUS_GOAL_MINUTES} min</div>
+                                                <div className="text-gray-300">完成度: {Math.round(focusPercentage)}%</div>
                                             </div>
                                         </div>
 
@@ -1962,39 +1965,70 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             </div>
                                         </div>
 
-                                        {/* Active Timeline (Bar Style) */}
+                                        {/* Active Timeline (High Precision) */}
                                         <div className="bg-white/90 backdrop-blur-xl p-6 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
-                                            <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2 mb-4">
-                                                <div className="w-2 h-2 rounded-full bg-red-400"></div> 活跃时间分布 (24h)
+                                            <div className="flex justify-between items-center mb-4">
+                                                <div className="text-gray-400 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-red-400"></div> 活跃时间分布 (06:00 - 22:00)
+                                                </div>
+                                                <span className="text-[10px] font-black text-red-300">统计精度: 15min</span>
                                             </div>
-                                            <div className="h-10 w-full bg-gray-50 rounded-xl overflow-hidden flex gap-0.5 p-1 relative group">
-                                                {/* Render 24 hour slots */}
-                                                {Array.from({ length: 96 }).map((_, i) => {
-                                                    const hour = Math.floor(i / 4).toString().padStart(2, '0');
-                                                    const min = ((i % 4) * 15).toString().padStart(2, '0');
+
+                                            <div className="h-14 w-full bg-gray-50 rounded-2xl overflow-hidden flex gap-0.5 p-1 relative border border-gray-100">
+                                                {/* Render relevant hours slots (6am to 10pm = 16 hours = 64 slots) */}
+                                                {Array.from({ length: 64 }).map((_, i) => {
+                                                    const totalMins = (6 * 60) + (i * 15);
+                                                    const hour = Math.floor(totalMins / 60).toString().padStart(2, '0');
+                                                    const min = (totalMins % 60).toString().padStart(2, '0');
                                                     const timeStr = `${hour}:${min}`;
+
                                                     const isActive = (dayData.focusLogs || []).some((log: any) => {
                                                         if (!log.startTime || !log.endTime || typeof log.startTime !== 'string') return false;
                                                         const start = log.startTime.split('T')[1]?.slice(0, 5);
                                                         const end = log.endTime.split('T')[1]?.slice(0, 5);
                                                         return start && end && timeStr >= start && timeStr <= end;
                                                     });
+
                                                     return (
-                                                        <div key={i} className={`flex-1 rounded-[2px] transition-colors ${isActive ? 'bg-red-400' : 'bg-gray-100'}`}></div>
+                                                        <div
+                                                            key={i}
+                                                            title={timeStr}
+                                                            className={`flex-1 rounded-[3px] transition-all duration-300 ${isActive ? 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.4)]' : 'bg-gray-100/50'}`}
+                                                        ></div>
                                                     );
                                                 })}
-                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                                                    <Flame size={14} className="text-red-400" />
-                                                    <span className="text-sm font-black text-[#5D4037]">{totalPoints} 🍭</span>
-                                                </div>
                                             </div>
-                                            <div className="flex justify-between mt-2 text-[8px] font-bold text-gray-300 px-1 uppercase tracking-widest">
-                                                <span>00:00</span>
+
+                                            <div className="flex justify-between mt-3 text-[10px] font-black text-gray-300 px-1 uppercase tracking-widest">
                                                 <span>06:00</span>
-                                                <span>12:00</span>
+                                                <span>10:00</span>
+                                                <span>14:00</span>
                                                 <span>18:00</span>
-                                                <span>24:00</span>
+                                                <span>22:00</span>
                                             </div>
+
+                                            {/* Interval Details List (New: Show specific active periods) */}
+                                            {(dayData.focusLogs || []).length > 0 && (
+                                                <div className="mt-6 space-y-3">
+                                                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-50 pb-1">专注时段明细</div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {(dayData.focusLogs || [])
+                                                            .filter((log: any) => log.duration > 0)
+                                                            .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))
+                                                            .map((log: any, idx: number) => (
+                                                                <div key={idx} className="bg-gray-50/50 rounded-xl p-2 flex items-center gap-2 border border-gray-100">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[10px] font-black text-[#5D4037]">
+                                                                            {log.startTime.split('T')[1].slice(0, 5)} - {log.endTime.split('T')[1].slice(0, 5)}
+                                                                        </span>
+                                                                        <span className="text-[8px] font-bold text-gray-400">{Math.floor(log.duration / 60)} 分钟</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Calendar Navigation */}
@@ -2002,7 +2036,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <div className="flex justify-between items-center mb-6">
                                                 <h3 className="font-black text-[#5D4037] flex items-center gap-2">
                                                     <Calendar size={18} className="text-blue-400" />
-                                                    成长印记历
+                                                    成长日历
                                                 </h3>
                                                 <span className="text-xs font-bold text-gray-400">{new Date().getFullYear()}年{new Date().getMonth() + 1}月</span>
                                             </div>
@@ -2019,6 +2053,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     for (let d = 1; d <= daysInMonth; d++) {
                                                         const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
                                                         const isSelected = dateStr === selectedStatsDate;
+                                                        const isTodayActual = dateStr === formatBeijingTime(new Date()).split(' ')[0];
                                                         const hasData = (licenseData as any)?.progress?.[dateStr]?.[selectedChildId]?.checkins?.length > 0;
                                                         cells.push(
                                                             <motion.button
@@ -2029,8 +2064,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                     ${isSelected ? 'bg-blue-500 text-white shadow-lg scale-110 z-10' : 'bg-gray-50/50 hover:bg-gray-100 text-gray-500'}`}
                                                             >
                                                                 <span className="text-xs font-black">{d}</span>
-                                                                {hasData && !isSelected && (
-                                                                    <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
+                                                                {isTodayActual && (
+                                                                    <div className={`absolute -top-1 -right-0.5 px-1 py-0.5 rounded-md text-[6px] font-black uppercase
+                                                                        ${isSelected ? 'bg-white text-blue-500' : 'bg-blue-500 text-white'}`}>今日</div>
+                                                                )}
+                                                                {hasData && !isSelected && !isTodayActual && (
+                                                                    <div className="absolute bottom-1 w-1 h-1 bg-orange-400 rounded-full"></div>
                                                                 )}
                                                             </motion.button>
                                                         );

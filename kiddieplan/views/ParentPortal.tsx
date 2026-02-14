@@ -979,20 +979,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 style={{ scrollBehavior: 'smooth' }}
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
-                    if (!isScrolled && top > 50) setIsScrolled(true);
+                    // Hysteresis buffer > 100px to prevent layout shift loop
+                    if (!isScrolled && top > 100) setIsScrolled(true);
                     else if (isScrolled && top < 20) setIsScrolled(false);
                 }}
             >
                 {/* Floating Header Wrapper - Dynamic Theme */}
-                <div className="sticky top-0 p-4 z-40">
+                <div className="sticky top-0 p-4 z-40 transition-all duration-500">
                     <header
                         layout
-                        className={`px-6 rounded-[32px] border border-white/30 shadow-sm transition-colors duration-500 ease-in-out ${isScrolled ? 'py-2 bg-white/40' : 'py-4'}`}
-                        style={{
-                            background: isScrolled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.01)', // 100% Transparent when expanded
-                            backdropFilter: 'blur(20px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                        }}
+                        className={`px-6 rounded-[32px] transition-all duration-500 ease-spring ${isScrolled
+                            ? 'py-3 bg-white/40 border border-white/40 shadow-sm backdrop-blur-xl'
+                            : 'py-4 bg-transparent border-transparent shadow-none backdrop-blur-none'
+                            }`}
                     >
                         {/* Top Row: Brand & Time */}
                         <motion.div layout className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'mb-0' : 'mb-6'}`}>

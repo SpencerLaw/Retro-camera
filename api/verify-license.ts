@@ -1,5 +1,5 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv } from '@vercel/kv';
+import { del } from '@vercel/blob';
 
 /**
  * Vercel Serverless Function - 授权码验证API (带 Redis 监控版 + 数据压缩)
@@ -200,6 +200,27 @@ export default async function handler(
       const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
       const redisKey = `license:${cleanCode}`;
 
+      // 1. 尝试获取数据以清理关联的 Blob 头像
+      try {
+        const data = await kv.get<any>(redisKey);
+        // 如果是压缩数据，尝试解压（虽然 blob 清理不一定依赖 full metadata，但需要 children 列表）
+        const metadata = data ? decompressMetadata(data, cleanCode) : null;
+
+        if (metadata && metadata.children && Array.isArray(metadata.children)) {
+          const avatarUrls = metadata.children
+            .map((c: any) => c.avatar)
+            .filter((url: string) => url && url.includes('public.blob.vercel-storage.com'));
+
+          if (avatarUrls.length > 0) {
+            console.log(`[Admin Delete] Cleaning up ${avatarUrls.length} avatars for ${cleanCode}`);
+            await del(avatarUrls);
+          }
+        }
+      } catch (blobErr) {
+        console.error('[Admin Delete] Avatar cleanup failed:', blobErr);
+        // 继续删除 KV 记录，不要因为 Blob 失败中断
+      }
+
       await kv.del(redisKey);
 
       // 临时处理：如果存在旧的带横杠的数据，也一并删除
@@ -210,7 +231,7 @@ export default async function handler(
 
       return res.status(200).json({
         success: true,
-        message: '授权记录已被彻底删除'
+        message: '授权记录及关联头像已被彻底删除'
       });
     }
 

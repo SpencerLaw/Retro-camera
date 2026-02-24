@@ -189,6 +189,31 @@ export default async function handler(
       });
     }
 
+    // === 管理员删除 ===
+    if (action === 'delete') {
+      if (!adminKey || adminKey.trim() !== 'spencer') {
+        console.warn(`[Admin Delete] Auth failed. Key: ${adminKey ? '***' : 'missing'}`);
+        return res.status(401).json({ success: false, message: '密码错误' });
+      }
+      if (!licenseCode) return res.status(400).json({ success: false, message: '请输入授权码' });
+
+      const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
+      const redisKey = `license:${cleanCode}`;
+
+      await kv.del(redisKey);
+
+      // 临时处理：如果存在旧的带横杠的数据，也一并删除
+      const rawRedisKey = `license:${licenseCode}`;
+      if (rawRedisKey !== redisKey) {
+        await kv.del(rawRedisKey);
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: '授权记录已被彻底删除'
+      });
+    }
+
     // === 管理员列表 ===
     if (action === 'list_all') {
       if (!adminKey || adminKey.trim() !== 'spencer') {

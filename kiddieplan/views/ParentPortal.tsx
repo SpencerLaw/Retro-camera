@@ -1178,7 +1178,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             key={selectedChildId}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/20 backdrop-blur-2xl p-8 rounded-[40px] border border-white/40 shadow-xl relative overflow-hidden"
+                            className="bg-white/20 backdrop-blur-2xl p-8 rounded-[40px] border border-white/10 shadow-xl relative overflow-hidden"
                         >
                             {/* Dashboard Content - Z-Index raised to sit on top of glass */}
                             <div className="relative z-10 space-y-6">
@@ -1186,7 +1186,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 {/* Dual Capsule Dashboard - Action & Rewards Separated */}
                                 <div className="grid grid-cols-2 gap-4">
                                     {/* Left Capsule: Real-time Action */}
-                                    <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-2 border-white/60 flex flex-col justify-between min-h-[160px] bg-gradient-to-br ${currentTheme.bg.replace('from-', 'from-white/10 to-').replace('50', '500').replace('100/30', '400')}`}>
+                                    <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border border-white/20 flex flex-col justify-between min-h-[160px] bg-gradient-to-br ${currentTheme.bg.replace('from-', 'from-white/10 to-').replace('50', '500').replace('100/30', '400')}`}>
                                         {/* Theme-based gradient override for the card */}
                                         <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : currentTheme.name === 'amber' ? 'from-amber-400 to-orange-500' : currentTheme.name === 'violet' ? 'from-violet-400 to-purple-500' : 'from-emerald-400 to-teal-500'} z-0`}></div>
 
@@ -1218,7 +1218,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </div>
 
                                     {/* Right Capsule: Reward Assets */}
-                                    <div className="p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border-2 border-white/60 bg-gradient-to-br from-[#F472B6] to-[#FB923C] flex flex-col justify-between min-h-[160px]">
+                                    <div className="p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border border-white/20 bg-gradient-to-br from-[#F472B6] to-[#FB923C] flex flex-col justify-between min-h-[160px]">
                                         <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/20 rounded-full -mr-10 -mb-10 blur-2xl"></div>
 
                                         <div className="relative z-10 flex justify-between items-start">
@@ -1261,7 +1261,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('tasks')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-[0.5px] border-white/30 hover:border-yellow-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
                                             <ListTodo size={32} strokeWidth={3} />
@@ -1274,7 +1274,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('rewards')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-[0.5px] border-white/30 hover:border-red-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
                                             <Gift size={32} strokeWidth={3} />
@@ -1287,7 +1287,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('checkins')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-[0.5px] border-white/30 hover:border-purple-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
                                             <CalendarCheck size={32} strokeWidth={3} />
@@ -1300,7 +1300,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('redemption')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-[0.5px] border-white/30 hover:border-pink-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 font-candy">
                                             <Trophy size={32} strokeWidth={3} />
@@ -1313,7 +1313,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 0 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('stats')}
-                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border-[0.5px] border-white/30 hover:border-emerald-200 transition-all font-candy"
+                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
                                         <div className="w-14 h-14 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg">
                                             <BarChart3 size={28} strokeWidth={3} />

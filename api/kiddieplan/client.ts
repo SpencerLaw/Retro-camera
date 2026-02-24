@@ -170,7 +170,7 @@ export default async function handler(
         }
 
         if (action === 'update_focus_status') {
-            const { isFocusing, taskTitle, duration, startTime } = data;
+            const { isFocusing, taskTitle, duration, startTime, accumulatedTime, taskId } = data;
             const license: any = await kv.get(licenseKey);
             if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
 
@@ -179,6 +179,17 @@ export default async function handler(
                 license.children[childIdx].isFocusing = isFocusing;
                 license.children[childIdx].currentTaskName = isFocusing ? taskTitle : null;
                 license.children[childIdx].lastFocusDuration = isFocusing ? duration : 0;
+
+                // 冗余更新具体任务的累计时间，确保即时准确
+                if (taskId && accumulatedTime !== undefined) {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    if (license.progress?.[todayStr]?.[childId]?.tasks) {
+                        const taskIdx = license.progress[todayStr][childId].tasks.findIndex((t: any) => t.id === taskId);
+                        if (taskIdx > -1) {
+                            license.progress[todayStr][childId].tasks[taskIdx].accumulatedTime = accumulatedTime;
+                        }
+                    }
+                }
 
                 // 记录专注开始时间，用于判断是否过期
                 if (isFocusing) {

@@ -136,7 +136,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     body: JSON.stringify({
                         action: 'update_focus_status',
                         token,
-                        data: { isFocusing: true, taskTitle: task.title, duration: timerSecondsRef.current }
+                        data: {
+                            isFocusing: true,
+                            taskTitle: task.title,
+                            duration: timerSecondsRef.current,
+                            taskId: activeTaskId,
+                            accumulatedTime: (task.accumulatedTime || 0) + timerSecondsRef.current
+                        }
                     })
                 });
             } catch (e) {
@@ -280,14 +286,26 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 await fetch('/api/kiddieplan/client', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'update_focus_status', token, data: { isFocusing: false } })
+                    body: JSON.stringify({
+                        action: 'update_focus_status',
+                        token,
+                        data: {
+                            isFocusing: false,
+                            taskId: task.id,
+                            accumulatedTime: (task.accumulatedTime || 0) + timerSeconds
+                        }
+                    })
                 });
             } catch (e) {
                 console.error('Stop sync failed');
             }
 
-            // 本地更新 tasks 列表中的 accumulatedTime
-            setTasks(prev => prev.map(t => t.id === task.id ? { ...t, accumulatedTime: (t.accumulatedTime || 0) + timerSeconds } : t));
+            // 本地更新 tasks 列表中的 accumulatedTime (放在 sync 之后以防 poll 覆盖)
+            setTasks(prev => {
+                const newTasks = prev.map(t => t.id === task.id ? { ...t, accumulatedTime: (t.accumulatedTime || 0) + timerSeconds } : t);
+                tasksRef.current = newTasks; // 立即同步 Ref
+                return newTasks;
+            });
 
             setIsTimerRunning(false);
             setActiveTaskId(null);
@@ -504,9 +522,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                     <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
-                                                    {((task.accumulatedTime || 0) > 0 || (isCurrentFocus && timerSeconds > 0)) && (
-                                                        <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                            <Timer size={10} /> {formatTime((task.accumulatedTime || 0) + (isCurrentFocus ? timerSeconds : 0))}
+                                                    {/* 显示条件：正在专注 OR 累计时间 > 0 */}
+                                                    {(isCurrentFocus || (task.accumulatedTime || 0) > 0) && (
+                                                        <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1 transition-all duration-300">
+                                                            <Timer size={10} className={isCurrentFocus ? "animate-spin-slow" : ""} /> {formatTime((task.accumulatedTime || 0) + (isCurrentFocus ? timerSeconds : 0))}
                                                         </span>
                                                     )}
                                                 </div>

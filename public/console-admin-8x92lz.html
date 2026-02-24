@@ -718,10 +718,10 @@
 
       const listEl = document.getElementById('genList');
       listEl.innerHTML = generatedCodes.map(c => `
-      < div class="gen-item" >
+      <div class="gen-item">
           <span>${c}</span>
           <span style="color:var(--text-light); font-size:12px;">未激活</span>
-        </div >
+      </div>
       `).join('');
     }
 
@@ -754,16 +754,14 @@
       modalActions.innerHTML = '';
 
       if (isConfirm) {
-        modalActions.innerHTML = `
-      < button class="btn-secondary" onclick = "closeModal()" > 取消</button >
-        <button class="btn-primary" style="background: var(--danger);" id="modalConfirmBtn">确定删除</button>
-    `;
+        modalActions.innerHTML = '<button class="btn-secondary" onclick="closeModal()">取消</button>' +
+          '<button class="btn-primary" style="background:var(--danger);" id="modalConfirmBtn">确定删除</button>';
         document.getElementById('modalConfirmBtn').addEventListener('click', () => {
           closeModal();
           if (onConfirm) onConfirm();
         });
       } else {
-        modalActions.innerHTML = `< button class="btn-primary" onclick = "closeModal()" > 知道了</button > `;
+        modalActions.innerHTML = '<button class="btn-primary" onclick="closeModal()">知道了</button>';
       }
 
       document.getElementById('customModal').classList.add('active');
@@ -793,7 +791,7 @@
 
             const json = await res.json();
             if (json.success) {
-              showDialog('成功', '删除成功');
+              closeModal(); // 直接关闭确认框
               login(); // 重新加载数据
             } else {
               showDialog('错误', '删除失败: ' + json.message);

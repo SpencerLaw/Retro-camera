@@ -223,6 +223,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 // 发现授权码数据被删除了（例如后台直接清理了记录），强制退出。
                 if (childrenList.length === 0 && !result.data.code && result.data.progress && Object.keys(result.data.progress).length === 0) {
                     alert("当前授权数据失效或已被清除，请重新登录");
+                    // 彻底清除持久化 Token，防止进入自动登录死循环
+                    localStorage.removeItem('kp_parent_token');
+                    localStorage.removeItem('kp_parent_auth_time');
+                    localStorage.removeItem('kp_token');
+                    localStorage.removeItem('kp_role');
                     onLogout();
                     return;
                 }

@@ -200,6 +200,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 // 如果 profile.avatar 为空且 tasks 为空，通常意味着数据库里查不到这个 Key 的聚合数据了
                 if (!result.data.profile?.avatar && (!result.data.tasks || result.data.tasks.length === 0) && result.data.points === 0) {
                     alert("当前授权数据已被管理员清除，请重新登录");
+                    // 彻底清除持久化 Token，防止进入自动登录死循环
+                    localStorage.removeItem('kp_child_token');
+                    localStorage.removeItem('kp_token');
+                    localStorage.removeItem('kp_role');
                     onLogout();
                     return;
                 }

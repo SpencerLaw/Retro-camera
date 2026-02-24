@@ -220,6 +220,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 // Only update children if the data has actually changed to avoid unnecessary re-renders
                 setChildren(prev => JSON.stringify(prev) !== JSON.stringify(childrenList) ? childrenList : prev);
 
+                // 发现授权码数据被删除了（例如后台直接清理了记录），强制退出。
+                if (childrenList.length === 0 && !result.data.code && result.data.progress && Object.keys(result.data.progress).length === 0) {
+                    alert("当前授权数据失效或已被清除，请重新登录");
+                    onLogout();
+                    return;
+                }
+
                 if (childrenList.length > 0 && !selectedChildId) {
                     setSelectedChildId(childrenList[0].id);
                 }
@@ -261,7 +268,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         } finally {
             if (!silent) setLoading(false);
         }
-    }, [token, selectedChildId, selectedCategory]); // Memoized for polling dependency
+    }, [token, selectedChildId, selectedCategory, onLogout]); // Memoized for polling dependency
 
     // Adaptive Polling
     useEffect(() => {
@@ -1220,6 +1227,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         isOpen: true,
                                                         title: '重置糖果收益',
                                                         message: '确定要重置当前宝贝的所有糖果吗？此操作无法撤销。',
+                                                        hideInput: true,
                                                         onConfirm: () => handleResetPoints()
                                                     });
                                                 }}
@@ -1248,7 +1256,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('tasks')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-yellow-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/50 hover:border-yellow-200 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-yellow-reward)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
                                             <ListTodo size={32} strokeWidth={3} />
@@ -1261,7 +1269,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('rewards')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-red-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/50 hover:border-red-200 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
                                             <Gift size={32} strokeWidth={3} />
@@ -1274,7 +1282,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('checkins')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-purple-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/50 hover:border-purple-200 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
                                             <CalendarCheck size={32} strokeWidth={3} />
@@ -1287,7 +1295,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('redemption')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border-2 border-white/50 hover:border-pink-200 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/50 hover:border-pink-200 transition-all font-candy"
                                     >
                                         <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 font-candy">
                                             <Trophy size={32} strokeWidth={3} />
@@ -1298,9 +1306,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                     <motion.button
                                         whileHover={{ y: -5, rotate: 0 }}
-                                        whileTap={{ scale: 0.98 }}
+                                        whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('stats')}
-                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border-2 border-white/50 hover:border-emerald-200 transition-all font-candy"
+                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border border-white/50 hover:border-emerald-200 transition-all font-candy"
                                     >
                                         <div className="w-14 h-14 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg">
                                             <BarChart3 size={28} strokeWidth={3} />

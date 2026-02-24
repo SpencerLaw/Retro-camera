@@ -196,6 +196,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             });
             const result = await res.json();
             if (result.success) {
+                // 检查数据是否被彻底删除了（例如管理后台清理了该授权码）
+                // 如果 profile.avatar 为空且 tasks 为空，通常意味着数据库里查不到这个 Key 的聚合数据了
+                if (!result.data.profile?.avatar && (!result.data.tasks || result.data.tasks.length === 0) && result.data.points === 0) {
+                    alert("当前授权数据已被管理员清除，请重新登录");
+                    onLogout();
+                    return;
+                }
+
                 const newTasks = result.data.tasks || [];
 
                 // Detect NEW tasks (ignore first load/decrease)

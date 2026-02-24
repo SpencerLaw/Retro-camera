@@ -50,11 +50,34 @@ export default async function handler(
                 }
             }
 
+            let modified = false;
+
+            // 检查过期挂起的专注状态 (防止因为孩子端断电导致家长端一直看到“正在进行”)
+            const now = Date.now();
+            if (license.children && license.children.length > 0) {
+                license.children.forEach((child: any) => {
+                    if (child.isFocusing) {
+                        if (!child.focusStartTime || (now - child.focusStartTime > 12 * 60 * 60 * 1000)) {
+                            child.isFocusing = false;
+                            child.currentTaskName = null;
+                            child.lastFocusDuration = 0;
+                            child.focusStartTime = null;
+                            modified = true;
+                        }
+                    }
+                });
+            }
+
             // 初始化默认分类
             if (!license.categories || license.categories.length === 0) {
                 license.categories = DEFAULT_CATEGORIES;
+                modified = true;
+            }
+
+            if (modified) {
                 await kv.set(licenseKey, license);
             }
+
             return response.status(200).json({ success: true, data: license });
         }
 

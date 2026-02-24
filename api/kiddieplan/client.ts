@@ -27,6 +27,23 @@ export default async function handler(
         if (action === 'get_today_data') {
             const license: any = await kv.get(licenseKey) || { children: [], progress: {} };
             const childData = license.children.find((c: any) => c.id === childId) || {};
+            let modified = false;
+
+            // 自动清理过期挂起的专注状态 (防止设备断电或关机后状态一直卡住)
+            const now = Date.now();
+            if (childData.isFocusing) {
+                if (!childData.focusStartTime || (now - childData.focusStartTime > 12 * 60 * 60 * 1000)) {
+                    childData.isFocusing = false;
+                    childData.currentTaskName = null;
+                    childData.lastFocusDuration = 0;
+                    childData.focusStartTime = null;
+                    modified = true;
+                }
+            }
+
+            if (modified) {
+                await kv.set(licenseKey, license);
+            }
 
             // 从聚合对象中读取记录
             const dailyData = license.progress?.[today]?.[childId] || { tasks: [], checkins: [] };
@@ -153,7 +170,7 @@ export default async function handler(
         }
 
         if (action === 'update_focus_status') {
-            const { isFocusing, taskTitle, duration } = data;
+            const { isFocusing, taskTitle, duration, startTime } = data;
             const license: any = await kv.get(licenseKey);
             if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
 
@@ -162,6 +179,14 @@ export default async function handler(
                 license.children[childIdx].isFocusing = isFocusing;
                 license.children[childIdx].currentTaskName = isFocusing ? taskTitle : null;
                 license.children[childIdx].lastFocusDuration = isFocusing ? duration : 0;
+
+                // 记录专注开始时间，用于判断是否过期
+                if (isFocusing) {
+                    license.children[childIdx].focusStartTime = startTime || Date.now();
+                } else {
+                    license.children[childIdx].focusStartTime = null;
+                }
+
                 await kv.set(licenseKey, license);
             }
             return response.status(200).json({ success: true });

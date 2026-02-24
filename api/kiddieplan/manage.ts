@@ -83,7 +83,8 @@ export default async function handler(
 
         if (action === 'save_child') {
             const { id, name, avatar, roomCode } = data;
-            const license: any = await kv.get(licenseKey) || { children: [], tasks: [], rewards: [], analytics: {}, progress: {} };
+            const license: any = await kv.get(licenseKey) || {};
+            if (!license.children) license.children = [];
 
             const childId = id || `c_${Date.now()}`;
             const existingChildIdx = license.children.findIndex((c: any) => c.id === childId);
@@ -158,7 +159,8 @@ export default async function handler(
 
         if (action === 'save_rewards') {
             const { childId, rewards } = data;
-            const license: any = await kv.get(licenseKey) || { children: [] };
+            const license: any = await kv.get(licenseKey) || {};
+            if (!license.children) license.children = [];
             const idx = license.children.findIndex((c: any) => c.id === childId);
             if (idx > -1) {
                 license.children[idx].rewards = rewards;
@@ -169,14 +171,16 @@ export default async function handler(
 
         if (action === 'get_rewards') {
             const { childId } = data;
-            const license: any = await kv.get(licenseKey) || { children: [] };
+            const license: any = await kv.get(licenseKey) || {};
+            if (!license.children) license.children = [];
             const child = license.children.find((c: any) => c.id === childId);
             return response.status(200).json({ success: true, data: { rewards: child?.rewards || [] } });
         }
 
         if (action === 'save_categories') {
             const { categories, hiddenPresets } = data;
-            const license: any = await kv.get(licenseKey) || { children: [] };
+            const license: any = await kv.get(licenseKey) || {};
+            if (!license.children) license.children = [];
             if (categories) license.categories = categories;
             if (hiddenPresets !== undefined) license.hiddenPresets = hiddenPresets;
             await kv.set(licenseKey, license);

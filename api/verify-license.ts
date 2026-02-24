@@ -114,7 +114,7 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
     return {
       code: code,
       totalDevices: 0,
-      maxDevices: 3,
+      maxDevices: code.startsWith('XXDK') ? 999999 : 3,
       generatedDate: new Date().toISOString(),
       expiryDate: new Date().toISOString(),
       firstActivatedAt: new Date().toISOString(),
@@ -265,7 +265,7 @@ export default async function handler(
       metadata = {
         code: cleanCode,
         totalDevices: 1,
-        maxDevices: 3, // 默认限制 3 台设备
+        maxDevices: cleanCode.startsWith('XXDK') ? 999999 : 3, // 星梦奇旅不限制设备数
         generatedDate: generatedDate.toISOString(),
         expiryDate: expiryDate.toISOString(),
         firstActivatedAt: nowISO,

@@ -27,13 +27,29 @@ export default async function handler(
 
     try {
         const decodedToken = Buffer.from(token, 'base64').toString();
-        const licenseCode = decodedToken.split(':')[1];
+        const rawLicenseCode = decodedToken.split(':')[1];
+        const licenseCode = rawLicenseCode.replace(/[-\s]/g, '').toUpperCase();
 
         // 1. 获取授权许可聚合对象
         const licenseKey = `license:${licenseCode}`;
 
         if (action === 'get_config') {
-            const license: any = await kv.get(licenseKey) || { children: [], tasks: [], rewards: [], analytics: {}, progress: {} };
+            let license: any = await kv.get(licenseKey) || { children: [], tasks: [], rewards: [], analytics: {}, progress: {} };
+
+            // 临时数据迁移：将旧的带横杠的数据合并到新 Key 中
+            if (rawLicenseCode !== licenseCode && (!license.children || license.children.length === 0)) {
+                const oldLicenseKey = `license:${rawLicenseCode}`;
+                const oldLicense: any = await kv.get(oldLicenseKey);
+                if (oldLicense && oldLicense.children && oldLicense.children.length > 0) {
+                    // 合并旧数据
+                    license = { ...license, ...oldLicense };
+                    license.code = licenseCode; // 修正 code 字段
+                    await kv.set(licenseKey, license);
+                    // 彻底删除旧的带横杠 Key，以防在控制台继续显示
+                    await kv.del(oldLicenseKey);
+                }
+            }
+
             // 初始化默认分类
             if (!license.categories || license.categories.length === 0) {
                 license.categories = DEFAULT_CATEGORIES;

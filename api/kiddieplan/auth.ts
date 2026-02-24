@@ -15,7 +15,7 @@ export default async function handler(
     }
 
     try {
-        const cleanCode = code.toUpperCase().trim();
+        const cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
 
         // 1. 家长端验证
         if (action === 'parent_auth') {

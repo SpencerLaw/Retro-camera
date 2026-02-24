@@ -18,7 +18,8 @@ export default async function handler(
             return response.status(403).json({ success: false, message: '权限不足' });
         }
         const childId = decodedToken.split(':')[1];
-        const licenseCode = decodedToken.split(':')[2];
+        const rawLicenseCode = decodedToken.split(':')[2];
+        const licenseCode = rawLicenseCode.replace(/[-\s]/g, '').toUpperCase();
         const licenseKey = `license:${licenseCode}`;
 
         const today = data?.date || new Date().toISOString().split('T')[0];

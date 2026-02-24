@@ -553,17 +553,18 @@
 
         // 计算状态颜色
         const usage = item.totalDevices;
-        const max = item.maxDevices || 3;
+        const isUnlimited = item.code.startsWith('XXDK') || item.maxDevices >= 9999;
+        const max = isUnlimited ? '∞' : (item.maxDevices || 3);
         let badgeClass = 'status-good';
         let statusText = '正常';
 
         if (isRevoked) {
           badgeClass = 'status-full'; // 用红色表示失效
           statusText = '🚫 已删除';
-        } else if (usage >= max) {
+        } else if (!isUnlimited && usage >= max) {
           badgeClass = 'status-full';
           statusText = '已满';
-        } else if (usage > max * 0.8) {
+        } else if (!isUnlimited && usage > max * 0.8) {
           badgeClass = 'status-warn';
           statusText = '即将满';
         }
@@ -703,8 +704,8 @@
           }
           code = datePart + random;
         }
-        // Format with dashes for display
-        newBatch.push(code.match(/.{1,4}/g).join('-'));
+        // Do not format with dashes for display to unify with other modules
+        newBatch.push(code);
       }
 
       generatedCodes = [...newBatch, ...generatedCodes];

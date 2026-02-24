@@ -542,30 +542,107 @@
       return date.toLocaleDateString();
     }
 
-    <table class="device-table">
-      <thead>
+    // === 渲染监控列表 ===
+    function renderMonitorList() {
+      const container = document.getElementById('monitorContent');
+
+      if (currentData.length === 0) {
+        container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
+        return;
+      }
+
+      container.innerHTML = currentData.map((item, index) => {
+        // 检查是否失效
+        const isRevoked = item.status === 'revoked';
+
+        // 计算状态颜色
+        const usage = item.totalDevices;
+        const isUnlimited = item.code.startsWith('XXDK') || item.maxDevices >= 9999;
+        const max = isUnlimited ? '∞' : (item.maxDevices || 3);
+        let badgeClass = 'status-good';
+        let statusText = '正常';
+
+        if (isRevoked) {
+          badgeClass = 'status-full'; // 用红色表示失效
+          statusText = '🚫 已删除';
+        } else if (!isUnlimited && usage >= max) {
+          badgeClass = 'status-full';
+          statusText = '已满';
+        } else if (!isUnlimited && usage > max * 0.8) {
+          badgeClass = 'status-warn';
+          statusText = '即将满';
+        }
+
+        // 构建设备详情行 (略微调整样式)
+        const deviceRows = item.devices.map((dev, i) => {
+          const deviceName = parseUA(dev.ua);
+          const fullUA = dev.ua.replace(/"/g, '&quot;');
+
+          return `
         <tr>
-          <th width="30">#</th>
-          <th>设备信息</th>
-          <th>Device ID</th>
-          <th>首次绑定</th>
-          <th>最后在线</th>
+          <td>${i + 1}</td>
+          <td>
+            <div style="font-weight:500; font-size:12px;">${deviceName}</div>
+            <div style="font-size:10px; color:#94a3b8; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${fullUA}">${dev.ua}</div>
+          </td>
+          <td>
+            <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
+            <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
+          </td>
+          <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
+          <td>${new Date(dev.lastSeen).toLocaleString()}</td>
         </tr>
-      </thead>
-      <tbody>
-        ${deviceRows}
-      </tbody>
-    </table>
+      `}).join('');
+
+        return `
+        <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+          <div class="item-summary" onclick="toggleItem(${index})">
+            <div class="toggle-btn">▶</div>
+            <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
+              ${item.code}
+            </div>
+            <div>
+              <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-light);">
+              ${timeAgo(new Date(item.lastUsedTime))}
+            </div>
+          </div>
+          
+          <div class="item-details">
+            <div class="details-grid">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                <div style="font-size:12px; color:var(--text-light);">
+                  <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
+                  <span style="margin-left:15px;">首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
+                </div>
+                <button onclick="deleteLicense('${item.code}')" class="btn-primary" style="background: var(--danger); padding: 5px 10px; font-size: 11px;">🗑️ 删除所有数据</button>
+              </div>
               
-              </div >
-            </div >
-          </div >
+              <table class="device-table">
+                <thead>
+                  <tr>
+                    <th width="30">#</th>
+                    <th>设备信息</th>
+                    <th>Device ID</th>
+                    <th>首次绑定</th>
+                    <th>最后在线</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${deviceRows}
+                </tbody>
+              </table>
+              
+            </div>
+          </div>
+        </div>
       `;
       }).join('');
     }
 
     function toggleItem(index) {
-      const el = document.getElementById(`item - ${ index } `);
+      const el = document.getElementById(`item - ${index} `);
       const isExpanded = el.classList.contains('expanded');
 
       // 关闭所有其他的 (可选，如果想保持手风琴效果)
@@ -650,7 +727,7 @@
 
     function exportEnv() {
       if (!generatedCodes.length) return alert('没有生成的代码');
-      const blob = new Blob([`LICENSE_CODES = ${ generatedCodes.join(',') } `], { type: 'text/plain' });
+      const blob = new Blob([`LICENSE_CODES = ${generatedCodes.join(',')} `], { type: 'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'LICENSE_CODES.env';
@@ -660,7 +737,7 @@
     function copyAllGenerated() {
       if (!generatedCodes.length) return;
       navigator.clipboard.writeText(generatedCodes.join('\n'));
-      showDialog('复制成功', `已复制 ${ generatedCodes.length } 个授权码`);
+      showDialog('复制成功', `已复制 ${generatedCodes.length} 个授权码`);
     }
 
     function copy(text) {
@@ -672,10 +749,10 @@
     function showDialog(title, message, isConfirm = false, onConfirm = null) {
       document.getElementById('modalTitle').textContent = title;
       document.getElementById('modalBody').textContent = message;
-      
+
       const modalActions = document.getElementById('modalActions');
       modalActions.innerHTML = '';
-      
+
       if (isConfirm) {
         modalActions.innerHTML = `
       < button class="btn-secondary" onclick = "closeModal()" > 取消</button >
@@ -688,7 +765,7 @@
       } else {
         modalActions.innerHTML = `< button class="btn-primary" onclick = "closeModal()" > 知道了</button > `;
       }
-      
+
       document.getElementById('customModal').classList.add('active');
     }
 
@@ -699,7 +776,7 @@
     function deleteLicense(code) {
       showDialog(
         '删除确认',
-        `警告：确定要彻底删除授权码 ${ code } 的所有数据（包含绑定的设备、星梦奇境数据等）吗？此操作不可逆！`,
+        `警告：确定要彻底删除授权码 ${code} 的所有数据（包含绑定的设备、星梦奇境数据等）吗？此操作不可逆！`,
         true,
         async () => {
           try {
@@ -746,10 +823,10 @@
       const seconds = Math.floor((new Date() - date) / 1000);
       if (seconds < 60) return '刚刚';
       const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return `${ minutes } 分钟前`;
+      if (minutes < 60) return `${minutes} 分钟前`;
       const hours = Math.floor(minutes / 60);
-      if (hours < 24) return `${ hours } 小时前`;
-      return `${ Math.floor(hours / 24) } 天前`;
+      if (hours < 24) return `${hours} 小时前`;
+      return `${Math.floor(hours / 24)} 天前`;
     }
   </script>
 

@@ -355,9 +355,9 @@ const KiddiePlanApp: React.FC = () => {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 1.05 }}
         transition={{ duration: 0.5 }}
-        className="h-[100dvh] w-screen relative overflow-hidden bg-white"
+        className="h-[100dvh] w-screen relative overflow-hidden bg-transparent"
       >
-        <div className="h-full w-full flex flex-col mx-auto relative shadow-2xl bg-transparent">
+        <div className="h-full w-full flex flex-col relative bg-transparent">
           {portal === 'parent' ? (
             <ParentPortal token={token!} onLogout={handleLogout} />
           ) : (

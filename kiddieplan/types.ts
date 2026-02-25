@@ -82,4 +82,5 @@ export interface RedemptionLog {
   rewardName: string;
   pointsCost: number;
   redeemedAt: string; // ISO String
+  status: 'pending' | 'approved' | 'rejected';
 }

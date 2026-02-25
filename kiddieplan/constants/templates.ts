@@ -242,7 +242,6 @@ export const DEFAULT_REWARDS = [
     { name: '共享单车探险', pointsCost: 200, icon: '🚲', category: 'outing' },
 
     // --- 创意精神 (Creative) ---
-    { name: '大大的拥抱表扬', pointsCost: 0, icon: '🤗', category: 'creative' },
     { name: '作品贴冰箱展示', pointsCost: 50, icon: '🖼️', category: 'creative' },
     { name: '家庭舞会/卡拉OK', pointsCost: 300, icon: '🎤', category: 'creative' },
     { name: '穿睡衣宅一天', pointsCost: 200, icon: '👕', category: 'creative' },
@@ -253,6 +252,5 @@ export const DEFAULT_REWARDS = [
     { name: '指挥爸妈做傻事', pointsCost: 200, icon: '🤡', category: 'creative' },
     { name: '全家唱喜欢的歌', pointsCost: 100, icon: '🎶', category: 'creative' },
     { name: '画一幅全家福', pointsCost: 200, icon: '👨‍👩‍👧‍👦', category: 'creative' },
-    { name: '鼓励小纸条', pointsCost: 50, icon: '📝', category: 'creative' },
     { name: '当一天家庭摄影师', pointsCost: 200, icon: '📸', category: 'creative' },
 ];

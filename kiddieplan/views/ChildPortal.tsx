@@ -21,6 +21,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [streak, setStreak] = useState(0);
     const [coins, setCoins] = useState(0);
     const [rewards, setRewards] = useState<any[]>([]);
+    const [redemptionLogs, setRedemptionLogs] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<AppTab>('home');
     const [loading, setLoading] = useState(true);
     const [childProfile, setChildProfile] = useState<{ name: string; avatar: string }>({ name: '宝贝', avatar: '' });
@@ -165,6 +166,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
     const handleRedeemReward = async (reward: any) => {
         if (coins < reward.pointsCost) return;
+
+        // 检查是否已有该奖励的待审批请求
+        const isPending = redemptionLogs.some(l => l.rewardName === reward.name && l.status === 'pending');
+        if (isPending) {
+            alert('这个奖励已经在申请中啦，请等待家长审批哦 ~');
+            return;
+        }
+
         try {
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',
@@ -173,17 +182,24 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             });
             const result = await res.json();
             if (result.success) {
-                setCoins(result.points);
+                setRedemptionLogs(prev => [{
+                    id: `temp_${Date.now()}`,
+                    rewardName: reward.name,
+                    pointsCost: reward.pointsCost,
+                    status: 'pending',
+                    redeemedAt: new Date().toISOString()
+                }, ...prev]);
+
                 confettis({
-                    particleCount: 150,
-                    spread: 70,
+                    particleCount: 80,
+                    spread: 40,
                     origin: { y: 0.6 },
-                    colors: ['#FBBF24', '#F472B6', '#60A5FA']
+                    colors: ['#60A5FA', '#93C5FD', '#BFDBFE'] // Soft blue/gift colors
                 });
-                alert(`🎉 成功兑换 ${reward.name}！快去找爸爸妈妈领取吧。`);
+                alert(result.message || `🎉 申请已发送！快去找家长审批吧。`);
             }
         } catch (err) {
-            alert('😭 兑换失败，请稍后再试');
+            alert('😭 发送申请失败，请稍后再试');
         }
     };
 
@@ -232,6 +248,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 setCoins(result.data.points || 0);
                 if (result.data.profile) setChildProfile(result.data.profile);
                 if (result.data.rewards) setRewards(result.data.rewards);
+                if (result.data.redemptionLogs) setRedemptionLogs(result.data.redemptionLogs);
 
                 // RESTORE FOCUS STATE: Ensure timer resumes after refresh
                 // Only overwrite if timer is NOT already running locally to prevent poll-resetting
@@ -571,7 +588,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     );
 
     return (
-        <div className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative" style={{ background: 'linear-gradient(160deg, #FFF0F3 0%, #FFE4E6 50%, #F5F3FF 100%)' }}>
+        <div
+            className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative"
+            style={{
+                background: 'linear-gradient(160deg, #FFF0F3 0%, #FFE4E6 50%, #F5F3FF 100%)',
+                paddingTop: 'env(safe-area-inset-top)'
+            }}
+        >
             {/* Decorative Blurs */}
             <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
@@ -692,28 +715,45 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5">
                                 <h2 className="text-2xl font-black text-gray-700 text-center">🎁 梦幻宝库</h2>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {rewards.map((reward, i) => (
-                                        <motion.div
-                                            key={i}
-                                            whileHover={{ y: -3, scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => handleRedeemReward(reward)}
-                                            className="bg-white/80 backdrop-blur-sm p-5 rounded-3xl flex flex-col items-center gap-3 text-center border border-white/50 shadow-sm cursor-pointer relative overflow-hidden"
-                                        >
-                                            <div className="text-4xl transform hover:scale-110 transition-transform">{reward.icon || '🎁'}</div>
-                                            <div>
-                                                <div className="font-bold text-gray-700 text-sm">{reward.name}</div>
-                                                <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-0.5 rounded-full mt-1.5 inline-block shadow-sm">
-                                                    {reward.pointsCost} 🍭
+                                    {rewards.map((reward, i) => {
+                                        const pendingLog = redemptionLogs.find(l => l.rewardName === reward.name && l.status === 'pending');
+                                        const isPending = !!pendingLog;
+
+                                        return (
+                                            <motion.div
+                                                key={i}
+                                                whileHover={!isPending ? { y: -3, scale: 1.02 } : {}}
+                                                whileTap={!isPending ? { scale: 0.98 } : {}}
+                                                onClick={() => !isPending && handleRedeemReward(reward)}
+                                                className={`p-5 rounded-3xl flex flex-col items-center gap-3 text-center border relative overflow-hidden transition-all
+                                                    ${isPending ? 'bg-orange-50/50 border-orange-200 opacity-80 cursor-default' : 'bg-white/80 backdrop-blur-sm border-white/50 shadow-sm cursor-pointer'}`}
+                                            >
+                                                <div className={`text-4xl transition-transform ${isPending ? 'grayscale-[0.5]' : 'hover:scale-110'}`}>{reward.icon || '🎁'}</div>
+                                                <div>
+                                                    <div className={`font-bold text-sm ${isPending ? 'text-orange-600/70' : 'text-gray-700'}`}>{reward.name}</div>
+                                                    {isPending ? (
+                                                        <div className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-0.5 rounded-full mt-1.5 inline-block animate-pulse">
+                                                            等待审批中...
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-0.5 rounded-full mt-1.5 inline-block shadow-sm">
+                                                            {reward.pointsCost} 🍭
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                            {coins < reward.pointsCost && (
-                                                <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-bold text-sm text-gray-400 backdrop-blur-[2px]">
-                                                    还差 {reward.pointsCost - coins} 🍭
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    ))}
+                                                {coins < reward.pointsCost && !isPending && (
+                                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-bold text-sm text-gray-400 backdrop-blur-[2px]">
+                                                        还差 {reward.pointsCost - coins} 🍭
+                                                    </div>
+                                                )}
+                                                {isPending && (
+                                                    <div className="absolute top-2 right-2">
+                                                        <Sparkles className="text-orange-400 animate-spin-slow" size={14} />
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        );
+                                    })}
                                 </div>
                             </motion.div>
                         )}

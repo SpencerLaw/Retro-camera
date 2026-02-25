@@ -808,6 +808,56 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         });
     };
 
+    const handleApproveRedemption = async (logId: string) => {
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'approve_redemption', token, data: { logId } })
+            });
+            const result = await res.json();
+            if (result.success) {
+                // 刷新数据以更新积分
+                const configRes = await fetch('/api/kiddieplan/manage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_config', token })
+                });
+                const config = await configRes.json();
+                if (config.success) {
+                    setChildren(config.data.children);
+                }
+                fetchRedemptionHistory();
+            } else {
+                alert(result.message);
+            }
+        } catch (err) {
+            alert('审批失败');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleRejectRedemption = async (logId: string) => {
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reject_redemption', token, data: { logId } })
+            });
+            const result = await res.json();
+            if (result.success) {
+                fetchRedemptionHistory();
+            }
+        } catch (err) {
+            alert('拒绝失败');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const removeReward = (id: string) => {
         setDialogConfig({
             isOpen: true,
@@ -1001,176 +1051,158 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         : CHILD_THEMES[0];
 
     return (
-        <div className={`h-full flex flex-col relative overflow-hidden text-[110%] px-1 transition-colors duration-1000 bg-gradient-to-b ${currentTheme.bg}`}>
-            {/* Dynamic Background Decorative elements */}
-            <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[120px] pointer-events-none opacity-40 transition-colors duration-1000 ${currentTheme.text.replace('text', 'bg')}`}></div>
-            <div className={`absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full blur-[100px] pointer-events-none opacity-30 transition-colors duration-1000 ${currentTheme.ring.replace('ring', 'bg')}`}></div>
+        <div
+            className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative"
+            style={{
+                background: 'linear-gradient(160deg, #FFF0F3 0%, #FFE4E6 50%, #F5F3FF 100%)',
+                overscrollBehavior: 'none',
+                paddingTop: 'env(safe-area-inset-top)'
+            }}
+        >
+            {/* Decorative Blurs */}
+            <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
+            <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
 
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
-            {/* Main Content Wrapper - Content scrolls UNDER the floating header */}
+            {/* Main Area - Everything scrolls under the glassy header */}
             <main
                 ref={mainScrollRef}
-                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
-                    // Strict collapse logic: if moved down, collapse.
-                    // Manual expand only (via click) to prevent jitter.
-                    if (!isScrolled && top > 20) setIsScrolled(true);
+                    if (top > 20 && !isScrolled) setIsScrolled(true);
+                    if (top <= 10 && isScrolled) setIsScrolled(false);
                 }}
+                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
             >
-                {/* Floating Header Wrapper - Dynamic Theme */}
+                {/* Top Bar - Harmonized with ChildPortal */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className={`px-6 rounded-[32px] transition-all duration-500 ease-in-out ${isScrolled
-                            ? 'py-3 bg-white/20 border border-white/40 shadow-sm backdrop-blur-2xl'
-                            : 'py-4 bg-white/20 border border-white/40 shadow-none backdrop-blur-2xl'
-                            }`}
+                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm' : 'py-4 shadow-none'}`}
+                        style={{
+                            background: isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                            backdropFilter: 'blur(20px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        }}
                     >
-                        {/* Top Row: Brand & Time */}
-                        <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'mb-0' : 'mb-6'}`}>
-                            <div className="flex items-center gap-3">
-                                <div className="flex flex-col">
-                                    <h1 className={`text-[20px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                        星梦奇旅
-                                    </h1>
-                                    <AnimatePresence>
-                                        {!isScrolled && (
-                                            <motion.span
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: 'auto' }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
-                                                style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
-                                            >
-                                                家长端
-                                            </motion.span>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-
-                                {/* Mini Avatar when Scrolled */}
-                                <AnimatePresence>
-                                    {isScrolled && selectedChild && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                                            exit={{ opacity: 0, x: -20, scale: 0.8 }}
-                                            className="flex items-center gap-2 bg-white/40 backdrop-blur-sm px-2 py-1 rounded-full border border-white/50"
-                                            onClick={() => {
-                                                // Scroll to top to expand
-                                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                            }}
-                                        >
-                                            <img src={selectedChild.avatar} className="w-6 h-6 rounded-full object-cover border border-white" alt="mini" />
-                                            <span className="text-xs font-bold text-gray-600">{selectedChild.name}</span>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                {isScrolled && (
-                                    <motion.button
-                                        initial={{ opacity: 0, scale: 0.5 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        onClick={() => {
-                                            setIsScrolled(false);
-                                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                        }}
-                                        className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
+                        {/* Left: Branding & Role (Vertical Stack) */}
+                        <div className="flex flex-col">
+                            <h1 className={`text-[18px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                星梦奇旅
+                            </h1>
+                            <AnimatePresence>
+                                {!isScrolled && (
+                                    <motion.span
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
+                                        style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
                                     >
-                                        <Menu size={20} />
-                                    </motion.button>
+                                        家长端
+                                    </motion.span>
                                 )}
-                                <div className="flex flex-col items-end mr-0.5">
-                                    <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
-                                        {formatBeijingTime(currentTime).split(' ')[1]}
-                                    </span>
-                                    <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
-                                        {formatBeijingTime(currentTime).split(' ')[0]}
-                                    </span>
-                                </div>
-                            </div>
+                            </AnimatePresence>
                         </div>
 
-                        {/* Child Selector Row - Collapsible */}
-                        <AnimatePresence>
-                            {!isScrolled && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    className="overflow-hidden"
+                        {/* Right: Time & Compact Buttons */}
+                        <div className="flex items-center gap-3">
+                            {isScrolled && (
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    onClick={() => {
+                                        setIsScrolled(false);
+                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
                                 >
-                                    <div className={`flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 ? 'justify-center' : 'justify-around'}`}>
-                                        {children.map((child, idx) => {
-                                            const isSelected = selectedChildId === child.id;
-                                            const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
-
-                                            return (
-                                                <motion.div
-                                                    key={child.id}
-                                                    className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
-                                                    onClick={() => setSelectedChildId(child.id)}
-                                                    whileTap={{ scale: 0.95 }}
-                                                >
-                                                    <div className="relative">
-                                                        <motion.div
-                                                            className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-300 relative z-10 bg-white
-                                                    ${isSelected ? `${theme.ring} scale-105 shadow-md border-white` : 'border-transparent opacity-60 grayscale-[0.3]'}`}
-                                                        >
-                                                            <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
-                                                        </motion.div>
-
-                                                        {/* Edit Button */}
-                                                        {isSelected && (
-                                                            <motion.button
-                                                                initial={{ scale: 0, opacity: 0 }}
-                                                                animate={{ scale: 1, opacity: 1 }}
-                                                                onClick={(e) => { e.stopPropagation(); handleEditChild(); }}
-                                                                className={`absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-gray-500 shadow-sm flex items-center justify-center border border-gray-100 z-20`}
-                                                            >
-                                                                <Edit2 size={10} />
-                                                            </motion.button>
-                                                        )}
-                                                    </div>
-
-                                                    <span className={`text-[10px] font-black transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-400'}`}>
-                                                        {child.name}
-                                                    </span>
-
-                                                    {/* Simple Active Dot */}
-                                                    {isSelected && (
-                                                        <motion.div
-                                                            layoutId="active-dot"
-                                                            className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('from-', 'bg-').split(' ')[0]}`}
-                                                        />
-                                                    )}
-                                                </motion.div>
-                                            );
-                                        })}
-
-                                        {/* Add Button - Max 3 Children */}
-                                        {children.length < 3 && (
-                                            <div className="flex flex-col items-center gap-2 min-w-[64px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer p-2" onClick={() => handleAddChild()}>
-                                                <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white/20">
-                                                    <Plus className="text-gray-400" size={20} />
-                                                </div>
-                                                <span className="text-[10px] font-bold text-gray-400">添加</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-
-                                </motion.div>
+                                    <Menu size={20} />
+                                </motion.button>
                             )}
-                        </AnimatePresence>
-
-
+                            <div className="flex flex-col items-end mr-0.5">
+                                <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
+                                    {formatBeijingTime(currentTime).split(' ')[1]}
+                                </span>
+                                <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
+                                    {formatBeijingTime(currentTime).split(' ')[0]}
+                                </span>
+                            </div>
+                        </div>
                     </header>
                 </div>
+
+                {/* Child Selector Row - Collapsible */}
+                <AnimatePresence>
+                    {!isScrolled && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="overflow-hidden"
+                        >
+                            <div className={`flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 ? 'justify-center' : 'justify-around'}`}>
+                                {children.map((child, idx) => {
+                                    const isSelected = selectedChildId === child.id;
+                                    const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
+
+                                    return (
+                                        <motion.div
+                                            key={child.id}
+                                            className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
+                                            onClick={() => setSelectedChildId(child.id)}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            <div className="relative">
+                                                <motion.div
+                                                    className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-300 relative z-10 bg-white
+                                                    ${isSelected ? `${theme.ring} scale-105 shadow-md border-white` : 'border-transparent opacity-60 grayscale-[0.3]'}`}
+                                                >
+                                                    <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
+                                                </motion.div>
+
+                                                {/* Edit Button */}
+                                                {isSelected && (
+                                                    <motion.button
+                                                        initial={{ scale: 0, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        onClick={(e) => { e.stopPropagation(); handleEditChild(); }}
+                                                        className={`absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-gray-500 shadow-sm flex items-center justify-center border border-gray-100 z-20`}
+                                                    >
+                                                        <Edit2 size={10} />
+                                                    </motion.button>
+                                                )}
+                                            </div>
+
+                                            <span className={`text-[10px] font-black transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-400'}`}>
+                                                {child.name}
+                                            </span>
+
+                                            {/* Simple Active Dot */}
+                                            {isSelected && (
+                                                <motion.div
+                                                    layoutId="active-dot"
+                                                    className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('from-', 'bg-').split(' ')[0]}`}
+                                                />
+                                            )}
+                                        </motion.div>
+                                    );
+                                })}
+
+                                {/* Add Button - Max 3 Children */}
+                                {children.length < 3 && (
+                                    <div className="flex flex-col items-center gap-2 min-w-[64px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer p-2" onClick={() => handleAddChild()}>
+                                        <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white/20">
+                                            <Plus className="text-gray-400" size={20} />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-gray-400">添加</span>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <div className="px-4 pb-0 space-y-6">
                     {(activeTab === 'children' && selectedChild) && (
@@ -1926,7 +1958,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 >
                                     <ArrowLeft size={20} />
                                 </motion.button>
-                                <h2 className="text-2xl font-black text-[#5D4037]">核销历史记录</h2>
+                                <h2 className="text-2xl font-black text-[#5D4037]">奖励核销审批</h2>
                             </div>
 
                             <div className="bg-gradient-to-br from-pink-400 to-pink-500 p-6 rounded-[40px] text-white shadow-xl relative overflow-hidden">
@@ -1945,31 +1977,82 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                {redemptionLogs.length > 0 ? (
-                                    redemptionLogs.map((log) => (
-                                        <div key={log.id} className="bg-white/85 backdrop-blur-md p-5 rounded-[28px] border border-white/50 shadow-sm relative overflow-hidden group">
-                                            <div className="absolute top-0 right-0 p-2 opacity-5">
-                                                <Gift size={40} />
-                                            </div>
-                                            <div className="flex justify-between items-start mb-2 relative z-10">
-                                                <div>
-                                                    <div className="font-black text-[#5D4037] text-base">{log.rewardName}</div>
-                                                    <div className="text-[10px] text-gray-400 font-bold flex items-center gap-1 mt-0.5 uppercase tracking-wider">
-                                                        <Clock size={10} /> {new Date(log.redeemedAt).toLocaleString('zh-CN')}
+                            {/* 待审批列表 */}
+                            {redemptionLogs.some(l => l.status === 'pending') && (
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-black text-orange-500 uppercase tracking-widest flex items-center gap-2">
+                                        <Sparkles size={16} /> 待审批申请
+                                    </h3>
+                                    {redemptionLogs.filter(l => l.status === 'pending').map((log) => (
+                                        <div key={log.id} className="bg-white p-5 rounded-[32px] border-2 border-orange-200 shadow-md relative overflow-hidden">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl">🎁</div>
+                                                    <div>
+                                                        <div className="font-black text-[#5D4037] text-lg">{log.rewardName}</div>
+                                                        <div className="text-[10px] text-gray-400 font-bold">{new Date(log.redeemedAt).toLocaleString('zh-CN')}</div>
                                                     </div>
                                                 </div>
-                                                <div className="bg-red-50 text-red-500 px-3 py-1 rounded-xl text-xs font-black shadow-sm">
+                                                <div className="bg-orange-100 text-orange-600 px-3 py-1 rounded-xl text-sm font-black">
+                                                    {log.pointsCost} 🍭
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => handleRejectRedemption(log.id)}
+                                                    disabled={isSaving}
+                                                    className="flex-1 py-3 rounded-xl border-2 border-gray-100 text-gray-400 font-bold text-sm hover:bg-gray-50 transition-colors"
+                                                >
+                                                    拒绝
+                                                </button>
+                                                <button
+                                                    onClick={() => handleApproveRedemption(log.id)}
+                                                    disabled={isSaving}
+                                                    className="flex-[2] py-3 rounded-xl bg-orange-500 text-white font-black text-sm shadow-lg shadow-orange-100 hover:bg-orange-600 transition-colors"
+                                                >
+                                                    批准发放
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* 历史记录 */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest pl-1">核销历史记录</h3>
+                                {redemptionLogs.filter(l => l.status !== 'pending').length > 0 ? (
+                                    redemptionLogs.filter(l => l.status !== 'pending').map((log) => (
+                                        <div key={log.id} className="bg-white/85 backdrop-blur-md p-5 rounded-[28px] border border-white/50 shadow-sm relative overflow-hidden group">
+                                            <div className="flex justify-between items-start mb-2 relative z-10">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="font-black text-[#5D4037] text-base">{log.rewardName}</div>
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${log.status === 'approved' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'}`}>
+                                                        {log.status === 'approved' ? '已批准' : '已拒绝'}
+                                                    </span>
+                                                </div>
+                                                <div className={`px-3 py-1 rounded-xl text-xs font-black shadow-sm ${log.status === 'approved' ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400 line-through'}`}>
                                                     -{log.pointsCost} 🍭
                                                 </div>
                                             </div>
                                             <div className="flex items-center justify-between pt-3 border-t border-gray-100/50">
-                                                <span className="text-[10px] font-bold text-gray-400">核销后账单结余</span>
-                                                <span className="text-sm font-black text-orange-400 font-mono">{log.remainingPoints ?? '---'} 🍭</span>
+                                                <span className="text-[10px] text-gray-400 font-bold">
+                                                    {new Date(log.redeemedAt).toLocaleString('zh-CN')}
+                                                </span>
+                                                {log.status === 'approved' && (
+                                                    <span className="text-sm font-black text-orange-400 font-mono">{log.remainingPoints ?? '---'} 🍭</span>
+                                                )}
                                             </div>
                                         </div>
                                     ))
                                 ) : (
+                                    redemptionLogs.every(l => l.status === 'pending') && (
+                                        <div className="text-center py-10 opacity-30">
+                                            <p className="font-bold text-xs">暂无处理过的核销记录</p>
+                                        </div>
+                                    )
+                                )}
+                                {redemptionLogs.length === 0 && (
                                     <div className="text-center py-20 opacity-50 bg-gray-50/30 rounded-[40px] border-2 border-dashed border-gray-100 flex flex-col items-center gap-4">
                                         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-200 text-3xl">
                                             📜
@@ -2242,7 +2325,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </motion.div>
                     )}
                 </div>
-            </main>
+            </main >
 
             {/* Dialog Overlay */}
             <AnimatePresence>

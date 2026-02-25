@@ -224,7 +224,8 @@ export default async function handler(
                 rewardName,
                 pointsCost,
                 remainingPoints: data.remainingPoints || 0,
-                redeemedAt: new Date().toISOString()
+                redeemedAt: new Date().toISOString(),
+                status: 'approved' // 家长端直接核销的视为已批准
             };
 
             license.redemptionLogs.unshift(newLog); // 最新的在前面
@@ -235,6 +236,55 @@ export default async function handler(
 
             await kv.set(licenseKey, license);
             return response.status(200).json({ success: true, data: newLog });
+        }
+
+        if (action === 'approve_redemption') {
+            const { logId } = data;
+            const license: any = await kv.get(licenseKey);
+            if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
+
+            if (!license.redemptionLogs) license.redemptionLogs = [];
+            const logIdx = license.redemptionLogs.findIndex((l: any) => l.id === logId);
+            if (logIdx === -1) return response.status(404).json({ success: false, message: '申请记录不存在' });
+
+            const log = license.redemptionLogs[logIdx];
+            if (log.status !== 'pending') return response.status(400).json({ success: false, message: '该记录已处理' });
+
+            // 获取孩子并扣分
+            const childIdx = license.children.findIndex((c: any) => c.id === log.childId);
+            if (childIdx === -1) return response.status(404).json({ success: false, message: '孩子不存在' });
+
+            const child = license.children[childIdx];
+            if (child.points < log.pointsCost) {
+                return response.status(400).json({ success: false, message: '孩子糖果不足，无法批准' });
+            }
+
+            // 扣分并更新状态
+            child.points -= log.pointsCost;
+            log.status = 'approved';
+            log.remainingPoints = child.points; // 更新为扣分后的余额
+
+            await kv.set(licenseKey, license);
+            return response.status(200).json({ success: true, message: '奖励已批准，糖果已扣除' });
+        }
+
+        if (action === 'reject_redemption') {
+            const { logId } = data;
+            const license: any = await kv.get(licenseKey);
+            if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
+
+            if (!license.redemptionLogs) license.redemptionLogs = [];
+            const logIdx = license.redemptionLogs.findIndex((l: any) => l.id === logId);
+            if (logIdx === -1) return response.status(404).json({ success: false, message: '申请记录不存在' });
+
+            const log = license.redemptionLogs[logIdx];
+            if (log.status !== 'pending') return response.status(400).json({ success: false, message: '该记录已处理' });
+
+            // 仅更新状态
+            log.status = 'rejected';
+
+            await kv.set(licenseKey, license);
+            return response.status(200).json({ success: true, message: '申请已拒绝' });
         }
 
         if (action === 'get_redemption_history') {

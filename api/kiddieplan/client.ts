@@ -49,6 +49,9 @@ export default async function handler(
             const dailyData = license.progress?.[today]?.[childId] || { tasks: [], checkins: [] };
             const { streak = 0, points = 0, rewards = [], name = '宝贝', avatar = '' } = childData;
 
+            // 获取该孩子的核销日志
+            const redemptionLogs = (license.redemptionLogs || []).filter((l: any) => l.childId === childId);
+
             return response.status(200).json({
                 success: true,
                 data: {
@@ -59,6 +62,7 @@ export default async function handler(
                     currentTaskName: childData.currentTaskName || null,
                     lastFocusDuration: childData.lastFocusDuration || 0,
                     rewards,
+                    redemptionLogs,
                     streak,
                     points,
                     profile: { name, avatar }
@@ -216,10 +220,10 @@ export default async function handler(
                 return response.status(400).json({ success: false, message: '糖果不足' });
             }
 
-            // 1. 扣除糖果
-            license.children[childIdx].points = currentPoints - cost;
+            // [Refactor] 不再立即扣除糖果，改为提交申请，等待家长审批
+            // 糖果扣除由 manage.ts 的 approve_redemption 处理
 
-            // 2. 记录核销日志
+            // 记录申请日志
             if (!license.redemptionLogs) license.redemptionLogs = [];
 
             const newLog = {
@@ -227,8 +231,9 @@ export default async function handler(
                 childId,
                 rewardName: rewardName || '未知奖励',
                 pointsCost: cost,
-                remainingPoints: license.children[childIdx].points,
-                redeemedAt: new Date().toISOString()
+                remainingPoints: currentPoints, // 这里显示的是申请时的点数
+                redeemedAt: new Date().toISOString(),
+                status: 'pending' // 初始状态为待审批
             };
 
             license.redemptionLogs.unshift(newLog); // 最新的在前面
@@ -238,7 +243,7 @@ export default async function handler(
             }
 
             await kv.set(licenseKey, license);
-            return response.status(200).json({ success: true, points: license.children[childIdx].points });
+            return response.status(200).json({ success: true, message: '申请已发送，请等待家长审批哦 ~' });
         }
 
         return response.status(400).json({ success: false, message: '无效的操作' });

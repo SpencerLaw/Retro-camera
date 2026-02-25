@@ -1,4 +1,5 @@
 import { kv } from '@vercel/kv';
+import { del } from '@vercel/blob';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
@@ -118,6 +119,11 @@ export default async function handler(
             };
 
             if (existingChildIdx > -1) {
+                // If avatar is changing, delete old one to prevent orphans
+                const oldAvatar = license.children[existingChildIdx].avatar;
+                if (oldAvatar && oldAvatar !== avatar && oldAvatar.includes('public.blob.vercel-storage.com')) {
+                    try { await del(oldAvatar); } catch (e) { console.error('Delete old avatar failed', e); }
+                }
                 license.children[existingChildIdx] = { ...license.children[existingChildIdx], ...newChild };
             } else {
                 if (license.children.length >= 3) {
@@ -127,18 +133,36 @@ export default async function handler(
             }
 
             await kv.set(licenseKey, license);
-            await kv.set(licenseKey, license);
             return response.status(200).json({ success: true, data: license });
         }
 
         if (action === 'remove_child') {
             const { childId } = request.body;
-            const license: any = await kv.get(licenseKey) || { children: [] };
+            const license: any = await kv.get(licenseKey) || { children: [], progress: {} };
 
-            // 过滤掉该孩子，无需操作 registry，因为下一次 save_child 或 auth 都会基于新的 children 列表
-            license.children = license.children.filter((c: any) => c.id !== childId);
+            const childToDelete = license.children.find((c: any) => c.id === childId);
+            if (childToDelete) {
+                // 1. Physically delete avatar from Vercel Blob
+                if (childToDelete.avatar && childToDelete.avatar.includes('public.blob.vercel-storage.com')) {
+                    try {
+                        await del(childToDelete.avatar);
+                    } catch (e) {
+                        console.error('Failed to delete child avatar from blob', e);
+                    }
+                }
 
-            await kv.set(licenseKey, license);
+                // 2. Remove child from children list
+                license.children = license.children.filter((c: any) => c.id !== childId);
+
+                // 3. Cleanup progress data for today if exists
+                const today = new Date().toISOString().split('T')[0];
+                if (license.progress?.[today]?.[childId]) {
+                    delete license.progress[today][childId];
+                }
+
+                await kv.set(licenseKey, license);
+            }
+
             return response.status(200).json({ success: true, data: license });
         }
 

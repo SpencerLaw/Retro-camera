@@ -1202,7 +1202,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <div className="relative z-10 mt-auto">
                                             {selectedChild.isFocusing ? (
                                                 <div className="space-y-1">
-                                                    <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
+                                                    <div className="flex justify-between items-end">
+                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
+                                                        {selectedChild.focusStartTime && (
+                                                            <div className="text-[9px] font-black bg-white/20 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                <Clock size={10} /> {new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(selectedChild.focusStartTime))} 开始
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                     <h2 className="text-xl font-black tracking-tight leading-snug break-words line-clamp-2 drop-shadow-sm min-h-[3rem] flex items-center">
                                                         {selectedChild.currentTaskName}
                                                     </h2>
@@ -1730,36 +1737,24 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="relative min-h-[300px]">
                                 {(focusLogs.length > 0 || currentTasks.some(t => t.completed)) ? (
                                     (() => {
-                                        // Aggregate logs by task title
-                                        const aggregated: { [key: string]: any } = {};
+                                        // Use individual logs instead of aggregation to show exact start/end times
+                                        const allLogs: any[] = [];
 
-                                        // 1. Process explicit focus logs
+                                        // 1. Process individual focus logs
                                         focusLogs.forEach(log => {
-                                            if (!aggregated[log.taskTitle]) {
-                                                aggregated[log.taskTitle] = {
-                                                    ...log,
-                                                    type: 'log',
-                                                    sortTime: new Date(log.startTime).getTime()
-                                                };
-                                            } else {
-                                                aggregated[log.taskTitle].duration += log.duration;
-                                                // Keep earliest start time
-                                                if (new Date(log.startTime).getTime() < aggregated[log.taskTitle].sortTime) {
-                                                    aggregated[log.taskTitle].sortTime = new Date(log.startTime).getTime();
-                                                    aggregated[log.taskTitle].startTime = log.startTime;
-                                                }
-                                                // Update latest end time
-                                                if (new Date(log.endTime) > new Date(aggregated[log.taskTitle].endTime)) {
-                                                    aggregated[log.taskTitle].endTime = log.endTime;
-                                                }
-                                            }
+                                            allLogs.push({
+                                                ...log,
+                                                type: 'log',
+                                                sortTime: new Date(log.startTime).getTime(),
+                                                isSilent: false
+                                            });
                                         });
 
                                         // 2. Process tasks marked as completed (Silent Check-ins)
                                         currentTasks.filter(t => t.completed).forEach(task => {
-                                            // Only add if not already captured by focus logs (avoid duplication)
-                                            if (!aggregated[task.title]) {
-                                                // Synthesize a sort time from timeSlot or default to now
+                                            // Only add if not captured by focus logs (simple heuristic: title match)
+                                            // Note: In a real system, we'd check taskId or unique IDs
+                                            if (!focusLogs.some(l => l.taskTitle === task.title)) {
                                                 let sortTime = Date.now();
                                                 let startTime = '';
                                                 if (task.timeSlot) {
@@ -1772,19 +1767,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     startTime = new Date().toISOString();
                                                 }
 
-                                                aggregated[task.title] = {
+                                                allLogs.push({
                                                     taskTitle: task.title,
                                                     duration: 0,
                                                     type: 'silent',
                                                     timeSlot: task.timeSlot,
                                                     sortTime: sortTime,
                                                     startTime: startTime,
-                                                    isSilent: true // Flag for UI distinction
-                                                };
+                                                    isSilent: true
+                                                });
                                             }
                                         });
 
-                                        return Object.values(aggregated)
+                                        return allLogs
                                             .sort((a, b) => b.sortTime - a.sortTime) // Sort desc (latest first)
                                             .map((log, i) => {
                                                 const startTime = log.startTime ? new Date(log.startTime) : null;

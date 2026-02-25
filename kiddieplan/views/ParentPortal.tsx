@@ -1065,18 +1065,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
             {/* Main Area - Everything scrolls under the glassy header */}
             <main
-                ref={mainScrollRef}
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
                     if (top > 20 && !isScrolled) setIsScrolled(true);
-                    if (top <= 10 && isScrolled) setIsScrolled(false);
+                    // Removed logic to auto-expand header on scroll up (per user request)
                 }}
                 className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
             >
                 {/* Top Bar - Harmonized with ChildPortal */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm' : 'py-4 shadow-none'}`}
+                        onClick={() => {
+                            if (isScrolled) {
+                                setIsScrolled(false);
+                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }}
+                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'}`}
                         style={{
                             background: isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
                             backdropFilter: 'blur(20px) saturate(180%)',

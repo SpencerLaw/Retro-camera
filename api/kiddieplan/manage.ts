@@ -300,7 +300,63 @@ export default async function handler(
             return response.status(200).json({ success: true, data: filteredLogs });
         }
 
+        if (action === 'cleanup_focus_logs') {
+            // 一次性清理：将所有 progress 中的 focusLogs 按 taskId 去重合并
+            const license: any = await kv.get(licenseKey);
+            if (!license) return response.status(404).json({ success: false, message: '未找到授权许可' });
+
+            const progress = license.progress || {};
+            let totalMerged = 0;
+
+            const dedup = (rawLogs: any[]) => {
+                const map: Record<string, any> = {};
+                const silents: any[] = [];
+                for (const log of rawLogs) {
+                    if (log.type === 'silent') { silents.push(log); continue; }
+                    const key = log.taskId || log.taskTitle || '_unknown';
+                    if (!map[key]) {
+                        map[key] = { ...log };
+                    } else {
+                        const ex = map[key];
+                        const exS = ex.startTime ? new Date(ex.startTime).getTime() : Infinity;
+                        const newS = log.startTime ? new Date(log.startTime).getTime() : Infinity;
+                        const exE = ex.endTime ? new Date(ex.endTime).getTime() : 0;
+                        const newE = log.endTime ? new Date(log.endTime).getTime() : 0;
+                        map[key] = {
+                            ...ex,
+                            startTime: newS < exS ? log.startTime : ex.startTime,
+                            endTime: newE > exE ? log.endTime : ex.endTime,
+                            duration: (ex.duration || 0) + (log.duration || 0),
+                        };
+                        totalMerged++;
+                    }
+                }
+                return [...Object.values(map), ...silents];
+            };
+
+            for (const dateKey of Object.keys(progress)) {
+                for (const childId of Object.keys(progress[dateKey])) {
+                    const dayData = progress[dateKey][childId];
+                    if (dayData.focusLogs && dayData.focusLogs.length > 1) {
+                        const before = dayData.focusLogs.length;
+                        dayData.focusLogs = dedup(dayData.focusLogs);
+                        const after = dayData.focusLogs.length;
+                        totalMerged += before - after;
+                    }
+                }
+            }
+
+            license.progress = progress;
+            await kv.set(licenseKey, license);
+
+            return response.status(200).json({
+                success: true,
+                message: `清理完成，共合并了 ${totalMerged} 条重复专注记录`
+            });
+        }
+
         return response.status(400).json({ success: false, message: '无效的操作' });
+
 
     } catch (error: any) {
         console.error('Manage API Error:', error);

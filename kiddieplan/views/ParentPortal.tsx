@@ -1161,6 +1161,33 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <span className="text-[10px] font-bold text-gray-400">添加</span>
                                             </div>
                                         )}
+
+                                        {/* Garbage Collection Button */}
+                                        <div
+                                            className="flex flex-col items-center gap-2 min-w-[64px] opacity-30 hover:opacity-100 transition-opacity cursor-pointer p-2"
+                                            onClick={async () => {
+                                                if (!confirm('确定要清理过期的头像文件吗？此操作将扫描所有授权码并删除不再使用的图片。')) return;
+                                                try {
+                                                    setIsSaving(true);
+                                                    const res = await fetch('/api/verify-license', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ action: 'cleanup_blobs', adminKey: 'spencer' })
+                                                    });
+                                                    const result = await res.json();
+                                                    alert(result.message || '清理完成');
+                                                } catch (e) {
+                                                    alert('清理出错了');
+                                                } finally {
+                                                    setIsSaving(false);
+                                                }
+                                            }}
+                                        >
+                                            <div className="w-14 h-14 rounded-full border border-dashed border-emerald-300 flex items-center justify-center bg-emerald-50/20">
+                                                <Trash2 className="text-emerald-400/60" size={18} />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-emerald-400/60">清理</span>
+                                        </div>
                                     </div>
 
 

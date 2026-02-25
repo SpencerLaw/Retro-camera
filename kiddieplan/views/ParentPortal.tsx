@@ -1549,32 +1549,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         <div className="text-xs text-gray-400 font-bold flex flex-wrap gap-2">
                                                             <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                             <span className="text-emerald-400">+{task.points} 🍭</span>
-                                                            {(() => {
-                                                                const taskLogs = focusLogs.filter(l => l.taskTitle === task.title);
-                                                                if (taskLogs.length === 0 && !task.completed) return null;
-
-                                                                const startTimes = taskLogs.filter(l => l.startTime).map(l => new Date(l.startTime).getTime());
-                                                                const endTimes = taskLogs.filter(l => l.endTime).map(l => new Date(l.endTime).getTime());
-
-                                                                const actualStart = startTimes.length > 0 ? Math.min(...startTimes) : null;
-                                                                const actualEnd = task.completed ?
-                                                                    (taskLogs.find(l => l.type === 'silent')?.endTime || Math.max(...endTimes, 0)) :
-                                                                    (endTimes.length > 0 ? Math.max(...endTimes) : null);
-
-                                                                const fmt = (t: number) => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(t));
-
-                                                                return (
-                                                                    <div className="flex gap-2">
-                                                                        {actualStart && <span className="text-blue-400 bg-blue-50/50 px-2 py-0.5 rounded-md">始: {fmt(actualStart)}</span>}
-                                                                        {actualEnd && <span className="text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">终: {fmt(actualEnd)}</span>}
-                                                                        {(task.accumulatedTime || 0) > 0 && (
-                                                                            <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                                                <Timer size={10} /> {formatTime(task.accumulatedTime!)}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                );
-                                                            })()}
+                                                            {task.accumulatedTime && task.accumulatedTime > 0 && (
+                                                                <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                    <Timer size={10} /> {formatTime(task.accumulatedTime)}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-1">
@@ -1829,51 +1808,76 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="relative min-h-[300px]">
                                 {(focusLogs.length > 0 || currentTasks.some(t => t.completed)) ? (
                                     (() => {
-                                        // Use individual logs instead of aggregation to show exact start/end times
-                                        const allLogs: any[] = [];
+                                        // Use a Map to ensure strictly one entry per task (merged)
+                                        const mergedTasks = new Map<string, any>();
 
-                                        // 1. Process individual focus logs
+                                        // 1. Process individual focus logs first
                                         focusLogs.forEach(log => {
-                                            allLogs.push({
-                                                ...log,
-                                                type: 'log',
-                                                sortTime: new Date(log.startTime).getTime(),
-                                                isSilent: false
-                                            });
-                                        });
+                                            const key = log.taskTitle || '专注活动';
+                                            const existing = mergedTasks.get(key);
+                                            const sTime = new Date(log.startTime).getTime();
+                                            const eTime = log.endTime ? new Date(log.endTime).getTime() : sTime;
 
-                                        // 2. Process tasks marked as completed (Silent Check-ins)
-                                        currentTasks.filter(t => t.completed).forEach(task => {
-                                            // Show completion events separately from focus logs
-                                            const silentLog = focusLogs.find(l => l.taskTitle === task.title && l.type === 'silent');
-
-                                            let sortTime = Date.now();
-                                            let startTime = '';
-                                            if (silentLog) {
-                                                sortTime = new Date(silentLog.startTime).getTime();
-                                                startTime = silentLog.startTime;
-                                            } else if (task.timeSlot) {
-                                                const [h, m] = task.timeSlot.split(':').map(Number);
-                                                const d = new Date();
-                                                d.setHours(h, m, 0, 0);
-                                                sortTime = d.getTime();
-                                                startTime = d.toISOString();
+                                            if (!existing) {
+                                                mergedTasks.set(key, {
+                                                    ...log,
+                                                    sortTime: sTime,
+                                                    startTime: log.startTime,
+                                                    endTime: log.endTime,
+                                                    duration: log.duration || 0,
+                                                    isSilent: false
+                                                });
                                             } else {
-                                                startTime = new Date().toISOString();
+                                                const finalStart = sTime < new Date(existing.startTime).getTime() ? log.startTime : existing.startTime;
+                                                const finalEnd = eTime > (existing.endTime ? new Date(existing.endTime).getTime() : 0) ? log.endTime : existing.endTime;
+                                                mergedTasks.set(key, {
+                                                    ...existing,
+                                                    startTime: finalStart,
+                                                    endTime: finalEnd,
+                                                    duration: existing.duration + (log.duration || 0),
+                                                    sortTime: Math.min(sTime, existing.sortTime)
+                                                });
                                             }
-
-                                            allLogs.push({
-                                                taskTitle: task.title,
-                                                duration: 0,
-                                                type: 'silent',
-                                                timeSlot: task.timeSlot,
-                                                sortTime: sortTime,
-                                                startTime: startTime,
-                                                isSilent: true
-                                            });
                                         });
 
-                                        return allLogs
+                                        // 2. Process tasks marked as completed - merge or add as silent
+                                        currentTasks.filter(t => t.completed).forEach(task => {
+                                            const key = task.title;
+                                            const existing = mergedTasks.get(key);
+
+                                            if (existing) {
+                                                // Task is already in from focus logs, just mark it as potentially silent if duration is 0
+                                                // But usually if it's here, it's a focus record.
+                                            } else {
+                                                // Pure check-in (silent)
+                                                const silentLog = focusLogs.find(l => l.taskTitle === task.title && l.type === 'silent');
+                                                let sortTime = Date.now();
+                                                let startTime = new Date().toISOString();
+
+                                                if (silentLog) {
+                                                    sortTime = new Date(silentLog.startTime).getTime();
+                                                    startTime = silentLog.startTime;
+                                                } else if (task.timeSlot) {
+                                                    const [h, m] = task.timeSlot.split(':').map(Number);
+                                                    const d = new Date();
+                                                    d.setHours(h, m, 0, 0);
+                                                    sortTime = d.getTime();
+                                                    startTime = d.toISOString();
+                                                }
+
+                                                mergedTasks.set(key, {
+                                                    taskTitle: task.title,
+                                                    duration: 0,
+                                                    type: 'silent',
+                                                    sortTime: sortTime,
+                                                    startTime: startTime,
+                                                    endTime: startTime,
+                                                    isSilent: true
+                                                });
+                                            }
+                                        });
+
+                                        return Array.from(mergedTasks.values())
                                             .sort((a, b) => b.sortTime - a.sortTime) // Sort desc (latest first)
                                             .map((log, i) => {
                                                 const startTime = log.startTime ? new Date(log.startTime) : null;
@@ -2288,37 +2292,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     </div>
                                                 </div>
 
-                                                {/* Detailed Log List */}
-                                                {(dayData.focusLogs || []).length > 0 && (
-                                                    <div className="mt-8 space-y-2 border-t border-gray-100 pt-8">
-                                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-4 text-center">专注活动明细</p>
-                                                        <div className="grid grid-cols-1 gap-3">
-                                                            {(dayData.focusLogs || [])
-                                                                .filter((log: any) => log.startTime)
-                                                                .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))
-                                                                .map((log: any, idx: number) => {
-                                                                    const s = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime));
-                                                                    const e = log.endTime ? new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)) : '--:--';
-                                                                    const dur = log.duration > 0 ? Math.floor(log.duration / 60) : 0;
-                                                                    return (
-                                                                        <div key={idx} className="flex items-center justify-between p-5 bg-gray-50/50 rounded-3xl border border-gray-100 ring-1 ring-white/20 hover:bg-white transition-all group hover:shadow-md">
-                                                                            <div className="flex items-center gap-5">
-                                                                                <div className="w-4 h-4 rounded-full bg-red-400 group-hover:scale-125 transition-transform ring-4 ring-red-50"></div>
-                                                                                <div className="flex flex-col">
-                                                                                    <span className="text-base font-black text-[#5D4037]">{log.taskTitle || '专注活动'}</span>
-                                                                                    <span className="text-[11px] font-bold text-gray-400 tracking-wider mt-0.5">{s} — {e}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="text-right flex items-baseline gap-1">
-                                                                                <span className="text-2xl font-black text-red-500 group-hover:scale-110 transition-transform">{dur}</span>
-                                                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">MINS</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                {/* Detailed Log List Removed per User Request */}
                                             </div>
 
                                             {/* 4. Day Task Detail List */}

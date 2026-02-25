@@ -153,12 +153,34 @@ export default async function handler(
             const daily = license.progress[today][childId];
             if (!daily.focusLogs) daily.focusLogs = [];
 
-            // 移除合并逻辑，始终追加新日志以保持颗粒度
-            // 这样能确保“活跃时间分布”图表准确反映每一次实际的专注时段
-            daily.focusLogs.push({
-                ...log,
-                recordedAt: new Date().toISOString()
-            });
+            // 合并同一任务的专注日志（同一任务只保留一条记录）
+            // 保留最早开始时间、最晚结束时间、累计时长
+            const existingIdx = daily.focusLogs.findIndex(
+                (l: any) => l.taskId === log.taskId && l.type !== 'silent'
+            );
+
+            if (existingIdx > -1) {
+                // Merge into existing entry
+                const existing = daily.focusLogs[existingIdx];
+                const existingStart = existing.startTime ? new Date(existing.startTime).getTime() : Infinity;
+                const newStart = log.startTime ? new Date(log.startTime).getTime() : Infinity;
+                const existingEnd = existing.endTime ? new Date(existing.endTime).getTime() : 0;
+                const newEnd = log.endTime ? new Date(log.endTime).getTime() : 0;
+
+                daily.focusLogs[existingIdx] = {
+                    ...existing,
+                    startTime: newStart < existingStart ? log.startTime : existing.startTime,
+                    endTime: newEnd > existingEnd ? log.endTime : existing.endTime,
+                    duration: (existing.duration || 0) + (log.duration || 0),
+                    updatedAt: new Date().toISOString()
+                };
+            } else {
+                // No existing entry for this task - create a fresh one
+                daily.focusLogs.push({
+                    ...log,
+                    recordedAt: new Date().toISOString()
+                });
+            }
 
             // 同时累加到具体任务的 accumulatedTime 字段上，方便展示
             if (daily.tasks) {

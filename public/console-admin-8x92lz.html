@@ -372,8 +372,6 @@
           <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
         </div>
         <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
-        <button onclick="cleanupBlobs()" class="btn-primary" style="background: var(--success); margin-left: 10px;">🧹
-          清理过期头像</button>
       </div>
     </div>
 
@@ -414,6 +412,7 @@
           <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
           <button onclick="generateCodes('xm')" class="btn-primary" style="background: #E0C3FC; color: #6A5D7B;">生成星梦码
             (XXDK)</button>
+          <button onclick="cleanupBlobs()" class="btn-primary" style="background: var(--success);">🧹 清理过期头像</button>
         </div>
 
         <div class="gen-list" id="genList"></div>
@@ -775,7 +774,7 @@
 
     // === 垃圾回收：清理孤儿头像 ===
     async function cleanupBlobs() {
-      if (!confirm('确定要执行全局存储清理吗？\n\n系统将扫描所有 Vercel Blob 文件关与其当前所有已激活的授权码及宝贝信息进行比对，删除所有未被引用的“孤儿”头像。建议在业务低峰期执行。')) return;
+      if (!confirm('确定要彻底删除所有未引用的头像吗？')) return;
 
       try {
         document.getElementById('connectionStatus').textContent = '正在清理存储...';

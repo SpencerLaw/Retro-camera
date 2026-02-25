@@ -1143,7 +1143,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="overflow-hidden"
+                            className="overflow-hidden mx-4 mb-6 bg-white/20 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-sm"
                         >
                             <div className={`flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 ? 'justify-center' : 'justify-around'}`}>
                                 {children.map((child, idx) => {

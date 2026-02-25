@@ -1108,6 +1108,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </AnimatePresence>
                         </div>
 
+                        {/* Center: Mini Profile when Scrolled */}
+                        <AnimatePresence>
+                            {isScrolled && selectedChild && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                                    exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm"
+                                >
+                                    <img
+                                        src={selectedChild.avatar}
+                                        className="w-6 h-6 rounded-full object-cover border border-white shadow-sm"
+                                        alt={selectedChild.name}
+                                    />
+                                    <span className="text-xs font-black text-gray-700 tracking-tight">
+                                        {selectedChild.name}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
                         {/* Right: Time & Compact Buttons */}
                         <div className="flex items-center gap-3">
                             {isScrolled && (

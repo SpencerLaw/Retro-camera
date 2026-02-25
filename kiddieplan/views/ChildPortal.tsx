@@ -589,11 +589,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
     return (
         <div
-            className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative"
-            style={{
-                background: 'linear-gradient(160deg, #FFF0F3 0%, #FFE4E6 50%, #F5F3FF 100%)',
-                paddingTop: 'env(safe-area-inset-top)'
-            }}
+            className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative bg-transparent"
         >
             {/* Decorative Blurs */}
             <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>

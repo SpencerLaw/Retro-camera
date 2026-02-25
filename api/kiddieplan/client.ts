@@ -52,12 +52,41 @@ export default async function handler(
             // 获取该孩子的核销日志
             const redemptionLogs = (license.redemptionLogs || []).filter((l: any) => l.childId === childId);
 
+            // 对 focusLogs 按 taskId 去重合并（兼容历史脏数据）
+            const rawLogs: any[] = dailyData.focusLogs || [];
+            const mergedLogsMap: Record<string, any> = {};
+            const silentLogs: any[] = [];
+
+            for (const log of rawLogs) {
+                if (log.type === 'silent') {
+                    silentLogs.push(log);
+                    continue;
+                }
+                const key = log.taskId || log.taskTitle || '_unknown';
+                if (!mergedLogsMap[key]) {
+                    mergedLogsMap[key] = { ...log };
+                } else {
+                    const ex = mergedLogsMap[key];
+                    const exStart = ex.startTime ? new Date(ex.startTime).getTime() : Infinity;
+                    const newStart = log.startTime ? new Date(log.startTime).getTime() : Infinity;
+                    const exEnd = ex.endTime ? new Date(ex.endTime).getTime() : 0;
+                    const newEnd = log.endTime ? new Date(log.endTime).getTime() : 0;
+                    mergedLogsMap[key] = {
+                        ...ex,
+                        startTime: newStart < exStart ? log.startTime : ex.startTime,
+                        endTime: newEnd > exEnd ? log.endTime : ex.endTime,
+                        duration: (ex.duration || 0) + (log.duration || 0),
+                    };
+                }
+            }
+            const focusLogs = [...Object.values(mergedLogsMap), ...silentLogs];
+
             return response.status(200).json({
                 success: true,
                 data: {
                     tasks: dailyData.tasks,
                     checkins: dailyData.checkins,
-                    focusLogs: dailyData.focusLogs || [],
+                    focusLogs,
                     isFocusing: childData.isFocusing || false,
                     currentTaskName: childData.currentTaskName || null,
                     lastFocusDuration: childData.lastFocusDuration || 0,

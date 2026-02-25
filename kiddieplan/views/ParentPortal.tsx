@@ -2115,7 +2115,26 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     const statsDate = selectedStatsDate;
                                     const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
                                     const tasksForStats = (baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks;
-                                    const dayData = { ...baselineData, tasks: tasksForStats };
+
+                                    // 去重合并 focusLogs，兼容历史脏数据
+                                    const rawFocusLogs: any[] = baselineData.focusLogs || [];
+                                    const mergedMap: Record<string, any> = {};
+                                    const silentOnes: any[] = [];
+                                    for (const log of rawFocusLogs) {
+                                        if (log.type === 'silent') { silentOnes.push(log); continue; }
+                                        const key = log.taskId || log.taskTitle || '_unknown';
+                                        if (!mergedMap[key]) { mergedMap[key] = { ...log }; }
+                                        else {
+                                            const ex = mergedMap[key];
+                                            const exS = ex.startTime ? new Date(ex.startTime).getTime() : Infinity;
+                                            const newS = log.startTime ? new Date(log.startTime).getTime() : Infinity;
+                                            const exE = ex.endTime ? new Date(ex.endTime).getTime() : 0;
+                                            const newE = log.endTime ? new Date(log.endTime).getTime() : 0;
+                                            mergedMap[key] = { ...ex, startTime: newS < exS ? log.startTime : ex.startTime, endTime: newE > exE ? log.endTime : ex.endTime, duration: (ex.duration || 0) + (log.duration || 0) };
+                                        }
+                                    }
+                                    const dedupedFocusLogs = [...Object.values(mergedMap), ...silentOnes];
+                                    const dayData = { ...baselineData, tasks: tasksForStats, focusLogs: dedupedFocusLogs };
 
                                     return (
                                         <div className="space-y-6">

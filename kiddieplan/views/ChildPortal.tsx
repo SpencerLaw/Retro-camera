@@ -330,12 +330,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             setStartTime(null);
         } else {
             // START TIMER
+            const now = new Date();
+            const nowISO = now.toISOString();
             setActiveTaskId(task.id);
             setTimerSeconds(0);
-            setStartTime(new Date().toISOString());
+            setStartTime(nowISO);
             setIsTimerRunning(true);
 
-            // Sync status immediately
+            // Sync status immediately - pass precise start timestamp so backend matches local timer
             try {
                 await fetch('/api/kiddieplan/client', {
                     method: 'POST',
@@ -343,7 +345,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     body: JSON.stringify({
                         action: 'update_focus_status',
                         token,
-                        data: { isFocusing: true, taskTitle: task.title, duration: 0 }
+                        data: { isFocusing: true, taskTitle: task.title, duration: 0, startTime: now.getTime() }
                     })
                 });
             } catch (e) {

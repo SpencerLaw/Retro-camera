@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv';
-import { del } from '@vercel/blob';
+import { del, list } from '@vercel/blob';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
  * Vercel Serverless Function - 授权码验证API (带 Redis 监控版 + 数据压缩)
@@ -24,6 +25,7 @@ interface LicenseMetadata {
   firstActivatedAt?: string;
   lastUsedTime: string;
   devices: DeviceInfo[];
+  children?: any[]; // 加长版数据可能包含孩子信息
 }
 
 // 压缩版数据结构 (用于 Redis 存储)
@@ -232,6 +234,58 @@ export default async function handler(
       return res.status(200).json({
         success: true,
         message: '授权记录及关联头像已被彻底删除'
+      });
+    }
+
+    // === 垃圾回收：清理孤儿头像 ===
+    if (action === 'cleanup_blobs') {
+      if (!adminKey || adminKey.trim() !== 'spencer') {
+        return res.status(401).json({ success: false, message: '密码错误' });
+      }
+
+      console.log('[Cleanup] Starting global blob garbage collection...');
+
+      // 1. 获取所有已存储的 Blob 文件
+      const { blobs } = await list();
+      if (blobs.length === 0) return res.status(200).json({ success: true, message: '空间为空，无需清理' });
+
+      // 2. 获取所有正在使用的授权码 keys
+      const keys = await kv.keys('license:*');
+      const usedAvatars = new Set<string>();
+
+      // 3. 扫描所有授权码，提取所有孩子正在使用的头像 URL
+      if (keys.length > 0) {
+        const values = await Promise.all(keys.map(key => kv.get<any>(key)));
+        values.forEach((license, idx) => {
+          if (!license) return;
+          const cleanCode = keys[idx].replace('license:', '');
+          const metadata = decompressMetadata(license, cleanCode);
+          if (metadata.children && Array.isArray(metadata.children)) {
+            metadata.children.forEach((c: any) => {
+              if (c.avatar) usedAvatars.add(c.avatar);
+            });
+          }
+        });
+      }
+
+      // 4. 找出不在 usedAvatars 中的文件 (且仅清理头像目录下的文件)
+      const orphans = blobs
+        .filter(blob => !usedAvatars.has(blob.url))
+        .map(blob => blob.url);
+
+      if (orphans.length === 0) {
+        return res.status(200).json({ success: true, message: '扫描完成，未发现孤儿头像' });
+      }
+
+      // 5. 批量删除
+      console.log(`[Cleanup] Found ${orphans.length} orphan blobs. Deleting...`);
+      await del(orphans);
+
+      return res.status(200).json({
+        success: true,
+        message: `清理成功！共删除 ${orphans.length} 个过期头像文件`,
+        clearedCount: orphans.length,
+        clearedList: orphans
       });
     }
 

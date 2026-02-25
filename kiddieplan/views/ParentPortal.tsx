@@ -174,6 +174,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 setFocusLogs([]); // Clear old logs to show fresh loading
                 fetchTasks();     // Re-use fetchTasks as it fetches logs too
             }
+            if (activeTab === 'stats') {
+                setFocusLogs([]); // Clear stale logs before refreshing
+                setCurrentTasks([]); // Clear stale tasks before refreshing
+                fetchTasks();     // Refresh both tasks and logs
+            }
         }
     }, [selectedChildId, activeTab]);
 
@@ -2115,7 +2120,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     return (
                                         <div className="space-y-6">
                                             {/* 1. Calendar Navigation */}
-                                            <div className="bg-white/92 backdrop-blur-2xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
+                                            <div className="bg-white/60 backdrop-blur-xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-2xl opacity-40"></div>
                                                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-100 rounded-full -ml-12 -mb-12 blur-2xl opacity-40"></div>
 
@@ -2172,7 +2177,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             </div>
 
                                             {/* 2. Completion Gauge */}
-                                            <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
+                                            <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
                                                 <div className="absolute top-0 right-0 w-40 h-40 bg-orange-100 rounded-full -mr-20 -mt-20 blur-3xl opacity-30"></div>
                                                 <div className="relative z-10">
                                                     <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-6 flex items-center justify-center gap-2 opacity-80">
@@ -2211,7 +2216,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             </div>
 
                                             {/* 3. Active Timeline (High Clarity Redesigned) */}
-                                            <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
+                                            <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
                                                 <div className="flex justify-between items-start mb-10">
                                                     <div>
                                                         <h4 className="text-xl font-black text-[#5D4037] flex items-center gap-2">

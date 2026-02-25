@@ -669,49 +669,49 @@
       for (let i = 0; i < count; i++) {
         let code = '';
         if (type === 'homework') {
-          // ZY + YYYYMMDD (8) + Random (6) = 16 chars
+          // ZY-YYYYMMDD (8)-Random (6) = 16 chars
           let random = '';
           for (let j = 0; j < 6; j++) {
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
-          code = 'ZY' + datePart + random;
+          code = 'ZY-' + datePart + '-' + random;
         } else if (type === 'magic') {
-          // DM + YYYYMMDD (8) + Random (6) = 16 chars
+          // DM-YYYYMMDD (8)-Random (6) = 16 chars
           let random = '';
           for (let j = 0; j < 6; j++) {
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
-          code = 'DM' + datePart + random;
+          code = 'DM-' + datePart + '-' + random;
         } else if (type === 'tree') {
-          // ZD + YYYYMMDD (8) + Random (6) = 16 chars
+          // ZD-YYYYMMDD (8)-Random (6) = 16 chars
           let random = '';
           for (let j = 0; j < 6; j++) {
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
-          code = 'ZD' + datePart + random;
+          code = 'ZD-' + datePart + '-' + random;
         } else if (type === 'gb') {
-          // GB + YYYYMMDD (8) + Random (6) = 16 chars
+          // GB-YYYYMMDD (8)-Random (6) = 16 chars
           let random = '';
           for (let j = 0; j < 6; j++) {
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
-          code = 'GB' + datePart + random;
+          code = 'GB-' + datePart + '-' + random;
         } else if (type === 'xm') {
-          // XXDK + YYYYMMDD (8) + Random (4) = 16 chars
+          // XXDK-YYYYMMDD (8)-Random (4) = 16 chars
           let random = '';
           for (let j = 0; j < 4; j++) {
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
-          code = 'XXDK' + datePart + random;
+          code = 'XXDK-' + datePart + '-' + random;
         } else {
-          // YYYYMMDD (8) + Random (8) = 16 chars
+          // YYYYMMDD (8)-Random (8) = 16 chars
           let random = '';
           for (let j = 0; j < 8; j++) {
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
-          code = datePart + random;
+          code = datePart + '-' + random;
         }
-        // Do not format with dashes for display to unify with other modules
+
         newBatch.push(code);
       }
 

@@ -1216,7 +1216,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                             ) : (
                                                 <div className="space-y-1">
-                                                    <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
+                                                    <div className="flex justify-between items-end">
+                                                        <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
+                                                        {focusLogs.length > 0 && (
+                                                            <div className="text-[9px] font-black bg-white/20 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                <CheckCircle2 size={10} /> {(() => {
+                                                                    const last = [...focusLogs].sort((a, b) => new Date(b.endTime || 0).getTime() - new Date(a.endTime || 0).getTime())[0];
+                                                                    return last ? `${new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(last.endTime))} 结束` : '暂无记录';
+                                                                })()}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                     <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
                                                     <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">能量恢复中</p>
                                                 </div>
@@ -1475,14 +1485,35 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="flex-1 bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-blue-100 transition-colors">
                                                     <div>
                                                         <h4 className="font-bold text-[#5D4037]">{task.title}</h4>
-                                                        <div className="text-xs text-gray-400 font-bold flex gap-2">
+                                                        <div className="text-xs text-gray-400 font-bold flex flex-wrap gap-2">
                                                             <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
-                                                            <span className="text-emerald-400">+{task.points} pts</span>
-                                                            {(task.accumulatedTime || 0) > 0 && (
-                                                                <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                                    <Timer size={10} /> 累计: {formatTime(task.accumulatedTime!)}
-                                                                </span>
-                                                            )}
+                                                            <span className="text-emerald-400">+{task.points} 🍭</span>
+                                                            {(() => {
+                                                                const taskLogs = focusLogs.filter(l => l.taskTitle === task.title);
+                                                                if (taskLogs.length === 0 && !task.completed) return null;
+
+                                                                const startTimes = taskLogs.filter(l => l.startTime).map(l => new Date(l.startTime).getTime());
+                                                                const endTimes = taskLogs.filter(l => l.endTime).map(l => new Date(l.endTime).getTime());
+
+                                                                const actualStart = startTimes.length > 0 ? Math.min(...startTimes) : null;
+                                                                const actualEnd = task.completed ?
+                                                                    (taskLogs.find(l => l.type === 'silent')?.endTime || Math.max(...endTimes, 0)) :
+                                                                    (endTimes.length > 0 ? Math.max(...endTimes) : null);
+
+                                                                const fmt = (t: number) => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(t));
+
+                                                                return (
+                                                                    <div className="flex gap-2">
+                                                                        {actualStart && <span className="text-blue-400 bg-blue-50/50 px-2 py-0.5 rounded-md">始: {fmt(actualStart)}</span>}
+                                                                        {actualEnd && <span className="text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">终: {fmt(actualEnd)}</span>}
+                                                                        {(task.accumulatedTime || 0) > 0 && (
+                                                                            <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                                <Timer size={10} /> {formatTime(task.accumulatedTime!)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-1">
@@ -1752,31 +1783,33 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                         // 2. Process tasks marked as completed (Silent Check-ins)
                                         currentTasks.filter(t => t.completed).forEach(task => {
-                                            // Only add if not captured by focus logs (simple heuristic: title match)
-                                            // Note: In a real system, we'd check taskId or unique IDs
-                                            if (!focusLogs.some(l => l.taskTitle === task.title)) {
-                                                let sortTime = Date.now();
-                                                let startTime = '';
-                                                if (task.timeSlot) {
-                                                    const [h, m] = task.timeSlot.split(':').map(Number);
-                                                    const d = new Date();
-                                                    d.setHours(h, m, 0, 0);
-                                                    sortTime = d.getTime();
-                                                    startTime = d.toISOString();
-                                                } else {
-                                                    startTime = new Date().toISOString();
-                                                }
+                                            // Show completion events separately from focus logs
+                                            const silentLog = focusLogs.find(l => l.taskTitle === task.title && l.type === 'silent');
 
-                                                allLogs.push({
-                                                    taskTitle: task.title,
-                                                    duration: 0,
-                                                    type: 'silent',
-                                                    timeSlot: task.timeSlot,
-                                                    sortTime: sortTime,
-                                                    startTime: startTime,
-                                                    isSilent: true
-                                                });
+                                            let sortTime = Date.now();
+                                            let startTime = '';
+                                            if (silentLog) {
+                                                sortTime = new Date(silentLog.startTime).getTime();
+                                                startTime = silentLog.startTime;
+                                            } else if (task.timeSlot) {
+                                                const [h, m] = task.timeSlot.split(':').map(Number);
+                                                const d = new Date();
+                                                d.setHours(h, m, 0, 0);
+                                                sortTime = d.getTime();
+                                                startTime = d.toISOString();
+                                            } else {
+                                                startTime = new Date().toISOString();
                                             }
+
+                                            allLogs.push({
+                                                taskTitle: task.title,
+                                                duration: 0,
+                                                type: 'silent',
+                                                timeSlot: task.timeSlot,
+                                                sortTime: sortTime,
+                                                startTime: startTime,
+                                                isSilent: true
+                                            });
                                         });
 
                                         return allLogs

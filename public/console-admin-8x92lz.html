@@ -372,6 +372,8 @@
           <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
         </div>
         <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
+        <button onclick="cleanupBlobs()" class="btn-primary" style="background: var(--success); margin-left: 10px;">🧹
+          清理过期头像</button>
       </div>
     </div>
 
@@ -769,6 +771,35 @@
 
     function closeModal() {
       document.getElementById('customModal').classList.remove('active');
+    }
+
+    // === 垃圾回收：清理孤儿头像 ===
+    async function cleanupBlobs() {
+      if (!confirm('确定要执行全局存储清理吗？\n\n系统将扫描所有 Vercel Blob 文件关与其当前所有已激活的授权码及宝贝信息进行比对，删除所有未被引用的“孤儿”头像。建议在业务低峰期执行。')) return;
+
+      try {
+        document.getElementById('connectionStatus').textContent = '正在清理存储...';
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'cleanup_blobs',
+            adminKey: SECRET_KEY
+          })
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          showDialog('清理成功', json.message + (json.clearedCount > 0 ? '\n\n释放了 ' + json.clearedCount + ' 个过期的头像文件。' : ''));
+          login(); // 刷新状态
+        } else {
+          showDialog('清理失败', json.message);
+        }
+      } catch (err) {
+        showDialog('错误', '请求失败: ' + err.message);
+      } finally {
+        document.getElementById('connectionStatus').textContent = '🟢 已连接';
+      }
     }
 
     function deleteLicense(code) {

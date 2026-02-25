@@ -274,7 +274,7 @@ export default async function handler(
         .map(blob => blob.url);
 
       if (orphans.length === 0) {
-        return res.status(200).json({ success: true, message: '扫描完成，未发现孤儿头像' });
+        return res.status(200).json({ success: true, message: '扫描完成，未发现未引用头像' });
       }
 
       // 5. 批量删除

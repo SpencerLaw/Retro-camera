@@ -1208,7 +1208,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             key={selectedChildId}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/20 backdrop-blur-2xl p-8 rounded-[40px] border border-white/10 shadow-xl relative overflow-hidden"
+                            className="bg-transparent p-4 md:p-8 relative overflow-hidden"
                         >
                             {/* Dashboard Content - Z-Index raised to sit on top of glass */}
                             <div className="relative z-10 space-y-6">

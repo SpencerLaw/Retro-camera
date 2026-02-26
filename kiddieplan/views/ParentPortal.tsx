@@ -2043,11 +2043,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 const eMins = sMins + 15;
                                                                 const isActive = (dayData.focusLogs || []).some((log: any) => {
                                                                     if (!log.startTime) return false;
-                                                                    const [sh, sm] = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime)).split(':').map(Number);
+                                                                    const sh = new Date(log.startTime).getHours();
+                                                                    const sm = new Date(log.startTime).getMinutes();
                                                                     const lStart = sh * 60 + sm;
                                                                     let lEnd = lStart + 5;
                                                                     if (log.endTime) {
-                                                                        const [eh, em] = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)).split(':').map(Number);
+                                                                        const eh = new Date(log.endTime).getHours();
+                                                                        const em = new Date(log.endTime).getMinutes();
                                                                         lEnd = eh * 60 + em;
                                                                     }
                                                                     if (lEnd <= lStart) lEnd = lStart + 5;
@@ -2085,7 +2087,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 const fmt = (iso: string) => {
                                                                     if (!iso) return '--:--';
                                                                     try {
-                                                                        return new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(iso));
+                                                                        const d = new Date(iso);
+                                                                        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
                                                                     } catch (e) { return '--:--'; }
                                                                 };
 

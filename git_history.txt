@@ -1,0 +1,3371 @@
+commit b0be4088f220a9740f8b2fe30d5a342a709aa736
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Wed Feb 25 11:21:19 2026 +0800
+
+    fix(admin): restore hyphenated format for generated license codes
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index d3d1f7e..09ee31b 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -669,49 +669,49 @@
+       for (let i = 0; i < count; i++) {
+         let code = '';
+         if (type === 'homework') {
+-          // ZY + YYYYMMDD (8) + Random (6) = 16 chars
++          // ZY-YYYYMMDD (8)-Random (6) = 16 chars
+           let random = '';
+           for (let j = 0; j < 6; j++) {
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+-          code = 'ZY' + datePart + random;
++          code = 'ZY-' + datePart + '-' + random;
+         } else if (type === 'magic') {
+-          // DM + YYYYMMDD (8) + Random (6) = 16 chars
++          // DM-YYYYMMDD (8)-Random (6) = 16 chars
+           let random = '';
+           for (let j = 0; j < 6; j++) {
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+-          code = 'DM' + datePart + random;
++          code = 'DM-' + datePart + '-' + random;
+         } else if (type === 'tree') {
+-          // ZD + YYYYMMDD (8) + Random (6) = 16 chars
++          // ZD-YYYYMMDD (8)-Random (6) = 16 chars
+           let random = '';
+           for (let j = 0; j < 6; j++) {
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+-          code = 'ZD' + datePart + random;
++          code = 'ZD-' + datePart + '-' + random;
+         } else if (type === 'gb') {
+-          // GB + YYYYMMDD (8) + Random (6) = 16 chars
++          // GB-YYYYMMDD (8)-Random (6) = 16 chars
+           let random = '';
+           for (let j = 0; j < 6; j++) {
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+-          code = 'GB' + datePart + random;
++          code = 'GB-' + datePart + '-' + random;
+         } else if (type === 'xm') {
+-          // XXDK + YYYYMMDD (8) + Random (4) = 16 chars
++          // XXDK-YYYYMMDD (8)-Random (4) = 16 chars
+           let random = '';
+           for (let j = 0; j < 4; j++) {
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+-          code = 'XXDK' + datePart + random;
++          code = 'XXDK-' + datePart + '-' + random;
+         } else {
+-          // YYYYMMDD (8) + Random (8) = 16 chars
++          // YYYYMMDD (8)-Random (8) = 16 chars
+           let random = '';
+           for (let j = 0; j < 8; j++) {
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+-          code = datePart + random;
++          code = datePart + '-' + random;
+         }
+-        // Do not format with dashes for display to unify with other modules
++
+         newBatch.push(code);
+       }
+ 
+
+commit b378a490ad2c196f61faa6c05bca751f61e99630
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Wed Feb 25 09:13:29 2026 +0800
+
+    Admin UI: Relocate 'Clean' button after XXDK and simplify confirmation prompt
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 57cd8c6..d3d1f7e 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -372,8 +372,6 @@
+           <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
+         </div>
+         <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
+-        <button onclick="cleanupBlobs()" class="btn-primary" style="background: var(--success); margin-left: 10px;">🧹
+-          清理过期头像</button>
+       </div>
+     </div>
+ 
+@@ -414,6 +412,7 @@
+           <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
+           <button onclick="generateCodes('xm')" class="btn-primary" style="background: #E0C3FC; color: #6A5D7B;">生成星梦码
+             (XXDK)</button>
++          <button onclick="cleanupBlobs()" class="btn-primary" style="background: var(--success);">🧹 清理过期头像</button>
+         </div>
+ 
+         <div class="gen-list" id="genList"></div>
+@@ -775,7 +774,7 @@
+ 
+     // === 垃圾回收：清理孤儿头像 ===
+     async function cleanupBlobs() {
+-      if (!confirm('确定要执行全局存储清理吗？\n\n系统将扫描所有 Vercel Blob 文件关与其当前所有已激活的授权码及宝贝信息进行比对，删除所有未被引用的“孤儿”头像。建议在业务低峰期执行。')) return;
++      if (!confirm('确定要彻底删除所有未引用的头像吗？')) return;
+ 
+       try {
+         document.getElementById('connectionStatus').textContent = '正在清理存储...';
+
+commit e98bbe63feb5bf74a56fc9b9592901865eb05107
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Wed Feb 25 09:09:54 2026 +0800
+
+    Admin: Relocate storage cleanup tool to Management Console
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index b126e80..57cd8c6 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -372,6 +372,8 @@
+           <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
+         </div>
+         <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
++        <button onclick="cleanupBlobs()" class="btn-primary" style="background: var(--success); margin-left: 10px;">🧹
++          清理过期头像</button>
+       </div>
+     </div>
+ 
+@@ -771,6 +773,35 @@
+       document.getElementById('customModal').classList.remove('active');
+     }
+ 
++    // === 垃圾回收：清理孤儿头像 ===
++    async function cleanupBlobs() {
++      if (!confirm('确定要执行全局存储清理吗？\n\n系统将扫描所有 Vercel Blob 文件关与其当前所有已激活的授权码及宝贝信息进行比对，删除所有未被引用的“孤儿”头像。建议在业务低峰期执行。')) return;
++
++      try {
++        document.getElementById('connectionStatus').textContent = '正在清理存储...';
++        const res = await fetch(API_URL, {
++          method: 'POST',
++          headers: { 'Content-Type': 'application/json' },
++          body: JSON.stringify({
++            action: 'cleanup_blobs',
++            adminKey: SECRET_KEY
++          })
++        });
++
++        const json = await res.json();
++        if (json.success) {
++          showDialog('清理成功', json.message + (json.clearedCount > 0 ? '\n\n释放了 ' + json.clearedCount + ' 个过期的头像文件。' : ''));
++          login(); // 刷新状态
++        } else {
++          showDialog('清理失败', json.message);
++        }
++      } catch (err) {
++        showDialog('错误', '请求失败: ' + err.message);
++      } finally {
++        document.getElementById('connectionStatus').textContent = '🟢 已连接';
++      }
++    }
++
+     function deleteLicense(code) {
+       showDialog(
+         '删除确认',
+
+commit 6fc405a6d22d8f72e832a8b1777db5bcfc5def12
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Feb 24 17:36:26 2026 +0800
+
+    Admin UI: Deep clean dialog HTML and streamline delete flow
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index ffbdc4d..b126e80 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -718,10 +718,10 @@
+ 
+       const listEl = document.getElementById('genList');
+       listEl.innerHTML = generatedCodes.map(c => `
+-      < div class="gen-item" >
++      <div class="gen-item">
+           <span>${c}</span>
+           <span style="color:var(--text-light); font-size:12px;">未激活</span>
+-        </div >
++      </div>
+       `).join('');
+     }
+ 
+@@ -754,16 +754,14 @@
+       modalActions.innerHTML = '';
+ 
+       if (isConfirm) {
+-        modalActions.innerHTML = `
+-      < button class="btn-secondary" onclick = "closeModal()" > 取消</button >
+-        <button class="btn-primary" style="background: var(--danger);" id="modalConfirmBtn">确定删除</button>
+-    `;
++        modalActions.innerHTML = '<button class="btn-secondary" onclick="closeModal()">取消</button>' +
++          '<button class="btn-primary" style="background:var(--danger);" id="modalConfirmBtn">确定删除</button>';
+         document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+           closeModal();
+           if (onConfirm) onConfirm();
+         });
+       } else {
+-        modalActions.innerHTML = `< button class="btn-primary" onclick = "closeModal()" > 知道了</button > `;
++        modalActions.innerHTML = '<button class="btn-primary" onclick="closeModal()">知道了</button>';
+       }
+ 
+       document.getElementById('customModal').classList.add('active');
+@@ -793,7 +791,7 @@
+ 
+             const json = await res.json();
+             if (json.success) {
+-              showDialog('成功', '删除成功');
++              closeModal(); // 直接关闭确认框
+               login(); // 重新加载数据
+             } else {
+               showDialog('错误', '删除失败: ' + json.message);
+
+commit 4b3d63c97816338d7684f9ec45f58eabc51e2aba
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Feb 24 17:20:37 2026 +0800
+
+    UI: Unify borders, fix reset dialog, and handle data deletion logout
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index a98b10a..ffbdc4d 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -642,7 +642,7 @@
+     }
+ 
+     function toggleItem(index) {
+-      const el = document.getElementById(`item - ${index} `);
++      const el = document.getElementById(`item-${index}`);
+       const isExpanded = el.classList.contains('expanded');
+ 
+       // 关闭所有其他的 (可选，如果想保持手风琴效果)
+
+commit ca92656fa62b2cf118f0280aa90d9803bf391554
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Feb 24 17:12:50 2026 +0800
+
+    Fix UI rendering syntax error by restoring renderMonitorList
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 7d3686f..a98b10a 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -542,30 +542,107 @@
+       return date.toLocaleDateString();
+     }
+ 
+-    <table class="device-table">
+-      <thead>
++    // === 渲染监控列表 ===
++    function renderMonitorList() {
++      const container = document.getElementById('monitorContent');
++
++      if (currentData.length === 0) {
++        container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
++        return;
++      }
++
++      container.innerHTML = currentData.map((item, index) => {
++        // 检查是否失效
++        const isRevoked = item.status === 'revoked';
++
++        // 计算状态颜色
++        const usage = item.totalDevices;
++        const isUnlimited = item.code.startsWith('XXDK') || item.maxDevices >= 9999;
++        const max = isUnlimited ? '∞' : (item.maxDevices || 3);
++        let badgeClass = 'status-good';
++        let statusText = '正常';
++
++        if (isRevoked) {
++          badgeClass = 'status-full'; // 用红色表示失效
++          statusText = '🚫 已删除';
++        } else if (!isUnlimited && usage >= max) {
++          badgeClass = 'status-full';
++          statusText = '已满';
++        } else if (!isUnlimited && usage > max * 0.8) {
++          badgeClass = 'status-warn';
++          statusText = '即将满';
++        }
++
++        // 构建设备详情行 (略微调整样式)
++        const deviceRows = item.devices.map((dev, i) => {
++          const deviceName = parseUA(dev.ua);
++          const fullUA = dev.ua.replace(/"/g, '&quot;');
++
++          return `
+         <tr>
+-          <th width="30">#</th>
+-          <th>设备信息</th>
+-          <th>Device ID</th>
+-          <th>首次绑定</th>
+-          <th>最后在线</th>
++          <td>${i + 1}</td>
++          <td>
++            <div style="font-weight:500; font-size:12px;">${deviceName}</div>
++            <div style="font-size:10px; color:#94a3b8; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${fullUA}">${dev.ua}</div>
++          </td>
++          <td>
++            <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
++            <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
++          </td>
++          <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
++          <td>${new Date(dev.lastSeen).toLocaleString()}</td>
+         </tr>
+-      </thead>
+-      <tbody>
+-        ${deviceRows}
+-      </tbody>
+-    </table>
++      `}).join('');
++
++        return `
++        <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
++          <div class="item-summary" onclick="toggleItem(${index})">
++            <div class="toggle-btn">▶</div>
++            <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
++              ${item.code}
++            </div>
++            <div>
++              <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
++            </div>
++            <div style="font-size: 11px; color: var(--text-light);">
++              ${timeAgo(new Date(item.lastUsedTime))}
++            </div>
++          </div>
++          
++          <div class="item-details">
++            <div class="details-grid">
++              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
++                <div style="font-size:12px; color:var(--text-light);">
++                  <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
++                  <span style="margin-left:15px;">首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
++                </div>
++                <button onclick="deleteLicense('${item.code}')" class="btn-primary" style="background: var(--danger); padding: 5px 10px; font-size: 11px;">🗑️ 删除所有数据</button>
++              </div>
++              
++              <table class="device-table">
++                <thead>
++                  <tr>
++                    <th width="30">#</th>
++                    <th>设备信息</th>
++                    <th>Device ID</th>
++                    <th>首次绑定</th>
++                    <th>最后在线</th>
++                  </tr>
++                </thead>
++                <tbody>
++                  ${deviceRows}
++                </tbody>
++              </table>
+               
+-              </div >
+-            </div >
+-          </div >
++            </div>
++          </div>
++        </div>
+       `;
+       }).join('');
+     }
+ 
+     function toggleItem(index) {
+-      const el = document.getElementById(`item - ${ index } `);
++      const el = document.getElementById(`item - ${index} `);
+       const isExpanded = el.classList.contains('expanded');
+ 
+       // 关闭所有其他的 (可选，如果想保持手风琴效果)
+@@ -650,7 +727,7 @@
+ 
+     function exportEnv() {
+       if (!generatedCodes.length) return alert('没有生成的代码');
+-      const blob = new Blob([`LICENSE_CODES = ${ generatedCodes.join(',') } `], { type: 'text/plain' });
++      const blob = new Blob([`LICENSE_CODES = ${generatedCodes.join(',')} `], { type: 'text/plain' });
+       const a = document.createElement('a');
+       a.href = URL.createObjectURL(blob);
+       a.download = 'LICENSE_CODES.env';
+@@ -660,7 +737,7 @@
+     function copyAllGenerated() {
+       if (!generatedCodes.length) return;
+       navigator.clipboard.writeText(generatedCodes.join('\n'));
+-      showDialog('复制成功', `已复制 ${ generatedCodes.length } 个授权码`);
++      showDialog('复制成功', `已复制 ${generatedCodes.length} 个授权码`);
+     }
+ 
+     function copy(text) {
+@@ -672,10 +749,10 @@
+     function showDialog(title, message, isConfirm = false, onConfirm = null) {
+       document.getElementById('modalTitle').textContent = title;
+       document.getElementById('modalBody').textContent = message;
+-      
++
+       const modalActions = document.getElementById('modalActions');
+       modalActions.innerHTML = '';
+-      
++
+       if (isConfirm) {
+         modalActions.innerHTML = `
+       < button class="btn-secondary" onclick = "closeModal()" > 取消</button >
+@@ -688,7 +765,7 @@
+       } else {
+         modalActions.innerHTML = `< button class="btn-primary" onclick = "closeModal()" > 知道了</button > `;
+       }
+-      
++
+       document.getElementById('customModal').classList.add('active');
+     }
+ 
+@@ -699,7 +776,7 @@
+     function deleteLicense(code) {
+       showDialog(
+         '删除确认',
+-        `警告：确定要彻底删除授权码 ${ code } 的所有数据（包含绑定的设备、星梦奇境数据等）吗？此操作不可逆！`,
++        `警告：确定要彻底删除授权码 ${code} 的所有数据（包含绑定的设备、星梦奇境数据等）吗？此操作不可逆！`,
+         true,
+         async () => {
+           try {
+@@ -746,10 +823,10 @@
+       const seconds = Math.floor((new Date() - date) / 1000);
+       if (seconds < 60) return '刚刚';
+       const minutes = Math.floor(seconds / 60);
+-      if (minutes < 60) return `${ minutes } 分钟前`;
++      if (minutes < 60) return `${minutes} 分钟前`;
+       const hours = Math.floor(minutes / 60);
+-      if (hours < 24) return `${ hours } 小时前`;
+-      return `${ Math.floor(hours / 24) } 天前`;
++      if (hours < 24) return `${hours} 小时前`;
++      return `${Math.floor(hours / 24)} 天前`;
+     }
+   </script>
+ 
+
+commit bfd8363c6caf805a178ab4861c43bab77e5ea4a9
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Feb 24 17:07:39 2026 +0800
+
+    UI: Remove children stats and replace browser dialog with custom modal
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 1b53d6e..7d3686f 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -301,6 +301,63 @@
+       background: var(--surface);
+       color: var(--text);
+     }
++
++    /* Custom Modal */
++    .modal-overlay {
++      position: fixed;
++      top: 0;
++      left: 0;
++      right: 0;
++      bottom: 0;
++      background: rgba(0, 0, 0, 0.5);
++      display: flex;
++      align-items: center;
++      justify-content: center;
++      z-index: 1000;
++      opacity: 0;
++      pointer-events: none;
++      transition: opacity 0.2s;
++    }
++
++    .modal-overlay.active {
++      opacity: 1;
++      pointer-events: auto;
++    }
++
++    .modal-content {
++      background: var(--surface);
++      padding: 25px;
++      border-radius: 12px;
++      width: 90%;
++      max-width: 400px;
++      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
++      transform: translateY(20px);
++      transition: transform 0.2s;
++    }
++
++    .modal-overlay.active .modal-content {
++      transform: translateY(0);
++    }
++
++    .modal-title {
++      font-size: 18px;
++      font-weight: 600;
++      margin-bottom: 10px;
++      color: var(--text);
++    }
++
++    .modal-body {
++      color: var(--text-light);
++      font-size: 14px;
++      margin-bottom: 20px;
++      line-height: 1.5;
++    }
++
++    .modal-actions {
++      display: flex;
++      justify-content: flex-end;
++      gap: 10px;
++    }
+   </style>
+ </head>
+ 
+@@ -368,6 +425,18 @@
+ 
+   </div>
+ 
++  <!-- Custom Dialog Modal -->
++  <div class="modal-overlay" id="customModal">
++    <div class="modal-content">
++      <div class="modal-title" id="modalTitle">提示</div>
++      <div class="modal-body" id="modalBody">您确定要执行此操作吗？</div>
++      <div class="modal-actions" id="modalActions">
++        <button class="btn-secondary" onclick="closeModal()">取消</button>
++        <button class="btn-primary" id="modalConfirmBtn">确定</button>
++      </div>
++    </div>
++  </div>
++
+   <script>
+     // 配置
+     const API_URL = '/api/verify-license';
+@@ -473,173 +542,30 @@
+       return date.toLocaleDateString();
+     }
+ 
+-    // === 渲染星梦奇缘数据区域 ===
+-    function renderKiddiePlanSection(item) {
+-      // 只对有孩子数据的授权码显示
+-      if (!item.children || item.children.length === 0) {
+-        return '';
+-      }
+-
+-      const today = new Date().toISOString().split('T')[0];
+-      const progress = item.progress || {};
+-      const todayProgress = progress[today] || {};
+-
+-      const childrenRows = item.children.map((child, i) => {
+-        const childProgress = todayProgress[child.id] || { tasks: [], checkins: [] };
+-        const tasks = childProgress.tasks || [];
+-        const checkins = childProgress.checkins || [];
+-        const completedCount = checkins.length;
+-        const totalCount = tasks.length;
+-        const rewards = child.rewards || [];
+-
+-        return `
+-          <div style="background: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+-              <div style="display: flex; align-items: center; gap: 12px;">
+-                <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+-                  ${child.avatar || '👧'}
+-                </div>
+-                <div>
+-                  <div style="font-weight: bold; color: #4A1D96;">${child.name}</div>
+-                  <div style="font-size: 11px; color: #6B21A8;">房间码: ${child.roomCode}</div>
+-                </div>
+-              </div>
+-              <div style="text-align: right;">
+-                <div style="font-size: 20px; font-weight: bold; color: #4A1D96;">${child.points || 0} 🍭</div>
+-                <div style="font-size: 10px; color: #6B21A8;">累计积分</div>
+-              </div>
+-            </div>
+-            
+-            <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+-              <div style="font-size: 11px; font-weight: bold; color: #4A1D96; margin-bottom: 8px;">📋 今日任务 (${completedCount}/${totalCount})</div>
+-              ${tasks.length > 0 ? tasks.map(task => {
+-          const isDone = checkins.some(c => c.taskId === task.id);
+-          return `<div style="font-size: 11px; padding: 4px 0; color: ${isDone ? '#16A34A' : '#64748B'};">${isDone ? '✅' : '⬜'} ${task.title} (+${task.points})</div>`;
+-        }).join('') : '<div style="font-size: 11px; color: #94A3B8;">暂无任务</div>'}
+-            </div>
+-            
+-            <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 12px;">
+-              <div style="font-size: 11px; font-weight: bold; color: #4A1D96; margin-bottom: 8px;">🎁 奖励商店 (${rewards.length}个)</div>
+-              ${rewards.length > 0 ? rewards.slice(0, 5).map(r =>
+-          `<span style="display: inline-block; font-size: 10px; background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 12px; margin: 2px;">${r.icon || '🎁'} ${r.name} (${r.pointsCost}分)</span>`
+-        ).join('') + (rewards.length > 5 ? `<span style="font-size: 10px; color: #94A3B8;"> +${rewards.length - 5} more</span>` : '') : '<div style="font-size: 11px; color: #94A3B8;">暂无奖励</div>'}
+-            </div>
+-          </div>
+-        `;
+-      }).join('');
+-
+-      return `
+-        <div style="margin-top: 16px; border-top: 1px dashed #E2E8F0; padding-top: 16px;">
+-          <div style="font-size: 12px; font-weight: bold; color: var(--primary); margin-bottom: 12px;">
+-            ⭐ 星梦奇缘数据 (${item.children.length} 个孩子)
+-          </div>
+-          ${childrenRows}
+-        </div>
+-      `;
+-    }
+-
+-    // === 渲染监控列表 ===
+-    function renderMonitorList() {
+-      const container = document.getElementById('monitorContent');
+-
+-      if (currentData.length === 0) {
+-        container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
+-        return;
+-      }
+-
+-      container.innerHTML = currentData.map((item, index) => {
+-        // 检查是否失效
+-        const isRevoked = item.status === 'revoked';
+-
+-        // 计算状态颜色
+-        const usage = item.totalDevices;
+-        const isUnlimited = item.code.startsWith('XXDK') || item.maxDevices >= 9999;
+-        const max = isUnlimited ? '∞' : (item.maxDevices || 3);
+-        let badgeClass = 'status-good';
+-        let statusText = '正常';
+-
+-        if (isRevoked) {
+-          badgeClass = 'status-full'; // 用红色表示失效
+-          statusText = '🚫 已删除';
+-        } else if (!isUnlimited && usage >= max) {
+-          badgeClass = 'status-full';
+-          statusText = '已满';
+-        } else if (!isUnlimited && usage > max * 0.8) {
+-          badgeClass = 'status-warn';
+-          statusText = '即将满';
+-        }
+-
+-        // 构建设备详情行 (略微调整样式)
+-        const deviceRows = item.devices.map((dev, i) => {
+-          const deviceName = parseUA(dev.ua);
+-          const fullUA = dev.ua.replace(/"/g, '&quot;');
+-
+-          return `
++    <table class="device-table">
++      <thead>
+         <tr>
+-          <td>${i + 1}</td>
+-          <td>
+-            <div style="font-weight:500; font-size:12px;">${deviceName}</div>
+-            <div style="font-size:10px; color:#94a3b8; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${fullUA}">${dev.ua}</div>
+-          </td>
+-          <td>
+-            <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
+-            <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
+-          </td>
+-          <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
+-          <td>${new Date(dev.lastSeen).toLocaleString()}</td>
++          <th width="30">#</th>
++          <th>设备信息</th>
++          <th>Device ID</th>
++          <th>首次绑定</th>
++          <th>最后在线</th>
+         </tr>
+-      `}).join('');
+-
+-        return `
+-        <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+-          <div class="item-summary" onclick="toggleItem(${index})">
+-            <div class="toggle-btn">▶</div>
+-            <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
+-              ${item.code}
+-            </div>
+-            <div>
+-              <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
+-            </div>
+-            <div style="font-size: 11px; color: var(--text-light);">
+-              ${timeAgo(new Date(item.lastUsedTime))}
+-            </div>
+-          </div>
+-          
+-          <div class="item-details">
+-            <div class="details-grid">
+-              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+-                <div style="font-size:12px; color:var(--text-light);">
+-                  <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
+-                  <span style="margin-left:15px;">首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
+-                </div>
+-                <button onclick="deleteLicense('${item.code}')" class="btn-primary" style="background: var(--danger); padding: 5px 10px; font-size: 11px;">🗑️ 删除所有数据</button>
+-              </div>
++      </thead>
++      <tbody>
++        ${deviceRows}
++      </tbody>
++    </table>
+               
+-              <table class="device-table">
+-                <thead>
+-                  <tr>
+-                    <th width="30">#</th>
+-                    <th>设备信息</th>
+-                    <th>Device ID</th>
+-                    <th>首次绑定</th>
+-                    <th>最后在线</th>
+-                  </tr>
+-                </thead>
+-                <tbody>
+-                  ${deviceRows}
+-                </tbody>
+-              </table>
+-              
+-              ${renderKiddiePlanSection(item)}
+-            </div>
+-          </div>
+-        </div>
++              </div >
++            </div >
++          </div >
+       `;
+       }).join('');
+     }
+ 
+     function toggleItem(index) {
+-      const el = document.getElementById(`item-${index}`);
++      const el = document.getElementById(`item - ${ index } `);
+       const isExpanded = el.classList.contains('expanded');
+ 
+       // 关闭所有其他的 (可选，如果想保持手风琴效果)
+@@ -715,16 +641,16 @@
+ 
+       const listEl = document.getElementById('genList');
+       listEl.innerHTML = generatedCodes.map(c => `
+-      <div class="gen-item">
+-        <span>${c}</span>
+-        <span style="color:var(--text-light); font-size:12px;">未激活</span>
+-      </div>
+-    `).join('');
++      < div class="gen-item" >
++          <span>${c}</span>
++          <span style="color:var(--text-light); font-size:12px;">未激活</span>
++        </div >
++      `).join('');
+     }
+ 
+     function exportEnv() {
+       if (!generatedCodes.length) return alert('没有生成的代码');
+-      const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], { type: 'text/plain' });
++      const blob = new Blob([`LICENSE_CODES = ${ generatedCodes.join(',') } `], { type: 'text/plain' });
+       const a = document.createElement('a');
+       a.href = URL.createObjectURL(blob);
+       a.download = 'LICENSE_CODES.env';
+@@ -734,40 +660,72 @@
+     function copyAllGenerated() {
+       if (!generatedCodes.length) return;
+       navigator.clipboard.writeText(generatedCodes.join('\n'));
+-      alert(`已复制 ${generatedCodes.length} 个授权码`);
++      showDialog('复制成功', `已复制 ${ generatedCodes.length } 个授权码`);
+     }
+ 
+     function copy(text) {
+       navigator.clipboard.writeText(text);
+-      alert('已复制 ID: ' + text);
+-    }
+-
+-    async function deleteLicense(code) {
+-      if (!confirm(`警告：确定要彻底删除授权码 ${code} 的所有数据（包含绑定的设备、星梦奇境数据等）吗？此操作不可逆！`)) {
+-        return;
+-      }
+-
+-      try {
+-        const res = await fetch(API_URL, {
+-          method: 'POST',
+-          headers: { 'Content-Type': 'application/json' },
+-          body: JSON.stringify({
+-            action: 'delete',
+-            licenseCode: code,
+-            adminKey: SECRET_KEY
+-          })
++      showDialog('复制成功', '已复制 ID: ' + text);
++    }
++
++    // === 自定义对话框功能 ===
++    function showDialog(title, message, isConfirm = false, onConfirm = null) {
++      document.getElementById('modalTitle').textContent = title;
++      document.getElementById('modalBody').textContent = message;
++      
++      const modalActions = document.getElementById('modalActions');
++      modalActions.innerHTML = '';
++      
++      if (isConfirm) {
++        modalActions.innerHTML = `
++      < button class="btn-secondary" onclick = "closeModal()" > 取消</button >
++        <button class="btn-primary" style="background: var(--danger);" id="modalConfirmBtn">确定删除</button>
++    `;
++        document.getElementById('modalConfirmBtn').addEventListener('click', () => {
++          closeModal();
++          if (onConfirm) onConfirm();
+         });
+-
+-        const json = await res.json();
+-        if (json.success) {
+-          alert('删除成功');
+-          login(); // 重新加载数据
+-        } else {
+-          alert('删除失败: ' + json.message);
+-        }
+-      } catch (err) {
+-        alert('请求失败: ' + err.message);
++      } else {
++        modalActions.innerHTML = `< button class="btn-primary" onclick = "closeModal()" > 知道了</button > `;
+       }
++      
++      document.getElementById('customModal').classList.add('active');
++    }
++
++    function closeModal() {
++      document.getElementById('customModal').classList.remove('active');
++    }
++
++    function deleteLicense(code) {
++      showDialog(
++        '删除确认',
++        `警告：确定要彻底删除授权码 ${ code } 的所有数据（包含绑定的设备、星梦奇境数据等）吗？此操作不可逆！`,
++        true,
++        async () => {
++          try {
++            document.getElementById('connectionStatus').textContent = '正在删除...';
++            const res = await fetch(API_URL, {
++              method: 'POST',
++              headers: { 'Content-Type': 'application/json' },
++              body: JSON.stringify({
++                action: 'delete',
++                licenseCode: code,
++                adminKey: SECRET_KEY
++              })
++            });
++
++            const json = await res.json();
++            if (json.success) {
++              showDialog('成功', '删除成功');
++              login(); // 重新加载数据
++            } else {
++              showDialog('错误', '删除失败: ' + json.message);
++            }
++          } catch (err) {
++            showDialog('错误', '请求失败: ' + err.message);
++          }
++        }
++      );
+     }
+ 
+     // === 工具函数 ===
+@@ -788,10 +746,10 @@
+       const seconds = Math.floor((new Date() - date) / 1000);
+       if (seconds < 60) return '刚刚';
+       const minutes = Math.floor(seconds / 60);
+-      if (minutes < 60) return `${minutes}分钟前`;
++      if (minutes < 60) return `${ minutes } 分钟前`;
+       const hours = Math.floor(minutes / 60);
+-      if (hours < 24) return `${hours}小时前`;
+-      return `${Math.floor(hours / 24)}天前`;
++      if (hours < 24) return `${ hours } 小时前`;
++      return `${ Math.floor(hours / 24) } 天前`;
+     }
+   </script>
+ 
+
+commit 7866ae49753a8a6327059bc66e8c4e20776e97ff
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Feb 24 17:03:41 2026 +0800
+
+    Add delete button to admin dashboard to wipe license data
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 25db622..1b53d6e 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -607,9 +607,12 @@
+           
+           <div class="item-details">
+             <div class="details-grid">
+-              <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); margin-bottom:10px;">
+-                <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
+-                <span>首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
++              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
++                <div style="font-size:12px; color:var(--text-light);">
++                  <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
++                  <span style="margin-left:15px;">首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
++                </div>
++                <button onclick="deleteLicense('${item.code}')" class="btn-primary" style="background: var(--danger); padding: 5px 10px; font-size: 11px;">🗑️ 删除所有数据</button>
+               </div>
+               
+               <table class="device-table">
+@@ -739,6 +742,34 @@
+       alert('已复制 ID: ' + text);
+     }
+ 
++    async function deleteLicense(code) {
++      if (!confirm(`警告：确定要彻底删除授权码 ${code} 的所有数据（包含绑定的设备、星梦奇境数据等）吗？此操作不可逆！`)) {
++        return;
++      }
++
++      try {
++        const res = await fetch(API_URL, {
++          method: 'POST',
++          headers: { 'Content-Type': 'application/json' },
++          body: JSON.stringify({
++            action: 'delete',
++            licenseCode: code,
++            adminKey: SECRET_KEY
++          })
++        });
++
++        const json = await res.json();
++        if (json.success) {
++          alert('删除成功');
++          login(); // 重新加载数据
++        } else {
++          alert('删除失败: ' + json.message);
++        }
++      } catch (err) {
++        alert('请求失败: ' + err.message);
++      }
++    }
++
+     // === 工具函数 ===
+     function switchTab(tabName) {
+       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+commit 223082ed9bb23dc834642e3c23d9ed9792afedfc
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Feb 24 16:56:59 2026 +0800
+
+    Fix license code formatting and grant unlimited devices to XXDK keys
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 11a874f..25db622 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -553,17 +553,18 @@
+ 
+         // 计算状态颜色
+         const usage = item.totalDevices;
+-        const max = item.maxDevices || 3;
++        const isUnlimited = item.code.startsWith('XXDK') || item.maxDevices >= 9999;
++        const max = isUnlimited ? '∞' : (item.maxDevices || 3);
+         let badgeClass = 'status-good';
+         let statusText = '正常';
+ 
+         if (isRevoked) {
+           badgeClass = 'status-full'; // 用红色表示失效
+           statusText = '🚫 已删除';
+-        } else if (usage >= max) {
++        } else if (!isUnlimited && usage >= max) {
+           badgeClass = 'status-full';
+           statusText = '已满';
+-        } else if (usage > max * 0.8) {
++        } else if (!isUnlimited && usage > max * 0.8) {
+           badgeClass = 'status-warn';
+           statusText = '即将满';
+         }
+@@ -703,8 +704,8 @@
+           }
+           code = datePart + random;
+         }
+-        // Format with dashes for display
+-        newBatch.push(code.match(/.{1,4}/g).join('-'));
++        // Do not format with dashes for display to unify with other modules
++        newBatch.push(code);
+       }
+ 
+       generatedCodes = [...newBatch, ...generatedCodes];
+
+commit 81cfb3afeb1d185cc1ec89b5ac578fe6b9a700af
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Feb 5 14:19:19 2026 +0800
+
+    feat: 后台支持显示星梦奇缘完整数据（孩子、任务、积分、奖励）
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index f357d1f..11a874f 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -473,6 +473,70 @@
+       return date.toLocaleDateString();
+     }
+ 
++    // === 渲染星梦奇缘数据区域 ===
++    function renderKiddiePlanSection(item) {
++      // 只对有孩子数据的授权码显示
++      if (!item.children || item.children.length === 0) {
++        return '';
++      }
++
++      const today = new Date().toISOString().split('T')[0];
++      const progress = item.progress || {};
++      const todayProgress = progress[today] || {};
++
++      const childrenRows = item.children.map((child, i) => {
++        const childProgress = todayProgress[child.id] || { tasks: [], checkins: [] };
++        const tasks = childProgress.tasks || [];
++        const checkins = childProgress.checkins || [];
++        const completedCount = checkins.length;
++        const totalCount = tasks.length;
++        const rewards = child.rewards || [];
++
++        return `
++          <div style="background: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
++            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
++              <div style="display: flex; align-items: center; gap: 12px;">
++                <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
++                  ${child.avatar || '👧'}
++                </div>
++                <div>
++                  <div style="font-weight: bold; color: #4A1D96;">${child.name}</div>
++                  <div style="font-size: 11px; color: #6B21A8;">房间码: ${child.roomCode}</div>
++                </div>
++              </div>
++              <div style="text-align: right;">
++                <div style="font-size: 20px; font-weight: bold; color: #4A1D96;">${child.points || 0} 🍭</div>
++                <div style="font-size: 10px; color: #6B21A8;">累计积分</div>
++              </div>
++            </div>
++            
++            <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 12px; margin-bottom: 8px;">
++              <div style="font-size: 11px; font-weight: bold; color: #4A1D96; margin-bottom: 8px;">📋 今日任务 (${completedCount}/${totalCount})</div>
++              ${tasks.length > 0 ? tasks.map(task => {
++          const isDone = checkins.some(c => c.taskId === task.id);
++          return `<div style="font-size: 11px; padding: 4px 0; color: ${isDone ? '#16A34A' : '#64748B'};">${isDone ? '✅' : '⬜'} ${task.title} (+${task.points})</div>`;
++        }).join('') : '<div style="font-size: 11px; color: #94A3B8;">暂无任务</div>'}
++            </div>
++            
++            <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 12px;">
++              <div style="font-size: 11px; font-weight: bold; color: #4A1D96; margin-bottom: 8px;">🎁 奖励商店 (${rewards.length}个)</div>
++              ${rewards.length > 0 ? rewards.slice(0, 5).map(r =>
++          `<span style="display: inline-block; font-size: 10px; background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 12px; margin: 2px;">${r.icon || '🎁'} ${r.name} (${r.pointsCost}分)</span>`
++        ).join('') + (rewards.length > 5 ? `<span style="font-size: 10px; color: #94A3B8;"> +${rewards.length - 5} more</span>` : '') : '<div style="font-size: 11px; color: #94A3B8;">暂无奖励</div>'}
++            </div>
++          </div>
++        `;
++      }).join('');
++
++      return `
++        <div style="margin-top: 16px; border-top: 1px dashed #E2E8F0; padding-top: 16px;">
++          <div style="font-size: 12px; font-weight: bold; color: var(--primary); margin-bottom: 12px;">
++            ⭐ 星梦奇缘数据 (${item.children.length} 个孩子)
++          </div>
++          ${childrenRows}
++        </div>
++      `;
++    }
+ 
+     // === 渲染监控列表 ===
+     function renderMonitorList() {
+@@ -561,6 +625,8 @@
+                   ${deviceRows}
+                 </tbody>
+               </table>
++              
++              ${renderKiddiePlanSection(item)}
+             </div>
+           </div>
+         </div>
+
+commit ab1b2e670dc8c8b0bfa93d3d03bf0510bfd7060f
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Feb 5 14:02:48 2026 +0800
+
+    debug: 添加 API 响应调试日志以排查数据问题
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index b298602..f357d1f 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -410,11 +410,13 @@
+         }
+ 
+         // 防御性检查：确保 data 是数组
++        console.log('[Admin Console] API Response:', json);
+         if (!Array.isArray(json.data)) {
+-          console.warn('API 返回的 data 不是数组:', json.data);
++          console.warn('[Admin Console] API 返回的 data 不是数组:', json.data);
+           currentData = [];
+         } else {
+           currentData = json.data;
++          console.log('[Admin Console] 成功加载', currentData.length, '条记录');
+         }
+ 
+         // 登录成功
+
+commit a1eaf3f30b4e56e7f023d4653ca16250b5192855
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Feb 5 14:01:15 2026 +0800
+
+    fix: 添加缺失的 timeAgo 函数，修复后台数据不显示问题
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 3ae66b1..b298602 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -455,6 +455,23 @@
+       return ua.length > 20 ? ua.substring(0, 20) + '...' : ua;
+     }
+ 
++    // === 辅助：相对时间显示 ===
++    function timeAgo(date) {
++      if (!date || isNaN(date.getTime())) return '未知';
++      const seconds = Math.floor((new Date() - date) / 1000);
++      if (seconds < 60) return '刚刚';
++      const minutes = Math.floor(seconds / 60);
++      if (minutes < 60) return `${minutes} 分钟前`;
++      const hours = Math.floor(minutes / 60);
++      if (hours < 24) return `${hours} 小时前`;
++      const days = Math.floor(hours / 24);
++      if (days < 30) return `${days} 天前`;
++      const months = Math.floor(days / 30);
++      if (months < 12) return `${months} 个月前`;
++      return date.toLocaleDateString();
++    }
++
++
+     // === 渲染监控列表 ===
+     function renderMonitorList() {
+       const container = document.getElementById('monitorContent');
+
+commit 76d480c166c7cca729841fd7fc4c40f748a0b373
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Feb 5 11:48:20 2026 +0800
+
+    fix: 修复授权码后台 currentData.map 错误，增加防御性检查
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index aa11c92..3ae66b1 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -409,11 +409,18 @@
+           throw new Error(json.message || '未知错误');
+         }
+ 
++        // 防御性检查：确保 data 是数组
++        if (!Array.isArray(json.data)) {
++          console.warn('API 返回的 data 不是数组:', json.data);
++          currentData = [];
++        } else {
++          currentData = json.data;
++        }
++
+         // 登录成功
+-        document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
++        document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${currentData.length} 条记录)`;
+         document.getElementById('connectionStatus').style.color = 'var(--success)';
+ 
+-        currentData = json.data;
+         renderMonitorList();
+ 
+       } catch (err) {
+
+commit c932afdca29bd17a67181640b519f0c47e29a180
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Mon Feb 2 11:33:44 2026 +0800
+
+    feat(kiddieplan): rebrand to Star Dream Adventure, add XXDK license support and update admin console
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 1c45113..aa11c92 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -345,7 +345,7 @@
+     <div id="generateSection" class="view-section">
+       <div class="gen-card">
+         <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
+-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
++        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+           <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+           <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
+           <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码
+@@ -353,6 +353,8 @@
+           <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
+           <button onclick="generateCodes('tree')" class="btn-primary" style="background: #eab308;">生成早读码 (ZD)</button>
+           <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
++          <button onclick="generateCodes('xm')" class="btn-primary" style="background: #E0C3FC; color: #6A5D7B;">生成星梦码
++            (XXDK)</button>
+         </div>
+ 
+         <div class="gen-list" id="genList"></div>
+@@ -594,6 +596,13 @@
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+           code = 'GB' + datePart + random;
++        } else if (type === 'xm') {
++          // XXDK + YYYYMMDD (8) + Random (4) = 16 chars
++          let random = '';
++          for (let j = 0; j < 4; j++) {
++            random += chars.charAt(Math.floor(Math.random() * chars.length));
++          }
++          code = 'XXDK' + datePart + random;
+         } else {
+           // YYYYMMDD (8) + Random (8) = 16 chars
+           let random = '';
+
+commit 5e9ebd667c4820c0addf5ba23550302811915940
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Jan 15 14:37:49 2026 +0800
+
+    feat(license): add GB prefix support and admin generation logic
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 169166f..1c45113 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -352,6 +352,7 @@
+             (ZY)</button>
+           <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
+           <button onclick="generateCodes('tree')" class="btn-primary" style="background: #eab308;">生成早读码 (ZD)</button>
++          <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
+         </div>
+ 
+         <div class="gen-list" id="genList"></div>
+@@ -586,6 +587,13 @@
+             random += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+           code = 'ZD' + datePart + random;
++        } else if (type === 'gb') {
++          // GB + YYYYMMDD (8) + Random (6) = 16 chars
++          let random = '';
++          for (let j = 0; j < 6; j++) {
++            random += chars.charAt(Math.floor(Math.random() * chars.length));
++          }
++          code = 'GB' + datePart + random;
+         } else {
+           // YYYYMMDD (8) + Random (8) = 16 chars
+           let random = '';
+
+commit 8714eaf320ef3451caea855f4b9c0b48dec44e12
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Jan 15 10:51:04 2026 +0800
+
+    feat: 新增早读能量树模块(ZD) - Add Morning Energy Tree
+    
+    - 新增 public/morning-energy-tree 独立模块(Audio+Canvas)
+    - 后台(admin)增加 ZD 授权码生成功能
+    - API 增加 ZD 授权码前缀验证支持
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 3bef8da..169166f 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -1,5 +1,6 @@
+ <!DOCTYPE html>
+ <html lang="zh-CN">
++
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@@ -26,8 +27,12 @@
+       --border: #334155;
+     }
+ 
+-    * { margin: 0; padding: 0; box-sizing: border-box; } 
+-    
++    * {
++      margin: 0;
++      padding: 0;
++      box-sizing: border-box;
++    }
++
+     body {
+       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+       background: var(--bg);
+@@ -36,7 +41,10 @@
+       transition: background 0.3s, color 0.3s;
+     }
+ 
+-    .container { max-width: 1000px; margin: 0 auto; }
++    .container {
++      max-width: 1000px;
++      margin: 0 auto;
++    }
+ 
+     /* Header & Auth */
+     .header {
+@@ -47,10 +55,14 @@
+       background: var(--surface);
+       padding: 15px 25px;
+       border-radius: 12px;
+-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
++      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
++    }
++
++    .header h1 {
++      font-size: 20px;
++      color: var(--text);
+     }
+-    .header h1 { font-size: 20px; color: var(--text); }
+-    
++
+     .btn-primary {
+       background: var(--primary);
+       color: white;
+@@ -62,7 +74,11 @@
+       font-size: 14px;
+       transition: background 0.2s;
+     }
+-    .btn-primary:hover { background: var(--primary-dark); }
++
++    .btn-primary:hover {
++      background: var(--primary-dark);
++    }
++
+     .btn-secondary {
+       background: var(--surface);
+       border: 1px solid var(--border);
+@@ -72,7 +88,7 @@
+       cursor: pointer;
+       font-size: 12px;
+     }
+-    
++
+     .theme-toggle {
+       background: none;
+       border: 1px solid var(--border);
+@@ -85,7 +101,13 @@
+     }
+ 
+     /* Tabs */
+-    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
++    .tabs {
++      display: flex;
++      gap: 5px;
++      margin-bottom: 20px;
++      border-bottom: 1px solid var(--border);
++    }
++
+     .tab {
+       padding: 10px 20px;
+       cursor: pointer;
+@@ -93,28 +115,35 @@
+       color: var(--text-light);
+       font-weight: 500;
+     }
++
+     .tab.active {
+       color: var(--primary);
+       border-bottom-color: var(--primary);
+     }
+ 
+     /* Content Area */
+-    .view-section { display: none; }
+-    .view-section.active { display: block; }
++    .view-section {
++      display: none;
++    }
++
++    .view-section.active {
++      display: block;
++    }
+ 
+     /* Monitor List */
+     .monitor-list {
+       background: var(--surface);
+       border-radius: 12px;
+-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
++      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+       overflow: hidden;
+     }
+-    
++
+     .monitor-header {
+       display: grid;
+       grid-template-columns: 40px 2fr 1fr 1fr;
+       padding: 15px 20px;
+-      background: var(--bg); /* Use bg var instead of hardcoded */
++      background: var(--bg);
++      /* Use bg var instead of hardcoded */
+       font-size: 12px;
+       font-weight: 600;
+       color: var(--text-light);
+@@ -124,7 +153,10 @@
+     .monitor-item {
+       border-bottom: 1px solid var(--border);
+     }
+-    .monitor-item:last-child { border-bottom: none; }
++
++    .monitor-item:last-child {
++      border-bottom: none;
++    }
+ 
+     .item-summary {
+       display: grid;
+@@ -134,7 +166,10 @@
+       cursor: pointer;
+       transition: background 0.1s;
+     }
+-    .item-summary:hover { background: var(--bg); }
++
++    .item-summary:hover {
++      background: var(--bg);
++    }
+ 
+     .toggle-btn {
+       width: 24px;
+@@ -147,10 +182,18 @@
+       font-weight: bold;
+       transition: transform 0.2s;
+     }
+-    .monitor-item.expanded .toggle-btn { transform: rotate(90deg); color: var(--primary); }
+ 
+-    .code-display { font-family: monospace; font-weight: 600; color: var(--text); }
+-    
++    .monitor-item.expanded .toggle-btn {
++      transform: rotate(90deg);
++      color: var(--primary);
++    }
++
++    .code-display {
++      font-family: monospace;
++      font-weight: 600;
++      color: var(--text);
++    }
++
+     .status-badge {
+       display: inline-block;
+       padding: 2px 8px;
+@@ -158,9 +201,21 @@
+       font-size: 11px;
+       font-weight: 600;
+     }
+-    .status-good { background: #dcfce7; color: #166534; }
+-    .status-warn { background: #fef3c7; color: #92400e; }
+-    .status-full { background: #fee2e2; color: #991b1b; }
++
++    .status-good {
++      background: #dcfce7;
++      color: #166534;
++    }
++
++    .status-warn {
++      background: #fef3c7;
++      color: #92400e;
++    }
++
++    .status-full {
++      background: #fee2e2;
++      color: #991b1b;
++    }
+ 
+     /* Item Details (Expanded) */
+     .item-details {
+@@ -169,14 +224,17 @@
+       background: var(--bg);
+       border-top: 1px solid var(--border);
+     }
+-    .monitor-item.expanded .item-details { display: block; }
++
++    .monitor-item.expanded .item-details {
++      display: block;
++    }
+ 
+     .details-grid {
+       padding: 20px;
+       display: grid;
+       gap: 20px;
+     }
+-    
++
+     .device-table {
+       width: 100%;
+       border-collapse: collapse;
+@@ -186,27 +244,35 @@
+       border-radius: 6px;
+       color: var(--text);
+     }
+-    .device-table th, .device-table td {
++
++    .device-table th,
++    .device-table td {
+       padding: 8px 12px;
+       text-align: left;
+       border-bottom: 1px solid var(--border);
+     }
+-    .device-table th { background: var(--bg); color: var(--text-light); font-weight: 500; }
+-    
++
++    .device-table th {
++      background: var(--bg);
++      color: var(--text-light);
++      font-weight: 500;
++    }
++
+     .tooltip {
+       position: relative;
+       cursor: help;
+       border-bottom: 1px dashed #999;
+     }
+-    
++
+     /* Generator Styles */
+     .gen-card {
+       background: var(--surface);
+       padding: 30px;
+       border-radius: 12px;
+-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
++      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+       text-align: center;
+     }
++
+     .gen-list {
+       margin-top: 20px;
+       text-align: left;
+@@ -215,6 +281,7 @@
+       border: 1px solid var(--border);
+       border-radius: 8px;
+     }
++
+     .gen-item {
+       padding: 10px 15px;
+       border-bottom: 1px solid var(--border);
+@@ -222,7 +289,7 @@
+       justify-content: space-between;
+       font-family: monospace;
+     }
+-    
++
+     /* Auth Input (Hidden by default in this version, but kept style just in case) */
+     .auth-input {
+       padding: 8px 12px;
+@@ -234,184 +301,186 @@
+       background: var(--surface);
+       color: var(--text);
+     }
+-
+   </style>
+ </head>
++
+ <body>
+ 
+-<div class="container">
+-  <!-- Header -->
+-  <div class="header">
+-    <div style="display: flex; align-items: center;">
+-      <div>
+-        <h1>🚀 Anypok Admin</h1>
+-        <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
++  <div class="container">
++    <!-- Header -->
++    <div class="header">
++      <div style="display: flex; align-items: center;">
++        <div>
++          <h1>🚀 Anypok Admin</h1>
++          <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
++        </div>
++        <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
+       </div>
+-      <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
+     </div>
+-  </div>
+ 
+-  <!-- Tabs -->
+-  <div class="tabs">
+-    <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
+-    <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
+-  </div>
++    <!-- Tabs -->
++    <div class="tabs">
++      <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
++      <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
++    </div>
+ 
+-  <!-- SECTION 1: MONITOR -->
+-  <div id="monitorSection" class="view-section active">
+-    <div class="monitor-list">
+-      <div class="monitor-header">
+-        <div></div>
+-        <div>授权码</div>
+-        <div>设备数</div>
+-        <div>最后活跃</div>
+-      </div>
+-      <div id="monitorContent">
+-        <div style="padding: 40px; text-align: center; color: var(--text-light);">
+-          加载中...
++    <!-- SECTION 1: MONITOR -->
++    <div id="monitorSection" class="view-section active">
++      <div class="monitor-list">
++        <div class="monitor-header">
++          <div></div>
++          <div>授权码</div>
++          <div>设备数</div>
++          <div>最后活跃</div>
++        </div>
++        <div id="monitorContent">
++          <div style="padding: 40px; text-align: center; color: var(--text-light);">
++            加载中...
++          </div>
+         </div>
+       </div>
+     </div>
+-  </div>
+ 
+-  <!-- SECTION 2: GENERATOR -->
+-  <div id="generateSection" class="view-section">
+-    <div class="gen-card">
+-      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
+-      <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+-        <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+-        <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
+-        <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
+-        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
+-      </div>
+-      
+-      <div class="gen-list" id="genList"></div>
+-      
+-      <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+-        <button onclick="exportEnv()" class="btn-secondary">📥 导出 ENV 文件</button>
+-        <button onclick="copyAllGenerated()" class="btn-secondary">📋 复制全部</button>
++    <!-- SECTION 2: GENERATOR -->
++    <div id="generateSection" class="view-section">
++      <div class="gen-card">
++        <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
++        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
++          <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
++          <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
++          <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码
++            (ZY)</button>
++          <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
++          <button onclick="generateCodes('tree')" class="btn-primary" style="background: #eab308;">生成早读码 (ZD)</button>
++        </div>
++
++        <div class="gen-list" id="genList"></div>
++
++        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
++          <button onclick="exportEnv()" class="btn-secondary">📥 导出 ENV 文件</button>
++          <button onclick="copyAllGenerated()" class="btn-secondary">📋 复制全部</button>
++        </div>
+       </div>
+     </div>
++
+   </div>
+ 
+-</div>
+-
+-<script>
+-  // 配置
+-  const API_URL = '/api/verify-license'; 
+-  // Hardcoded key for "passwordless" access via this secret file
+-  const SECRET_KEY = 'spencer'; 
+-  let currentData = [];
+-  let generatedCodes = [];
+-
+-  // === 初始化：自动登录 ===
+-  window.addEventListener('load', () => {
+-    // 检查主题
+-    const savedTheme = localStorage.getItem('theme');
+-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+-      document.documentElement.setAttribute('data-theme', 'dark');
+-      document.getElementById('themeBtn').textContent = '🌞';
+-    } else {
+-      document.getElementById('themeBtn').textContent = '🌙';
+-    }
+-
+-    // 自动登录
+-    login();
+-  });
+-
+-  // === 登录 & 加载数据 ===
+-  async function login() {
+-    try {
+-      const res = await fetch(API_URL, {
+-        method: 'POST',
+-        headers: { 'Content-Type': 'application/json' },
+-        body: JSON.stringify({
+-          action: 'list_all',
+-          adminKey: SECRET_KEY
+-        })
+-      });
+-
+-      const json = await res.json();
+-
+-      if (!json.success) {
+-        throw new Error(json.message || '未知错误');
++  <script>
++    // 配置
++    const API_URL = '/api/verify-license';
++    // Hardcoded key for "passwordless" access via this secret file
++    const SECRET_KEY = 'spencer';
++    let currentData = [];
++    let generatedCodes = [];
++
++    // === 初始化：自动登录 ===
++    window.addEventListener('load', () => {
++      // 检查主题
++      const savedTheme = localStorage.getItem('theme');
++      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
++        document.documentElement.setAttribute('data-theme', 'dark');
++        document.getElementById('themeBtn').textContent = '🌞';
++      } else {
++        document.getElementById('themeBtn').textContent = '🌙';
++      }
++
++      // 自动登录
++      login();
++    });
++
++    // === 登录 & 加载数据 ===
++    async function login() {
++      try {
++        const res = await fetch(API_URL, {
++          method: 'POST',
++          headers: { 'Content-Type': 'application/json' },
++          body: JSON.stringify({
++            action: 'list_all',
++            adminKey: SECRET_KEY
++          })
++        });
++
++        const json = await res.json();
++
++        if (!json.success) {
++          throw new Error(json.message || '未知错误');
++        }
++
++        // 登录成功
++        document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
++        document.getElementById('connectionStatus').style.color = 'var(--success)';
++
++        currentData = json.data;
++        renderMonitorList();
++
++      } catch (err) {
++        document.getElementById('connectionStatus').textContent = `🔴 连接失败: ${err.message}`;
++        document.getElementById('connectionStatus').style.color = 'var(--danger)';
++        document.getElementById('monitorContent').innerHTML = `<div style="padding: 20px; color: var(--danger); text-align: center;">加载失败: ${err.message}</div>`;
+       }
++    }
+ 
+-      // 登录成功
+-      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+-      document.getElementById('connectionStatus').style.color = 'var(--success)';
+-
+-      currentData = json.data;
+-      renderMonitorList();
+-
+-    } catch (err) {
+-      document.getElementById('connectionStatus').textContent = `🔴 连接失败: ${err.message}`;
+-      document.getElementById('connectionStatus').style.color = 'var(--danger)';
+-      document.getElementById('monitorContent').innerHTML = `<div style="padding: 20px; color: var(--danger); text-align: center;">加载失败: ${err.message}</div>`;
+-    }
+-  }
+-
+-  function toggleTheme() {
+-    const current = document.documentElement.getAttribute('data-theme');
+-    if (current === 'dark') {
+-      document.documentElement.removeAttribute('data-theme');
+-      localStorage.setItem('theme', 'light');
+-      document.getElementById('themeBtn').textContent = '🌙';
+-    } else {
+-      document.documentElement.setAttribute('data-theme', 'dark');
+-      localStorage.setItem('theme', 'dark');
+-      document.getElementById('themeBtn').textContent = '🌞';
+-    }
+-  }
+-
+-  // === 辅助：解析 User Agent ===
+-  function parseUA(ua) {
+-    if (!ua) return '未知设备';
+-    if (ua.includes('iPhone')) return 'iPhone (iOS)';
+-    if (ua.includes('iPad')) return 'iPad (iOS)';
+-    if (ua.includes('Android')) return 'Android 设备';
+-    if (ua.includes('Windows')) return 'Windows PC';
+-    if (ua.includes('Macintosh')) return 'Mac PC';
+-    if (ua.includes('Linux')) return 'Linux PC';
+-    return ua.length > 20 ? ua.substring(0, 20) + '...' : ua;
+-  }
+-
+-  // === 渲染监控列表 ===
+-  function renderMonitorList() {
+-    const container = document.getElementById('monitorContent');
+-    
+-    if (currentData.length === 0) {
+-      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
+-      return;
+-    }
+-
+-    container.innerHTML = currentData.map((item, index) => {
+-      // 检查是否失效
+-      const isRevoked = item.status === 'revoked';
+-      
+-      // 计算状态颜色
+-      const usage = item.totalDevices;
+-      const max = item.maxDevices || 3;
+-      let badgeClass = 'status-good';
+-      let statusText = '正常';
+-      
+-      if (isRevoked) {
+-        badgeClass = 'status-full'; // 用红色表示失效
+-        statusText = '🚫 已删除';
+-      } else if (usage >= max) {
+-        badgeClass = 'status-full';
+-        statusText = '已满';
+-      } else if (usage > max * 0.8) {
+-        badgeClass = 'status-warn';
+-        statusText = '即将满';
++    function toggleTheme() {
++      const current = document.documentElement.getAttribute('data-theme');
++      if (current === 'dark') {
++        document.documentElement.removeAttribute('data-theme');
++        localStorage.setItem('theme', 'light');
++        document.getElementById('themeBtn').textContent = '🌙';
++      } else {
++        document.documentElement.setAttribute('data-theme', 'dark');
++        localStorage.setItem('theme', 'dark');
++        document.getElementById('themeBtn').textContent = '🌞';
+       }
++    }
+ 
+-      // 构建设备详情行 (略微调整样式)
+-      const deviceRows = item.devices.map((dev, i) => {
+-        const deviceName = parseUA(dev.ua);
+-        const fullUA = dev.ua.replace(/"/g, '&quot;');
+-          
+-        return `
++    // === 辅助：解析 User Agent ===
++    function parseUA(ua) {
++      if (!ua) return '未知设备';
++      if (ua.includes('iPhone')) return 'iPhone (iOS)';
++      if (ua.includes('iPad')) return 'iPad (iOS)';
++      if (ua.includes('Android')) return 'Android 设备';
++      if (ua.includes('Windows')) return 'Windows PC';
++      if (ua.includes('Macintosh')) return 'Mac PC';
++      if (ua.includes('Linux')) return 'Linux PC';
++      return ua.length > 20 ? ua.substring(0, 20) + '...' : ua;
++    }
++
++    // === 渲染监控列表 ===
++    function renderMonitorList() {
++      const container = document.getElementById('monitorContent');
++
++      if (currentData.length === 0) {
++        container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
++        return;
++      }
++
++      container.innerHTML = currentData.map((item, index) => {
++        // 检查是否失效
++        const isRevoked = item.status === 'revoked';
++
++        // 计算状态颜色
++        const usage = item.totalDevices;
++        const max = item.maxDevices || 3;
++        let badgeClass = 'status-good';
++        let statusText = '正常';
++
++        if (isRevoked) {
++          badgeClass = 'status-full'; // 用红色表示失效
++          statusText = '🚫 已删除';
++        } else if (usage >= max) {
++          badgeClass = 'status-full';
++          statusText = '已满';
++        } else if (usage > max * 0.8) {
++          badgeClass = 'status-warn';
++          statusText = '即将满';
++        }
++
++        // 构建设备详情行 (略微调整样式)
++        const deviceRows = item.devices.map((dev, i) => {
++          const deviceName = parseUA(dev.ua);
++          const fullUA = dev.ua.replace(/"/g, '&quot;');
++
++          return `
+         <tr>
+           <td>${i + 1}</td>
+           <td>
+@@ -427,7 +496,7 @@
+         </tr>
+       `}).join('');
+ 
+-      return `
++        return `
+         <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+           <div class="item-summary" onclick="toggleItem(${index})">
+             <div class="toggle-btn">▶</div>
+@@ -467,116 +536,124 @@
+           </div>
+         </div>
+       `;
+-    }).join('');
+-  }
+-
+-  function toggleItem(index) {
+-    const el = document.getElementById(`item-${index}`);
+-    const isExpanded = el.classList.contains('expanded');
+-    
+-    // 关闭所有其他的 (可选，如果想保持手风琴效果)
+-    // document.querySelectorAll('.monitor-item').forEach(e => e.classList.remove('expanded'));
+-
+-    if (!isExpanded) {
+-      el.classList.add('expanded');
+-    } else {
+-      el.classList.remove('expanded');
+-    }
+-  }
+-
+-  // === 生成器功能 ===
+-  function generateCodes(type = 'doraemon') {
+-    const count = document.getElementById('genCount').value;
+-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+-    const now = new Date();
+-    const datePart = now.getFullYear() + 
+-                    String(now.getMonth() + 1).padStart(2, '0') + 
+-                    String(now.getDate()).padStart(2, '0');
+-    
+-    const newBatch = [];
+-    for (let i = 0; i < count; i++) {
+-      let code = '';
+-      if (type === 'homework') {
+-        // ZY + YYYYMMDD (8) + Random (6) = 16 chars
+-        let random = '';
+-        for (let j = 0; j < 6; j++) {
+-          random += chars.charAt(Math.floor(Math.random() * chars.length));
+-        }
+-        code = 'ZY' + datePart + random;
+-      } else if (type === 'magic') {
+-        // DM + YYYYMMDD (8) + Random (6) = 16 chars
+-        let random = '';
+-        for (let j = 0; j < 6; j++) {
+-          random += chars.charAt(Math.floor(Math.random() * chars.length));
+-        }
+-        code = 'DM' + datePart + random;
++      }).join('');
++    }
++
++    function toggleItem(index) {
++      const el = document.getElementById(`item-${index}`);
++      const isExpanded = el.classList.contains('expanded');
++
++      // 关闭所有其他的 (可选，如果想保持手风琴效果)
++      // document.querySelectorAll('.monitor-item').forEach(e => e.classList.remove('expanded'));
++
++      if (!isExpanded) {
++        el.classList.add('expanded');
+       } else {
+-        // YYYYMMDD (8) + Random (8) = 16 chars
+-        let random = '';
+-        for (let j = 0; j < 8; j++) {
+-          random += chars.charAt(Math.floor(Math.random() * chars.length));
+-        }
+-        code = datePart + random;
++        el.classList.remove('expanded');
+       }
+-      // Format with dashes for display
+-      newBatch.push(code.match(/.{1,4}/g).join('-'));
+     }
+ 
+-    generatedCodes = [...newBatch, ...generatedCodes];
+-    
+-    const listEl = document.getElementById('genList');
+-    listEl.innerHTML = generatedCodes.map(c => `
++    // === 生成器功能 ===
++    function generateCodes(type = 'doraemon') {
++      const count = document.getElementById('genCount').value;
++      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
++      const now = new Date();
++      const datePart = now.getFullYear() +
++        String(now.getMonth() + 1).padStart(2, '0') +
++        String(now.getDate()).padStart(2, '0');
++
++      const newBatch = [];
++      for (let i = 0; i < count; i++) {
++        let code = '';
++        if (type === 'homework') {
++          // ZY + YYYYMMDD (8) + Random (6) = 16 chars
++          let random = '';
++          for (let j = 0; j < 6; j++) {
++            random += chars.charAt(Math.floor(Math.random() * chars.length));
++          }
++          code = 'ZY' + datePart + random;
++        } else if (type === 'magic') {
++          // DM + YYYYMMDD (8) + Random (6) = 16 chars
++          let random = '';
++          for (let j = 0; j < 6; j++) {
++            random += chars.charAt(Math.floor(Math.random() * chars.length));
++          }
++          code = 'DM' + datePart + random;
++        } else if (type === 'tree') {
++          // ZD + YYYYMMDD (8) + Random (6) = 16 chars
++          let random = '';
++          for (let j = 0; j < 6; j++) {
++            random += chars.charAt(Math.floor(Math.random() * chars.length));
++          }
++          code = 'ZD' + datePart + random;
++        } else {
++          // YYYYMMDD (8) + Random (8) = 16 chars
++          let random = '';
++          for (let j = 0; j < 8; j++) {
++            random += chars.charAt(Math.floor(Math.random() * chars.length));
++          }
++          code = datePart + random;
++        }
++        // Format with dashes for display
++        newBatch.push(code.match(/.{1,4}/g).join('-'));
++      }
++
++      generatedCodes = [...newBatch, ...generatedCodes];
++
++      const listEl = document.getElementById('genList');
++      listEl.innerHTML = generatedCodes.map(c => `
+       <div class="gen-item">
+         <span>${c}</span>
+         <span style="color:var(--text-light); font-size:12px;">未激活</span>
+       </div>
+     `).join('');
+-  }
+-
+-  function exportEnv() {
+-    if(!generatedCodes.length) return alert('没有生成的代码');
+-    const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], {type: 'text/plain'});
+-    const a = document.createElement('a');
+-    a.href = URL.createObjectURL(blob);
+-    a.download = 'LICENSE_CODES.env';
+-    a.click();
+-  }
+-  
+-  function copyAllGenerated() {
+-    if(!generatedCodes.length) return;
+-    navigator.clipboard.writeText(generatedCodes.join('\n'));
+-    alert(`已复制 ${generatedCodes.length} 个授权码`);
+-  }
+-  
+-  function copy(text) {
+-    navigator.clipboard.writeText(text);
+-    alert('已复制 ID: ' + text);
+-  }
+-
+-  // === 工具函数 ===
+-  function switchTab(tabName) {
+-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+-    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+-    
+-    if (tabName === 'monitor') {
+-      document.querySelector('.tab:nth-child(1)').classList.add('active');
+-      document.getElementById('monitorSection').classList.add('active');
+-    } else {
+-      document.querySelector('.tab:nth-child(2)').classList.add('active');
+-      document.getElementById('generateSection').classList.add('active');
+-    }
+-  }
+-
+-  function timeAgo(date) {
+-    const seconds = Math.floor((new Date() - date) / 1000);
+-    if (seconds < 60) return '刚刚';
+-    const minutes = Math.floor(seconds / 60);
+-    if (minutes < 60) return `${minutes}分钟前`;
+-    const hours = Math.floor(minutes / 60);
+-    if (hours < 24) return `${hours}小时前`;
+-    return `${Math.floor(hours / 24)}天前`;
+-  }
+-</script>
++    }
++
++    function exportEnv() {
++      if (!generatedCodes.length) return alert('没有生成的代码');
++      const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], { type: 'text/plain' });
++      const a = document.createElement('a');
++      a.href = URL.createObjectURL(blob);
++      a.download = 'LICENSE_CODES.env';
++      a.click();
++    }
++
++    function copyAllGenerated() {
++      if (!generatedCodes.length) return;
++      navigator.clipboard.writeText(generatedCodes.join('\n'));
++      alert(`已复制 ${generatedCodes.length} 个授权码`);
++    }
++
++    function copy(text) {
++      navigator.clipboard.writeText(text);
++      alert('已复制 ID: ' + text);
++    }
++
++    // === 工具函数 ===
++    function switchTab(tabName) {
++      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
++      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
++
++      if (tabName === 'monitor') {
++        document.querySelector('.tab:nth-child(1)').classList.add('active');
++        document.getElementById('monitorSection').classList.add('active');
++      } else {
++        document.querySelector('.tab:nth-child(2)').classList.add('active');
++        document.getElementById('generateSection').classList.add('active');
++      }
++    }
++
++    function timeAgo(date) {
++      const seconds = Math.floor((new Date() - date) / 1000);
++      if (seconds < 60) return '刚刚';
++      const minutes = Math.floor(seconds / 60);
++      if (minutes < 60) return `${minutes}分钟前`;
++      const hours = Math.floor(minutes / 60);
++      if (hours < 24) return `${hours}小时前`;
++      return `${Math.floor(hours / 24)}天前`;
++    }
++  </script>
+ 
+ </body>
+-</html>
++
++</html>
+\ No newline at end of file
+
+commit 8b7b6be1f6dac607ba94621cdae8bcb0db5af63c
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Jan 13 11:07:20 2026 +0800
+
+    fix: revert naypok to Anypok and fix encoding corruption
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 4970011..3bef8da 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -3,7 +3,8 @@
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-      <title>Anypok 授权管理后台</title>  <style>
++  <title>Anypok 授权管理后台</title>
++  <style>
+     :root {
+       --primary: #6366f1;
+       --primary-dark: #4f46e5;
+@@ -253,7 +254,7 @@
+   <!-- Tabs -->
+   <div class="tabs">
+     <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
+-    <div class="tab" onclick="switchTab('generate')">📝 生成授权�?/div>
++    <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
+   </div>
+ 
+   <!-- SECTION 1: MONITOR -->
+@@ -261,13 +262,13 @@
+     <div class="monitor-list">
+       <div class="monitor-header">
+         <div></div>
+-        <div>授权�?/div>
+-        <div>设备�?/div>
+-        <div>最后活�?/div>
++        <div>授权码</div>
++        <div>设备数</div>
++        <div>最后活跃</div>
+       </div>
+       <div id="monitorContent">
+         <div style="padding: 40px; text-align: center; color: var(--text-light);">
+-          加载�?..
++          加载中...
+         </div>
+       </div>
+     </div>
+@@ -276,12 +277,12 @@
+   <!-- SECTION 2: GENERATOR -->
+   <div id="generateSection" class="view-section">
+     <div class="gen-card">
+-      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权�?/h2>
++      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
+       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+         <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+         <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
+         <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
+-        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名�?(DM)</button>
++        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
+       </div>
+       
+       <div class="gen-list" id="genList"></div>
+@@ -305,7 +306,8 @@
+ 
+   // === 初始化：自动登录 ===
+   window.addEventListener('load', () => {
+-    // 检查主�?    const savedTheme = localStorage.getItem('theme');
++    // 检查主题
++    const savedTheme = localStorage.getItem('theme');
+     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+       document.documentElement.setAttribute('data-theme', 'dark');
+       document.getElementById('themeBtn').textContent = '🌞';
+@@ -336,7 +338,7 @@
+       }
+ 
+       // 登录成功
+-      document.getElementById('connectionStatus').textContent = `🟢 已连�?(�?${json.data.length} 条记�?`;
++      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+       document.getElementById('connectionStatus').style.color = 'var(--success)';
+ 
+       currentData = json.data;
+@@ -362,7 +364,7 @@
+     }
+   }
+ 
+-  // === 辅助：解�?User Agent ===
++  // === 辅助：解析 User Agent ===
+   function parseUA(ua) {
+     if (!ua) return '未知设备';
+     if (ua.includes('iPhone')) return 'iPhone (iOS)';
+@@ -379,29 +381,32 @@
+     const container = document.getElementById('monitorContent');
+     
+     if (currentData.length === 0) {
+-      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记�?/div>';
++      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
+       return;
+     }
+ 
+     container.innerHTML = currentData.map((item, index) => {
+-      // 检查是否失�?      const isRevoked = item.status === 'revoked';
++      // 检查是否失效
++      const isRevoked = item.status === 'revoked';
+       
+-      // 计算状态颜�?      const usage = item.totalDevices;
++      // 计算状态颜色
++      const usage = item.totalDevices;
+       const max = item.maxDevices || 3;
+       let badgeClass = 'status-good';
+       let statusText = '正常';
+       
+       if (isRevoked) {
+-        badgeClass = 'status-full'; // 用红色表示失�?        statusText = '🚫 已删�?;
++        badgeClass = 'status-full'; // 用红色表示失效
++        statusText = '🚫 已删除';
+       } else if (usage >= max) {
+         badgeClass = 'status-full';
+         statusText = '已满';
+       } else if (usage > max * 0.8) {
+         badgeClass = 'status-warn';
+-        statusText = '即将�?;
++        statusText = '即将满';
+       }
+ 
+-      // 构建设备详情�?(略微调整样式)
++      // 构建设备详情行 (略微调整样式)
+       const deviceRows = item.devices.map((dev, i) => {
+         const deviceName = parseUA(dev.ua);
+         const fullUA = dev.ua.replace(/"/g, '&quot;');
+@@ -425,7 +430,7 @@
+       return `
+         <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+           <div class="item-summary" onclick="toggleItem(${index})">
+-            <div class="toggle-btn">�?/div>
++            <div class="toggle-btn">▶</div>
+             <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
+               ${item.code}
+             </div>
+@@ -441,7 +446,7 @@
+             <div class="details-grid">
+               <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); margin-bottom:10px;">
+                 <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
+-                <span>首次激�? ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
++                <span>首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
+               </div>
+               
+               <table class="device-table">
+@@ -451,7 +456,7 @@
+                     <th>设备信息</th>
+                     <th>Device ID</th>
+                     <th>首次绑定</th>
+-                    <th>最后在�?/th>
++                    <th>最后在线</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+@@ -479,7 +484,7 @@
+     }
+   }
+ 
+-  // === 生成器功�?===
++  // === 生成器功能 ===
+   function generateCodes(type = 'doraemon') {
+     const count = document.getElementById('genCount').value;
+     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+@@ -523,13 +528,13 @@
+     listEl.innerHTML = generatedCodes.map(c => `
+       <div class="gen-item">
+         <span>${c}</span>
+-        <span style="color:var(--text-light); font-size:12px;">未激�?/span>
++        <span style="color:var(--text-light); font-size:12px;">未激活</span>
+       </div>
+     `).join('');
+   }
+ 
+   function exportEnv() {
+-    if(!generatedCodes.length) return alert('没有生成的代�?);
++    if(!generatedCodes.length) return alert('没有生成的代码');
+     const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], {type: 'text/plain'});
+     const a = document.createElement('a');
+     a.href = URL.createObjectURL(blob);
+@@ -540,12 +545,12 @@
+   function copyAllGenerated() {
+     if(!generatedCodes.length) return;
+     navigator.clipboard.writeText(generatedCodes.join('\n'));
+-    alert(`已复�?${generatedCodes.length} 个授权码`);
++    alert(`已复制 ${generatedCodes.length} 个授权码`);
+   }
+   
+   function copy(text) {
+     navigator.clipboard.writeText(text);
+-    alert('已复�?ID: ' + text);
++    alert('已复制 ID: ' + text);
+   }
+ 
+   // === 工具函数 ===
+
+commit 6228b6e14e34531b114a4811fa0496a29d336e7f
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Jan 13 11:01:04 2026 +0800
+
+    feat: correctly rename project to Anypok
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index b361f93..4970011 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -3,7 +3,7 @@
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-      <title>naypok 授权管理后台</title>  <style>
++      <title>Anypok 授权管理后台</title>  <style>
+     :root {
+       --primary: #6366f1;
+       --primary-dark: #4f46e5;
+@@ -243,7 +243,7 @@
+   <div class="header">
+     <div style="display: flex; align-items: center;">
+       <div>
+-        <h1>🚀 naypok Admin</h1>
++        <h1>🚀 Anypok Admin</h1>
+         <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
+       </div>
+       <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
+@@ -253,7 +253,7 @@
+   <!-- Tabs -->
+   <div class="tabs">
+     <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
+-    <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
++    <div class="tab" onclick="switchTab('generate')">📝 生成授权�?/div>
+   </div>
+ 
+   <!-- SECTION 1: MONITOR -->
+@@ -261,13 +261,13 @@
+     <div class="monitor-list">
+       <div class="monitor-header">
+         <div></div>
+-        <div>授权码</div>
+-        <div>设备数</div>
+-        <div>最后活跃</div>
++        <div>授权�?/div>
++        <div>设备�?/div>
++        <div>最后活�?/div>
+       </div>
+       <div id="monitorContent">
+         <div style="padding: 40px; text-align: center; color: var(--text-light);">
+-          加载中...
++          加载�?..
+         </div>
+       </div>
+     </div>
+@@ -276,12 +276,12 @@
+   <!-- SECTION 2: GENERATOR -->
+   <div id="generateSection" class="view-section">
+     <div class="gen-card">
+-      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
++      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权�?/h2>
+       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+         <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+         <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
+         <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
+-        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
++        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名�?(DM)</button>
+       </div>
+       
+       <div class="gen-list" id="genList"></div>
+@@ -305,8 +305,7 @@
+ 
+   // === 初始化：自动登录 ===
+   window.addEventListener('load', () => {
+-    // 检查主题
+-    const savedTheme = localStorage.getItem('theme');
++    // 检查主�?    const savedTheme = localStorage.getItem('theme');
+     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+       document.documentElement.setAttribute('data-theme', 'dark');
+       document.getElementById('themeBtn').textContent = '🌞';
+@@ -337,7 +336,7 @@
+       }
+ 
+       // 登录成功
+-      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
++      document.getElementById('connectionStatus').textContent = `🟢 已连�?(�?${json.data.length} 条记�?`;
+       document.getElementById('connectionStatus').style.color = 'var(--success)';
+ 
+       currentData = json.data;
+@@ -363,7 +362,7 @@
+     }
+   }
+ 
+-  // === 辅助：解析 User Agent ===
++  // === 辅助：解�?User Agent ===
+   function parseUA(ua) {
+     if (!ua) return '未知设备';
+     if (ua.includes('iPhone')) return 'iPhone (iOS)';
+@@ -380,32 +379,29 @@
+     const container = document.getElementById('monitorContent');
+     
+     if (currentData.length === 0) {
+-      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
++      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记�?/div>';
+       return;
+     }
+ 
+     container.innerHTML = currentData.map((item, index) => {
+-      // 检查是否失效
+-      const isRevoked = item.status === 'revoked';
++      // 检查是否失�?      const isRevoked = item.status === 'revoked';
+       
+-      // 计算状态颜色
+-      const usage = item.totalDevices;
++      // 计算状态颜�?      const usage = item.totalDevices;
+       const max = item.maxDevices || 3;
+       let badgeClass = 'status-good';
+       let statusText = '正常';
+       
+       if (isRevoked) {
+-        badgeClass = 'status-full'; // 用红色表示失效
+-        statusText = '🚫 已删除';
++        badgeClass = 'status-full'; // 用红色表示失�?        statusText = '🚫 已删�?;
+       } else if (usage >= max) {
+         badgeClass = 'status-full';
+         statusText = '已满';
+       } else if (usage > max * 0.8) {
+         badgeClass = 'status-warn';
+-        statusText = '即将满';
++        statusText = '即将�?;
+       }
+ 
+-      // 构建设备详情行 (略微调整样式)
++      // 构建设备详情�?(略微调整样式)
+       const deviceRows = item.devices.map((dev, i) => {
+         const deviceName = parseUA(dev.ua);
+         const fullUA = dev.ua.replace(/"/g, '&quot;');
+@@ -429,7 +425,7 @@
+       return `
+         <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+           <div class="item-summary" onclick="toggleItem(${index})">
+-            <div class="toggle-btn">▶</div>
++            <div class="toggle-btn">�?/div>
+             <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
+               ${item.code}
+             </div>
+@@ -445,7 +441,7 @@
+             <div class="details-grid">
+               <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); margin-bottom:10px;">
+                 <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
+-                <span>首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
++                <span>首次激�? ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
+               </div>
+               
+               <table class="device-table">
+@@ -455,7 +451,7 @@
+                     <th>设备信息</th>
+                     <th>Device ID</th>
+                     <th>首次绑定</th>
+-                    <th>最后在线</th>
++                    <th>最后在�?/th>
+                   </tr>
+                 </thead>
+                 <tbody>
+@@ -483,7 +479,7 @@
+     }
+   }
+ 
+-  // === 生成器功能 ===
++  // === 生成器功�?===
+   function generateCodes(type = 'doraemon') {
+     const count = document.getElementById('genCount').value;
+     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+@@ -527,13 +523,13 @@
+     listEl.innerHTML = generatedCodes.map(c => `
+       <div class="gen-item">
+         <span>${c}</span>
+-        <span style="color:var(--text-light); font-size:12px;">未激活</span>
++        <span style="color:var(--text-light); font-size:12px;">未激�?/span>
+       </div>
+     `).join('');
+   }
+ 
+   function exportEnv() {
+-    if(!generatedCodes.length) return alert('没有生成的代码');
++    if(!generatedCodes.length) return alert('没有生成的代�?);
+     const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], {type: 'text/plain'});
+     const a = document.createElement('a');
+     a.href = URL.createObjectURL(blob);
+@@ -544,12 +540,12 @@
+   function copyAllGenerated() {
+     if(!generatedCodes.length) return;
+     navigator.clipboard.writeText(generatedCodes.join('\n'));
+-    alert(`已复制 ${generatedCodes.length} 个授权码`);
++    alert(`已复�?${generatedCodes.length} 个授权码`);
+   }
+   
+   function copy(text) {
+     navigator.clipboard.writeText(text);
+-    alert('已复制 ID: ' + text);
++    alert('已复�?ID: ' + text);
+   }
+ 
+   // === 工具函数 ===
+
+commit 7d1f895b36d5a25bf396dd0868af4332191cf34a
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Jan 13 10:56:20 2026 +0800
+
+    feat: rename project to naypok
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 3bef8da..b361f93 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -3,8 +3,7 @@
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-  <title>Anypok 授权管理后台</title>
+-  <style>
++      <title>naypok 授权管理后台</title>  <style>
+     :root {
+       --primary: #6366f1;
+       --primary-dark: #4f46e5;
+@@ -244,7 +243,7 @@
+   <div class="header">
+     <div style="display: flex; align-items: center;">
+       <div>
+-        <h1>🚀 Anypok Admin</h1>
++        <h1>🚀 naypok Admin</h1>
+         <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
+       </div>
+       <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
+
+commit a3061af373ff2921ab62bb243a2462da93a76004
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Dec 25 12:47:46 2025 +0800
+
+    style(admin): collapse monitor items by default
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index d5ef150..3bef8da 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -428,7 +428,7 @@
+       `}).join('');
+ 
+       return `
+-        <div class="monitor-item expanded" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
++        <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+           <div class="item-summary" onclick="toggleItem(${index})">
+             <div class="toggle-btn">▶</div>
+             <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
+
+commit 2bcf05e286ff42414c9e7c7abc145695ca31461d
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Thu Dec 25 10:08:23 2025 +0800
+
+    feat(admin): add generator for Magic Roll Call license codes (DM prefix)
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index a3c3b15..d5ef150 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -282,6 +282,7 @@
+         <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+         <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
+         <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
++        <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
+       </div>
+       
+       <div class="gen-list" id="genList"></div>
+@@ -502,6 +503,13 @@
+           random += chars.charAt(Math.floor(Math.random() * chars.length));
+         }
+         code = 'ZY' + datePart + random;
++      } else if (type === 'magic') {
++        // DM + YYYYMMDD (8) + Random (6) = 16 chars
++        let random = '';
++        for (let j = 0; j < 6; j++) {
++          random += chars.charAt(Math.floor(Math.random() * chars.length));
++        }
++        code = 'DM' + datePart + random;
+       } else {
+         // YYYYMMDD (8) + Random (8) = 16 chars
+         let random = '';
+
+commit 7ddf51a2cde58985cb8cc675cf1c55fedc83aaec
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Wed Dec 24 14:22:55 2025 +0800
+
+    feat: add Homework Crush code generator to admin and update backend parser
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 0296faa..a3c3b15 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -280,7 +280,8 @@
+       <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
+       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+         <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
+-        <button onclick="generateCodes()" class="btn-primary">生成</button>
++        <button onclick="generateCodes('doraemon')" class="btn-primary">生成哆啦A梦码</button>
++        <button onclick="generateCodes('homework')" class="btn-primary" style="background: var(--success);">生成作业消消乐码 (ZY)</button>
+       </div>
+       
+       <div class="gen-list" id="genList"></div>
+@@ -483,7 +484,7 @@
+   }
+ 
+   // === 生成器功能 ===
+-  function generateCodes() {
++  function generateCodes(type = 'doraemon') {
+     const count = document.getElementById('genCount').value;
+     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+     const now = new Date();
+@@ -493,11 +494,24 @@
+     
+     const newBatch = [];
+     for (let i = 0; i < count; i++) {
+-      let random = '';
+-      for (let j = 0; j < 8; j++) {
+-        random += chars.charAt(Math.floor(Math.random() * chars.length));
++      let code = '';
++      if (type === 'homework') {
++        // ZY + YYYYMMDD (8) + Random (6) = 16 chars
++        let random = '';
++        for (let j = 0; j < 6; j++) {
++          random += chars.charAt(Math.floor(Math.random() * chars.length));
++        }
++        code = 'ZY' + datePart + random;
++      } else {
++        // YYYYMMDD (8) + Random (8) = 16 chars
++        let random = '';
++        for (let j = 0; j < 8; j++) {
++          random += chars.charAt(Math.floor(Math.random() * chars.length));
++        }
++        code = datePart + random;
+       }
+-      newBatch.push((datePart + random).match(/.{1,4}/g).join('-'));
++      // Format with dashes for display
++      newBatch.push(code.match(/.{1,4}/g).join('-'));
+     }
+ 
+     generatedCodes = [...newBatch, ...generatedCodes];
+
+commit 0aede8f20d282f97a25ac37563eb60afa2e33a58
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Wed Dec 24 14:20:11 2025 +0800
+
+    security: remove IP/Location tracking and implement ZY license prefix enforcement
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 6ea5cc0..0296faa 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -112,7 +112,7 @@
+     
+     .monitor-header {
+       display: grid;
+-      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
++      grid-template-columns: 40px 2fr 1fr 1fr;
+       padding: 15px 20px;
+       background: var(--bg); /* Use bg var instead of hardcoded */
+       font-size: 12px;
+@@ -128,7 +128,7 @@
+ 
+     .item-summary {
+       display: grid;
+-      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
++      grid-template-columns: 40px 2fr 1fr 1fr;
+       padding: 15px 20px;
+       align-items: center;
+       cursor: pointer;
+@@ -265,7 +265,6 @@
+         <div>授权码</div>
+         <div>设备数</div>
+         <div>最后活跃</div>
+-        <div>IP归属</div>
+       </div>
+       <div id="monitorContent">
+         <div style="padding: 40px; text-align: center; color: var(--text-light);">
+@@ -405,15 +404,8 @@
+         statusText = '即将满';
+       }
+ 
+-      // 获取最新IP
+-      const lastDevice = item.devices.sort((a,b) => new Date(b.lastSeen) - new Date(a.lastSeen))[0];
+-      const lastIp = lastDevice ? lastDevice.ip : 'N/A';
+-
+       // 构建设备详情行 (略微调整样式)
+       const deviceRows = item.devices.map((dev, i) => {
+-        const location = dev.country ? 
+-          `<span style="margin-left:5px; font-size:10px; background:#f1f5f9; padding:2px 4px; border-radius:4px;">${dev.country}${dev.city ? ', ' + dev.city : ''}</span>` : '';
+-        
+         const deviceName = parseUA(dev.ua);
+         const fullUA = dev.ua.replace(/"/g, '&quot;');
+           
+@@ -428,7 +420,6 @@
+             <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
+             <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
+           </td>
+-          <td>${dev.ip}${location}</td>
+           <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
+           <td>${new Date(dev.lastSeen).toLocaleString()}</td>
+         </tr>
+@@ -447,9 +438,6 @@
+             <div style="font-size: 11px; color: var(--text-light);">
+               ${timeAgo(new Date(item.lastUsedTime))}
+             </div>
+-             <div style="font-size: 11px; color: var(--text-light); font-family: monospace;">
+-              ${lastIp}
+-            </div>
+           </div>
+           
+           <div class="item-details">
+@@ -465,7 +453,6 @@
+                     <th width="30">#</th>
+                     <th>设备信息</th>
+                     <th>Device ID</th>
+-                    <th>IP地址</th>
+                     <th>首次绑定</th>
+                     <th>最后在线</th>
+                   </tr>
+
+commit f7ed54d0247b82adc66a58116da013f63975b361
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Dec 23 14:04:28 2025 +0800
+
+    Fix: Resolve null pointer error in admin console login
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 2170c9a..6ea5cc0 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -337,7 +337,6 @@
+       }
+ 
+       // 登录成功
+-      document.getElementById('loggedInTools').style.display = 'block';
+       document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
+       document.getElementById('connectionStatus').style.color = 'var(--success)';
+ 
+
+commit cc86114fcce183731f85857da42fcf6f6c3d3b58
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Dec 23 14:02:13 2025 +0800
+
+    Clean: Remove redundant Refresh Data button from admin console
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+index 151c23d..2170c9a 100644
+--- a/public/console-admin-8x92lz.html
++++ b/public/console-admin-8x92lz.html
+@@ -249,10 +249,6 @@
+       </div>
+       <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
+     </div>
+-    
+-    <div id="loggedInTools" style="display: none;">
+-      <button onclick="refreshData()" class="btn-secondary">🔄 刷新数据</button>
+-    </div>
+   </div>
+ 
+   <!-- Tabs -->
+@@ -355,10 +351,6 @@
+     }
+   }
+ 
+-  function refreshData() {
+-    login();
+-  }
+-
+   function toggleTheme() {
+     const current = document.documentElement.getAttribute('data-theme');
+     if (current === 'dark') {
+
+commit 8e2c8b17bf49d2dd102df1048a9326bff88a9484
+Author: SpencerLaw <spencerlaw@example.com>
+Date:   Tue Dec 23 10:23:43 2025 +0800
+
+    Feat: Add total duration, remove admin password, and default expand list
+
+diff --git a/public/console-admin-8x92lz.html b/public/console-admin-8x92lz.html
+new file mode 100644
+index 0000000..151c23d
+--- /dev/null
++++ b/public/console-admin-8x92lz.html
+@@ -0,0 +1,582 @@
++<!DOCTYPE html>
++<html lang="zh-CN">
++<head>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>Anypok 授权管理后台</title>
++  <style>
++    :root {
++      --primary: #6366f1;
++      --primary-dark: #4f46e5;
++      --bg: #f8fafc;
++      --surface: #ffffff;
++      --text: #334155;
++      --text-light: #94a3b8;
++      --border: #e2e8f0;
++      --success: #10b981;
++      --warning: #f59e0b;
++      --danger: #ef4444;
++    }
++
++    [data-theme="dark"] {
++      --bg: #0f172a;
++      --surface: #1e293b;
++      --text: #f8fafc;
++      --text-light: #94a3b8;
++      --border: #334155;
++    }
++
++    * { margin: 0; padding: 0; box-sizing: border-box; } 
++    
++    body {
++      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
++      background: var(--bg);
++      color: var(--text);
++      padding: 20px;
++      transition: background 0.3s, color 0.3s;
++    }
++
++    .container { max-width: 1000px; margin: 0 auto; }
++
++    /* Header & Auth */
++    .header {
++      display: flex;
++      justify-content: space-between;
++      align-items: center;
++      margin-bottom: 25px;
++      background: var(--surface);
++      padding: 15px 25px;
++      border-radius: 12px;
++      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
++    }
++    .header h1 { font-size: 20px; color: var(--text); }
++    
++    .btn-primary {
++      background: var(--primary);
++      color: white;
++      border: none;
++      padding: 8px 16px;
++      border-radius: 6px;
++      cursor: pointer;
++      font-weight: 500;
++      font-size: 14px;
++      transition: background 0.2s;
++    }
++    .btn-primary:hover { background: var(--primary-dark); }
++    .btn-secondary {
++      background: var(--surface);
++      border: 1px solid var(--border);
++      color: var(--text);
++      padding: 6px 12px;
++      border-radius: 6px;
++      cursor: pointer;
++      font-size: 12px;
++    }
++    
++    .theme-toggle {
++      background: none;
++      border: 1px solid var(--border);
++      padding: 5px 10px;
++      border-radius: 6px;
++      cursor: pointer;
++      font-size: 14px;
++      margin-left: 10px;
++      color: var(--text);
++    }
++
++    /* Tabs */
++    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
++    .tab {
++      padding: 10px 20px;
++      cursor: pointer;
++      border-bottom: 2px solid transparent;
++      color: var(--text-light);
++      font-weight: 500;
++    }
++    .tab.active {
++      color: var(--primary);
++      border-bottom-color: var(--primary);
++    }
++
++    /* Content Area */
++    .view-section { display: none; }
++    .view-section.active { display: block; }
++
++    /* Monitor List */
++    .monitor-list {
++      background: var(--surface);
++      border-radius: 12px;
++      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
++      overflow: hidden;
++    }
++    
++    .monitor-header {
++      display: grid;
++      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
++      padding: 15px 20px;
++      background: var(--bg); /* Use bg var instead of hardcoded */
++      font-size: 12px;
++      font-weight: 600;
++      color: var(--text-light);
++      border-bottom: 1px solid var(--border);
++    }
++
++    .monitor-item {
++      border-bottom: 1px solid var(--border);
++    }
++    .monitor-item:last-child { border-bottom: none; }
++
++    .item-summary {
++      display: grid;
++      grid-template-columns: 40px 2fr 1fr 1fr 1fr;
++      padding: 15px 20px;
++      align-items: center;
++      cursor: pointer;
++      transition: background 0.1s;
++    }
++    .item-summary:hover { background: var(--bg); }
++
++    .toggle-btn {
++      width: 24px;
++      height: 24px;
++      border-radius: 4px;
++      display: flex;
++      align-items: center;
++      justify-content: center;
++      color: var(--text-light);
++      font-weight: bold;
++      transition: transform 0.2s;
++    }
++    .monitor-item.expanded .toggle-btn { transform: rotate(90deg); color: var(--primary); }
++
++    .code-display { font-family: monospace; font-weight: 600; color: var(--text); }
++    
++    .status-badge {
++      display: inline-block;
++      padding: 2px 8px;
++      border-radius: 12px;
++      font-size: 11px;
++      font-weight: 600;
++    }
++    .status-good { background: #dcfce7; color: #166534; }
++    .status-warn { background: #fef3c7; color: #92400e; }
++    .status-full { background: #fee2e2; color: #991b1b; }
++
++    /* Item Details (Expanded) */
++    .item-details {
++      display: none;
++      padding: 0;
++      background: var(--bg);
++      border-top: 1px solid var(--border);
++    }
++    .monitor-item.expanded .item-details { display: block; }
++
++    .details-grid {
++      padding: 20px;
++      display: grid;
++      gap: 20px;
++    }
++    
++    .device-table {
++      width: 100%;
++      border-collapse: collapse;
++      font-size: 12px;
++      background: var(--surface);
++      border: 1px solid var(--border);
++      border-radius: 6px;
++      color: var(--text);
++    }
++    .device-table th, .device-table td {
++      padding: 8px 12px;
++      text-align: left;
++      border-bottom: 1px solid var(--border);
++    }
++    .device-table th { background: var(--bg); color: var(--text-light); font-weight: 500; }
++    
++    .tooltip {
++      position: relative;
++      cursor: help;
++      border-bottom: 1px dashed #999;
++    }
++    
++    /* Generator Styles */
++    .gen-card {
++      background: var(--surface);
++      padding: 30px;
++      border-radius: 12px;
++      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
++      text-align: center;
++    }
++    .gen-list {
++      margin-top: 20px;
++      text-align: left;
++      max-height: 400px;
++      overflow-y: auto;
++      border: 1px solid var(--border);
++      border-radius: 8px;
++    }
++    .gen-item {
++      padding: 10px 15px;
++      border-bottom: 1px solid var(--border);
++      display: flex;
++      justify-content: space-between;
++      font-family: monospace;
++    }
++    
++    /* Auth Input (Hidden by default in this version, but kept style just in case) */
++    .auth-input {
++      padding: 8px 12px;
++      border: 1px solid var(--border);
++      border-radius: 6px;
++      outline: none;
++      font-size: 14px;
++      width: 200px;
++      background: var(--surface);
++      color: var(--text);
++    }
++
++  </style>
++</head>
++<body>
++
++<div class="container">
++  <!-- Header -->
++  <div class="header">
++    <div style="display: flex; align-items: center;">
++      <div>
++        <h1>🚀 Anypok Admin</h1>
++        <span id="connectionStatus" style="font-size: 12px; color: var(--text-light);">正在连接...</span>
++      </div>
++      <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌓</button>
++    </div>
++    
++    <div id="loggedInTools" style="display: none;">
++      <button onclick="refreshData()" class="btn-secondary">🔄 刷新数据</button>
++    </div>
++  </div>
++
++  <!-- Tabs -->
++  <div class="tabs">
++    <div class="tab active" onclick="switchTab('monitor')">📊 实时监控</div>
++    <div class="tab" onclick="switchTab('generate')">📝 生成授权码</div>
++  </div>
++
++  <!-- SECTION 1: MONITOR -->
++  <div id="monitorSection" class="view-section active">
++    <div class="monitor-list">
++      <div class="monitor-header">
++        <div></div>
++        <div>授权码</div>
++        <div>设备数</div>
++        <div>最后活跃</div>
++        <div>IP归属</div>
++      </div>
++      <div id="monitorContent">
++        <div style="padding: 40px; text-align: center; color: var(--text-light);">
++          加载中...
++        </div>
++      </div>
++    </div>
++  </div>
++
++  <!-- SECTION 2: GENERATOR -->
++  <div id="generateSection" class="view-section">
++    <div class="gen-card">
++      <h2 style="font-size: 18px; margin-bottom: 20px;">批量生成授权码</h2>
++      <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
++        <input type="number" id="genCount" value="10" class="auth-input" style="width: 100px;">
++        <button onclick="generateCodes()" class="btn-primary">生成</button>
++      </div>
++      
++      <div class="gen-list" id="genList"></div>
++      
++      <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
++        <button onclick="exportEnv()" class="btn-secondary">📥 导出 ENV 文件</button>
++        <button onclick="copyAllGenerated()" class="btn-secondary">📋 复制全部</button>
++      </div>
++    </div>
++  </div>
++
++</div>
++
++<script>
++  // 配置
++  const API_URL = '/api/verify-license'; 
++  // Hardcoded key for "passwordless" access via this secret file
++  const SECRET_KEY = 'spencer'; 
++  let currentData = [];
++  let generatedCodes = [];
++
++  // === 初始化：自动登录 ===
++  window.addEventListener('load', () => {
++    // 检查主题
++    const savedTheme = localStorage.getItem('theme');
++    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
++      document.documentElement.setAttribute('data-theme', 'dark');
++      document.getElementById('themeBtn').textContent = '🌞';
++    } else {
++      document.getElementById('themeBtn').textContent = '🌙';
++    }
++
++    // 自动登录
++    login();
++  });
++
++  // === 登录 & 加载数据 ===
++  async function login() {
++    try {
++      const res = await fetch(API_URL, {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({
++          action: 'list_all',
++          adminKey: SECRET_KEY
++        })
++      });
++
++      const json = await res.json();
++
++      if (!json.success) {
++        throw new Error(json.message || '未知错误');
++      }
++
++      // 登录成功
++      document.getElementById('loggedInTools').style.display = 'block';
++      document.getElementById('connectionStatus').textContent = `🟢 已连接 (共 ${json.data.length} 条记录)`;
++      document.getElementById('connectionStatus').style.color = 'var(--success)';
++
++      currentData = json.data;
++      renderMonitorList();
++
++    } catch (err) {
++      document.getElementById('connectionStatus').textContent = `🔴 连接失败: ${err.message}`;
++      document.getElementById('connectionStatus').style.color = 'var(--danger)';
++      document.getElementById('monitorContent').innerHTML = `<div style="padding: 20px; color: var(--danger); text-align: center;">加载失败: ${err.message}</div>`;
++    }
++  }
++
++  function refreshData() {
++    login();
++  }
++
++  function toggleTheme() {
++    const current = document.documentElement.getAttribute('data-theme');
++    if (current === 'dark') {
++      document.documentElement.removeAttribute('data-theme');
++      localStorage.setItem('theme', 'light');
++      document.getElementById('themeBtn').textContent = '🌙';
++    } else {
++      document.documentElement.setAttribute('data-theme', 'dark');
++      localStorage.setItem('theme', 'dark');
++      document.getElementById('themeBtn').textContent = '🌞';
++    }
++  }
++
++  // === 辅助：解析 User Agent ===
++  function parseUA(ua) {
++    if (!ua) return '未知设备';
++    if (ua.includes('iPhone')) return 'iPhone (iOS)';
++    if (ua.includes('iPad')) return 'iPad (iOS)';
++    if (ua.includes('Android')) return 'Android 设备';
++    if (ua.includes('Windows')) return 'Windows PC';
++    if (ua.includes('Macintosh')) return 'Mac PC';
++    if (ua.includes('Linux')) return 'Linux PC';
++    return ua.length > 20 ? ua.substring(0, 20) + '...' : ua;
++  }
++
++  // === 渲染监控列表 ===
++  function renderMonitorList() {
++    const container = document.getElementById('monitorContent');
++    
++    if (currentData.length === 0) {
++      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-light);">暂无激活记录</div>';
++      return;
++    }
++
++    container.innerHTML = currentData.map((item, index) => {
++      // 检查是否失效
++      const isRevoked = item.status === 'revoked';
++      
++      // 计算状态颜色
++      const usage = item.totalDevices;
++      const max = item.maxDevices || 3;
++      let badgeClass = 'status-good';
++      let statusText = '正常';
++      
++      if (isRevoked) {
++        badgeClass = 'status-full'; // 用红色表示失效
++        statusText = '🚫 已删除';
++      } else if (usage >= max) {
++        badgeClass = 'status-full';
++        statusText = '已满';
++      } else if (usage > max * 0.8) {
++        badgeClass = 'status-warn';
++        statusText = '即将满';
++      }
++
++      // 获取最新IP
++      const lastDevice = item.devices.sort((a,b) => new Date(b.lastSeen) - new Date(a.lastSeen))[0];
++      const lastIp = lastDevice ? lastDevice.ip : 'N/A';
++
++      // 构建设备详情行 (略微调整样式)
++      const deviceRows = item.devices.map((dev, i) => {
++        const location = dev.country ? 
++          `<span style="margin-left:5px; font-size:10px; background:#f1f5f9; padding:2px 4px; border-radius:4px;">${dev.country}${dev.city ? ', ' + dev.city : ''}</span>` : '';
++        
++        const deviceName = parseUA(dev.ua);
++        const fullUA = dev.ua.replace(/"/g, '&quot;');
++          
++        return `
++        <tr>
++          <td>${i + 1}</td>
++          <td>
++            <div style="font-weight:500; font-size:12px;">${deviceName}</div>
++            <div style="font-size:10px; color:#94a3b8; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${fullUA}">${dev.ua}</div>
++          </td>
++          <td>
++            <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
++            <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
++          </td>
++          <td>${dev.ip}${location}</td>
++          <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
++          <td>${new Date(dev.lastSeen).toLocaleString()}</td>
++        </tr>
++      `}).join('');
++
++      return `
++        <div class="monitor-item expanded" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
++          <div class="item-summary" onclick="toggleItem(${index})">
++            <div class="toggle-btn">▶</div>
++            <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
++              ${item.code}
++            </div>
++            <div>
++              <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
++            </div>
++            <div style="font-size: 11px; color: var(--text-light);">
++              ${timeAgo(new Date(item.lastUsedTime))}
++            </div>
++             <div style="font-size: 11px; color: var(--text-light); font-family: monospace;">
++              ${lastIp}
++            </div>
++          </div>
++          
++          <div class="item-details">
++            <div class="details-grid">
++              <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-light); margin-bottom:10px;">
++                <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
++                <span>首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
++              </div>
++              
++              <table class="device-table">
++                <thead>
++                  <tr>
++                    <th width="30">#</th>
++                    <th>设备信息</th>
++                    <th>Device ID</th>
++                    <th>IP地址</th>
++                    <th>首次绑定</th>
++                    <th>最后在线</th>
++                  </tr>
++                </thead>
++                <tbody>
++                  ${deviceRows}
++                </tbody>
++              </table>
++            </div>
++          </div>
++        </div>
++      `;
++    }).join('');
++  }
++
++  function toggleItem(index) {
++    const el = document.getElementById(`item-${index}`);
++    const isExpanded = el.classList.contains('expanded');
++    
++    // 关闭所有其他的 (可选，如果想保持手风琴效果)
++    // document.querySelectorAll('.monitor-item').forEach(e => e.classList.remove('expanded'));
++
++    if (!isExpanded) {
++      el.classList.add('expanded');
++    } else {
++      el.classList.remove('expanded');
++    }
++  }
++
++  // === 生成器功能 ===
++  function generateCodes() {
++    const count = document.getElementById('genCount').value;
++    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
++    const now = new Date();
++    const datePart = now.getFullYear() + 
++                    String(now.getMonth() + 1).padStart(2, '0') + 
++                    String(now.getDate()).padStart(2, '0');
++    
++    const newBatch = [];
++    for (let i = 0; i < count; i++) {
++      let random = '';
++      for (let j = 0; j < 8; j++) {
++        random += chars.charAt(Math.floor(Math.random() * chars.length));
++      }
++      newBatch.push((datePart + random).match(/.{1,4}/g).join('-'));
++    }
++
++    generatedCodes = [...newBatch, ...generatedCodes];
++    
++    const listEl = document.getElementById('genList');
++    listEl.innerHTML = generatedCodes.map(c => `
++      <div class="gen-item">
++        <span>${c}</span>
++        <span style="color:var(--text-light); font-size:12px;">未激活</span>
++      </div>
++    `).join('');
++  }
++
++  function exportEnv() {
++    if(!generatedCodes.length) return alert('没有生成的代码');
++    const blob = new Blob([`LICENSE_CODES=${generatedCodes.join(',')}`], {type: 'text/plain'});
++    const a = document.createElement('a');
++    a.href = URL.createObjectURL(blob);
++    a.download = 'LICENSE_CODES.env';
++    a.click();
++  }
++  
++  function copyAllGenerated() {
++    if(!generatedCodes.length) return;
++    navigator.clipboard.writeText(generatedCodes.join('\n'));
++    alert(`已复制 ${generatedCodes.length} 个授权码`);
++  }
++  
++  function copy(text) {
++    navigator.clipboard.writeText(text);
++    alert('已复制 ID: ' + text);
++  }
++
++  // === 工具函数 ===
++  function switchTab(tabName) {
++    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
++    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
++    
++    if (tabName === 'monitor') {
++      document.querySelector('.tab:nth-child(1)').classList.add('active');
++      document.getElementById('monitorSection').classList.add('active');
++    } else {
++      document.querySelector('.tab:nth-child(2)').classList.add('active');
++      document.getElementById('generateSection').classList.add('active');
++    }
++  }
++
++  function timeAgo(date) {
++    const seconds = Math.floor((new Date() - date) / 1000);
++    if (seconds < 60) return '刚刚';
++    const minutes = Math.floor(seconds / 60);
++    if (minutes < 60) return `${minutes}分钟前`;
++    const hours = Math.floor(minutes / 60);
++    if (hours < 24) return `${hours}小时前`;
++    return `${Math.floor(hours / 24)}天前`;
++  }
++</script>
++
++</body>
++</html>

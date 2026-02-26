@@ -28,7 +28,9 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [plannerTab, setPlannerTab] = useState(0);
     const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
     const [cloudToast, setCloudToast] = useState<{ show: boolean; count: number }>({ show: false, count: 0 });
+    const [rewardToast, setRewardToast] = useState<{ show: boolean }>({ show: false });
     const prevTasksCount = useRef<number>(0);
+    const prevRewardsHash = useRef<string>('');
     const isFirstLoad = useRef(true);
 
     // Timer state
@@ -241,6 +243,15 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
                 setTasks(newTasks);
                 prevTasksCount.current = newTasks.length;
+
+                const currentRewards = result.data.rewards || [];
+                // Detect REWARD changes (simple hash check of IDs)
+                const rewardsHash = currentRewards.map((r: any) => r.id).join(',');
+                if (!isFirstLoad.current && prevRewardsHash.current !== '' && rewardsHash !== prevRewardsHash.current) {
+                    setRewardToast({ show: true });
+                    setTimeout(() => setRewardToast({ show: false }), 5000);
+                }
+                prevRewardsHash.current = rewardsHash;
                 isFirstLoad.current = false;
 
                 setCheckins(result.data.checkins || []);
@@ -637,6 +648,27 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                         爸爸妈妈给你分配了 <span className="text-orange-500 text-lg mx-0.5">{cloudToast.count}</span> 个新任务！
                                     </p>
                                 </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+                {rewardToast.show && (
+                    <motion.div
+                        initial={{ y: -100, x: "-50%", opacity: 0, scale: 0.8 }}
+                        animate={{ y: 20, x: "-50%", opacity: 1, scale: 1 }}
+                        exit={{ y: -100, x: "-50%", opacity: 0, scale: 0.8 }}
+                        style={{ left: "50%" }}
+                        className="fixed top-12 z-[100] w-[90%] max-w-sm"
+                    >
+                        <div className="bg-white/95 backdrop-blur-xl p-5 rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.1)] border-4 border-orange-100 flex items-center gap-4 relative overflow-hidden">
+                            <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0 animate-tada">
+                                <Trophy size={28} />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-orange-500 font-black text-sm uppercase tracking-wider mb-1">宝库更新啦！</h4>
+                                <p className="text-[#5D4037] font-bold text-base leading-tight">
+                                    奖励库已经焕然一新，快去看看有什么新惊喜！
+                                </p>
                             </div>
                         </div>
                     </motion.div>

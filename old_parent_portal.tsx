@@ -14,7 +14,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [licenseData, setLicenseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'stats' | 'redemption'>('children');
+    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'checkins' | 'stats' | 'redemption'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -109,7 +109,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [selectedRewardCategory, setSelectedRewardCategory] = useState<string>('family');
     const [customCategories, setCustomCategories] = useState<Category[]>([]);
     const [hiddenPresets, setHiddenPresets] = useState<string[]>([]);
-    const [hiddenRewardPresets, setHiddenRewardPresets] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isManagingCategories, setIsManagingCategories] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
@@ -171,10 +170,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 fetchTasks();
             }
             if (activeTab === 'rewards') fetchRewards();
-            if (activeTab === 'stats') {
-                setFocusLogs([]); // Clear stale logs before refreshing
-                setCurrentTasks([]); // Clear stale tasks before refreshing
-                fetchTasks();     // Refresh both tasks and logs
+            if (activeTab === 'checkins') {
+                setFocusLogs([]); // Clear old logs to show fresh loading
+                fetchTasks();     // Re-use fetchTasks as it fetches logs too
             }
         }
     }, [selectedChildId, activeTab]);
@@ -254,15 +252,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 if (result.data.hiddenPresets) {
                     setHiddenPresets(result.data.hiddenPresets);
                 }
-                if (result.data.hiddenRewardPresets) {
-                    setHiddenRewardPresets(result.data.hiddenRewardPresets);
-                }
 
                 // 核心同步：从 license 聚合对象中提取当前孩子的专注日志
                 const today = formatBeijingTime(new Date()).split(' ')[0];
                 const dailyData = result.data.progress?.[today]?.[selectedChildId];
-                const newLogs = dailyData?.focusLogs || [];
-                setFocusLogs(prev => JSON.stringify(prev) !== JSON.stringify(newLogs) ? newLogs : prev);
+                if (dailyData?.focusLogs) {
+                    setFocusLogs(prev => JSON.stringify(prev) !== JSON.stringify(dailyData.focusLogs) ? dailyData.focusLogs : prev);
+                }
 
                 // 核心修复: 实时同步孩子的任务状态 (包括 completed 标记)
                 if (selectedChildId) {
@@ -296,7 +292,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         return () => clearInterval(timer);
     }, [activeTab, isIdle, fetchConfig]); // Added memoization dependencies
 
-    const handleSaveCategories = async (newCategories: Category[], newHiddenPresets?: string[], newHiddenRewardPresets?: string[]) => {
+    const handleSaveCategories = async (newCategories: Category[], newHiddenPresets?: string[]) => {
         setIsSaving(true);
         try {
             const res = await fetch('/api/kiddieplan/manage', {
@@ -307,8 +303,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     token,
                     data: {
                         categories: newCategories,
-                        hiddenPresets: newHiddenPresets || hiddenPresets,
-                        hiddenRewardPresets: newHiddenRewardPresets || hiddenRewardPresets
+                        hiddenPresets: newHiddenPresets !== undefined ? newHiddenPresets : hiddenPresets
                     }
                 })
             });
@@ -394,8 +389,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
         setDialogConfig({
             isOpen: true,
-            title: '隐藏预设',
-            message: `确定要不再显示“${templateTitle}”吗？`,
+            title: isCustom ? '🗑️ 删除模板' : '🙈 隐藏任务',
+            message: msg,
+            hideInput: true,
+            placeholder: '',
             onConfirm: async () => {
                 if (isCustom && templateIndex !== undefined) {
                     const newCategories = customCategories.map(c => {
@@ -416,25 +413,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     }
                 }
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
-            },
-            hideInput: true
-        });
-    };
-
-    const handleDeleteRewardTemplate = (category: string, rewardName: string) => {
-        setDialogConfig({
-            isOpen: true,
-            title: '隐藏奖励预设',
-            message: `确定要不再显示“${rewardName}”吗？`,
-            onConfirm: async () => {
-                const presetKey = `${category}:${rewardName}`;
-                if (!hiddenRewardPresets.includes(presetKey)) {
-                    const newHidden = [...hiddenRewardPresets, presetKey];
-                    await handleSaveCategories(customCategories, hiddenPresets, newHidden);
-                }
-                setDialogConfig(prev => ({ ...prev, isOpen: false }));
-            },
-            hideInput: true
+            }
         });
     };
 
@@ -695,28 +674,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
-    const handleAddReward = (importedReward?: Partial<Reward>) => {
-        if (importedReward) {
-            setDialogConfig({
-                isOpen: true,
-                title: '🎁 确认添加奖励',
-                message: `是否要添加“${importedReward.name}”到奖励列表？`,
-                hideInput: true,
-                onConfirm: () => {
-                    const newReward: Reward = {
-                        id: `r_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                        name: importedReward.name!,
-                        pointsCost: importedReward.pointsCost || 500,
-                        icon: importedReward.icon || '🎁',
-                        category: importedReward.category || selectedRewardCategory
-                    };
-                    setRewards(prev => [...prev, newReward]);
-                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                }
-            });
-            return;
-        }
-
+    const handleAddReward = () => {
         setDialogConfig({
             isOpen: true,
             title: '🎁 新增奖励项',
@@ -848,56 +806,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             },
             hideInput: true
         });
-    };
-
-    const handleApproveRedemption = async (logId: string) => {
-        setIsSaving(true);
-        try {
-            const res = await fetch('/api/kiddieplan/manage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'approve_redemption', token, data: { logId } })
-            });
-            const result = await res.json();
-            if (result.success) {
-                // 刷新数据以更新积分
-                const configRes = await fetch('/api/kiddieplan/manage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'get_config', token })
-                });
-                const config = await configRes.json();
-                if (config.success) {
-                    setChildren(config.data.children);
-                }
-                fetchRedemptionHistory();
-            } else {
-                alert(result.message);
-            }
-        } catch (err) {
-            alert('审批失败');
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleRejectRedemption = async (logId: string) => {
-        setIsSaving(true);
-        try {
-            const res = await fetch('/api/kiddieplan/manage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'reject_redemption', token, data: { logId } })
-            });
-            const result = await res.json();
-            if (result.success) {
-                fetchRedemptionHistory();
-            }
-        } catch (err) {
-            alert('拒绝失败');
-        } finally {
-            setIsSaving(false);
-        }
     };
 
     const removeReward = (id: string) => {
@@ -1093,201 +1001,184 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         : CHILD_THEMES[0];
 
     return (
-        <div
-            className={`flex flex-col h-full w-full overflow-hidden font-sans relative transition-colors duration-1000 bg-gradient-to-br ${currentTheme.bg}`}
-            style={{
-                overscrollBehavior: 'none'
-            }}
-        >
-            {/* Decorative Blurs */}
-            <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
-            <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
+        <div className={`h-full flex flex-col relative overflow-hidden text-[110%] px-1 transition-colors duration-1000 bg-gradient-to-b ${currentTheme.bg}`}>
+            {/* Dynamic Background Decorative elements */}
+            <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[120px] pointer-events-none opacity-40 transition-colors duration-1000 ${currentTheme.text.replace('text', 'bg')}`}></div>
+            <div className={`absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full blur-[100px] pointer-events-none opacity-30 transition-colors duration-1000 ${currentTheme.ring.replace('ring', 'bg')}`}></div>
 
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
-            {/* Main Area - Everything scrolls under the glassy header */}
+            {/* Main Content Wrapper - Content scrolls UNDER the floating header */}
             <main
-                ref={mainScrollRef as any}
+                ref={mainScrollRef}
+                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
-                    // 仅在此处做收缩判断，展开由点击 Header 触发
-                    if (top > 40 && !isScrolled) setIsScrolled(true);
+                    // Strict collapse logic: if moved down, collapse.
+                    // Manual expand only (via click) to prevent jitter.
+                    if (!isScrolled && top > 20) setIsScrolled(true);
                 }}
-                className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
-                style={{ WebkitOverflowScrolling: 'touch' }}
             >
-                {/* Top Bar - Harmonized with ChildPortal */}
+                {/* Floating Header Wrapper - Dynamic Theme */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        onClick={() => {
-                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                            if (isScrolled) setIsScrolled(false);
-                        }}
-                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'}`}
-                        style={{
-                            background: isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                            backdropFilter: 'blur(20px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                        }}
+                        className={`px-6 rounded-[32px] transition-all duration-500 ease-in-out ${isScrolled
+                            ? 'py-3 bg-white/20 border border-white/40 shadow-sm backdrop-blur-2xl'
+                            : 'py-4 bg-white/20 border border-white/40 shadow-none backdrop-blur-2xl'
+                            }`}
                     >
-                        <div className="flex flex-col cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                            if (isScrolled) setIsScrolled(false);
-                        }}>
-                            <h1 className={`text-[18px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                星梦奇旅
-                            </h1>
-                            <AnimatePresence>
-                                {!isScrolled && (
-                                    <motion.span
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
-                                        style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
+                        {/* Top Row: Brand & Time */}
+                        <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'mb-0' : 'mb-6'}`}>
+                            <div className="flex items-center gap-3">
+                                <div className="flex flex-col">
+                                    <h1 className={`text-[20px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                        星梦奇旅
+                                    </h1>
+                                    <AnimatePresence>
+                                        {!isScrolled && (
+                                            <motion.span
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
+                                                style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
+                                            >
+                                                家长端
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Mini Avatar when Scrolled */}
+                                <AnimatePresence>
+                                    {isScrolled && selectedChild && (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                                            exit={{ opacity: 0, x: -20, scale: 0.8 }}
+                                            className="flex items-center gap-2 bg-white/40 backdrop-blur-sm px-2 py-1 rounded-full border border-white/50"
+                                            onClick={() => {
+                                                // Scroll to top to expand
+                                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                        >
+                                            <img src={selectedChild.avatar} className="w-6 h-6 rounded-full object-cover border border-white" alt="mini" />
+                                            <span className="text-xs font-bold text-gray-600">{selectedChild.name}</span>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                {isScrolled && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        onClick={() => {
+                                            setIsScrolled(false);
+                                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
                                     >
-                                        家长端
-                                    </motion.span>
+                                        <Menu size={20} />
+                                    </motion.button>
                                 )}
-                            </AnimatePresence>
+                                <div className="flex flex-col items-end mr-0.5">
+                                    <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
+                                        {formatBeijingTime(currentTime).split(' ')[1]}
+                                    </span>
+                                    <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
+                                        {formatBeijingTime(currentTime).split(' ')[0]}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Center: Mini Profile when Scrolled */}
+                        {/* Child Selector Row - Collapsible */}
                         <AnimatePresence>
-                            {isScrolled && selectedChild && (
+                            {!isScrolled && (
                                 <motion.div
-                                    initial={{ opacity: 0, scale: 0.8, x: -10 }}
-                                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                        if (isScrolled) setIsScrolled(false);
-                                    }}
-                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm cursor-pointer hover:bg-white/60"
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    className="overflow-hidden"
                                 >
-                                    <img
-                                        src={selectedChild.avatar}
-                                        className="w-6 h-6 rounded-full object-cover border border-white shadow-sm"
-                                        alt={selectedChild.name}
-                                    />
-                                    <span className="text-xs font-black text-gray-700 tracking-tight">
-                                        {selectedChild.name}
-                                    </span>
+                                    <div className={`flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 ? 'justify-center' : 'justify-around'}`}>
+                                        {children.map((child, idx) => {
+                                            const isSelected = selectedChildId === child.id;
+                                            const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
+
+                                            return (
+                                                <motion.div
+                                                    key={child.id}
+                                                    className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
+                                                    onClick={() => setSelectedChildId(child.id)}
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
+                                                    <div className="relative">
+                                                        <motion.div
+                                                            className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-300 relative z-10 bg-white
+                                                    ${isSelected ? `${theme.ring} scale-105 shadow-md border-white` : 'border-transparent opacity-60 grayscale-[0.3]'}`}
+                                                        >
+                                                            <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
+                                                        </motion.div>
+
+                                                        {/* Edit Button */}
+                                                        {isSelected && (
+                                                            <motion.button
+                                                                initial={{ scale: 0, opacity: 0 }}
+                                                                animate={{ scale: 1, opacity: 1 }}
+                                                                onClick={(e) => { e.stopPropagation(); handleEditChild(); }}
+                                                                className={`absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-gray-500 shadow-sm flex items-center justify-center border border-gray-100 z-20`}
+                                                            >
+                                                                <Edit2 size={10} />
+                                                            </motion.button>
+                                                        )}
+                                                    </div>
+
+                                                    <span className={`text-[10px] font-black transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-400'}`}>
+                                                        {child.name}
+                                                    </span>
+
+                                                    {/* Simple Active Dot */}
+                                                    {isSelected && (
+                                                        <motion.div
+                                                            layoutId="active-dot"
+                                                            className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('from-', 'bg-').split(' ')[0]}`}
+                                                        />
+                                                    )}
+                                                </motion.div>
+                                            );
+                                        })}
+
+                                        {/* Add Button - Max 3 Children */}
+                                        {children.length < 3 && (
+                                            <div className="flex flex-col items-center gap-2 min-w-[64px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer p-2" onClick={() => handleAddChild()}>
+                                                <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white/20">
+                                                    <Plus className="text-gray-400" size={20} />
+                                                </div>
+                                                <span className="text-[10px] font-bold text-gray-400">添加</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+
                                 </motion.div>
                             )}
                         </AnimatePresence>
 
-                        {/* Right: Time & Compact Buttons */}
-                        <div className="flex items-center gap-3">
-                            {isScrolled && (
-                                <motion.button
-                                    initial={{ opacity: 0, scale: 0.5 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    onClick={() => {
-                                        setIsScrolled(false);
-                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                    }}
-                                    className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
-                                >
-                                    <Menu size={20} />
-                                </motion.button>
-                            )}
-                            <div className="flex flex-col items-end mr-0.5">
-                                <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[1]}
-                                </span>
-                                <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[0]}
-                                </span>
-                            </div>
-                        </div>
+
                     </header>
                 </div>
 
-                {/* Child Selector Row - Collapsible */}
-                <AnimatePresence>
-                    {!isScrolled && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="overflow-hidden mx-4 mb-6 bg-white/20 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-sm"
-                        >
-                            <div className={`flex items-start gap-4 overflow-x-auto no-scrollbar pb-2 pt-2 w-full ${children.length === 1 ? 'justify-center' : 'justify-around'}`}>
-                                {children.map((child, idx) => {
-                                    const isSelected = selectedChildId === child.id;
-                                    const theme = CHILD_THEMES[idx % CHILD_THEMES.length];
-
-                                    return (
-                                        <motion.div
-                                            key={child.id}
-                                            className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
-                                            onClick={() => {
-                                                setSelectedChildId(child.id);
-                                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                            }}
-                                            whileTap={{ scale: 0.95 }}
-                                        >
-                                            <div className="relative">
-                                                <motion.div
-                                                    className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-300 relative z-10 bg-white
-                                                    ${isSelected ? `${theme.ring} scale-105 shadow-md border-white` : 'border-transparent opacity-60 grayscale-[0.3]'}`}
-                                                >
-                                                    <img src={child.avatar} alt={child.name} className="w-full h-full object-cover" />
-                                                </motion.div>
-
-                                                {/* Edit Button */}
-                                                {isSelected && (
-                                                    <motion.button
-                                                        initial={{ scale: 0, opacity: 0 }}
-                                                        animate={{ scale: 1, opacity: 1 }}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditChild(); }}
-                                                        className={`absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-gray-500 shadow-sm flex items-center justify-center border border-gray-100 z-20`}
-                                                    >
-                                                        <Edit2 size={10} />
-                                                    </motion.button>
-                                                )}
-                                            </div>
-
-                                            <span className={`text-[10px] font-black transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-400'}`}>
-                                                {child.name}
-                                            </span>
-
-                                            {/* Simple Active Dot */}
-                                            {isSelected && (
-                                                <motion.div
-                                                    layoutId="active-dot"
-                                                    className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('from-', 'bg-').split(' ')[0]}`}
-                                                />
-                                            )}
-                                        </motion.div>
-                                    );
-                                })}
-
-                                {/* Add Button - Max 3 Children */}
-                                {children.length < 3 && (
-                                    <div className="flex flex-col items-center gap-2 min-w-[64px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer p-2" onClick={() => handleAddChild()}>
-                                        <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-white/20">
-                                            <Plus className="text-gray-400" size={20} />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-gray-400">添加</span>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                <div className="px-4 pb-4 space-y-6">
+                <div className="px-4 pb-0 space-y-6">
                     {(activeTab === 'children' && selectedChild) && (
                         <motion.div
                             key={selectedChildId}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/20 backdrop-blur-2xl p-4 md:p-8 rounded-[40px] border border-white/10 shadow-xl relative overflow-hidden"
+                            className="bg-white/20 backdrop-blur-2xl p-8 rounded-[40px] border border-white/10 shadow-xl relative overflow-hidden"
                         >
                             {/* Dashboard Content - Z-Index raised to sit on top of glass */}
                             <div className="relative z-10 space-y-6">
@@ -1297,7 +1188,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     {/* Left Capsule: Real-time Action */}
                                     <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border border-white/20 flex flex-col justify-between min-h-[160px] bg-gradient-to-br ${currentTheme.bg.replace('from-', 'from-white/10 to-').replace('50', '500').replace('100/30', '400')}`}>
                                         {/* Theme-based gradient override for the card */}
-                                        <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : 'from-violet-400 to-purple-500'} z-0`}></div>
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : currentTheme.name === 'amber' ? 'from-amber-400 to-orange-500' : currentTheme.name === 'violet' ? 'from-violet-400 to-purple-500' : 'from-emerald-400 to-teal-500'} z-0`}></div>
 
                                         <div className="absolute top-0 left-0 w-24 h-24 bg-white/20 rounded-full -ml-10 -mt-10 blur-2xl"></div>
 
@@ -1313,9 +1204,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="space-y-1">
                                                     <div className="flex justify-between items-end">
                                                         <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
-                                                        {liveFocusDuration > 0 && (
-                                                            <div className="text-xs font-black bg-white/20 px-2 py-0.5 rounded-lg flex items-center gap-1 animate-pulse">
-                                                                <Timer size={10} /> {formatTime(liveFocusDuration)}
+                                                        {selectedChild.focusStartTime && (
+                                                            <div className="text-[9px] font-black bg-white/20 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                <Clock size={10} /> {new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(selectedChild.focusStartTime))} 开始
                                                             </div>
                                                         )}
                                                     </div>
@@ -1327,8 +1218,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="space-y-1">
                                                     <div className="flex justify-between items-end">
                                                         <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
+                                                        {focusLogs.length > 0 && (
+                                                            <div className="text-[9px] font-black bg-white/20 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                <CheckCircle2 size={10} /> {(() => {
+                                                                    const last = [...focusLogs].sort((a, b) => new Date(b.endTime || 0).getTime() - new Date(a.endTime || 0).getTime())[0];
+                                                                    return last ? `${new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(last.endTime))} 结束` : '暂无记录';
+                                                                })()}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
+                                                    <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">能量恢复中</p>
                                                 </div>
                                             )}
                                         </div>
@@ -1372,7 +1272,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                 </div>
 
-                                {/* Action Grid (Redesigned: 2x2 Grid, Clean & Symmetric) */}
+                                {/* Action Grid */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <motion.button
                                         whileHover={{ y: -5, rotate: -1 }}
@@ -1403,10 +1303,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveTab('checkins')}
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
+                                    >
+                                        <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
+                                            <CalendarCheck size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">打卡记录</span>
+                                        <span className="text-xs text-gray-400 font-bold">查看成长历史</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: 1 }}
+                                        whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('redemption')}
                                         className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
-                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
+                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 font-candy">
                                             <Trophy size={32} strokeWidth={3} />
                                         </div>
                                         <span className="font-black text-[#5D4037] text-lg">核销记录</span>
@@ -1414,16 +1327,18 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </motion.button>
 
                                     <motion.button
-                                        whileHover={{ y: -5, rotate: 1 }}
+                                        whileHover={{ y: -5, rotate: 0 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('stats')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
+                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
-                                        <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
-                                            <BarChart3 size={32} strokeWidth={3} />
+                                        <div className="w-14 h-14 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                                            <BarChart3 size={28} strokeWidth={3} />
                                         </div>
-                                        <span className="font-black text-[#5D4037] text-lg">统计分析</span>
-                                        <span className="text-xs text-gray-400 font-bold">成长数据报表</span>
+                                        <div className="text-left">
+                                            <div className="font-black text-[#5D4037] text-lg">详情统计分析</div>
+                                            <div className="text-xs text-gray-400 font-bold">查看宝贝的成长指数与数据报表</div>
+                                        </div>
                                     </motion.button>
                                 </div>
                             </div>
@@ -1573,11 +1488,32 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         <div className="text-xs text-gray-400 font-bold flex flex-wrap gap-2">
                                                             <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                             <span className="text-emerald-400">+{task.points} 🍭</span>
-                                                            {task.accumulatedTime && task.accumulatedTime > 0 && (
-                                                                <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                                    <Timer size={10} /> {formatTime(task.accumulatedTime)}
-                                                                </span>
-                                                            )}
+                                                            {(() => {
+                                                                const taskLogs = focusLogs.filter(l => l.taskTitle === task.title);
+                                                                if (taskLogs.length === 0 && !task.completed) return null;
+
+                                                                const startTimes = taskLogs.filter(l => l.startTime).map(l => new Date(l.startTime).getTime());
+                                                                const endTimes = taskLogs.filter(l => l.endTime).map(l => new Date(l.endTime).getTime());
+
+                                                                const actualStart = startTimes.length > 0 ? Math.min(...startTimes) : null;
+                                                                const actualEnd = task.completed ?
+                                                                    (taskLogs.find(l => l.type === 'silent')?.endTime || Math.max(...endTimes, 0)) :
+                                                                    (endTimes.length > 0 ? Math.max(...endTimes) : null);
+
+                                                                const fmt = (t: number) => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(t));
+
+                                                                return (
+                                                                    <div className="flex gap-2">
+                                                                        {actualStart && <span className="text-blue-400 bg-blue-50/50 px-2 py-0.5 rounded-md">始: {fmt(actualStart)}</span>}
+                                                                        {actualEnd && <span className="text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">终: {fmt(actualEnd)}</span>}
+                                                                        {(task.accumulatedTime || 0) > 0 && (
+                                                                            <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                                <Timer size={10} /> {formatTime(task.accumulatedTime!)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-1">
@@ -1590,7 +1526,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     {currentTasks.length === 0 && (
                                         <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
                                             <p className="font-bold text-gray-500">今日尚未添加待办任务</p>
-                                            <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">期待你的计划</p>
+                                            <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">Waiting for your plan</p>
                                         </div>
                                     )}
                                 </div>
@@ -1618,128 +1554,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => setActiveTab('children')}
-                                        className="w-10 h-10 bg-white/30 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/30"
+                                        className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
                                     >
                                         <ArrowLeft size={20} />
                                     </motion.button>
-                                    <h2 className="text-2xl font-black text-[#5D4037]">奖励库配置</h2>
+                                    <h2 className="text-2xl font-black text-[#5D4037]">奖励商店</h2>
                                 </div>
-                                <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleAddReward()} className="bg-[var(--color-yellow-reward)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
+                                <motion.button whileTap={{ scale: 0.9 }} onClick={handleAddReward} className="bg-[var(--color-yellow-reward)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
                                     <Plus size={24} />
                                 </motion.button>
-                            </div>
-
-                            {/* Reward Category Templates */}
-                            <div className="flex flex-wrap gap-2 items-center">
-                                {REWARD_CATEGORIES.map(cat => (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => setSelectedRewardCategory(cat.id)}
-                                        className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
-                                    ${selectedRewardCategory === cat.id
-                                                ? 'bg-orange-500 text-white border-orange-500 shadow-md'
-                                                : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
-                                    >
-                                        <span>{cat.icon}</span>
-                                        {cat.name}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
-                                {DEFAULT_REWARDS
-                                    .filter(r => r.category === selectedRewardCategory)
-                                    .filter(r => !hiddenRewardPresets.includes(`${selectedRewardCategory}:${r.name}`))
-                                    .map((tmp, i) => (
-                                        <div key={`rew_tmp_${i}`} className="relative group">
-                                            <motion.button
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={() => handleAddReward(tmp)}
-                                                className="w-full bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-orange-100 shadow-sm flex items-center gap-3"
-                                            >
-                                                <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.name}</div>
-                                                    <div className="text-[10px] text-orange-400 font-bold mt-0.5">{tmp.pointsCost} 🍭</div>
-                                                </div>
-                                            </motion.button>
-
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteRewardTemplate(selectedRewardCategory, tmp.name!);
-                                                }}
-                                                className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
-                                            >
-                                                <Trash2 size={12} />
-                                            </button>
-                                        </div>
-                                    ))}
-                            </div>
-
-                            <div className="h-px bg-gray-200 my-4" />
-
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest pl-1">当前待发布奖励</h3>
-                                <div className="grid grid-cols-1 gap-3">
-                                    {rewards.map((reward) => (
-                                        <motion.div
-                                            key={reward.id}
-                                            layout
-                                            className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-orange-100 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-2xl w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-                                                    {reward.icon}
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-[#5D4037]">{reward.name}</h4>
-                                                    <div className="text-xs text-orange-400 font-bold">{reward.pointsCost} 🍭</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-1">
-                                                <button onClick={() => editReward(reward)} className="p-2 text-gray-300 hover:text-blue-500 transition-colors"><Edit2 size={16} /></button>
-                                                <button onClick={() => removeReward(reward.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                    {rewards.length === 0 && (
-                                        <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
-                                            <p className="font-bold text-gray-500">奖励列表空空如也</p>
-                                            <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">从上方预设快速添加</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {rewards.length > 0 && (
-                                <div className="space-y-4 pt-4">
+                                {rewards.length > 0 && (
                                     <motion.button
-                                        whileTap={{ scale: 0.95 }}
+                                        whileTap={{ scale: 0.9 }}
                                         onClick={() => {
                                             setDialogConfig({
                                                 isOpen: true,
-                                                title: '🎁 确认同步奖励库',
-                                                message: `这就把设置的 ${rewards.length} 项奖励同步给 ${selectedChild.name} 吗？`,
-                                                hideInput: true,
-                                                onConfirm: async () => {
-                                                    await handleSaveRewards();
-                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                                                }
-                                            });
-                                        }}
-                                        disabled={isSaving}
-                                        className="w-full bg-pink-500 py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#db2777] active:shadow-none active:translate-y-2 transition-all"
-                                    >
-                                        {isSaving ? '同步中...' : `发布给 ${selectedChild.name}`}
-                                    </motion.button>
-
-                                    <button
-                                        onClick={() => {
-                                            setDialogConfig({
-                                                isOpen: true,
-                                                title: '清空草稿库',
-                                                message: '确定要清空当前所有待发布的奖励吗？',
+                                                title: '清空所有奖励',
+                                                message: '确定要清空所有奖励吗？此操作不可撤销。',
                                                 onConfirm: () => {
                                                     setRewards([]);
                                                     setDialogConfig(prev => ({ ...prev, isOpen: false }));
@@ -1747,12 +1578,341 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 hideInput: true
                                             });
                                         }}
-                                        className="w-full py-2 text-gray-400 font-bold text-xs hover:text-red-400 transition-colors"
+                                        className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-400 shadow-sm border border-red-100"
+                                        title="清空所有奖励"
                                     >
-                                        清空当前列表 (草稿)
-                                    </button>
+                                        <Trash2 size={20} />
+                                    </motion.button>
+                                )}
+                            </div>
+
+                            <div className="flex flex-wrap gap-3 mb-4">
+                                {REWARD_CATEGORIES.map(cat => (
+                                    <motion.button
+                                        key={cat.id}
+                                        onClick={() => setSelectedRewardCategory(cat.id)}
+                                        whileTap={{ scale: 0.95 }}
+                                        className={`px-4 py-2.5 rounded-xl border-2 font-bold text-sm flex items-center gap-2 transition-all
+                                            ${selectedRewardCategory === cat.id
+                                                ? 'bg-[var(--color-yellow-reward)] border-[var(--color-yellow-reward)] text-white shadow-lg shadow-orange-100'
+                                                : 'bg-white border-transparent text-gray-400 hover:bg-orange-50'}`}
+                                    >
+                                        <span className="text-lg">{cat.icon}</span>
+                                        {cat.name}
+                                    </motion.button>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {rewards
+                                    .filter(r => r.category === selectedRewardCategory || (!r.category && selectedRewardCategory === 'other'))
+                                    .map((reward, i) => (
+                                        <motion.div
+                                            key={reward.id || i}
+                                            whileHover={{ y: -3 }}
+                                            className="bg-white p-5 rounded-[32px] flex flex-col items-center gap-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)] border-2 border-transparent hover:border-yellow-200 relative group overflow-hidden"
+                                        >
+                                            <div className="absolute top-2 right-2 flex gap-1">
+                                                <button onClick={(e) => { e.stopPropagation(); editReward(reward); }} className="p-1.5 text-blue-400 bg-blue-50 rounded-full hover:scale-110 transition-transform">
+                                                    <Edit2 size={12} />
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); removeReward(reward.id); }} className="p-1.5 text-red-400 bg-red-50 rounded-full hover:scale-110 transition-transform">
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            </div>
+
+                                            <div className="text-5xl mb-2 filter drop-shadow-md">{reward.icon}</div>
+                                            <div className="text-center">
+                                                <div className="font-bold text-[#5D4037] text-sm mb-1">{reward.name}</div>
+                                                <div className="bg-yellow-50 text-[var(--color-yellow-reward)] px-3 py-1 rounded-full text-xs font-black">
+                                                    {reward.pointsCost} 🍭
+                                                </div>
+                                            </div>
+
+                                            <motion.button
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={() => handleRedeemReward(reward)}
+                                                className={`mt-2 w-full py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1
+                                                ${selectedChild.points >= reward.pointsCost
+                                                        ? 'bg-[var(--color-yellow-reward)] text-white shadow-lg'
+                                                        : 'bg-gray-100 text-gray-400 grayscale cursor-not-allowed'}`}
+                                            >
+                                                核销奖励
+                                            </motion.button>
+                                        </motion.div>
+                                    ))}
+                            </div>
+
+                            <div className="pt-8 space-y-4">
+                                {rewards.length > 0 ? (
+                                    <div className="space-y-4">
+                                        <motion.button
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => {
+                                                setDialogConfig({
+                                                    isOpen: true,
+                                                    title: '🎁 确认派送奖励',
+                                                    message: `是否将当前的奖励库派送给 ${selectedChild.name}？`,
+                                                    hideInput: true,
+                                                    onConfirm: async () => {
+                                                        await handleSaveRewards();
+                                                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                    }
+                                                });
+                                            }}
+                                            disabled={isSaving}
+                                            className="w-full bg-[#F472B6] py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#059669] active:shadow-none active:translate-y-2 transition-all"
+                                        >
+                                            {isSaving ? '派送中...' : `派送给 ${selectedChild.name}`}
+                                        </motion.button>
+
+                                        <button
+                                            onClick={() => {
+                                                setDialogConfig({
+                                                    isOpen: true,
+                                                    title: '清空本地奖励',
+                                                    message: '确定要清空当前本地列表中的所有奖励吗？',
+                                                    onConfirm: () => {
+                                                        setRewards([]);
+                                                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                    },
+                                                    hideInput: true
+                                                });
+                                            }}
+                                            className="w-full py-2 text-gray-400 font-bold text-xs hover:text-red-400 transition-colors"
+                                        >
+                                            清空当前列表 (本地)
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 space-y-4">
+                                        <div className="text-gray-300 font-bold text-sm">奖励库空空如也</div>
+                                        <button
+                                            onClick={() => setRewards(DEFAULT_REWARDS)}
+                                            className="text-blue-500 font-bold text-sm hover:underline"
+                                        >
+                                            导入系统预设奖励
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="pt-4 border-t border-gray-50">
+                                    <p className="text-[10px] text-gray-300 font-bold text-center mb-4 uppercase tracking-widest">远程同步管理</p>
+                                    <motion.button
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                            setDialogConfig({
+                                                isOpen: true,
+                                                title: '🗑️ 确认清空远程奖励',
+                                                message: `这就把 ${selectedChild.name} 的远程宝库全部清空吗？此操作将立即覆盖孩子端。`,
+                                                hideInput: true,
+                                                onConfirm: async () => {
+                                                    // Force empty list to sync
+                                                    const res = await fetch('/api/kiddieplan/manage', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            action: 'save_rewards',
+                                                            token,
+                                                            data: { childId: selectedChildId, rewards: [] }
+                                                        })
+                                                    });
+                                                    const result = await res.json();
+                                                    if (result.success) {
+                                                        setRewards([]);
+                                                        setDialogConfig({
+                                                            isOpen: true,
+                                                            title: '✨ 清理成功',
+                                                            message: `${selectedChild.name} 的远程奖励库已重置为空。`,
+                                                            onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                                                            hideInput: true
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }}
+                                        disabled={isSaving}
+                                        className="w-full bg-gradient-to-r from-orange-400 to-red-400 py-4 rounded-2xl text-white font-black text-sm shadow-[0_6px_0_#c2410c] active:translate-y-1 active:shadow-none transition-all"
+                                    >
+                                        {isSaving ? '同步清理中...' : `立即清空 ${selectedChild.name} 的远程奖励`}
+                                    </motion.button>
                                 </div>
-                            )}
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'checkins' && selectedChild && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setActiveTab('children')}
+                                        className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </motion.button>
+                                    <div>
+                                        <h2 className="text-2xl font-black text-[#5D4037]">今日专注记录</h2>
+                                        <p className="text-xs text-gray-400 font-bold mt-1">记录孩子每一次努力的时光</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-3xl font-black text-orange-500">
+                                        {Math.round(focusLogs.reduce((acc, log) => acc + (log.duration || 0), 0) / 60)} <span className="text-sm text-gray-400 font-bold">分钟</span>
+                                    </span>
+                                    <span className="text-[10px] font-black text-orange-300 uppercase tracking-widest">今日累计专注</span>
+                                </div>
+                            </div>
+
+                            <div className="relative min-h-[300px]">
+                                {(focusLogs.length > 0 || currentTasks.some(t => t.completed)) ? (
+                                    (() => {
+                                        // Use individual logs instead of aggregation to show exact start/end times
+                                        const allLogs: any[] = [];
+
+                                        // 1. Process individual focus logs
+                                        focusLogs.forEach(log => {
+                                            allLogs.push({
+                                                ...log,
+                                                type: 'log',
+                                                sortTime: new Date(log.startTime).getTime(),
+                                                isSilent: false
+                                            });
+                                        });
+
+                                        // 2. Process tasks marked as completed (Silent Check-ins)
+                                        currentTasks.filter(t => t.completed).forEach(task => {
+                                            // Show completion events separately from focus logs
+                                            const silentLog = focusLogs.find(l => l.taskTitle === task.title && l.type === 'silent');
+
+                                            let sortTime = Date.now();
+                                            let startTime = '';
+                                            if (silentLog) {
+                                                sortTime = new Date(silentLog.startTime).getTime();
+                                                startTime = silentLog.startTime;
+                                            } else if (task.timeSlot) {
+                                                const [h, m] = task.timeSlot.split(':').map(Number);
+                                                const d = new Date();
+                                                d.setHours(h, m, 0, 0);
+                                                sortTime = d.getTime();
+                                                startTime = d.toISOString();
+                                            } else {
+                                                startTime = new Date().toISOString();
+                                            }
+
+                                            allLogs.push({
+                                                taskTitle: task.title,
+                                                duration: 0,
+                                                type: 'silent',
+                                                timeSlot: task.timeSlot,
+                                                sortTime: sortTime,
+                                                startTime: startTime,
+                                                isSilent: true
+                                            });
+                                        });
+
+                                        return allLogs
+                                            .sort((a, b) => b.sortTime - a.sortTime) // Sort desc (latest first)
+                                            .map((log, i) => {
+                                                const startTime = log.startTime ? new Date(log.startTime) : null;
+                                                const endTime = log.endTime ? new Date(log.endTime) : null;
+                                                const isSilent = log.duration === 0;
+
+                                                return (
+                                                    <motion.div
+                                                        key={i}
+                                                        initial={{ opacity: 0, x: -10 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: i * 0.05 }}
+                                                        className="relative py-2"
+                                                    >
+
+                                                        {/* Card Content (Refined: No large icon, bold task name, Chinese labels) */}
+                                                        <div className={`flex items-center gap-4 p-5 rounded-[28px] border shadow-sm transition-all hover:shadow-md
+                                                            ${isSilent ? 'bg-[#ECFDF5]/80 border-[#D1FAE5]' : 'bg-[#FFF7ED]/80 border-[#FFEDD5]'}`}>
+
+                                                            {/* Text Info (Larger and clearer) */}
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <h4 className={`font-black text-xl break-words ${isSilent ? 'text-[#065F46]' : 'text-[#9A3412]'}`}>
+                                                                        {log.taskTitle}
+                                                                    </h4>
+                                                                    <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
+                                                                        {log.timeSlot || (() => {
+                                                                            if (!log.startTime) return '--:--';
+                                                                            try {
+                                                                                return new Intl.DateTimeFormat('zh-CN', {
+                                                                                    hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
+                                                                                }).format(new Date(log.startTime));
+                                                                            } catch (e) { return '--:--'; }
+                                                                        })()}
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-2 text-sm font-bold opacity-80">
+                                                                    {isSilent ? (
+                                                                        <span className="text-[#059669]">
+                                                                            ✅ 打卡于 {(() => {
+                                                                                if (!log.startTime) return '--:--';
+                                                                                try {
+                                                                                    return new Intl.DateTimeFormat('zh-CN', {
+                                                                                        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
+                                                                                    }).format(new Date(log.startTime));
+                                                                                } catch (e) { return '--:--'; }
+                                                                            })()}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <div className="flex items-center gap-2 text-[#EA580C]">
+                                                                            <Clock size={14} />
+                                                                            <span>
+                                                                                {(() => {
+                                                                                    if (!log.startTime || !log.endTime) return '--:--';
+                                                                                    try {
+                                                                                        const fmt = new Intl.DateTimeFormat('zh-CN', {
+                                                                                            hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
+                                                                                        });
+                                                                                        return `${fmt.format(new Date(log.startTime))} - ${fmt.format(new Date(log.endTime))}`;
+                                                                                    } catch (e) { return '--:--'; }
+                                                                                })()}
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Right Status (Localized to Chinese) */}
+                                                            <div className="text-right pl-4 border-l-2 border-black/5 min-w-[100px]">
+                                                                <div className={`text-[10px] font-black tracking-widest mb-1 ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
+                                                                    {isSilent ? '已打卡' : '专注时长'}
+                                                                </div>
+                                                                <div className={`text-2xl font-black font-mono leading-none ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
+                                                                    {isSilent ? (
+                                                                        <CheckCircle2 size={24} strokeWidth={4} />
+                                                                    ) : (
+                                                                        <div className="flex items-baseline gap-0.5">
+                                                                            {Math.floor(log.duration / 60)}
+                                                                            <span className="text-xs font-bold ml-1">分钟</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                );
+                                            });
+                                    })()
+                                ) : (
+                                    <div className="ml-12 py-12 text-center bg-gray-50 rounded-[32px] border-2 border-dashed border-gray-200">
+                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-gray-300">
+                                            <Target size={32} />
+                                        </div>
+                                        <p className="text-gray-400 font-bold text-sm">今天还没有专注记录哦</p>
+                                        <p className="text-gray-300 text-xs mt-1">快去提醒宝贝开始任务吧！</p>
+                                    </div>
+                                )}
+                            </div>
+
                         </motion.div>
                     )}
 
@@ -1766,7 +1926,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 >
                                     <ArrowLeft size={20} />
                                 </motion.button>
-                                <h2 className="text-2xl font-black text-[#5D4037]">奖励核销审批</h2>
+                                <h2 className="text-2xl font-black text-[#5D4037]">核销历史记录</h2>
                             </div>
 
                             <div className="bg-gradient-to-br from-pink-400 to-pink-500 p-6 rounded-[40px] text-white shadow-xl relative overflow-hidden">
@@ -1785,82 +1945,31 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 </div>
                             </div>
 
-                            {/* 待审批列表 */}
-                            {redemptionLogs.some(l => l.status === 'pending') && (
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-black text-orange-500 uppercase tracking-widest flex items-center gap-2">
-                                        <Sparkles size={16} /> 待审批申请
-                                    </h3>
-                                    {redemptionLogs.filter(l => l.status === 'pending').map((log) => (
-                                        <div key={log.id} className="bg-white p-5 rounded-[32px] border-2 border-orange-200 shadow-md relative overflow-hidden">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl">🎁</div>
-                                                    <div>
-                                                        <div className="font-black text-[#5D4037] text-lg">{log.rewardName}</div>
-                                                        <div className="text-[10px] text-gray-400 font-bold">{new Date(log.redeemedAt).toLocaleString('zh-CN')}</div>
+                            <div className="space-y-4">
+                                {redemptionLogs.length > 0 ? (
+                                    redemptionLogs.map((log) => (
+                                        <div key={log.id} className="bg-white/85 backdrop-blur-md p-5 rounded-[28px] border border-white/50 shadow-sm relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-2 opacity-5">
+                                                <Gift size={40} />
+                                            </div>
+                                            <div className="flex justify-between items-start mb-2 relative z-10">
+                                                <div>
+                                                    <div className="font-black text-[#5D4037] text-base">{log.rewardName}</div>
+                                                    <div className="text-[10px] text-gray-400 font-bold flex items-center gap-1 mt-0.5 uppercase tracking-wider">
+                                                        <Clock size={10} /> {new Date(log.redeemedAt).toLocaleString('zh-CN')}
                                                     </div>
                                                 </div>
-                                                <div className="bg-orange-100 text-orange-600 px-3 py-1 rounded-xl text-sm font-black">
-                                                    {log.pointsCost} 🍭
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={() => handleRejectRedemption(log.id)}
-                                                    disabled={isSaving}
-                                                    className="flex-1 py-3 rounded-xl border-2 border-gray-100 text-gray-400 font-bold text-sm hover:bg-gray-50 transition-colors"
-                                                >
-                                                    拒绝
-                                                </button>
-                                                <button
-                                                    onClick={() => handleApproveRedemption(log.id)}
-                                                    disabled={isSaving}
-                                                    className="flex-[2] py-3 rounded-xl bg-orange-500 text-white font-black text-sm shadow-lg shadow-orange-100 hover:bg-orange-600 transition-colors"
-                                                >
-                                                    批准发放
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* 历史记录 */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest pl-1">核销历史记录</h3>
-                                {redemptionLogs.filter(l => l.status !== 'pending').length > 0 ? (
-                                    redemptionLogs.filter(l => l.status !== 'pending').map((log) => (
-                                        <div key={log.id} className="bg-white/85 backdrop-blur-md p-5 rounded-[28px] border border-white/50 shadow-sm relative overflow-hidden group">
-                                            <div className="flex justify-between items-start mb-2 relative z-10">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="font-black text-[#5D4037] text-base">{log.rewardName}</div>
-                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${log.status === 'approved' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'}`}>
-                                                        {log.status === 'approved' ? '已批准' : '已拒绝'}
-                                                    </span>
-                                                </div>
-                                                <div className={`px-3 py-1 rounded-xl text-xs font-black shadow-sm ${log.status === 'approved' ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400 line-through'}`}>
+                                                <div className="bg-red-50 text-red-500 px-3 py-1 rounded-xl text-xs font-black shadow-sm">
                                                     -{log.pointsCost} 🍭
                                                 </div>
                                             </div>
                                             <div className="flex items-center justify-between pt-3 border-t border-gray-100/50">
-                                                <span className="text-[10px] text-gray-400 font-bold">
-                                                    {new Date(log.redeemedAt).toLocaleString('zh-CN')}
-                                                </span>
-                                                {log.status === 'approved' && (
-                                                    <span className="text-sm font-black text-orange-400 font-mono">{log.remainingPoints ?? '---'} 🍭</span>
-                                                )}
+                                                <span className="text-[10px] font-bold text-gray-400">核销后账单结余</span>
+                                                <span className="text-sm font-black text-orange-400 font-mono">{log.remainingPoints ?? '---'} 🍭</span>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
-                                    redemptionLogs.every(l => l.status === 'pending') && (
-                                        <div className="text-center py-10 opacity-30">
-                                            <p className="font-bold text-xs">暂无处理过的核销记录</p>
-                                        </div>
-                                    )
-                                )}
-                                {redemptionLogs.length === 0 && (
                                     <div className="text-center py-20 opacity-50 bg-gray-50/30 rounded-[40px] border-2 border-dashed border-gray-100 flex flex-col items-center gap-4">
                                         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-200 text-3xl">
                                             📜
@@ -1893,37 +2002,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 try {
                                     const statsDate = selectedStatsDate;
                                     const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
-                                    // 去重合并 focusLogs，兼容历史脏数据
-                                    const todayStr = formatBeijingTime(new Date()).split(' ')[0];
-                                    const tasksForStats = (statsDate === todayStr)
-                                        ? currentTasks
-                                        : ((baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks);
-
-                                    const rawFocusLogs: any[] = (statsDate === todayStr)
-                                        ? [...focusLogs, ...(baselineData.focusLogs || [])]
-                                        : (baselineData.focusLogs || []);
-                                    const mergedMap: Record<string, any> = {};
-                                    const silentOnes: any[] = [];
-                                    for (const log of rawFocusLogs) {
-                                        if (log.type === 'silent') { silentOnes.push(log); continue; }
-                                        const key = log.taskId || log.taskTitle || '_unknown';
-                                        if (!mergedMap[key]) { mergedMap[key] = { ...log }; }
-                                        else {
-                                            const ex = mergedMap[key];
-                                            const exS = ex.startTime ? new Date(ex.startTime).getTime() : Infinity;
-                                            const newS = log.startTime ? new Date(log.startTime).getTime() : Infinity;
-                                            const exE = ex.endTime ? new Date(ex.endTime).getTime() : 0;
-                                            const newE = log.endTime ? new Date(log.endTime).getTime() : 0;
-                                            mergedMap[key] = { ...ex, startTime: newS < exS ? log.startTime : ex.startTime, endTime: newE > exE ? log.endTime : ex.endTime, duration: (ex.duration || 0) + (log.duration || 0) };
-                                        }
-                                    }
-                                    const dedupedFocusLogs = [...Object.values(mergedMap), ...silentOnes];
-                                    const dayData = { ...baselineData, tasks: tasksForStats, focusLogs: dedupedFocusLogs };
+                                    const tasksForStats = (baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks;
+                                    const dayData = { ...baselineData, tasks: tasksForStats };
 
                                     return (
                                         <div className="space-y-6">
                                             {/* 1. Calendar Navigation */}
-                                            <div className="bg-white/60 backdrop-blur-xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
+                                            <div className="bg-white/92 backdrop-blur-2xl p-6 rounded-[40px] border-2 border-white shadow-xl relative overflow-hidden">
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 blur-2xl opacity-40"></div>
                                                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-100 rounded-full -ml-12 -mb-12 blur-2xl opacity-40"></div>
 
@@ -1980,7 +2065,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             </div>
 
                                             {/* 2. Completion Gauge */}
-                                            <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
+                                            <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden text-center">
                                                 <div className="absolute top-0 right-0 w-40 h-40 bg-orange-100 rounded-full -mr-20 -mt-20 blur-3xl opacity-30"></div>
                                                 <div className="relative z-10">
                                                     <div className="text-gray-400 text-xs font-black uppercase tracking-widest mb-6 flex items-center justify-center gap-2 opacity-80">
@@ -2011,49 +2096,53 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 <span className="text-2xl ml-1 text-gray-300">%</span>
                                                             </div>
                                                             <div className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
-                                                                已完成 {dayData.checkins.length} / {dayData.tasks.length}
+                                                                Done {dayData.checkins.length} / {dayData.tasks.length}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* 3. Active Timeline (Premium Heat Track Redesigned) */}
-                                            <div className="bg-white/70 backdrop-blur-2xl p-8 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white/80 relative overflow-hidden">
-                                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500/0 via-orange-500/20 to-orange-500/0"></div>
-
-                                                <div className="flex justify-between items-center mb-10 relative z-10">
+                                            {/* 3. Active Timeline (High Clarity Redesigned) */}
+                                            <div className="bg-white/92 backdrop-blur-2xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
+                                                <div className="flex justify-between items-start mb-10">
                                                     <div>
                                                         <h4 className="text-xl font-black text-[#5D4037] flex items-center gap-2">
-                                                            <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center">
-                                                                <Clock size={20} className="text-orange-500" />
-                                                            </div>
+                                                            <Clock size={20} className="text-red-500" />
                                                             活跃时间分布
                                                         </h4>
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 ml-12">记录每日 06:00 - 22:00 专注轨迹</p>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">记录每日 06:00 - 22:00 专注轨迹</p>
                                                     </div>
-                                                    <div className="px-4 py-2 bg-white/40 backdrop-blur-md rounded-[20px] border border-white/60 shadow-sm flex flex-col items-center min-w-[80px]">
-                                                        <span className="text-lg font-black text-orange-600 leading-none">{dayData.focusLogs?.length || 0}</span>
-                                                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter mt-1">打卡频次</span>
+                                                    <div className="px-3 py-1.5 bg-red-50 rounded-xl border border-red-100 flex flex-col items-end">
+                                                        <span className="text-xs font-black text-red-500">{dayData.focusLogs?.length || 0} 次专注</span>
+                                                        <span className="text-[8px] font-bold text-red-300 uppercase tracking-tighter">打卡频次</span>
                                                     </div>
                                                 </div>
 
-                                                <div className="relative px-2">
-                                                    {/* Data Track */}
-                                                    <div className="h-10 w-full bg-gray-100/50 rounded-2xl relative p-1.5 border border-white/40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] overflow-hidden flex items-center">
-                                                        <div className="absolute inset-0 flex gap-[2px] px-2 py-2">
-                                                            {Array.from({ length: 48 }).map((_, i) => {
-                                                                const sMins = (6 * 60) + (i * 20); // 20-min chunks
-                                                                const eMins = sMins + 20;
+                                                <div className="relative pt-2 pb-12">
+                                                    {/* Legend and Markers */}
+                                                    <div className="absolute inset-x-0 bottom-0 h-full flex justify-between px-1">
+                                                        {[6, 10, 14, 18, 22].map(h => (
+                                                            <div key={h} className="flex flex-col items-center h-full">
+                                                                <div className="w-[1px] h-full bg-gray-100 flex-1 border-dashed border-gray-200"></div>
+                                                                <span className="text-[10px] font-black text-gray-400 mt-2 bg-white px-1.5 py-0.5 rounded-md border border-gray-50 shadow-sm">{h.toString().padStart(2, '0')}:00</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Data Bar */}
+                                                    <div className="h-6 w-full bg-gray-50 rounded-full relative z-10 p-1 border border-gray-100 shadow-inner mt-4 overflow-hidden">
+                                                        <div className="absolute inset-0 flex gap-0.5 px-1">
+                                                            {Array.from({ length: 64 }).map((_, i) => {
+                                                                const sMins = (6 * 60) + (i * 15);
+                                                                const eMins = sMins + 15;
                                                                 const isActive = (dayData.focusLogs || []).some((log: any) => {
                                                                     if (!log.startTime) return false;
-                                                                    const sh = new Date(log.startTime).getHours();
-                                                                    const sm = new Date(log.startTime).getMinutes();
+                                                                    const [sh, sm] = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime)).split(':').map(Number);
                                                                     const lStart = sh * 60 + sm;
                                                                     let lEnd = lStart + 5;
                                                                     if (log.endTime) {
-                                                                        const eh = new Date(log.endTime).getHours();
-                                                                        const em = new Date(log.endTime).getMinutes();
+                                                                        const [eh, em] = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)).split(':').map(Number);
                                                                         lEnd = eh * 60 + em;
                                                                     }
                                                                     if (lEnd <= lStart) lEnd = lStart + 5;
@@ -2061,30 +2150,44 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 });
 
                                                                 return (
-                                                                    <motion.div
-                                                                        key={i}
-                                                                        initial={false}
-                                                                        animate={{
-                                                                            scaleY: isActive ? 1 : 0.4,
-                                                                            opacity: isActive ? 1 : 0.1
-                                                                        }}
-                                                                        className={`flex-1 rounded-full transition-all duration-1000 ${isActive ? 'bg-gradient-to-t from-orange-400 to-red-500 shadow-[0_0_15px_rgba(249,115,22,0.3)]' : 'bg-gray-400'}`}
-                                                                    ></motion.div>
+                                                                    <div key={i} className={`flex-1 h-full rounded-md transition-all duration-700 ${isActive ? 'bg-gradient-to-b from-red-400 to-red-600 shadow-[0_0_12px_rgba(239,68,68,0.4)] ring-1 ring-white/20' : 'bg-transparent'}`}></div>
                                                                 );
                                                             })}
                                                         </div>
                                                     </div>
-
-                                                    {/* Time Markers */}
-                                                    <div className="flex justify-between mt-6 px-1">
-                                                        {[6, 10, 14, 18, 22].map(h => (
-                                                            <div key={h} className="text-center group">
-                                                                <div className="text-[10px] font-black text-gray-400 font-mono transition-colors group-hover:text-orange-500">{h.toString().padStart(2, '0')}:00</div>
-                                                                <div className="w-[1px] h-1 bg-gray-200 mx-auto mt-1 rounded-full"></div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
                                                 </div>
+
+                                                {/* Detailed Log List */}
+                                                {(dayData.focusLogs || []).length > 0 && (
+                                                    <div className="mt-8 space-y-2 border-t border-gray-100 pt-8">
+                                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-4 text-center">专注活动明细</p>
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            {(dayData.focusLogs || [])
+                                                                .filter((log: any) => log.startTime)
+                                                                .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))
+                                                                .map((log: any, idx: number) => {
+                                                                    const s = new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.startTime));
+                                                                    const e = log.endTime ? new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(log.endTime)) : '--:--';
+                                                                    const dur = log.duration > 0 ? Math.floor(log.duration / 60) : 0;
+                                                                    return (
+                                                                        <div key={idx} className="flex items-center justify-between p-5 bg-gray-50/50 rounded-3xl border border-gray-100 ring-1 ring-white/20 hover:bg-white transition-all group hover:shadow-md">
+                                                                            <div className="flex items-center gap-5">
+                                                                                <div className="w-4 h-4 rounded-full bg-red-400 group-hover:scale-125 transition-transform ring-4 ring-red-50"></div>
+                                                                                <div className="flex flex-col">
+                                                                                    <span className="text-base font-black text-[#5D4037]">{log.taskTitle || '专注活动'}</span>
+                                                                                    <span className="text-[11px] font-bold text-gray-400 tracking-wider mt-0.5">{s} — {e}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="text-right flex items-baseline gap-1">
+                                                                                <span className="text-2xl font-black text-red-500 group-hover:scale-110 transition-transform">{dur}</span>
+                                                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">MINS</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* 4. Day Task Detail List */}
@@ -2102,59 +2205,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                             .sort((a: any, b: any) => (a.timeSlot || '').localeCompare(b.timeSlot || ''))
                                                             .map((task: any) => {
                                                                 const isDone = dayData.checkins.includes(task.id);
-                                                                const taskLog = dayData.focusLogs.find((l: any) => l.taskId === task.id || l.taskTitle === task.title);
-
-                                                                const fmt = (val: string | number) => {
-                                                                    if (!val) return '--:--';
-                                                                    try {
-                                                                        let d: Date;
-                                                                        if (typeof val === 'string' && val.includes(' ') && !val.includes('T')) {
-                                                                            d = new Date(val.replace(' ', 'T'));
-                                                                        } else {
-                                                                            d = new Date(val);
-                                                                        }
-                                                                        if (isNaN(d.getTime())) return '--:--';
-                                                                        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-                                                                    } catch (e) { return '--:--'; }
-                                                                };
-
                                                                 return (
                                                                     <div key={task.id} className={`p-5 rounded-[32px] border transition-all flex items-center justify-between
-                                                                         ${isDone ? 'bg-emerald-50/20 border-emerald-100 shadow-sm' : 'bg-white/50 border-gray-50 shadow-none'}`}>
+                                                                        ${isDone ? 'bg-emerald-50/50 border-emerald-100 shadow-sm' : 'bg-white/50 border-gray-50 shadow-none'}`}>
                                                                         <div className="flex items-center gap-5">
                                                                             <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center text-2xl shadow-inner
-                                                                                 ${isDone ? 'bg-white text-emerald-500 ring-4 ring-emerald-50' : 'bg-gray-50 text-gray-200'}`}>
+                                                                                ${isDone ? 'bg-white text-emerald-500 ring-4 ring-emerald-50' : 'bg-gray-50 text-gray-200'}`}>
                                                                                 {isDone ? '✨' : '📅'}
                                                                             </div>
-                                                                            <div className="flex flex-col">
+                                                                            <div>
                                                                                 <div className={`font-black text-lg ${isDone ? 'text-emerald-700' : 'text-gray-400'}`}>{task.title}</div>
                                                                                 <div className="flex items-center gap-2 mt-1">
                                                                                     <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{task.timeSlot}</span>
-                                                                                    {taskLog && (
-                                                                                        <span className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-0.5 rounded-md flex items-center gap-1 border border-orange-100">
-                                                                                            <Clock size={10} /> {fmt(taskLog.startTime)}
-                                                                                            {(taskLog.endTime && taskLog.endTime !== taskLog.startTime) ? ` - ${fmt(taskLog.endTime)}` : ''}
-                                                                                        </span>
-                                                                                    )}
+                                                                                    <span className="text-[10px] font-black text-orange-400">{task.points} 🍭糖果</span>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                        <div className="text-right flex flex-col items-end gap-1">
-                                                                            {(() => {
-                                                                                const duration = task.accumulatedTime || (taskLog ? taskLog.duration : 0);
-                                                                                if (isDone && duration === 0) {
-                                                                                    return <div className="text-orange-500 text-xs font-black mb-1">秒打卡</div>;
-                                                                                } else if (duration > 0) {
-                                                                                    return (
-                                                                                        <div className="flex items-baseline gap-1 text-orange-500">
-                                                                                            <span className="text-xl font-black">{formatTime(duration)}</span>
-                                                                                        </div>
-                                                                                    );
-                                                                                }
-                                                                                return null;
-                                                                            })()}
-                                                                            {isDone && <span className="text-[10px] font-black text-emerald-500 bg-white px-3 py-1 rounded-full border border-emerald-50 shadow-sm uppercase tracking-tighter">打卡成功</span>}
-                                                                        </div>
+                                                                        {isDone && <span className="text-[10px] font-black text-emerald-500 bg-white px-3 py-1.5 rounded-full border border-emerald-50 shadow-sm uppercase tracking-tighter">打卡成功</span>}
                                                                     </div>
                                                                 );
                                                             })
@@ -2175,7 +2242,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </motion.div>
                     )}
                 </div>
-            </main >
+            </main>
 
             {/* Dialog Overlay */}
             <AnimatePresence>

@@ -235,13 +235,22 @@ export default async function handler(
         }
 
         if (action === 'save_categories') {
-            const { categories, hiddenPresets } = data;
+            const { categories, hiddenPresets, hiddenRewardPresets } = data;
             const license: any = await kv.get(licenseKey) || {};
             if (!license.children) license.children = [];
             if (categories) license.categories = categories;
             if (hiddenPresets !== undefined) license.hiddenPresets = hiddenPresets;
+            if (hiddenRewardPresets !== undefined) license.hiddenRewardPresets = hiddenRewardPresets;
             await kv.set(licenseKey, license);
-            return response.status(200).json({ success: true, message: '设置已更新', data: { categories: license.categories, hiddenPresets: license.hiddenPresets } });
+            return response.status(200).json({
+                success: true,
+                message: '设置已更新',
+                data: {
+                    categories: license.categories,
+                    hiddenPresets: license.hiddenPresets,
+                    hiddenRewardPresets: license.hiddenRewardPresets
+                }
+            });
         }
 
         if (action === 'record_redemption') {

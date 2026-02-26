@@ -660,19 +660,6 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
                         {/* Right: Time & Compact Buttons (Ultra Grouped) */}
                         <div className="flex items-center gap-3">
-                            {isScrolled && (
-                                <motion.button
-                                    initial={{ opacity: 0, scale: 0.5 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    onClick={() => {
-                                        setIsScrolled(false);
-                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                    }}
-                                    className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
-                                >
-                                    <Menu size={18} />
-                                </motion.button>
-                            )}
                             <div className="flex flex-col items-end mr-0.5">
                                 <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
                                     {formatBeijingTime(currentTime).split(' ')[1]}

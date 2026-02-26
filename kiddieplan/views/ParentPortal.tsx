@@ -1077,10 +1077,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 <div className="sticky top-0 p-4 z-40">
                     <header
                         onClick={() => {
-                            if (isScrolled) {
-                                setIsScrolled(false);
-                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                            }
+                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                            if (isScrolled) setIsScrolled(false);
                         }}
                         className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'}`}
                         style={{
@@ -1261,6 +1259,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="space-y-1">
                                                     <div className="flex justify-between items-end">
                                                         <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
+                                                        {liveFocusDuration > 0 && (
+                                                            <div className="text-xs font-black bg-white/20 px-2 py-0.5 rounded-lg flex items-center gap-1 animate-pulse">
+                                                                <Timer size={10} /> {formatTime(liveFocusDuration)}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <h2 className="text-xl font-black tracking-tight leading-snug break-words line-clamp-2 drop-shadow-sm min-h-[3rem] flex items-center">
                                                         {selectedChild.currentTaskName}
@@ -1885,13 +1888,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 try {
                                     const statsDate = selectedStatsDate;
                                     const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
+                                    // 去重合并 focusLogs，兼容历史脏数据
                                     const todayStr = formatBeijingTime(new Date()).split(' ')[0];
                                     const tasksForStats = (statsDate === todayStr)
                                         ? currentTasks
                                         : ((baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks);
 
-                                    // 去重合并 focusLogs，兼容历史脏数据
-                                    const rawFocusLogs: any[] = baselineData.focusLogs || [];
+                                    const rawFocusLogs: any[] = (statsDate === todayStr)
+                                        ? [...focusLogs, ...(baselineData.focusLogs || [])]
+                                        : (baselineData.focusLogs || []);
                                     const mergedMap: Record<string, any> = {};
                                     const silentOnes: any[] = [];
                                     for (const log of rawFocusLogs) {

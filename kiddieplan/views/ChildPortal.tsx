@@ -655,7 +655,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 {/* Top Bar - iOS 26 Extreme Glass Header */}
                 <div className="sticky top-0 p-4 z-40">
                     <header
-                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm' : 'py-4 shadow-none'}`}
+                        onClick={() => {
+                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                            if (isScrolled) setIsScrolled(false);
+                        }}
+                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'}`}
                         style={{
                             background: isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)', // Increased transparency (Crystal Glass)
                             backdropFilter: 'blur(20px) saturate(180%)',
@@ -667,8 +671,45 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             <h1 className="text-[18px] font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                                 星梦奇旅
                             </h1>
-                            <span className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>宝贝端</span>
+                            <AnimatePresence>
+                                {!isScrolled && (
+                                    <motion.span
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
+                                        style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
+                                    >
+                                        宝贝端
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
                         </div>
+
+                        {/* Center: Mini Profile when Scrolled */}
+                        <AnimatePresence>
+                            {isScrolled && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                                    exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm"
+                                >
+                                    {childProfile.avatar ? (
+                                        <img
+                                            src={childProfile.avatar}
+                                            className="w-6 h-6 rounded-full object-cover border border-white shadow-sm"
+                                            alt={childProfile.name}
+                                        />
+                                    ) : (
+                                        <span className="text-xs">👋</span>
+                                    )}
+                                    <span className="text-xs font-black text-gray-700 tracking-tight">
+                                        {childProfile.name}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Right: Time & Compact Buttons (Ultra Grouped) */}
                         <div className="flex items-center gap-3">

@@ -1087,8 +1087,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                         }}
                     >
-                        {/* Left: Branding & Role (Vertical Stack) */}
-                        <div className="flex flex-col">
+                        <div className="flex flex-col cursor-pointer" onClick={(e) => {
+                            e.stopPropagation();
+                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                            if (isScrolled) setIsScrolled(false);
+                        }}>
                             <h1 className={`text-[18px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                                 星梦奇旅
                             </h1>
@@ -1174,7 +1177,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <motion.div
                                             key={child.id}
                                             className={`flex flex-col items-center gap-1.5 relative min-w-[72px] cursor-pointer p-2 rounded-2xl transition-all duration-300 ${isSelected ? 'bg-white/25 backdrop-blur-md shadow-inner' : 'hover:bg-white/5'}`}
-                                            onClick={() => setSelectedChildId(child.id)}
+                                            onClick={() => {
+                                                setSelectedChildId(child.id);
+                                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
                                             whileTap={{ scale: 0.95 }}
                                         >
                                             <div className="relative">

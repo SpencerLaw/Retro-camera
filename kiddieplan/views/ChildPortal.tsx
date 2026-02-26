@@ -666,8 +666,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                         }}
                     >
-                        {/* Left: Branding & Role (Vertical Stack) */}
-                        <div className="flex flex-col">
+                        <div className="flex flex-col cursor-pointer" onClick={(e) => {
+                            e.stopPropagation();
+                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                            if (isScrolled) setIsScrolled(false);
+                        }}>
                             <h1 className="text-[18px] font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-pink-500 to-orange-600 tracking-tight leading-none" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
                                 星梦奇旅
                             </h1>

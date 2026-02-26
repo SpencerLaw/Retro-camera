@@ -1066,6 +1066,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
             {/* Main Area - Everything scrolls under the glassy header */}
             <main
+                ref={mainScrollRef as any}
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
                     if (top > 20 && !isScrolled) setIsScrolled(true);
@@ -2139,13 +2140,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                             </div>
                                                                         </div>
                                                                         <div className="text-right flex flex-col items-end gap-1">
-                                                                            {isDone && task.accumulatedTime === 0 ? (
-                                                                                <div className="text-orange-500 text-xs font-black mb-1">秒打卡</div>
-                                                                            ) : task.accumulatedTime > 0 && (
-                                                                                <div className="flex items-baseline gap-1 text-orange-500">
-                                                                                    <span className="text-xl font-black">{formatTime(task.accumulatedTime)}</span>
-                                                                                </div>
-                                                                            )}
+                                                                            {(() => {
+                                                                                const duration = task.accumulatedTime || (taskLog ? taskLog.duration : 0);
+                                                                                if (isDone && duration === 0) {
+                                                                                    return <div className="text-orange-500 text-xs font-black mb-1">秒打卡</div>;
+                                                                                } else if (duration > 0) {
+                                                                                    return (
+                                                                                        <div className="flex items-baseline gap-1 text-orange-500">
+                                                                                            <span className="text-xl font-black">{formatTime(duration)}</span>
+                                                                                        </div>
+                                                                                    );
+                                                                                }
+                                                                                return null;
+                                                                            })()}
                                                                             {isDone && <span className="text-[10px] font-black text-emerald-500 bg-white px-3 py-1 rounded-full border border-emerald-50 shadow-sm uppercase tracking-tighter">打卡成功</span>}
                                                                         </div>
                                                                     </div>

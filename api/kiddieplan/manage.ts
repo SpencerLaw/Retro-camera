@@ -79,6 +79,39 @@ export default async function handler(
                 await kv.set(licenseKey, license);
             }
 
+            // 对今日数据进行实时去重合并，确保前端拿到的数据是干净的
+            const today = new Date().toISOString().split('T')[0];
+            if (license.progress && license.progress[today]) {
+                const dayProgress = license.progress[today];
+                for (const childId of Object.keys(dayProgress)) {
+                    const childData = dayProgress[childId];
+                    if (childData.focusLogs && childData.focusLogs.length > 1) {
+                        const mergedMap: Record<string, any> = {};
+                        const silents: any[] = [];
+                        for (const log of childData.focusLogs) {
+                            if (log.type === 'silent') { silents.push(log); continue; }
+                            const key = log.taskId || log.taskTitle || '_unknown';
+                            if (!mergedMap[key]) {
+                                mergedMap[key] = { ...log };
+                            } else {
+                                const ex = mergedMap[key];
+                                const exS = ex.startTime ? new Date(ex.startTime).getTime() : Infinity;
+                                const newS = log.startTime ? new Date(log.startTime).getTime() : Infinity;
+                                const exE = ex.endTime ? new Date(ex.endTime).getTime() : 0;
+                                const newE = log.endTime ? new Date(log.endTime).getTime() : 0;
+                                mergedMap[key] = {
+                                    ...ex,
+                                    startTime: newS < exS ? log.startTime : ex.startTime,
+                                    endTime: newE > exE ? log.endTime : ex.endTime,
+                                    duration: (ex.duration || 0) + (log.duration || 0),
+                                };
+                            }
+                        }
+                        childData.focusLogs = [...Object.values(mergedMap), ...silents];
+                    }
+                }
+            }
+
             return response.status(200).json({ success: true, data: license });
         }
 

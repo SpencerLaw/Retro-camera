@@ -14,7 +14,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [licenseData, setLicenseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'checkins' | 'stats' | 'redemption'>('children');
+    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'stats' | 'redemption'>('children');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -170,10 +170,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 fetchTasks();
             }
             if (activeTab === 'rewards') fetchRewards();
-            if (activeTab === 'checkins') {
-                setFocusLogs([]); // Clear old logs to show fresh loading
-                fetchTasks();     // Re-use fetchTasks as it fetches logs too
-            }
             if (activeTab === 'stats') {
                 setFocusLogs([]); // Clear stale logs before refreshing
                 setCurrentTasks([]); // Clear stale tasks before refreshing
@@ -1333,7 +1329,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                 </div>
 
-                                {/* Action Grid */}
+                                {/* Action Grid (Redesigned: 2x2 Grid, Clean & Symmetric) */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <motion.button
                                         whileHover={{ y: -5, rotate: -1 }}
@@ -1364,14 +1360,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('checkins')}
+                                        onClick={() => setActiveTab('stats')}
                                         className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
-                                        <div className="w-16 h-16 bg-purple-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
-                                            <CalendarCheck size={32} strokeWidth={3} />
+                                        <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
+                                            <BarChart3 size={32} strokeWidth={3} />
                                         </div>
-                                        <span className="font-black text-[#5D4037] text-lg">打卡记录</span>
-                                        <span className="text-xs text-gray-400 font-bold">查看成长历史</span>
+                                        <span className="font-black text-[#5D4037] text-lg">统计分析</span>
+                                        <span className="text-xs text-gray-400 font-bold">成长数据报表</span>
                                     </motion.button>
 
                                     <motion.button
@@ -1380,26 +1376,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         onClick={() => setActiveTab('redemption')}
                                         className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
-                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 font-candy">
+                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
                                             <Trophy size={32} strokeWidth={3} />
                                         </div>
                                         <span className="font-black text-[#5D4037] text-lg">核销记录</span>
                                         <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
-                                    </motion.button>
-
-                                    <motion.button
-                                        whileHover={{ y: -5, rotate: 0 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('stats')}
-                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-5 rounded-[32px] flex items-center gap-6 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
-                                    >
-                                        <div className="w-14 h-14 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                                            <BarChart3 size={28} strokeWidth={3} />
-                                        </div>
-                                        <div className="text-left">
-                                            <div className="font-black text-[#5D4037] text-lg">详情统计分析</div>
-                                            <div className="text-xs text-gray-400 font-bold">查看宝贝的成长指数与数据报表</div>
-                                        </div>
                                     </motion.button>
                                 </div>
                             </div>
@@ -1781,206 +1762,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         </motion.div>
                     )}
 
-                    {activeTab === 'checkins' && selectedChild && (
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-4">
-                                    <motion.button
-                                        whileTap={{ scale: 0.9 }}
-                                        onClick={() => setActiveTab('children')}
-                                        className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
-                                    >
-                                        <ArrowLeft size={20} />
-                                    </motion.button>
-                                    <div>
-                                        <h2 className="text-2xl font-black text-[#5D4037]">今日专注记录</h2>
-                                        <p className="text-xs text-gray-400 font-bold mt-1">记录孩子每一次努力的时光</p>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-3xl font-black text-orange-500">
-                                        {Math.round(focusLogs.reduce((acc, log) => acc + (log.duration || 0), 0) / 60)} <span className="text-sm text-gray-400 font-bold">分钟</span>
-                                    </span>
-                                    <span className="text-[10px] font-black text-orange-300 uppercase tracking-widest">今日累计专注</span>
-                                </div>
-                            </div>
-
-                            <div className="relative min-h-[300px]">
-                                {(focusLogs.length > 0 || currentTasks.some(t => t.completed)) ? (
-                                    (() => {
-                                        // Use a Map to ensure strictly one entry per task (merged)
-                                        const mergedTasks = new Map<string, any>();
-
-                                        // 1. Process individual focus logs first
-                                        focusLogs.forEach(log => {
-                                            const key = log.taskTitle || '专注活动';
-                                            const existing = mergedTasks.get(key);
-                                            const sTime = new Date(log.startTime).getTime();
-                                            const eTime = log.endTime ? new Date(log.endTime).getTime() : sTime;
-
-                                            if (!existing) {
-                                                mergedTasks.set(key, {
-                                                    ...log,
-                                                    sortTime: sTime,
-                                                    startTime: log.startTime,
-                                                    endTime: log.endTime,
-                                                    duration: log.duration || 0,
-                                                    isSilent: false
-                                                });
-                                            } else {
-                                                const finalStart = sTime < new Date(existing.startTime).getTime() ? log.startTime : existing.startTime;
-                                                const finalEnd = eTime > (existing.endTime ? new Date(existing.endTime).getTime() : 0) ? log.endTime : existing.endTime;
-                                                mergedTasks.set(key, {
-                                                    ...existing,
-                                                    startTime: finalStart,
-                                                    endTime: finalEnd,
-                                                    duration: existing.duration + (log.duration || 0),
-                                                    sortTime: Math.min(sTime, existing.sortTime)
-                                                });
-                                            }
-                                        });
-
-                                        // 2. Process tasks marked as completed - merge or add as silent
-                                        currentTasks.filter(t => t.completed).forEach(task => {
-                                            const key = task.title;
-                                            const existing = mergedTasks.get(key);
-
-                                            if (existing) {
-                                                // Task is already in from focus logs, just mark it as potentially silent if duration is 0
-                                                // But usually if it's here, it's a focus record.
-                                            } else {
-                                                // Pure check-in (silent)
-                                                const silentLog = focusLogs.find(l => l.taskTitle === task.title && l.type === 'silent');
-                                                let sortTime = Date.now();
-                                                let startTime = new Date().toISOString();
-
-                                                if (silentLog) {
-                                                    sortTime = new Date(silentLog.startTime).getTime();
-                                                    startTime = silentLog.startTime;
-                                                } else if (task.timeSlot) {
-                                                    const [h, m] = task.timeSlot.split(':').map(Number);
-                                                    const d = new Date();
-                                                    d.setHours(h, m, 0, 0);
-                                                    sortTime = d.getTime();
-                                                    startTime = d.toISOString();
-                                                }
-
-                                                mergedTasks.set(key, {
-                                                    taskTitle: task.title,
-                                                    duration: 0,
-                                                    type: 'silent',
-                                                    sortTime: sortTime,
-                                                    startTime: startTime,
-                                                    endTime: startTime,
-                                                    isSilent: true
-                                                });
-                                            }
-                                        });
-
-                                        return Array.from(mergedTasks.values())
-                                            .sort((a, b) => b.sortTime - a.sortTime) // Sort desc (latest first)
-                                            .map((log, i) => {
-                                                const startTime = log.startTime ? new Date(log.startTime) : null;
-                                                const endTime = log.endTime ? new Date(log.endTime) : null;
-                                                const isSilent = log.duration === 0;
-
-                                                return (
-                                                    <motion.div
-                                                        key={i}
-                                                        initial={{ opacity: 0, x: -10 }}
-                                                        animate={{ opacity: 1, x: 0 }}
-                                                        transition={{ delay: i * 0.05 }}
-                                                        className="relative py-2"
-                                                    >
-
-                                                        {/* Card Content (Refined: No large icon, bold task name, Chinese labels) */}
-                                                        <div className={`flex items-center gap-4 p-5 rounded-[28px] border shadow-sm transition-all hover:shadow-md
-                                                            ${isSilent ? 'bg-[#ECFDF5]/80 border-[#D1FAE5]' : 'bg-[#FFF7ED]/80 border-[#FFEDD5]'}`}>
-
-                                                            {/* Text Info (Larger and clearer) */}
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <h4 className={`font-black text-xl break-words ${isSilent ? 'text-[#065F46]' : 'text-[#9A3412]'}`}>
-                                                                        {log.taskTitle}
-                                                                    </h4>
-                                                                    <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black ${isSilent ? 'bg-white/50 text-[#059669]' : 'bg-white/50 text-[#EA580C]'}`}>
-                                                                        {log.timeSlot || (() => {
-                                                                            if (!log.startTime) return '--:--';
-                                                                            try {
-                                                                                return new Intl.DateTimeFormat('zh-CN', {
-                                                                                    hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
-                                                                                }).format(new Date(log.startTime));
-                                                                            } catch (e) { return '--:--'; }
-                                                                        })()}
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="flex items-center gap-2 text-sm font-bold opacity-80">
-                                                                    {isSilent ? (
-                                                                        <span className="text-[#059669]">
-                                                                            ✅ 打卡于 {(() => {
-                                                                                if (!log.startTime) return '--:--';
-                                                                                try {
-                                                                                    return new Intl.DateTimeFormat('zh-CN', {
-                                                                                        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
-                                                                                    }).format(new Date(log.startTime));
-                                                                                } catch (e) { return '--:--'; }
-                                                                            })()}
-                                                                        </span>
-                                                                    ) : (
-                                                                        <div className="flex items-center gap-2 text-[#EA580C]">
-                                                                            <Clock size={14} />
-                                                                            <span>
-                                                                                {(() => {
-                                                                                    if (!log.startTime || !log.endTime) return '--:--';
-                                                                                    try {
-                                                                                        const fmt = new Intl.DateTimeFormat('zh-CN', {
-                                                                                            hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai'
-                                                                                        });
-                                                                                        return `${fmt.format(new Date(log.startTime))} - ${fmt.format(new Date(log.endTime))}`;
-                                                                                    } catch (e) { return '--:--'; }
-                                                                                })()}
-                                                                            </span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Right Status (Localized to Chinese) */}
-                                                            <div className="text-right pl-4 border-l-2 border-black/5 min-w-[100px]">
-                                                                <div className={`text-[10px] font-black tracking-widest mb-1 ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
-                                                                    {isSilent ? '已打卡' : '专注时长'}
-                                                                </div>
-                                                                <div className={`text-2xl font-black font-mono leading-none ${isSilent ? 'text-[#059669]' : 'text-[#EA580C]'}`}>
-                                                                    {isSilent ? (
-                                                                        <CheckCircle2 size={24} strokeWidth={4} />
-                                                                    ) : (
-                                                                        <div className="flex items-baseline gap-0.5">
-                                                                            {Math.floor(log.duration / 60)}
-                                                                            <span className="text-xs font-bold ml-1">分钟</span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                );
-                                            });
-                                    })()
-                                ) : (
-                                    <div className="ml-12 py-12 text-center bg-gray-50 rounded-[32px] border-2 border-dashed border-gray-200">
-                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-gray-300">
-                                            <Target size={32} />
-                                        </div>
-                                        <p className="text-gray-400 font-bold text-sm">今天还没有专注记录哦</p>
-                                        <p className="text-gray-300 text-xs mt-1">快去提醒宝贝开始任务吧！</p>
-                                    </div>
-                                )}
-                            </div>
-
-                        </motion.div>
-                    )}
-
                     {activeTab === 'redemption' && selectedChild && (
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                             <div className="flex items-center gap-4">
@@ -2310,23 +2091,44 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                             .sort((a: any, b: any) => (a.timeSlot || '').localeCompare(b.timeSlot || ''))
                                                             .map((task: any) => {
                                                                 const isDone = dayData.checkins.includes(task.id);
+                                                                const taskLog = dayData.focusLogs.find((l: any) => l.taskId === task.id || l.taskTitle === task.title);
+
+                                                                const fmt = (iso: string) => {
+                                                                    if (!iso) return '--:--';
+                                                                    try {
+                                                                        return new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(iso));
+                                                                    } catch (e) { return '--:--'; }
+                                                                };
+
                                                                 return (
                                                                     <div key={task.id} className={`p-5 rounded-[32px] border transition-all flex items-center justify-between
-                                                                        ${isDone ? 'bg-emerald-50/50 border-emerald-100 shadow-sm' : 'bg-white/50 border-gray-50 shadow-none'}`}>
+                                                                         ${isDone ? 'bg-emerald-50/20 border-emerald-100 shadow-sm' : 'bg-white/50 border-gray-50 shadow-none'}`}>
                                                                         <div className="flex items-center gap-5">
                                                                             <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center text-2xl shadow-inner
-                                                                                ${isDone ? 'bg-white text-emerald-500 ring-4 ring-emerald-50' : 'bg-gray-50 text-gray-200'}`}>
+                                                                                 ${isDone ? 'bg-white text-emerald-500 ring-4 ring-emerald-50' : 'bg-gray-50 text-gray-200'}`}>
                                                                                 {isDone ? '✨' : '📅'}
                                                                             </div>
-                                                                            <div>
+                                                                            <div className="flex flex-col">
                                                                                 <div className={`font-black text-lg ${isDone ? 'text-emerald-700' : 'text-gray-400'}`}>{task.title}</div>
                                                                                 <div className="flex items-center gap-2 mt-1">
                                                                                     <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{task.timeSlot}</span>
-                                                                                    <span className="text-[10px] font-black text-orange-400">{task.points} 🍭糖果</span>
+                                                                                    {taskLog && (
+                                                                                        <span className="text-[10px] font-black text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                                            <Clock size={10} /> {fmt(taskLog.startTime)} - {fmt(taskLog.endTime)}
+                                                                                        </span>
+                                                                                    )}
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                        {isDone && <span className="text-[10px] font-black text-emerald-500 bg-white px-3 py-1.5 rounded-full border border-emerald-50 shadow-sm uppercase tracking-tighter">打卡成功</span>}
+                                                                        <div className="text-right flex flex-col items-end gap-1">
+                                                                            {taskLog && taskLog.duration > 0 && (
+                                                                                <div className="flex items-baseline gap-1 text-orange-500">
+                                                                                    <span className="text-xl font-black">{Math.floor(taskLog.duration / 60)}</span>
+                                                                                    <span className="text-[10px] font-bold uppercase tracking-tighter">MINS</span>
+                                                                                </div>
+                                                                            )}
+                                                                            {isDone && <span className="text-[10px] font-black text-emerald-500 bg-white px-3 py-1 rounded-full border border-emerald-50 shadow-sm uppercase tracking-tighter">打卡成功</span>}
+                                                                        </div>
                                                                     </div>
                                                                 );
                                                             })

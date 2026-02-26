@@ -20,30 +20,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const cleanCode = code.toUpperCase().trim();
         const cleanLicense = license.replace(/[-\s]/g, '').toUpperCase();
 
-        // Key format: br:rooms:{LICENSE}
-        const key = `br:rooms:${cleanLicense}`;
+        // Key format: license:{LICENSE}
+        const licenseKey = `license:${cleanLicense}`;
+        const data: any = await kv.get(licenseKey);
 
-        // Get existing data
-        const existing = await kv.get<{ rooms: string[], updatedAt: number }>(key);
-
-        if (!existing || !existing.rooms) {
-            // No data found, nothing to delete
-            return res.status(200).json({ success: true, message: 'Room not found in active list' });
+        if (!data) {
+            return res.status(200).json({ success: true, message: 'License record not found' });
         }
 
-        // Remove the room code from the array
-        const updatedRooms = existing.rooms.filter(r => r !== cleanCode);
+        const getRooms = (licData: any) => {
+            if (licData.r) return licData.r;
+            if (licData.rooms) return licData.rooms;
+            return [];
+        };
 
-        if (updatedRooms.length === 0) {
-            // If no rooms left, delete the entire key
-            await kv.del(key);
+        let rooms = getRooms(data);
+        const updatedRooms = rooms.filter((r: string) => r !== cleanCode);
+
+        // Update the license object
+        if (data.d) {
+            data.r = updatedRooms;
         } else {
-            // Update with remaining rooms
-            await kv.set(key, {
-                rooms: updatedRooms,
-                updatedAt: Date.now()
-            }, { ex: 60 * 60 * 24 * 30 });
+            data.rooms = updatedRooms;
         }
+
+        await kv.set(licenseKey, data);
+
+        // CLEANUP: If old separate key exists, remove it
+        await kv.del(`br:rooms:${cleanLicense}`);
 
         return res.status(200).json({ success: true });
     } catch (error) {

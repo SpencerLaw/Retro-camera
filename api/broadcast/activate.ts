@@ -60,26 +60,44 @@ export default async function handler(
         }
 
         // === License is valid, proceed with activation ===
-        const key = `br:rooms:${cleanLicense}`;
+        const licenseKey = `license:${cleanLicense}`;
+        const data: any = await kv.get(licenseKey);
 
-        // Get existing data
-        const existing = await kv.get<{ rooms: string[], updatedAt: number }>(key);
-
-        let rooms: string[] = [];
-        if (existing && existing.rooms) {
-            rooms = existing.rooms;
+        if (!data) {
+            return response.status(404).json({ error: 'License data not found' });
         }
+
+        // Helper to ensure we handle both compressed and uncompressed formats
+        const getRooms = (licData: any) => {
+            if (licData.r) return licData.r; // Compressed format
+            if (licData.rooms) return licData.rooms; // Full format
+            return [];
+        };
+
+        let rooms = getRooms(data);
 
         // Add room code if not already present
         if (!rooms.includes(cleanCode)) {
             rooms.push(cleanCode);
         }
 
-        // Save with 30-day expiration
-        await kv.set(key, {
-            rooms: rooms,
-            updatedAt: Date.now()
-        }, { ex: 60 * 60 * 24 * 30 });
+        // Update the license object
+        if (data.d) {
+            // It's compressed
+            data.r = rooms;
+        } else {
+            // It's full/legacy
+            data.rooms = rooms;
+        }
+        data.l = Date.now(); // Update last used time (l for compressed, will add for full too)
+
+        // Save back to license key
+        await kv.set(licenseKey, data);
+
+        // CLEANUP: If old separate key exists, remove it
+        await kv.del(`br:rooms:${cleanLicense}`);
+
+        return response.status(200).json({ success: true });
 
         return response.status(200).json({ success: true });
     } catch (error: any) {

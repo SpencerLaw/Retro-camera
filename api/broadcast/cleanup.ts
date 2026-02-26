@@ -19,9 +19,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         const cleanLicense = license.replace(/[-\s]/g, '').toUpperCase();
 
-        // Delete the entire license's room record
-        const key = `br:rooms:${cleanLicense}`;
-        await kv.del(key);
+        const licenseKey = `license:${cleanLicense}`;
+        const data: any = await kv.get(licenseKey);
+
+        if (data) {
+            if (data.d) {
+                delete data.r;
+            } else {
+                delete data.rooms;
+            }
+            await kv.set(licenseKey, data);
+        }
+
+        // Delete the legacy separate rooms record
+        await kv.del(`br:rooms:${cleanLicense}`);
 
         return res.status(200).json({ success: true });
     } catch (error) {

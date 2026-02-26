@@ -18,16 +18,29 @@ export default async function handler(
     try {
         const cleanCode = code.toUpperCase().trim();
 
-        // 1. Check if room is active/registered in new format
-        // Search through all br:rooms:* keys to find if this room exists
-        const roomKeys = await kv.keys('br:rooms:*');
+        // 1. Check if room is active/registered
+        // Unified Search: Look through all license:* keys
+        const licenseKeys = await kv.keys('license:*');
         let isValidRoom = false;
 
-        for (const key of roomKeys) {
-            const data = await kv.get<{ rooms: string[], updatedAt: number }>(key);
-            if (data && data.rooms && data.rooms.includes(cleanCode)) {
+        for (const lKey of licenseKeys) {
+            const data: any = await kv.get(lKey);
+            const rooms = data?.r || data?.rooms || [];
+            if (rooms.includes(cleanCode)) {
                 isValidRoom = true;
                 break;
+            }
+        }
+
+        // Search through legacy br:rooms:* keys if not found
+        if (!isValidRoom) {
+            const roomKeys = await kv.keys('br:rooms:*');
+            for (const key of roomKeys) {
+                const data = await kv.get<{ rooms: string[], updatedAt: number }>(key);
+                if (data && data.rooms && data.rooms.includes(cleanCode)) {
+                    isValidRoom = true;
+                    break;
+                }
             }
         }
 

@@ -25,7 +25,13 @@ interface LicenseMetadata {
   firstActivatedAt?: string;
   lastUsedTime: string;
   devices: DeviceInfo[];
-  children?: any[]; // 加长版数据可能包含孩子信息
+  rooms?: string[]; // 房间广播记录
+  children?: any[]; // 星梦奇缘：孩子列表
+  progress?: any;   // 星梦奇缘：每日打卡进度
+  categories?: any[]; // 星梦奇缘：自定义分类
+  hiddenPresets?: string[]; // 星梦奇缘：隐藏的任务预设
+  hiddenRewardPresets?: string[]; // 星梦奇缘：隐藏的奖励预设
+  redemptionLogs?: any[]; // 星梦奇缘：奖励核销日志
 }
 
 // 压缩版数据结构 (用于 Redis 存储)
@@ -41,6 +47,13 @@ interface CompressedMetadata {
   f: number; // firstActivatedAt (timestamp)
   l: number; // lastUsedTime (timestamp)
   d: CompressedDevice[]; // devices
+  r?: string[]; // rooms (房间码列表)
+  c?: any[]; // children (孩子列表)
+  p?: any;   // progress (打卡进度)
+  cat?: any[]; // categories (分类)
+  hp?: string[]; // hiddenPresets (隐藏任务预设)
+  hrp?: string[]; // hiddenRewardPresets (隐藏奖励预设)
+  rl?: any[]; // redemptionLogs (奖励日志)
 }
 
 // === 辅助工具 ===
@@ -99,7 +112,14 @@ function compressMetadata(full: LicenseMetadata): CompressedMetadata {
       f: new Date(dev.firstSeen).getTime(),
       l: new Date(dev.lastSeen).getTime(),
       u: dev.ua
-    }))
+    })),
+    r: full.rooms,
+    c: full.children,
+    p: full.progress,
+    cat: full.categories,
+    hp: full.hiddenPresets,
+    hrp: full.hiddenRewardPresets,
+    rl: full.redemptionLogs
   };
 }
 
@@ -130,11 +150,6 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
   const expDate = new Date(genDate);
   expDate.setFullYear(expDate.getFullYear() + 1);
 
-  // 保留原始数据中的额外字段（如星梦奇缘的 children, progress 等）
-  const extra: any = {};
-  if ((c as any).children) extra.children = (c as any).children;
-  if ((c as any).progress) extra.progress = (c as any).progress;
-
   return {
     code: code,
     totalDevices: c.d.length,
@@ -149,7 +164,13 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
       lastSeen: new Date(dev.l).toISOString(),
       ua: dev.u
     })),
-    ...extra
+    rooms: c.r,
+    children: c.c,
+    progress: c.p,
+    categories: (c as any).categories || c.cat, // 兼容旧版全称和新版压缩
+    hiddenPresets: (c as any).hiddenPresets || c.hp,
+    hiddenRewardPresets: (c as any).hiddenRewardPresets || c.hrp,
+    redemptionLogs: (c as any).redemptionLogs || c.rl
   };
 }
 

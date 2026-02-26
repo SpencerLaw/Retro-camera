@@ -721,36 +721,6 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             </AnimatePresence>
                         </div>
 
-                        {/* Center: Mini Profile when Scrolled */}
-                        <AnimatePresence>
-                            {isScrolled && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.8, x: -10 }}
-                                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                        if (isScrolled) setIsScrolled(false);
-                                    }}
-                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm cursor-pointer hover:bg-white/60"
-                                >
-                                    {childProfile.avatar ? (
-                                        <img
-                                            src={childProfile.avatar}
-                                            className="w-6 h-6 rounded-full object-cover border border-white shadow-sm"
-                                            alt={childProfile.name}
-                                        />
-                                    ) : (
-                                        <span className="text-xs">👋</span>
-                                    )}
-                                    <span className="text-xs font-black text-gray-700 tracking-tight">
-                                        {childProfile.name}
-                                    </span>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
                         {/* Right: Time & Compact Buttons (Ultra Grouped) */}
                         <div className="flex items-center gap-3">
                             <div className="flex flex-col items-end mr-0.5">

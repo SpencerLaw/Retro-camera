@@ -1044,7 +1044,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const CHILD_THEMES = [
         { name: 'pink', bg: 'from-pink-100 to-pink-200', ring: 'ring-[#F472B6]', text: 'text-[#F472B6]', border: 'border-pink-300', shadow: 'shadow-pink-300', line: 'bg-[#F472B6]' },
         { name: 'blue', bg: 'from-blue-100 to-blue-200', ring: 'ring-[#60A5FA]', text: 'text-[#60A5FA]', border: 'border-blue-300', shadow: 'shadow-blue-300', line: 'bg-[#60A5FA]' },
-        { name: 'orange', bg: 'from-orange-100 to-orange-200', ring: 'ring-[#FB923C]', text: 'text-[#FB923C]', border: 'border-orange-300', shadow: 'shadow-orange-300', line: 'bg-[#FB923C]' },
+        { name: 'orange', bg: 'from-orange-200 to-orange-300', ring: 'ring-[#F97316]', text: 'text-[#F97316]', border: 'border-orange-400', shadow: 'shadow-orange-400', line: 'bg-[#F97316]' },
     ];
 
     const currentTheme = selectedChild

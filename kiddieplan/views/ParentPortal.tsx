@@ -257,9 +257,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 // 核心同步：从 license 聚合对象中提取当前孩子的专注日志
                 const today = formatBeijingTime(new Date()).split(' ')[0];
                 const dailyData = result.data.progress?.[today]?.[selectedChildId];
-                if (dailyData?.focusLogs) {
-                    setFocusLogs(prev => JSON.stringify(prev) !== JSON.stringify(dailyData.focusLogs) ? dailyData.focusLogs : prev);
-                }
+                const newLogs = dailyData?.focusLogs || [];
+                setFocusLogs(prev => JSON.stringify(prev) !== JSON.stringify(newLogs) ? newLogs : prev);
 
                 // 核心修复: 实时同步孩子的任务状态 (包括 completed 标记)
                 if (selectedChildId) {
@@ -2112,10 +2111,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 const isDone = dayData.checkins.includes(task.id);
                                                                 const taskLog = dayData.focusLogs.find((l: any) => l.taskId === task.id || l.taskTitle === task.title);
 
-                                                                const fmt = (iso: string) => {
-                                                                    if (!iso) return '--:--';
+                                                                const fmt = (val: string | number) => {
+                                                                    if (!val) return '--:--';
                                                                     try {
-                                                                        const d = new Date(iso);
+                                                                        let d: Date;
+                                                                        if (typeof val === 'string' && val.includes(' ') && !val.includes('T')) {
+                                                                            d = new Date(val.replace(' ', 'T'));
+                                                                        } else {
+                                                                            d = new Date(val);
+                                                                        }
+                                                                        if (isNaN(d.getTime())) return '--:--';
                                                                         return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
                                                                     } catch (e) { return '--:--'; }
                                                                 };
@@ -2133,8 +2138,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                                 <div className="flex items-center gap-2 mt-1">
                                                                                     <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{task.timeSlot}</span>
                                                                                     {taskLog && (
-                                                                                        <span className="text-[10px] font-black text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                                                            <Clock size={10} /> {fmt(taskLog.startTime)} - {fmt(taskLog.endTime)}
+                                                                                        <span className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-0.5 rounded-md flex items-center gap-1 border border-orange-100">
+                                                                                            <Clock size={10} /> {fmt(taskLog.startTime)}
+                                                                                            {(taskLog.endTime && taskLog.endTime !== taskLog.startTime) ? ` - ${fmt(taskLog.endTime)}` : ''}
                                                                                         </span>
                                                                                     )}
                                                                                 </div>

@@ -696,7 +696,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     initial={{ opacity: 0, scale: 0.8, x: -10 }}
                                     animate={{ opacity: 1, scale: 1, x: 0 }}
                                     exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                        if (isScrolled) setIsScrolled(false);
+                                    }}
+                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm cursor-pointer hover:bg-white/60"
                                 >
                                     {childProfile.avatar ? (
                                         <img

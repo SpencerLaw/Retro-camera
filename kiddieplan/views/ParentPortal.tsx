@@ -1117,7 +1117,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     initial={{ opacity: 0, scale: 0.8, x: -10 }}
                                     animate={{ opacity: 1, scale: 1, x: 0 }}
                                     exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                        if (isScrolled) setIsScrolled(false);
+                                    }}
+                                    className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 shadow-sm cursor-pointer hover:bg-white/60"
                                 >
                                     <img
                                         src={selectedChild.avatar}
@@ -2019,39 +2024,33 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                             </div>
 
-                                            {/* 3. Active Timeline (High Clarity Redesigned) */}
-                                            <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[40px] shadow-xl border-2 border-white relative overflow-hidden">
-                                                <div className="flex justify-between items-start mb-10">
+                                            {/* 3. Active Timeline (Premium Heat Track Redesigned) */}
+                                            <div className="bg-white/70 backdrop-blur-2xl p-8 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white/80 relative overflow-hidden">
+                                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500/0 via-orange-500/20 to-orange-500/0"></div>
+
+                                                <div className="flex justify-between items-center mb-10 relative z-10">
                                                     <div>
                                                         <h4 className="text-xl font-black text-[#5D4037] flex items-center gap-2">
-                                                            <Clock size={20} className="text-red-500" />
+                                                            <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center">
+                                                                <Clock size={20} className="text-orange-500" />
+                                                            </div>
                                                             活跃时间分布
                                                         </h4>
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">记录每日 06:00 - 22:00 专注轨迹</p>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 ml-12">记录每日 06:00 - 22:00 专注轨迹</p>
                                                     </div>
-                                                    <div className="px-3 py-1.5 bg-red-50 rounded-xl border border-red-100 flex flex-col items-end">
-                                                        <span className="text-xs font-black text-red-500">{dayData.focusLogs?.length || 0} 次专注</span>
-                                                        <span className="text-[8px] font-bold text-red-300 uppercase tracking-tighter">打卡频次</span>
+                                                    <div className="px-4 py-2 bg-white/40 backdrop-blur-md rounded-[20px] border border-white/60 shadow-sm flex flex-col items-center min-w-[80px]">
+                                                        <span className="text-lg font-black text-orange-600 leading-none">{dayData.focusLogs?.length || 0}</span>
+                                                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter mt-1">打卡频次</span>
                                                     </div>
                                                 </div>
 
-                                                <div className="relative pt-2 pb-12">
-                                                    {/* Legend and Markers */}
-                                                    <div className="absolute inset-x-0 bottom-0 h-full flex justify-between px-1">
-                                                        {[6, 10, 14, 18, 22].map(h => (
-                                                            <div key={h} className="flex flex-col items-center h-full">
-                                                                <div className="w-[1px] h-full bg-gray-100 flex-1 border-dashed border-gray-200"></div>
-                                                                <span className="text-[10px] font-black text-gray-400 mt-2 bg-white px-1.5 py-0.5 rounded-md border border-gray-50 shadow-sm">{h.toString().padStart(2, '0')}:00</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    {/* Data Bar */}
-                                                    <div className="h-6 w-full bg-gray-50 rounded-full relative z-10 p-1 border border-gray-100 shadow-inner mt-4 overflow-hidden">
-                                                        <div className="absolute inset-0 flex gap-0.5 px-1">
-                                                            {Array.from({ length: 64 }).map((_, i) => {
-                                                                const sMins = (6 * 60) + (i * 15);
-                                                                const eMins = sMins + 15;
+                                                <div className="relative px-2">
+                                                    {/* Data Track */}
+                                                    <div className="h-10 w-full bg-gray-100/50 rounded-2xl relative p-1.5 border border-white/40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] overflow-hidden flex items-center">
+                                                        <div className="absolute inset-0 flex gap-[2px] px-2 py-2">
+                                                            {Array.from({ length: 48 }).map((_, i) => {
+                                                                const sMins = (6 * 60) + (i * 20); // 20-min chunks
+                                                                const eMins = sMins + 20;
                                                                 const isActive = (dayData.focusLogs || []).some((log: any) => {
                                                                     if (!log.startTime) return false;
                                                                     const sh = new Date(log.startTime).getHours();
@@ -2068,14 +2067,30 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 });
 
                                                                 return (
-                                                                    <div key={i} className={`flex-1 h-full rounded-md transition-all duration-700 ${isActive ? 'bg-gradient-to-b from-red-400 to-red-600 shadow-[0_0_12px_rgba(239,68,68,0.4)] ring-1 ring-white/20' : 'bg-transparent'}`}></div>
+                                                                    <motion.div
+                                                                        key={i}
+                                                                        initial={false}
+                                                                        animate={{
+                                                                            scaleY: isActive ? 1 : 0.4,
+                                                                            opacity: isActive ? 1 : 0.1
+                                                                        }}
+                                                                        className={`flex-1 rounded-full transition-all duration-1000 ${isActive ? 'bg-gradient-to-t from-orange-400 to-red-500 shadow-[0_0_15px_rgba(249,115,22,0.3)]' : 'bg-gray-400'}`}
+                                                                    ></motion.div>
                                                                 );
                                                             })}
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {/* Detailed Log List Removed per User Request */}
+                                                    {/* Time Markers */}
+                                                    <div className="flex justify-between mt-6 px-1">
+                                                        {[6, 10, 14, 18, 22].map(h => (
+                                                            <div key={h} className="text-center group">
+                                                                <div className="text-[10px] font-black text-gray-400 font-mono transition-colors group-hover:text-orange-500">{h.toString().padStart(2, '0')}:00</div>
+                                                                <div className="w-[1px] h-1 bg-gray-200 mx-auto mt-1 rounded-full"></div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {/* 4. Day Task Detail List */}
@@ -2124,7 +2139,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                             </div>
                                                                         </div>
                                                                         <div className="text-right flex flex-col items-end gap-1">
-                                                                            {task.accumulatedTime > 0 && (
+                                                                            {isDone && task.accumulatedTime === 0 ? (
+                                                                                <div className="text-orange-500 text-xs font-black mb-1">秒打卡</div>
+                                                                            ) : task.accumulatedTime > 0 && (
                                                                                 <div className="flex items-baseline gap-1 text-orange-500">
                                                                                     <span className="text-xl font-black">{formatTime(task.accumulatedTime)}</span>
                                                                                 </div>

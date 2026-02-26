@@ -355,6 +355,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     };
 
     const handleToggleTask = async (taskId: string) => {
+        // AUTO-STOP TIMER if completing the currently active task
+        if (isTimerRunning && activeTaskId === taskId) {
+            const focusingTask = tasks.find(t => t.id === taskId);
+            if (focusingTask) {
+                await toggleTimer(focusingTask); // Stop the timer first
+            }
+        }
+
         try {
             const res = await fetch('/api/kiddieplan/client', {
                 method: 'POST',

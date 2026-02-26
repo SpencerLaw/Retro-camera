@@ -1044,7 +1044,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const CHILD_THEMES = [
         { name: 'pink', bg: 'from-pink-100 to-pink-200', ring: 'ring-[#F472B6]', text: 'text-[#F472B6]', border: 'border-pink-300', shadow: 'shadow-pink-300', line: 'bg-[#F472B6]' },
         { name: 'blue', bg: 'from-blue-100 to-blue-200', ring: 'ring-[#60A5FA]', text: 'text-[#60A5FA]', border: 'border-blue-300', shadow: 'shadow-blue-300', line: 'bg-[#60A5FA]' },
-        { name: 'orange', bg: 'from-orange-400 to-orange-500', ring: 'ring-[#EA580C]', text: 'text-[#EA580C]', border: 'border-orange-500', shadow: 'shadow-orange-500', line: 'bg-[#EA580C]' },
+        { name: 'violet', bg: 'from-violet-100 to-violet-200', ring: 'ring-[#A78BFA]', text: 'text-[#A78BFA]', border: 'border-violet-300', shadow: 'shadow-violet-300', line: 'bg-[#A78BFA]' },
     ];
 
     const currentTheme = selectedChild
@@ -1245,7 +1245,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     {/* Left Capsule: Real-time Action */}
                                     <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border border-white/20 flex flex-col justify-between min-h-[160px] bg-gradient-to-br ${currentTheme.bg.replace('from-', 'from-white/10 to-').replace('50', '500').replace('100/30', '400')}`}>
                                         {/* Theme-based gradient override for the card */}
-                                        <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : 'from-emerald-400 to-teal-500'} z-0`}></div>
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : 'from-violet-400 to-purple-500'} z-0`}></div>
 
                                         <div className="absolute top-0 left-0 w-24 h-24 bg-white/20 rounded-full -ml-10 -mt-10 blur-2xl"></div>
 

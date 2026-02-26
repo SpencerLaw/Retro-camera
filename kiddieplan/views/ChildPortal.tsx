@@ -245,13 +245,20 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 prevTasksCount.current = newTasks.length;
 
                 const currentRewards = result.data.rewards || [];
-                // Detect REWARD changes (simple hash check of IDs)
-                const rewardsHash = currentRewards.map((r: any) => r.id).join(',');
-                if (!isFirstLoad.current && prevRewardsHash.current !== '' && rewardsHash !== prevRewardsHash.current) {
-                    setRewardToast({ show: true });
-                    setTimeout(() => setRewardToast({ show: false }), 5000);
+                const publishedRewardsHash = currentRewards.filter((r: any) => r.isPublished).map((r: any) => r.id).join(',');
+
+                // Detect NEWLY PUBLISHED rewards (ignore first load/decreases)
+                if (!isFirstLoad.current && prevRewardsHash.current !== '' && publishedRewardsHash !== prevRewardsHash.current) {
+                    // Only show if the number of published rewards increased
+                    const prevCount = prevRewardsHash.current ? prevRewardsHash.current.split(',').filter(Boolean).length : 0;
+                    const currCount = publishedRewardsHash ? publishedRewardsHash.split(',').filter(Boolean).length : 0;
+
+                    if (currCount > prevCount) {
+                        setRewardToast({ show: true });
+                        setTimeout(() => setRewardToast({ show: false }), 5000);
+                    }
                 }
-                prevRewardsHash.current = rewardsHash;
+                prevRewardsHash.current = publishedRewardsHash;
                 isFirstLoad.current = false;
 
                 setCheckins(result.data.checkins || []);
@@ -458,7 +465,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     </div>
 
                     {/* Stats Grid - Candy Style */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="bg-blue-50/50 p-4 rounded-3xl border border-blue-100/50 flex flex-col items-center gap-1 group/item hover:bg-blue-50 transition-colors">
                             <span className="text-2xl group-hover/item:scale-125 transition-transform">🗓️</span>
                             <span className="text-2xl font-black text-blue-600 leading-none">{tasks.length}</span>
@@ -468,11 +475,6 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             <span className="text-2xl group-hover/item:scale-125 transition-transform">⚡</span>
                             <span className="text-2xl font-black text-pink-600 leading-none">+{tasks.reduce((acc, t) => acc + t.points, 0)}</span>
                             <span className="text-[10px] font-black text-pink-300 uppercase tracking-widest">预计可得糖果</span>
-                        </div>
-                        <div className="bg-yellow-50/50 p-4 rounded-3xl border border-yellow-100/50 flex flex-col items-center gap-1 group/item hover:bg-yellow-50 transition-colors">
-                            <span className="text-2xl group-hover/item:scale-125 transition-transform">🍭</span>
-                            <span className="text-2xl font-black text-yellow-600 leading-none">{coins}</span>
-                            <span className="text-[10px] font-black text-yellow-300 uppercase tracking-widest">我的糖果库</span>
                         </div>
                     </div>
                 </div>
@@ -760,48 +762,59 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         {activeTab === 'home' && renderDashboardView()}
                         {activeTab === 'plan' && renderPlannerView()}
                         {activeTab === 'rewards' && (
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-5">
-                                <h2 className="text-2xl font-black text-gray-700 text-center">🎁 梦幻宝库</h2>
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+                                {/* Enhanced Treasure Header */}
+                                <div className="text-center space-y-2">
+                                    <h2 className="text-3xl font-black text-gray-800" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>🎁 梦幻宝库</h2>
+                                    <div className="inline-flex items-center gap-2 bg-yellow-400/90 text-white px-6 py-2 rounded-full shadow-lg border-4 border-white animate-bounce-slow">
+                                        <span className="text-xl">🍭</span>
+                                        <span className="text-xl font-black">{coins}</span>
+                                        <span className="text-xs font-bold opacity-80">当前存余</span>
+                                    </div>
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-3">
-                                    {rewards.map((reward, i) => {
+                                    {rewards.filter(r => r.isPublished).map((reward, i) => {
                                         const pendingLog = redemptionLogs.find(l => l.rewardName === reward.name && l.status === 'pending');
                                         const isPending = !!pendingLog;
 
                                         return (
                                             <motion.div
-                                                key={i}
+                                                key={reward.id || i}
                                                 whileHover={!isPending ? { y: -3, scale: 1.02 } : {}}
                                                 whileTap={!isPending ? { scale: 0.98 } : {}}
                                                 onClick={() => !isPending && handleRedeemReward(reward)}
                                                 className={`p-5 rounded-3xl flex flex-col items-center gap-3 text-center border relative overflow-hidden transition-all
-                                                    ${isPending ? 'bg-orange-50/50 border-orange-200 opacity-80 cursor-default' : 'bg-white/80 backdrop-blur-sm border-white/50 shadow-sm cursor-pointer'}`}
+                                                    ${isPending ? 'bg-orange-50/50 border-orange-200 opacity-80 cursor-default' : 'bg-white/90 backdrop-blur-md border-white/50 shadow-sm cursor-pointer'}`}
                                             >
-                                                <div className={`text-4xl transition-transform ${isPending ? 'grayscale-[0.5]' : 'hover:scale-110'}`}>{reward.icon || '🎁'}</div>
+                                                <div className={`text-4xl transition-transform ${isPending ? 'grayscale-[0.5]' : 'group-hover:scale-110'}`}>{reward.icon || '🎁'}</div>
                                                 <div>
                                                     <div className={`font-bold text-sm ${isPending ? 'text-orange-600/70' : 'text-gray-700'}`}>{reward.name}</div>
                                                     {isPending ? (
-                                                        <div className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-0.5 rounded-full mt-1.5 inline-block animate-pulse">
+                                                        <div className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-1 rounded-full mt-2 inline-block animate-pulse">
                                                             等待审批中...
                                                         </div>
                                                     ) : (
-                                                        <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-0.5 rounded-full mt-1.5 inline-block shadow-sm">
+                                                        <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-3 py-1 rounded-full mt-2 inline-block shadow-sm">
                                                             {reward.pointsCost} 🍭
                                                         </div>
                                                     )}
                                                 </div>
                                                 {coins < reward.pointsCost && !isPending && (
-                                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-bold text-sm text-gray-400 backdrop-blur-[2px]">
+                                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-bold text-xs text-gray-400 backdrop-blur-[2px] p-2 leading-tight">
                                                         还差 {reward.pointsCost - coins} 🍭
-                                                    </div>
-                                                )}
-                                                {isPending && (
-                                                    <div className="absolute top-2 right-2">
-                                                        <Sparkles className="text-orange-400 animate-spin-slow" size={14} />
                                                     </div>
                                                 )}
                                             </motion.div>
                                         );
                                     })}
+                                    {rewards.filter(r => r.isPublished).length === 0 && (
+                                        <div className="col-span-2 text-center py-20 bg-white/20 rounded-[40px] border-4 border-dashed border-white/30">
+                                            <div className="text-5xl mb-4 opacity-30">🎪</div>
+                                            <p className="font-bold text-gray-400">目前宝库正在补货中...</p>
+                                            <p className="text-xs text-gray-300 mt-2 font-black uppercase">请期待爸爸妈妈为你精心准备的礼物</p>
+                                        </div>
+                                    )}
                                 </div>
                             </motion.div>
                         )}

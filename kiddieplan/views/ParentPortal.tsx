@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2, ArrowRight, Flame, Menu } from 'lucide-react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2, ArrowRight, Flame, Menu, ShieldCheck } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog, RedemptionLog } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES, REWARD_CATEGORIES } from '../constants/templates';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,12 +9,15 @@ interface ParentPortalProps {
     onLogout: () => void;
 }
 
+type AppTab = 'children' | 'tasks' | 'rewards' | 'registry' | 'stats' | 'redemption';
+
 const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [children, setChildren] = useState<Child[]>([]);
     const [licenseData, setLicenseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'registry' | 'stats' | 'redemption'>('children');
+    const [activeTab, setActiveTab] = useState<AppTab>('children');
+    const [rewardSubTab, setRewardSubTab] = useState<'presets' | 'drafts' | 'published'>('presets');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -551,9 +554,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
-    const handleSaveRewards = async () => {
-        if (!selectedChildId) return;
-        setIsSaving(true);
+    const handleSyncWithBackend = async (targetRewards: Reward[], successMessage: string) => {
         try {
             const res = await fetch('/api/kiddieplan/manage', {
                 method: 'POST',
@@ -561,7 +562,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 body: JSON.stringify({
                     action: 'save_rewards',
                     token,
-                    data: { childId: selectedChildId, rewards }
+                    data: { childId: selectedChildId, rewards: targetRewards }
                 })
             });
             const result = await res.json();
@@ -570,13 +571,24 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     isOpen: true,
                     title: '🎁 奖励已同步',
                     placeholder: '',
-                    message: '你设定的“成长银行”奖励项已更新，快去鼓励孩子吧！',
+                    message: successMessage,
                     onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
                     hideInput: true
                 });
+            } else {
+                throw new Error(result.message || '同步失败');
             }
         } catch (err) {
-            alert('同步失败');
+            alert('同步失败: ' + err);
+            throw err;
+        }
+    };
+
+    const handleSaveRewards = async () => {
+        if (!selectedChildId) return;
+        setIsSaving(true);
+        try {
+            await handleSyncWithBackend(rewards, '你设定的“成长银行”奖励项已更新，快去鼓励孩子吧！');
         } finally {
             setIsSaving(false);
         }
@@ -608,22 +620,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             setSelectedChildId(updated[0].id);
                         } else {
                             setSelectedChildId(null);
-                            setActiveTab('children');
                         }
-                    } else {
-                        throw new Error(result.message || '删除失败');
                     }
-                } catch (err: any) {
-                    setDialogConfig({
-                        isOpen: true,
-                        title: '删除失败',
-                        message: err.message || '系统繁忙，请稍后再试',
-                        onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false }))
-                    });
+                } catch (e) {
+                    alert('删除失败');
                 } finally {
                     setIsSaving(false);
                 }
-            }
+            },
+            hideInput: true
         });
     };
 
@@ -708,7 +713,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         name: importedReward.name!,
                         pointsCost: importedReward.pointsCost || 500,
                         icon: importedReward.icon || '🎁',
-                        category: importedReward.category || selectedRewardCategory
+                        category: importedReward.category || selectedRewardCategory,
+                        isPublished: false
                     };
                     setRewards(prev => [...prev, newReward]);
                     setDialogConfig(prev => ({ ...prev, isOpen: false }));
@@ -730,7 +736,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     name,
                     pointsCost: pts || 500,
                     icon: '🎁',
-                    category: selectedRewardCategory
+                    category: selectedRewardCategory,
+                    isPublished: false
                 };
                 setRewards(prev => [...prev, newReward]);
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
@@ -1622,136 +1629,242 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     >
                                         <ArrowLeft size={20} />
                                     </motion.button>
-                                    <h2 className="text-2xl font-black text-[#5D4037]">奖励库配置</h2>
+                                    <h2 className="text-2xl font-black text-[#5D4037]">奖励分库配置</h2>
                                 </div>
-                                <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleAddReward()} className="bg-[var(--color-yellow-reward)] text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
-                                    <Plus size={24} />
+                            </div>
+
+                            {/* Reward Category Templates & Add Button */}
+                            <div className="flex flex-wrap gap-2 items-center">
+                                {REWARD_CATEGORIES.map(cat => (
+                                    <div key={cat.id} className="relative group">
+                                        <button
+                                            onClick={() => setSelectedRewardCategory(cat.id)}
+                                            className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
+                                        ${selectedRewardCategory === cat.id
+                                                    ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                                                    : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+                                        >
+                                            <span>{cat.icon}</span>
+                                            {cat.name}
+                                        </button>
+                                        {selectedRewardCategory === cat.id && (
+                                            <motion.button
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setIsManagingCategories(true);
+                                                }}
+                                                className="absolute -top-2 -right-2 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-sm border border-white z-20"
+                                            >
+                                                <Edit2 size={10} fill="currentColor" />
+                                            </motion.button>
+                                        )}
+                                    </div>
+                                ))}
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => handleAddReward()}
+                                    className="px-4 py-2 rounded-full text-sm font-black bg-emerald-500 text-white shadow-md flex items-center gap-1 hover:bg-emerald-600 transition-colors"
+                                >
+                                    <Plus size={16} /> 新增奖励项
                                 </motion.button>
                             </div>
 
-                            {/* Reward Category Templates */}
-                            <div className="flex flex-wrap gap-2 items-center">
-                                {REWARD_CATEGORIES.map(cat => (
+                            {/* Sub-tabs Navigation */}
+                            <div className="flex bg-gray-100/50 p-1 rounded-2xl gap-1">
+                                {[
+                                    { id: 'presets', label: '发现灵感', icon: <Sparkles size={16} /> },
+                                    { id: 'drafts', label: '草稿工作台', icon: <Edit2 size={16} /> },
+                                    { id: 'published', label: '已公开发布', icon: <ShieldCheck size={16} /> }
+                                ].map(tab => (
                                     <button
-                                        key={cat.id}
-                                        onClick={() => setSelectedRewardCategory(cat.id)}
-                                        className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
-                                    ${selectedRewardCategory === cat.id
-                                                ? 'bg-orange-500 text-white border-orange-500 shadow-md'
-                                                : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+                                        key={tab.id}
+                                        onClick={() => setRewardSubTab(tab.id as any)}
+                                        className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2
+                                            ${rewardSubTab === tab.id
+                                                ? 'bg-white text-orange-500 shadow-sm'
+                                                : 'text-gray-400 hover:text-gray-600'}`}
                                     >
-                                        <span>{cat.icon}</span>
-                                        {cat.name}
+                                        {tab.icon} {tab.label}
+                                        {tab.id === 'drafts' && rewards.filter(r => !r.isPublished).length > 0 && (
+                                            <span className="w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-[10px]">
+                                                {rewards.filter(r => !r.isPublished).length}
+                                            </span>
+                                        )}
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
-                                {DEFAULT_REWARDS
-                                    .filter(r => r.category === selectedRewardCategory)
-                                    .filter(r => !hiddenRewardPresets.includes(`${selectedRewardCategory}:${r.name}`))
-                                    .map((tmp, i) => (
-                                        <div key={`rew_tmp_${i}`} className="relative group">
-                                            <motion.button
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={() => handleAddReward(tmp)}
-                                                className="w-full bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-orange-100 shadow-sm flex items-center gap-3"
-                                            >
-                                                <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.name}</div>
-                                                    <div className="text-[10px] text-orange-400 font-bold mt-0.5">{tmp.pointsCost} 🍭</div>
-                                                </div>
-                                            </motion.button>
+                            {rewardSubTab === 'presets' && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
+                                        {DEFAULT_REWARDS
+                                            .filter(r => r.category === selectedRewardCategory)
+                                            .filter(r => !hiddenRewardPresets.includes(`${selectedRewardCategory}:${r.name}`))
+                                            .map((tmp, i) => (
+                                                <div key={`rew_tmp_${i}`} className="relative group">
+                                                    <motion.button
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={() => handleAddReward(tmp)}
+                                                        className="w-full bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-orange-100 shadow-sm flex items-center gap-3"
+                                                    >
+                                                        <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.name}</div>
+                                                            <div className="text-[10px] text-orange-400 font-bold mt-0.5">{tmp.pointsCost} 🍭</div>
+                                                        </div>
+                                                    </motion.button>
 
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteRewardTemplate(selectedRewardCategory, tmp.name!);
+                                                        }}
+                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {rewardSubTab === 'drafts' && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                                    <div className="flex items-center justify-between pl-1">
+                                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">待发布清单</h3>
+                                        {rewards.filter(r => !r.isPublished).length > 0 && (
                                             <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteRewardTemplate(selectedRewardCategory, tmp.name!);
+                                                onClick={() => {
+                                                    setDialogConfig({
+                                                        isOpen: true,
+                                                        title: '🎁 确认发布奖励',
+                                                        message: `将把这 ${rewards.filter(r => !r.isPublished).length} 项奖励同步给孩子吗？`,
+                                                        hideInput: true,
+                                                        onConfirm: async () => {
+                                                            setIsSaving(true);
+                                                            try {
+                                                                const updatedRewards = rewards.map(r => ({ ...r, isPublished: true }));
+                                                                setRewards(updatedRewards);
+                                                                await handleSyncWithBackend(updatedRewards, '奖励已在孩子端闪亮登场！');
+                                                                setRewardSubTab('published');
+                                                            } catch (e) { alert('发布失败'); }
+                                                            finally { setIsSaving(false); setDialogConfig(prev => ({ ...prev, isOpen: false })); }
+                                                        }
+                                                    });
                                                 }}
-                                                className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
+                                                className="text-xs font-black text-orange-500 flex items-center gap-1 bg-orange-50 px-3 py-1.5 rounded-full hover:bg-orange-100 transition-colors"
                                             >
-                                                <Trash2 size={12} />
+                                                <Zap size={14} fill="currentColor" /> 发布全部
                                             </button>
-                                        </div>
-                                    ))}
-                            </div>
+                                        )}
+                                    </div>
 
-                            <div className="h-px bg-gray-200 my-4" />
-
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest pl-1">当前待发布奖励</h3>
-                                <div className="grid grid-cols-1 gap-3">
-                                    {rewards.map((reward) => (
-                                        <motion.div
-                                            key={reward.id}
-                                            layout
-                                            className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-orange-100 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-2xl w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-                                                    {reward.icon}
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {rewards.filter(r => !r.isPublished).map((reward) => (
+                                            <motion.div
+                                                key={reward.id}
+                                                layout
+                                                className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-orange-100 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-2xl w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                                        {reward.icon}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-[#5D4037]">{reward.name}</h4>
+                                                        <div className="text-xs text-orange-400 font-bold">{reward.pointsCost} 🍭</div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h4 className="font-bold text-[#5D4037]">{reward.name}</h4>
-                                                    <div className="text-xs text-orange-400 font-bold">{reward.pointsCost} 🍭</div>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => editReward(reward)} className="p-2 text-gray-300 hover:text-blue-500 transition-colors"><Edit2 size={16} /></button>
+                                                    <button onClick={() => removeReward(reward.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
                                                 </div>
+                                            </motion.div>
+                                        ))}
+                                        {rewards.filter(r => !r.isPublished).length === 0 && (
+                                            <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
+                                                <p className="font-bold text-gray-500 text-sm">暂无待发布的草稿</p>
+                                                <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">请从“发现灵感”中点击添加</p>
                                             </div>
-                                            <div className="flex gap-1">
-                                                <button onClick={() => editReward(reward)} className="p-2 text-gray-300 hover:text-blue-500 transition-colors"><Edit2 size={16} /></button>
-                                                <button onClick={() => removeReward(reward.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {rewardSubTab === 'published' && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest pl-1">已发布奖励 (孩子端可见)</h3>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {rewards.filter(r => r.isPublished).map((reward) => {
+                                            const redemptions = redemptionLogs.filter(l => l.rewardName === reward.name);
+                                            const pendingCount = redemptions.filter(l => l.status === 'pending').length;
+                                            const approvedCount = redemptions.filter(l => l.status === 'approved').length;
+
+                                            return (
+                                                <motion.div
+                                                    key={reward.id}
+                                                    layout
+                                                    className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 relative group"
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="text-2xl w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center grayscale group-hover:grayscale-0 transition-all">
+                                                            {reward.icon}
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <h4 className="font-bold text-[#5D4037]">{reward.name}</h4>
+                                                                {pendingCount > 0 && (
+                                                                    <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full animate-bounce">
+                                                                        {pendingCount} 个待处理
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-3 mt-0.5">
+                                                                <div className="text-[10px] text-gray-400 font-bold">{reward.pointsCost} 🍭</div>
+                                                                <div className="text-[10px] text-emerald-500 font-black">已发 {approvedCount} 次</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        <button
+                                                            onClick={() => {
+                                                                setDialogConfig({
+                                                                    isOpen: true,
+                                                                    title: '取消发布',
+                                                                    message: `确定要撤销“${reward.name}”的发布吗？孩子端将不再可见。`,
+                                                                    hideInput: true,
+                                                                    onConfirm: async () => {
+                                                                        const updatedRewards = rewards.map(r => r.id === reward.id ? { ...r, isPublished: false } : r);
+                                                                        setRewards(updatedRewards);
+                                                                        await handleSyncWithBackend(updatedRewards, '已撤销发布');
+                                                                        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                                    }
+                                                                });
+                                                            }}
+                                                            className="p-2 text-gray-300 hover:text-orange-400 transition-colors"
+                                                            title="下架"
+                                                        >
+                                                            <LogOut size={16} className="rotate-180" />
+                                                        </button>
+                                                        <button onClick={() => removeReward(reward.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
+                                        {rewards.filter(r => r.isPublished).length === 0 && (
+                                            <div className="text-center py-20 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
+                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-2xl">
+                                                    📢
+                                                </div>
+                                                <p className="font-bold text-gray-400 text-sm">还没有发布的奖励哦</p>
+                                                <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">发布后孩子即可在宝库中兑换</p>
                                             </div>
-                                        </motion.div>
-                                    ))}
-                                    {rewards.length === 0 && (
-                                        <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
-                                            <p className="font-bold text-gray-500">奖励列表空空如也</p>
-                                            <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">从上方预设快速添加</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {rewards.length > 0 && (
-                                <div className="space-y-4 pt-4">
-                                    <motion.button
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => {
-                                            setDialogConfig({
-                                                isOpen: true,
-                                                title: '🎁 确认同步奖励库',
-                                                message: `这就把设置的 ${rewards.length} 项奖励同步给 ${selectedChild.name} 吗？`,
-                                                hideInput: true,
-                                                onConfirm: async () => {
-                                                    await handleSaveRewards();
-                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                                                }
-                                            });
-                                        }}
-                                        disabled={isSaving}
-                                        className="w-full bg-pink-500 py-4 rounded-2xl text-white font-black text-lg shadow-[0_8px_0_#db2777] active:shadow-none active:translate-y-2 transition-all"
-                                    >
-                                        {isSaving ? '同步中...' : `发布给 ${selectedChild.name}`}
-                                    </motion.button>
-
-                                    <button
-                                        onClick={() => {
-                                            setDialogConfig({
-                                                isOpen: true,
-                                                title: '清空草稿库',
-                                                message: '确定要清空当前所有待发布的奖励吗？',
-                                                onConfirm: () => {
-                                                    setRewards([]);
-                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                                                },
-                                                hideInput: true
-                                            });
-                                        }}
-                                        className="w-full py-2 text-gray-400 font-bold text-xs hover:text-red-400 transition-colors"
-                                    >
-                                        清空当前列表 (草稿)
-                                    </button>
-                                </div>
+                                        )}
+                                    </div>
+                                </motion.div>
                             )}
                         </motion.div>
                     )}

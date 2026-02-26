@@ -45,6 +45,8 @@ export interface Reward {
   pointsCost: number;
   icon: string;
   category?: string;
+  isPublished?: boolean; // 是否已发布给孩子端可见
+  description?: string; // 奖励详情描述
 }
 
 export interface Child {

@@ -1261,11 +1261,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="space-y-1">
                                                     <div className="flex justify-between items-end">
                                                         <div className="text-[10px] font-black uppercase tracking-widest opacity-70">正在进行</div>
-                                                        {selectedChild.focusStartTime && (
-                                                            <div className="text-[9px] font-black bg-white/20 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                                <Clock size={10} /> {new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(selectedChild.focusStartTime))} 开始
-                                                            </div>
-                                                        )}
                                                     </div>
                                                     <h2 className="text-xl font-black tracking-tight leading-snug break-words line-clamp-2 drop-shadow-sm min-h-[3rem] flex items-center">
                                                         {selectedChild.currentTaskName}
@@ -1275,17 +1270,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <div className="space-y-1">
                                                     <div className="flex justify-between items-end">
                                                         <div className="text-[10px] font-black uppercase tracking-widest opacity-70">今日动态</div>
-                                                        {focusLogs.length > 0 && (
-                                                            <div className="text-[9px] font-black bg-white/20 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                                <CheckCircle2 size={10} /> {(() => {
-                                                                    const last = [...focusLogs].sort((a, b) => new Date(b.endTime || 0).getTime() - new Date(a.endTime || 0).getTime())[0];
-                                                                    return last ? `${new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(new Date(last.endTime))} 结束` : '暂无记录';
-                                                                })()}
-                                                            </div>
-                                                        )}
                                                     </div>
                                                     <h2 className="text-2xl font-black tracking-tight leading-none drop-shadow-sm">正在休息</h2>
-                                                    <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">能量恢复中</p>
                                                 </div>
                                             )}
                                         </div>

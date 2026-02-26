@@ -1533,7 +1533,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     {currentTasks.length === 0 && (
                                         <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
                                             <p className="font-bold text-gray-500">今日尚未添加待办任务</p>
-                                            <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">Waiting for your plan</p>
+                                            <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">期待你的计划</p>
                                         </div>
                                     )}
                                 </div>
@@ -2001,7 +2001,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                 <span className="text-2xl ml-1 text-gray-300">%</span>
                                                             </div>
                                                             <div className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
-                                                                Done {dayData.checkins.length} / {dayData.tasks.length}
+                                                                已完成 {dayData.checkins.length} / {dayData.tasks.length}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -2113,10 +2113,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                                             </div>
                                                                         </div>
                                                                         <div className="text-right flex flex-col items-end gap-1">
-                                                                            {taskLog && taskLog.duration > 0 && (
+                                                                            {task.accumulatedTime > 0 && (
                                                                                 <div className="flex items-baseline gap-1 text-orange-500">
-                                                                                    <span className="text-xl font-black">{Math.floor(taskLog.duration / 60)}</span>
-                                                                                    <span className="text-[10px] font-bold uppercase tracking-tighter">MINS</span>
+                                                                                    <span className="text-xl font-black">{formatTime(task.accumulatedTime)}</span>
                                                                                 </div>
                                                                             )}
                                                                             {isDone && <span className="text-[10px] font-black text-emerald-500 bg-white px-3 py-1 rounded-full border border-emerald-50 shadow-sm uppercase tracking-tighter">打卡成功</span>}

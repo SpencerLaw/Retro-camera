@@ -1053,10 +1053,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     return (
         <div
-            className={`flex flex-col h-full w-full overflow-hidden font-sans relative transition-colors duration-1000 bg-gradient-to-br ${currentTheme.bg}`}
+            className={`flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative transition-colors duration-1000 bg-gradient-to-br ${currentTheme.bg}`}
             style={{
-                overscrollBehavior: 'none',
-                minHeight: '100dvh'
+                overscrollBehavior: 'none'
             }}
         >
             {/* Decorative Blurs */}
@@ -1071,6 +1070,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 onScroll={(e) => {
                     const top = e.currentTarget.scrollTop;
                     if (top > 20 && !isScrolled) setIsScrolled(true);
+                    if (top <= 20 && isScrolled) setIsScrolled(false);
                 }}
                 className="flex-1 w-full overflow-y-auto no-scrollbar relative z-10"
                 style={{ WebkitOverflowScrolling: 'touch' }}
@@ -1240,7 +1240,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     )}
                 </AnimatePresence>
 
-                <div className="px-4 pb-12 space-y-6">
+                <div className="px-4 pb-6 space-y-6">
                     {(activeTab === 'children' && selectedChild) && (
                         <motion.div
                             key={selectedChildId}

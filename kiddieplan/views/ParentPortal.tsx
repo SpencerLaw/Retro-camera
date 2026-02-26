@@ -1885,7 +1885,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 try {
                                     const statsDate = selectedStatsDate;
                                     const baselineData = (licenseData as any)?.progress?.[statsDate]?.[selectedChildId] || { checkins: [], focusLogs: [] };
-                                    const tasksForStats = (baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks;
+                                    const todayStr = formatBeijingTime(new Date()).split(' ')[0];
+                                    const tasksForStats = (statsDate === todayStr)
+                                        ? currentTasks
+                                        : ((baselineData.tasks && baselineData.tasks.length > 0) ? baselineData.tasks : currentTasks);
 
                                     // 去重合并 focusLogs，兼容历史脏数据
                                     const rawFocusLogs: any[] = baselineData.focusLogs || [];

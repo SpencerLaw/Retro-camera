@@ -1053,7 +1053,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     return (
         <div
-            className="flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative bg-transparent"
+            className={`flex flex-col h-[100dvh] w-full overflow-hidden font-sans relative transition-colors duration-1000 bg-gradient-to-br ${currentTheme.bg}`}
             style={{
                 overscrollBehavior: 'none'
             }}

@@ -120,14 +120,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const mainScrollRef = useRef<HTMLElement>(null);
     const tabScrollPositions = useRef<Record<string, number>>({});
 
+    // Smart Polling Logic
+    const [isIdle, setIsIdle] = useState(false);
+    const lastActivityRef = useRef(Date.now());
+
     // Live Focus Timer State for Parent View
     const [liveFocusDuration, setLiveFocusDuration] = useState(0);
+
+    const [parentToast, setParentToast] = useState<{ show: boolean; count: number }>({ show: false, count: 0 });
+    const prevPendingCount = useRef(0);
 
     useEffect(() => {
         const selectedChild = children.find(c => c.id === selectedChildId);
         if (selectedChild?.isFocusing) {
-            // Only update from backend if we don't have a local timer running
-            // or if the drift is significant (> 30s) to avoid jitter
             setLiveFocusDuration(prev => {
                 const backendVal = selectedChild.lastFocusDuration || 0;
                 if (prev === 0 || Math.abs(prev - backendVal) > 30) {
@@ -144,6 +149,29 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             setLiveFocusDuration(0);
         }
     }, [children, selectedChildId]);
+
+    // Background Polling for Updates (Redemption, Sync)
+    useEffect(() => {
+        const poll = async () => {
+            if (isIdle || !selectedChildId) return;
+            // Silent sync
+            fetchConfig(true);
+            fetchRedemptionHistory();
+        };
+
+        const interval = setInterval(poll, 30000); // 30s
+        return () => clearInterval(interval);
+    }, [isIdle, selectedChildId]);
+
+    // Detect NEW Pending Redemptions to show Toast
+    useEffect(() => {
+        const pending = redemptionLogs.filter(l => l.status === 'pending');
+        if (pending.length > prevPendingCount.current) {
+            setParentToast({ show: true, count: pending.length });
+            setTimeout(() => setParentToast(p => ({ ...p, show: false })), 5000);
+        }
+        prevPendingCount.current = pending.length;
+    }, [redemptionLogs]);
 
     useEffect(() => {
         // Restore position for NEW activeTab
@@ -181,10 +209,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             }
         }
     }, [selectedChildId, activeTab]);
-
-    // Smart Polling Logic
-    const [isIdle, setIsIdle] = useState(false);
-    const lastActivityRef = useRef(Date.now());
 
     // Activity Detection
     useEffect(() => {
@@ -1110,6 +1134,41 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-50 pointer-events-none"></div>
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-200 rounded-full translate-x-1/2 blur-3xl opacity-40 pointer-events-none"></div>
 
+            {/* Parent Notification Toast (Cloud) */}
+            <AnimatePresence>
+                {parentToast.show && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5, y: -50 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.5, y: -20 }}
+                        onClick={() => {
+                            setActiveTab('redemption');
+                            setParentToast({ show: false, count: 0 });
+                        }}
+                        className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] cursor-pointer"
+                    >
+                        <div className="relative group">
+                            {/* Cloud Body using SVGs for that organic look */}
+                            <div className="relative bg-white/90 backdrop-blur-xl px-6 py-4 rounded-[40px] shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-white flex items-center gap-4 min-w-[280px]">
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-white/90 rounded-full blur-[2px]" />
+                                <div className="absolute -top-2 left-1/3 w-6 h-6 bg-white/90 rounded-full blur-[1px]" />
+
+                                <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-2xl animate-bounce">
+                                    🎁
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-[#5D4037] text-sm">宝贝呼叫家长！</span>
+                                    <p className="text-[10px] text-gray-400 font-bold">发出了奖励申请，快去审批吧 ~</p>
+                                </div>
+                                <div className="ml-2 flex items-center gap-1 bg-red-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black">
+                                    {parentToast.count}
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileChange} />
 
             {/* Main Area - Everything scrolls under the glassy header */}
@@ -1398,10 +1457,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('rewards')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy relative"
                                     >
-                                        <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
+                                        <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 relative">
                                             <Gift size={32} strokeWidth={3} />
+                                            {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white shadow-sm ring-2 ring-red-100"
+                                                >
+                                                    {redemptionLogs.filter(l => l.status === 'pending').length}
+                                                </motion.div>
+                                            )}
                                         </div>
                                         <span className="font-black text-[#5D4037] text-lg">奖励中心</span>
                                         <span className="text-xs text-gray-400 font-bold">设定心愿清单</span>
@@ -1411,10 +1479,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('redemption')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy relative"
                                     >
-                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
+                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 relative">
                                             <Trophy size={32} strokeWidth={3} />
+                                            {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white shadow-sm ring-2 ring-red-100 animate-pulse"
+                                                >
+                                                    {redemptionLogs.filter(l => l.status === 'pending').length}
+                                                </motion.div>
+                                            )}
                                         </div>
                                         <span className="font-black text-[#5D4037] text-lg">核销记录</span>
                                         <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
@@ -1447,9 +1524,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => setActiveTab('children')}
-                                        className="w-10 h-10 bg-white/30 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/30"
+                                        className="w-10 h-10 bg-white/30 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/30 relative"
                                     >
                                         <ArrowLeft size={20} />
+                                        {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
+                                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white shadow-sm" />
+                                        )}
                                     </motion.button>
                                     <h2 className="text-2xl font-black text-[#5D4037]">今日任务清单</h2>
                                 </div>
@@ -1625,9 +1705,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => setActiveTab('children')}
-                                        className="w-10 h-10 bg-white/30 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/30"
+                                        className="w-10 h-10 bg-white/30 backdrop-blur-md rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-white/30 relative"
                                     >
                                         <ArrowLeft size={20} />
+                                        {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
+                                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white shadow-sm" />
+                                        )}
                                     </motion.button>
                                     <h2 className="text-2xl font-black text-[#5D4037]">奖励分库配置</h2>
                                 </div>
@@ -1882,9 +1965,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => setActiveTab('children')}
-                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100 relative"
                                 >
                                     <ArrowLeft size={20} />
+                                    {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
+                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white shadow-sm" />
+                                    )}
                                 </motion.button>
                                 <h2 className="text-2xl font-black text-[#5D4037]">奖励核销审批</h2>
                             </div>
@@ -2001,9 +2087,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => setActiveTab('children')}
-                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100"
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm border border-gray-100 relative"
                                 >
                                     <ArrowLeft size={20} />
+                                    {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
+                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white shadow-sm" />
+                                    )}
                                 </motion.button>
                                 <h2 className="text-2xl font-black text-[#5D4037]">成长看板</h2>
                             </div>

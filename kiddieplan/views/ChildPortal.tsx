@@ -423,8 +423,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 <div className="relative z-10 flex flex-col gap-8">
                     {/* Welcome Text */}
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-3xl flex items-center justify-center text-3xl shadow-lg border-4 border-white rotate-3 group-hover:rotate-0 transition-transform">
-                            👋
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-3xl flex items-center justify-center text-3xl shadow-lg border-4 border-white rotate-3 group-hover:rotate-0 transition-transform overflow-hidden">
+                            {childProfile.avatar ? (
+                                <img src={childProfile.avatar} alt="avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <span>👋</span>
+                            )}
                         </div>
                         <div>
                             <h2 className="text-3xl font-black text-gray-800 tracking-tight" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>

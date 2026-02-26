@@ -1360,27 +1360,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('stats')}
+                                        onClick={() => setActiveTab('redemption')}
                                         className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
-                                        <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
-                                            <BarChart3 size={32} strokeWidth={3} />
+                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3">
+                                            <Trophy size={32} strokeWidth={3} />
                                         </div>
-                                        <span className="font-black text-[#5D4037] text-lg">统计分析</span>
-                                        <span className="text-xs text-gray-400 font-bold">成长数据报表</span>
+                                        <span className="font-black text-[#5D4037] text-lg">核销记录</span>
+                                        <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
                                     </motion.button>
 
                                     <motion.button
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('redemption')}
+                                        onClick={() => setActiveTab('stats')}
                                         className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
-                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
-                                            <Trophy size={32} strokeWidth={3} />
+                                        <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
+                                            <BarChart3 size={32} strokeWidth={3} />
                                         </div>
-                                        <span className="font-black text-[#5D4037] text-lg">核销记录</span>
-                                        <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
+                                        <span className="font-black text-[#5D4037] text-lg">统计分析</span>
+                                        <span className="text-xs text-gray-400 font-bold">成长数据报表</span>
                                     </motion.button>
                                 </div>
                             </div>

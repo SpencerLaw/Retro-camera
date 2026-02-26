@@ -316,12 +316,44 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             if (result.success) {
                 setCustomCategories(newCategories);
                 if (newHiddenPresets !== undefined) setHiddenPresets(newHiddenPresets);
+                if (newHiddenRewardPresets !== undefined) setHiddenRewardPresets(newHiddenRewardPresets);
             } else {
                 alert(result.message);
             }
         } catch (e) {
             console.error(e);
             alert('保存失败');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCleanupLegacyRooms = async () => {
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'cleanup_legacy_rooms',
+                    token
+                })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setDialogConfig({
+                    isOpen: true,
+                    title: '清理成功',
+                    message: result.message || '所有旧版房间记录已清理完毕。',
+                    hideInput: true,
+                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false }))
+                });
+            } else {
+                alert(result.message || '清理失败');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('请求失败，请检查网络');
         } finally {
             setIsSaving(false);
         }
@@ -2413,6 +2445,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     className="px-4 py-3 rounded-xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors border-2 border-transparent hover:border-gray-100"
                                 >
                                     <RotateCcw size={16} /> 恢复预设
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setDialogConfig({
+                                            isOpen: true,
+                                            title: '数据深度清理',
+                                            message: '这将永久删除 KV 中所有过期的 br:rooms:* 键，合并到授权码主键中。确定吗？',
+                                            onConfirm: () => {
+                                                handleCleanupLegacyRooms();
+                                                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                            },
+                                            hideInput: true
+                                        });
+                                    }}
+                                    className="px-4 py-3 rounded-xl font-bold text-orange-400 hover:bg-orange-50 flex items-center justify-center gap-2 transition-colors border-2 border-transparent hover:border-orange-100"
+                                >
+                                    <RefreshCw size={16} className={isSaving ? 'animate-spin' : ''} /> 深度清理
                                 </button>
                                 <button
                                     onClick={() => setIsManagingCategories(false)}

@@ -1817,14 +1817,21 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                             <div className="flex items-center gap-2">
                                                                 <h4 className="font-bold text-[#5D4037]">{reward.name}</h4>
                                                                 {pendingCount > 0 && (
-                                                                    <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full animate-bounce">
+                                                                    <motion.button
+                                                                        whileTap={{ scale: 0.9 }}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setActiveTab('redemption');
+                                                                        }}
+                                                                        className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full animate-bounce hover:bg-red-600 transition-colors cursor-pointer"
+                                                                    >
                                                                         {pendingCount} 个待处理
-                                                                    </span>
+                                                                    </motion.button>
                                                                 )}
                                                             </div>
                                                             <div className="flex items-center gap-3 mt-0.5">
                                                                 <div className="text-[10px] text-gray-400 font-bold">{reward.pointsCost} 🍭</div>
-                                                                <div className="text-[10px] text-emerald-500 font-black">已发 {approvedCount} 次</div>
+                                                                <div className="text-[10px] text-emerald-500 font-black">已兑现 {approvedCount} 次</div>
                                                             </div>
                                                         </div>
                                                     </div>

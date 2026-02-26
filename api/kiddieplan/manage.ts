@@ -397,6 +397,18 @@ export default async function handler(
             });
         }
 
+        if (action === 'cleanup_legacy_rooms') {
+            // 全量清理：删除所有 br:rooms:* 前缀的旧数据键
+            const keys = await kv.keys('br:rooms:*');
+            if (keys.length > 0) {
+                await Promise.all(keys.map(key => kv.del(key)));
+            }
+            return response.status(200).json({
+                success: true,
+                message: `成功清理了 ${keys.length} 条旧版房间记录`
+            });
+        }
+
         return response.status(400).json({ success: false, message: '无效的操作' });
 
 

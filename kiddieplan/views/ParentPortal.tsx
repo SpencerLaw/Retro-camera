@@ -1042,9 +1042,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     // Dynamic Theme System
     const CHILD_THEMES = [
-        { name: 'pink', bg: 'from-pink-100 to-pink-200', ring: 'ring-[#F472B6]', text: 'text-[#F472B6]', border: 'border-pink-300', shadow: 'shadow-pink-300', line: 'bg-[#F472B6]' },
-        { name: 'blue', bg: 'from-blue-100 to-blue-200', ring: 'ring-[#60A5FA]', text: 'text-[#60A5FA]', border: 'border-blue-300', shadow: 'shadow-blue-300', line: 'bg-[#60A5FA]' },
-        { name: 'orange', bg: 'from-orange-200 to-orange-300', ring: 'ring-[#F97316]', text: 'text-[#F97316]', border: 'border-orange-400', shadow: 'shadow-orange-400', line: 'bg-[#F97316]' },
+        { name: 'emerald', bg: 'from-emerald-100 to-emerald-200', ring: 'ring-[#10B981]', text: 'text-[#10B981]', border: 'border-emerald-300', shadow: 'shadow-emerald-300', line: 'bg-[#10B981]' },
+        { name: 'emerald', bg: 'from-emerald-100 to-emerald-200', ring: 'ring-[#10B981]', text: 'text-[#10B981]', border: 'border-emerald-300', shadow: 'shadow-emerald-300', line: 'bg-[#10B981]' },
+        { name: 'emerald', bg: 'from-emerald-100 to-emerald-200', ring: 'ring-[#10B981]', text: 'text-[#10B981]', border: 'border-emerald-300', shadow: 'shadow-emerald-300', line: 'bg-[#10B981]' },
     ];
 
     const currentTheme = selectedChild

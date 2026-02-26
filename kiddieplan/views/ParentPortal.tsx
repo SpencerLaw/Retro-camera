@@ -1042,8 +1042,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     // Dynamic Theme System
     const CHILD_THEMES = [
-        { name: 'emerald', bg: 'from-emerald-100 to-emerald-200', ring: 'ring-[#10B981]', text: 'text-[#10B981]', border: 'border-emerald-300', shadow: 'shadow-emerald-300', line: 'bg-[#10B981]' },
-        { name: 'emerald', bg: 'from-emerald-100 to-emerald-200', ring: 'ring-[#10B981]', text: 'text-[#10B981]', border: 'border-emerald-300', shadow: 'shadow-emerald-300', line: 'bg-[#10B981]' },
+        { name: 'pink', bg: 'from-pink-100 to-pink-200', ring: 'ring-[#F472B6]', text: 'text-[#F472B6]', border: 'border-pink-300', shadow: 'shadow-pink-300', line: 'bg-[#F472B6]' },
+        { name: 'blue', bg: 'from-blue-100 to-blue-200', ring: 'ring-[#60A5FA]', text: 'text-[#60A5FA]', border: 'border-blue-300', shadow: 'shadow-blue-300', line: 'bg-[#60A5FA]' },
         { name: 'emerald', bg: 'from-emerald-100 to-emerald-200', ring: 'ring-[#10B981]', text: 'text-[#10B981]', border: 'border-emerald-300', shadow: 'shadow-emerald-300', line: 'bg-[#10B981]' },
     ];
 
@@ -1245,7 +1245,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     {/* Left Capsule: Real-time Action */}
                                     <div className={`p-6 rounded-[40px] text-white relative overflow-hidden shadow-xl border border-white/20 flex flex-col justify-between min-h-[160px] bg-gradient-to-br ${currentTheme.bg.replace('from-', 'from-white/10 to-').replace('50', '500').replace('100/30', '400')}`}>
                                         {/* Theme-based gradient override for the card */}
-                                        <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : currentTheme.name === 'amber' ? 'from-amber-400 to-orange-500' : currentTheme.name === 'violet' ? 'from-violet-400 to-purple-500' : 'from-emerald-400 to-teal-500'} z-0`}></div>
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${currentTheme.name === 'pink' ? 'from-pink-400 to-rose-500' : currentTheme.name === 'blue' ? 'from-blue-400 to-indigo-500' : 'from-emerald-400 to-teal-500'} z-0`}></div>
 
                                         <div className="absolute top-0 left-0 w-24 h-24 bg-white/20 rounded-full -ml-10 -mt-10 blur-2xl"></div>
 

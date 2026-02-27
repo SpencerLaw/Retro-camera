@@ -117,6 +117,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [hiddenRewardPresets, setHiddenRewardPresets] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isManagingCategories, setIsManagingCategories] = useState(false);
+    const [isEditingRewardCategory, setIsEditingRewardCategory] = useState(false);
+    const [draftRewardCategory, setDraftRewardCategory] = useState<Category | null>(null);
+    const [draftCategoryRewards, setDraftCategoryRewards] = useState<Reward[]>([]);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [selectedStatsDate, setSelectedStatsDate] = useState(formatBeijingTime(new Date()).split(' ')[0]);
     const mainScrollRef = useRef<HTMLElement>(null);
@@ -754,18 +757,149 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
+    const handleAddRewardCategory = () => {
+        setDialogConfig({
+            isOpen: true,
+            title: '✨ 新增奖励标签',
+            placeholder: '输入标签名称（例如：周末奖赏）',
+            onConfirm: async (val) => {
+                if (!val) return;
+                const newCat: Category = {
+                    id: `cat_${Date.now()}`,
+                    name: val,
+                    icon: '🎯',
+                    templates: []
+                };
+                const updated = [...rewardCategories, newCat];
+                setRewardCategories(updated);
+
+                try {
+                    await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_categories',
+                            token,
+                            data: {
+                                categories: taskCategories,
+                                rewardCategories: updated,
+                                hiddenPresets,
+                                hiddenRewardPresets
+                            }
+                        })
+                    });
+                } catch (e) {
+                    console.error('Save failed', e);
+                }
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                setSelectedRewardCategory(newCat.id);
+            }
+        });
+    };
+
+    const openRewardCategoryEditor = (catId: string) => {
+        const cat = rewardCategories.find(c => c.id === catId);
+        if (!cat) return;
+        setDraftRewardCategory({ ...cat });
+        setDraftCategoryRewards(rewards.filter(r => r.category === catId));
+        setIsEditingRewardCategory(true);
+    };
+
+    const handleSaveRewardCategoryEditor = async () => {
+        if (!draftRewardCategory) return;
+        setIsSaving(true);
+        try {
+            const updatedCategories = rewardCategories.map(c => c.id === draftRewardCategory.id ? draftRewardCategory : c);
+            const otherRewards = rewards.filter(r => r.category !== draftRewardCategory.id);
+
+            // Filter out empty name rewards from draft
+            const validDraftRewards = draftCategoryRewards.filter(r => r.name.trim() !== '');
+            const updatedRewards = [...otherRewards, ...validDraftRewards];
+
+            await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_categories',
+                    token,
+                    data: {
+                        categories: taskCategories,
+                        rewardCategories: updatedCategories,
+                        hiddenPresets,
+                        hiddenRewardPresets
+                    }
+                })
+            });
+
+            await handleSyncWithBackend(updatedRewards, '该分类及其奖励项目已全部保存！');
+
+            setRewardCategories(updatedCategories);
+            setRewards(updatedRewards);
+            setIsEditingRewardCategory(false);
+        } catch (e) {
+            console.error('Save failed', e);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const promptDeleteRewardCategory = () => {
+        if (!draftRewardCategory) return;
+        setDialogConfig({
+            isOpen: true,
+            title: '删除整个分类？',
+            message: `确定要删除分类“${draftRewardCategory.name}”以及它里面的所有草稿和已发布奖励吗？此操作不可恢复。`,
+            onConfirm: async () => {
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                setIsSaving(true);
+                try {
+                    const updatedCategories = rewardCategories.filter(c => c.id !== draftRewardCategory.id);
+                    const updatedRewards = rewards.filter(r => r.category !== draftRewardCategory.id);
+
+                    await fetch('/api/kiddieplan/manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'save_categories',
+                            token,
+                            data: { categories: taskCategories, rewardCategories: updatedCategories, hiddenPresets, hiddenRewardPresets }
+                        })
+                    });
+                    await handleSyncWithBackend(updatedRewards, '已彻底删除该分类及全部项目！');
+
+                    setRewardCategories(updatedCategories);
+                    setRewards(updatedRewards);
+                    if (selectedRewardCategory === draftRewardCategory.id && updatedCategories.length > 0) {
+                        setSelectedRewardCategory(updatedCategories[0].id);
+                    } else if (updatedCategories.length === 0) {
+                        setSelectedRewardCategory('');
+                    }
+                    setIsEditingRewardCategory(false);
+                } catch (e) {
+                    console.error('Delete failed', e);
+                } finally {
+                    setIsSaving(false);
+                }
+            },
+            hideInput: true
+        });
+    };
+
     const handleAddReward = (importedReward?: Partial<Reward>) => {
         if (importedReward) {
             setDialogConfig({
                 isOpen: true,
-                title: '🎁 确认添加奖励',
-                message: `是否要添加“${importedReward.name}”到奖励列表？`,
-                hideInput: true,
-                onConfirm: () => {
+                title: '✨ 调整并添加奖励预设',
+                placeholder: '奖励名称',
+                defaultValue: importedReward.name,
+                showPoints: true,
+                defaultPoints: importedReward.pointsCost || 500,
+                onConfirm: (name, _, pts) => {
+                    if (!name) return;
                     const newReward: Reward = {
                         id: `r_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                        name: importedReward.name!,
-                        pointsCost: importedReward.pointsCost || 500,
+                        name,
+                        pointsCost: pts || 500,
                         icon: importedReward.icon || '🎁',
                         category: importedReward.category || selectedRewardCategory,
                         isPublished: false
@@ -1763,22 +1897,28 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <span>{cat.icon}</span>
                                             {cat.name}
                                         </button>
+                                        {selectedRewardCategory === cat.id && (
+                                            <motion.button
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openRewardCategoryEditor(cat.id);
+                                                }}
+                                                className="absolute -top-2 -right-2 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-sm border border-white z-20 hover:scale-110 active:scale-90 transition-all"
+                                                title="管理分类与下属奖励"
+                                            >
+                                                <Edit2 size={10} fill="currentColor" />
+                                            </motion.button>
+                                        )}
                                     </div>
                                 ))}
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
-                                    onClick={() => handleAddReward()}
-                                    className="px-4 py-2 rounded-full text-sm font-black bg-emerald-500 text-white shadow-md flex items-center gap-1 hover:bg-emerald-600 transition-colors whitespace-nowrap"
+                                    onClick={handleAddRewardCategory}
+                                    className="px-4 py-2 rounded-full text-xs font-black bg-white text-emerald-500 shadow-sm border border-emerald-500 flex items-center gap-1 hover:bg-emerald-50 transition-colors whitespace-nowrap"
                                 >
-                                    <Plus size={16} /> 新增奖励项
-                                </motion.button>
-                                <motion.button
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => { setManagingType('rewards'); setIsManagingCategories(true); }}
-                                    className="w-9 h-9 rounded-full bg-white text-gray-400 shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 flex-shrink-0"
-                                    title="管理分类"
-                                >
-                                    <Settings size={16} />
+                                    <Plus size={14} /> 新增标签
                                 </motion.button>
                             </div>
 
@@ -1809,7 +1949,29 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                             {rewardSubTab === 'presets' && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]">
+                                    <div className="flex justify-end gap-2 mb-[-1rem]">
+                                        <button
+                                            onClick={() => {
+                                                const currentPresets = DEFAULT_REWARDS.filter(r => r.category === selectedRewardCategory).map(r => `${selectedRewardCategory}:${r.name}`);
+                                                const newHidden = Array.from(new Set([...hiddenRewardPresets, ...currentPresets]));
+                                                handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
+                                            }}
+                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 bg-gray-50 hover:bg-gray-100 hover:text-gray-600 transition-colors flex items-center gap-1 border border-transparent"
+                                        >
+                                            <Trash2 size={12} /> 隐藏系统预设
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const currentPresets = DEFAULT_REWARDS.filter(r => r.category === selectedRewardCategory).map(r => `${selectedRewardCategory}:${r.name}`);
+                                                const newHidden = hiddenRewardPresets.filter(h => !currentPresets.includes(h));
+                                                handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
+                                            }}
+                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-orange-400 bg-orange-50 hover:bg-orange-100 hover:text-orange-600 transition-colors flex items-center gap-1 border border-transparent"
+                                        >
+                                            <RotateCcw size={12} /> 导入系统预设
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px] mt-4">
                                         {DEFAULT_REWARDS
                                             .filter(r => r.category === selectedRewardCategory)
                                             .filter(r => !hiddenRewardPresets.includes(`${selectedRewardCategory}:${r.name}`))
@@ -2684,6 +2846,142 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     className="flex-1 py-3 text-[#5D4037] font-black hover:text-blue-500 transition-colors bg-blue-50 rounded-xl"
                                 >
                                     完成
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {isEditingRewardCategory && draftRewardCategory && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            onClick={() => setIsEditingRewardCategory(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                            className="bg-white p-5 sm:p-6 rounded-[32px] w-full max-w-lg shadow-2xl relative z-60 flex flex-col max-h-[85vh]"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-black text-[#5D4037]">
+                                    综合编辑：{draftRewardCategory.name}
+                                </h3>
+                                <button
+                                    onClick={promptDeleteRewardCategory}
+                                    className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                                    title="删除此分类及旗下所有奖励"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            </div>
+
+                            {/* Category Banner Editor */}
+                            <div className="bg-[#F5F7FA] p-4 rounded-2xl flex gap-3 mb-6 items-center">
+                                <input
+                                    value={draftRewardCategory.icon}
+                                    onChange={e => setDraftRewardCategory(prev => prev ? { ...prev, icon: e.target.value } : prev)}
+                                    className="w-12 h-12 bg-white rounded-xl text-center text-2xl border-2 border-transparent focus:border-orange-200 outline-none shadow-sm"
+                                    placeholder="🎯"
+                                />
+                                <input
+                                    value={draftRewardCategory.name}
+                                    onChange={e => setDraftRewardCategory(prev => prev ? { ...prev, name: e.target.value } : prev)}
+                                    className="flex-1 bg-white px-4 py-3 rounded-xl font-black text-[#5D4037] border-2 border-transparent focus:border-orange-200 outline-none shadow-sm"
+                                    placeholder="分类名称"
+                                />
+                            </div>
+
+                            {/* Rewards Editor List */}
+                            <div className="flex-1 overflow-y-auto min-h-[200px] mb-6 space-y-3 pr-2 no-scrollbar">
+                                <div className="text-sm font-bold text-gray-400 mb-2 flex justify-between items-center">
+                                    <span>旗下所有奖励项目配置</span>
+                                    <span className="text-xs bg-orange-100 text-orange-500 px-2 py-1 rounded-full">{draftCategoryRewards.length} 项</span>
+                                </div>
+
+                                {draftCategoryRewards.length === 0 ? (
+                                    <div className="text-center py-8 opacity-50 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200">
+                                        <p className="font-bold text-gray-400 text-sm">该标签下暂无内容</p>
+                                    </div>
+                                ) : (
+                                    draftCategoryRewards.map((reward, idx) => (
+                                        <div key={reward.id} className="flex gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
+                                            <input
+                                                value={reward.name}
+                                                onChange={e => {
+                                                    const newArr = [...draftCategoryRewards];
+                                                    newArr[idx] = { ...newArr[idx], name: e.target.value };
+                                                    setDraftCategoryRewards(newArr);
+                                                }}
+                                                className="flex-[2] bg-white px-3 py-2 rounded-lg text-sm font-bold text-[#5D4037] outline-none shadow-sm min-w-0"
+                                                placeholder="输入奖励项目..."
+                                            />
+                                            <div className="flex-1 bg-white px-3 py-2 rounded-lg flex items-center gap-1 shadow-sm shrink-0 min-w-[80px]">
+                                                <span className="text-xs">🍬</span>
+                                                <input
+                                                    type="number"
+                                                    value={reward.pointsCost || ''}
+                                                    onChange={e => {
+                                                        const val = parseInt(e.target.value) || 0;
+                                                        const newArr = [...draftCategoryRewards];
+                                                        newArr[idx] = { ...newArr[idx], pointsCost: val };
+                                                        setDraftCategoryRewards(newArr);
+                                                    }}
+                                                    className="w-full bg-transparent text-sm font-black text-orange-500 outline-none shrink-0"
+                                                    placeholder="数值"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    const newArr = draftCategoryRewards.filter((_, i) => i !== idx);
+                                                    setDraftCategoryRewards(newArr);
+                                                }}
+                                                className="w-8 h-8 flex items-center justify-center shrink-0 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+
+                                <button
+                                    onClick={() => {
+                                        const blankReward: Reward = {
+                                            id: `r_draft_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                                            name: '',
+                                            pointsCost: 100,
+                                            icon: draftRewardCategory.icon || '🎁',
+                                            category: draftRewardCategory.id,
+                                            isPublished: false
+                                        };
+                                        setDraftCategoryRewards([...draftCategoryRewards, blankReward]);
+                                    }}
+                                    className="w-full py-3 mt-4 rounded-xl border-2 border-dashed border-orange-200 text-orange-500 font-bold text-sm bg-orange-50/50 hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={16} /> 新增奖励内容
+                                </button>
+                            </div>
+
+                            <div className="flex gap-3 shrink-0">
+                                <button
+                                    onClick={() => setIsEditingRewardCategory(false)}
+                                    className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
+                                    disabled={isSaving}
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    onClick={handleSaveRewardCategoryEditor}
+                                    disabled={isSaving}
+                                    className={`flex-[2] py-4 rounded-2xl font-bold shadow-lg shadow-orange-200 active:scale-95 transition-all ${isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-orange-500 text-white'}`}
+                                >
+                                    {isSaving ? '处理中...' : '确定保存'}
                                 </button>
                             </div>
                         </motion.div>

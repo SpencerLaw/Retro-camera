@@ -168,16 +168,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         return () => clearInterval(interval);
     }, [isIdle, selectedChildId]);
 
-    // Detect NEW Pending Redemptions to show Toast
-    useEffect(() => {
-        const pending = redemptionLogs.filter(l => l.status === 'pending');
-        if (pending.length > prevPendingCount.current) {
-            setParentToast({ show: true, count: pending.length });
-            setTimeout(() => setParentToast(p => ({ ...p, show: false })), 5000);
-        }
-        prevPendingCount.current = pending.length;
-    }, [redemptionLogs]);
-
     useEffect(() => {
         // Restore position for NEW activeTab
         const prevPos = tabScrollPositions.current[activeTab] || 0;
@@ -342,6 +332,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const handleSaveCategories = async (newCategories: Category[], newHiddenPresets?: string[], newHiddenRewardPresets?: string[], type: 'tasks' | 'rewards' = 'tasks') => {
         setIsSaving(true);
+        // Optimistic UI updates for faster perceived performance, especially for presets
+        if (newHiddenPresets !== undefined) setHiddenPresets(newHiddenPresets);
+        if (newHiddenRewardPresets !== undefined) setHiddenRewardPresets(newHiddenRewardPresets);
+        if (type === 'tasks') setTaskCategories(newCategories);
+        else setRewardCategories(newCategories);
+
         try {
             const payload: any = {
                 action: 'save_categories',
@@ -364,15 +360,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 body: JSON.stringify(payload)
             });
             const result = await res.json();
-            if (result.success) {
-                if (type === 'tasks') {
-                    setTaskCategories(newCategories);
-                } else {
-                    setRewardCategories(newCategories);
-                }
-                if (newHiddenPresets !== undefined) setHiddenPresets(newHiddenPresets);
-            } else {
+            if (!result.success) {
                 alert(result.message);
+                // Rollback on failure could be implemented here if critical
             }
         } catch (e) {
             console.error(e);
@@ -1889,12 +1879,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <div key={cat.id} className="relative group">
                                         <button
                                             onClick={() => setSelectedRewardCategory(cat.id)}
-                                            className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1 whitespace-nowrap
+                                            className={`px-4 py-2.5 rounded-2xl text-sm font-bold transition-all border flex items-center gap-1.5 whitespace-nowrap
                                         ${selectedRewardCategory === cat.id
-                                                    ? 'bg-orange-500 text-white border-orange-500 shadow-md'
-                                                    : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
+                                                    ? 'bg-orange-50 text-orange-600 border-orange-200 shadow-[0_2px_10px_rgba(249,115,22,0.15)] -translate-y-0.5'
+                                                    : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50 hover:border-gray-200 shadow-sm'}`}
                                         >
-                                            <span>{cat.icon}</span>
+                                            <span className="text-base">{cat.icon}</span>
                                             {cat.name}
                                         </button>
                                         {selectedRewardCategory === cat.id && (
@@ -1905,10 +1895,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                     e.stopPropagation();
                                                     openRewardCategoryEditor(cat.id);
                                                 }}
-                                                className="absolute -top-2 -right-2 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-sm border border-white z-20 hover:scale-110 active:scale-90 transition-all"
+                                                className="absolute -top-2.5 -right-2.5 w-6 h-6 bg-gradient-to-br from-orange-400 to-red-500 text-white rounded-full flex items-center justify-center shadow-md border-2 border-white z-20 hover:scale-110 active:scale-95 transition-all"
                                                 title="管理分类与下属奖励"
                                             >
-                                                <Edit2 size={10} fill="currentColor" />
+                                                <Edit2 size={12} fill="currentColor" />
                                             </motion.button>
                                         )}
                                     </div>
@@ -1916,14 +1906,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
                                     onClick={handleAddRewardCategory}
-                                    className="px-4 py-2 rounded-full text-xs font-black bg-white text-emerald-500 shadow-sm border border-emerald-500 flex items-center gap-1 hover:bg-emerald-50 transition-colors whitespace-nowrap"
+                                    className="px-4 py-2.5 rounded-2xl text-xs font-black bg-white text-emerald-500 shadow-sm border border-emerald-200 flex items-center gap-1 hover:bg-emerald-50 hover:border-emerald-300 transition-colors whitespace-nowrap"
                                 >
                                     <Plus size={14} /> 新增标签
                                 </motion.button>
                             </div>
 
                             {/* Sub-tabs Navigation */}
-                            <div className="flex bg-gray-100/50 p-1 rounded-2xl gap-1">
+                            <div className="flex bg-gray-100/50 p-1.5 rounded-2xl gap-1.5 relative border border-gray-200/50">
                                 {[
                                     { id: 'presets', label: '当前奖励', icon: <Sparkles size={16} /> },
                                     { id: 'drafts', label: '待发布奖励', icon: <Edit2 size={16} /> },
@@ -1932,14 +1922,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <button
                                         key={tab.id}
                                         onClick={() => setRewardSubTab(tab.id as any)}
-                                        className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2
+                                        className={`flex-1 py-3 rounded-xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 relative z-10
                                             ${rewardSubTab === tab.id
-                                                ? 'bg-white text-orange-500 shadow-sm'
-                                                : 'text-gray-400 hover:text-gray-600'}`}
+                                                ? 'text-orange-600 shadow-sm bg-white'
+                                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50/50'}`}
                                     >
                                         {tab.icon} {tab.label}
                                         {tab.id === 'drafts' && rewards.filter(r => !r.isPublished).length > 0 && (
-                                            <span className="w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-[10px]">
+                                            <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[9px] shadow-sm">
                                                 {rewards.filter(r => !r.isPublished).length}
                                             </span>
                                         )}
@@ -1956,7 +1946,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 const newHidden = Array.from(new Set([...hiddenRewardPresets, ...currentPresets]));
                                                 handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
                                             }}
-                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 bg-gray-50 hover:bg-gray-100 hover:text-gray-600 transition-colors flex items-center gap-1 border border-transparent"
+                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 bg-white shadow-sm hover:shadow hover:text-gray-600 transition-all flex items-center gap-1 border border-gray-100"
                                         >
                                             <Trash2 size={12} /> 隐藏系统预设
                                         </button>
@@ -1966,38 +1956,35 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 const newHidden = hiddenRewardPresets.filter(h => !currentPresets.includes(h));
                                                 handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
                                             }}
-                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-orange-400 bg-orange-50 hover:bg-orange-100 hover:text-orange-600 transition-colors flex items-center gap-1 border border-transparent"
+                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-orange-500 bg-orange-50 shadow-sm hover:shadow hover:bg-orange-100 transition-all flex items-center gap-1 border border-orange-100"
                                         >
                                             <RotateCcw size={12} /> 导入系统预设
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px] mt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-h-[100px] mt-6">
                                         {DEFAULT_REWARDS
                                             .filter(r => r.category === selectedRewardCategory)
                                             .filter(r => !hiddenRewardPresets.includes(`${selectedRewardCategory}:${r.name}`))
                                             .map((tmp, i) => (
                                                 <div key={`rew_tmp_${i}`} className="relative group">
                                                     <motion.button
-                                                        whileTap={{ scale: 0.95 }}
+                                                        whileTap={{ scale: 0.98 }}
                                                         onClick={() => handleAddReward(tmp)}
-                                                        className="w-full bg-white p-4 rounded-2xl text-left border-2 border-transparent hover:border-orange-100 shadow-sm flex items-center gap-3"
+                                                        className="w-full bg-gradient-to-br from-white to-[#FDFBF7] p-5 rounded-[20px] text-left border border-orange-50 hover:border-orange-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(249,115,22,0.08)] transition-all flex items-center gap-4 group-hover:-translate-y-1"
                                                     >
-                                                        <div className="text-2xl flex-shrink-0">{tmp.icon}</div>
+                                                        <div className="text-3xl flex-shrink-0 drop-shadow-sm">{tmp.icon}</div>
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="font-bold text-[#5D4037] text-sm truncate">{tmp.name}</div>
-                                                            <div className="text-[10px] text-orange-400 font-bold mt-0.5">{tmp.pointsCost} 🍭</div>
+                                                            <div className="font-black text-[#5D4037] text-sm tracking-wide truncate">{tmp.name}</div>
+                                                            <div className="text-xs font-black mt-1 flex items-center gap-1">
+                                                                <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                                                    {tmp.pointsCost} 🍭
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Plus size={16} strokeWidth={3} />
                                                         </div>
                                                     </motion.button>
-
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteRewardTemplate(selectedRewardCategory, tmp.name!);
-                                                        }}
-                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
-                                                    >
-                                                        <Trash2 size={12} />
-                                                    </button>
                                                 </div>
                                             ))}
                                     </div>
@@ -2040,20 +2027,24 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <motion.div
                                                 key={reward.id}
                                                 layout
-                                                className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-[0_4px_10px_rgba(0,0,0,0.03)] border border-gray-100 hover:border-orange-100 transition-colors"
+                                                className="bg-gradient-to-br from-white to-[#FDFBF7] p-5 rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-orange-50 flex justify-between items-center group hover:shadow-[0_8px_24px_rgba(249,115,22,0.08)] hover:-translate-y-0.5 transition-all"
                                             >
                                                 <div className="flex items-center gap-4">
-                                                    <div className="text-2xl w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                                    <div className="text-3xl flex-shrink-0 drop-shadow-sm">
                                                         {reward.icon}
                                                     </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-[#5D4037]">{reward.name}</h4>
-                                                        <div className="text-xs text-orange-400 font-bold">{reward.pointsCost} 🍭</div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-black text-[#5D4037] text-sm tracking-wide truncate">{reward.name}</h4>
+                                                        <div className="text-xs font-black mt-1 flex items-center gap-1">
+                                                            <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                                                {reward.pointsCost} 🍭
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-1">
-                                                    <button onClick={() => editReward(reward)} className="p-2 text-gray-300 hover:text-blue-500 transition-colors"><Edit2 size={16} /></button>
-                                                    <button onClick={() => removeReward(reward.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => editReward(reward)} className="p-2.5 bg-gray-50 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"><Edit2 size={16} /></button>
+                                                    <button onClick={() => removeReward(reward.id)} className="p-2.5 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"><Trash2 size={16} /></button>
                                                 </div>
                                             </motion.div>
                                         ))}

@@ -235,10 +235,11 @@ export default async function handler(
         }
 
         if (action === 'save_categories') {
-            const { categories, hiddenPresets, hiddenRewardPresets } = data;
+            const { categories, rewardCategories, hiddenPresets, hiddenRewardPresets } = data;
             const license: any = await kv.get(licenseKey) || {};
             if (!license.children) license.children = [];
             if (categories) license.categories = categories;
+            if (rewardCategories) license.rewardCategories = rewardCategories;
             if (hiddenPresets !== undefined) license.hiddenPresets = hiddenPresets;
             if (hiddenRewardPresets !== undefined) license.hiddenRewardPresets = hiddenRewardPresets;
             await kv.set(licenseKey, license);
@@ -247,6 +248,7 @@ export default async function handler(
                 message: '设置已更新',
                 data: {
                     categories: license.categories,
+                    rewardCategories: license.rewardCategories,
                     hiddenPresets: license.hiddenPresets,
                     hiddenRewardPresets: license.hiddenRewardPresets
                 }

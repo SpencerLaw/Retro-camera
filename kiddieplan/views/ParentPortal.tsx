@@ -110,7 +110,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [redemptionLogs, setRedemptionLogs] = useState<RedemptionLog[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedRewardCategory, setSelectedRewardCategory] = useState<string>('family');
-    const [customCategories, setCustomCategories] = useState<Category[]>([]);
+    const [taskCategories, setTaskCategories] = useState<Category[]>([]);
+    const [rewardCategories, setRewardCategories] = useState<Category[]>([]);
+    const [managingType, setManagingType] = useState<'tasks' | 'rewards'>('tasks');
     const [hiddenPresets, setHiddenPresets] = useState<string[]>([]);
     const [hiddenRewardPresets, setHiddenRewardPresets] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -265,16 +267,28 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     setSelectedChildId(childrenList[0].id);
                 }
 
-                // 加载分类
-                let activeCats = result.data.categories || [];
-                if (activeCats.length === 0) {
-                    activeCats = DEFAULT_CATEGORIES;
+                // 加载分类 (任务)
+                let activeTaskCats = result.data.categories || [];
+                if (activeTaskCats.length === 0) {
+                    activeTaskCats = DEFAULT_CATEGORIES;
                 }
-                setCustomCategories(activeCats);
+                setTaskCategories(activeTaskCats);
 
-                // 如果当前没选中或选中的分类不存在了，默认选第一个
-                if (!selectedCategory || !activeCats.find((c: any) => c.id === selectedCategory)) {
-                    if (activeCats.length > 0) setSelectedCategory(activeCats[0].id);
+                // 加载分类 (奖励)
+                let activeRewardCats = result.data.rewardCategories || [];
+                if (activeRewardCats.length === 0) {
+                    activeRewardCats = REWARD_CATEGORIES;
+                }
+                setRewardCategories(activeRewardCats);
+
+                // 如果当前没选中或选中的任务分类不存在了，默认选第一个
+                if (!selectedCategory || !activeTaskCats.find((c: any) => c.id === selectedCategory)) {
+                    if (activeTaskCats.length > 0) setSelectedCategory(activeTaskCats[0].id);
+                }
+
+                // 如果当前选中的奖励分类不存在了，默认选第一个
+                if (!selectedRewardCategory || !activeRewardCats.find((c: any) => c.id === selectedRewardCategory)) {
+                    if (activeRewardCats.length > 0) setSelectedRewardCategory(activeRewardCats[0].id);
                 }
 
                 // 加载隐藏的预设
@@ -323,25 +337,36 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         return () => clearInterval(timer);
     }, [activeTab, isIdle, fetchConfig]); // Added memoization dependencies
 
-    const handleSaveCategories = async (newCategories: Category[], newHiddenPresets?: string[], newHiddenRewardPresets?: string[]) => {
+    const handleSaveCategories = async (newCategories: Category[], newHiddenPresets?: string[], newHiddenRewardPresets?: string[], type: 'tasks' | 'rewards' = 'tasks') => {
         setIsSaving(true);
         try {
+            const payload: any = {
+                action: 'save_categories',
+                token,
+                data: {
+                    hiddenPresets: newHiddenPresets || hiddenPresets,
+                    hiddenRewardPresets: newHiddenRewardPresets || hiddenRewardPresets
+                }
+            };
+
+            if (type === 'tasks') {
+                payload.data.categories = newCategories;
+            } else {
+                payload.data.rewardCategories = newCategories;
+            }
+
             const res = await fetch('/api/kiddieplan/manage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'save_categories',
-                    token,
-                    data: {
-                        categories: newCategories,
-                        hiddenPresets: newHiddenPresets || hiddenPresets,
-                        hiddenRewardPresets: newHiddenRewardPresets || hiddenRewardPresets
-                    }
-                })
+                body: JSON.stringify(payload)
             });
             const result = await res.json();
             if (result.success) {
-                setCustomCategories(newCategories);
+                if (type === 'tasks') {
+                    setTaskCategories(newCategories);
+                } else {
+                    setRewardCategories(newCategories);
+                }
                 if (newHiddenPresets !== undefined) setHiddenPresets(newHiddenPresets);
             } else {
                 alert(result.message);
@@ -354,24 +379,28 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         }
     };
 
-    const handleSaveCategory = async (name: string, icon: string) => {
+    const handleSaveCategory = async (name: string, icon: string, type: 'tasks' | 'rewards') => {
         if (!name) return;
-        const newCat = { id: `cat_${Date.now()}`, name, icon };
-        await handleSaveCategories([...customCategories, newCat]);
+        const targetCats = type === 'tasks' ? taskCategories : rewardCategories;
+        const newCat = { id: `cat_${Date.now()}`, name, icon, templates: [] };
+        await handleSaveCategories([...targetCats, newCat], undefined, undefined, type);
         setDialogConfig(prev => ({ ...prev, isOpen: false }));
     };
 
-    const handleDeleteCategory = async (id: string) => {
+    const handleDeleteCategory = async (id: string, type: 'tasks' | 'rewards') => {
         setDialogConfig({
             isOpen: true,
             title: '删除分类',
-            message: '确定要删除这个任务分类吗？此操作不可恢复。',
+            message: '确定要删除这个分类吗？此操作不可恢复。此外，属于该分类的任务/奖励将不再受分类筛选。',
             onConfirm: async () => {
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                const newCats = customCategories.filter(c => c.id !== id);
-                await handleSaveCategories(newCats);
-                if (id === selectedCategory && newCats.length > 0) {
+                const targetCats = type === 'tasks' ? taskCategories : rewardCategories;
+                const newCats = targetCats.filter(c => c.id !== id);
+                await handleSaveCategories(newCats, undefined, undefined, type);
+                if (type === 'tasks' && id === selectedCategory && newCats.length > 0) {
                     setSelectedCategory(newCats[0].id);
+                } else if (type === 'rewards' && id === selectedRewardCategory && newCats.length > 0) {
+                    setSelectedRewardCategory(newCats[0].id);
                 }
             }
         });
@@ -379,13 +408,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const handleAddInlineCategory = async () => {
         if (!newCategoryName.trim()) return;
+        const targetCats = managingType === 'tasks' ? taskCategories : rewardCategories;
         const newCat: Category = { id: `cat_${Date.now()}`, name: newCategoryName.trim(), icon: '✨', templates: [] };
-        await handleSaveCategories([...customCategories, newCat]);
+        await handleSaveCategories([...targetCats, newCat], undefined, undefined, managingType);
         setNewCategoryName('');
     };
 
     const handleAddTemplate = (catId: string) => {
-        const cat = customCategories.find(c => c.id === catId);
+        const cat = taskCategories.find(c => c.id === catId);
         if (!cat) return;
 
         setDialogConfig({
@@ -403,14 +433,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     icon: '🎯' // 用户自定义模板默认图标
                 };
 
-                const newCategories = customCategories.map(c => {
+                const newCategories = taskCategories.map(c => {
                     if (c.id === catId) {
                         return { ...c, templates: [...(c.templates || []), newTemplate] };
                     }
                     return c;
                 });
 
-                await handleSaveCategories(newCategories);
+                await handleSaveCategories(newCategories, undefined, undefined, 'tasks');
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
             }
         });
@@ -425,7 +455,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             message: `确定要不再显示“${templateTitle}”吗？`,
             onConfirm: async () => {
                 if (isCustom && templateIndex !== undefined) {
-                    const newCategories = customCategories.map(c => {
+                    const newCategories = taskCategories.map(c => {
                         if (c.id === catId) {
                             const newTemplates = [...(c.templates || [])];
                             newTemplates.splice(templateIndex, 1);
@@ -433,13 +463,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         }
                         return c;
                     });
-                    await handleSaveCategories(newCategories);
+                    await handleSaveCategories(newCategories, undefined, undefined, 'tasks');
                 } else {
                     // 隐藏预设模板
                     const presetKey = `${catId}:${templateTitle}`;
                     if (!hiddenPresets.includes(presetKey)) {
                         const newHidden = [...hiddenPresets, presetKey];
-                        await handleSaveCategories(customCategories, newHidden);
+                        await handleSaveCategories(taskCategories, newHidden, undefined, 'tasks');
                     }
                 }
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
@@ -457,7 +487,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 const presetKey = `${category}:${rewardName}`;
                 if (!hiddenRewardPresets.includes(presetKey)) {
                     const newHidden = [...hiddenRewardPresets, presetKey];
-                    await handleSaveCategories(customCategories, hiddenPresets, newHidden);
+                    await handleSaveCategories(rewardCategories, hiddenPresets, newHidden, 'rewards');
                 }
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
             },
@@ -688,7 +718,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 }
             });
         } else {
-            const currentCatName = customCategories.find(c => c.id === selectedCategory)?.name || '自定义';
+            const currentCatName = taskCategories.find(c => c.id === selectedCategory)?.name || '自定义';
             const dialogTitle = selectedCategory === 'all' ? '✨ 开启新任务' : `✨ 新增任务 [${currentCatName}]`;
 
             setDialogConfig({
@@ -1539,7 +1569,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {/* Templates */}
                             <div className="flex flex-wrap gap-2 items-center">
                                 {/* Category buttons list */}
-                                {customCategories.map(cat => (
+                                {taskCategories.map(cat => (
                                     <button
                                         key={cat.id}
                                         onClick={() => setSelectedCategory(cat.id)}
@@ -1553,7 +1583,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </button>
                                 ))}
                                 <button
-                                    onClick={() => setIsManagingCategories(true)}
+                                    onClick={() => {
+                                        setManagingType('tasks');
+                                        setIsManagingCategories(true);
+                                    }}
                                     className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200"
                                 >
                                     <Settings size={16} />
@@ -1718,11 +1751,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                             {/* Reward Category Templates & Add Button */}
                             <div className="flex flex-wrap gap-2 items-center">
-                                {REWARD_CATEGORIES.map(cat => (
+                                {rewardCategories.map(cat => (
                                     <div key={cat.id} className="relative group">
                                         <button
                                             onClick={() => setSelectedRewardCategory(cat.id)}
-                                            className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1
+                                            className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 flex items-center gap-1 whitespace-nowrap
                                         ${selectedRewardCategory === cat.id
                                                     ? 'bg-orange-500 text-white border-orange-500 shadow-md'
                                                     : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}
@@ -1730,36 +1763,31 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <span>{cat.icon}</span>
                                             {cat.name}
                                         </button>
-                                        {selectedRewardCategory === cat.id && (
-                                            <motion.button
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setIsManagingCategories(true);
-                                                }}
-                                                className="absolute -top-2 -right-2 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-sm border border-white z-20"
-                                            >
-                                                <Edit2 size={10} fill="currentColor" />
-                                            </motion.button>
-                                        )}
                                     </div>
                                 ))}
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => handleAddReward()}
-                                    className="px-4 py-2 rounded-full text-sm font-black bg-emerald-500 text-white shadow-md flex items-center gap-1 hover:bg-emerald-600 transition-colors"
+                                    className="px-4 py-2 rounded-full text-sm font-black bg-emerald-500 text-white shadow-md flex items-center gap-1 hover:bg-emerald-600 transition-colors whitespace-nowrap"
                                 >
                                     <Plus size={16} /> 新增奖励项
+                                </motion.button>
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => { setManagingType('rewards'); setIsManagingCategories(true); }}
+                                    className="w-9 h-9 rounded-full bg-white text-gray-400 shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 flex-shrink-0"
+                                    title="管理分类"
+                                >
+                                    <Settings size={16} />
                                 </motion.button>
                             </div>
 
                             {/* Sub-tabs Navigation */}
                             <div className="flex bg-gray-100/50 p-1 rounded-2xl gap-1">
                                 {[
-                                    { id: 'presets', label: '发现灵感', icon: <Sparkles size={16} /> },
-                                    { id: 'drafts', label: '草稿工作台', icon: <Edit2 size={16} /> },
-                                    { id: 'published', label: '已公开发布', icon: <ShieldCheck size={16} /> }
+                                    { id: 'presets', label: '当前奖励', icon: <Sparkles size={16} /> },
+                                    { id: 'drafts', label: '待发布奖励', icon: <Edit2 size={16} /> },
+                                    { id: 'published', label: '已发布奖励', icon: <ShieldCheck size={16} /> }
                                 ].map(tab => (
                                     <button
                                         key={tab.id}
@@ -1869,8 +1897,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         ))}
                                         {rewards.filter(r => !r.isPublished).length === 0 && (
                                             <div className="text-center py-10 opacity-50 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
-                                                <p className="font-bold text-gray-500 text-sm">暂无待发布的草稿</p>
-                                                <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">请从“发现灵感”中点击添加</p>
+                                                <p className="font-bold text-gray-500 text-sm">暂无待发布的分类奖励</p>
+                                                <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">请从“当前奖励”添加或“新增奖励项”</p>
                                             </div>
                                         )}
                                     </div>
@@ -2565,25 +2593,51 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             exit={{ scale: 0.9, y: 20, opacity: 0 }}
                             className="bg-white p-6 rounded-[32px] w-full max-w-sm shadow-2xl relative z-60"
                         >
-                            <h3 className="text-xl font-black text-[#5D4037] mb-4 text-center">管理任务分类</h3>
+                            <h3 className="text-xl font-black text-[#5D4037] mb-4 text-center">
+                                管理{managingType === 'tasks' ? '任务' : '奖励'}分类
+                            </h3>
 
                             <div className="max-h-[50vh] overflow-y-auto space-y-2 mb-4 pr-1 no-scrollbar">
-                                {customCategories.map(cat => (
+                                {(managingType === 'tasks' ? taskCategories : rewardCategories).map(cat => (
                                     <div key={cat.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-transparent hover:border-blue-100 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <span className="text-2xl">{cat.icon}</span>
                                             <span className="font-bold text-[#5D4037]">{cat.name}</span>
                                         </div>
-                                        <button
-                                            onClick={() => handleDeleteCategory(cat.id)}
-                                            disabled={isSaving}
-                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-colors"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    setDialogConfig({
+                                                        isOpen: true,
+                                                        title: '修改分类',
+                                                        placeholder: '分类名称 (如: 围棋)',
+                                                        defaultValue: cat.name,
+                                                        showAvatarUpload: false,
+                                                        onConfirm: async (name, icon) => {
+                                                            if (!name) return;
+                                                            const targetCats = managingType === 'tasks' ? taskCategories : rewardCategories;
+                                                            const newCats = targetCats.map(c => c.id === cat.id ? { ...c, name, icon: icon || c.icon } : c);
+                                                            await handleSaveCategories(newCats, undefined, undefined, managingType);
+                                                            setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                        },
+                                                        defaultExtra: cat.icon // 借用 defaultExtra 传递图标
+                                                    });
+                                                }}
+                                                className="p-2 text-gray-400 hover:text-blue-500 hover:bg-white rounded-lg transition-colors"
+                                            >
+                                                <Edit2 size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteCategory(cat.id, managingType)}
+                                                disabled={isSaving}
+                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
-                                {customCategories.length === 0 && (
+                                {(managingType === 'tasks' ? taskCategories : rewardCategories).length === 0 && (
                                     <div className="text-center text-gray-400 py-4 text-xs font-bold">暂无分类</div>
                                 )}
                             </div>
@@ -2606,23 +2660,25 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </div>
 
                             <div className="flex gap-3 mb-4">
-                                <button
-                                    onClick={() => {
-                                        setDialogConfig({
-                                            isOpen: true,
-                                            title: '恢复预设分类',
-                                            message: '确定要恢复所有隐藏的系统任务吗？',
-                                            onConfirm: () => {
-                                                handleSaveCategories(customCategories, []);
-                                                setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                                            },
-                                            hideInput: true
-                                        });
-                                    }}
-                                    className="px-4 py-3 rounded-xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors border-2 border-transparent hover:border-gray-100"
-                                >
-                                    <RotateCcw size={16} /> 恢复预设
-                                </button>
+                                {managingType === 'tasks' && (
+                                    <button
+                                        onClick={() => {
+                                            setDialogConfig({
+                                                isOpen: true,
+                                                title: '恢复预设分类',
+                                                message: '确定要恢复所有隐藏的系统任务吗？',
+                                                onConfirm: () => {
+                                                    handleSaveCategories(taskCategories, [], undefined, 'tasks');
+                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                },
+                                                hideInput: true
+                                            });
+                                        }}
+                                        className="px-4 py-3 rounded-xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors border-2 border-transparent hover:border-gray-100"
+                                    >
+                                        <RotateCcw size={16} /> 恢复预设
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => setIsManagingCategories(false)}
                                     className="flex-1 py-3 text-[#5D4037] font-black hover:text-blue-500 transition-colors bg-blue-50 rounded-xl"

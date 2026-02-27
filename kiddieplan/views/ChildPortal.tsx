@@ -1,8 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw, Menu } from 'lucide-react';
+import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw, Menu, Lock } from 'lucide-react';
 import { Task, AppTab } from '../types';
 import confettis from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface CheckinLog {
+    id: string;
+    action: string;
+    points: number;
+    timestamp: string;
+}
+
+interface Reward {
+    id: string;
+    name: string;
+    pointsCost: number;
+    icon?: string;
+    description?: string;
+    isPublished?: boolean;
+}
+
+interface ActiveChildProfile {
+    // Assuming this interface was intended to be defined here,
+    // but its content was cut off in the provided snippet.
+    // For now, leaving it as an empty interface to maintain structure.
+}
 
 interface ChildPortalProps {
     token: string;
@@ -38,11 +60,20 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [timerSeconds, setTimerSeconds] = useState(0);
     const timerSecondsRef = useRef(0); // Use ref to avoid sync pulse dependency loop
     const [startTime, setStartTime] = useState<string | null>(null);
-    const [currentTime, setCurrentTime] = useState(new Date());
+    // UI State
+    const [currentTime, setCurrentTime] = useState(new Date().toISOString());
     const [isScrolled, setIsScrolled] = useState(false);
-    const mainScrollRef = useRef<HTMLElement>(null);
+    const mainScrollRef = useRef<HTMLDivElement>(null);
+    const [dialogConfig, setDialogConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        confirmText?: string;
+        cancelText?: string;
+    }>({ isOpen: false, title: '', message: '', onConfirm: () => { } });
 
-    // Sync ref with state
+    // Toast Notificationstate
     useEffect(() => {
         timerSecondsRef.current = timerSeconds;
     }, [timerSeconds]);
@@ -55,7 +86,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         const hh = pad(date.getHours());
         const mm = pad(date.getMinutes());
         const ss = pad(date.getSeconds());
-        return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+        return `${y} -${m} -${d} ${hh}:${mm}:${ss} `;
     };
 
     // Update real-time EVERY SECOND
@@ -102,7 +133,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             intervalTime = 3000; // Active: 3 sec (Optimized for real-time feel)
         }
 
-        console.log(`Child Polling interval set to: ${intervalTime}ms (${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
+        console.log(`Child Polling interval set to: ${intervalTime} ms(${document.hidden ? 'Hidden' : isIdle ? 'Idle' : 'Active'})`);
 
         const poll = setInterval(() => fetchTodayData(true), intervalTime);
         return () => clearInterval(poll);
@@ -163,46 +194,97 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         const hrs = Math.floor(totalSeconds / 3600);
         const mins = Math.floor((totalSeconds % 3600) / 60);
         const secs = totalSeconds % 60;
-        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} `;
     };
 
-    const handleRedeemReward = async (reward: any) => {
-        if (coins < reward.pointsCost) return;
+    const handleRedeemReward = async (reward: Reward) => {
+        if (coins < reward.pointsCost) {
+            // Change: Subtle glassmorphic overlay for unaffordable items
+            // This logic would typically be handled in the rendering of the reward item itself,
+            // by applying a specific class or style if coins < reward.pointsCost.
+            // For the purpose of this function, we just prevent the action.
+            // The alert is replaced by a dialog below.
+            setDialogConfig({
+                isOpen: true,
+                title: '糖果不足',
+                message: `你只有 ${coins} 颗糖果，还差 ${reward.pointsCost - coins} 颗才能兑换【${reward.name}】哦！`,
+                onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                confirmText: '知道了'
+            });
+            return;
+        }
 
         // 检查是否已有该奖励的待审批请求
         const isPending = redemptionLogs.some(l => l.rewardName === reward.name && l.status === 'pending');
         if (isPending) {
-            alert('这个奖励已经在申请中啦，请等待家长审批哦 ~');
+            setDialogConfig({
+                isOpen: true,
+                title: '申请已存在',
+                message: '这个奖励已经在申请中啦，请等待家长审批哦 ~',
+                onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                confirmText: '知道了'
+            });
             return;
         }
 
-        try {
-            const res = await fetch('/api/kiddieplan/client', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'redeem_reward', token, data: { rewardId: reward.id, cost: reward.pointsCost, rewardName: reward.name } })
-            });
-            const result = await res.json();
-            if (result.success) {
-                setRedemptionLogs(prev => [{
-                    id: `temp_${Date.now()}`,
-                    rewardName: reward.name,
-                    pointsCost: reward.pointsCost,
-                    status: 'pending',
-                    redeemedAt: new Date().toISOString()
-                }, ...prev]);
+        setDialogConfig({
+            isOpen: true,
+            title: '兑换确认',
+            message: `确定要花费 ${reward.pointsCost} 🍭 兑换【${reward.name}】吗？`,
+            confirmText: '兑换',
+            cancelText: '再想想',
+            onConfirm: async () => {
+                setDialogConfig(prev => ({ ...prev, isOpen: false })); // Close dialog immediately
+                try {
+                    const res = await fetch('/api/kiddieplan/client', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'redeem_reward', token, data: { rewardId: reward.id, cost: reward.pointsCost, rewardName: reward.name } })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        setRedemptionLogs(prev => [{
+                            id: `temp_${Date.now()} `,
+                            rewardName: reward.name,
+                            pointsCost: reward.pointsCost,
+                            status: 'pending',
+                            redeemedAt: new Date().toISOString()
+                        }, ...prev]);
+                        setCoins(result.points); // Update coins after successful redemption
 
-                confettis({
-                    particleCount: 80,
-                    spread: 40,
-                    origin: { y: 0.6 },
-                    colors: ['#60A5FA', '#93C5FD', '#BFDBFE'] // Soft blue/gift colors
-                });
-                alert(result.message || `🎉 申请已发送！快去找家长审批吧。`);
+                        confettis({
+                            particleCount: 80,
+                            spread: 40,
+                            origin: { y: 0.6 },
+                            colors: ['#60A5FA', '#93C5FD', '#BFDBFE'] // Soft blue/gift colors
+                        });
+                        setDialogConfig({
+                            isOpen: true,
+                            title: '申请成功！',
+                            message: result.message || `🎉 申请已发送！快去找家长审批吧。`,
+                            onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                            confirmText: '太棒了！'
+                        });
+                    } else {
+                        setDialogConfig({
+                            isOpen: true,
+                            title: '兑换失败',
+                            message: result.message || '😭 兑换失败，请稍后再试',
+                            onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                            confirmText: '知道了'
+                        });
+                    }
+                } catch (err) {
+                    setDialogConfig({
+                        isOpen: true,
+                        title: '网络错误',
+                        message: '😭 发送申请失败，请稍后再试',
+                        onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                        confirmText: '知道了'
+                    });
+                }
             }
-        } catch (err) {
-            alert('😭 发送申请失败，请稍后再试');
-        }
+        });
     };
 
     useEffect(() => {
@@ -223,12 +305,19 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 // 检查数据是否被彻底删除了（例如管理后台清理了该授权码）
                 // 如果 profile.avatar 为空且 tasks 为空，通常意味着数据库里查不到这个 Key 的聚合数据了
                 if (!result.data.profile?.avatar && (!result.data.tasks || result.data.tasks.length === 0) && result.data.points === 0) {
-                    alert("当前授权数据已被管理员清除，请重新登录");
-                    // 彻底清除持久化 Token，防止进入自动登录死循环
-                    localStorage.removeItem('kp_child_token');
-                    localStorage.removeItem('kp_token');
-                    localStorage.removeItem('kp_role');
-                    onLogout();
+                    setDialogConfig({
+                        isOpen: true,
+                        title: '数据已清除',
+                        message: '当前授权数据已被管理员清除，请重新登录',
+                        onConfirm: () => {
+                            localStorage.removeItem('kp_child_token');
+                            localStorage.removeItem('kp_token');
+                            localStorage.removeItem('kp_role');
+                            onLogout();
+                            setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                        },
+                        confirmText: '重新登录'
+                    });
                     return;
                 }
 
@@ -290,7 +379,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         if (isTimerRunning) {
             // STOP TIMER: Record log
             if (activeTaskId !== task.id) {
-                alert('请先停止当前正在进行的任务哦~');
+                setDialogConfig({
+                    isOpen: true,
+                    title: '任务冲突',
+                    message: '请先停止当前正在进行的任务哦~',
+                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                    confirmText: '知道了'
+                });
                 return;
             }
 
@@ -490,15 +585,15 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     return (
                         <div
                             key={task.id}
-                            className={`p-4 rounded-2xl flex items-center justify-between border transition-all relative overflow-hidden
-                            ${isCompleted ? 'bg-gray-50 border-transparent opacity-60' : 'bg-white/85 backdrop-blur-md border-white/50 shadow-sm'}`}
+                            className={`p - 4 rounded - 2xl flex items - center justify - between border transition - all relative overflow - hidden
+                            ${isCompleted ? 'bg-gray-50 border-transparent opacity-60' : 'bg-white/85 backdrop-blur-md border-white/50 shadow-sm'} `}
                         >
                             <div className="flex items-center gap-3 relative z-10">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-green-100 text-green-500' : 'bg-pink-50 text-pink-400'}`}>
+                                <div className={`w - 10 h - 10 rounded - xl flex items - center justify - center transition - all ${isCompleted ? 'bg-green-100 text-green-500' : 'bg-pink-50 text-pink-400'} `}>
                                     {isCompleted ? <CheckCircle2 size={22} /> : <Clock size={20} />}
                                 </div>
                                 <div>
-                                    <div className={`font-bold ${isCompleted ? 'line-through text-gray-400' : 'text-gray-700'}`}>{task.title}</div>
+                                    <div className={`font - bold ${isCompleted ? 'line-through text-gray-400' : 'text-gray-700'} `}>{task.title}</div>
                                     <div className="text-[11px] font-medium text-gray-400">{task.timeSlot}</div>
                                 </div>
                             </div>
@@ -546,23 +641,23 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             className="relative"
                         >
                             {/* Node Dot */}
-                            <div className={`absolute -left-8 top-5 w-7 h-7 rounded-full border-4 bg-white z-10 flex items-center justify-center shadow-sm transition-colors
-                                ${isCompleted ? 'border-green-400 text-green-400' : isCurrentFocus ? 'border-orange-400 text-orange-400 animate-pulse' : 'border-blue-200 text-gray-300'}`}>
+                            <div className={`absolute - left - 8 top - 5 w - 7 h - 7 rounded - full border - 4 bg - white z - 10 flex items - center justify - center shadow - sm transition - colors
+                                ${isCompleted ? 'border-green-400 text-green-400' : isCurrentFocus ? 'border-orange-400 text-orange-400 animate-pulse' : 'border-blue-200 text-gray-300'} `}>
                                 {isCompleted ? <CheckCircle2 size={14} /> : <div className="w-2 h-2 rounded-full bg-current" />}
                             </div>
 
                             <motion.div
                                 whileTap={{ scale: 0.98 }}
-                                className={`bg-white/90 backdrop-blur-md p-4 rounded-[28px] border transition-all ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-md hover:shadow-lg'}`}
+                                className={`bg - white / 90 backdrop - blur - md p - 4 rounded - [28px] border transition - all ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-md hover:shadow-lg'} `}
                             >
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isCompleted ? 'bg-green-50 text-green-500' : 'bg-blue-50 text-blue-400'}`}>
+                                            <div className={`w - 12 h - 12 rounded - 2xl flex items - center justify - center text - xl ${isCompleted ? 'bg-green-50 text-green-500' : 'bg-blue-50 text-blue-400'} `}>
                                                 {task.category?.includes('学') ? '📚' : task.category?.includes('玩') ? '🎮' : '🌟'}
                                             </div>
                                             <div>
-                                                <h3 className={`font-black text-lg ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.title}</h3>
+                                                <h3 className={`font - black text - lg ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'} `}>{task.title}</h3>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                     <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
@@ -575,7 +670,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div onClick={() => handleToggleTask(task.id)} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 cursor-pointer transition-all ${isCompleted ? 'border-green-200 bg-green-50 text-green-500' : 'border-gray-100 text-gray-200 hover:border-green-200 hover:text-green-400'}`}>
+                                        <div onClick={() => handleToggleTask(task.id)} className={`w - 10 h - 10 rounded - full flex items - center justify - center border - 2 cursor - pointer transition - all ${isCompleted ? 'border-green-200 bg-green-50 text-green-500' : 'border-gray-100 text-gray-200 hover:border-green-200 hover:text-green-400'} `}>
                                             <CheckCircle2 size={24} />
                                         </div>
                                     </div>
@@ -585,11 +680,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                             <button
                                                 onClick={() => toggleTimer(task)}
                                                 disabled={isTimerRunning && !isCurrentFocus}
-                                                className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2
+                                                className={`flex - 1 py - 2.5 rounded - xl font - black text - xs transition - all flex items - center justify - center gap - 2
                                                     ${isCurrentFocus
                                                         ? 'bg-red-500 text-white shadow-[0_4px_0_#991b1b]'
-                                                        : 'bg-orange-400 text-white shadow-[0_4px_0_#c2410c] hover:translate-y-0.5 active:shadow-none'}
-                                                    ${isTimerRunning && !isCurrentFocus ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
+                                                        : 'bg-orange-400 text-white shadow-[0_4px_0_#c2410c] hover:translate-y-0.5 active:shadow-none'
+                                                    }
+                                                    ${isTimerRunning && !isCurrentFocus ? 'opacity-30 grayscale cursor-not-allowed' : ''} `}
                                             >
                                                 {isCurrentFocus ? (
                                                     <>结束专注 ({formatTime(timerSeconds)})</>
@@ -609,6 +705,113 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 <div className="flex flex-col items-center justify-center py-20 text-gray-300 font-bold space-y-4">
                     <div className="text-6xl">🗓️</div>
                     <div>今天暂时没有任务计划哦</div>
+                </div>
+            )}
+        </motion.div>
+    );
+
+    const renderRewardsView = () => (
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+            {/* Enhanced Treasure Header */}
+            <div className="text-center space-y-2">
+                <h2 className="text-3xl font-black text-gray-800" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>🎁 梦幻宝库</h2>
+                <div className="inline-flex items-center gap-2 bg-yellow-400/90 text-white px-6 py-2 rounded-full shadow-lg border-4 border-white animate-bounce-slow">
+                    <span className="text-xl">🍭</span>
+                    <span className="text-xl font-black">{coins}</span>
+                    <span className="text-xs font-bold opacity-80">当前存余</span>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+                {rewards.filter(r => r.isPublished).map((reward, i) => {
+                    const pendingLog = redemptionLogs.find(l => l.rewardId === reward.id && l.status === 'pending');
+                    const isPending = !!pendingLog;
+
+                    return (
+                        <motion.div
+                            key={reward.id || i}
+                            whileHover={!isPending && coins >= reward.pointsCost ? { y: -3, scale: 1.02 } : {}}
+                            whileTap={!isPending && coins >= reward.pointsCost ? { scale: 0.98 } : {}}
+                            onClick={() => !isPending && coins >= reward.pointsCost && handleRedeemReward(reward)}
+                            className={`p - 5 rounded - 3xl flex flex - col items - center gap - 3 text - center border relative overflow - hidden transition - all
+                                ${isPending ? 'bg-orange-50/50 border-orange-200 opacity-80 cursor-default' : 'bg-white/90 backdrop-blur-md border-white/50 shadow-sm cursor-pointer'} `}
+                        >
+                            <div className={`text - 4xl transition - transform ${isPending ? 'grayscale-[0.5]' : 'group-hover:scale-110'} `}>{reward.icon || '🎁'}</div>
+                            <div>
+                                <div className={`font - bold text - sm ${isPending ? 'text-orange-600/70' : 'text-gray-700'} `}>{reward.name}</div>
+                                {isPending ? (
+                                    <div className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-1 rounded-full mt-2 inline-block animate-pulse">
+                                        等待审批中...
+                                    </div>
+                                ) : (
+                                    <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-3 py-1 rounded-full mt-2 inline-block shadow-sm">
+                                        {reward.pointsCost} 🍭
+                                    </div>
+                                )}
+                            </div>
+                            {/* Glassmorphic Lock Overlay for Unaffordable Rewards */}
+                            {coins < reward.pointsCost && !isPending && (
+                                <div className="absolute inset-x-2 inset-y-2 rounded-[22px] bg-white/40 backdrop-blur-[2px] border border-white/40 flex flex-col items-center justify-center gap-1 z-20">
+                                    <div className="w-10 h-10 rounded-full bg-white/80 shadow-sm flex items-center justify-center text-gray-400">
+                                        <Lock size={18} />
+                                    </div>
+                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest bg-white/90 px-2 py-0.5 rounded-full shadow-sm">
+                                        还需要 {reward.pointsCost - coins} 🍭
+                                    </span>
+                                </div>
+                            )}
+                        </motion.div>
+                    );
+                })}
+                {rewards.filter(r => r.isPublished).length === 0 && (
+                    <div className="col-span-2 text-center py-20 bg-white/20 rounded-[40px] border-4 border-dashed border-white/30">
+                        <div className="text-5xl mb-4 opacity-30">🎪</div>
+                        <p className="font-bold text-gray-400">目前宝库正在补货中...</p>
+                        <p className="text-xs text-gray-300 mt-2 font-black uppercase">请期待爸爸妈妈为你精心准备的礼物</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Redemption History */}
+            {redemptionLogs.length > 0 && (
+                <div className="space-y-3 pt-4">
+                    <h3 className="text-lg font-bold text-gray-700 pl-1 flex items-center gap-2">
+                        <History size={18} className="text-purple-400" /> 兑换记录
+                    </h3>
+                    <div className="space-y-2">
+                        {redemptionLogs.sort((a, b) => new Date(b.requestTime).getTime() - new Date(a.requestTime).getTime()).map((req) => (
+                            <div
+                                key={req.id}
+                                className={`p-4 rounded-2xl flex items-center justify-between border transition-all
+                                    ${req.status === 'pending' ? 'bg-orange-50/50 border-orange-200' :
+                                        req.status === 'approved' ? 'bg-emerald-50/50 border-emerald-200' :
+                                            'bg-red-50/50 border-red-200'} `}
+                            >
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                        <span className="text-xl shrink-0">{rewards.find(r => r.id === req.rewardId)?.icon || '🎁'}</span>
+                                        <span className="font-black text-[#5D4037] text-sm truncate">{req.rewardName}</span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[10px] text-gray-400 font-bold flex items-center gap-1">
+                                            <Clock size={10} /> 申请于: {new Date(req.requestTime).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                        {req.status === 'approved' && req.approveTime && (
+                                            <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                                                <CheckCircle2 size={10} /> 批准于: {new Date(req.approveTime).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className={`text-xs font-black px-3 py-1 rounded-full
+                                    ${req.status === 'pending' ? 'bg-orange-100 text-orange-600 animate-pulse' :
+                                        req.status === 'approved' ? 'bg-emerald-100 text-emerald-600' :
+                                            'bg-red-100 text-red-600'} `}>
+                                    {req.status === 'pending' ? '待审批' : req.status === 'approved' ? '已批准' : '已拒绝'}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </motion.div>
@@ -693,7 +896,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                             if (isScrolled) setIsScrolled(false);
                         }}
-                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'}`}
+                        className={`px - 6 transition - all duration - 500 flex justify - between items - center rounded - 3xl border border - white / 20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'} `}
                         style={{
                             background: isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)', // Increased transparency (Crystal Glass)
                             backdropFilter: 'blur(20px) saturate(180%)',
@@ -761,69 +964,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     <AnimatePresence mode='wait'>
                         {activeTab === 'home' && renderDashboardView()}
                         {activeTab === 'plan' && renderPlannerView()}
-                        {activeTab === 'rewards' && (
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-                                {/* Enhanced Treasure Header */}
-                                <div className="text-center space-y-2">
-                                    <h2 className="text-3xl font-black text-gray-800" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>🎁 梦幻宝库</h2>
-                                    <div className="inline-flex items-center gap-2 bg-yellow-400/90 text-white px-6 py-2 rounded-full shadow-lg border-4 border-white animate-bounce-slow">
-                                        <span className="text-xl">🍭</span>
-                                        <span className="text-xl font-black">{coins}</span>
-                                        <span className="text-xs font-bold opacity-80">当前存余</span>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3">
-                                    {rewards.filter(r => r.isPublished).map((reward, i) => {
-                                        const pendingLog = redemptionLogs.find(l => l.rewardName === reward.name && l.status === 'pending');
-                                        const isPending = !!pendingLog;
-
-                                        return (
-                                            <motion.div
-                                                key={reward.id || i}
-                                                whileHover={!isPending ? { y: -3, scale: 1.02 } : {}}
-                                                whileTap={!isPending ? { scale: 0.98 } : {}}
-                                                onClick={() => !isPending && handleRedeemReward(reward)}
-                                                className={`p-5 rounded-3xl flex flex-col items-center gap-3 text-center border relative overflow-hidden transition-all
-                                                    ${isPending ? 'bg-orange-50/50 border-orange-200 opacity-80 cursor-default' : 'bg-white/90 backdrop-blur-md border-white/50 shadow-sm cursor-pointer'}`}
-                                            >
-                                                <div className={`text-4xl transition-transform ${isPending ? 'grayscale-[0.5]' : 'group-hover:scale-110'}`}>{reward.icon || '🎁'}</div>
-                                                <div>
-                                                    <div className={`font-bold text-sm ${isPending ? 'text-orange-600/70' : 'text-gray-700'}`}>{reward.name}</div>
-                                                    {isPending ? (
-                                                        <div className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-1 rounded-full mt-2 inline-block animate-pulse">
-                                                            等待审批中...
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-[10px] font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-400 px-3 py-1 rounded-full mt-2 inline-block shadow-sm">
-                                                            {reward.pointsCost} 🍭
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {coins < reward.pointsCost && !isPending && (
-                                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-bold text-xs text-gray-400 backdrop-blur-[2px] p-2 leading-tight">
-                                                        还差 {reward.pointsCost - coins} 🍭
-                                                    </div>
-                                                )}
-                                            </motion.div>
-                                        );
-                                    })}
-                                    {rewards.filter(r => r.isPublished).length === 0 && (
-                                        <div className="col-span-2 text-center py-20 bg-white/20 rounded-[40px] border-4 border-dashed border-white/30">
-                                            <div className="text-5xl mb-4 opacity-30">🎪</div>
-                                            <p className="font-bold text-gray-400">目前宝库正在补货中...</p>
-                                            <p className="text-xs text-gray-300 mt-2 font-black uppercase">请期待爸爸妈妈为你精心准备的礼物</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
+                        {activeTab === 'rewards' && renderRewardsView()}
                     </AnimatePresence>
                 </div>
             </main>
 
             {/* Bottom Nav - Moon-Base Style (Pinned, Rounded Top, No gaps) */}
-            <div
+            < div
                 className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px]"
                 style={{
                     height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
@@ -854,17 +1001,67 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                 />
                             )}
-                            <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
+                            <span className={`relative z - 10 transition - colors duration - 200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'} `}>
                                 <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
                             </span>
-                            <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
+                            <span className={`relative z - 10 text - [9px] font - bold transition - colors duration - 200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'} `}>
                                 {tab.label}
                             </span>
                         </button>
                     ))}
                 </div>
-            </div>
-        </div>
+            </div >
+
+            {/* Custom Dialog for Child Portal */}
+            <AnimatePresence>
+                {
+                    dialogConfig.isOpen && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" style={{ fontFamily: '"Nunito", "ZCOOL KuaiLe", sans-serif' }}>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+                                onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                            />
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                className="bg-white/95 backdrop-blur-2xl w-full max-w-sm rounded-[32px] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-2 border-white relative z-10 text-center overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 pointer-events-none"></div>
+
+                                <div className="flex justify-center mb-4">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-pink-400 rounded-full flex items-center justify-center text-3xl shadow-lg border-4 border-white animate-bounce-slow">
+                                        🎁
+                                    </div>
+                                </div>
+
+                                <h3 className="text-xl font-black text-[#5D4037] mb-2">{dialogConfig.title}</h3>
+                                <p className="text-gray-500 font-bold text-sm mb-8 px-2">{dialogConfig.message}</p>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                                        className="flex-1 py-3.5 rounded-2xl font-black text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200 shadow-sm"
+                                    >
+                                        {dialogConfig.cancelText || '取消'}
+                                    </button>
+                                    <button
+                                        onClick={dialogConfig.onConfirm}
+                                        className="flex-1 py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-orange-400 to-pink-500 shadow-md hover:shadow-lg transition-all active:scale-95 border-none"
+                                    >
+                                        {dialogConfig.confirmText || '确定'}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </AnimatePresence >
+
+        </div >
     );
 };
 

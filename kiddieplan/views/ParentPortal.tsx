@@ -1942,23 +1942,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <div className="flex justify-end gap-2 mb-[-1rem]">
                                         <button
                                             onClick={() => {
-                                                const currentPresets = DEFAULT_REWARDS.filter(r => r.category === selectedRewardCategory).map(r => `${selectedRewardCategory}:${r.name}`);
-                                                const newHidden = Array.from(new Set([...hiddenRewardPresets, ...currentPresets]));
+                                                // Global hide: Add all default rewards to hidden list
+                                                const allPresets = DEFAULT_REWARDS.map(r => `${r.category}:${r.name}`);
+                                                const newHidden = Array.from(new Set([...hiddenRewardPresets, ...allPresets]));
                                                 handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
                                             }}
                                             className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 bg-white shadow-sm hover:shadow hover:text-gray-600 transition-all flex items-center gap-1 border border-gray-100"
                                         >
-                                            <Trash2 size={12} /> 隐藏系统预设
+                                            <Trash2 size={12} /> 一键隐藏所有预设
                                         </button>
                                         <button
                                             onClick={() => {
-                                                const currentPresets = DEFAULT_REWARDS.filter(r => r.category === selectedRewardCategory).map(r => `${selectedRewardCategory}:${r.name}`);
-                                                const newHidden = hiddenRewardPresets.filter(h => !currentPresets.includes(h));
-                                                handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
+                                                // Global restore: Clear hidden list for rewards
+                                                handleSaveCategories(rewardCategories, undefined, [], 'rewards');
                                             }}
                                             className="px-3 py-1.5 rounded-lg text-xs font-bold text-orange-500 bg-orange-50 shadow-sm hover:shadow hover:bg-orange-100 transition-all flex items-center gap-1 border border-orange-100"
                                         >
-                                            <RotateCcw size={12} /> 导入系统预设
+                                            <RotateCcw size={12} /> 恢复所有预设
                                         </button>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-h-[100px] mt-6">
@@ -1985,6 +1985,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                             <Plus size={16} strokeWidth={3} />
                                                         </div>
                                                     </motion.button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const newHidden = [...hiddenRewardPresets, `${selectedRewardCategory}:${tmp.name}`];
+                                                            handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
+                                                        }}
+                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
+                                                        title="删除此预设项"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
                                                 </div>
                                             ))}
                                     </div>

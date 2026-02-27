@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw, Menu, Lock } from 'lucide-react';
+import { LogOut, CheckCircle2, Star, Trophy, Clock, Sparkles, Smile, BookOpen, LayoutGrid, Timer, Gift, User, Home, ListTodo, ShieldCheck, Plus, ArrowLeft, Medal, Zap, RefreshCw, Menu, Lock, History } from 'lucide-react';
 import { Task, AppTab } from '../types';
 import confettis from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -585,15 +585,15 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                     return (
                         <div
                             key={task.id}
-                            className={`p - 4 rounded - 2xl flex items - center justify - between border transition - all relative overflow - hidden
+                            className={`p-4 rounded-2xl flex items-center justify-between border transition-all relative overflow-hidden
                             ${isCompleted ? 'bg-gray-50 border-transparent opacity-60' : 'bg-white/85 backdrop-blur-md border-white/50 shadow-sm'} `}
                         >
                             <div className="flex items-center gap-3 relative z-10">
-                                <div className={`w - 10 h - 10 rounded - xl flex items - center justify - center transition - all ${isCompleted ? 'bg-green-100 text-green-500' : 'bg-pink-50 text-pink-400'} `}>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-green-100 text-green-500' : 'bg-pink-50 text-pink-400'} `}>
                                     {isCompleted ? <CheckCircle2 size={22} /> : <Clock size={20} />}
                                 </div>
                                 <div>
-                                    <div className={`font - bold ${isCompleted ? 'line-through text-gray-400' : 'text-gray-700'} `}>{task.title}</div>
+                                    <div className={`font-bold ${isCompleted ? 'line-through text-gray-400' : 'text-gray-700'} `}>{task.title}</div>
                                     <div className="text-[11px] font-medium text-gray-400">{task.timeSlot}</div>
                                 </div>
                             </div>
@@ -641,23 +641,23 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             className="relative"
                         >
                             {/* Node Dot */}
-                            <div className={`absolute - left - 8 top - 5 w - 7 h - 7 rounded - full border - 4 bg - white z - 10 flex items - center justify - center shadow - sm transition - colors
+                            <div className={`absolute -left-8 top-5 w-7 h-7 rounded-full border-4 bg-white z-10 flex items-center justify-center shadow-sm transition-colors
                                 ${isCompleted ? 'border-green-400 text-green-400' : isCurrentFocus ? 'border-orange-400 text-orange-400 animate-pulse' : 'border-blue-200 text-gray-300'} `}>
                                 {isCompleted ? <CheckCircle2 size={14} /> : <div className="w-2 h-2 rounded-full bg-current" />}
                             </div>
 
                             <motion.div
                                 whileTap={{ scale: 0.98 }}
-                                className={`bg - white / 90 backdrop - blur - md p - 4 rounded - [28px] border transition - all ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-md hover:shadow-lg'} `}
+                                className={`bg-white/90 backdrop-blur-md p-4 rounded-[28px] border transition-all ${isCompleted ? 'border-transparent opacity-60' : 'border-white/50 shadow-md hover:shadow-lg'} `}
                             >
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w - 12 h - 12 rounded - 2xl flex items - center justify - center text - xl ${isCompleted ? 'bg-green-50 text-green-500' : 'bg-blue-50 text-blue-400'} `}>
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isCompleted ? 'bg-green-50 text-green-500' : 'bg-blue-50 text-blue-400'} `}>
                                                 {task.category?.includes('学') ? '📚' : task.category?.includes('玩') ? '🎮' : '🌟'}
                                             </div>
                                             <div>
-                                                <h3 className={`font - black text - lg ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'} `}>{task.title}</h3>
+                                                <h3 className={`font-black text-lg ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'} `}>{task.title}</h3>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                     <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
@@ -670,7 +670,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div onClick={() => handleToggleTask(task.id)} className={`w - 10 h - 10 rounded - full flex items - center justify - center border - 2 cursor - pointer transition - all ${isCompleted ? 'border-green-200 bg-green-50 text-green-500' : 'border-gray-100 text-gray-200 hover:border-green-200 hover:text-green-400'} `}>
+                                        <div onClick={() => handleToggleTask(task.id)} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 cursor-pointer transition-all ${isCompleted ? 'border-green-200 bg-green-50 text-green-500' : 'border-gray-100 text-gray-200 hover:border-green-200 hover:text-green-400'} `}>
                                             <CheckCircle2 size={24} />
                                         </div>
                                     </div>
@@ -680,7 +680,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                             <button
                                                 onClick={() => toggleTimer(task)}
                                                 disabled={isTimerRunning && !isCurrentFocus}
-                                                className={`flex - 1 py - 2.5 rounded - xl font - black text - xs transition - all flex items - center justify - center gap - 2
+                                                className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2
                                                     ${isCurrentFocus
                                                         ? 'bg-red-500 text-white shadow-[0_4px_0_#991b1b]'
                                                         : 'bg-orange-400 text-white shadow-[0_4px_0_#c2410c] hover:translate-y-0.5 active:shadow-none'
@@ -733,12 +733,12 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             whileHover={!isPending && coins >= reward.pointsCost ? { y: -3, scale: 1.02 } : {}}
                             whileTap={!isPending && coins >= reward.pointsCost ? { scale: 0.98 } : {}}
                             onClick={() => !isPending && coins >= reward.pointsCost && handleRedeemReward(reward)}
-                            className={`p - 5 rounded - 3xl flex flex - col items - center gap - 3 text - center border relative overflow - hidden transition - all
+                            className={`p-5 rounded-3xl flex flex-col items-center gap-3 text-center border relative overflow-hidden transition-all
                                 ${isPending ? 'bg-orange-50/50 border-orange-200 opacity-80 cursor-default' : 'bg-white/90 backdrop-blur-md border-white/50 shadow-sm cursor-pointer'} `}
                         >
-                            <div className={`text - 4xl transition - transform ${isPending ? 'grayscale-[0.5]' : 'group-hover:scale-110'} `}>{reward.icon || '🎁'}</div>
+                            <div className={`text-4xl transition-transform ${isPending ? 'grayscale-[0.5]' : 'group-hover:scale-110'} `}>{reward.icon || '🎁'}</div>
                             <div>
-                                <div className={`font - bold text - sm ${isPending ? 'text-orange-600/70' : 'text-gray-700'} `}>{reward.name}</div>
+                                <div className={`font-bold text-sm ${isPending ? 'text-orange-600/70' : 'text-gray-700'} `}>{reward.name}</div>
                                 {isPending ? (
                                     <div className="text-[10px] font-black text-orange-500 bg-orange-100/50 px-2 py-1 rounded-full mt-2 inline-block animate-pulse">
                                         等待审批中...
@@ -749,14 +749,14 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                 )}
                             </div>
-                            {/* Glassmorphic Lock Overlay for Unaffordable Rewards */}
+                            {/* Glassmorphic Lock Overlay for Unaffordable Rewards - Redesigned to be less intrusive */}
                             {coins < reward.pointsCost && !isPending && (
-                                <div className="absolute inset-x-2 inset-y-2 rounded-[22px] bg-white/40 backdrop-blur-[2px] border border-white/40 flex flex-col items-center justify-center gap-1 z-20">
-                                    <div className="w-10 h-10 rounded-full bg-white/80 shadow-sm flex items-center justify-center text-gray-400">
-                                        <Lock size={18} />
+                                <div className="absolute top-2 right-2 flex flex-col items-end gap-1 z-20">
+                                    <div className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-md shadow-sm flex items-center justify-center text-gray-400 border border-white/50">
+                                        <Lock size={14} />
                                     </div>
-                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest bg-white/90 px-2 py-0.5 rounded-full shadow-sm">
-                                        还需要 {reward.pointsCost - coins} 🍭
+                                    <span className="text-[9px] font-black text-rose-500 bg-rose-50/90 backdrop-blur-md px-2 py-0.5 rounded-full shadow-sm border border-rose-100">
+                                        还差 {reward.pointsCost - coins} 🍭
                                     </span>
                                 </div>
                             )}
@@ -794,11 +794,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                     <div className="flex flex-col gap-0.5">
                                         <span className="text-[10px] text-gray-400 font-bold flex items-center gap-1">
-                                            <Clock size={10} /> 申请于: {new Date(req.requestTime).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            <Clock size={10} /> 申请于: {new Date(req.requestTime || req.redeemedAt).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                         </span>
-                                        {req.status === 'approved' && req.approveTime && (
+                                        {req.status === 'approved' && (req.approveTime || req.timestamp) && (
                                             <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                                                <CheckCircle2 size={10} /> 批准于: {new Date(req.approveTime).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                <CheckCircle2 size={10} /> 批准于: {new Date(req.approveTime || req.timestamp).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         )}
                                     </div>
@@ -896,7 +896,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                             mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                             if (isScrolled) setIsScrolled(false);
                         }}
-                        className={`px - 6 transition - all duration - 500 flex justify - between items - center rounded - 3xl border border - white / 20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'} `}
+                        className={`px-6 transition-all duration-500 flex justify-between items-center rounded-3xl border border-white/20 ${isScrolled ? 'py-3 shadow-sm cursor-pointer hover:bg-white/30' : 'py-4 shadow-none'}`}
                         style={{
                             background: isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)', // Increased transparency (Crystal Glass)
                             backdropFilter: 'blur(20px) saturate(180%)',
@@ -1059,9 +1059,9 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         </div>
                     )
                 }
-            </AnimatePresence >
+            </AnimatePresence>
 
-        </div >
+        </div>
     );
 };
 

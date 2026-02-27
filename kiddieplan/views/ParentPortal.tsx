@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2, ArrowRight, Flame, Menu, ShieldCheck } from 'lucide-react';
 import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog, RedemptionLog } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES, REWARD_CATEGORIES } from '../constants/templates';
@@ -17,9 +17,11 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [loading, setLoading] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
     const [activeTab, setActiveTab] = useState<AppTab>('children');
-    const [rewardSubTab, setRewardSubTab] = useState<'presets' | 'drafts' | 'published'>('presets');
+    const [rewardSubTab, setRewardSubTab] = useState<'pool' | 'drafts' | 'published'>('pool');
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    const selectedChild = children.find(c => c.id === selectedChildId);
 
     // Update time EVERY SECOND
     useEffect(() => {
@@ -64,6 +66,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         hideInput?: boolean;
         showDelete?: boolean;
         onDelete?: () => void;
+        showPublish?: boolean;
+        onPublish?: (val: string, pts: number) => void;
+        publishText?: string;
     }>({
         isOpen: false,
         title: '',
@@ -870,59 +875,109 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                 } finally {
                     setIsSaving(false);
                 }
-            },
-            hideInput: true
+            }
         });
     };
 
-    const handleAddReward = (importedReward?: Partial<Reward>) => {
-        if (importedReward) {
-            setDialogConfig({
-                isOpen: true,
-                title: '✨ 调整并添加奖励预设',
-                placeholder: '奖励名称',
-                defaultValue: importedReward.name,
-                showPoints: true,
-                defaultPoints: importedReward.pointsCost || 500,
-                onConfirm: (name, _, pts) => {
-                    if (!name) return;
-                    const newReward: Reward = {
-                        id: `r_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                        name,
-                        pointsCost: pts || 500,
-                        icon: importedReward.icon || '🎁',
-                        category: importedReward.category || selectedRewardCategory,
-                        isPublished: false
-                    };
-                    setRewards(prev => [...prev, newReward]);
-                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
-                }
-            });
-            return;
-        }
-
+    const openPoolItemDialog = (item: any) => {
         setDialogConfig({
             isOpen: true,
-            title: '🎁 新增奖励项',
-            placeholder: '输入奖励名称',
+            title: item.isPreset ? '✨ 管理系统奖励' : '🎁 编辑自定义项',
+            placeholder: '名称',
+            defaultValue: item.name,
             showPoints: true,
-            defaultPoints: 500,
+            defaultPoints: item.pointsCost || 500,
+            showDelete: true,
+            onDelete: () => {
+                if (item.isPreset) {
+                    const newHidden = [...hiddenRewardPresets, `${selectedRewardCategory}:${item.name}`];
+                    handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
+                } else {
+                    const newCategories = rewardCategories.map(c => {
+                        if (c.id === selectedRewardCategory) {
+                            return { ...c, templates: (c.templates || []).filter((t: any) => t.id !== item.id) };
+                        }
+                        return c;
+                    });
+                    handleSaveCategories(newCategories, undefined, undefined, 'rewards');
+                }
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+            },
             onConfirm: (name, _, pts) => {
                 if (!name) return;
+                if (item.isPreset) {
+                    const newHidden = [...hiddenRewardPresets, `${selectedRewardCategory}:${item.name}`];
+                    const newTemplate = { id: `r_tpl_${Date.now()}`, name, icon: item.icon, pointsCost: pts || 500 };
+                    const newCategories = rewardCategories.map(c => {
+                        if (c.id === selectedRewardCategory) {
+                            return { ...c, templates: [...(c.templates || []), newTemplate] };
+                        }
+                        return c;
+                    });
+                    handleSaveCategories(newCategories, undefined, newHidden, 'rewards');
+                } else {
+                    const newCategories = rewardCategories.map(c => {
+                        if (c.id === selectedRewardCategory) {
+                            return {
+                                ...c,
+                                templates: (c.templates || []).map((t: any) => t.id === item.id ? { ...t, name, pointsCost: pts || 500 } : t)
+                            };
+                        }
+                        return c;
+                    });
+                    handleSaveCategories(newCategories, undefined, undefined, 'rewards');
+                }
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+            },
+            showPublish: true,
+            publishText: '放入待发布',
+            onPublish: (name, pts) => {
                 const newReward: Reward = {
                     id: `r_${Date.now()}`,
-                    name,
-                    pointsCost: pts || 500,
-                    icon: '🎁',
+                    name: name || item.name,
+                    pointsCost: pts || item.pointsCost || 500,
+                    icon: item.icon || '🎁',
                     category: selectedRewardCategory,
                     isPublished: false
                 };
                 setRewards(prev => [...prev, newReward]);
                 setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                setRewardSubTab('drafts');
             }
         });
     };
 
+    const handleAddPoolReward = () => {
+        setDialogConfig({
+            isOpen: true,
+            title: '🌟 新增奖励模板',
+            placeholder: '输入奖励名称',
+            showPoints: true,
+            defaultPoints: 500,
+            onConfirm: (name, _, pts) => {
+                if (!name) return;
+                const newTemplate = { id: `r_tpl_${Date.now()}`, name, icon: '🎁', pointsCost: pts || 500 };
+                const newCategories = rewardCategories.map(c => {
+                    if (c.id === selectedRewardCategory) {
+                        return { ...c, templates: [...(c.templates || []), newTemplate] };
+                    }
+                    return c;
+                });
+                handleSaveCategories(newCategories, undefined, undefined, 'rewards');
+                setDialogConfig(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    };
+
+    const handleAddReward = (importedReward?: Partial<Reward>) => {
+        // Legacy function - keeping it for compatibility if called from elsewhere, 
+        // but redirecting to the new pool item dialog if it's a preset lookalike.
+        if (importedReward) {
+            openPoolItemDialog({ ...importedReward, isPreset: true });
+            return;
+        }
+        handleAddPoolReward();
+    };
     const editTask = (task: Task) => {
         setDialogConfig({
             isOpen: true,
@@ -1264,7 +1319,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         </div >
     );
 
-    const selectedChild = children.find(c => c.id === selectedChildId);
+    const selectedChildIdLocal = selectedChildId; // placeholder to satisfy ref logic if needed
 
     // Dynamic Theme System
     const CHILD_THEMES = [
@@ -1721,7 +1776,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 {(() => {
                                     // 1. 获取预设模板
                                     const presetTemplates = TASK_TEMPLATES.find(t => t.category === selectedCategory)?.tasks || [];
-                                    const currentCat = customCategories.find(c => c.id === selectedCategory);
+                                    const currentCat = taskCategories.find(c => c.id === selectedCategory);
                                     const combinedTemplates = [
                                         ...presetTemplates
                                             .filter(t => !hiddenPresets.includes(`${selectedCategory}:${t.title}`))
@@ -1915,9 +1970,9 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             {/* Sub-tabs Navigation */}
                             <div className="flex bg-gray-100/50 p-1.5 rounded-2xl gap-1.5 relative border border-gray-200/50">
                                 {[
-                                    { id: 'presets', label: '当前奖励', icon: <Sparkles size={16} /> },
-                                    { id: 'drafts', label: '待发布奖励', icon: <Edit2 size={16} /> },
-                                    { id: 'published', label: '已发布奖励', icon: <ShieldCheck size={16} /> }
+                                    { id: 'pool', label: '奖励分库', icon: <LayoutGrid size={16} /> },
+                                    { id: 'drafts', label: '待发布', icon: <Edit2 size={16} /> },
+                                    { id: 'published', label: '已发布', icon: <ShieldCheck size={16} /> }
                                 ].map(tab => (
                                     <button
                                         key={tab.id}
@@ -1937,68 +1992,63 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 ))}
                             </div>
 
-                            {rewardSubTab === 'presets' && (
+                            {rewardSubTab === 'pool' && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                                    <div className="flex justify-end gap-2 mb-[-1rem]">
+                                    <div className="flex justify-between items-center mb-[-0.5rem] mt-2">
+                                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest pl-1">
+                                            {rewardCategories.find(c => c.id === selectedRewardCategory)?.name || '未分类'} 资源池
+                                        </h3>
                                         <button
-                                            onClick={() => {
-                                                // Global hide: Add all default rewards to hidden list
-                                                const allPresets = DEFAULT_REWARDS.map(r => `${r.category}:${r.name}`);
-                                                const newHidden = Array.from(new Set([...hiddenRewardPresets, ...allPresets]));
-                                                handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
-                                            }}
-                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 bg-white shadow-sm hover:shadow hover:text-gray-600 transition-all flex items-center gap-1 border border-gray-100"
+                                            onClick={() => handleAddPoolReward()}
+                                            className="px-4 py-2 rounded-xl text-xs font-black text-white bg-gradient-to-r from-orange-400 to-orange-500 shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95"
                                         >
-                                            <Trash2 size={12} /> 一键隐藏所有预设
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                // Global restore: Clear hidden list for rewards
-                                                handleSaveCategories(rewardCategories, undefined, [], 'rewards');
-                                            }}
-                                            className="px-3 py-1.5 rounded-lg text-xs font-bold text-orange-500 bg-orange-50 shadow-sm hover:shadow hover:bg-orange-100 transition-all flex items-center gap-1 border border-orange-100"
-                                        >
-                                            <RotateCcw size={12} /> 恢复所有预设
+                                            <Plus size={14} strokeWidth={3} /> 新增奖励项
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-h-[100px] mt-6">
-                                        {DEFAULT_REWARDS
-                                            .filter(r => r.category === selectedRewardCategory)
-                                            .filter(r => !hiddenRewardPresets.includes(`${selectedRewardCategory}:${r.name}`))
-                                            .map((tmp, i) => (
-                                                <div key={`rew_tmp_${i}`} className="relative group">
-                                                    <motion.button
-                                                        whileTap={{ scale: 0.98 }}
-                                                        onClick={() => handleAddReward(tmp)}
-                                                        className="w-full bg-gradient-to-br from-white to-[#FDFBF7] p-5 rounded-[20px] text-left border border-orange-50 hover:border-orange-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(249,115,22,0.08)] transition-all flex items-center gap-4 group-hover:-translate-y-1"
-                                                    >
-                                                        <div className="text-3xl flex-shrink-0 drop-shadow-sm">{tmp.icon}</div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="font-black text-[#5D4037] text-sm tracking-wide truncate">{tmp.name}</div>
-                                                            <div className="text-xs font-black mt-1 flex items-center gap-1">
-                                                                <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
-                                                                    {tmp.pointsCost} 🍭
-                                                                </span>
-                                                            </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-h-[100px]">
+                                        {/* Combined List: Defaults + Custom Templates */}
+                                        {[
+                                            ...DEFAULT_REWARDS
+                                                .filter(r => r.category === selectedRewardCategory)
+                                                .filter(r => !hiddenRewardPresets.some(h => h === `${selectedRewardCategory}:${r.name}`))
+                                                .map(r => ({ ...r, isPreset: true })),
+                                            ...(rewardCategories.find(c => c.id === selectedRewardCategory)?.templates || [])
+                                                .map((r: any) => ({ ...r, isPreset: false }))
+                                        ].map((item, i) => (
+                                            <div key={`pool_item_${i}`} className="relative group">
+                                                <motion.button
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={() => openPoolItemDialog(item)}
+                                                    className="w-full bg-gradient-to-br from-white to-[#FDFBF7] p-5 rounded-[20px] text-left border border-orange-50 hover:border-orange-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(249,115,22,0.08)] transition-all flex items-center gap-4 group-hover:-translate-y-1"
+                                                >
+                                                    <div className="text-3xl flex-shrink-0 drop-shadow-sm">{item.icon}</div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-black text-[#5D4037] text-sm tracking-wide truncate">{item.name}</div>
+                                                        <div className="text-xs font-black mt-1 flex items-center gap-1">
+                                                            <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                                                {item.pointsCost} 🍭
+                                                            </span>
+                                                            {item.isPreset && <span className="text-[9px] text-gray-300 font-bold uppercase ml-1">系统</span>}
                                                         </div>
-                                                        <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <Plus size={16} strokeWidth={3} />
-                                                        </div>
-                                                    </motion.button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const newHidden = [...hiddenRewardPresets, `${selectedRewardCategory}:${tmp.name}`];
-                                                            handleSaveCategories(rewardCategories, undefined, newHidden, 'rewards');
-                                                        }}
-                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 z-10"
-                                                        title="删除此预设项"
-                                                    >
-                                                        <Trash2 size={12} />
-                                                    </button>
-                                                </div>
-                                            ))}
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Edit2 size={14} />
+                                                    </div>
+                                                </motion.button>
+                                            </div>
+                                        ))}
                                     </div>
+
+                                    {/* Empty state specifically for the pool */}
+                                    {DEFAULT_REWARDS.filter(r => r.category === selectedRewardCategory).filter(r => !hiddenRewardPresets.includes(`${selectedRewardCategory}:${r.name}`)).length === 0 &&
+                                        (rewardCategories.find(c => c.id === selectedRewardCategory)?.templates || []).length === 0 && (
+                                            <div className="text-center py-12 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
+                                                <div className="text-4xl mb-3 opacity-20">📦</div>
+                                                <p className="font-bold text-gray-400 text-sm">该分类下暂无奖励资源</p>
+                                                <p className="text-[10px] text-gray-300 mt-1 uppercase font-black">点击上方按钮添加您需要的奖励</p>
+                                            </div>
+                                        )}
                                 </motion.div>
                             )}
 
@@ -2706,34 +2756,48 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                 )}
 
-                                <div className="mt-8 flex gap-3">
-                                    <button
-                                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                        className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
-                                    >
-                                        取消
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            if (uploadingAvatar) {
-                                                setDialogConfig({
-                                                    isOpen: true,
-                                                    title: '请稍候',
-                                                    message: '头像正在上传中，请稍后再试。',
-                                                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false }))
-                                                });
-                                                return;
-                                            }
-                                            const input = document.getElementById('dialogInput') as HTMLInputElement;
-                                            const time = document.getElementById('dialogTime') as HTMLInputElement;
-                                            const points = document.getElementById('dialogPoints') as HTMLInputElement;
-                                            dialogConfig.onConfirm(input?.value, time?.value, parseInt(points?.value) || 0);
-                                        }}
-                                        disabled={uploadingAvatar || isSaving}
-                                        className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
-                                    >
-                                        {uploadingAvatar ? '上传中...' : (isSaving ? '处理中...' : '确定')}
-                                    </button>
+                                <div className="mt-8 flex flex-col gap-3">
+                                    {dialogConfig.showPublish && (
+                                        <button
+                                            onClick={() => {
+                                                const input = document.getElementById('dialogInput') as HTMLInputElement;
+                                                const points = document.getElementById('dialogPoints') as HTMLInputElement;
+                                                dialogConfig.onPublish?.(input?.value, parseInt(points?.value) || 0);
+                                            }}
+                                            className="w-full py-4 rounded-2xl font-black bg-orange-500 text-white shadow-lg shadow-orange-100 active:scale-95 transition-all text-lg"
+                                        >
+                                            {dialogConfig.publishText || '发布'}
+                                        </button>
+                                    )}
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                                            className="flex-1 py-4 rounded-2xl font-bold text-gray-400 hover:bg-gray-100 transition-colors"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (uploadingAvatar) {
+                                                    setDialogConfig({
+                                                        isOpen: true,
+                                                        title: '请稍候',
+                                                        message: '头像正在上传中，请稍后再试。',
+                                                        onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false }))
+                                                    });
+                                                    return;
+                                                }
+                                                const input = document.getElementById('dialogInput') as HTMLInputElement;
+                                                const time = document.getElementById('dialogTime') as HTMLInputElement;
+                                                const points = document.getElementById('dialogPoints') as HTMLInputElement;
+                                                dialogConfig.onConfirm(input?.value, time?.value, parseInt(points?.value) || 0);
+                                            }}
+                                            disabled={uploadingAvatar || isSaving}
+                                            className={`flex-1 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all ${uploadingAvatar || isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--color-blue-fun)] text-white'}`}
+                                        >
+                                            {uploadingAvatar ? '上传中...' : (isSaving ? '确定保存' : '确定')}
+                                        </button>
+                                    </div>
                                 </div>
                             </motion.div>
                         </div>
@@ -2843,6 +2907,25 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         <RotateCcw size={16} /> 恢复预设
                                     </button>
                                 )}
+                                {managingType === 'rewards' && (
+                                    <button
+                                        onClick={() => {
+                                            setDialogConfig({
+                                                isOpen: true,
+                                                title: '恢复预设奖励',
+                                                message: '确定要恢复所有隐藏的系统预设奖励吗？',
+                                                onConfirm: () => {
+                                                    handleSaveCategories(rewardCategories, undefined, [], 'rewards');
+                                                    setDialogConfig(prev => ({ ...prev, isOpen: false }));
+                                                },
+                                                hideInput: true
+                                            });
+                                        }}
+                                        className="px-4 py-3 rounded-xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors border-2 border-transparent hover:border-gray-100"
+                                    >
+                                        <RotateCcw size={16} /> 恢复所有预设
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => setIsManagingCategories(false)}
                                     className="flex-1 py-3 text-[#5D4037] font-black hover:text-blue-500 transition-colors bg-blue-50 rounded-xl"
@@ -2885,15 +2968,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </div>
 
                             {/* Category Banner Editor */}
-                            <div className="bg-[#F5F7FA] p-4 rounded-2xl flex gap-3 mb-6 items-center">
+                            <div className="flex gap-4 mb-6">
                                 <input
-                                    value={draftRewardCategory.icon}
+                                    value={draftRewardCategory?.icon || '🎁'}
                                     onChange={e => setDraftRewardCategory(prev => prev ? { ...prev, icon: e.target.value } : prev)}
                                     className="w-12 h-12 bg-white rounded-xl text-center text-2xl border-2 border-transparent focus:border-orange-200 outline-none shadow-sm"
                                     placeholder="🎯"
                                 />
                                 <input
-                                    value={draftRewardCategory.name}
+                                    value={draftRewardCategory?.name || ''}
                                     onChange={e => setDraftRewardCategory(prev => prev ? { ...prev, name: e.target.value } : prev)}
                                     className="flex-1 bg-white px-4 py-3 rounded-xl font-black text-[#5D4037] border-2 border-transparent focus:border-orange-200 outline-none shadow-sm"
                                     placeholder="分类名称"
@@ -2958,8 +3041,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             id: `r_draft_${Date.now()}_${Math.random().toString(36).substring(7)}`,
                                             name: '',
                                             pointsCost: 100,
-                                            icon: draftRewardCategory.icon || '🎁',
-                                            category: draftRewardCategory.id,
+                                            icon: draftRewardCategory?.icon || '🎁',
+                                            category: draftRewardCategory?.id || '',
                                             isPublished: false
                                         };
                                         setDraftCategoryRewards([...draftCategoryRewards, blankReward]);
@@ -2990,7 +3073,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </div>
                 )}
             </AnimatePresence>
-        </div >
+        </div>
     );
 };
 

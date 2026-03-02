@@ -15,6 +15,8 @@ export interface TTSOptions {
 class TTSManager {
     private static instance: TTSManager;
     private audio: HTMLAudioElement | null = null;
+    private silentAudio: HTMLAudioElement | null = null;
+    private isSilentLoopPlaying: boolean = false;
 
     private constructor() {
         this.audio = new Audio();
@@ -99,23 +101,59 @@ class TTSManager {
     }
 
     private async speakEdge(text: string, options: TTSOptions): Promise<void> {
-        try {
-            // Using a common public Edge TTS proxy (Vercel based)
-            // You can replace this with your own deployment for more stability
-            const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
-            const rate = options.rate ? `${Math.round((options.rate - 1) * 100)}%` : '0%';
+        const proxies = [
+            'https://edge-tts.vercel.app/api/tts',
+            'https://tts.cy7.io/api/tts' // Potential fallback proxy
+        ];
 
-            // Note: This is a widely used community endpoint pattern. 
-            // In a production app, the user might want to provide their own proxy URL in settings.
-            const url = `https://edge-tts.vercel.app/api/tts?text=${encodeURIComponent(text)}&voice=${voice}&rate=${rate}`;
+        let lastError: any = null;
 
-            if (this.audio) {
-                this.audio.src = url;
-                await this.audio.play();
+        for (const proxyBase of proxies) {
+            try {
+                const voice = options.voice || 'zh-CN-YunxiNeural';
+                const rate = options.rate ? `${Math.round((options.rate - 1) * 100)}%` : '0%';
+                const url = `${proxyBase}?text=${encodeURIComponent(text)}&voice=${voice}&rate=${rate}`;
+
+                if (this.audio) {
+                    this.audio.src = url;
+                    await this.audio.play();
+                    return; // Success!
+                }
+            } catch (error) {
+                lastError = error;
+                console.warn(`Edge TTS proxy ${proxyBase} failed, trying next...`);
+                continue;
             }
-        } catch (error) {
-            console.error('Edge TTS failed, falling back to native:', error);
-            this.speakNative(text, options);
+        }
+
+        console.error('All Edge TTS proxies failed:', lastError);
+        this.speakNative(text, options);
+    }
+
+    // Silent audio to keep the browser tab "audible" and prevent background suspension
+    public startSilentLoop(): void {
+        if (this.isSilentLoopPlaying) return;
+
+        if (!this.silentAudio) {
+            this.silentAudio = new Audio();
+            // Tiny silent wav (1 pixel worth of silence)
+            this.silentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+            this.silentAudio.loop = true;
+            this.silentAudio.volume = 0.01; // Extremely quiet but not zero
+        }
+
+        this.silentAudio.play().then(() => {
+            this.isSilentLoopPlaying = true;
+            console.log('Silent keep-alive loop started.');
+        }).catch(err => {
+            console.warn('Silent loop block by browser policy, will retry on next user interaction.', err);
+        });
+    }
+
+    public stopSilentLoop(): void {
+        if (this.silentAudio) {
+            this.silentAudio.pause();
+            this.isSilentLoopPlaying = false;
         }
     }
 

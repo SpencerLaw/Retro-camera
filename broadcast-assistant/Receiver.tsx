@@ -259,12 +259,25 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     }, [fullRoomId, isListening, speak]);
 
     useEffect(() => {
+        let isActive = true;
+
+        const poll = async () => {
+            if (!isJoined || !isActive) return;
+            await fetchMessage();
+            if (isActive) {
+                // Background-friendly: if tab is hidden, we keep polling but can adjust frequency if needed.
+                // browsers usually throttle to 1s min in bg, which is fine for our 3s poll.
+                pollingTimer.current = setTimeout(poll, 3000);
+            }
+        };
+
         if (isJoined) {
-            fetchMessage();
-            pollingTimer.current = setInterval(fetchMessage, 3000);
+            poll();
         }
+
         return () => {
-            if (pollingTimer.current) clearInterval(pollingTimer.current);
+            isActive = false;
+            if (pollingTimer.current) clearTimeout(pollingTimer.current);
         };
     }, [isJoined, fetchMessage]);
 
@@ -303,20 +316,27 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             if (!response.ok) {
                 // Room is invalid or not active
                 if (response.status === 404) {
-                    setError(t('broadcast.receiver.invalidRoom') || '无效的房间号');
+                    setError(t('broadcast.receiver.channelNotFound'));
                 } else {
                     setError('验证失败，请重试');
                 }
                 return;
             }
 
-            // Room is valid, proceed to join
-            localStorage.setItem('br_last_full_room_rx', fullRoomId);
+            // Success! 
             setIsJoined(true);
+
+            // CRITICAL: Unlock audio context for background playback
+            ttsManager.startSilentLoop();
+
+            // Play a short join chime to "bless" the audio context with a user gesture
+            const joinChime = new Audio('data:audio/wav;base64,UklGRjAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+            joinChime.volume = 0.5;
+            joinChime.play().catch(() => { });
+
+            // Save room code
+            localStorage.setItem('br_receiver_room', fullRoomId.trim().toUpperCase());
             setIsListening(true);
-            // Wake up TTS for iOS
-            const wakeUp = new SpeechSynthesisUtterance('');
-            window.speechSynthesis.speak(wakeUp);
         } catch (err) {
             setError('网络错误，请检查连接');
         }
@@ -517,7 +537,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center space-y-8 animate-in fade-in duration-1000 relative z-0 flex flex-col items-center justify-center h-full pb-20">
+                    <div className="text-center space-y-8 animate-in fade-in duration-1000 relative z-0 flex flex-col items-center justify-center h-full pb-[25vh]">
                         <div className="relative inline-block">
                             <div className="absolute inset-0 rounded-full border-4 border-dashed border-gray-400/20 animate-[spin_20s_linear_infinite]"></div>
                             <div className="m-8 w-24 h-24 md:w-32 md:h-32 rounded-full GlassContainer border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl shadow-inner">
@@ -525,7 +545,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             </div>
                         </div>
                         <div className="space-y-4">
-                            <p className="text-2xl md:text-4xl font-black tracking-widest uppercase italic opacity-20">{t('broadcast.receiver.downlinkSync') || '下行接收信号中'}</p>
+                            <p className="text-2xl md:text-5xl font-black tracking-widest uppercase italic opacity-20">{t('broadcast.receiver.downlinkSync') || '下行接收信号中'}</p>
                             <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.4em] opacity-40">
                                 <Wifi size={14} /> {t('broadcast.receiver.standbySource') || '稳定连接待机'}
                             </div>

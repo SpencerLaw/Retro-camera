@@ -204,6 +204,17 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         }
     };
 
+    const handleReplay = (text: string, isEmergencyMsg: boolean) => {
+        setInputText(text);
+        setIsEmergency(isEmergencyMsg);
+        // Scroll to top to let user see/confirm or just handleSend?
+        // User asked for "one-click", so I'll trigger handleSend after a brief delay so they see the population.
+        setTimeout(() => {
+            const btn = document.querySelector('button[onClick*="handleSend"]');
+            if (btn) (btn as HTMLButtonElement).click();
+        }, 100);
+    };
+
     const clearHistory = () => {
         if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
             setHistory([]);
@@ -476,6 +487,13 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     </div>
                                     <p className={`text-base font-semibold leading-relaxed ${msg.isEmergency ? 'text-red-500' : 'opacity-80'}`}>{msg.text}</p>
                                 </div>
+                                <button
+                                    onClick={() => handleReplay(msg.text, msg.isEmergency)}
+                                    className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
+                                    title="一键再次播报"
+                                >
+                                    <RefreshCw size={18} />
+                                </button>
                             </div>
                         ))
                     )}

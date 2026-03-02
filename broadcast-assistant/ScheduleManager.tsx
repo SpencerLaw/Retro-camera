@@ -367,251 +367,267 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     };
 
     return (
-        <GlassCard className="p-8 mt-8 border-2 border-indigo-500/20">
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                        <Calendar size={20} />
+        <GlassCard className="p-8 mt-8 border-2 border-indigo-500/20 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 px-2 border-b border-black/5 dark:border-white/5 pb-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <Calendar size={28} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold tracking-tight">{t('broadcast.sender.scheduler') || '定时播报计划'}</h3>
-                        <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">
-                            {tasks.length} {t('broadcast.sender.rules') || 'TASKS LOADED'}
-                        </p>
+                        <h3 className="text-xl font-black tracking-tight">{t('broadcast.sender.scheduler') || '定时播报计划'}</h3>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-500 px-2 py-0.5 rounded-full">
+                                {tasks.length} {t('broadcast.sender.rules') || 'TASKS'}
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">Automated Sequence v2.1</span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleToggleAuto}
+                        className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm border ${isAutoEnabled
+                            ? 'bg-green-500 text-white border-green-400 shadow-green-500/20'
+                            : 'bg-white dark:bg-white/5 text-gray-400 border-black/5 hover:border-black/10'}`}
+                    >
+                        {isAutoEnabled ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
+                        {isAutoEnabled ? '服务已运行' : '服务已暂停'}
+                    </button>
+                    {tasks.length > 0 && (
                         <button
-                            onClick={handleToggleAuto}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isAutoEnabled
-                                ? 'bg-green-500/10 text-green-500 border border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
-                                : 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'}`}
+                            onClick={handleClearAll}
+                            className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all border border-transparent hover:border-red-500/20"
+                            title="清空所有任务"
                         >
-                            {isAutoEnabled ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
-                            {t('broadcast.sender.autoBroadcast') || '自动播报'} {isAutoEnabled ? (t('broadcast.sender.enabled') || 'ON') : (t('broadcast.sender.disabled') || 'OFF')}
+                            <Trash2 size={20} />
                         </button>
-                        {tasks.length > 0 && (
-                            <button
-                                onClick={handleClearAll}
-                                className="p-2 text-gray-300 hover:text-red-500 transition-colors bg-white/5 rounded-lg"
-                            >
-                                <Trash2 size={18} />
-                            </button>
-                        )}
-                    </div>
+                    )}
                 </div>
-
-                {/* Import UI */}
-                <div className="mb-6">
-                    {!showImport ? (
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => setShowImport(true)}
-                                className="flex-1 py-4 rounded-xl border-2 border-dashed border-indigo-200 dark:border-indigo-500/30 text-indigo-500 font-bold bg-indigo-50/50 dark:bg-indigo-500/5 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <FileText size={18} />
-                                {t('broadcast.sender.importExcel') || '从 Excel 导入计划'}
-                            </button>
-                            <label className="flex-1 py-4 rounded-xl border-2 border-dashed border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50/50 dark:bg-emerald-500/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors flex items-center justify-center gap-2 cursor-pointer text-center px-4">
-                                {isParsingDocx ? (
-                                    <span className="animate-pulse">正在智能解析...</span>
-                                ) : (
-                                    <>
-                                        <Upload size={18} className="flex-none" />
-                                        <span>一键导入《1530安全教育》Word文档</span>
-                                    </>
-                                )}
-                                <input
-                                    type="file"
-                                    accept=".docx"
-                                    className="hidden"
-                                    onChange={handleFileUpload}
-                                    disabled={isParsingDocx}
-                                />
-                            </label>
-                        </div>
-                    ) : null}
-                </div>
-
-                {/* Preview Overlay */}
-                {previewTasks && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
-                        <div className="bg-white dark:bg-gray-900 border border-black/10 dark:border-white/10 shadow-2xl rounded-3xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-                            <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-indigo-50/30 dark:bg-indigo-500/5">
-                                <div>
-                                    <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                                        <ListTodo size={24} className="text-indigo-500" />
-                                        请核对解析结果
-                                    </h3>
-                                    <p className="text-sm text-gray-500 font-medium mt-1">共解析出 <span className="text-indigo-500 font-bold">{previewTasks.length}</span> 条播报任务，您可以直接在此修改有误的内容或删除不要的记录，确认无误后点击下方导入按钮。</p>
-                                </div>
-                                <button onClick={() => setPreviewTasks(null)} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
-                                    <span className="text-2xl font-light leading-none">&times;</span>
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-gray-50 dark:bg-black/20">
-                                {previewTasks.length === 0 ? (
-                                    <div className="text-center py-12 text-gray-400 font-bold">已清空列表。</div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {previewTasks.map((pt, idx) => (
-                                            <div key={pt.id} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center p-4 rounded-xl bg-white dark:bg-gray-800 border border-black/5 dark:border-white/5 shadow-sm group">
-                                                <div className="flex gap-2 w-full sm:w-auto">
-                                                    <input
-                                                        type="date"
-                                                        value={pt.date}
-                                                        onChange={e => updatePreviewTask(pt.id, 'date', e.target.value)}
-                                                        className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-white/5 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 text-sm font-semibold outline-none flex-[1.5] w-full min-w-[130px]"
-                                                    />
-                                                    <input
-                                                        type="time"
-                                                        value={pt.time}
-                                                        onChange={e => updatePreviewTask(pt.id, 'time', e.target.value)}
-                                                        className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-white/5 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 text-sm font-semibold outline-none flex-1 w-full min-w-[100px]"
-                                                    />
-                                                </div>
-                                                <input
-                                                    value={pt.content}
-                                                    onChange={e => updatePreviewTask(pt.id, 'content', e.target.value)}
-                                                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-white/5 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 text-sm font-semibold outline-none flex-1 w-full"
-                                                    placeholder="播报详细内容"
-                                                />
-                                                <button
-                                                    onClick={() => deletePreviewTask(pt.id)}
-                                                    className="sm:opacity-0 sm:group-hover:opacity-100 flex-none p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
-                                                    title="删除此行"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="p-4 sm:p-6 border-t border-black/5 dark:border-white/5 bg-white dark:bg-gray-900 flex justify-end gap-3">
-                                <button
-                                    onClick={() => setPreviewTasks(null)}
-                                    className="px-6 py-3 rounded-xl font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-300"
-                                >
-                                    放弃导入
-                                </button>
-                                <button
-                                    onClick={handleConfirmPreview}
-                                    disabled={previewTasks.length === 0}
-                                    className="px-8 py-3 rounded-xl font-bold bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-colors disabled:opacity-50 flex items-center gap-2"
-                                >
-                                    <CheckCircle2 size={18} />
-                                    确认无误，全部导入 ({previewTasks.length} 篇)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {showImport && (
-                    <div className="mt-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                        {/* Tasks Guide Table */}
-                        <div className="bg-white dark:bg-black/20 rounded-lg p-3 font-mono text-[10px] overflow-x-auto text-gray-600 dark:text-gray-300 border border-black/5 dark:border-white/5 mb-4">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="border-b border-gray-200 dark:border-white/10 opacity-60">
-                                        <th className="py-1 min-w-[100px]">A列: 日期</th>
-                                        <th className="py-1 min-w-[80px]">B列: 时间</th>
-                                        <th className="py-1">C列: 播报内容</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td className="py-1">2026-03-01</td>
-                                        <td className="py-1">08:00</td>
-                                        <td className="py-1">第一周安全教育：防溺水...</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-1">2026-03-01</td>
-                                        <td className="py-1">15:30</td>
-                                        <td className="py-1">放学提示：请注意交通安全...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <p className="text-xs text-indigo-500/80 mb-3 font-bold">
-                            👉 {t('broadcast.sender.copyPasteInstruction') || '选中 Excel 中的这三列，按 Ctrl+C 复制，然后直接通过 Ctrl+V 粘贴到下方框中即可。'}
-                        </p>
-
-                        <textarea
-                            value={importText}
-                            onChange={(e) => setImportText(e.target.value)}
-                            placeholder={t('broadcast.sender.pasteExcelHere') || '请在此处使用 Ctrl+C 和 Ctrl+V 粘贴您的表格...'}
-                            rows={6}
-                            className="w-full bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-gray-300 whitespace-pre"
-                        />
-
-                        <div className="flex gap-3 mt-4">
-                            <button
-                                onClick={() => setShowImport(false)}
-                                className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
-                            >
-                                取消
-                            </button>
-                            <button
-                                onClick={handleImport}
-                                disabled={!importText.trim()}
-                                className="flex-[2] py-3 rounded-xl bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                            >
-                                {t('broadcast.sender.parseBtn') || '智能解析并保存'}
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
 
-            {/* Tasks List */}
-            {
-                tasks.length > 0 && (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto px-1 custom-scrollbar mt-6">
-                        {tasks.map((task) => (
-                            <div
-                                key={task.id}
-                                className={`group p-4 rounded-2xl border transition-all flex items-center gap-4 ${task.isPlayed
-                                    ? 'bg-gray-50/50 dark:bg-white/[0.02] border-transparent opacity-60 grayscale'
-                                    : 'bg-white dark:bg-white/5 border-black/5 dark:border-white/10 hover:border-indigo-500/30 shadow-sm'
-                                    }`}
-                            >
-                                <div className="flex-none flex flex-col items-center justify-center w-16 h-16 rounded-xl bg-gray-50 dark:bg-black/20 text-indigo-500 font-mono">
-                                    {task.isPlayed ? (
-                                        <CheckCircle2 size={24} className="text-green-500" />
-                                    ) : (
-                                        <>
-                                            <span className="text-[10px] uppercase font-bold opacity-50 mb-0.5">{task.date.slice(-5)}</span>
-                                            <span className="text-sm font-black tracking-tight">{task.time}</span>
-                                        </>
-                                    )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className={`text-sm font-semibold truncate ${task.isPlayed ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-gray-200'}`}>
-                                        {task.content}
-                                    </p>
-                                    <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mt-1 flex items-center gap-1">
-                                        {task.isPlayed
-                                            ? <><Check size={10} /> {t('broadcast.sender.played') || '已播报'} </>
-                                            : <><Clock size={10} /> {t('broadcast.sender.pending') || '待执行'} </>
-                                        }
-                                        · ROOM {task.channelCode}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() => handleDelete(task.id)}
-                                    className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+            {/* Actions / Import Section */}
+            {!showImport && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                    <button
+                        onClick={() => setShowImport(true)}
+                        className="group relative flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition-all text-indigo-500 overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <FileText size={60} />
+                        </div>
+                        <Upload size={32} className="mb-3 group-hover:scale-110 transition-transform" />
+                        <span className="font-black uppercase tracking-widest text-xs">从 Excel 粘贴导入</span>
+                    </button>
+
+                    <label className="group relative flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all text-emerald-600 dark:text-emerald-400 cursor-pointer overflow-hidden">
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Upload size={60} />
+                        </div>
+                        {isParsingDocx ? (
+                            <div className="flex flex-col items-center">
+                                <span className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin mb-3"></span>
+                                <span className="font-black uppercase tracking-widest text-xs">正在深度解析...</span>
                             </div>
-                        ))}
+                        ) : (
+                            <>
+                                <FileText size={32} className="mb-3 group-hover:scale-110 transition-transform" />
+                                <span className="font-black uppercase tracking-widest text-xs">导入安全教育 Word</span>
+                            </>
+                        )}
+                        <input
+                            type="file"
+                            accept=".docx"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                            disabled={isParsingDocx}
+                        />
+                    </label>
+                </div>
+            )}
+
+            {/* Preview Overlay */}
+            {previewTasks && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-900 border border-black/10 dark:border-white/10 shadow-2xl rounded-3xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-indigo-50/30 dark:bg-indigo-500/5">
+                            <div>
+                                <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+                                    <ListTodo size={24} className="text-indigo-500" />
+                                    请核对解析结果
+                                </h3>
+                                <p className="text-sm text-gray-500 font-medium mt-1">共解析出 <span className="text-indigo-500 font-bold">{previewTasks.length}</span> 条播报任务，您可以直接在此修改有误的内容或删除不要的记录，确认无误后点击下方导入按钮。</p>
+                            </div>
+                            <button onClick={() => setPreviewTasks(null)} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
+                                <span className="text-2xl font-light leading-none">&times;</span>
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-gray-50 dark:bg-black/20">
+                            {previewTasks.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400 font-bold">已清空列表。</div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {previewTasks.map((pt, idx) => (
+                                        <div key={pt.id} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center p-4 rounded-xl bg-white dark:bg-gray-800 border border-black/5 dark:border-white/5 shadow-sm group">
+                                            <div className="flex gap-2 w-full sm:w-auto">
+                                                <input
+                                                    type="date"
+                                                    value={pt.date}
+                                                    onChange={e => updatePreviewTask(pt.id, 'date', e.target.value)}
+                                                    className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-white/5 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 text-sm font-semibold outline-none flex-[1.5] w-full min-w-[130px]"
+                                                />
+                                                <input
+                                                    type="time"
+                                                    value={pt.time}
+                                                    onChange={e => updatePreviewTask(pt.id, 'time', e.target.value)}
+                                                    className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-white/5 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 text-sm font-semibold outline-none flex-1 w-full min-w-[100px]"
+                                                />
+                                            </div>
+                                            <input
+                                                value={pt.content}
+                                                onChange={e => updatePreviewTask(pt.id, 'content', e.target.value)}
+                                                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-white/5 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 text-sm font-semibold outline-none flex-1 w-full"
+                                                placeholder="播报详细内容"
+                                            />
+                                            <button
+                                                onClick={() => deletePreviewTask(pt.id)}
+                                                className="sm:opacity-0 sm:group-hover:opacity-100 flex-none p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                                                title="删除此行"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-4 sm:p-6 border-t border-black/5 dark:border-white/5 bg-white dark:bg-gray-900 flex justify-end gap-3">
+                            <button
+                                onClick={() => setPreviewTasks(null)}
+                                className="px-6 py-3 rounded-xl font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-300"
+                            >
+                                放弃导入
+                            </button>
+                            <button
+                                onClick={handleConfirmPreview}
+                                disabled={previewTasks.length === 0}
+                                className="px-8 py-3 rounded-xl font-bold bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                            >
+                                <CheckCircle2 size={18} />
+                                确认无误，全部导入 ({previewTasks.length} 篇)
+                            </button>
+                        </div>
                     </div>
-                )
-            }
+                </div>
+            )}
+
+            {showImport && (
+                <div className="mt-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                    {/* Tasks Guide Table */}
+                    <div className="bg-white dark:bg-black/20 rounded-lg p-3 font-mono text-[10px] overflow-x-auto text-gray-600 dark:text-gray-300 border border-black/5 dark:border-white/5 mb-4">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-gray-200 dark:border-white/10 opacity-60">
+                                    <th className="py-1 min-w-[100px]">A列: 日期</th>
+                                    <th className="py-1 min-w-[80px]">B列: 时间</th>
+                                    <th className="py-1">C列: 播报内容</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="py-1">2026-03-01</td>
+                                    <td className="py-1">08:00</td>
+                                    <td className="py-1">第一周安全教育：防溺水...</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-1">2026-03-01</td>
+                                    <td className="py-1">15:30</td>
+                                    <td className="py-1">放学提示：请注意交通安全...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p className="text-xs text-indigo-500/80 mb-3 font-bold">
+                        👉 {t('broadcast.sender.copyPasteInstruction') || '选中 Excel 中的这三列，按 Ctrl+C 复制，然后直接通过 Ctrl+V 粘贴到下方框中即可。'}
+                    </p>
+
+                    <textarea
+                        value={importText}
+                        onChange={(e) => setImportText(e.target.value)}
+                        placeholder={t('broadcast.sender.pasteExcelHere') || '请在此处使用 Ctrl+C 和 Ctrl+V 粘贴您的表格...'}
+                        rows={6}
+                        className="w-full bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-gray-300 whitespace-pre"
+                    />
+
+                    <div className="flex gap-3 mt-4">
+                        <button
+                            onClick={() => setShowImport(false)}
+                            className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
+                        >
+                            取消
+                        </button>
+                        <button
+                            onClick={handleImport}
+                            disabled={!importText.trim()}
+                            className="flex-[2] py-3 rounded-xl bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            {t('broadcast.sender.parseBtn') || '智能解析并保存'}
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+
+            {/* Tasks List */ }
+    {
+        tasks.length > 0 && (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto px-1 custom-scrollbar mt-6">
+                {tasks.map((task) => (
+                    <div
+                        key={task.id}
+                        className={`group p-4 rounded-2xl border transition-all flex items-center gap-4 ${task.isPlayed
+                            ? 'bg-gray-50/50 dark:bg-white/[0.02] border-transparent opacity-60 grayscale'
+                            : 'bg-white dark:bg-white/5 border-black/5 dark:border-white/10 hover:border-indigo-500/30 shadow-sm'
+                            }`}
+                    >
+                        <div className="flex-none flex flex-col items-center justify-center w-16 h-16 rounded-xl bg-gray-50 dark:bg-black/20 text-indigo-500 font-mono">
+                            {task.isPlayed ? (
+                                <CheckCircle2 size={24} className="text-green-500" />
+                            ) : (
+                                <>
+                                    <span className="text-[10px] uppercase font-bold opacity-50 mb-0.5">{task.date.slice(-5)}</span>
+                                    <span className="text-sm font-black tracking-tight">{task.time}</span>
+                                </>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-semibold truncate ${task.isPlayed ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-gray-200'}`}>
+                                {task.content}
+                            </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mt-1 flex items-center gap-1">
+                                {task.isPlayed
+                                    ? <><Check size={10} /> {t('broadcast.sender.played') || '已播报'} </>
+                                    : <><Clock size={10} /> {t('broadcast.sender.pending') || '待执行'} </>
+                                }
+                                · ROOM {task.channelCode}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => handleDelete(task.id)}
+                            className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                ))}
+            </div>
+        )
+    }
         </GlassCard >
     );
 };

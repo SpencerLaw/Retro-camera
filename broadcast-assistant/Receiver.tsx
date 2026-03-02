@@ -42,6 +42,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const pollingTimer = useRef<NodeJS.Timeout | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const activeSentenceRef = useRef<HTMLSpanElement>(null);
+    const rescueTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isUserScrollingRef = useRef(false);
 
     useEffect(() => {
         const savedHistory = localStorage.getItem('br_receiver_history');
@@ -99,15 +101,43 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         return -1;
     }, [charIndex, sentences]);
 
-    // Auto-scroll logic: Trigger ONLY on sentence change
-    useEffect(() => {
+    // Auto-scroll logic: Trigger ONLY on sentence change OR rescue
+    const scrollToActive = useCallback((behavior: ScrollBehavior = 'smooth') => {
         if (activeSentenceRef.current) {
             activeSentenceRef.current.scrollIntoView({
-                behavior: 'smooth',
+                behavior,
                 block: 'center'
             });
         }
-    }, [activeSentenceIndex]);
+    }, []);
+
+    useEffect(() => {
+        scrollToActive();
+    }, [activeSentenceIndex, scrollToActive]);
+
+    // Scroll Rescue Logic: Detect manual scroll and return after 1s
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            if (!isPlaying) return;
+
+            isUserScrollingRef.current = true;
+            if (rescueTimeoutRef.current) clearTimeout(rescueTimeoutRef.current);
+
+            rescueTimeoutRef.current = setTimeout(() => {
+                isUserScrollingRef.current = false;
+                scrollToActive();
+            }, 1000);
+        };
+
+        container.addEventListener('scroll', handleScroll, { passive: true });
+        return () => {
+            container.removeEventListener('scroll', handleScroll);
+            if (rescueTimeoutRef.current) clearTimeout(rescueTimeoutRef.current);
+        };
+    }, [isPlaying, scrollToActive]);
 
     const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1, id: string) => {
         pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;

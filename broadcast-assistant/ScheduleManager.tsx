@@ -281,17 +281,48 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         {t('broadcast.sender.importExcel') || '从 Excel 导入计划'}
                     </button>
                 ) : (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-top-4">
-                        <p className="text-xs text-indigo-500/80 font-bold bg-indigo-500/10 p-3 rounded-lg border border-indigo-500/20">
-                            💡 {t('broadcast.sender.scheduleHelper') || '系统支持自动播报预设内容。请将 Excel 内容（每行：日期、时间、内容，可使用 Tab 或空格分隔）直接粘贴在下方。'}
-                            <br /><span className="opacity-70 font-mono mt-1 block">示例: 2026-03-01(Tab)08:00(Tab)第一周安全教育：防溺水...</span>
-                        </p>
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                        <div className="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20">
+                            <h4 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2 flex items-center gap-2">
+                                💡 {t('broadcast.sender.howToImportTitle') || '如何从 Excel 导入？'}
+                            </h4>
+                            <p className="text-xs text-indigo-500/80 leading-relaxed">
+                                {t('broadcast.sender.scheduleHelper') || '系统支持纯本地自动播报（不占用云端）。无需传文件，只需直接打开您的 Excel 课表：'}
+                            </p>
+                            <div className="mt-3 bg-white dark:bg-black/20 rounded-lg p-3 font-mono text-xs overflow-x-auto text-gray-600 dark:text-gray-300 border border-black/5 dark:border-white/5">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-gray-200 dark:border-white/10 opacity-60">
+                                            <th className="py-1 min-w-[100px]">A列: 日期</th>
+                                            <th className="py-1 min-w-[80px]">B列: 时间</th>
+                                            <th className="py-1">C列: 播报内容</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="py-1">2026-03-01</td>
+                                            <td className="py-1">08:00</td>
+                                            <td className="py-1">第一周安全教育：防溺水...</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="py-1">2026-03-01</td>
+                                            <td className="py-1">15:30</td>
+                                            <td className="py-1">放学提示：请注意交通安全...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="text-xs text-indigo-500/80 mt-3 font-bold">
+                                👉 {t('broadcast.sender.copyPasteInstruction') || '选中 Excel 中的这三列（不要全选整张表），按 Ctrl+C 复制，然后直接通过 Ctrl+V 粘贴到下方框中即可。'}
+                            </p>
+                        </div>
+
                         <textarea
                             value={importText}
                             onChange={(e) => setImportText(e.target.value)}
-                            placeholder={t('broadcast.sender.pasteExcelHere') || '在此处粘贴...'}
+                            placeholder={t('broadcast.sender.pasteExcelHere') || '请在此处使用 Ctrl+C 和 Ctrl+V 粘贴您的表格...'}
                             rows={6}
-                            className="w-full bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-gray-300"
+                            className="w-full bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-gray-300 whitespace-pre"
                         />
                         <div className="flex gap-3">
                             <button

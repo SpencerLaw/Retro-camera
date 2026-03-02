@@ -124,7 +124,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [isManagingCategories, setIsManagingCategories] = useState(false);
     const [isEditingRewardCategory, setIsEditingRewardCategory] = useState(false);
     const [draftRewardCategory, setDraftRewardCategory] = useState<Category | null>(null);
-    const [draftCategoryRewards, setDraftCategoryRewards] = useState<Reward[]>([]);
+    const [draftCategoryTemplates, setDraftCategoryTemplates] = useState<any[]>([]);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [selectedStatsDate, setSelectedStatsDate] = useState(formatBeijingTime(new Date()).split(' ')[0]);
     const mainScrollRef = useRef<HTMLElement>(null);
@@ -796,7 +796,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         const cat = rewardCategories.find(c => c.id === catId);
         if (!cat) return;
         setDraftRewardCategory({ ...cat });
-        setDraftCategoryRewards(rewards.filter(r => r.category === catId));
+        // Include both existing templates and potentially visible presets as editable items?
+        // User wants to see ALL items. Let's merge them for the editor.
+        const templates = cat.templates || [];
+        // We also show presets that belong to this category so they can be "modified"
+        const presets = DEFAULT_REWARDS.filter(r => r.category === catId).map(p => ({ ...p, isPreset: true, id: `preset_${p.name}` }));
+
+        setDraftCategoryTemplates([...presets, ...templates]);
         setIsEditingRewardCategory(true);
     };
 
@@ -804,12 +810,27 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         if (!draftRewardCategory) return;
         setIsSaving(true);
         try {
-            const updatedCategories = rewardCategories.map(c => c.id === draftRewardCategory.id ? draftRewardCategory : c);
-            const otherRewards = rewards.filter(r => r.category !== draftRewardCategory.id);
+            // Distinguish between presets (to hide if "removed" or modified) and templates
+            const finalTemplates = draftCategoryTemplates.filter(t => !t.isPreset && t.name.trim() !== '');
+            const modifiedPresets = draftCategoryTemplates.filter(t => t.isPreset);
 
-            // Filter out empty name rewards from draft
-            const validDraftRewards = draftCategoryRewards.filter(r => r.name.trim() !== '');
-            const updatedRewards = [...otherRewards, ...validDraftRewards];
+            // Check which presets were "removed" from the editor list
+            const currentPresets = DEFAULT_REWARDS.filter(r => r.category === draftRewardCategory.id);
+            let newHiddenPresets = [...hiddenRewardPresets];
+
+            currentPresets.forEach(cp => {
+                const stillExists = modifiedPresets.some(mp => mp.name === cp.name);
+                const identifier = `${draftRewardCategory.id}:${cp.name}`;
+                if (!stillExists && !newHiddenPresets.includes(identifier)) {
+                    newHiddenPresets.push(identifier);
+                } else if (stillExists && newHiddenPresets.includes(identifier)) {
+                    newHiddenPresets = newHiddenPresets.filter(h => h !== identifier);
+                }
+            });
+
+            const updatedCategories = rewardCategories.map(c =>
+                c.id === draftRewardCategory.id ? { ...draftRewardCategory, templates: finalTemplates } : c
+            );
 
             await fetch('/api/kiddieplan/manage', {
                 method: 'POST',
@@ -821,16 +842,15 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         categories: taskCategories,
                         rewardCategories: updatedCategories,
                         hiddenPresets,
-                        hiddenRewardPresets
+                        hiddenRewardPresets: newHiddenPresets
                     }
                 })
             });
 
-            await handleSyncWithBackend(updatedRewards, '该分类及其奖励项目已全部保存！');
-
             setRewardCategories(updatedCategories);
-            setRewards(updatedRewards);
+            setHiddenRewardPresets(newHiddenPresets);
             setIsEditingRewardCategory(false);
+            handleSyncWithBackend(rewards, '该分类资源库已同步完成！');
         } catch (e) {
             console.error('Save failed', e);
         } finally {
@@ -2987,22 +3007,22 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             <div className="flex-1 overflow-y-auto min-h-[200px] mb-6 space-y-3 pr-2 no-scrollbar">
                                 <div className="text-sm font-bold text-gray-400 mb-2 flex justify-between items-center">
                                     <span>旗下所有奖励项目配置</span>
-                                    <span className="text-xs bg-orange-100 text-orange-500 px-2 py-1 rounded-full">{draftCategoryRewards.length} 项</span>
+                                    <span className="text-xs bg-orange-100 text-orange-500 px-2 py-1 rounded-full">{draftCategoryTemplates.length} 项</span>
                                 </div>
 
-                                {draftCategoryRewards.length === 0 ? (
+                                {draftCategoryTemplates.length === 0 ? (
                                     <div className="text-center py-8 opacity-50 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200">
                                         <p className="font-bold text-gray-400 text-sm">该标签下暂无内容</p>
                                     </div>
                                 ) : (
-                                    draftCategoryRewards.map((reward, idx) => (
-                                        <div key={reward.id} className="flex gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
+                                    draftCategoryTemplates.map((item, idx) => (
+                                        <div key={item.id || idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
                                             <input
-                                                value={reward.name}
+                                                value={item.name}
                                                 onChange={e => {
-                                                    const newArr = [...draftCategoryRewards];
+                                                    const newArr = [...draftCategoryTemplates];
                                                     newArr[idx] = { ...newArr[idx], name: e.target.value };
-                                                    setDraftCategoryRewards(newArr);
+                                                    setDraftCategoryTemplates(newArr);
                                                 }}
                                                 className="flex-[2] bg-white px-3 py-2 rounded-lg text-sm font-bold text-[#5D4037] outline-none shadow-sm min-w-0"
                                                 placeholder="输入奖励项目..."
@@ -3011,12 +3031,12 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                 <span className="text-xs">🍬</span>
                                                 <input
                                                     type="number"
-                                                    value={reward.pointsCost || ''}
+                                                    value={item.pointsCost || ''}
                                                     onChange={e => {
                                                         const val = parseInt(e.target.value) || 0;
-                                                        const newArr = [...draftCategoryRewards];
+                                                        const newArr = [...draftCategoryTemplates];
                                                         newArr[idx] = { ...newArr[idx], pointsCost: val };
-                                                        setDraftCategoryRewards(newArr);
+                                                        setDraftCategoryTemplates(newArr);
                                                     }}
                                                     className="w-full bg-transparent text-sm font-black text-orange-500 outline-none shrink-0"
                                                     placeholder="数值"
@@ -3024,8 +3044,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             </div>
                                             <button
                                                 onClick={() => {
-                                                    const newArr = draftCategoryRewards.filter((_, i) => i !== idx);
-                                                    setDraftCategoryRewards(newArr);
+                                                    const newArr = draftCategoryTemplates.filter((_, i) => i !== idx);
+                                                    setDraftCategoryTemplates(newArr);
                                                 }}
                                                 className="w-8 h-8 flex items-center justify-center shrink-0 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                             >
@@ -3037,15 +3057,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                 <button
                                     onClick={() => {
-                                        const blankReward: Reward = {
-                                            id: `r_draft_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                                        const newTemplate = {
+                                            id: `r_tpl_${Date.now()}_${Math.random().toString(36).substring(7)}`,
                                             name: '',
-                                            pointsCost: 100,
+                                            pointsCost: 500,
                                             icon: draftRewardCategory?.icon || '🎁',
-                                            category: draftRewardCategory?.id || '',
-                                            isPublished: false
+                                            isPreset: false
                                         };
-                                        setDraftCategoryRewards([...draftCategoryRewards, blankReward]);
+                                        setDraftCategoryTemplates([...draftCategoryTemplates, newTemplate]);
                                     }}
                                     className="w-full py-3 mt-4 rounded-xl border-2 border-dashed border-orange-200 text-orange-500 font-bold text-sm bg-orange-50/50 hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
                                 >

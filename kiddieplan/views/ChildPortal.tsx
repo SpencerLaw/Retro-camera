@@ -61,7 +61,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const timerSecondsRef = useRef(0); // Use ref to avoid sync pulse dependency loop
     const [startTime, setStartTime] = useState<string | null>(null);
     // UI State
-    const [currentTime, setCurrentTime] = useState(new Date().toISOString());
+    const [currentTime, setCurrentTime] = useState<Date>(new Date());
     const [isScrolled, setIsScrolled] = useState(false);
     const mainScrollRef = useRef<HTMLDivElement>(null);
     const [dialogConfig, setDialogConfig] = useState<{
@@ -86,7 +86,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
         const hh = pad(date.getHours());
         const mm = pad(date.getMinutes());
         const ss = pad(date.getSeconds());
-        return `${y} -${m} -${d} ${hh}:${mm}:${ss} `;
+        return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
     };
 
     // Update real-time EVERY SECOND
@@ -779,7 +779,11 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         <History size={18} className="text-purple-400" /> 兑换记录
                     </h3>
                     <div className="space-y-2">
-                        {redemptionLogs.sort((a, b) => new Date(b.requestTime).getTime() - new Date(a.requestTime).getTime()).map((req) => (
+                        {redemptionLogs.sort((a, b) => {
+                            const timeA = new Date(a.redeemedAt || a.requestTime || 0).getTime();
+                            const timeB = new Date(b.redeemedAt || b.requestTime || 0).getTime();
+                            return timeB - timeA;
+                        }).map((req) => (
                             <div
                                 key={req.id}
                                 className={`p-4 rounded-2xl flex items-center justify-between border transition-all
@@ -794,7 +798,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                     <div className="flex flex-col gap-0.5">
                                         <span className="text-[10px] text-gray-400 font-bold flex items-center gap-1">
-                                            <Clock size={10} /> 申请于: {new Date(req.requestTime || req.redeemedAt).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            <Clock size={10} /> 申请于: {new Date(req.redeemedAt || req.requestTime).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                         {req.status === 'approved' && (req.approveTime || req.timestamp) && (
                                             <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
@@ -970,7 +974,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             </main>
 
             {/* Bottom Nav - Moon-Base Style (Pinned, Rounded Top, No gaps) */}
-            < div
+            <div
                 className="fixed bottom-0 left-0 right-0 z-[100] px-6 rounded-t-[40px]"
                 style={{
                     height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
@@ -1001,64 +1005,62 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                 />
                             )}
-                            <span className={`relative z - 10 transition - colors duration - 200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'} `}>
+                            <span className={`relative z-10 transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
                                 <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
                             </span>
-                            <span className={`relative z - 10 text - [9px] font - bold transition - colors duration - 200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'} `}>
+                            <span className={`relative z-10 text-[9px] font-bold transition-colors duration-200 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-300'}`}>
                                 {tab.label}
                             </span>
                         </button>
                     ))}
                 </div>
-            </div >
+            </div>
 
             {/* Custom Dialog for Child Portal */}
             <AnimatePresence>
-                {
-                    dialogConfig.isOpen && (
-                        <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" style={{ fontFamily: '"Nunito", "ZCOOL KuaiLe", sans-serif' }}>
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-                                onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                            />
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                                animate={{ scale: 1, opacity: 1, y: 0 }}
-                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                                className="bg-white/95 backdrop-blur-2xl w-full max-w-sm rounded-[32px] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-2 border-white relative z-10 text-center overflow-hidden"
-                            >
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 pointer-events-none"></div>
+                {dialogConfig.isOpen && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" style={{ fontFamily: '"Nunito", "ZCOOL KuaiLe", sans-serif' }}>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+                            onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white/95 backdrop-blur-2xl w-full max-w-sm rounded-[32px] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-2 border-white relative z-10 text-center overflow-hidden"
+                        >
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 pointer-events-none"></div>
 
-                                <div className="flex justify-center mb-4">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-pink-400 rounded-full flex items-center justify-center text-3xl shadow-lg border-4 border-white animate-bounce-slow">
-                                        🎁
-                                    </div>
+                            <div className="flex justify-center mb-4">
+                                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-pink-400 rounded-full flex items-center justify-center text-3xl shadow-lg border-4 border-white animate-bounce-slow">
+                                    🎁
                                 </div>
+                            </div>
 
-                                <h3 className="text-xl font-black text-[#5D4037] mb-2">{dialogConfig.title}</h3>
-                                <p className="text-gray-500 font-bold text-sm mb-8 px-2">{dialogConfig.message}</p>
+                            <h3 className="text-xl font-black text-[#5D4037] mb-2">{dialogConfig.title}</h3>
+                            <p className="text-gray-500 font-bold text-sm mb-8 px-2">{dialogConfig.message}</p>
 
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
-                                        className="flex-1 py-3.5 rounded-2xl font-black text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200 shadow-sm"
-                                    >
-                                        {dialogConfig.cancelText || '取消'}
-                                    </button>
-                                    <button
-                                        onClick={dialogConfig.onConfirm}
-                                        className="flex-1 py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-orange-400 to-pink-500 shadow-md hover:shadow-lg transition-all active:scale-95 border-none"
-                                    >
-                                        {dialogConfig.confirmText || '确定'}
-                                    </button>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )
-                }
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                                    className="flex-1 py-3.5 rounded-2xl font-black text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200 shadow-sm"
+                                >
+                                    {dialogConfig.cancelText || '取消'}
+                                </button>
+                                <button
+                                    onClick={dialogConfig.onConfirm}
+                                    className="flex-1 py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-orange-400 to-pink-500 shadow-md hover:shadow-lg transition-all active:scale-95 border-none"
+                                >
+                                    {dialogConfig.confirmText || '确定'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
         </div>

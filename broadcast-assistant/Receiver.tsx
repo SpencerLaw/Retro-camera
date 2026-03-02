@@ -61,8 +61,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         window.addEventListener('offline', handleOffline);
 
         if (isJoined && fullRoomId) {
-            const saved = localStorage.getItem(`br_synced_name_${fullRoomId.trim().toUpperCase()}`);
-            if (saved) setSyncedChannelName(saved);
+            const savedName = localStorage.getItem(`br_synced_name_${fullRoomId.trim().toUpperCase()}`);
+            if (savedName) setSyncedChannelName(savedName);
+
+            const savedLastId = localStorage.getItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`);
+            if (savedLastId) lastPlayedId.current = savedLastId;
         }
 
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -106,8 +109,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         }
     }, [activeSentenceIndex]);
 
-    const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1) => {
+    const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1, id: string) => {
         pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
+        lastPlayedId.current = id;
+        if (fullRoomId) {
+            localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
+        }
         setIsPlaying(true);
 
         const playNext = () => {
@@ -170,6 +177,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 // If it's a "silent sync" (no text), just update the name and return
                 if (!msg.text) {
                     lastPlayedId.current = msg.id;
+                    localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, msg.id);
                     return;
                 }
 
@@ -193,8 +201,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 }
 
                 if (isListening && msg.id !== lastPlayedId.current) {
-                    speak(msg.text, msg.isEmergency, msg.repeatCount ?? 1);
+                    speak(msg.text, msg.isEmergency, msg.repeatCount ?? 1, msg.id);
                     lastPlayedId.current = msg.id;
+                    localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, msg.id);
                 }
             } else if (!isPlaying) {
                 // Only clear if not playing, to prevent message disappearing due to expiration

@@ -100,6 +100,17 @@ function getEffectiveMaxDevices(code: string): number {
   return 5; // 其他默认 5
 }
 
+// 检查授权码是否在白名单中
+function isCodeInWhitelist(code: string): boolean {
+  const envCodes = process.env.LICENSE_CODES || '';
+  const validCodeSet = new Set(
+    envCodes.split(',')
+      .map(c => c.replace(/[-\s]/g, '').toUpperCase())
+      .filter(c => c.length > 0)
+  );
+  return validCodeSet.has(code.replace(/[-\s]/g, '').toUpperCase());
+}
+
 // === 压缩与解压逻辑 ===
 
 function compressMetadata(full: LicenseMetadata): CompressedMetadata {
@@ -322,14 +333,6 @@ export default async function handler(
 
       const values = await Promise.all(keys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key)));
 
-      // 获取当前白名单
-      const envCodes = process.env.LICENSE_CODES || '';
-      const validCodeSet = new Set(
-        envCodes.split(',')
-          .map(c => c.replace(/[-\s]/g, '').toUpperCase())
-          .filter(c => c.length > 0)
-      );
-
       const list = values
         .map((v, index) => {
           if (!v) return null;
@@ -339,11 +342,11 @@ export default async function handler(
           // 注入状态字段：检查是否在白名单中
           return {
             ...meta,
-            status: validCodeSet.has(code) ? 'active' : 'revoked'
+            status: isCodeInWhitelist(code) ? 'active' : 'revoked'
           };
         })
-        .filter(Boolean)
-        .sort((a, b) => new Date(b!.lastUsedTime).getTime() - new Date(a!.lastUsedTime).getTime());
+        .filter((item): item is NonNullable<typeof item> => item !== null)
+        .sort((a, b) => new Date(b.lastUsedTime).getTime() - new Date(a.lastUsedTime).getTime());
 
       return res.status(200).json({
         success: true,

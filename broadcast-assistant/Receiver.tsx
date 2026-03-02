@@ -442,17 +442,20 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[40vh]">
+                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[45vh]">
                             {sentences.map((sentence, sIdx) => {
                                 const isActive = sIdx === activeSentenceIndex;
                                 const isPast = activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex;
+
+                                // Calculate the absolute start index of this sentence
+                                const sentenceStartIndex = sentences.slice(0, sIdx).join('').length;
 
                                 return (
                                     <span
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
                                         className={`block transition-all duration-700 py-6 md:py-10 w-full break-words select-none origin-center text-center ${isActive
-                                            ? `scale-110 font-black opacity-100 ${currentMsg.isEmergency ? 'text-white' : 'text-blue-500'} drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]`
+                                            ? `scale-110 font-bold opacity-100 drop-shadow-[0_0_20px_rgba(59,130,246,0.2)]`
                                             : isPast
                                                 ? 'opacity-30 blur-[1px] font-bold scale-95'
                                                 : 'opacity-10 blur-[2px] font-bold scale-90'
@@ -461,7 +464,23 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                                     'text-4xl md:text-7xl'
                                             }`}
                                     >
-                                        {sentence}
+                                        {sentence.split('').map((char, cIdx) => {
+                                            const charAbsIndex = sentenceStartIndex + cIdx;
+                                            const isCharRead = charAbsIndex <= charIndex;
+
+                                            if (!isActive) return char;
+
+                                            return (
+                                                <span
+                                                    key={cIdx}
+                                                    className={`transition-colors duration-300 ${isCharRead
+                                                        ? (currentMsg.isEmergency ? 'text-white' : 'text-blue-500 underline decoration-blue-500/30 underline-offset-8')
+                                                        : 'opacity-40'}`}
+                                                >
+                                                    {char}
+                                                </span>
+                                            );
+                                        })}
                                     </span>
                                 );
                             })}

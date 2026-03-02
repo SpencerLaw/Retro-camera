@@ -369,37 +369,37 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     return (
         <GlassCard className="p-8 mt-8 border-2 border-indigo-500/20 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header Area */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 px-2 border-b border-black/5 dark:border-white/5 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 px-2 border-b border-black/5 dark:border-white/5 pb-6">
                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <Calendar size={28} />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+                        <Calendar size={24} className="sm:w-7 sm:h-7" />
                     </div>
-                    <div>
-                        <h3 className="text-xl font-black tracking-tight">{t('broadcast.sender.scheduler') || '定时播报计划'}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-500 px-2 py-0.5 rounded-full">
+                    <div className="min-w-0">
+                        <h3 className="text-lg sm:text-xl font-black tracking-tight truncate">{t('broadcast.sender.scheduler') || '定时播报计划'}</h3>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-500 px-2 py-0.5 rounded-full whitespace-nowrap">
                                 {tasks.length} {t('broadcast.sender.rules') || 'TASKS'}
                             </span>
-                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                            <span className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">Automated Sequence v2.1</span>
+                            <span className="hidden sm:block w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-30 italic truncate">v2.1</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     <button
                         onClick={handleToggleAuto}
-                        className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm border ${isAutoEnabled
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all shadow-sm border ${isAutoEnabled
                             ? 'bg-green-500 text-white border-green-400 shadow-green-500/20'
                             : 'bg-white dark:bg-white/5 text-gray-400 border-black/5 hover:border-black/10'}`}
                     >
-                        {isAutoEnabled ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
-                        {isAutoEnabled ? '服务已运行' : '服务已暂停'}
+                        {isAutoEnabled ? <ToggleRight size={20} className="sm:w-6 sm:h-6" /> : <ToggleLeft size={20} className="sm:w-6 sm:h-6" />}
+                        <span className="whitespace-nowrap">{isAutoEnabled ? '已运行' : '已暂停'}</span>
                     </button>
                     {tasks.length > 0 && (
                         <button
                             onClick={handleClearAll}
-                            className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all border border-transparent hover:border-red-500/20"
+                            className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all border border-transparent hover:border-red-500/20 shrink-0"
                             title="清空所有任务"
                         >
                             <Trash2 size={20} />
@@ -413,30 +413,29 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     <button
                         onClick={() => setShowImport(true)}
-                        className="group relative flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition-all text-indigo-500 overflow-hidden"
+                        className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition-all text-indigo-500 overflow-hidden text-left sm:text-center"
                     >
-                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <FileText size={60} />
+                        <Upload size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
+                        <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">从 Excel 粘贴导入</span>
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden sm:block">
+                            <FileText size={40} />
                         </div>
-                        <Upload size={32} className="mb-3 group-hover:scale-110 transition-transform" />
-                        <span className="font-black uppercase tracking-widest text-xs">从 Excel 粘贴导入</span>
                     </button>
 
-                    <label className="group relative flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all text-emerald-600 dark:text-emerald-400 cursor-pointer overflow-hidden">
-                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Upload size={60} />
-                        </div>
+                    <label className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all text-emerald-600 dark:text-emerald-400 cursor-pointer overflow-hidden text-left sm:text-center">
                         {isParsingDocx ? (
-                            <div className="flex flex-col items-center">
-                                <span className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin mb-3"></span>
-                                <span className="font-black uppercase tracking-widest text-xs">正在深度解析...</span>
+                            <div className="flex items-center mr-4 sm:mr-0">
+                                <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin sm:mb-3"></span>
                             </div>
                         ) : (
-                            <>
-                                <FileText size={32} className="mb-3 group-hover:scale-110 transition-transform" />
-                                <span className="font-black uppercase tracking-widest text-xs">导入安全教育 Word</span>
-                            </>
+                            <FileText size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
                         )}
+                        <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">
+                            {isParsingDocx ? '正在深度解析...' : '导入 1530 表格 Word'}
+                        </span>
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden sm:block">
+                            <Upload size={40} />
+                        </div>
                         <input
                             type="file"
                             accept=".docx"
@@ -566,39 +565,38 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         {tasks.map((task) => (
                             <div
                                 key={task.id}
-                                className={`group p-5 rounded-3xl border transition-all flex items-center gap-4 ${task.isPlayed
+                                className={`group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all flex flex-row items-center gap-3 sm:gap-4 ${task.isPlayed
                                     ? 'bg-gray-50/50 dark:bg-white/[0.02] border-transparent opacity-50 grayscale'
                                     : 'bg-white dark:bg-white/5 border-black/5 dark:border-white/10 hover:border-indigo-500/40 hover:shadow-md'
                                     }`}
                             >
-                                <div className="flex-none flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-gray-50 dark:bg-black/20 text-indigo-500 font-mono shadow-inner">
+                                <div className="flex-none flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gray-50 dark:bg-black/20 text-indigo-500 font-mono shadow-inner shrink-0">
                                     {task.isPlayed ? (
-                                        <CheckCircle2 size={24} className="text-green-500" />
+                                        <CheckCircle2 size={20} className="text-green-500 sm:w-6 sm:h-6" />
                                     ) : (
                                         <>
-                                            <span className="text-[9px] uppercase font-black opacity-40 leading-none mb-1">{task.date.slice(-5)}</span>
-                                            <span className="text-sm font-black tracking-tighter leading-none">{task.time}</span>
+                                            <span className="text-[8px] sm:text-[9px] uppercase font-black opacity-40 leading-none mb-1">{task.date.slice(-5)}</span>
+                                            <span className="text-xs sm:text-sm font-black tracking-tighter leading-none">{task.time}</span>
                                         </>
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className={`text-sm font-bold truncate ${task.isPlayed ? 'text-gray-400 line-through' : 'text-gray-800 dark:text-gray-200'}`}>
+                                    <p className={`text-xs sm:text-sm font-bold truncate ${task.isPlayed ? 'text-gray-400 line-through' : 'text-gray-800 dark:text-gray-200'}`}>
                                         {task.content}
                                     </p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${task.isPlayed ? 'text-green-500' : 'text-indigo-500 opacity-60'}`}>
-                                            {task.isPlayed ? <Check size={10} /> : <Clock size={10} />}
+                                    <div className="flex items-center gap-2 mt-0.5 sm:mt-1">
+                                        <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${task.isPlayed ? 'text-green-500' : 'text-indigo-500 opacity-60'}`}>
                                             {task.isPlayed ? 'PLAYED' : 'PENDING'}
                                         </span>
-                                        <span className="text-[10px] opacity-20 font-black">/</span>
-                                        <span className="text-[10px] font-mono opacity-40 font-bold uppercase">Room {task.channelCode}</span>
+                                        <span className="text-[8px] sm:text-[10px] opacity-20 font-black">/</span>
+                                        <span className="text-[8px] sm:text-[10px] font-mono opacity-40 font-bold uppercase truncate max-w-[80px]">Room {task.channelCode}</span>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => handleDelete(task.id)}
-                                    className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
+                                    className="p-2 sm:p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all sm:opacity-0 group-hover:opacity-100 shrink-0"
                                 >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
                                 </button>
                             </div>
                         ))}

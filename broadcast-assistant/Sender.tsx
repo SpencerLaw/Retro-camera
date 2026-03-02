@@ -364,25 +364,26 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     </div>
                 </GlassCard>
             ) : (
-                <GlassCard className="p-8 flex items-center justify-between group relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-600"></div>
-                    <div className="space-y-1 min-w-0 flex-1 mr-4">
+                <GlassCard className="p-4 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between group relative overflow-hidden gap-4">
+                    <div className="absolute top-0 left-0 w-1 sm:w-1.5 h-full bg-gradient-to-b from-blue-500 to-purple-600"></div>
+                    <div className="space-y-1 min-w-0 flex-1 w-full">
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40">
                             <Radio size={12} className="text-blue-500" /> {activeChannel?.name}
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="text-6xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1 min-w-[200px]">
+                            <div className="text-4xl sm:text-6xl font-black tracking-tighter italic bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent px-1 min-w-0 sm:min-w-[200px] break-all">
                                 {channelCode}
                             </div>
-                            <button onClick={copyRoomId} className="p-2 text-gray-400 hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0">
+                            <button onClick={copyRoomId} className="p-2 text-gray-400 hover:text-blue-500 transition-colors sm:opacity-0 group-hover:opacity-100 flex-shrink-0">
                                 <Copy size={20} />
                             </button>
                         </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black tracking-widest uppercase truncate max-w-[100px]">
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-auto border-t sm:border-t-0 border-black/5 dark:border-white/5 pt-3 sm:pt-0">
+                        <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black tracking-widest uppercase truncate">
                             {t('broadcast.sender.active')}
                         </div>
+                        <div className="text-[10px] font-bold opacity-30 ml-auto sm:ml-0">SENDER ID: {license.slice(-4)}</div>
                     </div>
                 </GlassCard>
             )}
@@ -401,22 +402,22 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mt-4">
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mt-4">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
                         <button
                             onClick={() => setIsEmergency(!isEmergency)}
-                            className={`flex items-center justify-center gap-3 px-6 py-4 sm:py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isEmergency
-                                ? 'bg-red-500 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.5)] scale-100 sm:scale-105'
+                            className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isEmergency
+                                ? 'bg-red-500 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.5)]'
                                 : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
                                 }`}
                         >
                             <AlertTriangle size={18} /> {t('broadcast.sender.emergencyMode')}
                         </button>
 
-                        <div className="flex flex-1 sm:flex-none items-center justify-between gap-2 p-1 rounded-2xl border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1 rounded-2xl border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20">
                             <button
                                 onClick={() => setIsLooping(!isLooping)}
-                                className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold transition-all flex-1 sm:flex-none border shadow-sm ${isLooping
+                                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold transition-all border shadow-sm ${isLooping
                                     ? 'bg-blue-500 text-white border-blue-500'
                                     : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10'}`}
                             >
@@ -425,7 +426,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                             </button>
 
                             {!isLooping && (
-                                <div className="flex items-center gap-2 px-3 py-1.5 sm:py-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+                                <div className="flex items-center justify-between sm:justify-start gap-2 px-3 py-3 sm:py-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
                                     <span className="text-xs text-gray-500 font-bold whitespace-nowrap">播报次数:</span>
                                     <input
                                         type="number"

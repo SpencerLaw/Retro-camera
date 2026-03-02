@@ -140,11 +140,32 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         setEditCode(channel.code);
     };
 
-    const saveEdit = () => {
+    const saveEdit = async () => {
         if (!editingChannel) return;
+        const newName = editName.trim() || '未知班级';
+        const newCode = editCode.toUpperCase().trim();
+
         setChannels(channels.map(c =>
-            c.id === editingChannel ? { ...c, name: editName, code: editCode.toUpperCase() } : c
+            c.id === editingChannel ? { ...c, name: newName, code: newCode } : c
         ));
+
+        // Push name sync to KV immediately
+        try {
+            fetch('/api/broadcast/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    license,
+                    code: newCode,
+                    text: '', // Silent update
+                    channelName: newName,
+                    isEmergency: false
+                })
+            });
+        } catch (e) {
+            console.error('Metadata sync failed:', e);
+        }
+
         setEditingChannel(null);
     };
 

@@ -19,8 +19,8 @@ export default async function handler(
         return response.status(401).json({ error: '未提供有效的授权码' });
     }
 
-    if (!code || !text) {
-        return response.status(400).json({ error: '房间码和消息内容不能为空' });
+    if (!code || (!text && !channelName)) {
+        return response.status(400).json({ error: '房间码和消息内容(或名称)不能为空' });
     }
 
     try {

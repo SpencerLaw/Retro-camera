@@ -155,11 +155,13 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     }, [isPlaying, scrollToActive]);
 
     const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1, id: string) => {
-        pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
+        // Update Ref IMMEDIATELY to prevent race condition with polling
         lastPlayedId.current = id;
         if (fullRoomId) {
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
         }
+
+        pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
         setIsPlaying(true);
 
         const playNext = () => {
@@ -194,7 +196,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
 
         playNext();
-    }, []);
+    }, [fullRoomId]);
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;
@@ -248,8 +250,6 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                 if (isListening && msg.id !== lastPlayedId.current) {
                     speak(msg.text, msg.isEmergency, msg.repeatCount ?? 1, msg.id);
-                    lastPlayedId.current = msg.id;
-                    localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, msg.id);
                 }
             } else if (!isPlaying) {
                 // Only clear if not playing, to prevent message disappearing due to expiration
@@ -500,27 +500,31 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     <span
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`block transition-all duration-700 py-6 md:py-10 w-full break-words select-none origin-center text-center ${isActive
-                                            ? `scale-110 font-bold opacity-100 drop-shadow-[0_0_20px_rgba(59,130,246,0.2)]`
+                                        className={`block transition-all duration-700 py-8 md:py-12 w-full break-words select-none text-center ${isActive
+                                            ? `font-black opacity-100`
                                             : isPast
-                                                ? 'opacity-30 blur-[1px] font-bold scale-95'
-                                                : 'opacity-10 blur-[2px] font-bold scale-90'
+                                                ? 'opacity-30 blur-[0.5px]'
+                                                : 'opacity-10 blur-[1.5px]'
                                             } ${currentMsg.text.length > 300 ? 'text-xl md:text-3xl' :
                                                 currentMsg.text.length > 100 ? 'text-2xl md:text-5xl' :
                                                     'text-4xl md:text-7xl'
                                             }`}
+                                        style={{
+                                            transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                                            willChange: 'transform, opacity'
+                                        }}
                                     >
                                         {sentence.split('').map((char, cIdx) => {
                                             const charAbsIndex = sentenceStartIndex + cIdx;
-                                            const isCharRead = charAbsIndex <= charIndex;
+                                            const isCharRead = charAbsIndex < charIndex; // Fixed comparison for better precision
 
                                             if (!isActive) return char;
 
                                             return (
                                                 <span
                                                     key={cIdx}
-                                                    className={`transition-colors duration-300 ${isCharRead
-                                                        ? (currentMsg.isEmergency ? 'text-white' : 'text-blue-500 underline decoration-blue-500/30 underline-offset-8')
+                                                    className={`transition-colors duration-200 ${isCharRead
+                                                        ? (currentMsg.isEmergency ? 'text-white' : 'text-orange-500 underline decoration-orange-500/30 underline-offset-8')
                                                         : 'opacity-40'}`}
                                                 >
                                                     {char}
@@ -550,68 +554,66 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 )}
             </div>
 
-            {/* HUD Footer & History Drawer */}
+            {/* HUD Footer & Always Visible History */}
             <div className="relative z-50">
-                {showSettings && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-[95vw] max-w-2xl mb-6 animate-in slide-in-from-bottom-6 duration-500">
-                        <GlassCard className="p-8 rounded-[2.5rem] overflow-hidden max-h-[65vh] flex flex-col border-2 border-white/20">
-                            <div className="flex items-center justify-between mb-6 shrink-0">
-                                <h4 className="text-sm font-black uppercase tracking-widest opacity-60 flex items-center gap-3 text-indigo-500">
-                                    <History size={18} /> {t('broadcast.sender.timeline') || '历史播报记录'}
-                                </h4>
-                                <button
-                                    onClick={() => {
+                <div className="mx-auto w-[95vw] max-w-5xl mb-6">
+                    <GlassCard className="p-6 rounded-[2.5rem] overflow-hidden flex flex-col border-2 border-white/20 shadow-2xl">
+                        <div className="flex items-center justify-between mb-4 shrink-0 px-2">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest opacity-60 flex items-center gap-3 text-orange-500">
+                                <History size={16} /> {t('broadcast.sender.timeline') || '历史播报记录'}
+                            </h4>
+                            {isPlaying && (
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-500 animate-pulse">
+                                    <RefreshCw size={12} className="animate-spin" />
+                                    正在播报中...
+                                </div>
+                            )}
+                            <button
+                                onClick={() => {
+                                    if (window.confirm('确定清空所有历史记录吗？')) {
                                         setReceivedHistory([]);
                                         localStorage.removeItem('br_receiver_history');
-                                    }}
-                                    className="text-xs font-bold text-red-500 hover:opacity-70 px-4 py-1.5 rounded-full hover:bg-red-500/10 transition-all"
-                                >
-                                    {t('broadcast.sender.wipeLogs') || '清除全部'}
-                                </button>
-                            </div>
+                                    }
+                                }}
+                                className="text-[10px] font-bold text-red-500 hover:opacity-70 px-3 py-1 rounded-full hover:bg-red-500/10 transition-all uppercase tracking-widest"
+                            >
+                                {t('broadcast.sender.wipeLogs') || '清除'}
+                            </button>
+                        </div>
 
-                            <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-3">
-                                {receivedHistory.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-20 opacity-20 italic">
-                                        <History size={48} className="mb-4" />
-                                        <p className="text-lg font-bold">暂无历史播报</p>
-                                    </div>
-                                ) : (
-                                    [...receivedHistory].reverse().map((msg) => (
-                                        <button
-                                            key={msg.id}
-                                            onClick={() => {
+                        <div className="flex flex-row gap-4 overflow-x-auto custom-scrollbar pb-2 px-1">
+                            {receivedHistory.length === 0 ? (
+                                <div className="flex items-center justify-center py-6 px-10 opacity-20 italic w-full">
+                                    <p className="text-xs font-bold">暂无历史播报</p>
+                                </div>
+                            ) : (
+                                [...receivedHistory].reverse().map((msg) => (
+                                    <button
+                                        key={msg.id}
+                                        onClick={() => {
+                                            if (!isPlaying || window.confirm('当前正在播放，确定要切换到这条历史记录吗？')) {
                                                 setCurrentMsg(msg);
-                                                speak(msg.text, msg.isEmergency);
-                                                setShowSettings(false);
-                                            }}
-                                            className="w-full text-left p-5 rounded-3xl bg-black/5 dark:bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 group active:scale-[0.98]"
-                                        >
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="text-[10px] font-bold opacity-40">{new Date(parseInt(msg.timestamp)).toLocaleString()}</span>
-                                                {msg.isEmergency && <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full uppercase scale-90">EMERGENCY</span>}
-                                            </div>
-                                            <p className="text-sm font-bold truncate group-hover:whitespace-normal transition-all leading-relaxed mr-4">{msg.text}</p>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        </GlassCard>
-                    </div>
-                )}
+                                                speak(msg.text, msg.isEmergency, 1, msg.id);
+                                            }
+                                        }}
+                                        className="flex-none w-64 text-left p-4 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 group active:scale-[0.98]"
+                                    >
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-[9px] font-bold opacity-40">{new Date(parseInt(msg.timestamp)).toLocaleTimeString()}</span>
+                                            {msg.isEmergency && <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full uppercase scale-75">SOS</span>}
+                                        </div>
+                                        <p className="text-xs font-bold truncate leading-relaxed text-gray-700 dark:text-gray-300">{msg.text}</p>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </GlassCard>
+                </div>
 
-                <div className="p-10 flex justify-center pb-12">
-                    <button
-                        onClick={() => setShowSettings(!showSettings)}
-                        className={`px-8 py-3 rounded-full GlassContainer border text-[10px] font-black uppercase tracking-[0.35em] flex items-center gap-4 transition-all ${showSettings
-                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500 opacity-100 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
-                            : 'border-white/20 bg-white/5 backdrop-blur-md opacity-40 hover:opacity-100'
-                            }`}
-                    >
-                        <RefreshCw size={14} className={isPlaying ? 'animate-spin' : ''} />
-                        {isPlaying ? '正在播报中...' : (t('broadcast.receiver.broadcastMode') || '广播播报模式 // 运行中')}
-                        <History size={14} className={showSettings ? 'scale-125' : ''} />
-                    </button>
+                <div className="p-4 flex justify-center pb-10">
+                    <p className="text-[10px] font-black uppercase tracking-[0.6em] opacity-20 italic">
+                        Classroom Broadcast Node v2.5 // Secure Sync Active
+                    </p>
                 </div>
             </div>
         </div>

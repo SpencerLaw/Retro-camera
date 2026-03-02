@@ -91,13 +91,16 @@ function extractDateFromCode(code: string): Date | null {
   }
 }
 
-// 检查白名单
-function isCodeInWhitelist(code: string): boolean {
-  const codes = process.env.LICENSE_CODES || '';
-  const validCodes = codes.split(',')
-    .map(c => c.replace(/[-\s]/g, '').toUpperCase())
-    .filter(c => c.length > 0);
-  return validCodes.includes(code.toUpperCase());
+// 获取设备限制数
+function getEffectiveMaxDevices(code: string): number {
+  const cleanCode = code.toUpperCase();
+  if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM')) {
+    return 999999; // 星梦奇旅不限制
+  }
+  if (cleanCode.startsWith('GB')) {
+    return 3; // 广播依然是 3
+  }
+  return 5; // 其他默认 5
 }
 
 // === 压缩与解压逻辑 ===
@@ -136,7 +139,7 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
     return {
       code: code,
       totalDevices: 0,
-      maxDevices: code.startsWith('XXDK') ? 999999 : 3,
+      maxDevices: getEffectiveMaxDevices(code),
       generatedDate: new Date().toISOString(),
       expiryDate: new Date().toISOString(),
       firstActivatedAt: new Date().toISOString(),
@@ -153,7 +156,7 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
   return {
     code: code,
     totalDevices: c.d.length,
-    maxDevices: c.m,
+    maxDevices: getEffectiveMaxDevices(code), // 强制使用最新的限制逻辑
     generatedDate: genDate.toISOString(),
     expiryDate: expDate.toISOString(),
     firstActivatedAt: new Date(c.f).toISOString(),
@@ -386,7 +389,7 @@ export default async function handler(
       metadata = {
         code: cleanCode,
         totalDevices: 1,
-        maxDevices: cleanCode.startsWith('XXDK') ? 999999 : 3, // 星梦奇旅不限制设备数
+        maxDevices: getEffectiveMaxDevices(cleanCode),
         generatedDate: generatedDate.toISOString(),
         expiryDate: expiryDate.toISOString(),
         firstActivatedAt: nowISO,
@@ -418,6 +421,14 @@ export default async function handler(
         // 添加新设备
         console.log(`[License] New Device: ${cleanCode} Device: ${deviceId}`);
 
+        // 检查限制
+        const max = getEffectiveMaxDevices(cleanCode);
+        if (metadata.devices.length >= max) {
+          return res.status(403).json({
+            success: false,
+            message: `设备授权已满 (${metadata.devices.length}/${max})，请联系管理员清理旧设备`
+          });
+        }
 
         metadata.devices.push({
           deviceId,

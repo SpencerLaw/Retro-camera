@@ -23,7 +23,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
     const [isJoined, setIsJoined] = useState(false);
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
-    const [syncedChannelName, setSyncedChannelName] = useState<string>('');
+    const [syncedChannelName, setSyncedChannelName] = useState<string>(() => {
+        const saved = localStorage.getItem(`br_synced_name_${localStorage.getItem('br_last_full_room_rx') || ''}`);
+        return saved || '';
+    });
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isListening, setIsListening] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -57,6 +60,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
+        if (isJoined && fullRoomId) {
+            const saved = localStorage.getItem(`br_synced_name_${fullRoomId.trim().toUpperCase()}`);
+            if (saved) setSyncedChannelName(saved);
+        }
 
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
 
@@ -149,6 +156,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 // Persist the channel name locally
                 if (msg.channelName) {
                     setSyncedChannelName(msg.channelName);
+                    localStorage.setItem(`br_synced_name_${fullRoomId}`, msg.channelName);
                 }
 
                 // If it's a "silent sync" (no text), just update the name and return

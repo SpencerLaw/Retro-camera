@@ -225,15 +225,32 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         }
     };
 
-    const handleReplay = (text: string, isEmergencyMsg: boolean) => {
-        setInputText(text);
-        setIsEmergency(isEmergencyMsg);
-        // Scroll to top to let user see/confirm or just handleSend?
-        // User asked for "one-click", so I'll trigger handleSend after a brief delay so they see the population.
-        setTimeout(() => {
-            const btn = document.querySelector('button[onClick*="handleSend"]');
-            if (btn) (btn as HTMLButtonElement).click();
-        }, 100);
+    const handleReplay = async (text: string, isEmergencyMsg: boolean, originalChannelName?: string) => {
+        setStatus({ type: 'loading', msg: t('broadcast.sender.broadcasting') });
+        try {
+            const resp = await fetch('/api/broadcast/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    license,
+                    code: channelCode.trim(),
+                    text: text.trim(),
+                    isEmergency: isEmergencyMsg,
+                    channelName: originalChannelName || activeChannel?.name || '未知班级',
+                    repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
+                }),
+            });
+
+            const data = await resp.json();
+            if (data.success) {
+                setStatus({ type: 'success', msg: t('broadcast.sender.broadcastDelivered') });
+                setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (err) {
+            setStatus({ type: 'error', msg: t('broadcast.sender.failedToSend') });
+        }
     };
 
     const clearHistory = () => {
@@ -509,7 +526,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     <p className={`text-base font-semibold leading-relaxed ${msg.isEmergency ? 'text-red-500' : 'opacity-80'}`}>{msg.text}</p>
                                 </div>
                                 <button
-                                    onClick={() => handleReplay(msg.text, msg.isEmergency)}
+                                    onClick={() => handleReplay(msg.text, msg.isEmergency, msg.channelName)}
                                     className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
                                     title="一键再次播报"
                                 >

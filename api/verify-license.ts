@@ -94,11 +94,8 @@ function extractDateFromCode(code: string): Date | null {
 // 获取设备限制数
 function getEffectiveMaxDevices(code: string): number {
   const cleanCode = code.toUpperCase();
-  if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM')) {
-    return 999999; // 星梦奇旅不限制
-  }
-  if (cleanCode.startsWith('GB')) {
-    return 3; // 广播依然是 3
+  if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM') || cleanCode.startsWith('GB')) {
+    return 999999; // 星梦奇旅和广播不限制
   }
   return 5; // 其他默认 5
 }

@@ -505,20 +505,28 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                             )}
                         </div>
 
-                        <div className="p-4 sm:p-6 border-t border-black/5 dark:border-white/5 bg-white dark:bg-gray-900 flex justify-end gap-3">
+                        <div className="p-4 sm:p-6 border-t border-black/5 dark:border-white/5 bg-white dark:bg-gray-900 flex justify-between gap-3">
                             <button
                                 onClick={() => setPreviewTasks(null)}
                                 className="px-6 py-3 rounded-xl font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 transition-colors text-gray-600"
                             >
                                 放弃
                             </button>
-                            <button
-                                onClick={handleConfirmPreview}
-                                disabled={previewTasks.length === 0}
-                                className="px-8 py-3 rounded-xl font-bold bg-indigo-500 text-white shadow-lg hover:bg-indigo-600 transition-colors disabled:opacity-50"
-                            >
-                                确认导入 ({previewTasks.length})
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setPreviewTasks([])}
+                                    className="px-6 py-3 rounded-xl font-bold bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 transition-colors text-red-500"
+                                >
+                                    清空全部
+                                </button>
+                                <button
+                                    onClick={handleConfirmPreview}
+                                    disabled={previewTasks.length === 0}
+                                    className="px-8 py-3 rounded-xl font-bold bg-indigo-500 text-white shadow-lg hover:bg-indigo-600 transition-colors disabled:opacity-50"
+                                >
+                                    确认导入 ({previewTasks.length})
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -424,13 +424,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
             ? 'bg-red-600 text-white'
-            : (isDark ? 'bg-[#050505] text-white' : 'bg-white text-black')
+            : (isDark ? 'bg-[#050505] text-white' : 'bg-[#F5F5F7] text-black')
             }`}>
-            {/* Background Ambience - iOS 26 Style (Extremely subtle) */}
+            {/* Background Ambience - Gradient Pink in Light Mode */}
             {!currentMsg?.isEmergency && (
-                <div className="absolute inset-0 z-0 opacity-[0.05] transition-all duration-1000 pointer-events-none">
-                    <div className={`absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-blue-900/40' : 'bg-blue-100'}`}></div>
-                    <div className={`absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[180px] ${isDark ? 'bg-purple-900/40' : 'bg-purple-100'}`}></div>
+                <div className="absolute inset-0 z-0 transition-all duration-1000 pointer-events-none overflow-hidden">
+                    <div className={`absolute top-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] ${isDark ? 'opacity-10 bg-blue-900' : 'opacity-30 bg-pink-300'}`}></div>
+                    <div className={`absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] ${isDark ? 'opacity-10 bg-purple-900' : 'opacity-20 bg-purple-300'}`}></div>
+                    <div className={`absolute top-[30%] left-[10%] w-[40%] h-[40%] rounded-full blur-[120px] ${isDark ? 'opacity-5 bg-indigo-900' : 'opacity-10 bg-blue-200'}`}></div>
                 </div>
             )}
             {/* HUD Header for Active Room (kept as overlay) */}
@@ -492,7 +493,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 {currentMsg ? (
                     <div
                         ref={scrollContainerRef}
-                        className="w-full h-full flex flex-col items-center space-y-4 md:space-y-8 animate-in fade-in zoom-in-95 duration-1000 px-4 py-16 overflow-y-auto custom-scrollbar"
+                        className="w-full h-full flex flex-col items-center animate-in fade-in duration-1000 px-4 overflow-y-auto custom-scrollbar"
                     >
                         {currentMsg.isEmergency && (
                             <div className="flex flex-col items-center gap-4 md:gap-6 animate-pulse shrink-0">
@@ -505,7 +506,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[20vh]">
+                        <div className="flex flex-col items-center justify-center w-full max-w-6xl mx-auto min-h-full py-8 pb-32">
                             {sentences.map((sentence, sIdx) => {
                                 const isActive = sIdx === activeSentenceIndex;
                                 const isPast = activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex;
@@ -518,9 +519,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
                                         className={`block transition-all duration-500 py-6 md:py-10 w-full break-words select-none text-center ${isActive
-                                            ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-orange-500 font-black opacity-100 drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]')
+                                            ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-sky-500 font-black opacity-100')
                                             : isPast
-                                                ? 'opacity-40 blur-[0.5px]'
+                                                ? 'opacity-50 blur-[0.3px]'
                                                 : 'opacity-20 blur-[1px]'
                                             } ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
                                                 currentMsg.text.length > 100 ? 'text-xl md:text-4xl' :

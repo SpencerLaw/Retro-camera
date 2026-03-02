@@ -196,6 +196,9 @@
       "status": "Status",
       "pending": "Pending",
       "played": "Played",
+      "rules": "TASKS LOADED",
+      "howToImportTitle": "How to Import?",
+      "copyPasteInstruction": "Select the three columns in Excel, press Ctrl+C to copy, and use Ctrl+V to paste into the box below.",
       "scheduleHelper": "Paste tabular data exported from Excel. Ensure each line contains: Date, Time, Content (separated by tabs)."
     },
     "receiver": {

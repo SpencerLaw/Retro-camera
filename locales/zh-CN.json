@@ -196,6 +196,9 @@
       "status": "状态",
       "pending": "待播报",
       "played": "已结束",
+      "rules": "条计划任务",
+      "howToImportTitle": "如何导入极速计划？",
+      "copyPasteInstruction": "选中 Excel 中的这三列（不要全选整张表），按 Ctrl+C 复制，然后直接通过 Ctrl+V 粘贴到下方框中即可。",
       "scheduleHelper": "系统支持自动播报预设内容。请将 Excel 内容（确保每行为：日期、时间、内容，可使用 Tab 键或空格分隔）直接粘贴在上方文本框中。"
     },
     "receiver": {

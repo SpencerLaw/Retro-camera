@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Trash2, Clock, CheckCircle2, Check, AlertTriangle, ToggleLeft, ToggleRight, ListTodo, FileText } from 'lucide-react';
+import { Calendar, Trash2, Clock, CheckCircle2, Check, AlertTriangle, ToggleLeft, ToggleRight, ListTodo, FileText, Upload } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
+import * as mammoth from 'mammoth';
 
 export interface ScheduleTask {
     id: string;
@@ -30,6 +31,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     const [isAutoEnabled, setIsAutoEnabled] = useState(false);
     const [showImport, setShowImport] = useState(false);
     const [isSending, setIsSending] = useState(false);
+    const [isParsingDocx, setIsParsingDocx] = useState(false);
 
     // Initialize from local storage
     useEffect(() => {
@@ -221,6 +223,124 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
         }
     };
 
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsParsingDocx(true);
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            const text = result.value;
+
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+            const newTasks: ScheduleTask[] = [];
+            let currentWeekStart: Date | null = null;
+            let currentDateStr = '';
+            let currentContentLines: string[] = [];
+
+            const dayMap: Record<string, number> = { '一': 0, '二': 1, '三': 2, '四': 3, '五': 4, '六': 5, '日': 6 };
+
+            const flushCurrentTask = () => {
+                if (currentDateStr && currentContentLines.length > 0) {
+                    let title = currentContentLines[0];
+                    let content = currentContentLines.slice(1).join(' ');
+
+                    if (content.length > 10) {
+                        newTasks.push({
+                            id: `task_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                            date: currentDateStr,
+                            time: '15:55',
+                            content: `【${title}】${content}`,
+                            isPlayed: false,
+                            channelCode: activeChannelCode
+                        });
+                    } else if (title.length > 10) {
+                        newTasks.push({
+                            id: `task_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                            date: currentDateStr,
+                            time: '15:55',
+                            content: title,
+                            isPlayed: false,
+                            channelCode: activeChannelCode
+                        });
+                    }
+                }
+                currentContentLines = [];
+            };
+
+            let i = 0;
+            const currentYear = new Date().getFullYear();
+            while (i < lines.length) {
+                const line = lines[i];
+
+                if (line === '时间' && i + 1 < lines.length) {
+                    const timeLine = lines[i + 1];
+                    const match = timeLine.match(/(\d+)月(\d+)日/);
+                    if (match) {
+                        currentWeekStart = new Date(currentYear, parseInt(match[1]) - 1, parseInt(match[2]));
+                    }
+                    i++;
+                    continue;
+                }
+
+                const dayMatch = line.match(/^周(一|二|三|四|五|六|日)/);
+                if (dayMatch && currentWeekStart) {
+                    flushCurrentTask();
+
+                    const dayIndex = dayMap[dayMatch[1]];
+                    const taskDate = new Date(currentWeekStart);
+                    taskDate.setDate(taskDate.getDate() + dayIndex);
+
+                    const yyyy = taskDate.getFullYear();
+                    const mm = String(taskDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(taskDate.getDate()).padStart(2, '0');
+                    currentDateStr = `${yyyy}-${mm}-${dd}`;
+
+                    i++;
+                    continue;
+                }
+
+                if (line.includes('年春季学期') || line === '周次' || line.match(/^第\d+周/) || line === '班级' || line.includes('年级1班') || line === '授课教师学生代表签字' || line === '离' || line === '校' || line === '前' || line === '1' || line === '分' || line === '钟' || line === '离校前1分钟' || line.match(/^假期.*安全教育/)) {
+                    i++;
+                    continue;
+                }
+
+                if (currentDateStr) {
+                    currentContentLines.push(line);
+                }
+
+                i++;
+            }
+
+            flushCurrentTask();
+
+            if (newTasks.length > 0) {
+                const combined = [...tasks, ...newTasks];
+                combined.sort((a, b) => {
+                    const timeA = new Date(`${a.date}T${a.time}:00`).getTime();
+                    const timeB = new Date(`${b.date}T${b.time}:00`).getTime();
+                    return (isNaN(timeA) ? Number.MAX_SAFE_INTEGER : timeA) - (isNaN(timeB) ? Number.MAX_SAFE_INTEGER : timeB);
+                });
+
+                setTasks(combined);
+                localStorage.setItem('br_schedule_tasks', JSON.stringify(combined));
+                setShowImport(false);
+                alert(`成功解析并极速装载 ${newTasks.length} 条1530安全教育播报任务！`);
+            } else {
+                alert('从文档中未能提取到有效任务，请确认是否为标准的 1530 记录表格式。');
+            }
+
+        } catch (error) {
+            console.error('Docx parse error', error);
+            alert('解析 Word 文档失败，请重试');
+        } finally {
+            setIsParsingDocx(false);
+            if (e.target) e.target.value = '';
+        }
+    };
+
     const handleDelete = (id: string) => {
         const updated = tasks.filter(t => t.id !== id);
         setTasks(updated);
@@ -273,13 +393,32 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
             {/* Import UI */}
             <div className="mb-6">
                 {!showImport ? (
-                    <button
-                        onClick={() => setShowImport(true)}
-                        className="w-full py-4 rounded-xl border-2 border-dashed border-indigo-200 dark:border-indigo-500/30 text-indigo-500 font-bold bg-indigo-50/50 dark:bg-indigo-500/5 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <FileText size={18} />
-                        {t('broadcast.sender.importExcel') || '从 Excel 导入计划'}
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => setShowImport(true)}
+                            className="flex-1 py-4 rounded-xl border-2 border-dashed border-indigo-200 dark:border-indigo-500/30 text-indigo-500 font-bold bg-indigo-50/50 dark:bg-indigo-500/5 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <FileText size={18} />
+                            {t('broadcast.sender.importExcel') || '从 Excel 导入计划'}
+                        </button>
+                        <label className="flex-1 py-4 rounded-xl border-2 border-dashed border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50/50 dark:bg-emerald-500/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors flex items-center justify-center gap-2 cursor-pointer text-center px-4">
+                            {isParsingDocx ? (
+                                <span className="animate-pulse">正在智能解析...</span>
+                            ) : (
+                                <>
+                                    <Upload size={18} className="flex-none" />
+                                    <span>一键导入《1530安全教育》Word文档</span>
+                                </>
+                            )}
+                            <input
+                                type="file"
+                                accept=".docx"
+                                className="hidden"
+                                onChange={handleFileUpload}
+                                disabled={isParsingDocx}
+                            />
+                        </label>
+                    </div>
                 ) : (
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
                         <div className="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20">

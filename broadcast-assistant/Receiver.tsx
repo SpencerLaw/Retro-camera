@@ -76,12 +76,42 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const pendingPlayouts = useRef<number>(0);
 
+    // Helper to split text into sentences for Karaoke effect
+    const sentences = React.useMemo(() => {
+        if (!currentMsg?.text) return [];
+        return currentMsg.text.split(/([。！？；\.!\?;]+)/g).reduce((acc: string[], cur, i) => {
+            if (i % 2 === 0) acc.push(cur);
+            else if (acc.length > 0) acc[acc.length - 1] += cur;
+            return acc;
+        }, []).filter(s => s.trim());
+    }, [currentMsg?.text]);
+
+    const activeSentenceIndex = React.useMemo(() => {
+        let count = 0;
+        for (let i = 0; i < sentences.length; i++) {
+            const len = sentences[i].length;
+            if (charIndex >= count && charIndex < count + len) return i;
+            count += len;
+        }
+        return -1;
+    }, [charIndex, sentences]);
+
+    // Auto-scroll logic: Trigger ONLY on sentence change
+    useEffect(() => {
+        if (activeSentenceRef.current) {
+            activeSentenceRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }, [activeSentenceIndex]);
+
     const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1) => {
-        pendingPlayouts.current = repeatCount;
+        pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
         setIsPlaying(true);
 
         const playNext = () => {
-            if (pendingPlayouts.current === 0) {
+            if (pendingPlayouts.current <= 0) {
                 setIsPlaying(false);
                 return;
             }
@@ -97,13 +127,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     setCharIndex(idx);
                 },
                 onEnd: () => {
-                    if (pendingPlayouts.current > 0) {
+                    if (pendingPlayouts.current > 0 && pendingPlayouts.current !== 999) {
                         pendingPlayouts.current--;
                     }
-                    if (pendingPlayouts.current !== 0) {
-                        setTimeout(() => {
-                            playNext();
-                        }, 1000);
+                    if (pendingPlayouts.current > 0) {
+                        setTimeout(() => playNext(), 1500);
                     } else {
                         setIsPlaying(false);
                         setCharIndex(0);
@@ -114,26 +142,6 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
         playNext();
     }, []);
-
-    // Helper to split text into sentences for Karaoke effect
-    const getSentences = (text: string) => {
-        // Split by punctuation: 。！？；... . ! ? ;
-        return text.split(/([。！？；\.!\?;]+)/g).reduce((acc: string[], cur, i) => {
-            if (i % 2 === 0) acc.push(cur);
-            else if (acc.length > 0) acc[acc.length - 1] += cur;
-            return acc;
-        }, []).filter(s => s.trim());
-    };
-
-    // Auto-scroll logic
-    useEffect(() => {
-        if (activeSentenceRef.current) {
-            activeSentenceRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-        }
-    }, [charIndex]);
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;
@@ -425,17 +433,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-20">
-                            {getSentences(currentMsg.text).map((sentence, sIdx, arr) => {
-                                const prevText = arr.slice(0, sIdx).join("");
-                                const isActive = charIndex >= prevText.length && charIndex < (prevText.length + sentence.length);
-                                const isPast = charIndex >= (prevText.length + sentence.length);
+                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[40vh]">
+                            {sentences.map((sentence, sIdx) => {
+                                const isActive = sIdx === activeSentenceIndex;
+                                const isPast = activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex;
 
                                 return (
                                     <span
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`block transition-all duration-700 py-4 md:py-8 w-full break-words select-none origin-center text-center ${isActive
+                                        className={`block transition-all duration-700 py-6 md:py-10 w-full break-words select-none origin-center text-center ${isActive
                                             ? `scale-110 font-black opacity-100 ${currentMsg.isEmergency ? 'text-white' : 'text-blue-500'} drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]`
                                             : isPast
                                                 ? 'opacity-30 blur-[1px] font-bold scale-95'

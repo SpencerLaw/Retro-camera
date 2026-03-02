@@ -168,7 +168,7 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
     generatedDate: genDate.toISOString(),
     expiryDate: expDate.toISOString(),
     firstActivatedAt: new Date(c.f).toISOString(),
-    lastUsedTime: new Date(c.l).toISOString(),
+    lastUsedTime: c.l ? new Date(c.l).toISOString() : new Date().toISOString(),
     devices: c.d.map(dev => ({
       deviceId: dev.i,
       firstSeen: new Date(dev.f).toISOString(),
@@ -376,14 +376,27 @@ export default async function handler(
     }
 
     // 2. 读取 Redis
+    // 统一使用不带横杠的 Key 以匹配新旧数据 (如果旧数据也没横杠的话)
+    // 提示：如果之前存的是带横杠的，这里可能需要兼容
     const redisKey = `license:${cleanCode}`;
     const rawData = await kv.get<CompressedMetadata | LicenseMetadata>(redisKey);
+
+    // 兼容性检查：如果没搜到，再尝试带原始授权码搜一下 (处理可能有横杠的旧数据)
+    let finalData = rawData;
+    if (!finalData && licenseCode !== cleanCode) {
+      const backupKey = `license:${licenseCode}`;
+      finalData = await kv.get<CompressedMetadata | LicenseMetadata>(backupKey);
+      if (finalData) console.log(`[License] Found legacy data with original key: ${backupKey}`);
+    }
+
     const now = Date.now();
     const nowISO = new Date(now).toISOString();
 
+    console.log(`[License] Logged in: ${cleanCode} action: verify`);
+
     let metadata: LicenseMetadata;
 
-    if (!rawData) {
+    if (!finalData) {
       // 首次激活
       console.log(`[License] New Activation: ${cleanCode} Device: ${deviceId}`);
       metadata = {

@@ -36,7 +36,7 @@ class TTSManager {
         if (this.audio) {
             this.audio.onplay = () => {
                 if (options.onStart) options.onStart();
-                this.simulateBoundaries(text, options);
+                this.simulateBoundaries(text, options, this.audio!);
             };
             this.audio.onended = () => {
                 this.clearBoundaryTimer();
@@ -201,25 +201,49 @@ class TTSManager {
         }
     }
 
-    // Since Edge/Fish don't provide boundaries, we estimate for the "Lyrics" effect
-    private simulateBoundaries(text: string, options: TTSOptions) {
+    // Since Edge/Fish don't provide native boundaries, we sync simulation to the actual audio duration
+    private simulateBoundaries(text: string, options: TTSOptions, audioEl?: HTMLAudioElement) {
         if (!options.onBoundary || options.engine === 'native') return;
         this.clearBoundaryTimer();
 
-        let charIndex = 0;
-        const rate = options.rate || 1.0;
-        // Average Chinese reading speed is roughly 4-6 chars per second
-        const msPerChar = 220 / rate;
+        const startSimulation = (msPerChar: number) => {
+            let charIndex = 0;
+            this.boundaryTimer = setInterval(() => {
+                if (charIndex >= text.length) {
+                    this.clearBoundaryTimer();
+                    return;
+                }
+                charIndex += 1;
+                if (options.onBoundary) options.onBoundary(charIndex);
+            }, msPerChar);
+        };
 
-        this.boundaryTimer = setInterval(() => {
-            if (charIndex >= text.length) {
-                this.clearBoundaryTimer();
-                return;
-            }
-            // Update every word-ish or punctuation (simplified simulation)
-            charIndex += 1;
-            if (options.onBoundary) options.onBoundary(charIndex);
-        }, msPerChar);
+        const el = audioEl || this.audio;
+
+        // If audio has already loaded its metadata (duration is available), use it directly
+        if (el && el.duration && isFinite(el.duration) && el.duration > 0) {
+            // Use 92% of duration to ensure we don't outpace the audio
+            const msPerChar = (el.duration * 1000 * 0.92) / text.length;
+            startSimulation(msPerChar);
+        } else if (el) {
+            // Wait for metadata to load, then compute the rate
+            const onMeta = () => {
+                el.removeEventListener('loadedmetadata', onMeta);
+                if (el.duration && isFinite(el.duration) && el.duration > 0) {
+                    const msPerChar = (el.duration * 1000 * 0.92) / text.length;
+                    startSimulation(msPerChar);
+                } else {
+                    // Fallback: safe conservative estimate (300ms/char ≈ 3.3 chars/sec)
+                    const rate = options.rate || 1.0;
+                    startSimulation(300 / rate);
+                }
+            };
+            el.addEventListener('loadedmetadata', onMeta);
+        } else {
+            // Last resort fallback
+            const rate = options.rate || 1.0;
+            startSimulation(300 / rate);
+        }
     }
 }
 

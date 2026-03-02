@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy, Plus, Edit2 } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
+import ScheduleManager from './ScheduleManager';
 
 interface Message {
     id: string;
@@ -432,6 +433,9 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     )}
                 </div>
             </GlassCard>
+
+            {/* Auto Schedule Section */}
+            <ScheduleManager license={license} activeChannelCode={channelCode} isDark={isDark} />
         </div>
     );
 };

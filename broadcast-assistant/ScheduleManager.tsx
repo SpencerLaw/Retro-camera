@@ -311,7 +311,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 setPreviewTasks(newTasks);
                 setShowImport(false);
             } else {
-                alert('从文档中未能提取到有效任务，请确认是否为标准的 1530 记录表格式。');
+                alert('从文档中未能提取到有效任务，请确认是否为标准的 Word 表格格式。');
             }
 
         } catch (error) {
@@ -431,7 +431,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                             <FileText size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
                         )}
                         <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">
-                            {isParsingDocx ? '正在深度解析...' : '导入 1530 表格 Word'}
+                            {isParsingDocx ? '正在深度解析...' : '导入 Word 表格'}
                         </span>
                         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden sm:block">
                             <Upload size={40} />
@@ -450,8 +450,8 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
             {/* Results Preview Overlay */}
             {previewTasks && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-900 border border-black/10 dark:border-white/10 shadow-2xl rounded-3xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-indigo-50/30 dark:bg-indigo-500/5">
+                    <div className="bg-white dark:bg-gray-900 border border-black/10 dark:border-white/10 shadow-2xl rounded-3xl w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-indigo-50/30 dark:bg-indigo-500/5 shrink-0">
                             <div>
                                 <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
                                     <ListTodo size={24} className="text-indigo-500" />

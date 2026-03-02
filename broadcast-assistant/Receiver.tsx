@@ -23,6 +23,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
     const [isJoined, setIsJoined] = useState(false);
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
+    const [syncedChannelName, setSyncedChannelName] = useState<string>('');
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isListening, setIsListening] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -144,6 +145,17 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             if (data.message) {
                 const msg = data.message as Message;
+
+                // Persist the channel name locally
+                if (msg.channelName) {
+                    setSyncedChannelName(msg.channelName);
+                }
+
+                // If it's a "silent sync" (no text), just update the name and return
+                if (!msg.text) {
+                    lastPlayedId.current = msg.id;
+                    return;
+                }
 
                 // Add to history if new
                 if (msg.id !== lastPlayedId.current) {
@@ -346,7 +358,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 else if (hour >= 12 && hour < 18) greeting = "下午好";
                                 else greeting = "晚上好";
 
-                                const name = currentMsg?.channelName || fullRoomId || (isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost'));
+                                const name = syncedChannelName || currentMsg?.channelName || fullRoomId || (isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost'));
                                 return `${greeting}，${name}`;
                             })()}
                         </span>

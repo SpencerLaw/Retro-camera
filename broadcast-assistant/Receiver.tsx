@@ -497,39 +497,20 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     <span
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`block transition-all duration-700 py-6 md:py-10 w-full break-words select-none text-center ${isActive
-                                            ? `font-black opacity-100`
+                                        className={`block transition-all duration-500 py-6 md:py-10 w-full break-words select-none text-center ${isActive
+                                            ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-orange-500 font-black opacity-100 drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]')
                                             : isPast
-                                                ? 'opacity-30 blur-[0.5px]'
-                                                : 'opacity-10 blur-[1.5px]'
+                                                ? 'opacity-40 blur-[0.5px]'
+                                                : 'opacity-20 blur-[1px]'
                                             } ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
                                                 currentMsg.text.length > 100 ? 'text-xl md:text-4xl' :
                                                     'text-3xl md:text-6xl'
                                             }`}
                                         style={{
-                                            willChange: 'opacity, filter'
+                                            willChange: 'opacity, filter, color'
                                         }}
                                     >
-                                        {sentence.split('').map((char, cIdx) => {
-                                            const charAbsIndex = sentenceStartIndex + cIdx;
-
-                                            // VERY STRICT SYNC: charIndex is the TTS progress.
-                                            // If our absolute index is strict LESS than TTS progress, it's read.
-                                            const isCharRead = charAbsIndex < charIndex;
-
-                                            if (!isActive) return char;
-
-                                            return (
-                                                <span
-                                                    key={cIdx}
-                                                    className={`transition-colors duration-150 ${isCharRead
-                                                        ? (currentMsg.isEmergency ? 'text-white' : 'text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]')
-                                                        : 'opacity-40'}`}
-                                                >
-                                                    {char}
-                                                </span>
-                                            );
-                                        })}
+                                        {sentence}
                                     </span>
                                 );
                             })}

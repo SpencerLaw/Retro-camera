@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy, Plus, Edit2 } from 'lucide-react';
+import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy, Plus, Edit2, Repeat } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import ScheduleManager from './ScheduleManager';
@@ -50,6 +50,8 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
     const [inputText, setInputText] = useState('');
     const [isEmergency, setIsEmergency] = useState(false);
+    const [isLooping, setIsLooping] = useState(false);
+    const [repeatCount, setRepeatCount] = useState<number>(1);
     const [history, setHistory] = useState<Message[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'loading' | null; msg: string }>({ type: null, msg: '' });
 
@@ -163,6 +165,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     code: channelCode.trim(),
                     text: inputText.trim(),
                     isEmergency,
+                    repeatCount: isLooping ? -1 : repeatCount,
                 }),
             });
 
@@ -329,7 +332,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
             )}
 
             {/* Input Section */}
-            <GlassCard className="p-10 space-y-8">
+            <GlassCard className="p-6 md:p-10 space-y-6 md:space-y-8">
                 <div className="relative group">
                     <textarea
                         value={inputText}
@@ -342,21 +345,48 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <button
-                        onClick={() => setIsEmergency(!isEmergency)}
-                        className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isEmergency
-                            ? 'bg-red-500 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.5)] scale-105'
-                            : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
-                            }`}
-                    >
-                        <AlertTriangle size={18} /> {t('broadcast.sender.emergencyMode')}
-                    </button>
+                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mt-4">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                        <button
+                            onClick={() => setIsEmergency(!isEmergency)}
+                            className={`flex items-center justify-center gap-3 px-6 py-4 sm:py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isEmergency
+                                ? 'bg-red-500 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.5)] scale-100 sm:scale-105'
+                                : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
+                                }`}
+                        >
+                            <AlertTriangle size={18} /> {t('broadcast.sender.emergencyMode')}
+                        </button>
+
+                        <div className="flex flex-1 sm:flex-none items-center justify-between gap-2 bg-gray-100 dark:bg-white/5 p-1 rounded-2xl">
+                            <button
+                                onClick={() => setIsLooping(!isLooping)}
+                                className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold transition-all flex-1 sm:flex-none ${isLooping
+                                    ? 'bg-blue-500 text-white shadow-md'
+                                    : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'}`}
+                            >
+                                <Repeat size={16} /> 自动循环播报
+                            </button>
+
+                            {!isLooping && (
+                                <div className="flex items-center gap-1 px-3">
+                                    <span className="text-xs text-gray-500 font-bold whitespace-nowrap">次数:</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="99"
+                                        value={repeatCount}
+                                        onChange={(e) => setRepeatCount(Math.max(1, parseInt(e.target.value) || 1))}
+                                        className="w-10 bg-white dark:bg-black/20 border-none rounded-lg text-center font-bold text-sm outline-none px-1 text-gray-800 dark:text-gray-200 py-1"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     <button
                         onClick={handleSend}
                         disabled={status.type === 'loading'}
-                        className="px-10 py-5 bg-black dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-lg hover:opacity-90 shadow-xl active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center gap-3"
+                        className="px-8 sm:px-10 py-4 sm:py-5 bg-black dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-base sm:text-lg hover:opacity-90 shadow-xl active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3 w-full md:w-auto"
                     >
                         {status.type === 'loading' ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
                         {t('broadcast.sender.launch')}

@@ -12,7 +12,8 @@ export default async function handler(
         return response.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { code, text, isEmergency, license } = request.body;
+
+    const { code, text, isEmergency, license, repeatCount } = request.body;
 
     if (!license) {
         return response.status(401).json({ error: '未提供有效的授权码' });
@@ -29,6 +30,7 @@ export default async function handler(
             text,
             isEmergency: !!isEmergency,
             timestamp: messageId,
+            repeatCount: repeatCount !== undefined ? repeatCount : 1,
         };
 
         // V2: Global Shared Pool for 4-digit codes

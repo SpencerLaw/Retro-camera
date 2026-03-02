@@ -8,6 +8,7 @@ interface Message {
     text: string;
     isEmergency: boolean;
     timestamp: string;
+    repeatCount?: number;
 }
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -43,12 +44,32 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
     }, []);
 
-    const speak = useCallback((text: string, isEmergency: boolean) => {
-        ttsManager.speak(text, {
-            engine: 'edge',
-            voice: 'zh-CN-YunxiNeural',
-            rate: isEmergency ? 0.85 : 1.0
-        });
+    const pendingPlayouts = useRef<number>(0);
+
+    const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1) => {
+        pendingPlayouts.current = repeatCount;
+
+        const playNext = () => {
+            if (pendingPlayouts.current === 0) return; // Stopped externally
+
+            ttsManager.speak(text, {
+                engine: 'edge',
+                voice: 'zh-CN-YunxiNeural',
+                rate: isEmergency ? 0.85 : 1.0,
+                onEnd: () => {
+                    if (pendingPlayouts.current > 0) {
+                        pendingPlayouts.current--;
+                    }
+                    if (pendingPlayouts.current !== 0) {
+                        setTimeout(() => {
+                            playNext();
+                        }, 1000); // 1s delay
+                    }
+                }
+            });
+        };
+
+        playNext();
     }, []);
 
     const fetchMessage = useCallback(async () => {
@@ -69,8 +90,17 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             if (data.message) {
                 const msg = data.message as Message;
                 setCurrentMsg(msg);
+
+                // Notifications when hidden
+                if (document.hidden && 'Notification' in window && Notification.permission === 'granted' && msg.id !== lastPlayedId.current) {
+                    new Notification(msg.isEmergency ? '【紧急广播】' : '校园广播提示', {
+                        body: msg.text,
+                        icon: '/favicon.ico'
+                    });
+                }
+
                 if (isListening && msg.id !== lastPlayedId.current) {
-                    speak(msg.text, msg.isEmergency);
+                    speak(msg.text, msg.isEmergency, msg.repeatCount ?? 1);
                     lastPlayedId.current = msg.id;
                 }
             } else {
@@ -100,6 +130,13 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         }
     };
 
+    useEffect(() => {
+        if (!isListening) {
+            ttsManager.stop();
+            pendingPlayouts.current = 0;
+        }
+    }, [isListening]);
+
     const handleStart = async () => {
         if (!fullRoomId.trim()) {
             setError(t('broadcast.receiver.missingChannel'));
@@ -108,6 +145,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
         // Clear previous error
         setError('');
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
 
         // Validate room before joining
         try {
@@ -267,23 +308,26 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
 
             {/* Main Broadcast Area */}
-            <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-10 text-center relative z-10 overflow-hidden w-full ${isFullscreen ? '' : 'origin-top scale-[0.98] sm:scale-100'} transition-transform`}>
+            <div className={`flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-10 text-center relative z-10 overflow-hidden w-full h-full ${isFullscreen ? '' : 'origin-top scale-[0.98] sm:scale-100'} transition-transform`}>
                 {currentMsg ? (
-                    <div className="w-full flex flex-col justify-center items-center space-y-8 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000 px-2 py-6">
+                    <div className="w-full h-full flex flex-col justify-center items-center space-y-4 md:space-y-8 animate-in fade-in zoom-in-95 duration-1000 px-2 py-2 max-h-full">
                         {currentMsg.isEmergency && (
-                            <div className="flex flex-col items-center gap-6 animate-pulse">
-                                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center shadow-2xl">
-                                    <AlertCircle size={64} className="text-white" />
+                            <div className="flex flex-col items-center gap-4 md:gap-6 animate-pulse shrink-0">
+                                <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-white/20 flex items-center justify-center shadow-2xl">
+                                    <AlertCircle size={48} className="text-white md:w-16 md:h-16" />
                                 </div>
-                                <div className="text-3xl md:text-5xl font-black tracking-[0.5em] uppercase text-white drop-shadow-lg">
+                                <div className="text-2xl md:text-5xl font-black tracking-[0.3em] md:tracking-[0.5em] uppercase text-white drop-shadow-lg">
                                     {t('broadcast.receiver.criticalBroadcast')}
                                 </div>
                             </div>
                         )}
-                        <h1 className={`font-black tracking-tighter drop-shadow-sm select-none transition-all duration-500 w-full break-words text-center ${currentMsg.text.length > 100 ? 'text-3xl md:text-5xl lg:text-7xl leading-snug lg:leading-tight' :
-                            currentMsg.text.length > 40 ? 'text-4xl md:text-6xl lg:text-9xl leading-tight' : 'text-5xl md:text-8xl lg:text-11xl leading-[1.1]'
+                        <h1 className={`font-black tracking-tighter drop-shadow-sm select-none transition-all duration-500 w-full break-words text-center flex-shrink overflow-hidden flex flex-col justify-center ${currentMsg.text.length > 300 ? 'text-base sm:text-lg md:text-2xl lg:text-4xl leading-normal' :
+                                currentMsg.text.length > 150 ? 'text-lg sm:text-xl md:text-3xl lg:text-5xl leading-relaxed' :
+                                    currentMsg.text.length > 80 ? 'text-2xl sm:text-3xl md:text-4xl lg:text-6xl leading-snug' :
+                                        currentMsg.text.length > 30 ? 'text-4xl sm:text-5xl md:text-6xl lg:text-8xl leading-tight' :
+                                            'text-5xl sm:text-6xl md:text-8xl lg:text-[10rem] leading-[1.1]'
                             }`}>
-                            {currentMsg.text}
+                            <span>{currentMsg.text}</span>
                         </h1>
                     </div>
                 ) : (

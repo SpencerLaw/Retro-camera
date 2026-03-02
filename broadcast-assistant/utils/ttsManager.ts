@@ -7,6 +7,7 @@ export interface TTSOptions {
     pitch?: number;
     apiKey?: string;
     fishModelId?: string;
+    onEnd?: () => void;
 }
 
 class TTSManager {
@@ -27,6 +28,12 @@ class TTSManager {
     public async speak(text: string, options: TTSOptions): Promise<void> {
         // Stop current audio or speech
         this.stop();
+
+        if (this.audio) {
+            this.audio.onended = () => {
+                if (options.onEnd) options.onEnd();
+            };
+        }
 
         switch (options.engine) {
             case 'fish':
@@ -63,6 +70,12 @@ class TTSManager {
             const voices = window.speechSynthesis.getVoices();
             const selectedVoice = voices.find(v => v.name === options.voice);
             if (selectedVoice) utterance.voice = selectedVoice;
+        }
+
+        if (options.onEnd) {
+            utterance.onend = () => {
+                if (options.onEnd) options.onEnd();
+            };
         }
 
         window.speechSynthesis.speak(utterance);

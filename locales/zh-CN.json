@@ -212,7 +212,8 @@
       "signalLost": "信号丢失",
       "criticalBroadcast": "紧急播报",
       "downlinkSync": "正在接收信息中",
-      "standbySource": "等待播报源接入..."
+      "standbySource": "等待播报源接入...",
+      "broadcastMode": "广播播报模式 // 运行中"
     }
   },
   "morningTree": {

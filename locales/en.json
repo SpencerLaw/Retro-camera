@@ -212,7 +212,8 @@
       "signalLost": "Signal Lost",
       "criticalBroadcast": "Emergency Broadcast",
       "downlinkSync": "Receiving messages...",
-      "standbySource": "Waiting for broadcast source..."
+      "standbySource": "Waiting for broadcast source...",
+      "broadcastMode": "BROADCAST MODE // ACTIVE"
     }
   },
   "morningTree": {

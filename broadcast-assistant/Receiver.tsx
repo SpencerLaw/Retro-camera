@@ -267,9 +267,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
 
             {/* Main Broadcast Area */}
-            <div className={`flex-1 flex flex-col items-center justify-center p-10 md:p-24 text-center relative z-10 overflow-hidden`}>
+            <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-10 text-center relative z-10 overflow-hidden w-full ${isFullscreen ? '' : 'origin-top scale-[0.98] sm:scale-100'} transition-transform`}>
                 {currentMsg ? (
-                    <div className="w-full max-h-full overflow-y-auto space-y-12 animate-in fade-in zoom-in-95 duration-1000 px-4 py-10 custom-scrollbar">
+                    <div className="w-full flex flex-col justify-center items-center space-y-8 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000 px-2 py-6">
                         {currentMsg.isEmergency && (
                             <div className="flex flex-col items-center gap-6 animate-pulse">
                                 <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center shadow-2xl">
@@ -280,8 +280,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 </div>
                             </div>
                         )}
-                        <h1 className={`font-black tracking-tighter leading-[1.05] drop-shadow-sm select-none transition-all duration-500 whitespace-pre-wrap ${currentMsg.text.length > 100 ? 'text-4xl md:text-6xl lg:text-7xl text-left' :
-                            currentMsg.text.length > 40 ? 'text-6xl md:text-8xl lg:text-9xl' : 'text-8xl md:text-10xl lg:text-11xl'
+                        <h1 className={`font-black tracking-tighter drop-shadow-sm select-none transition-all duration-500 w-full break-words text-center ${currentMsg.text.length > 100 ? 'text-3xl md:text-5xl lg:text-7xl leading-snug lg:leading-tight' :
+                            currentMsg.text.length > 40 ? 'text-4xl md:text-6xl lg:text-9xl leading-tight' : 'text-5xl md:text-8xl lg:text-11xl leading-[1.1]'
                             }`}>
                             {currentMsg.text}
                         </h1>
@@ -306,11 +306,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             {/* HUD Footer */}
             <div className="p-10 flex justify-center pb-12 relative z-20">
-                <div className="px-8 py-3 rounded-full GlassContainer border border-white/20 text-[10px] font-black uppercase tracking-[0.35em] opacity-30 flex items-center gap-4 bg-white/5 backdrop-blur-md">
+                <div className="px-6 md:px-8 py-2 md:py-3 rounded-full GlassContainer border border-white/20 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.35em] opacity-40 flex items-center gap-2 md:gap-4 bg-white/5 backdrop-blur-md">
                     <span className="flex gap-1">
-                        {[...Array(4)].map((_, i) => <div key={i} className="w-1 h-3 bg-current opacity-40 rounded-full"></div>)}
+                        {[...Array(4)].map((_, i) => <div key={i} className="w-1 h-2 md:h-3 bg-current opacity-40 rounded-full"></div>)}
                     </span>
-                    BROADCAST MODE // ACTIVE
+                    {t('broadcast.receiver.broadcastMode') || '广播播报模式 // 运行中'}
                 </div>
             </div>
         </div>

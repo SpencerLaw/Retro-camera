@@ -209,7 +209,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     };
 
     return (
-        <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20">
+        <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20 origin-top scale-95 md:scale-100 transition-transform">
             {/* Channel Management Section */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">

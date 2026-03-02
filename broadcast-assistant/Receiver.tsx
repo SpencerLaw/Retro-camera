@@ -81,14 +81,19 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const pendingPlayouts = useRef<number>(0);
 
-    // Helper to split text into sentences for Karaoke effect
+    // Helper to split text into sentences for Karaoke effect - Now PRESERVES all characters for 1:1 indexing
     const sentences = React.useMemo(() => {
         if (!currentMsg?.text) return [];
+        // Note: we use capturing group in split to keep the delimiters, 
+        // and we DO NOT filter trim() to keep character indices perfectly aligned with TTS
         return currentMsg.text.split(/([。！？；\.!\?;]+)/g).reduce((acc: string[], cur, i) => {
-            if (i % 2 === 0) acc.push(cur);
-            else if (acc.length > 0) acc[acc.length - 1] += cur;
+            if (i % 2 === 0) {
+                if (cur || i === 0) acc.push(cur);
+            } else if (acc.length > 0) {
+                acc[acc.length - 1] += cur;
+            }
             return acc;
-        }, []).filter(s => s.trim());
+        }, []);
     }, [currentMsg?.text]);
 
     const activeSentenceIndex = React.useMemo(() => {
@@ -101,9 +106,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         return -1;
     }, [charIndex, sentences]);
 
-    // Auto-scroll logic: Trigger ONLY on sentence change OR rescue
+    // Auto-scroll logic: Only trigger if user is NOT manual scrolling
     const scrollToActive = useCallback((behavior: ScrollBehavior = 'smooth') => {
-        if (activeSentenceRef.current) {
+        if (activeSentenceRef.current && !isUserScrollingRef.current) {
             activeSentenceRef.current.scrollIntoView({
                 behavior,
                 block: 'center'
@@ -111,9 +116,19 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         }
     }, []);
 
+    // Effect 1: Trigger on sentence change (during reading)
     useEffect(() => {
-        scrollToActive();
+        scrollToActive('smooth');
     }, [activeSentenceIndex, scrollToActive]);
+
+    // Effect 2: Trigger IMMEDIATELY when a new message arrives (fix delayed display)
+    useEffect(() => {
+        if (currentMsg?.id) {
+            // Give a tiny timeout for DOM to render the new message sentences
+            const timer = setTimeout(() => scrollToActive('auto'), 50);
+            return () => clearTimeout(timer);
+        }
+    }, [currentMsg?.id, scrollToActive]);
 
     // Scroll Rescue Logic: Detect manual scroll and return after 1s
     useEffect(() => {
@@ -168,7 +183,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         pendingPlayouts.current--;
                     }
                     if (pendingPlayouts.current > 0) {
-                        setTimeout(() => playNext(), 1500);
+                        // User requested exactly 3 seconds delay between repeats
+                        setTimeout(() => playNext(), 3000);
                     } else {
                         setIsPlaying(false);
                         setCharIndex(0);

@@ -175,6 +175,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     setCharIndex(idx);
                 },
                 onEnd: () => {
+                    // Force complete highlight of all characters during the 3-second delay
+                    setCharIndex(text.length + 100);
+
                     if (pendingPlayouts.current > 0 && pendingPlayouts.current !== 999) {
                         pendingPlayouts.current--;
                     }
@@ -482,7 +485,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[40vh] pb-[50vh]">
+                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[20vh]">
                             {sentences.map((sentence, sIdx) => {
                                 const isActive = sIdx === activeSentenceIndex;
                                 const isPast = activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex;
@@ -504,8 +507,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                                     'text-3xl md:text-6xl'
                                             }`}
                                         style={{
-                                            transform: isActive ? 'scale(1.05)' : 'scale(1)',
-                                            willChange: 'transform, opacity'
+                                            willChange: 'opacity, filter'
                                         }}
                                     >
                                         {sentence.split('').map((char, cIdx) => {
@@ -534,17 +536,17 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center space-y-10 animate-in fade-in duration-1000 relative z-0">
-                        <div className="relative inline-block mt-20">
+                    <div className="text-center space-y-8 animate-in fade-in duration-1000 relative z-0 flex flex-col items-center justify-center h-full pb-20">
+                        <div className="relative inline-block">
                             <div className="absolute inset-0 rounded-full border-4 border-dashed border-gray-400/20 animate-[spin_20s_linear_infinite]"></div>
                             <div className="m-8 w-24 h-24 md:w-32 md:h-32 rounded-full GlassContainer border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl shadow-inner">
-                                <Signal size={48} className="opacity-20 animate-pulse" />
+                                <Signal size={48} className="opacity-30 animate-pulse text-indigo-500" />
                             </div>
                         </div>
-                        <div className="space-y-3">
-                            <p className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic opacity-10">{t('broadcast.receiver.downlinkSync')}</p>
-                            <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.4em] opacity-30">
-                                <Wifi size={14} /> {t('broadcast.receiver.standbySource')}
+                        <div className="space-y-4">
+                            <p className="text-2xl md:text-4xl font-black tracking-widest uppercase italic opacity-20">{t('broadcast.receiver.downlinkSync') || '下行接收信号中'}</p>
+                            <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.4em] opacity-40">
+                                <Wifi size={14} /> {t('broadcast.receiver.standbySource') || '稳定连接待机'}
                             </div>
                         </div>
                     </div>

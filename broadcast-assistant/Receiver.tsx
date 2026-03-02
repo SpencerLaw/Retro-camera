@@ -81,19 +81,13 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const pendingPlayouts = useRef<number>(0);
 
-    // Helper to split text into sentences for Karaoke effect - Now PRESERVES all characters for 1:1 indexing
+    // Helper to split text into sentences for Karaoke effect
     const sentences = React.useMemo(() => {
         if (!currentMsg?.text) return [];
-        // Note: we use capturing group in split to keep the delimiters, 
-        // and we DO NOT filter trim() to keep character indices perfectly aligned with TTS
-        return currentMsg.text.split(/([。！？；\.!\?;]+)/g).reduce((acc: string[], cur, i) => {
-            if (i % 2 === 0) {
-                if (cur || i === 0) acc.push(cur);
-            } else if (acc.length > 0) {
-                acc[acc.length - 1] += cur;
-            }
-            return acc;
-        }, []);
+        // Extract raw sentences while keeping punctuation attached. 
+        // We use match to find parts, which is safer than split with capture groups to guarantee 1:1 length mapping.
+        const parts = currentMsg.text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g);
+        return parts ? parts : [currentMsg.text];
     }, [currentMsg?.text]);
 
     const activeSentenceIndex = React.useMemo(() => {
@@ -488,7 +482,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[45vh]">
+                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-[40vh] pb-[50vh]">
                             {sentences.map((sentence, sIdx) => {
                                 const isActive = sIdx === activeSentenceIndex;
                                 const isPast = activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex;
@@ -500,31 +494,34 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     <span
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`block transition-all duration-700 py-8 md:py-12 w-full break-words select-none text-center ${isActive
+                                        className={`block transition-all duration-700 py-6 md:py-10 w-full break-words select-none text-center ${isActive
                                             ? `font-black opacity-100`
                                             : isPast
                                                 ? 'opacity-30 blur-[0.5px]'
                                                 : 'opacity-10 blur-[1.5px]'
-                                            } ${currentMsg.text.length > 300 ? 'text-xl md:text-3xl' :
-                                                currentMsg.text.length > 100 ? 'text-2xl md:text-5xl' :
-                                                    'text-4xl md:text-7xl'
+                                            } ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
+                                                currentMsg.text.length > 100 ? 'text-xl md:text-4xl' :
+                                                    'text-3xl md:text-6xl'
                                             }`}
                                         style={{
-                                            transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                                            transform: isActive ? 'scale(1.05)' : 'scale(1)',
                                             willChange: 'transform, opacity'
                                         }}
                                     >
                                         {sentence.split('').map((char, cIdx) => {
                                             const charAbsIndex = sentenceStartIndex + cIdx;
-                                            const isCharRead = charAbsIndex < charIndex; // Fixed comparison for better precision
+
+                                            // VERY STRICT SYNC: charIndex is the TTS progress.
+                                            // If our absolute index is strict LESS than TTS progress, it's read.
+                                            const isCharRead = charAbsIndex < charIndex;
 
                                             if (!isActive) return char;
 
                                             return (
                                                 <span
                                                     key={cIdx}
-                                                    className={`transition-colors duration-200 ${isCharRead
-                                                        ? (currentMsg.isEmergency ? 'text-white' : 'text-orange-500 underline decoration-orange-500/30 underline-offset-8')
+                                                    className={`transition-colors duration-150 ${isCharRead
+                                                        ? (currentMsg.isEmergency ? 'text-white' : 'text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]')
                                                         : 'opacity-40'}`}
                                                 >
                                                     {char}
@@ -554,18 +551,18 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 )}
             </div>
 
-            {/* HUD Footer & Always Visible History */}
-            <div className="relative z-50">
-                <div className="mx-auto w-[95vw] max-w-5xl mb-6">
-                    <GlassCard className="p-6 rounded-[2.5rem] overflow-hidden flex flex-col border-2 border-white/20 shadow-2xl">
-                        <div className="flex items-center justify-between mb-4 shrink-0 px-2">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest opacity-60 flex items-center gap-3 text-orange-500">
-                                <History size={16} /> {t('broadcast.sender.timeline') || '历史播报记录'}
+            {/* HUD Footer & Always Visible History (Floating to prevent squishing text) */}
+            <div className="absolute bottom-4 left-0 right-0 z-50 pointer-events-none flex flex-col items-center">
+                <div className="w-[98vw] max-w-5xl mb-2 pointer-events-auto">
+                    <GlassCard className="p-4 rounded-[2rem] overflow-hidden flex flex-col border border-white/20 shadow-2xl backdrop-blur-xl bg-white/40 dark:bg-black/40">
+                        <div className="flex items-center justify-between mb-3 shrink-0 px-2">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest opacity-80 flex items-center gap-2 text-orange-500">
+                                <History size={14} /> 历史播报小组件
                             </h4>
                             {isPlaying && (
                                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-500 animate-pulse">
                                     <RefreshCw size={12} className="animate-spin" />
-                                    正在播报中...
+                                    同步中...
                                 </div>
                             )}
                             <button
@@ -575,16 +572,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                         localStorage.removeItem('br_receiver_history');
                                     }
                                 }}
-                                className="text-[10px] font-bold text-red-500 hover:opacity-70 px-3 py-1 rounded-full hover:bg-red-500/10 transition-all uppercase tracking-widest"
+                                className="text-[10px] font-bold text-red-500 hover:opacity-100 opacity-60 px-3 py-1 rounded-full hover:bg-red-500/10 transition-all uppercase tracking-widest"
                             >
-                                {t('broadcast.sender.wipeLogs') || '清除'}
+                                清除
                             </button>
                         </div>
 
-                        <div className="flex flex-row gap-4 overflow-x-auto custom-scrollbar pb-2 px-1">
+                        <div className="flex flex-row gap-3 overflow-x-auto custom-scrollbar pb-1 px-1 snap-x">
                             {receivedHistory.length === 0 ? (
-                                <div className="flex items-center justify-center py-6 px-10 opacity-20 italic w-full">
-                                    <p className="text-xs font-bold">暂无历史播报</p>
+                                <div className="flex items-center justify-center py-4 px-6 opacity-40 italic w-full">
+                                    <p className="text-[10px] font-bold">暂无历史播报</p>
                                 </div>
                             ) : (
                                 [...receivedHistory].reverse().map((msg) => (
@@ -596,13 +593,13 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                                 speak(msg.text, msg.isEmergency, 1, msg.id);
                                             }
                                         }}
-                                        className="flex-none w-64 text-left p-4 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 group active:scale-[0.98]"
+                                        className="flex-none w-56 text-left p-3 rounded-xl bg-white/50 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-all border border-transparent hover:border-white/30 group active:scale-[0.98] snap-start shadow-sm"
                                     >
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-[9px] font-bold opacity-40">{new Date(parseInt(msg.timestamp)).toLocaleTimeString()}</span>
-                                            {msg.isEmergency && <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full uppercase scale-75">SOS</span>}
+                                        <div className="flex justify-between items-center mb-1.5">
+                                            <span className="text-[9px] font-bold opacity-50">{new Date(parseInt(msg.timestamp)).toLocaleTimeString()}</span>
+                                            {msg.isEmergency && <span className="text-[8px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full uppercase scale-75 origin-right">SOS</span>}
                                         </div>
-                                        <p className="text-xs font-bold truncate leading-relaxed text-gray-700 dark:text-gray-300">{msg.text}</p>
+                                        <p className="text-[11px] font-bold truncate leading-relaxed text-gray-800 dark:text-gray-200">{msg.text}</p>
                                     </button>
                                 ))
                             )}
@@ -610,9 +607,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     </GlassCard>
                 </div>
 
-                <div className="p-4 flex justify-center pb-10">
-                    <p className="text-[10px] font-black uppercase tracking-[0.6em] opacity-20 italic">
-                        Classroom Broadcast Node v2.5 // Secure Sync Active
+                <div className="pointer-events-auto opacity-20 hover:opacity-100 transition-opacity">
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] italic drop-shadow-md">
+                        Broadcast Node Active // Secure Sync
                     </p>
                 </div>
             </div>

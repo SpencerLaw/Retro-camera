@@ -49,14 +49,20 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const [editCode, setEditCode] = useState('');
 
     const [inputText, setInputText] = useState('');
+    const [currentTime, setCurrentTime] = useState(new Date());
     const [isEmergency, setIsEmergency] = useState(false);
     const [isLooping, setIsLooping] = useState(false);
-    const [repeatCount, setRepeatCount] = useState<number>(1);
+    const [repeatCount, setRepeatCount] = useState<number | string>(1);
     const [history, setHistory] = useState<Message[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'loading' | null; msg: string }>({ type: null, msg: '' });
 
     const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0];
     const channelCode = activeChannel?.code || '';
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         const savedHistory = localStorage.getItem('br_sender_history');
@@ -165,7 +171,8 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     code: channelCode.trim(),
                     text: inputText.trim(),
                     isEmergency,
-                    repeatCount: isLooping ? -1 : repeatCount,
+                    channelName: activeChannel?.name || '未知班级',
+                    repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                 }),
             });
 
@@ -357,26 +364,37 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                             <AlertTriangle size={18} /> {t('broadcast.sender.emergencyMode')}
                         </button>
 
-                        <div className="flex flex-1 sm:flex-none items-center justify-between gap-2 bg-gray-100 dark:bg-white/5 p-1 rounded-2xl">
+                        <div className="flex flex-1 sm:flex-none items-center justify-between gap-2 p-1 rounded-2xl border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20">
                             <button
                                 onClick={() => setIsLooping(!isLooping)}
-                                className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold transition-all flex-1 sm:flex-none ${isLooping
-                                    ? 'bg-blue-500 text-white shadow-md'
-                                    : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'}`}
+                                className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold transition-all flex-1 sm:flex-none border shadow-sm ${isLooping
+                                    ? 'bg-blue-500 text-white border-blue-500'
+                                    : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10'}`}
                             >
-                                <Repeat size={16} /> 自动循环播报
+                                <Repeat size={16} className={isLooping ? 'animate-[spin_4s_linear_infinite]' : ''} />
+                                {isLooping ? '自动循环: 开启' : '自动循环: 关闭'}
                             </button>
 
                             {!isLooping && (
-                                <div className="flex items-center gap-1 px-3">
-                                    <span className="text-xs text-gray-500 font-bold whitespace-nowrap">次数:</span>
+                                <div className="flex items-center gap-2 px-3 py-1.5 sm:py-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+                                    <span className="text-xs text-gray-500 font-bold whitespace-nowrap">播报次数:</span>
                                     <input
                                         type="number"
                                         min="1"
                                         max="99"
                                         value={repeatCount}
-                                        onChange={(e) => setRepeatCount(Math.max(1, parseInt(e.target.value) || 1))}
-                                        className="w-10 bg-white dark:bg-black/20 border-none rounded-lg text-center font-bold text-sm outline-none px-1 text-gray-800 dark:text-gray-200 py-1"
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '') setRepeatCount('');
+                                            else {
+                                                const num = parseInt(val);
+                                                if (!isNaN(num)) setRepeatCount(Math.min(99, num));
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            if (repeatCount === '' || Number(repeatCount) < 1) setRepeatCount(1);
+                                        }}
+                                        className="w-12 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg text-center font-bold text-sm outline-none px-1 text-blue-600 dark:text-blue-400 py-1 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                                     />
                                 </div>
                             )}

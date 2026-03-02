@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft, RefreshCw, History, Clock } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { ttsManager } from './utils/ttsManager';
 
@@ -9,6 +9,7 @@ interface Message {
     isEmergency: boolean;
     timestamp: string;
     repeatCount?: number;
+    channelName?: string;
 }
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -22,14 +23,32 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
     const [isJoined, setIsJoined] = useState(false);
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
     const [isListening, setIsListening] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [showSettings, setShowSettings] = useState(false);
 
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [charIndex, setCharIndex] = useState(0);
+    const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
+
     const lastPlayedId = useRef<string | null>(null);
     const pollingTimer = useRef<NodeJS.Timeout | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const activeSentenceRef = useRef<HTMLSpanElement>(null);
+
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('br_receiver_history');
+        if (savedHistory) {
+            try { setReceivedHistory(JSON.parse(savedHistory)); } catch (e) { setReceivedHistory([]); }
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('br_receiver_history', JSON.stringify(receivedHistory.slice(-30)));
+    }, [receivedHistory]);
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -38,9 +57,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         window.addEventListener('offline', handleOffline);
 
 
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
+            clearInterval(timer);
         };
     }, []);
 
@@ -48,14 +70,24 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1) => {
         pendingPlayouts.current = repeatCount;
+        setIsPlaying(true);
 
         const playNext = () => {
-            if (pendingPlayouts.current === 0) return; // Stopped externally
+            if (pendingPlayouts.current === 0) {
+                setIsPlaying(false);
+                return;
+            }
 
             ttsManager.speak(text, {
                 engine: 'edge',
                 voice: 'zh-CN-YunxiNeural',
                 rate: isEmergency ? 0.85 : 1.0,
+                onStart: () => {
+                    setCharIndex(0);
+                },
+                onBoundary: (idx) => {
+                    setCharIndex(idx);
+                },
                 onEnd: () => {
                     if (pendingPlayouts.current > 0) {
                         pendingPlayouts.current--;
@@ -63,7 +95,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     if (pendingPlayouts.current !== 0) {
                         setTimeout(() => {
                             playNext();
-                        }, 1000); // 1s delay
+                        }, 1000);
+                    } else {
+                        setIsPlaying(false);
+                        setCharIndex(0);
                     }
                 }
             });
@@ -71,6 +106,26 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
         playNext();
     }, []);
+
+    // Helper to split text into sentences for Karaoke effect
+    const getSentences = (text: string) => {
+        // Split by punctuation: 。！？；... . ! ? ;
+        return text.split(/([。！？；\.!\?;]+)/g).reduce((acc: string[], cur, i) => {
+            if (i % 2 === 0) acc.push(cur);
+            else if (acc.length > 0) acc[acc.length - 1] += cur;
+            return acc;
+        }, []).filter(s => s.trim());
+    };
+
+    // Auto-scroll logic
+    useEffect(() => {
+        if (activeSentenceRef.current) {
+            activeSentenceRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }, [charIndex]);
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;
@@ -89,6 +144,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             if (data.message) {
                 const msg = data.message as Message;
+
+                // Add to history if new
+                if (msg.id !== lastPlayedId.current) {
+                    setReceivedHistory(prev => {
+                        const exists = prev.some(h => h.id === msg.id);
+                        if (exists) return prev;
+                        return [...prev, msg].slice(-30);
+                    });
+                }
+
                 setCurrentMsg(msg);
 
                 // Notifications when hidden
@@ -103,7 +168,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     speak(msg.text, msg.isEmergency, msg.repeatCount ?? 1);
                     lastPlayedId.current = msg.id;
                 }
-            } else {
+            } else if (!isPlaying) {
+                // Only clear if not playing, to prevent message disappearing due to expiration
                 setCurrentMsg(null);
             }
             setError(null);
@@ -273,8 +339,22 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     <div className="flex items-center gap-3 px-6 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md">
                         <div className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
-                            {fullRoomId} // {isOnline ? (currentMsg ? t('broadcast.receiver.online') : t('broadcast.receiver.downlinkSync')) : t('broadcast.receiver.signalLost')}
+                            {(() => {
+                                const hour = currentTime.getHours();
+                                let greeting = "您好";
+                                if (hour >= 5 && hour < 12) greeting = "上午好";
+                                else if (hour >= 12 && hour < 18) greeting = "下午好";
+                                else greeting = "晚上好";
+
+                                const name = currentMsg?.channelName || (isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost'));
+                                return `${greeting}，${name}`;
+                            })()}
                         </span>
+                    </div>
+                    {/* Receiver Digital Clock */}
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md font-mono text-sm font-black tabular-nums min-w-[100px] justify-center">
+                        <Clock size={16} className="opacity-40" />
+                        {currentTime.toLocaleTimeString([], { hour12: false })}
                     </div>
                     <button
                         onClick={() => setIsListening(!isListening)}
@@ -308,9 +388,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
 
             {/* Main Broadcast Area */}
-            <div className={`flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-10 text-center relative z-10 overflow-hidden w-full h-full ${isFullscreen ? '' : 'origin-top scale-[0.98] sm:scale-100'} transition-transform`}>
+            <div className={`flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-10 text-center relative z-10 w-full h-full overflow-hidden ${isFullscreen ? '' : 'origin-top scale-[0.98] sm:scale-100'} transition-transform`}>
                 {currentMsg ? (
-                    <div className="w-full h-full flex flex-col justify-center items-center space-y-4 md:space-y-8 animate-in fade-in zoom-in-95 duration-1000 px-2 py-2 max-h-full">
+                    <div
+                        ref={scrollContainerRef}
+                        className="w-full h-full flex flex-col items-center space-y-4 md:space-y-8 animate-in fade-in zoom-in-95 duration-1000 px-4 py-16 overflow-y-auto custom-scrollbar"
+                    >
                         {currentMsg.isEmergency && (
                             <div className="flex flex-col items-center gap-4 md:gap-6 animate-pulse shrink-0">
                                 <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-white/20 flex items-center justify-center shadow-2xl">
@@ -321,14 +404,32 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 </div>
                             </div>
                         )}
-                        <h1 className={`font-black tracking-tighter drop-shadow-sm select-none transition-all duration-500 w-full break-words text-center flex-shrink overflow-hidden flex flex-col justify-center ${currentMsg.text.length > 300 ? 'text-base sm:text-lg md:text-2xl lg:text-4xl leading-normal' :
-                                currentMsg.text.length > 150 ? 'text-lg sm:text-xl md:text-3xl lg:text-5xl leading-relaxed' :
-                                    currentMsg.text.length > 80 ? 'text-2xl sm:text-3xl md:text-4xl lg:text-6xl leading-snug' :
-                                        currentMsg.text.length > 30 ? 'text-4xl sm:text-5xl md:text-6xl lg:text-8xl leading-tight' :
-                                            'text-5xl sm:text-6xl md:text-8xl lg:text-[10rem] leading-[1.1]'
-                            }`}>
-                            <span>{currentMsg.text}</span>
-                        </h1>
+
+                        <div className="flex flex-col items-center w-full max-w-6xl mx-auto py-20">
+                            {getSentences(currentMsg.text).map((sentence, sIdx, arr) => {
+                                const prevText = arr.slice(0, sIdx).join("");
+                                const isActive = charIndex >= prevText.length && charIndex < (prevText.length + sentence.length);
+                                const isPast = charIndex >= (prevText.length + sentence.length);
+
+                                return (
+                                    <span
+                                        key={sIdx}
+                                        ref={isActive ? activeSentenceRef : null}
+                                        className={`block transition-all duration-700 py-4 md:py-8 w-full break-words select-none origin-center text-center ${isActive
+                                            ? `scale-110 font-black opacity-100 ${currentMsg.isEmergency ? 'text-white' : 'text-blue-500'} drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]`
+                                            : isPast
+                                                ? 'opacity-30 blur-[1px] font-bold scale-95'
+                                                : 'opacity-10 blur-[2px] font-bold scale-90'
+                                            } ${currentMsg.text.length > 300 ? 'text-xl md:text-3xl' :
+                                                currentMsg.text.length > 100 ? 'text-2xl md:text-5xl' :
+                                                    'text-4xl md:text-7xl'
+                                            }`}
+                                    >
+                                        {sentence}
+                                    </span>
+                                );
+                            })}
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center space-y-10 animate-in fade-in duration-1000">
@@ -348,13 +449,68 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 )}
             </div>
 
-            {/* HUD Footer */}
-            <div className="p-10 flex justify-center pb-12 relative z-20">
-                <div className="px-6 md:px-8 py-2 md:py-3 rounded-full GlassContainer border border-white/20 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.35em] opacity-40 flex items-center gap-2 md:gap-4 bg-white/5 backdrop-blur-md">
-                    <span className="flex gap-1">
-                        {[...Array(4)].map((_, i) => <div key={i} className="w-1 h-2 md:h-3 bg-current opacity-40 rounded-full"></div>)}
-                    </span>
-                    {t('broadcast.receiver.broadcastMode') || '广播播报模式 // 运行中'}
+            {/* HUD Footer & History Drawer */}
+            <div className="relative z-50">
+                {showSettings && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-[95vw] max-w-2xl mb-6 animate-in slide-in-from-bottom-6 duration-500">
+                        <GlassCard className="p-8 rounded-[2.5rem] overflow-hidden max-h-[65vh] flex flex-col border-2 border-white/20">
+                            <div className="flex items-center justify-between mb-6 shrink-0">
+                                <h4 className="text-sm font-black uppercase tracking-widest opacity-60 flex items-center gap-3 text-indigo-500">
+                                    <History size={18} /> {t('broadcast.sender.timeline') || '历史播报记录'}
+                                </h4>
+                                <button
+                                    onClick={() => {
+                                        setReceivedHistory([]);
+                                        localStorage.removeItem('br_receiver_history');
+                                    }}
+                                    className="text-xs font-bold text-red-500 hover:opacity-70 px-4 py-1.5 rounded-full hover:bg-red-500/10 transition-all"
+                                >
+                                    {t('broadcast.sender.wipeLogs') || '清除全部'}
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-3">
+                                {receivedHistory.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-20 opacity-20 italic">
+                                        <History size={48} className="mb-4" />
+                                        <p className="text-lg font-bold">暂无历史播报</p>
+                                    </div>
+                                ) : (
+                                    [...receivedHistory].reverse().map((msg) => (
+                                        <button
+                                            key={msg.id}
+                                            onClick={() => {
+                                                setCurrentMsg(msg);
+                                                speak(msg.text, msg.isEmergency);
+                                                setShowSettings(false);
+                                            }}
+                                            className="w-full text-left p-5 rounded-3xl bg-black/5 dark:bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 group active:scale-[0.98]"
+                                        >
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-[10px] font-bold opacity-40">{new Date(parseInt(msg.timestamp)).toLocaleString()}</span>
+                                                {msg.isEmergency && <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full uppercase scale-90">EMERGENCY</span>}
+                                            </div>
+                                            <p className="text-sm font-bold truncate group-hover:whitespace-normal transition-all leading-relaxed mr-4">{msg.text}</p>
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        </GlassCard>
+                    </div>
+                )}
+
+                <div className="p-10 flex justify-center pb-12">
+                    <button
+                        onClick={() => setShowSettings(!showSettings)}
+                        className={`px-8 py-3 rounded-full GlassContainer border text-[10px] font-black uppercase tracking-[0.35em] flex items-center gap-4 transition-all ${showSettings
+                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500 opacity-100 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
+                            : 'border-white/20 bg-white/5 backdrop-blur-md opacity-40 hover:opacity-100'
+                            }`}
+                    >
+                        <RefreshCw size={14} className={isPlaying ? 'animate-spin' : ''} />
+                        {isPlaying ? '正在播报中...' : (t('broadcast.receiver.broadcastMode') || '广播播报模式 // 运行中')}
+                        <History size={14} className={showSettings ? 'scale-125' : ''} />
+                    </button>
                 </div>
             </div>
         </div>

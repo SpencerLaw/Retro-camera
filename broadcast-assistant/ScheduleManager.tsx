@@ -509,56 +509,62 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                     </div>
                 )}
 
-                {/* Tasks List */}
-                <div className="mt-3 bg-white dark:bg-black/20 rounded-lg p-3 font-mono text-xs overflow-x-auto text-gray-600 dark:text-gray-300 border border-black/5 dark:border-white/5">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-gray-200 dark:border-white/10 opacity-60">
-                                <th className="py-1 min-w-[100px]">A列: 日期</th>
-                                <th className="py-1 min-w-[80px]">B列: 时间</th>
-                                <th className="py-1">C列: 播报内容</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td className="py-1">2026-03-01</td>
-                                <td className="py-1">08:00</td>
-                                <td className="py-1">第一周安全教育：防溺水...</td>
-                            </tr>
-                            <tr>
-                                <td className="py-1">2026-03-01</td>
-                                <td className="py-1">15:30</td>
-                                <td className="py-1">放学提示：请注意交通安全...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <p className="text-xs text-indigo-500/80 mt-3 font-bold">
-                    👉 {t('broadcast.sender.copyPasteInstruction') || '选中 Excel 中的这三列（不要全选整张表），按 Ctrl+C 复制，然后直接通过 Ctrl+V 粘贴到下方框中即可。'}
-                </p>
+                {showImport && (
+                    <div className="mt-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                        {/* Tasks Guide Table */}
+                        <div className="bg-white dark:bg-black/20 rounded-lg p-3 font-mono text-[10px] overflow-x-auto text-gray-600 dark:text-gray-300 border border-black/5 dark:border-white/5 mb-4">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-gray-200 dark:border-white/10 opacity-60">
+                                        <th className="py-1 min-w-[100px]">A列: 日期</th>
+                                        <th className="py-1 min-w-[80px]">B列: 时间</th>
+                                        <th className="py-1">C列: 播报内容</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="py-1">2026-03-01</td>
+                                        <td className="py-1">08:00</td>
+                                        <td className="py-1">第一周安全教育：防溺水...</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-1">2026-03-01</td>
+                                        <td className="py-1">15:30</td>
+                                        <td className="py-1">放学提示：请注意交通安全...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                <textarea
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    placeholder={t('broadcast.sender.pasteExcelHere') || '请在此处使用 Ctrl+C 和 Ctrl+V 粘贴您的表格...'}
-                    rows={6}
-                    className="w-full bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-4 mt-6 font-mono text-sm outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-gray-300 whitespace-pre"
-                />
-                <div className="flex gap-3 mt-4">
-                    <button
-                        onClick={() => setShowImport(false)}
-                        className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
-                    >
-                        取消
-                    </button>
-                    <button
-                        onClick={handleImport}
-                        disabled={!importText.trim()}
-                        className="flex-[2] py-3 rounded-xl bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                        {t('broadcast.sender.parseBtn') || '智能解析并保存'}
-                    </button>
-                </div>
+                        <p className="text-xs text-indigo-500/80 mb-3 font-bold">
+                            👉 {t('broadcast.sender.copyPasteInstruction') || '选中 Excel 中的这三列，按 Ctrl+C 复制，然后直接通过 Ctrl+V 粘贴到下方框中即可。'}
+                        </p>
+
+                        <textarea
+                            value={importText}
+                            onChange={(e) => setImportText(e.target.value)}
+                            placeholder={t('broadcast.sender.pasteExcelHere') || '请在此处使用 Ctrl+C 和 Ctrl+V 粘贴您的表格...'}
+                            rows={6}
+                            className="w-full bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-gray-300 whitespace-pre"
+                        />
+
+                        <div className="flex gap-3 mt-4">
+                            <button
+                                onClick={() => setShowImport(false)}
+                                className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
+                            >
+                                取消
+                            </button>
+                            <button
+                                onClick={handleImport}
+                                disabled={!importText.trim()}
+                                className="flex-[2] py-3 rounded-xl bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                {t('broadcast.sender.parseBtn') || '智能解析并保存'}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Tasks List */}

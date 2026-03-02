@@ -7,7 +7,9 @@ export interface TTSOptions {
     pitch?: number;
     apiKey?: string;
     fishModelId?: string;
+    onStart?: () => void;
     onEnd?: () => void;
+    onBoundary?: (charIndex: number) => void;
 }
 
 class TTSManager {
@@ -30,7 +32,12 @@ class TTSManager {
         this.stop();
 
         if (this.audio) {
+            this.audio.onplay = () => {
+                if (options.onStart) options.onStart();
+                this.simulateBoundaries(text, options);
+            };
             this.audio.onended = () => {
+                this.clearBoundaryTimer();
                 if (options.onEnd) options.onEnd();
             };
         }
@@ -70,6 +77,16 @@ class TTSManager {
             const voices = window.speechSynthesis.getVoices();
             const selectedVoice = voices.find(v => v.name === options.voice);
             if (selectedVoice) utterance.voice = selectedVoice;
+        }
+
+        utterance.onstart = () => {
+            if (options.onStart) options.onStart();
+        };
+
+        if (options.onBoundary) {
+            utterance.onboundary = (event) => {
+                if (options.onBoundary) options.onBoundary(event.charIndex);
+            };
         }
 
         if (options.onEnd) {
@@ -136,6 +153,35 @@ class TTSManager {
             console.error('Fish Audio failed, falling back to native:', error);
             this.speakNative(text, options);
         }
+    }
+
+    private boundaryTimer: NodeJS.Timeout | null = null;
+    private clearBoundaryTimer() {
+        if (this.boundaryTimer) {
+            clearInterval(this.boundaryTimer);
+            this.boundaryTimer = null;
+        }
+    }
+
+    // Since Edge/Fish don't provide boundaries, we estimate for the "Lyrics" effect
+    private simulateBoundaries(text: string, options: TTSOptions) {
+        if (!options.onBoundary || options.engine === 'native') return;
+        this.clearBoundaryTimer();
+
+        let charIndex = 0;
+        const rate = options.rate || 1.0;
+        // Average Chinese reading speed is roughly 4-6 chars per second
+        const msPerChar = 220 / rate;
+
+        this.boundaryTimer = setInterval(() => {
+            if (charIndex >= text.length) {
+                this.clearBoundaryTimer();
+                return;
+            }
+            // Update every word-ish or punctuation (simplified simulation)
+            charIndex += 1;
+            if (options.onBoundary) options.onBoundary(charIndex);
+        }, msPerChar);
     }
 }
 

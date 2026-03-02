@@ -245,8 +245,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 if (isListening && msg.id !== lastPlayedId.current) {
                     speak(msg.text, msg.isEmergency, msg.repeatCount ?? 1, msg.id);
                 }
-            } else if (!isPlaying) {
-                // Only clear if not playing, to prevent message disappearing due to expiration
+            } else if (!isPlaying && pendingPlayouts.current <= 0) {
+                // Only clear if completely NOT playing, to prevent message disappearing during repeats
                 setCurrentMsg(null);
             }
             setError(null);
@@ -534,11 +534,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center space-y-10 animate-in fade-in duration-1000">
-                        <div className="relative inline-block">
+                    <div className="text-center space-y-10 animate-in fade-in duration-1000 relative z-0">
+                        <div className="relative inline-block mt-20">
                             <div className="absolute inset-0 rounded-full border-4 border-dashed border-gray-400/20 animate-[spin_20s_linear_infinite]"></div>
-                            <div className="m-8 w-32 h-32 rounded-full GlassContainer border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl shadow-inner">
-                                <Signal size={60} className="opacity-20 animate-pulse" />
+                            <div className="m-8 w-24 h-24 md:w-32 md:h-32 rounded-full GlassContainer border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl shadow-inner">
+                                <Signal size={48} className="opacity-20 animate-pulse" />
                             </div>
                         </div>
                         <div className="space-y-3">

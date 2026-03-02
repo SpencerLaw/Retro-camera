@@ -346,7 +346,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 else if (hour >= 12 && hour < 18) greeting = "下午好";
                                 else greeting = "晚上好";
 
-                                const name = currentMsg?.channelName || (isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost'));
+                                const name = currentMsg?.channelName || fullRoomId || (isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost'));
                                 return `${greeting}，${name}`;
                             })()}
                         </span>

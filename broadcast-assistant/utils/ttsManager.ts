@@ -1,4 +1,4 @@
-export type TTSEngine = 'native' | 'edge' | 'fish' | 'baidu';
+export type TTSEngine = 'native' | 'edge' | 'fish';
 
 export interface TTSOptions {
     engine: TTSEngine;
@@ -59,9 +59,6 @@ class TTSManager {
                     case 'edge':
                         await this.speakEdge(text, extendedOptions);
                         break;
-                    case 'baidu':
-                        await this.speakBaiduPrimary(text, extendedOptions);
-                        break;
                     case 'native':
                     default:
                         this.speakNative(text, extendedOptions);
@@ -79,7 +76,7 @@ class TTSManager {
      * Useful for zero-gap sequencing.
      */
     public async prefetch(text: string, options: TTSOptions): Promise<string | null> {
-        if (options.engine === 'native' || options.engine === 'baidu') return null;
+        if (options.engine === 'native') return null;
 
         try {
             let blob: Blob | null = null;
@@ -258,55 +255,8 @@ class TTSManager {
         return null;
     }
 
-    private async speakBaiduPrimary(text: string, options: TTSOptions): Promise<void> {
-        this.stop();
-        if (!this.audio) return;
-
-        const voiceStr = (options.voice || '').toLowerCase();
-        const per = voiceStr.includes('yunxi') || voiceStr.includes('male') && !voiceStr.includes('female') ? 1 : 0;
-        const url = `https://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=5&per=${per}&text=${encodeURIComponent(text)}`;
-
-        this.currentBlobUrl = url;
-        this.audio.src = url;
-
-        this.audio.onplay = () => {
-            if (options.onStart) options.onStart();
-            this.simulateBoundaries(text, options, this.audio!);
-        };
-
-        this.audio.onended = () => {
-            this.clearBoundaryTimer();
-            if (options.onEnd) options.onEnd();
-        };
-
-        this.audio.onerror = () => {
-            console.error('Baidu TTS direct playback failed, falling back to Native');
-            this.speakNative(text, options);
-        };
-
-        if (options.volume && options.volume > 1.0) {
-            this.setupAudioNodes(options.volume);
-        } else if (this.gainNode) {
-            this.gainNode.gain.setTargetAtTime(1.0, this.audioCtx!.currentTime, 0.1);
-        }
-
-        try {
-            await this.audio.play();
-        } catch (e) {
-            console.error('Baidu play error:', e);
-            this.speakNative(text, options);
-        }
-    }
-
     private async speakEdge(text: string, options: TTSOptions): Promise<void> {
         let blob = await this.fetchEdgeBlob(text, options);
-
-        // Secondary fallback: Baidu (Very stable for default male/female)
-        if (!blob && options.voice?.includes('zh-CN')) {
-            console.warn('Edge TTS failed, falling back to Baidu via direct Audio element playback');
-            await this.speakBaiduPrimary(text, options);
-            return;
-        }
 
         if (blob) {
             const url = URL.createObjectURL(blob);

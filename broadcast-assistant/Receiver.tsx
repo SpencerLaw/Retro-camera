@@ -201,17 +201,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     const sentence = currentSentences[i];
                     const nextSentence = currentSentences[i + 1];
                     const targetVoice = voiceOverride || (isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice);
-                    const engineType = targetVoice.startsWith('baidu-') ? 'baidu' : 'edge';
 
                     const ttsOptions = {
-                        engine: engineType as any, // type casting since 'baidu' is not in strict TTSEngine type natively, though will handle dynamically
+                        engine: 'edge' as const,
                         voice: targetVoice,
                         rate: isEmergency ? 0.85 : 1.0,
                         volume: volumeBoost, // Added volumeBoost here
                     };
 
                     // Pre-fetch next sentence while current one is playing
-                    if (nextSentence && !prefetchedBlobs.current[nextSentence] && engineType !== 'baidu') {
+                    if (nextSentence && !prefetchedBlobs.current[nextSentence]) {
                         ttsManager.prefetch(nextSentence, ttsOptions).then(url => {
                             if (url && playbackIdRef.current === currentPlaybackId) {
                                 prefetchedBlobs.current[nextSentence] = url;

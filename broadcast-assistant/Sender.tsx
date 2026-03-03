@@ -541,20 +541,20 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     微软男声
                                 </button>
                                 <button
-                                    onClick={() => setSelectedVoice('baidu-female')}
-                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'baidu-female'
+                                    onClick={() => setSelectedVoice('zh-CN-XiaoyiNeural')}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-XiaoyiNeural'
                                         ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
                                         : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
-                                    百度女声
+                                    备用女声
                                 </button>
                                 <button
-                                    onClick={() => setSelectedVoice('baidu-male')}
-                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'baidu-male'
+                                    onClick={() => setSelectedVoice('zh-CN-YunjianNeural')}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-YunjianNeural'
                                         ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
                                         : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
-                                    百度男声
+                                    备用男声
                                 </button>
                             </div>
                         </div>

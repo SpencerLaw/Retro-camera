@@ -24,13 +24,17 @@ const ClockDisplay = () => {
     return <span>{time.toLocaleTimeString()}</span>;
 };
 
-const BackgroundAmbience = React.memo(({ isDark, isEmergency, isSimplfied }: { isDark: boolean; isEmergency: boolean; isSimplfied?: boolean }) => {
-    if (isEmergency || isSimplfied) return <div className={`absolute inset-0 z-0 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`} />;
+const BackgroundAmbience = React.memo(({ isDark, isEmergency }: { isDark: boolean; isEmergency: boolean }) => {
+    if (isEmergency) return <div className={`absolute inset-0 z-0 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`} />;
     return (
-        <div className="absolute inset-0 z-0 transition-opacity duration-1000 pointer-events-none overflow-hidden">
-            <div className={`absolute top-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full blur-[60px] ${isDark ? 'opacity-[0.03] bg-blue-900' : 'opacity-10 bg-pink-100'}`}></div>
-            <div className={`absolute bottom-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full blur-[60px] ${isDark ? 'opacity-[0.03] bg-purple-900' : 'opacity-[0.08] bg-purple-100'}`}></div>
-        </div>
+        <div
+            className="absolute inset-0 z-0 transition-opacity duration-1000 pointer-events-none overflow-hidden"
+            style={{
+                background: isDark
+                    ? 'radial-gradient(circle at 70% 20%, rgba(30, 58, 138, 0.05), transparent 50%), radial-gradient(circle at 20% 80%, rgba(88, 28, 135, 0.05), transparent 50%)'
+                    : 'radial-gradient(circle at 70% 20%, rgba(219, 39, 119, 0.1), transparent 50%), radial-gradient(circle at 20% 80%, rgba(147, 51, 234, 0.08), transparent 50%)'
+            }}
+        />
     );
 });
 BackgroundAmbience.displayName = 'BackgroundAmbience';
@@ -39,7 +43,7 @@ const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, text
     return (
         <div
             ref={isActive ? activeSentenceRef : null}
-            className={`relative block py-4 md:py-6 w-full break-words select-none text-center transition-all duration-500 ${isActive ? (isEmergency ? 'text-white font-black scale-105 drop-shadow-2xl' : 'text-blue-500 dark:text-cyan-400 font-black scale-105 opacity-100') : isPast ? 'opacity-30 blur-[1px]' : 'opacity-10'} ${textLength > 300 ? 'text-lg md:text-2xl' : textLength > 100 ? 'text-xl md:text-4xl' : 'text-3xl md:text-7xl'}`}
+            className={`relative block py-4 md:py-6 w-full break-words select-none text-center transform-gpu transition-all duration-500 ${isActive ? (isEmergency ? 'text-white font-black scale-105' : 'text-blue-500 dark:text-cyan-400 font-black scale-105') : isPast ? 'opacity-30' : 'opacity-10'} ${textLength > 300 ? 'text-lg md:text-2xl' : textLength > 100 ? 'text-xl md:text-4xl' : 'text-3xl md:text-7xl'}`}
         >
             {sentence}
         </div>
@@ -96,11 +100,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     };
 
     const [isPlaying, setIsPlaying] = useState(false);
-    const [isSimplfied, setIsSimplfied] = useState(() => localStorage.getItem('br_receiver_simplified') === 'true');
 
-    useEffect(() => {
-        localStorage.setItem('br_receiver_simplified', isSimplfied.toString());
-    }, [isSimplfied]);
     const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
 
@@ -444,12 +444,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     }
 
     return (
-        <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency ? 'bg-red-600 text-white' : (isDark ? 'bg-[#050505] text-white' : 'bg-[#F5F5F7] text-black')}`}>
-            <BackgroundAmbience isDark={isDark} isEmergency={!!currentMsg?.isEmergency} isSimplfied={isSimplfied} />
+        <div className={`fixed inset-0 z-[100] flex flex-col transition-colors duration-1000 ${currentMsg?.isEmergency ? 'bg-red-600 text-white' : (isDark ? 'bg-[#050505] text-white' : 'bg-[#F5F5F7] text-black')}`}>
+            <BackgroundAmbience isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
             <div className="p-8 flex justify-between items-center bg-transparent relative z-50 pointer-events-none">
                 <div className="flex items-center gap-6 pointer-events-auto">
-                    <div className={`flex items-center gap-3 px-6 py-2 rounded-full border border-white/20 ${isSimplfied ? 'bg-black/40' : 'bg-white/10 backdrop-blur-[3px]'}`}>
-                        <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'} ${isSimplfied ? '' : 'animate-pulse'}`}></div>
+                    <div className="flex items-center gap-3 px-6 py-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-[8px]">
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
                             {(() => {
                                 const hour = new Date().getHours();
@@ -462,16 +462,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             })()}
                         </span>
                     </div>
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 ${isSimplfied ? 'bg-black/40' : 'bg-white/10 backdrop-blur-[6px]'} font-mono text-sm font-black tabular-nums min-w-[120px] justify-center pointer-events-auto`}>
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-[8px] font-mono text-sm font-black tabular-nums min-w-[120px] justify-center pointer-events-auto">
                         <Clock size={16} className="opacity-40" />
                         <ClockDisplay />
                     </div>
-                    <button onClick={() => setIsListening(!isListening)} className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all ${isSimplfied ? 'bg-black/40' : 'bg-white/10 backdrop-blur-[6px]'} hover:scale-110 active:scale-95 cursor-pointer ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}>
+                    <button onClick={() => setIsListening(!isListening)} className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all bg-white/5 backdrop-blur-[8px] hover:scale-110 active:scale-95 cursor-pointer ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}>
                         {isListening ? <Volume2 size={24} /> : <VolumeX size={24} />}
                     </button>
-                    <button onClick={() => setIsSimplfied(!isSimplfied)} className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all ${isSimplfied ? 'bg-green-500/40 text-green-500 border-green-500/30' : 'bg-white/10 text-gray-400'} hover:scale-110 active:scale-95 cursor-pointer`} title="极简模式 (降低CPU/GPU占用)">
-                        <Zap size={20} />
-                    </button>
+
                 </div>
                 <div className="flex gap-4 pointer-events-auto">
                     <button onClick={toggleTheme} className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/20 text-orange-500 cursor-pointer">

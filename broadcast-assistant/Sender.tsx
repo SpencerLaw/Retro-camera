@@ -389,14 +389,14 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <div className="flex items-center gap-2">
                         <button
                             onClick={clearCloudRooms}
-                            className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all active:scale-90"
+                            className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition active:scale-90"
                             title={t('broadcast.sender.clearAllRooms')}
                         >
                             <AlertTriangle size={18} />
                         </button>
                         <button
                             onClick={addChannel}
-                            className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all active:scale-90"
+                            className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition active:scale-90"
                         >
                             <Plus size={20} />
                         </button>
@@ -408,7 +408,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         <button
                             key={channel.id}
                             onClick={() => setActiveChannelId(channel.id)}
-                            className={`flex-none px-6 py-4 rounded-3xl border transition-all duration-300 flex items-center gap-3 relative group ${activeChannelId === channel.id
+                            className={`flex-none px-6 py-4 rounded-3xl border transition duration-300 flex items-center gap-3 relative group ${activeChannelId === channel.id
                                 ? 'bg-gradient-to-r from-pink-500/90 to-rose-500/90 backdrop-blur-md border-pink-500/30 text-white shadow-xl scale-105 shadow-pink-500/20'
                                 : 'bg-white/50 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-400 hover:bg-white/80 dark:hover:bg-white/10'
                                 }`}
@@ -447,7 +447,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                             <input
                                 value={editName}
                                 onChange={(e) => setEditName(e.target.value)}
-                                className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white"
+                                className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition dark:text-white"
                                 placeholder={t('broadcast.sender.classNamePlaceholder')}
                             />
                         </div>
@@ -457,7 +457,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 <input
                                     value={editCode}
                                     onChange={(e) => setEditCode(e.target.value.toUpperCase())}
-                                    className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white uppercase tracking-widest"
+                                    className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition dark:text-white uppercase tracking-widest"
                                     placeholder={t('broadcast.sender.roomCodePlaceholder')}
                                     maxLength={8}
                                 />
@@ -473,13 +473,13 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <div className="flex gap-4">
                         <button
                             onClick={() => setEditingChannel(null)}
-                            className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 transition-all"
+                            className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 transition"
                         >
                             {t('broadcast.sender.abandon') || '取消'}
                         </button>
                         <button
                             onClick={saveEdit}
-                            className="flex-1 py-4 rounded-2xl bg-blue-500 text-white font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                            className="flex-1 py-4 rounded-2xl bg-blue-500 text-white font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition"
                         >
                             {t('broadcast.sender.on') || '保存'}
                         </button>
@@ -519,7 +519,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         placeholder={t('broadcast.sender.broadcastPlaceholder')}
                         rows={4}
                         autoFocus
-                        className="w-full bg-transparent border-none text-2xl font-bold tracking-tight outline-none resize-none placeholder:opacity-20 transition-all min-h-[140px] dark:text-white"
+                        className="w-full bg-transparent border-none text-2xl font-bold tracking-tight outline-none resize-none placeholder:opacity-20 transition min-h-[140px] dark:text-white"
                     />
                     <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                 </div>
@@ -528,7 +528,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
                         <button
                             onClick={() => setIsEmergency(!isEmergency)}
-                            className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isEmergency
+                            className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition ${isEmergency
                                 ? 'bg-red-500 text-white shadow-lg'
                                 : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
                                 }`}
@@ -539,7 +539,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1 rounded-2xl border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20">
                             <button
                                 onClick={() => setIsLooping(!isLooping)}
-                                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold transition-all border shadow-sm ${isLooping
+                                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold transition border shadow-sm ${isLooping
                                     ? 'bg-blue-500 text-white border-blue-500'
                                     : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10'}`}
                             >
@@ -566,7 +566,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                         onBlur={() => {
                                             if (repeatCount === '' || Number(repeatCount) < 1) setRepeatCount(1);
                                         }}
-                                        className="w-12 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg text-center font-bold text-sm outline-none px-1 text-blue-600 dark:text-blue-400 py-1 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                                        className="w-12 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg text-center font-bold text-sm outline-none px-1 text-blue-600 dark:text-blue-400 py-1 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                                     />
                                 </div>
                             )}
@@ -578,7 +578,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <button
                         onClick={handleSend}
                         disabled={status.type === 'loading'}
-                        className="px-8 lg:px-12 py-4 lg:py-5 bg-black dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-base lg:text-xl hover:scale-[1.02] active:scale-95 shadow-xl transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3 w-full xl:w-auto"
+                        className="px-8 lg:px-12 py-4 lg:py-5 bg-black dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-base lg:text-xl hover:scale-[1.02] active:scale-95 shadow-xl transition disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3 w-full xl:w-auto"
                     >
                         {status.type === 'loading' ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
                         {t('broadcast.sender.launch')}
@@ -626,7 +626,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         </div>
                     ) : (
                         history.map((msg) => (
-                            <div key={msg.id} className="group p-5 rounded-3xl bg-gray-50 dark:bg-white/[0.03] border border-transparent hover:border-white/10 transition-all flex items-start gap-4">
+                            <div key={msg.id} className="group p-5 rounded-3xl bg-gray-50 dark:bg-white/[0.03] border border-transparent hover:border-white/10 transition flex items-start gap-4">
                                 <div className="pt-1">
                                     {msg.isEmergency ? (
                                         <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
@@ -654,7 +654,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 </div>
                                 <button
                                     onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName)}
-                                    className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
+                                    className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 opacity-0 group-hover:opacity-100 transition hover:bg-blue-500 hover:text-white"
                                     title={t('broadcast.sender.replayAction')}
                                 >
                                     <RefreshCw size={18} />
@@ -694,7 +694,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 <textarea
                                     value={replayData.text}
                                     onChange={(e) => setReplayData({ ...replayData, text: e.target.value })}
-                                    className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white min-h-[120px] text-lg lg:text-xl"
+                                    className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition dark:text-white min-h-[120px] text-lg lg:text-xl"
                                 />
                             </div>
 
@@ -704,7 +704,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     <div className="flex items-center gap-4 bg-gray-100 dark:bg-white/5 p-2 rounded-2xl">
                                         <button
                                             onClick={() => setReplayData({ ...replayData, repeatCount: Math.max(1, replayData.repeatCount - 1) })}
-                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
+                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition"
                                         >
                                             -
                                         </button>
@@ -713,7 +713,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                         </span>
                                         <button
                                             onClick={() => setReplayData({ ...replayData, repeatCount: Math.min(99, replayData.repeatCount + 1) })}
-                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
+                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition"
                                         >
                                             +
                                         </button>
@@ -724,7 +724,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
                             <button
                                 onClick={() => setReplayData({ ...replayData, isEmergency: !replayData.isEmergency })}
-                                className={`w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${replayData.isEmergency
+                                className={`w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition ${replayData.isEmergency
                                     ? 'bg-red-500 text-white shadow-lg'
                                     : 'bg-gray-100 dark:bg-white/5 text-gray-500'}`}
                             >
@@ -735,13 +735,13 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         <div className="flex gap-4 pt-4">
                             <button
                                 onClick={() => setShowReplayDialog(false)}
-                                className="flex-1 py-5 rounded-3xl bg-gray-100 dark:bg-white/5 font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all text-gray-400"
+                                className="flex-1 py-5 rounded-3xl bg-gray-100 dark:bg-white/5 font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition text-gray-400"
                             >
                                 取消
                             </button>
                             <button
                                 onClick={executeReplay}
-                                className="flex-[2] py-5 rounded-3xl bg-blue-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                className="flex-[2] py-5 rounded-3xl bg-blue-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition"
                             >
                                 立即重发
                             </button>

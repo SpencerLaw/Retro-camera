@@ -11,7 +11,7 @@ import { useTranslations } from '../hooks/useTranslations';
 import CustomDialog, { DialogType } from './components/CustomDialog';
 
 const GlassContainer = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] rounded-[2rem] ${className}`}>
+    <div className={`backdrop-blur-[10px] bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] rounded-[2rem] ${className}`}>
         {children}
     </div>
 );
@@ -116,14 +116,19 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
 
     if (mode === 'license') {
         return (
-            <div className={`min-h-screen flex items-center justify-center p-6 transition-colors duration-500 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`}>
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className={`absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-400'}`}></div>
-                    <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${theme === 'dark' ? 'bg-purple-600' : 'bg-pink-400'}`}></div>
-                </div>
+            <div className={`min-h-[100dvh] transition-colors duration-500 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden ${theme === 'dark' ? 'bg-zinc-950 text-white' : 'bg-[#F5F5F7] text-gray-900'}`}>
+                {/* Optimized background */}
+                <div
+                    className="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-overlay"
+                    style={{
+                        background: theme === 'dark'
+                            ? 'radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.05), transparent 40%), radial-gradient(circle at 100% 100%, rgba(147, 51, 234, 0.05), transparent 40%)'
+                            : 'radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.1), transparent 40%), radial-gradient(circle at 100% 100%, rgba(147, 51, 234, 0.1), transparent 40%)'
+                    }}
+                />
 
                 <GlassContainer className="max-w-2xl w-full p-10 rounded-[2.5rem] relative">
-                    <button onClick={() => setMode('selection')} className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all active:scale-95">
+                    <button onClick={() => setMode('selection')} className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition active:scale-95">
                         <ArrowLeft size={24} />
                     </button>
 

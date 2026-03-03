@@ -268,10 +268,34 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         }
     };
 
+    const clearCloudRooms = async () => {
+        if (window.confirm(t('broadcast.sender.clearAllRoomsConfirm'))) {
+            setStatus({ type: 'loading', msg: t('broadcast.sender.clearing') });
+            try {
+                const resp = await fetch('/api/broadcast/cleanup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ license })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    setStatus({ type: 'success', msg: t('broadcast.sender.clearSuccess') });
+                    // Optionally clear local channels too if they are just syncs of the DB
+                    // setChannels([{ id: 'default', name: t('broadcast.sender.unknownClass'), code: Math.floor(1000 + Math.random() * 9000).toString() }]);
+                    setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (err) {
+                setStatus({ type: 'error', msg: t('broadcast.sender.clearFailed') });
+            }
+        }
+    };
+
     const copyRoomId = (e: React.MouseEvent) => {
         e.stopPropagation();
         navigator.clipboard.writeText(channelCode);
-        setStatus({ type: 'success', msg: 'Room ID Copied' });
+        setStatus({ type: 'success', msg: t('broadcast.sender.copySuccess') });
         setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
     };
 
@@ -300,7 +324,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 }`}
                         >
                             <div className="text-left">
-                                <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeChannelId === channel.id ? 'opacity-80 text-white' : 'opacity-40'}`}>ROOM {channel.code}</p>
+                                <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeChannelId === channel.id ? 'opacity-80 text-white' : 'opacity-40'}`}>{t('broadcast.sender.room')} {channel.code}</p>
                                 <p className="text-sm font-bold truncate max-w-[120px]">{channel.name}</p>
                             </div>
                             <div className={`flex items-center gap-1 ${activeChannelId === channel.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-opacity'}`}>
@@ -391,7 +415,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black tracking-widest uppercase truncate">
                             {t('broadcast.sender.active')}
                         </div>
-                        <div className="text-[10px] font-bold opacity-30 ml-auto sm:ml-0">SENDER ID: {license.slice(-4)}</div>
+                        <div className="text-[10px] font-bold opacity-30 ml-auto sm:ml-0">{t('broadcast.sender.senderId')}: {license.slice(-4).toUpperCase()}</div>
                     </div>
                 </GlassCard>
             )}
@@ -491,13 +515,22 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                             <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">{t('broadcast.sender.last30Sessions')}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={clearHistory}
-                        className="p-3 text-gray-300 hover:text-red-500 transition-colors"
-                        title={t('broadcast.sender.wipeLogs')}
-                    >
-                        <Trash2 size={20} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={clearCloudRooms}
+                            className="p-3 text-gray-300 hover:text-orange-500 transition-colors"
+                            title={t('broadcast.sender.clearAllRooms')}
+                        >
+                            <AlertTriangle size={20} />
+                        </button>
+                        <button
+                            onClick={clearHistory}
+                            className="p-3 text-gray-300 hover:text-red-500 transition-colors"
+                            title={t('broadcast.sender.wipeLogs')}
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="space-y-4 max-h-[300px] overflow-y-auto px-2 custom-scrollbar">

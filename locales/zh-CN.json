@@ -173,7 +173,14 @@
       "last30Sessions": "最近 30 条记录",
       "wipeLogs": "清除日志",
       "clearHistoryConfirm": "确定要清空本地播报记录吗？",
+      "clearAllRooms": "清空云端房间",
+      "clearAllRoomsConfirm": "确定要清空云端数据库中所有关联的房间吗？此操作不可撤销。",
+      "clearing": "正在清理...",
+      "clearSuccess": "云端数据已清空",
+      "clearFailed": "清理失败",
       "silentAirwaves": "当前电波处于静默状态。",
+      "manageClasses": "管理教室",
+      "senderId": "发送端 ID",
       "addClass": "添加班级",
       "editClass": "编辑班级",
       "deleteClass": "删除班级",
@@ -226,6 +233,8 @@
       "smartParseHeader": "智能解析导入",
       "formatPrompt": "格式：日期 - 时间 - 内容 (支持从 Excel 直接复制粘贴)",
       "pastePlaceholder": "请在此处粘贴表格内容...",
+      "copySuccess": "房间 ID 已复制",
+      "room": "房间",
       "queueHeader": "待播报任务队列"
     },
     "receiver": {

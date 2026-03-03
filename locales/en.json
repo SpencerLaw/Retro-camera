@@ -173,7 +173,14 @@
       "last30Sessions": "Last 30 Sessions",
       "wipeLogs": "Wipe Logs",
       "clearHistoryConfirm": "Clear all local broadcast history?",
+      "clearAllRooms": "Clear Cloud Rooms",
+      "clearAllRoomsConfirm": "Are you sure you want to clear ALL associated rooms in the cloud database? This action cannot be undone.",
+      "clearing": "Clearing...",
+      "clearSuccess": "Cloud data cleared",
+      "clearFailed": "Clear failed",
       "silentAirwaves": "Your airwaves are currently silent.",
+      "manageClasses": "Manage Classes",
+      "senderId": "Sender ID",
       "addClass": "Add Class",
       "editClass": "Edit Class",
       "deleteClass": "Delete Class",
@@ -225,6 +232,8 @@
       "smartParseHeader": "Smart Parse Import",
       "formatPrompt": "Format: Date - Time - Content (Supports copy-paste from Excel)",
       "pastePlaceholder": "Paste table content here...",
+      "copySuccess": "Room ID Copied",
+      "room": "ROOM",
       "queueHeader": "Upcoming Tasks Queue"
     },
     "receiver": {

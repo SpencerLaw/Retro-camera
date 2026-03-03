@@ -106,6 +106,11 @@ class TTSManager {
         };
         this.audio.onended = () => {
             this.clearBoundaryTimer();
+            // Automatically clean up blob memory to prevent leaks
+            if (url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+                this.blobPool.delete(url);
+            }
             if (options.onEnd) options.onEnd();
         };
 
@@ -226,32 +231,72 @@ class TTSManager {
     }
 
     private async fetchEdgeBlob(text: string, options: TTSOptions): Promise<Blob | null> {
-        const proxies = [
-            'https://edge-tts.vercel.app/api/tts',
-            'https://tts.cy7.io/api/tts',
-            'https://api.tts.me/edge'
-        ];
-
-        for (const proxyBase of proxies) {
+        // Fallback robust dictionaries API as ultimate safety net
+        const fetchFanyiFallback = async (text: string, voice: string) => {
             try {
-                const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
-                const rate = options.rate ? `${Math.round((options.rate - 1) * 100)}%` : '0%';
-                const url = `${proxyBase}?text=${encodeURIComponent(text)}&voice=${voice}&rate=${rate}`;
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout for each proxy
-
-                const resp = await fetch(url, { signal: controller.signal });
-                clearTimeout(timeoutId);
-
-                if (resp.ok) {
-                    const blob = await resp.blob();
-                    if (blob.size > 100) return blob; // Valid audio blob should have some size
-                }
-            } catch (error) {
-                console.warn(`Edge fetch failed via ${proxyBase}`);
+                const per = voice.toLowerCase().includes('female') || voice.toLowerCase().includes('xiaoxiao') || voice.toLowerCase().includes('xiaoyi') ? 0 : 1;
+                const url = `https://fanyi.baidu.com/gettts?lan=zh&text=${encodeURIComponent(text)}&spd=5&source=web&per=${per}`;
+                const resp = await fetch(url);
+                if (resp.ok) return await resp.blob();
+            } catch (e) {
+                console.warn('Fanyi fallback failed:', e);
             }
+            return null;
+        };
+
+        const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
+        const rate = options.rate ? `${Math.round((options.rate - 1) * 100)}%` : '0%';
+
+        // Proxy 1: tts.quest (High quality but requires specific format)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const resp = await fetch('https://api.tts.quest/v3/voice/synthesis', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: text,
+                    voiceName: voice,
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.data?.audioUrl) {
+                    const audioResp = await fetch(data.data.audioUrl);
+                    if (audioResp.ok) {
+                        const blob = await audioResp.blob();
+                        if (blob.size > 100) return blob;
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn(`Edge fetch failed via api.tts.quest`);
         }
+
+        // Proxy 2: edge-tts.vercel.app (Standard GET)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const url = `https://edge-tts.vercel.app/api/tts?text=${encodeURIComponent(text)}&voice=${voice}&rate=${rate}`;
+            const resp = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (resp.ok) {
+                const blob = await resp.blob();
+                if (blob.size > 100) return blob;
+            }
+        } catch (error) {
+            console.warn(`Edge fetch failed via vercel.app`);
+        }
+
+        // Ultimate fallback: Baidu Fanyi
+        console.warn('All primary Edge proxies failed, attempting Fanyi HTTP fallback...');
+        const fanyiBlob = await fetchFanyiFallback(text, voice);
+        if (fanyiBlob && fanyiBlob.size > 100) return fanyiBlob;
+
         return null;
     }
 

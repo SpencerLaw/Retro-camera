@@ -35,37 +35,7 @@ const ClockDisplay = () => {
     return <span>{time.toLocaleTimeString()}</span>;
 };
 
-const VOICE_CATEGORIES = [
-    {
-        id: 'standard', name: '通用 (标准)', options: [
-            { value: 'zh-CN-XiaoxiaoNeural', label: '晓晓 (女声, 温暖)' },
-            { value: 'zh-CN-XiaoyiNeural', label: '晓伊 (女声, 甜美)' },
-            { value: 'zh-CN-YunxiNeural', label: '云希 (男声, 活力)' },
-            { value: 'zh-CN-YunjianNeural', label: '云健 (男声, 稳重)' },
-            { value: 'zh-CN-YunyangNeural', label: '云扬 (男声, 新闻)' },
-        ]
-    },
-    {
-        id: 'emotion', name: '情感 & 角色', options: [
-            { value: 'zh-CN-XiaozhenNeural', label: '晓甄 (女声, 儿童)' },
-            { value: 'zh-CN-YunxiaNeural', label: '云夏 (男声, 少年)' },
-            { value: 'zh-CN-XiaomoNeural', label: '晓墨 (女声, 严肃)' },
-            { value: 'zh-CN-XiaoruiNeural', label: '晓睿 (女声, 可爱)' },
-            { value: 'zh-CN-XiaoshuangNeural', label: '晓双 (女声, 儿童)' },
-        ]
-    },
-    {
-        id: 'dialect', name: '地方口音', options: [
-            { value: 'zh-CN-liaoning-XiaobeiNeural', label: '东北话 (辽宁女声)' },
-            { value: 'zh-CN-shaanxi-XiaoniNeural', label: '陕西话 (西安女声)' },
-            { value: 'zh-CN-sichuan-YunxiNeural', label: '四川话 (成都男声)' },
-            { value: 'zh-HK-HiuMaanNeural', label: '粤语 (香港女声)' },
-            { value: 'zh-HK-WanLungNeural', label: '粤语 (香港男声)' },
-            { value: 'zh-TW-HsiaoChenNeural', label: '繁体 (台湾女声)' },
-            { value: 'zh-TW-YunJheNeural', label: '繁体 (台湾男声)' },
-        ]
-    }
-];
+
 
 const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
     const t = useTranslations();
@@ -306,7 +276,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     isEmergency: replayData.isEmergency,
                     channelName: replayData.channelName || activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: replayData.repeatCount,
-                    voice: replayData.voice
+                    voice: ''
                 }),
             });
 
@@ -316,7 +286,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     id: data.messageId,
                     text: replayData.text.trim(),
                     isEmergency: replayData.isEmergency,
-                    voice: replayData.voice,
+                    voice: '',
                     repeatCount: replayData.repeatCount,
                     timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
                     channelName: replayData.channelName || activeChannel.name
@@ -386,12 +356,21 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
             <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">
                     <h3 className="text-sm font-black uppercase tracking-[0.2em] opacity-30">{t('broadcast.sender.manageClasses')}</h3>
-                    <button
-                        onClick={addChannel}
-                        className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all active:scale-90"
-                    >
-                        <Plus size={20} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={clearCloudRooms}
+                            className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all active:scale-90"
+                            title={t('broadcast.sender.clearAllRooms')}
+                        >
+                            <AlertTriangle size={18} />
+                        </button>
+                        <button
+                            onClick={addChannel}
+                            className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all active:scale-90"
+                        >
+                            <Plus size={20} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex flex-nowrap overflow-x-auto gap-4 py-2 px-1 no-scrollbar scroll-smooth">
@@ -600,13 +579,6 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     </div>
                     <div className="flex items-center gap-1">
                         <button
-                            onClick={clearCloudRooms}
-                            className="p-3 text-gray-300 hover:text-orange-500 transition-colors"
-                            title={t('broadcast.sender.clearAllRooms')}
-                        >
-                            <AlertTriangle size={20} />
-                        </button>
-                        <button
                             onClick={clearHistory}
                             className="p-3 text-gray-300 hover:text-red-500 transition-colors"
                             title={t('broadcast.sender.wipeLogs')}
@@ -716,43 +688,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                             +
                                         </button>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-30">修改发音人</label>
-                                        <div className="relative group/voice h-[56px] rounded-2xl bg-gray-100 dark:bg-white/5 border-2 border-transparent hover:border-blue-500/20 transition-all cursor-pointer flex items-center justify-between px-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase font-black tracking-widest text-blue-500">
-                                                    {VOICE_CATEGORIES.find(c => c.options.some(o => o.value === replayData.voice))?.options.find(o => o.value === replayData.voice)?.label || '智能语音'}
-                                                </span>
-                                            </div>
-                                            <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-gray-400 group-hover/voice:text-blue-500 transition-colors">
-                                                <Radio size={14} />
-                                            </div>
-                                            {/* Dropdown Menu */}
-                                            <div className="absolute bottom-full right-0 mb-4 w-64 bg-white dark:bg-black border border-gray-100 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover/voice:opacity-100 group-hover/voice:visible transition-all translate-y-2 group-hover/voice:translate-y-0 z-50 overflow-hidden flex flex-col max-h-[40vh]">
-                                                <div className="flex-1 overflow-y-auto w-full no-scrollbar">
-                                                    {VOICE_CATEGORIES.map(category => (
-                                                        <div key={category.id} className="p-2 border-b border-gray-100/50 dark:border-white/5 last:border-0 border-solid cursor-default">
-                                                            <div className="text-[10px] font-black tracking-widest text-gray-400 uppercase px-3 py-2">
-                                                                {category.name}
-                                                            </div>
-                                                            <div className="space-y-1 mt-1">
-                                                                {category.options.map(voice => (
-                                                                    <button
-                                                                        key={voice.value}
-                                                                        onClick={(e) => { e.stopPropagation(); setReplayData({ ...replayData, voice: voice.value }); }}
-                                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold transition-all flex items-center justify-between ${replayData.voice === voice.value ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
-                                                                    >
-                                                                        {voice.label}
-                                                                        {replayData.voice === voice.value && <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                 </div>
                             </div>
 

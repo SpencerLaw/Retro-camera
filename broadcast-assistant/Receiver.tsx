@@ -596,7 +596,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
 
             {/* Main Broadcast Area */}
-            <div className={`flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-10 text-center relative z-10 w-full h-full overflow-hidden ${isFullscreen ? '' : 'origin-top scale-[0.98] sm:scale-100'} transition-transform`}>
+            <div className={`flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-10 text-center relative z-10 w-full h-full ${isFullscreen ? '' : 'origin-top scale-[0.98] sm:scale-100'} transition-transform`}>
                 {currentMsg ? (
                     <div
                         ref={scrollContainerRef}

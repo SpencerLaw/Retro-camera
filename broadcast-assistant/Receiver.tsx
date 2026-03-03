@@ -118,6 +118,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const rescueTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const isUserScrollingRef = useRef(false);
 
+    // Refs for stable polling logic without re-triggering effects
+    const isPlayingRef = useRef(false);
+    useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+    const isListeningRef = useRef(false);
+    useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+
     useEffect(() => {
         const savedHistory = localStorage.getItem('br_receiver_history');
         if (savedHistory) {
@@ -332,17 +338,17 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         icon: '/favicon.ico'
                     });
                 }
-                if (isListening && msg.id !== lastPlayedId.current) {
+                if (isListeningRef.current && msg.id !== lastPlayedId.current) {
                     speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice);
                 }
-            } else if (!isPlaying && pendingPlayouts.current <= 0) {
+            } else if (!isPlayingRef.current && pendingPlayouts.current <= 0) {
                 setCurrentMsg(null);
             }
             setError(null);
         } catch (err) {
             console.error('Polling error:', err);
         }
-    }, [fullRoomId, isListening, speak, t, isPlaying]);
+    }, [fullRoomId, speak, t]);
 
     useEffect(() => {
         let isActive = true;
@@ -353,16 +359,24 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
         if (isJoined) {
             poll();
-            // Try to start silent loop for auto-play (might be blocked until first click)
             ttsManager.startSilentLoop();
         }
         return () => {
             isActive = false;
             if (pollingTimer.current) clearTimeout(pollingTimer.current);
+            // DO NOT stop audio here, as this effect re-runs on fetchMessage changes.
+            // Component-level cleanup is handled by unmount or explicit stop.
+        };
+    }, [isJoined, fetchMessage]);
+
+    // Global cleanup on unmount
+    useEffect(() => {
+        return () => {
             ttsManager.stop();
             ttsManager.stopSilentLoop();
         };
-    }, [isJoined, fetchMessage]);
+    }, []);
+
 
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {

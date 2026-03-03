@@ -178,9 +178,16 @@
       "editClass": "编辑班级",
       "deleteClass": "删除班级",
       "className": "班级名称",
-      "roomCode": "房间码",
-      "manageClasses": "班级管理",
       "active": "在线",
+      "unknownClass": "未知班级",
+      "roomCodePlaceholder": "4位数字",
+      "classNamePlaceholder": "输入班级名称",
+      "autoLoop": "自动循环",
+      "repeatCount": "播报次数",
+      "on": "开启",
+      "off": "关闭",
+      "replayAction": "一键再次播报",
+      "contentPlaceholder": "播报内容",
       "scheduler": "定时播报计划",
       "importExcel": "导入计划",
       "pasteExcelHere": "粘贴您的表格（日期 | 时间 | 播报内容）...",
@@ -199,7 +206,27 @@
       "rules": "条计划任务",
       "howToImportTitle": "如何导入极速计划？",
       "copyPasteInstruction": "选中 Excel 中的这三列（不要全选整张表），按 Ctrl+C 复制，然后直接通过 Ctrl+V 粘贴到下方框中即可。",
-      "scheduleHelper": "系统支持自动播报预设内容。请将 Excel 内容（确保每行为：日期、时间、内容，可使用 Tab 键或空格分隔）直接粘贴在上方文本框中。"
+      "scheduleHelper": "系统支持自动播报预设内容。请将 Excel 内容（确保每行为：日期、时间、内容，可使用 Tab 键或空格分隔）直接粘贴在上方文本框中。",
+      "parseFailedExcel": "未能识别有效的数据，请确保格式为: 日期(Tab)时间(Tab)内容，并检查是否有制表符或多个空格分隔。",
+      "parseFailedWord": "从文档中未能提取到有效任务，请确认是否为标准的 Word 表格格式。",
+      "parseError": "解析 Word 文档失败，请重试",
+      "importSuccess": "成功入库 {count} 条播放任务！系统将等待并自动执行。",
+      "clearScheduleConfirm": "确定清空所有排期数据吗？",
+      "running": "已运行",
+      "paused": "已暂停",
+      "importExcelTitle": "从 Excel 粘贴导入",
+      "importWordTitle": "导入 Word 表格",
+      "parsing": "正在深度解析...",
+      "verifyResults": "请核对解析结果",
+      "verifyDesc": "共解析出 {count} 条播报任务，您可以直接在此修改或删除，确认后点导入。",
+      "emptyList": "已清空列表。",
+      "abandon": "放弃",
+      "clearAll": "清空全部",
+      "confirmImport": "确认导入 ({count})",
+      "smartParseHeader": "智能解析导入",
+      "formatPrompt": "格式：日期 - 时间 - 内容 (支持从 Excel 直接复制粘贴)",
+      "pastePlaceholder": "请在此处粘贴表格内容...",
+      "queueHeader": "待播报任务队列"
     },
     "receiver": {
       "joinChannel": "进入通道",
@@ -213,7 +240,26 @@
       "criticalBroadcast": "紧急播报",
       "downlinkSync": "正在接收信息中",
       "standbySource": "等待播报源接入...",
-      "broadcastMode": "广播播报模式 // 运行中"
+      "broadcastMode": "广播播报模式 // 运行中",
+      "channelNotFound": "未找到该频道",
+      "verificationFailed": "验证失败，请重试",
+      "networkError": "网络错误，请检查连接",
+      "greeting": {
+        "morning": "上午好",
+        "afternoon": "下午好",
+        "evening": "晚上好",
+        "hello": "您好"
+      },
+      "notification": {
+        "emergency": "【紧急广播】",
+        "normal": "校园广播提示"
+      },
+      "voiceSettings": {
+        "title": "语音风格设置",
+        "xiaoxiao": "晓晓 (温柔女声)",
+        "yunxi": "云希 (活力男声)",
+        "yunjian": "云健 (专业男声)"
+      }
     }
   },
   "morningTree": {

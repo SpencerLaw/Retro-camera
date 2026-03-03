@@ -210,7 +210,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
             setImportText('');
             setShowImport(false);
         } else {
-            alert('未能识别有效的数据，请确保格式为: 日期(Tab)时间(Tab)内容，并检查是否有制表符或多个空格分隔。');
+            alert(t('broadcast.sender.parseFailedExcel'));
         }
     };
 
@@ -311,12 +311,12 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 setPreviewTasks(newTasks);
                 setShowImport(false);
             } else {
-                alert('从文档中未能提取到有效任务，请确认是否为标准的 Word 表格格式。');
+                alert(t('broadcast.sender.parseFailedWord'));
             }
 
         } catch (error) {
             console.error('Docx parse error', error);
-            alert('解析 Word 文档失败，请重试');
+            alert(t('broadcast.sender.parseError'));
         } finally {
             setIsParsingDocx(false);
             if (e.target) e.target.value = '';
@@ -346,7 +346,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
         localStorage.setItem('br_schedule_tasks', JSON.stringify(combined));
         const addedCount = previewTasks.length;
         setPreviewTasks(null);
-        alert(`成功入库 ${addedCount} 条播放任务！系统将等待并自动执行。`);
+        alert(t('broadcast.sender.importSuccess').replace('{count}', String(addedCount)));
     };
 
     const updatePreviewTask = (id: string, field: keyof ScheduleTask, value: string) => {
@@ -394,13 +394,13 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                             : 'bg-white dark:bg-white/5 text-gray-400 border-black/5 hover:border-black/10'}`}
                     >
                         {isAutoEnabled ? <ToggleRight size={20} className="sm:w-6 sm:h-6" /> : <ToggleLeft size={20} className="sm:w-6 sm:h-6" />}
-                        <span className="whitespace-nowrap">{isAutoEnabled ? '已运行' : '已暂停'}</span>
+                        <span className="whitespace-nowrap">{isAutoEnabled ? t('broadcast.sender.running') : t('broadcast.sender.paused')}</span>
                     </button>
                     {tasks.length > 0 && (
                         <button
                             onClick={handleClearAll}
                             className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all border border-transparent hover:border-red-500/20 shrink-0"
-                            title="清空所有任务"
+                            title={t('broadcast.sender.clearAll')}
                         >
                             <Trash2 size={20} />
                         </button>
@@ -416,7 +416,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition-all text-indigo-500 overflow-hidden text-left sm:text-center"
                     >
                         <Upload size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
-                        <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">从 Excel 粘贴导入</span>
+                        <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">{t('broadcast.sender.importExcelTitle')}</span>
                         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden sm:block">
                             <FileText size={40} />
                         </div>
@@ -431,7 +431,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                             <FileText size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
                         )}
                         <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">
-                            {isParsingDocx ? '正在深度解析...' : '导入 Word 表格'}
+                            {isParsingDocx ? t('broadcast.sender.parsing') : t('broadcast.sender.importWordTitle')}
                         </span>
                         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden sm:block">
                             <Upload size={40} />
@@ -455,10 +455,10 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                             <div>
                                 <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
                                     <ListTodo size={24} className="text-indigo-500" />
-                                    请核对解析结果
+                                    {t('broadcast.sender.verifyResults')}
                                 </h3>
                                 <p className="text-sm text-gray-500 font-medium mt-1">
-                                    共解析出 <span className="text-indigo-500 font-bold">{previewTasks.length}</span> 条播报任务，您可以直接在此修改或删除，确认后点导入。
+                                    {t('broadcast.sender.verifyDesc').replace('{count}', String(previewTasks.length))}
                                 </p>
                             </div>
                             <button onClick={() => setPreviewTasks(null)} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
@@ -468,7 +468,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
 
                         <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-gray-50 dark:bg-black/20">
                             {previewTasks.length === 0 ? (
-                                <div className="text-center py-12 text-gray-400 font-bold">已清空列表。</div>
+                                <div className="text-center py-12 text-gray-400 font-bold">{t('broadcast.sender.emptyList')}</div>
                             ) : (
                                 <div className="space-y-3">
                                     {previewTasks.map((pt) => (
@@ -491,7 +491,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                                                 value={pt.content}
                                                 onChange={e => updatePreviewTask(pt.id, 'content', e.target.value)}
                                                 className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-white/5 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 text-sm font-semibold outline-none flex-1 w-full"
-                                                placeholder="播报内容"
+                                                placeholder={t('broadcast.sender.contentPlaceholder')}
                                             />
                                             <button
                                                 onClick={() => deletePreviewTask(pt.id)}
@@ -510,21 +510,21 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                                 onClick={() => setPreviewTasks(null)}
                                 className="px-6 py-3 rounded-xl font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 transition-colors text-gray-600"
                             >
-                                放弃
+                                {t('broadcast.sender.abandon')}
                             </button>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setPreviewTasks([])}
                                     className="px-6 py-3 rounded-xl font-bold bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 transition-colors text-red-500"
                                 >
-                                    清空全部
+                                    {t('broadcast.sender.clearAll')}
                                 </button>
                                 <button
                                     onClick={handleConfirmPreview}
                                     disabled={previewTasks.length === 0}
                                     className="px-8 py-3 rounded-xl font-bold bg-indigo-500 text-white shadow-lg hover:bg-indigo-600 transition-colors disabled:opacity-50"
                                 >
-                                    确认导入 ({previewTasks.length})
+                                    {t('broadcast.sender.confirmImport').replace('{count}', String(previewTasks.length))}
                                 </button>
                             </div>
                         </div>
@@ -536,27 +536,27 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
             {showImport && (
                 <div className="mt-2 p-6 rounded-3xl bg-indigo-500/5 border-2 border-dashed border-indigo-500/20 animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-black uppercase tracking-widest text-indigo-500">智能解析导入</h4>
+                        <h4 className="text-sm font-black uppercase tracking-widest text-indigo-500">{t('broadcast.sender.smartParseHeader')}</h4>
                         <button onClick={() => setShowImport(false)} className="text-gray-400 hover:text-red-500 transition-colors">
                             <X size={20} />
                         </button>
                     </div>
 
                     <div className="bg-white dark:bg-black/20 rounded-xl p-3 font-mono text-[10px] overflow-x-auto text-gray-500 mb-4 border border-black/5">
-                        <p className="mb-2 opacity-60">格式：日期 - 时间 - 内容 (支持从 Excel 直接复制粘贴)</p>
+                        <p className="mb-2 opacity-60">{t('broadcast.sender.formatPrompt')}</p>
                     </div>
 
                     <textarea
                         value={importText}
                         onChange={(e) => setImportText(e.target.value)}
-                        placeholder="请在此处粘贴表格内容..."
+                        placeholder={t('broadcast.sender.pastePlaceholder')}
                         rows={6}
                         className="w-full bg-white dark:bg-black/40 border border-indigo-500/20 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all dark:text-gray-200"
                     />
 
                     <div className="flex gap-3 mt-4">
-                        <button onClick={() => setShowImport(false)} className="flex-1 py-3 rounded-xl bg-gray-100 font-bold text-gray-500">取消</button>
-                        <button onClick={handleImport} disabled={!importText.trim()} className="flex-[2] py-3 rounded-xl bg-indigo-500 text-white font-bold disabled:opacity-30">解析并任务导入</button>
+                        <button onClick={() => setShowImport(false)} className="flex-1 py-3 rounded-xl bg-gray-100 font-bold text-gray-500">{t('broadcast.receiver.voiceSettings.abandon')}</button>
+                        <button onClick={handleImport} disabled={!importText.trim()} className="flex-[2] py-3 rounded-xl bg-indigo-500 text-white font-bold disabled:opacity-30">{t('broadcast.sender.importWordTitle')}</button>
                     </div>
                 </div>
             )}
@@ -565,7 +565,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
             {tasks.length > 0 && (
                 <div className="mt-8 space-y-4">
                     <div className="flex items-center justify-between px-2">
-                        <h4 className="text-xs font-black uppercase tracking-widest opacity-40">待播报任务队列</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest opacity-40">{t('broadcast.sender.queueHeader')}</h4>
                         <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent"></div>
                     </div>
 

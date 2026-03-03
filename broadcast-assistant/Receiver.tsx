@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft, RefreshCw, History, Clock } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft, RefreshCw, History, Clock, Settings } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { ttsManager } from './utils/ttsManager';
 
@@ -13,7 +13,7 @@ interface Message {
 }
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] ${className}`}>
+    <div className={`bg-white/90 dark:bg-black/80 border border-white/20 dark:border-white/10 shadow-2xl rounded-[2rem] ${className}`}>
         {children}
     </div>
 );
@@ -27,13 +27,12 @@ const ClockDisplay = () => {
     return <span>{time.toLocaleTimeString()}</span>;
 };
 
-const BackgroundAmbience = React.memo(({ isDark, isEmergency }: { isDark: boolean; isEmergency: boolean }) => {
+const BackgroundAmbience = React.memo(({ isDark, isEmergency, isSimplfied }: { isDark: boolean; isEmergency: boolean; isSimplfied?: boolean }) => {
     if (isEmergency) return null;
     return (
-        <div className="absolute inset-0 z-0 transition-all duration-1000 pointer-events-none overflow-hidden">
-            <div className={`absolute top-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[80px] ${isDark ? 'opacity-10 bg-blue-900' : 'opacity-30 bg-pink-300'}`}></div>
-            <div className={`absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[80px] ${isDark ? 'opacity-10 bg-purple-900' : 'opacity-20 bg-purple-300'}`}></div>
-            <div className={`absolute top-[30%] left-[10%] w-[40%] h-[40%] rounded-full blur-[60px] ${isDark ? 'opacity-5 bg-indigo-900' : 'opacity-10 bg-blue-200'}`}></div>
+        <div className="absolute inset-0 z-0 transition-opacity duration-1000 pointer-events-none overflow-hidden">
+            <div className={`absolute top-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full ${isSimplfied ? '' : 'blur-[100px]'} ${isDark ? 'opacity-5 bg-blue-900' : 'opacity-20 bg-pink-200'}`}></div>
+            <div className={`absolute bottom-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full ${isSimplfied ? '' : 'blur-[100px]'} ${isDark ? 'opacity-5 bg-purple-900' : 'opacity-15 bg-purple-200'}`}></div>
         </div>
     );
 });
@@ -48,6 +47,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         const saved = localStorage.getItem(`br_synced_name_${localStorage.getItem('br_last_full_room_rx') || ''}`);
         return saved || '';
     });
+    const [selectedVoice, setSelectedVoice] = useState(() => localStorage.getItem('br_selected_voice') || 'zh-CN-XiaoxiaoNeural');
+    const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem('br_selected_voice', selectedVoice);
+    }, [selectedVoice]);
     // currentTime removed to prevent whole-page re-renders every second
     const [isListening, setIsListening] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -184,7 +189,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             ttsManager.speak(text, {
                 engine: 'edge',
-                voice: 'zh-CN-YunxiNeural',
+                voice: isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice,
                 rate: isEmergency ? 0.85 : 1.0,
                 onStart: () => {
                     setCharIndex(0);
@@ -220,7 +225,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             const resp = await fetch(`/api/broadcast/fetch?code=${fullRoomId.trim().toUpperCase()}`);
 
             if (resp.status === 404) {
-                setError('无效的房间号');
+                setError(t('broadcast.receiver.invalidRoom'));
                 setCurrentMsg(null);
                 setIsJoined(false); // Force exit to join screen
                 return;
@@ -257,7 +262,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                 // Notifications when hidden
                 if (document.hidden && 'Notification' in window && Notification.permission === 'granted' && msg.id !== lastPlayedId.current) {
-                    new Notification(msg.isEmergency ? '【紧急广播】' : '校园广播提示', {
+                    new Notification(msg.isEmergency ? t('broadcast.receiver.notification.emergency') : t('broadcast.receiver.notification.normal'), {
                         body: msg.text,
                         icon: '/favicon.ico'
                     });
@@ -336,7 +341,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 if (response.status === 404) {
                     setError(t('broadcast.receiver.channelNotFound'));
                 } else {
-                    setError('验证失败，请重试');
+                    setError(t('broadcast.receiver.verificationFailed'));
                 }
                 return;
             }
@@ -356,7 +361,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             localStorage.setItem('br_receiver_room', fullRoomId.trim().toUpperCase());
             setIsListening(true);
         } catch (err) {
-            setError('网络错误，请检查连接');
+            setError(t('broadcast.receiver.networkError'));
         }
     };
 
@@ -439,13 +444,15 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         );
     }
 
+    const isSimplifiedMode = isPlaying && (currentMsg?.text?.length || 0) > 100;
+
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-all duration-1000 ${currentMsg?.isEmergency
             ? 'bg-red-600 text-white'
             : (isDark ? 'bg-[#050505] text-white' : 'bg-[#F5F5F7] text-black')
             }`}>
             {/* Background Ambience - Gradient Pink in Light Mode */}
-            <BackgroundAmbience isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
+            <BackgroundAmbience isDark={isDark} isEmergency={!!currentMsg?.isEmergency} isSimplfied={isSimplifiedMode} />
 
             {/* HUD Header for Active Room (kept as overlay) */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-50 pointer-events-none">
@@ -455,10 +462,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
                             {(() => {
                                 const hour = new Date().getHours();
-                                let greeting = "您好";
-                                if (hour >= 5 && hour < 12) greeting = "上午好";
-                                else if (hour >= 12 && hour < 18) greeting = "下午好";
-                                else greeting = "晚上好";
+                                let greeting = t('broadcast.receiver.greeting.hello');
+                                if (hour >= 5 && hour < 12) greeting = t('broadcast.receiver.greeting.morning');
+                                else if (hour >= 12 && hour < 18) greeting = t('broadcast.receiver.greeting.afternoon');
+                                else if (hour >= 18 || hour < 5) greeting = t('broadcast.receiver.greeting.evening');
 
                                 const name = syncedChannelName || currentMsg?.channelName || fullRoomId || (isOnline ? t('broadcast.receiver.online') : t('broadcast.receiver.signalLost'));
                                 return `${greeting}，${name}`;
@@ -479,21 +486,57 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 </div>
 
                 <div className="flex gap-4 pointer-events-auto">
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+                            className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all bg-white/20 hover:scale-110 active:scale-95 cursor-pointer ${showVoiceSettings ? 'text-indigo-400 scale-110' : 'text-gray-400'}`}
+                            title={t('broadcast.receiver.voiceSettings.title')}
+                        >
+                            <Settings size={24} className={showVoiceSettings ? 'animate-spin-slow' : ''} />
+                        </button>
+
+                        {showVoiceSettings && (
+                            <div className="absolute bottom-16 right-0 w-64 p-4 rounded-3xl bg-white dark:bg-gray-900 shadow-2xl border border-black/10 dark:border-white/10 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-200">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4 px-2">{t('broadcast.receiver.voiceSettings.title')}</h4>
+                                <div className="space-y-1">
+                                    {[
+                                        { id: 'zh-CN-XiaoxiaoNeural', name: t('broadcast.receiver.voiceSettings.xiaoxiao') },
+                                        { id: 'zh-CN-YunxiNeural', name: t('broadcast.receiver.voiceSettings.yunxi') },
+                                        { id: 'zh-CN-YunjianNeural', name: t('broadcast.receiver.voiceSettings.yunjian') }
+                                    ].map(voice => (
+                                        <button
+                                            key={voice.id}
+                                            onClick={() => {
+                                                setSelectedVoice(voice.id);
+                                                setShowVoiceSettings(false);
+                                            }}
+                                            className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all ${selectedVoice === voice.id
+                                                ? 'bg-indigo-500 text-white'
+                                                : 'hover:bg-gray-100 dark:hover:bg-white/5 opacity-60 hover:opacity-100'
+                                                }`}
+                                        >
+                                            {voice.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <button
                         onClick={toggleTheme}
-                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/10 backdrop-blur-md text-orange-500 cursor-pointer"
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/20 text-orange-500 cursor-pointer"
                     >
                         {isDark ? <Sun size={24} /> : <Moon size={24} />}
                     </button>
                     <button
                         onClick={toggleFullscreen}
-                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/10 backdrop-blur-md cursor-pointer"
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/20 cursor-pointer text-gray-400"
                     >
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>
                     <button
                         onClick={() => setIsJoined(false)}
-                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500 hover:scale-110 active:scale-95 hover:text-white transition-all bg-white/10 backdrop-blur-md cursor-pointer"
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500/80 hover:scale-110 active:scale-95 hover:text-white transition-all bg-white/20 cursor-pointer text-gray-400"
                     >
                         <X size={24} />
                     </button>
@@ -532,18 +575,15 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     <span
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`block transition-all duration-500 py-3 md:py-5 w-full break-words select-none text-center ${isActive
+                                        className={`block py-3 md:py-5 w-full break-words select-none text-center ${isActive
                                             ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-fuchsia-500 dark:text-fuchsia-400 font-black opacity-100')
                                             : isPast
-                                                ? 'opacity-50 blur-[0.3px]'
-                                                : 'opacity-20 blur-[1px]'
-                                            } ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
+                                                ? 'opacity-40'
+                                                : 'opacity-10'
+                                            } ${isSimplifiedMode ? '' : 'transition-opacity duration-500'} ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
                                                 currentMsg.text.length > 100 ? 'text-xl md:text-4xl' :
                                                     'text-3xl md:text-6xl'
                                             }`}
-                                        style={{
-                                            willChange: 'opacity, filter, color'
-                                        }}
                                     >
                                         {sentence}
                                     </span>
@@ -572,10 +612,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             {/* HUD Footer & Always Visible History (Floating to prevent squishing text) */}
             <div className="absolute bottom-4 left-0 right-0 z-50 pointer-events-none flex flex-col items-center">
                 <div className="w-[98vw] max-w-5xl mb-2 pointer-events-auto">
-                    <GlassCard className="p-4 rounded-[2rem] overflow-hidden flex flex-col border border-white/20 shadow-2xl backdrop-blur-xl bg-white/40 dark:bg-black/40">
+                    <GlassCard className="p-4 rounded-[2rem] overflow-hidden flex flex-col border border-white/20 shadow-2xl bg-white/90 dark:bg-black/80">
                         <div className="flex items-center justify-between mb-3 shrink-0 px-2">
                             <h4 className="text-[10px] font-black uppercase tracking-widest opacity-80 flex items-center gap-2 text-orange-500">
-                                <History size={14} /> 历史播报小组件
+                                <History size={14} /> {t('broadcast.sender.timeline')}
                             </h4>
                             {isPlaying && (
                                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-500 animate-pulse">

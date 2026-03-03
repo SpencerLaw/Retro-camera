@@ -46,7 +46,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                 return [];
             }
         }
-        return [{ id: 'default', name: '默认班级', code: Math.floor(1000 + Math.random() * 9000).toString() }];
+        return [{ id: 'default', name: t('broadcast.sender.unknownClass'), code: Math.floor(1000 + Math.random() * 9000).toString() }];
     });
 
     const [activeChannelId, setActiveChannelId] = useState(() => {
@@ -150,7 +150,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
     const saveEdit = async () => {
         if (!editingChannel) return;
-        const newName = editName.trim() || '未知班级';
+        const newName = editName.trim() || t('broadcast.sender.unknownClass');
         const newCode = editCode.toUpperCase().trim();
 
         setChannels(channels.map(c =>
@@ -200,7 +200,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     code: channelCode.trim(),
                     text: inputText.trim(),
                     isEmergency,
-                    channelName: activeChannel?.name || '未知班级',
+                    channelName: activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                 }),
             });
@@ -244,7 +244,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     code: channelCode.trim(),
                     text: text.trim(),
                     isEmergency: isEmergencyMsg,
-                    channelName: originalChannelName || activeChannel?.name || '未知班级',
+                    channelName: originalChannelName || activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                 }),
             });
@@ -334,7 +334,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 value={editName}
                                 onChange={(e) => setEditName(e.target.value)}
                                 className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white"
-                                placeholder="输入班级名称"
+                                placeholder={t('broadcast.sender.classNamePlaceholder')}
                             />
                         </div>
                         <div className="space-y-2">
@@ -344,7 +344,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     value={editCode}
                                     onChange={(e) => setEditCode(e.target.value.toUpperCase())}
                                     className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white uppercase tracking-widest"
-                                    placeholder="4位数字"
+                                    placeholder={t('broadcast.sender.roomCodePlaceholder')}
                                     maxLength={8}
                                 />
                                 <button
@@ -361,13 +361,13 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                             onClick={() => setEditingChannel(null)}
                             className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 transition-all"
                         >
-                            取消
+                            {t('broadcast.receiver.voiceSettings.abandon') || '取消'}
                         </button>
                         <button
                             onClick={saveEdit}
                             className="flex-1 py-4 rounded-2xl bg-blue-500 text-white font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
                         >
-                            保存
+                            {t('broadcast.sender.on') || '保存'}
                         </button>
                     </div>
                 </GlassCard>
@@ -430,12 +430,12 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10'}`}
                             >
                                 <Repeat size={16} className={isLooping ? 'animate-[spin_4s_linear_infinite]' : ''} />
-                                {isLooping ? '自动循环: 开启' : '自动循环: 关闭'}
+                                {t('broadcast.sender.autoLoop')}: {isLooping ? t('broadcast.sender.on') : t('broadcast.sender.off')}
                             </button>
 
                             {!isLooping && (
                                 <div className="flex items-center justify-between sm:justify-start gap-2 px-3 py-3 sm:py-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
-                                    <span className="text-xs text-gray-500 font-bold whitespace-nowrap">播报次数:</span>
+                                    <span className="text-xs text-gray-500 font-bold whitespace-nowrap">{t('broadcast.sender.repeatCount')}:</span>
                                     <input
                                         type="number"
                                         min="1"
@@ -537,7 +537,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 <button
                                     onClick={() => handleReplay(msg.text, msg.isEmergency, msg.channelName)}
                                     className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
-                                    title="一键再次播报"
+                                    title={t('broadcast.sender.replayAction')}
                                 >
                                     <RefreshCw size={18} />
                                 </button>

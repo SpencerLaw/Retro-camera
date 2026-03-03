@@ -178,9 +178,15 @@
       "editClass": "Edit Class",
       "deleteClass": "Delete Class",
       "className": "Class Name",
-      "roomCode": "Room Code",
-      "manageClasses": "Manage Classes",
       "active": "Online",
+      "unknownClass": "Unknown Class",
+      "roomCodePlaceholder": "4 Digits",
+      "classNamePlaceholder": "Enter class name",
+      "autoLoop": "Auto Loop",
+      "repeatCount": "Repeats",
+      "on": "ON",
+      "off": "OFF",
+      "replayAction": "Replay Now",
       "scheduler": "Schedule Planner",
       "importExcel": "Import Schedule",
       "pasteExcelHere": "Paste your spreadsheet (Date | Time | Content)...",
@@ -199,7 +205,27 @@
       "rules": "TASKS LOADED",
       "howToImportTitle": "How to Import?",
       "copyPasteInstruction": "Select the three columns in Excel, press Ctrl+C to copy, and use Ctrl+V to paste into the box below.",
-      "scheduleHelper": "Paste tabular data exported from Excel. Ensure each line contains: Date, Time, Content (separated by tabs)."
+      "scheduleHelper": "Paste tabular data exported from Excel. Ensure each line contains: Date, Time, Content (separated by tabs).",
+      "parseFailedExcel": "Could not identify valid data. Please ensure format is Date(Tab)Time(Tab)Content.",
+      "parseFailedWord": "Could not extract tasks from document. Please ensure it is a standard Word table.",
+      "parseError": "Failed to parse Word document, please try again.",
+      "importSuccess": "Successfully imported {count} tasks! System is now monitoring.",
+      "clearScheduleConfirm": "Are you sure you want to clear all scheduled tasks?",
+      "running": "Running",
+      "paused": "Paused",
+      "importExcelTitle": "Paste from Excel",
+      "importWordTitle": "Import Word Table",
+      "parsing": "Parsing deeply...",
+      "verifyResults": "Verify Results",
+      "verifyDesc": "Parsed {count} tasks. You can edit or delete them before final import.",
+      "emptyList": "List cleared.",
+      "abandon": "Abandon",
+      "clearAll": "Clear All",
+      "confirmImport": "Confirm Import ({count})",
+      "smartParseHeader": "Smart Parse Import",
+      "formatPrompt": "Format: Date - Time - Content (Supports copy-paste from Excel)",
+      "pastePlaceholder": "Paste table content here...",
+      "queueHeader": "Upcoming Tasks Queue"
     },
     "receiver": {
       "joinChannel": "Join Channel",
@@ -213,7 +239,26 @@
       "criticalBroadcast": "Emergency Broadcast",
       "downlinkSync": "Receiving messages...",
       "standbySource": "Waiting for broadcast source...",
-      "broadcastMode": "BROADCAST MODE // ACTIVE"
+      "broadcastMode": "BROADCAST MODE // ACTIVE",
+      "channelNotFound": "Channel not found",
+      "verificationFailed": "Verification failed, please try again",
+      "networkError": "Network error, please check connection",
+      "greeting": {
+        "morning": "Good Morning",
+        "afternoon": "Good Afternoon",
+        "evening": "Good Evening",
+        "hello": "Hello"
+      },
+      "notification": {
+        "emergency": "[EMERGENCY]",
+        "normal": "Broadcast Notification"
+      },
+      "voiceSettings": {
+        "title": "Voice Style Settings",
+        "xiaoxiao": "Xiaoxiao (Soft Female)",
+        "yunxi": "Yunxi (Active Male)",
+        "yunjian": "Yunjian (Pro Male)"
+      }
     }
   },
   "morningTree": {

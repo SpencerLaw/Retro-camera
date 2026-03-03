@@ -234,90 +234,25 @@ class TTSManager {
         const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
         const rate = options.rate ?? 1.0;
 
-        // --- Strategy 1: Server-side proxy (works in China, bypasses GFW) ---
+        // Server-side proxy (Vercel function calls Microsoft Edge TTS bypassing GFW)
+        // If proxy is unavailable, returns null → speakEdge falls back to native TTS immediately.
         try {
             const resp = await fetch('/api/broadcast/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text, voice, rate }),
-                signal: AbortSignal.timeout(12000),
+                signal: AbortSignal.timeout(10000),
             });
 
             if (resp.ok) {
                 const blob = await resp.blob();
                 if (blob.size > 100) return blob;
-            } else {
-                const err = await resp.text();
-                console.warn('TTS proxy returned error:', resp.status, err);
             }
         } catch (e) {
-            console.warn('TTS proxy request failed, trying direct WebSocket:', e);
+            // Proxy unavailable - will fall back to native TTS
         }
 
-        // --- Strategy 2: Direct WebSocket (works outside China) ---
-        if (!window.WebSocket) return null;
-
-        let lang = 'zh-CN';
-        if (voice.startsWith('zh-HK')) lang = 'zh-HK';
-        else if (voice.startsWith('zh-TW')) lang = 'zh-TW';
-
-        const rateStr = rate === 1.0 ? '+0%' : `${rate > 1 ? '+' : ''}${Math.round((rate - 1) * 100)}%`;
-
-        return new Promise<Blob | null>((resolve) => {
-            const ws = new WebSocket('wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4');
-            let audioData: Uint8Array[] = [];
-            let isResolved = false;
-
-            const cleanup = (result: Blob | null) => {
-                if (isResolved) return;
-                isResolved = true;
-                clearTimeout(timeout);
-                try { ws.close(); } catch (e) { }
-                resolve(result);
-            };
-
-            const timeout = setTimeout(() => {
-                cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null);
-            }, 8000);
-
-            ws.onopen = () => {
-                const reqId = (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Date.now().toString(16));
-                const ts = new Date().toUTCString();
-                const config = JSON.stringify({
-                    context: {
-                        synthesis: {
-                            audio: {
-                                metadataoptions: { sentenceBoundaryEnabled: 'false', wordBoundaryEnabled: 'false' },
-                                outputFormat: 'audio-24khz-48kbitrate-mono-mp3'
-                            }
-                        }
-                    }
-                });
-                ws.send(`X-Timestamp:${ts}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n${config}`);
-                const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${lang}'><voice name='${voice}'><prosody rate='${rateStr}'>${text}</prosody></voice></speak>`;
-                ws.send(`X-RequestId:${reqId}\r\nX-Timestamp:${ts}\r\nContent-Type:application/ssml+xml\r\nPath:ssml\r\n\r\n${ssml}`);
-            };
-
-            ws.onmessage = async (event) => {
-                if (typeof event.data === 'string') {
-                    if (event.data.includes('Path:turn.end'))
-                        cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null);
-                } else if (event.data instanceof Blob) {
-                    try {
-                        const buffer = await event.data.arrayBuffer();
-                        const headerLen = new DataView(buffer).getUint16(0);
-                        const header = new TextDecoder().decode(new Uint8Array(buffer, 2, headerLen));
-                        if (header.includes('Path:audio')) {
-                            const audio = new Uint8Array(buffer, 2 + headerLen);
-                            if (audio.length > 0) audioData.push(audio);
-                        }
-                    } catch (e) { /* ignore parse errors */ }
-                }
-            };
-
-            ws.onerror = () => cleanup(null);
-            ws.onclose = () => { if (!isResolved) cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null); };
-        });
+        return null;
     }
 
     private async speakEdge(text: string, options: TTSOptions): Promise<void> {

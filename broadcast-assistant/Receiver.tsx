@@ -61,7 +61,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [fullRoomId, setFullRoomId] = useState(() => {
         return urlRoom || localStorage.getItem('br_receiver_room') || '';
     });
-    const [isJoined, setIsJoined] = useState(false);
+    const [isJoined, setIsJoined] = useState(() => {
+        return !!urlRoom || !!localStorage.getItem('br_receiver_room');
+    });
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
     const [syncedChannelName, setSyncedChannelName] = useState<string>(() => {
         const saved = localStorage.getItem(`br_synced_name_${localStorage.getItem('br_receiver_room') || ''}`);
@@ -73,7 +75,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         localStorage.setItem('br_volume_boost', volumeBoost.toString());
     }, [volumeBoost]);
 
-    const [isListening, setIsListening] = useState(false);
+    const [isListening, setIsListening] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -134,8 +136,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             const savedName = localStorage.getItem(`br_synced_name_${fullRoomId.trim().toUpperCase()}`);
             if (savedName) setSyncedChannelName(savedName);
 
-            const savedLastId = localStorage.getItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`);
-            if (savedLastId) lastPlayedId.current = savedLastId;
+            // Do not restore lastPlayedId here to allow auto-play of current active message on join/refresh
         }
 
         return () => {

@@ -18,7 +18,12 @@ const GlassContainer = ({ children, className = "" }: { children: React.ReactNod
 const BroadcastApp: React.FC = () => {
     const navigate = useNavigate();
     const t = useTranslations();
-    const [mode, setMode] = useState<'selection' | 'sender' | 'receiver' | 'license'>('selection');
+    const [mode, setMode] = useState<'selection' | 'sender' | 'receiver' | 'license'>(() => {
+        // If ?receiver=1 is in the URL, go straight to receiver mode (for classroom auto-start)
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('receiver') === '1') return 'receiver';
+        return 'selection';
+    });
     const [theme, setTheme] = useState<'light' | 'dark'>(
         localStorage.getItem('bc_theme') as 'light' | 'dark' ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')

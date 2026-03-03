@@ -353,9 +353,16 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                 });
                 const data = await resp.json();
                 if (data.success) {
+                    // Clear local channel list and reset to one default channel
+                    const defaultChannel = {
+                        id: 'default',
+                        name: t('broadcast.sender.unknownClass'),
+                        code: Math.floor(1000 + Math.random() * 9000).toString()
+                    };
+                    setChannels([defaultChannel]);
+                    setActiveChannelId('default');
+                    localStorage.removeItem('br_sender_channels');
                     setStatus({ type: 'success', msg: t('broadcast.sender.clearSuccess') });
-                    // Optionally clear local channels too if they are just syncs of the DB
-                    // setChannels([{ id: 'default', name: t('broadcast.sender.unknownClass'), code: Math.floor(1000 + Math.random() * 9000).toString() }]);
                     setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
                 } else {
                     throw new Error(data.error);

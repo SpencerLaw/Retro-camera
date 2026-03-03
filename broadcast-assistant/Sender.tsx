@@ -8,6 +8,8 @@ interface Message {
     id: string;
     text: string;
     isEmergency: boolean;
+    repeatCount?: number;
+    voice?: string;
     timestamp: string;
     channelName?: string;
 }
@@ -62,8 +64,18 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const [isEmergency, setIsEmergency] = useState(false);
     const [isLooping, setIsLooping] = useState(false);
     const [repeatCount, setRepeatCount] = useState<number | string>(1);
+    const [selectedVoice, setSelectedVoice] = useState('zh-CN-XiaoxiaoNeural');
     const [history, setHistory] = useState<Message[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'loading' | null; msg: string }>({ type: null, msg: '' });
+
+    const [showReplayDialog, setShowReplayDialog] = useState(false);
+    const [replayData, setReplayData] = useState<{
+        text: string;
+        repeatCount: number;
+        voice: string;
+        isEmergency: boolean;
+        channelName?: string;
+    } | null>(null);
 
     const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0];
     const channelCode = activeChannel?.code || '';
@@ -202,6 +214,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     isEmergency,
                     channelName: activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
+                    voice: selectedVoice
                 }),
             });
 
@@ -212,6 +225,8 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     id: data.messageId,
                     text: inputText.trim(),
                     isEmergency,
+                    voice: selectedVoice,
+                    repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                     timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
                     channelName: activeChannel.name
                 };
@@ -233,7 +248,20 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         }
     };
 
-    const handleReplay = async (text: string, isEmergencyMsg: boolean, originalChannelName?: string) => {
+    const handleReplay = (text: string, isEmergencyMsg: boolean, voice?: string, repeat?: number, originalChannelName?: string) => {
+        setReplayData({
+            text,
+            isEmergency: isEmergencyMsg,
+            voice: voice || 'zh-CN-XiaoxiaoNeural',
+            repeatCount: repeat || 1,
+            channelName: originalChannelName
+        });
+        setShowReplayDialog(true);
+    };
+
+    const executeReplay = async () => {
+        if (!replayData) return;
+        setShowReplayDialog(false);
         setStatus({ type: 'loading', msg: t('broadcast.sender.broadcasting') });
         try {
             const resp = await fetch('/api/broadcast/send', {
@@ -242,22 +270,35 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                 body: JSON.stringify({
                     license,
                     code: channelCode.trim(),
-                    text: text.trim(),
-                    isEmergency: isEmergencyMsg,
-                    channelName: originalChannelName || activeChannel?.name || t('broadcast.sender.unknownClass'),
-                    repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
+                    text: replayData.text.trim(),
+                    isEmergency: replayData.isEmergency,
+                    channelName: replayData.channelName || activeChannel?.name || t('broadcast.sender.unknownClass'),
+                    repeatCount: replayData.repeatCount,
+                    voice: replayData.voice
                 }),
             });
 
             const data = await resp.json();
             if (data.success) {
-                setStatus({ type: 'success', msg: t('broadcast.sender.broadcastDelivered') });
+                const newMessage: Message = {
+                    id: data.messageId,
+                    text: replayData.text.trim(),
+                    isEmergency: replayData.isEmergency,
+                    voice: replayData.voice,
+                    repeatCount: replayData.repeatCount,
+                    timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
+                    channelName: replayData.channelName || activeChannel.name
+                };
 
+                const newHistory = [newMessage, ...history].slice(0, 30);
+                setHistory(newHistory);
+                localStorage.setItem('br_sender_history', JSON.stringify(newHistory));
+                setStatus({ type: 'success', msg: t('broadcast.sender.broadcastDelivered') });
                 setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
             } else {
-                throw new Error(data.error);
+                throw new Error(data.error || 'Server Error');
             }
-        } catch (err) {
+        } catch (err: any) {
             setStatus({ type: 'error', msg: t('broadcast.sender.failedToSend') });
         }
     };
@@ -435,12 +476,12 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mt-4">
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 mt-4">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
                         <button
                             onClick={() => setIsEmergency(!isEmergency)}
                             className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isEmergency
-                                ? 'bg-red-500 text-white shadow-[0_10px_20px_-5px_rgba(239,68,68,0.5)]'
+                                ? 'bg-red-500 text-white shadow-lg'
                                 : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
                                 }`}
                         >
@@ -454,7 +495,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     ? 'bg-blue-500 text-white border-blue-500'
                                     : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10'}`}
                             >
-                                <Repeat size={16} className={isLooping ? 'animate-[spin_4s_linear_infinite]' : ''} />
+                                <Repeat size={16} className={isLooping ? 'animate-spin' : ''} />
                                 {t('broadcast.sender.autoLoop')}: {isLooping ? t('broadcast.sender.on') : t('broadcast.sender.off')}
                             </button>
 
@@ -481,21 +522,40 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     />
                                 </div>
                             )}
+
+                            <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm ml-auto sm:ml-0">
+                                <button
+                                    onClick={() => setSelectedVoice('zh-CN-XiaoxiaoNeural')}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-XiaoxiaoNeural'
+                                        ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
+                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                                >
+                                    女声
+                                </button>
+                                <button
+                                    onClick={() => setSelectedVoice('zh-CN-YunxiNeural')}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-YunxiNeural'
+                                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
+                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                                >
+                                    男声
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <button
                         onClick={handleSend}
                         disabled={status.type === 'loading'}
-                        className="px-8 sm:px-10 py-4 sm:py-5 bg-black dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-base sm:text-lg hover:opacity-90 shadow-xl active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3 w-full md:w-auto"
+                        className="px-8 lg:px-12 py-4 lg:py-5 bg-black dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-base lg:text-xl hover:scale-[1.02] active:scale-95 shadow-xl transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3 w-full xl:w-auto"
                     >
-                        {status.type === 'loading' ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
+                        {status.type === 'loading' ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
                         {t('broadcast.sender.launch')}
                     </button>
                 </div>
 
                 {status.type && (
-                    <div className={`p-4 rounded-xl flex items-center gap-2 text-sm font-bold border ${status.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
+                    <div className={`p-4 rounded-xl flex items-center gap-2 text-sm font-bold border animate-in fade-in slide-in-from-top-2 duration-300 ${status.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
                         status.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-gray-500/10 border-gray-500/20 text-gray-400'
                         }`}>
                         {status.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
@@ -569,7 +629,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                     <p className={`text-base font-semibold leading-relaxed ${msg.isEmergency ? 'text-red-500' : 'opacity-80'}`}>{msg.text}</p>
                                 </div>
                                 <button
-                                    onClick={() => handleReplay(msg.text, msg.isEmergency, msg.channelName)}
+                                    onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName)}
                                     className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
                                     title={t('broadcast.sender.replayAction')}
                                 >
@@ -583,6 +643,109 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
             {/* Auto Schedule Section */}
             <ScheduleManager license={license} activeChannelCode={channelCode} isDark={isDark} />
+
+            {/* Replay/Edit Dialog */}
+            {showReplayDialog && replayData && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowReplayDialog(false)}></div>
+                    <GlassCard className="relative w-full max-w-lg p-8 space-y-8 shadow-2xl border-2 border-blue-500/20 scale-100 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                                    <Edit2 size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black tracking-tight">编辑并重新播报</h3>
+                                    <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">历史记录二次编辑</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowReplayDialog(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                                <Plus size={24} className="rotate-45" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">播报内容</label>
+                                <textarea
+                                    value={replayData.text}
+                                    onChange={(e) => setReplayData({ ...replayData, text: e.target.value })}
+                                    className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white min-h-[120px] text-lg lg:text-xl"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-30">循环次数</label>
+                                    <div className="flex items-center gap-4 bg-gray-100 dark:bg-white/5 p-2 rounded-2xl">
+                                        <button
+                                            onClick={() => setReplayData({ ...replayData, repeatCount: Math.max(1, replayData.repeatCount - 1) })}
+                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
+                                        >
+                                            -
+                                        </button>
+                                        <span className="flex-1 text-center font-black text-xl text-blue-500">
+                                            {replayData.repeatCount === -1 ? '∞' : replayData.repeatCount}
+                                        </span>
+                                        <button
+                                            onClick={() => setReplayData({ ...replayData, repeatCount: Math.min(99, replayData.repeatCount + 1) })}
+                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-30">发音人</label>
+                                    <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-2xl h-[56px] items-center">
+                                        <button
+                                            onClick={() => setReplayData({ ...replayData, voice: 'zh-CN-XiaoxiaoNeural' })}
+                                            className={`flex-1 h-full rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${replayData.voice === 'zh-CN-XiaoxiaoNeural'
+                                                ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
+                                                : 'text-gray-400 hover:bg-white/10'}`}
+                                        >
+                                            女声
+                                        </button>
+                                        <button
+                                            onClick={() => setReplayData({ ...replayData, voice: 'zh-CN-YunxiNeural' })}
+                                            className={`flex-1 h-full rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${replayData.voice === 'zh-CN-YunxiNeural'
+                                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
+                                                : 'text-gray-400 hover:bg-white/10'}`}
+                                        >
+                                            男声
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setReplayData({ ...replayData, isEmergency: !replayData.isEmergency })}
+                                className={`w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${replayData.isEmergency
+                                    ? 'bg-red-500 text-white shadow-lg'
+                                    : 'bg-gray-100 dark:bg-white/5 text-gray-500'}`}
+                            >
+                                <AlertTriangle size={18} /> 紧急模式: {replayData.isEmergency ? '已开启' : '已关闭'}
+                            </button>
+                        </div>
+
+                        <div className="flex gap-4 pt-4">
+                            <button
+                                onClick={() => setShowReplayDialog(false)}
+                                className="flex-1 py-5 rounded-3xl bg-gray-100 dark:bg-white/5 font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all text-gray-400"
+                            >
+                                取消
+                            </button>
+                            <button
+                                onClick={executeReplay}
+                                className="flex-[2] py-5 rounded-3xl bg-blue-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                            >
+                                立即重发
+                            </button>
+                        </div>
+                    </GlassCard>
+                </div>
+            )}
         </div>
     );
 };

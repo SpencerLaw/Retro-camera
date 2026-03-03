@@ -10,6 +10,7 @@ interface Message {
     timestamp: string;
     repeatCount?: number;
     channelName?: string;
+    voice?: string;
 }
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -169,7 +170,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
     }, [isPlaying, scrollToActive]);
 
-    const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string) => {
+    const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string, voiceOverride?: string) => {
         lastPlayedId.current = id;
         if (fullRoomId) {
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
@@ -196,7 +197,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     const nextSentence = currentSentences[i + 1];
                     const ttsOptions = {
                         engine: 'edge' as const,
-                        voice: isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice,
+                        voice: voiceOverride || (isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice),
                         rate: isEmergency ? 0.85 : 1.0,
                     };
 
@@ -310,9 +311,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         icon: '/favicon.ico'
                     });
                 }
-
+                // If it's new, speak it
                 if (isListening && msg.id !== lastPlayedId.current) {
-                    speak(msg.text, msg.isEmergency, msg.repeatCount ?? 1, msg.id);
+                    speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice);
                 }
             } else if (!isPlaying && pendingPlayouts.current <= 0) {
                 // Only clear if completely NOT playing, to prevent message disappearing during repeats
@@ -693,7 +694,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                         onClick={() => {
                                             if (!isPlaying || window.confirm('当前正在播放，确定要切换到这条历史记录吗？')) {
                                                 setCurrentMsg(msg);
-                                                speak(msg.text, msg.isEmergency, 1, msg.id);
+                                                speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice);
                                             }
                                         }}
                                         className="flex-none w-56 text-left p-3 rounded-xl bg-white/50 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-all border border-transparent hover:border-white/30 group active:scale-[0.98] snap-start shadow-sm"

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edge TTS 连通性测试</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        button {
+            margin: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background: #0f3460;
+            color: white;
+        }
+
+        button:hover {
+            background: #16213e;
+        }
+
+        button.testing {
+            background: #f39c12;
+        }
+
+        button.ok {
+            background: #27ae60;
+        }
+
+        button.fail {
+            background: #c0392b;
+        }
+
+        #log {
+            background: #111;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        h2 {
+            color: #e94560;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        label {
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🎤 Edge TTS 连通性测试工具</h2>
+    <div class="section">
+        <label>测试文本:</label><br>
+        <input id="testText" value="你好，这是一段测试语音，测试音色是否正常工作。"
+            style="width:100%;padding:8px;background:#222;color:#fff;border:1px solid #444;border-radius:6px;margin:6px 0;" />
+    </div>
+    <div class="section">
+        <button onclick="testAll()">▶ 全部测试</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+    <div id="voices"></div>
+    <div id="log">等待测试...</div>
+
+    <script>
+        const VOICES = [
+            { name: '晓晓 (女声)', value: 'zh-CN-XiaoxiaoNeural' },
+            { name: '晓伊 (女声)', value: 'zh-CN-XiaoyiNeural' },
+            { name: '云希 (男声)', value: 'zh-CN-YunxiNeural' },
+            { name: '云健 (男声)', value: 'zh-CN-YunjianNeural' },
+            { name: '云扬 (男声)', value: 'zh-CN-YunyangNeural' },
+            { name: '晓甄 (儿童)', value: 'zh-CN-XiaozhenNeural' },
+            { name: '云夏 (少年)', value: 'zh-CN-YunxiaNeural' },
+            { name: '晓墨 (严肃)', value: 'zh-CN-XiaomoNeural' },
+            { name: '东北话', value: 'zh-CN-liaoning-XiaobeiNeural' },
+            { name: '四川话', value: 'zh-CN-sichuan-YunxiNeural' },
+            { name: '粤语女', value: 'zh-HK-HiuMaanNeural' },
+            { name: '粤语男', value: 'zh-HK-WanLungNeural' },
+            { name: '台湾女', value: 'zh-TW-HsiaoChenNeural' },
+            { name: '台湾男', value: 'zh-TW-YunJheNeural' },
+        ];
+
+        const log = (msg) => {
+            const el = document.getElementById('log');
+            el.textContent += '\n' + new Date().toLocaleTimeString() + ' ' + msg;
+            el.scrollTop = el.scrollHeight;
+        };
+
+        const clearLog = () => { document.getElementById('log').textContent = ''; };
+
+        // Build buttons
+        const container = document.getElementById('voices');
+        VOICES.forEach(v => {
+            const btn = document.createElement('button');
+            btn.textContent = v.name;
+            btn.id = 'btn-' + v.value;
+            btn.onclick = () => testVoice(v.value, v.name, btn);
+            container.appendChild(btn);
+        });
+
+        function makeSSML(text, voice, rate) {
+            // Use correct xml:lang per voice
+            let lang = 'zh-CN';
+            if (voice.startsWith('zh-HK')) lang = 'zh-HK';
+            if (voice.startsWith('zh-TW')) lang = 'zh-TW';
+            return `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${lang}'><voice name='${voice}'><prosody rate='${rate}'>${text}</prosody></voice></speak>`;
+        }
+
+        function testVoice(voiceId, voiceName, btn) {
+            return new Promise((outerResolve) => {
+                const text = document.getElementById('testText').value || '这是测试语音';
+                log(`[测试] ${voiceName} (${voiceId})`);
+                if (btn) { btn.className = 'testing'; btn.textContent = voiceName + ' ...'; }
+
+                const WS_URL = 'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4';
+                let ws;
+                try {
+                    ws = new WebSocket(WS_URL);
+                } catch (e) {
+                    log(`[错误] WebSocket创建失败: ${e.message}`);
+                    if (btn) { btn.className = 'fail'; btn.textContent = voiceName + ' ❌'; }
+                    outerResolve(false);
+                    return;
+                }
+
+                let audioChunks = [];
+                let done = false;
+                let connected = false;
+
+                const finish = (success, errorMsg) => {
+                    if (done) return;
+                    done = true;
+                    try { if (ws.readyState === WebSocket.OPEN) ws.close(); } catch (e) { }
+                    if (success && audioChunks.length > 0) {
+                        const blob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        log(`[成功] ${voiceName} ✅ 音频大小: ${blob.size} 字节`);
+                        if (btn) { btn.className = 'ok'; btn.textContent = voiceName + ' ✅'; }
+                        // Play audio
+                        const url = URL.createObjectURL(blob);
+                        const audio = new Audio(url);
+                        audio.onended = () => URL.revokeObjectURL(url);
+                        audio.play().catch(e => log(`[播放错误] ${e.message}`));
+                        outerResolve(true);
+                    } else {
+                        log(`[失败] ${voiceName} ❌ ${errorMsg || '无音频数据'}`);
+                        if (btn) { btn.className = 'fail'; btn.textContent = voiceName + ' ❌'; }
+                        outerResolve(false);
+                    }
+                };
+
+                const timeout = setTimeout(() => finish(false, '超时 (8秒)'), 8000);
+
+                ws.onopen = () => {
+                    connected = true;
+                    log(`[连接] ${voiceName} WebSocket 已连接`);
+                    const reqId = Date.now().toString(16);
+                    const config = JSON.stringify({
+                        context: {
+                            synthesis: {
+                                audio: {
+                                    metadataoptions: { sentenceBoundaryEnabled: "false", wordBoundaryEnabled: "false" },
+                                    outputFormat: "audio-24khz-48kbitrate-mono-mp3"
+                                }
+                            }
+                        }
+                    });
+                    ws.send(`X-Timestamp:${new Date().toUTCString()}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n${config}`);
+                    const ssml = makeSSML(text, voiceId, '+0%');
+                    ws.send(`X-RequestId:${reqId}\r\nContent-Type:application/ssml+xml\r\nPath:ssml\r\n\r\n${ssml}`);
+                };
+
+                ws.onmessage = async (event) => {
+                    if (typeof event.data === 'string') {
+                        if (event.data.includes('Path:turn.end')) {
+                            clearTimeout(timeout);
+                            finish(true);
+                        }
+                    } else if (event.data instanceof Blob) {
+                        try {
+                            const buffer = await event.data.arrayBuffer();
+                            const view = new DataView(buffer);
+                            // Header length is at offset 0, uint16 big-endian
+                            const headerLen = view.getUint16(0);
+                            const headerStr = new TextDecoder().decode(new Uint8Array(buffer, 2, headerLen));
+                            if (headerStr.includes('Path:audio')) {
+                                const audioPayload = event.data.slice(2 + headerLen);
+                                if (audioPayload.size > 0) audioChunks.push(audioPayload);
+                            }
+                        } catch (e) {
+                            log(`[解析错误] ${e.message}`);
+                        }
+                    }
+                };
+
+                ws.onerror = (e) => {
+                    clearTimeout(timeout);
+                    finish(false, 'WebSocket 连接错误');
+                };
+
+                ws.onclose = (e) => {
+                    if (!done) {
+                        clearTimeout(timeout);
+                        finish(audioChunks.length > 0, `连接关闭: code=${e.code}`);
+                    }
+                };
+            });
+        }
+
+        async function testAll() {
+            clearLog();
+            log('开始全部音色测试...\n');
+            for (const v of VOICES) {
+                const btn = document.getElementById('btn-' + v.value);
+                await testVoice(v.value, v.name, btn);
+                await new Promise(r => setTimeout(r, 500)); // brief pause between tests
+            }
+            log('\n✅ 全部测试完成！');
+        }
+    </script>
+</body>
+
+</html>

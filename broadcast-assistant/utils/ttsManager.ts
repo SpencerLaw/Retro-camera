@@ -234,82 +234,95 @@ class TTSManager {
         const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
         const rate = options.rate ? `${options.rate > 1 ? '+' : ''}${Math.round((options.rate - 1) * 100)}%` : '+0%';
 
+        // Determine the correct xml:lang based on voice locale
+        let lang = 'zh-CN';
+        if (voice.startsWith('zh-HK')) lang = 'zh-HK';
+        else if (voice.startsWith('zh-TW')) lang = 'zh-TW';
+
         if (!window.WebSocket) {
             console.error('WebSocket not supported by browser.');
             return null;
         }
 
-        try {
-            const wsBlob = await new Promise<Blob | null>((resolve) => {
-                const ws = new WebSocket('wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4');
-                let audioData: Blob[] = [];
-                let isResolved = false;
+        return new Promise<Blob | null>((resolve) => {
+            const ws = new WebSocket('wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4');
+            let audioData: Uint8Array[] = [];
+            let isResolved = false;
 
-                const cleanup = (result: Blob | null) => {
-                    if (isResolved) return;
-                    isResolved = true;
-                    clearTimeout(timeout);
-                    if (ws.readyState === WebSocket.OPEN) ws.close();
-                    resolve(result);
-                };
+            const cleanup = (result: Blob | null) => {
+                if (isResolved) return;
+                isResolved = true;
+                clearTimeout(timeout);
+                try { ws.close(); } catch (e) { }
+                resolve(result);
+            };
 
-                const timeout = setTimeout(() => {
-                    console.warn('Edge TTS direct WebSocket timeout');
-                    cleanup(null);
-                }, 8000);
+            const timeout = setTimeout(() => {
+                console.warn('Edge TTS WebSocket timeout after 8s for voice:', voice);
+                cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null);
+            }, 8000);
 
-                ws.onopen = () => {
-                    const reqId = Date.now().toString(16) + Math.random().toString(16).substring(2);
-                    const config = JSON.stringify({
-                        context: {
-                            synthesis: {
-                                audio: {
-                                    metadataoptions: { sentenceBoundaryEnabled: "false", wordBoundaryEnabled: "true" },
-                                    outputFormat: "audio-24khz-48kbitrate-mono-mp3"
-                                }
+            ws.onopen = () => {
+                const reqId = crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Date.now().toString(16);
+                const timestamp = new Date().toUTCString();
+
+                const config = JSON.stringify({
+                    context: {
+                        synthesis: {
+                            audio: {
+                                metadataoptions: { sentenceBoundaryEnabled: "false", wordBoundaryEnabled: "false" },
+                                outputFormat: "audio-24khz-48kbitrate-mono-mp3"
                             }
                         }
-                    });
-
-                    ws.send(`Content-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n${config}`);
-
-                    const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='zh-CN'><voice name='${voice}'><prosody rate='${rate}' pitch='+0Hz'>${text}</prosody></voice></speak>`;
-                    ws.send(`X-RequestId:${reqId}\r\nContent-Type:application/ssml+xml\r\nPath:ssml\r\n\r\n${ssml}`);
-                };
-
-                ws.onmessage = async (event) => {
-                    if (typeof event.data === 'string') {
-                        if (event.data.includes('Path:turn.end')) {
-                            cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null);
-                        }
-                    } else if (event.data instanceof Blob) {
-                        try {
-                            const buffer = await event.data.arrayBuffer();
-                            const view = new DataView(buffer);
-                            const headerLength = view.getUint16(0);
-                            const audioPayload = event.data.slice(2 + headerLength);
-                            audioData.push(audioPayload);
-                        } catch (e) {
-                            console.error('Failed to parse Edge WS audio blob', e);
-                        }
                     }
-                };
+                });
 
-                ws.onerror = (e) => {
-                    console.error('Edge WS err:', e);
-                    cleanup(null);
-                };
-            });
+                ws.send(`X-Timestamp:${timestamp}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n${config}`);
 
-            if (wsBlob && wsBlob.size > 100) return wsBlob;
+                const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${lang}'><voice name='${voice}'><prosody rate='${rate}'>${text}</prosody></voice></speak>`;
+                ws.send(`X-RequestId:${reqId}\r\nX-Timestamp:${timestamp}\r\nContent-Type:application/ssml+xml\r\nPath:ssml\r\n\r\n${ssml}`);
+            };
 
-        } catch (err) {
-            console.error('Edge WS init failed', err);
-        }
+            ws.onmessage = async (event) => {
+                if (typeof event.data === 'string') {
+                    if (event.data.includes('Path:turn.end')) {
+                        cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null);
+                    }
+                } else if (event.data instanceof Blob) {
+                    try {
+                        const buffer = await event.data.arrayBuffer();
+                        const dataView = new DataView(buffer);
+                        // First 2 bytes = header length (big-endian uint16)
+                        const headerLen = dataView.getUint16(0);
+                        // Header is at bytes 2..2+headerLen
+                        const headerBytes = new Uint8Array(buffer, 2, headerLen);
+                        const header = new TextDecoder().decode(headerBytes);
+                        // Only collect if this message contains audio payload
+                        if (header.includes('Path:audio')) {
+                            const audioStart = 2 + headerLen;
+                            const audioBytes = new Uint8Array(buffer, audioStart);
+                            if (audioBytes.length > 0) {
+                                audioData.push(audioBytes);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse Edge WS audio blob', e);
+                    }
+                }
+            };
 
-        console.error('Direct WebSocket to Edge TTS failed.');
+            ws.onerror = () => {
+                console.error('Edge TTS WebSocket connection error for voice:', voice);
+                cleanup(null);
+            };
 
-        return null;
+            ws.onclose = (e) => {
+                if (!isResolved) {
+                    // Connection closed before turn.end - use whatever audio we got
+                    cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null);
+                }
+            };
+        });
     }
 
     private async speakEdge(text: string, options: TTSOptions): Promise<void> {

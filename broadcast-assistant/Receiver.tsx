@@ -228,21 +228,25 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                     if (url && playbackIdRef.current === currentPlaybackId) {
                         await new Promise<void>((resolve) => {
+                            let settled = false;
+                            const settle = () => {
+                                if (settled) return;
+                                settled = true;
+                                clearInterval(monitor);
+                                resolve();
+                            };
+
                             const monitor = setInterval(() => {
                                 if (playbackIdRef.current !== currentPlaybackId) {
                                     ttsManager.stop();
-                                    clearInterval(monitor);
-                                    resolve();
+                                    settle();
                                 }
-                            }, 100);
+                            }, 200);
 
                             ttsManager.playBlob(url as string, sentence, {
                                 ...ttsOptions,
-                                onEnd: () => {
-                                    clearInterval(monitor);
-                                    resolve();
-                                }
-                            });
+                                onEnd: settle
+                            }).catch(() => settle()); // catch play() DOMException
                         });
                     } else if (playbackIdRef.current === currentPlaybackId) {
                         // FALLBACK or Direct Play engines (like Baidu): 

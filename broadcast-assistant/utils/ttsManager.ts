@@ -32,33 +32,37 @@ class TTSManager {
         return TTSManager.instance;
     }
 
-    public async speak(text: string, options: TTSOptions): Promise<void> {
-        // Stop current audio or speech
+    public async speak(text: string, options: TTSOptions = {}): Promise<void> {
         this.stop();
+        this.startSilentLoop();
 
-        if (this.audio) {
-            this.audio.onplay = () => {
-                if (options.onStart) options.onStart();
-                this.simulateBoundaries(text, options, this.audio!);
+        return new Promise<void>(async (resolve) => {
+            const extendedOptions = {
+                ...options,
+                onEnd: () => {
+                    if (options.onEnd) options.onEnd();
+                    resolve();
+                }
             };
-            this.audio.onended = () => {
-                this.clearBoundaryTimer();
-                if (options.onEnd) options.onEnd();
-            };
-        }
 
-        switch (options.engine) {
-            case 'fish':
-                await this.speakFish(text, options);
-                break;
-            case 'edge':
-                await this.speakEdge(text, options);
-                break;
-            case 'native':
-            default:
-                this.speakNative(text, options);
-                break;
-        }
+            try {
+                switch (options.engine) {
+                    case 'fish':
+                        await this.speakFish(text, extendedOptions);
+                        break;
+                    case 'edge':
+                        await this.speakEdge(text, extendedOptions);
+                        break;
+                    case 'native':
+                    default:
+                        this.speakNative(text, extendedOptions);
+                        break;
+                }
+            } catch (e) {
+                console.error('TTS execution failed, trying native fallback:', e);
+                this.speakNative(text, extendedOptions);
+            }
+        });
     }
 
     /**
@@ -134,7 +138,11 @@ class TTSManager {
     }
 
     private speakNative(text: string, options: TTSOptions): void {
-        if (!window.speechSynthesis) return;
+        if (!window.speechSynthesis) {
+            if (options.onEnd) options.onEnd();
+            return;
+        }
+
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'zh-CN';
         utterance.rate = options.rate || 1.0;
@@ -142,7 +150,8 @@ class TTSManager {
 
         if (options.voice) {
             const voices = window.speechSynthesis.getVoices();
-            const selectedVoice = voices.find(v => v.name === options.voice);
+            // Try better matching for native voices
+            const selectedVoice = voices.find(v => v.name === options.voice || v.name.includes(options.voice));
             if (selectedVoice) utterance.voice = selectedVoice;
         }
 
@@ -150,17 +159,17 @@ class TTSManager {
             if (options.onStart) options.onStart();
         };
 
-        if (options.onBoundary) {
-            utterance.onboundary = (event) => {
-                if (options.onBoundary) options.onBoundary(event.charIndex);
-            };
-        }
+        utterance.onboundary = (event) => {
+            if (options.onBoundary) options.onBoundary(event.charIndex);
+        };
 
-        if (options.onEnd) {
-            utterance.onend = () => {
-                if (options.onEnd) options.onEnd();
-            };
-        }
+        utterance.onend = () => {
+            if (options.onEnd) options.onEnd();
+        };
+
+        utterance.onerror = () => {
+            if (options.onEnd) options.onEnd();
+        };
 
         window.speechSynthesis.speak(utterance);
     }

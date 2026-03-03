@@ -225,7 +225,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 }
                             }, 100);
 
-                            ttsManager.playBlob(url, sentence, {
+                            ttsManager.playBlob(url as string, sentence, {
                                 ...ttsOptions,
                                 onBoundary: (idx) => {
                                     if (playbackIdRef.current !== currentPlaybackId) return;
@@ -243,6 +243,21 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 }
                             });
                         });
+                    } else if (playbackIdRef.current === currentPlaybackId) {
+                        // FALLBACK: If Edge/Fish prefetch failed, use direct speak (which now has robust fallback)
+                        await ttsManager.speak(sentence, {
+                            ...ttsOptions,
+                            onBoundary: (idx) => {
+                                if (playbackIdRef.current !== currentPlaybackId) return;
+                                const progress = (idx / sentence.length) * 100;
+                                const el = highlightRefs.current[i];
+                                if (el) el.style.clipPath = `inset(0 ${100 - progress}% 0 0)`;
+                            }
+                        });
+                        if (playbackIdRef.current === currentPlaybackId) {
+                            const el = highlightRefs.current[i];
+                            if (el) el.style.clipPath = 'none';
+                        }
                     }
                 }
 

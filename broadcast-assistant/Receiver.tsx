@@ -352,8 +352,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     });
                 }
                 if (isListeningRef.current && msg.id !== lastPlayedId.current) {
-                    // Update ID early to prevent double trigging
+                    // Update ID early to prevent double triggering
                     lastPlayedId.current = msg.id;
+                    if (fullRoomId) localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, msg.id);
                     speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice);
                 }
             } else if (!isPlayingRef.current && pendingPlayouts.current <= 0) {
@@ -396,6 +397,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     // Global cleanup on unmount
     useEffect(() => {
         return () => {
+            playbackIdRef.current++; // Kill any async speak loops
             ttsManager.stop();
             ttsManager.clearPool();
             ttsManager.stopSilentLoop();

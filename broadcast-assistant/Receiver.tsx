@@ -58,13 +58,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         const saved = localStorage.getItem(`br_synced_name_${localStorage.getItem('br_receiver_room') || ''}`);
         return saved || '';
     });
-    const [selectedVoice, setSelectedVoice] = useState(() => localStorage.getItem('br_selected_voice') || 'zh-CN-XiaoxiaoNeural');
     const [volumeBoost, setVolumeBoost] = useState(() => parseFloat(localStorage.getItem('br_volume_boost') || '1.5'));
-    const [showVoiceSettings, setShowVoiceSettings] = useState(false);
-
-    useEffect(() => {
-        localStorage.setItem('br_selected_voice', selectedVoice);
-    }, [selectedVoice]);
 
     useEffect(() => {
         localStorage.setItem('br_volume_boost', volumeBoost.toString());
@@ -217,7 +211,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                     const sentence = currentSentences[i];
                     const nextSentence = currentSentences[i + 1];
-                    const targetVoice = voiceOverride || (isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice);
+                    const targetVoice = voiceOverride || 'native';
 
                     const ttsOptions = {
                         engine: 'edge' as const,
@@ -290,7 +284,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
 
         playMessageCycles();
-    }, [fullRoomId, selectedVoice]);
+    }, [fullRoomId]);
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;

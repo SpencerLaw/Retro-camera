@@ -96,7 +96,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const [isEmergency, setIsEmergency] = useState(false);
     const [isLooping, setIsLooping] = useState(false);
     const [repeatCount, setRepeatCount] = useState<number | string>(1);
-    const [selectedVoice, setSelectedVoice] = useState('zh-CN-XiaoxiaoNeural');
+
     const [history, setHistory] = useState<Message[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'loading' | null; msg: string }>({ type: null, msg: '' });
 
@@ -246,7 +246,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     isEmergency,
                     channelName: activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
-                    voice: selectedVoice
+                    voice: ''
                 }),
             });
 
@@ -257,7 +257,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     id: data.messageId,
                     text: inputText.trim(),
                     isEmergency,
-                    voice: selectedVoice,
+                    voice: '',
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                     timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
                     channelName: activeChannel.name
@@ -562,27 +562,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 </div>
                             )}
 
-                            <div className="flex-1 min-w-[140px]">
-                                <select
-                                    value={selectedVoice}
-                                    onChange={(e) => setSelectedVoice(e.target.value as any)}
-                                    className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 py-3 px-3 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5"
-                                    style={{
-                                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                                        backgroundPosition: `right 0.5rem center`,
-                                        backgroundRepeat: `no-repeat`,
-                                        backgroundSize: `1.5em 1.5em`
-                                    }}
-                                >
-                                    {VOICE_CATEGORIES.map(category => (
-                                        <optgroup key={category.id} label={category.name}>
-                                            {category.options.map(voice => (
-                                                <option key={voice.value} value={voice.value}>{voice.label}</option>
-                                            ))}
-                                        </optgroup>
-                                    ))}
-                                </select>
-                            </div>
+
                         </div>
                     </div>
 

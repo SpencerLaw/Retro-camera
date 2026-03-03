@@ -305,9 +305,11 @@ class TTSManager {
         }
     }
 
+    private isSilentLoopPending: boolean = false;
+
     // Silent audio to keep the browser tab "audible" and prevent background suspension
     public startSilentLoop(): void {
-        if (this.isSilentLoopPlaying) return;
+        if (this.isSilentLoopPlaying || this.isSilentLoopPending) return;
 
         if (!this.silentAudio) {
             this.silentAudio = new Audio();
@@ -317,10 +319,13 @@ class TTSManager {
             this.silentAudio.volume = 0.01; // Extremely quiet but not zero
         }
 
+        this.isSilentLoopPending = true;
         this.silentAudio.play().then(() => {
             this.isSilentLoopPlaying = true;
+            this.isSilentLoopPending = false;
             console.log('Silent keep-alive loop started.');
         }).catch(err => {
+            this.isSilentLoopPending = false;
             console.warn('Silent loop block by browser policy, will retry on next user interaction.', err);
         });
     }
@@ -329,6 +334,7 @@ class TTSManager {
         if (this.silentAudio) {
             this.silentAudio.pause();
             this.isSilentLoopPlaying = false;
+            this.isSilentLoopPending = false;
         }
     }
 

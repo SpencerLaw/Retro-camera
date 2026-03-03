@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 // @ts-ignore
 import enTranslations from '../locales/en.json';
@@ -17,16 +18,20 @@ const translations: Record<GlobalLanguage, any> = {
 
 export const useTranslations = () => {
   const { language } = useLanguage();
-  const t = translations[language] || translations['en'];
 
+  // Memoize the selected translation object
+  const currentTranslations = useMemo(() =>
+    translations[language] || translations['en'],
+    [language]);
+
+  // Memoize the translation function itself
   return React.useCallback((key: string): string => {
     const keys = key.split('.');
-    let value: any = t;
+    let value: any = currentTranslations;
     for (const k of keys) {
       value = value?.[k];
       if (value === undefined) break;
     }
     return typeof value === 'string' ? value : key;
-  }, [t]);
+  }, [currentTranslations]);
 };
-

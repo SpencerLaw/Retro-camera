@@ -229,9 +229,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         prefetchedBlobs.current = {};
 
         const playMessageCycles = async () => {
+            const currentSentences = text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [text];
             while (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
                 if (playbackIdRef.current !== currentPlaybackId) break;
-                const currentSentences = text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [text];
 
                 if (playbackIdRef.current !== currentPlaybackId) {
                     ttsManager.stop();
@@ -368,11 +368,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         }
     }, [fullRoomId, speak, t]);
 
+    const fetchMessageRef = useRef(fetchMessage);
+    useEffect(() => { fetchMessageRef.current = fetchMessage; }, [fetchMessage]);
+
     useEffect(() => {
         let isActive = true;
         const poll = async () => {
             if (!isJoined || !isActive) return;
-            await fetchMessage();
+            await fetchMessageRef.current();
             if (isActive) pollingTimer.current = setTimeout(poll, 3000);
         };
         if (isJoined) {
@@ -389,10 +392,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         return () => {
             isActive = false;
             if (pollingTimer.current) clearTimeout(pollingTimer.current);
-            // DO NOT stop audio here, as this effect re-runs on fetchMessage changes.
-            // Component-level cleanup is handled by unmount or explicit stop.
         };
-    }, [isJoined, fetchMessage]);
+    }, [isJoined]); // Only depends on isJoined
 
     // Global cleanup on unmount
     useEffect(() => {
@@ -454,8 +455,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         return (
             <div className={`fixed inset-0 flex items-center justify-center overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`}>
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className={`absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${isDark ? 'bg-blue-600' : 'bg-blue-400'}`}></div>
-                    <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${isDark ? 'bg-purple-600' : 'bg-pink-400'}`}></div>
+                    <div className={`absolute inset-0 opacity-20`} style={{ background: isDark ? 'radial-gradient(circle at 70% 20%, #2563eb, transparent 40%), radial-gradient(circle at 20% 80%, #9333ea, transparent 40%)' : 'radial-gradient(circle at 70% 20%, #60a5fa, transparent 40%), radial-gradient(circle at 20% 80%, #f472b6, transparent 40%)' }}></div>
                 </div>
                 <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative z-50 animate-in zoom-in duration-500">
                     <button onClick={onExit} className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition active:scale-95 cursor-pointer z-50">

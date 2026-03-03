@@ -231,25 +231,12 @@ class TTSManager {
     }
 
     private async fetchEdgeBlob(text: string, options: TTSOptions): Promise<Blob | null> {
-        // Fallback robust dictionaries API as ultimate safety net
-        const fetchFanyiFallback = async (text: string, voice: string) => {
-            try {
-                const per = voice.toLowerCase().includes('female') || voice.toLowerCase().includes('xiaoxiao') || voice.toLowerCase().includes('xiaoyi') ? 0 : 1;
-                const url = `https://fanyi.baidu.com/gettts?lan=zh&text=${encodeURIComponent(text)}&spd=5&source=web&per=${per}`;
-                const resp = await fetch(url);
-                if (resp.ok) return await resp.blob();
-            } catch (e) {
-                console.warn('Fanyi fallback failed:', e);
-            }
-            return null;
-        };
-
         const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
         const rate = options.rate ? `${options.rate > 1 ? '+' : ''}${Math.round((options.rate - 1) * 100)}%` : '+0%';
 
         if (!window.WebSocket) {
-            console.warn('WebSocket not supported, falling back to Fanyi');
-            return fetchFanyiFallback(text, voice);
+            console.error('WebSocket not supported by browser.');
+            return null;
         }
 
         try {
@@ -320,10 +307,7 @@ class TTSManager {
             console.error('Edge WS init failed', err);
         }
 
-        // Direct WebSocket failed, use Fanyi fallback
-        console.warn('Direct WebSocket failed, using Fanyi fallback...');
-        const fanyiBlob = await fetchFanyiFallback(text, voice);
-        if (fanyiBlob && fanyiBlob.size > 100) return fanyiBlob;
+        console.error('Direct WebSocket to Edge TTS failed.');
 
         return null;
     }

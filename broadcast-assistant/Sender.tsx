@@ -35,6 +35,38 @@ const ClockDisplay = () => {
     return <span>{time.toLocaleTimeString()}</span>;
 };
 
+const VOICE_CATEGORIES = [
+    {
+        id: 'standard', name: '通用 (标准)', options: [
+            { value: 'zh-CN-XiaoxiaoNeural', label: '晓晓 (女声, 温暖)' },
+            { value: 'zh-CN-XiaoyiNeural', label: '晓伊 (女声, 甜美)' },
+            { value: 'zh-CN-YunxiNeural', label: '云希 (男声, 活力)' },
+            { value: 'zh-CN-YunjianNeural', label: '云健 (男声, 稳重)' },
+            { value: 'zh-CN-YunyangNeural', label: '云扬 (男声, 新闻)' },
+        ]
+    },
+    {
+        id: 'emotion', name: '情感 & 角色', options: [
+            { value: 'zh-CN-XiaozhenNeural', label: '晓甄 (女声, 儿童)' },
+            { value: 'zh-CN-YunxiaNeural', label: '云夏 (男声, 少年)' },
+            { value: 'zh-CN-XiaomoNeural', label: '晓墨 (女声, 严肃)' },
+            { value: 'zh-CN-XiaoruiNeural', label: '晓睿 (女声, 可爱)' },
+            { value: 'zh-CN-XiaoshuangNeural', label: '晓双 (女声, 儿童)' },
+        ]
+    },
+    {
+        id: 'dialect', name: '地方口音', options: [
+            { value: 'zh-CN-liaoning-XiaobeiNeural', label: '东北话 (辽宁女声)' },
+            { value: 'zh-CN-shaanxi-XiaoniNeural', label: '陕西话 (西安女声)' },
+            { value: 'zh-CN-sichuan-YunxiNeural', label: '四川话 (成都男声)' },
+            { value: 'zh-HK-HiuMaanNeural', label: '粤语 (香港女声)' },
+            { value: 'zh-HK-WanLungNeural', label: '粤语 (香港男声)' },
+            { value: 'zh-TW-HsiaoChenNeural', label: '繁体 (台湾女声)' },
+            { value: 'zh-TW-YunJheNeural', label: '繁体 (台湾男声)' },
+        ]
+    }
+];
+
 const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
     const t = useTranslations();
     const licensePrefix = getLicensePrefix(license);
@@ -535,29 +567,13 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                         backgroundSize: `1.5em 1.5em`
                                     }}
                                 >
-                                    <optgroup label="通用 (标准)">
-                                        <option value="zh-CN-XiaoxiaoNeural">晓晓 (女声, 温暖)</option>
-                                        <option value="zh-CN-XiaoyiNeural">晓伊 (女声, 甜美)</option>
-                                        <option value="zh-CN-YunxiNeural">云希 (男声, 活力)</option>
-                                        <option value="zh-CN-YunjianNeural">云健 (男声, 稳重)</option>
-                                        <option value="zh-CN-YunyangNeural">云扬 (男声, 新闻)</option>
-                                    </optgroup>
-                                    <optgroup label="情感 & 角色">
-                                        <option value="zh-CN-XiaozhenNeural">晓甄 (女声, 儿童)</option>
-                                        <option value="zh-CN-YunxiaNeural">云夏 (男声, 少年)</option>
-                                        <option value="zh-CN-XiaomoNeural">晓墨 (女声, 严肃)</option>
-                                        <option value="zh-CN-XiaoruiNeural">晓睿 (女声, 可爱)</option>
-                                        <option value="zh-CN-XiaoshuangNeural">晓双 (女声, 儿童)</option>
-                                    </optgroup>
-                                    <optgroup label="地方口音">
-                                        <option value="zh-CN-liaoning-XiaobeiNeural">东北话 (辽宁女声)</option>
-                                        <option value="zh-CN-shaanxi-XiaoniNeural">陕西话 (西安女声)</option>
-                                        <option value="zh-CN-sichuan-YunxiNeural">四川话 (成都男声)</option>
-                                        <option value="zh-HK-HiuMaanNeural">粤语 (香港女声)</option>
-                                        <option value="zh-HK-WanLungNeural">粤语 (香港男声)</option>
-                                        <option value="zh-TW-HsiaoChenNeural">繁体 (台湾女声)</option>
-                                        <option value="zh-TW-YunJheNeural">繁体 (台湾男声)</option>
-                                    </optgroup>
+                                    {VOICE_CATEGORIES.map(category => (
+                                        <optgroup key={category.id} label={category.name}>
+                                            {category.options.map(voice => (
+                                                <option key={voice.value} value={voice.value}>{voice.label}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -713,27 +729,42 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                             +
                                         </button>
                                     </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-30">发音人</label>
-                                    <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-2xl h-[56px] items-center">
-                                        <button
-                                            onClick={() => setReplayData({ ...replayData, voice: 'zh-CN-XiaoxiaoNeural' })}
-                                            className={`flex-1 h-full rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${replayData.voice === 'zh-CN-XiaoxiaoNeural'
-                                                ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
-                                                : 'text-gray-400 hover:bg-white/10'}`}
-                                        >
-                                            女声
-                                        </button>
-                                        <button
-                                            onClick={() => setReplayData({ ...replayData, voice: 'zh-CN-YunxiNeural' })}
-                                            className={`flex-1 h-full rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${replayData.voice === 'zh-CN-YunxiNeural'
-                                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                                                : 'text-gray-400 hover:bg-white/10'}`}
-                                        >
-                                            男声
-                                        </button>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-30">修改发音人</label>
+                                        <div className="relative group/voice h-[56px] rounded-2xl bg-gray-100 dark:bg-white/5 border-2 border-transparent hover:border-blue-500/20 transition-all cursor-pointer flex items-center justify-between px-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase font-black tracking-widest text-blue-500">
+                                                    {VOICE_CATEGORIES.find(c => c.options.some(o => o.value === replayData.voice))?.options.find(o => o.value === replayData.voice)?.label || '智能语音'}
+                                                </span>
+                                            </div>
+                                            <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-gray-400 group-hover/voice:text-blue-500 transition-colors">
+                                                <Radio size={14} />
+                                            </div>
+                                            {/* Dropdown Menu */}
+                                            <div className="absolute bottom-full right-0 mb-4 w-64 bg-white dark:bg-black border border-gray-100 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover/voice:opacity-100 group-hover/voice:visible transition-all translate-y-2 group-hover/voice:translate-y-0 z-50 overflow-hidden flex flex-col max-h-[40vh]">
+                                                <div className="flex-1 overflow-y-auto w-full no-scrollbar">
+                                                    {VOICE_CATEGORIES.map(category => (
+                                                        <div key={category.id} className="p-2 border-b border-gray-100/50 dark:border-white/5 last:border-0 border-solid cursor-default">
+                                                            <div className="text-[10px] font-black tracking-widest text-gray-400 uppercase px-3 py-2">
+                                                                {category.name}
+                                                            </div>
+                                                            <div className="space-y-1 mt-1">
+                                                                {category.options.map(voice => (
+                                                                    <button
+                                                                        key={voice.value}
+                                                                        onClick={(e) => { e.stopPropagation(); setReplayData({ ...replayData, voice: voice.value }); }}
+                                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold transition-all flex items-center justify-between ${replayData.voice === voice.value ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                                                    >
+                                                                        {voice.label}
+                                                                        {replayData.voice === voice.value && <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

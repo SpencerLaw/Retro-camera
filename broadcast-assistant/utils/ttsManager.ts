@@ -189,7 +189,16 @@ class TTSManager {
         if (options.voice) {
             const voices = window.speechSynthesis.getVoices();
             // Try better matching for native voices
-            const selectedVoice = voices.find(v => v.name === options.voice || v.name.includes(options.voice));
+            let selectedVoice = voices.find(v => v.name === options.voice || v.name.includes(options.voice));
+
+            // If it's a known male voice name but not found, try searching for any male voice
+            if (!selectedVoice && (options.voice.toLowerCase().includes('yunxi') || options.voice.toLowerCase().includes('yunjian') || options.voice.toLowerCase().includes('kangkang'))) {
+                selectedVoice = voices.find(v =>
+                    (v.lang.startsWith('zh') || v.lang.startsWith('en')) &&
+                    (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('kangkang') || v.name.toLowerCase().includes('jiayue'))
+                );
+            }
+
             if (selectedVoice) utterance.voice = selectedVoice;
         }
 
@@ -219,7 +228,8 @@ class TTSManager {
     private async fetchEdgeBlob(text: string, options: TTSOptions): Promise<Blob | null> {
         const proxies = [
             'https://edge-tts.vercel.app/api/tts',
-            'https://tts.cy7.io/api/tts'
+            'https://tts.cy7.io/api/tts',
+            'https://api.tts.me/edge'
         ];
 
         for (const proxyBase of proxies) {
@@ -228,8 +238,16 @@ class TTSManager {
                 const rate = options.rate ? `${Math.round((options.rate - 1) * 100)}%` : '0%';
                 const url = `${proxyBase}?text=${encodeURIComponent(text)}&voice=${voice}&rate=${rate}`;
 
-                const resp = await fetch(url);
-                if (resp.ok) return await resp.blob();
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout for each proxy
+
+                const resp = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    if (blob.size > 100) return blob; // Valid audio blob should have some size
+                }
             } catch (error) {
                 console.warn(`Edge fetch failed via ${proxyBase}`);
             }
@@ -237,14 +255,35 @@ class TTSManager {
         return null;
     }
 
+    private async fetchBaiduBlob(text: string, options: TTSOptions): Promise<Blob | null> {
+        try {
+            // per=1 (male), per=0 (female)
+            // Xiaoxiao -> 0, Yunxi -> 1
+            const per = options.voice?.toLowerCase().includes('yunxi') ? 1 : 0;
+            const url = `https://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=5&per=${per}&text=${encodeURIComponent(text)}`;
+            const resp = await fetch(url);
+            if (resp.ok) return await resp.blob();
+        } catch (e) {
+            console.warn('Baidu TTS fetch failed');
+        }
+        return null;
+    }
+
     private async speakEdge(text: string, options: TTSOptions): Promise<void> {
-        const blob = await this.fetchEdgeBlob(text, options);
+        let blob = await this.fetchEdgeBlob(text, options);
+
+        // Secondary fallback: Baidu (Very stable for default male/female)
+        if (!blob && options.voice?.includes('zh-CN')) {
+            console.warn('Edge TTS failed, falling back to Baidu');
+            blob = await this.fetchBaiduBlob(text, options);
+        }
+
         if (blob) {
             const url = URL.createObjectURL(blob);
             this.blobPool.add(url);
             await this.playBlob(url, text, options);
         } else {
-            console.error('Edge TTS failed, falling back to native');
+            console.error('All cloud TTS engines failed, falling back to native');
             this.speakNative(text, options);
         }
     }

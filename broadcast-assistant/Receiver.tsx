@@ -61,8 +61,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [showSettings, setShowSettings] = useState(false);
 
     const [isPlaying, setIsPlaying] = useState(false);
-    const [charIndex, setCharIndex] = useState(0);
+    const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
+
+    const prefetchedBlobs = useRef<Record<string, string>>({});
+    const highlightRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
     const lastPlayedId = useRef<string | null>(null);
     const pollingTimer = useRef<NodeJS.Timeout | null>(null);
@@ -107,21 +110,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     // Helper to split text into sentences for Karaoke effect
     const sentences = React.useMemo(() => {
         if (!currentMsg?.text) return [];
-        // Extract raw sentences while keeping punctuation attached. 
-        // We use match to find parts, which is safer than split with capture groups to guarantee 1:1 length mapping.
         const parts = currentMsg.text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g);
         return parts ? parts : [currentMsg.text];
     }, [currentMsg?.text]);
-
-    const activeSentenceIndex = React.useMemo(() => {
-        let count = 0;
-        for (let i = 0; i < sentences.length; i++) {
-            const len = sentences[i].length;
-            if (charIndex >= count && charIndex < count + len) return i;
-            count += len;
-        }
-        return -1;
-    }, [charIndex, sentences]);
 
     // Auto-scroll logic: Only trigger if user is NOT manual scrolling
     const scrollToActive = useCallback((behavior: ScrollBehavior = 'smooth') => {
@@ -171,8 +162,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
     }, [isPlaying, scrollToActive]);
 
-    const speak = useCallback((text: string, isEmergency: boolean, repeatCount: number = 1, id: string) => {
-        // Update Ref IMMEDIATELY to prevent race condition with polling
+    const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string) => {
         lastPlayedId.current = id;
         if (fullRoomId) {
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
@@ -180,43 +170,74 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
         pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
         setIsPlaying(true);
+        ttsManager.clearPool();
+        prefetchedBlobs.current = {};
 
-        const playNext = () => {
-            if (pendingPlayouts.current <= 0) {
-                setIsPlaying(false);
-                return;
-            }
+        const playMessageCycles = async () => {
+            while (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
+                // Split current sentences (local snapshot to be safe)
+                const currentSentences = text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [text];
 
-            ttsManager.speak(text, {
-                engine: 'edge',
-                voice: isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice,
-                rate: isEmergency ? 0.85 : 1.0,
-                onStart: () => {
-                    setCharIndex(0);
-                },
-                onBoundary: (idx) => {
-                    setCharIndex(idx);
-                },
-                onEnd: () => {
-                    // Force complete highlight of all characters during the 3-second delay
-                    setCharIndex(text.length + 100);
+                for (let i = 0; i < currentSentences.length; i++) {
+                    if (!isPlaying) break; // Check if stopped
 
-                    if (pendingPlayouts.current > 0 && pendingPlayouts.current !== 999) {
-                        pendingPlayouts.current--;
+                    setActiveSentenceIndex(i);
+
+                    const sentence = currentSentences[i];
+                    const nextSentence = currentSentences[i + 1];
+                    const ttsOptions = {
+                        engine: 'edge' as const,
+                        voice: isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice,
+                        rate: isEmergency ? 0.85 : 1.0,
+                    };
+
+                    // Pre-fetch next sentence while current one is playing
+                    if (nextSentence && !prefetchedBlobs.current[nextSentence]) {
+                        ttsManager.prefetch(nextSentence, ttsOptions).then(url => {
+                            if (url) prefetchedBlobs.current[nextSentence] = url;
+                        });
                     }
-                    if (pendingPlayouts.current > 0) {
-                        // User requested exactly 3 seconds delay between repeats
-                        setTimeout(() => playNext(), 3000);
-                    } else {
-                        setIsPlaying(false);
-                        setCharIndex(0);
+
+                    // Get or fetch current audio
+                    let url = prefetchedBlobs.current[sentence];
+                    if (!url) {
+                        url = await ttsManager.prefetch(sentence, ttsOptions) || '';
+                    }
+
+                    if (url) {
+                        await new Promise<void>((resolve) => {
+                            ttsManager.playBlob(url, sentence, {
+                                ...ttsOptions,
+                                onBoundary: (idx) => {
+                                    const progress = (idx / sentence.length) * 100;
+                                    const el = highlightRefs.current[i];
+                                    if (el) el.style.clipPath = `inset(0 ${100 - progress}% 0 0)`;
+                                },
+                                onEnd: () => {
+                                    const el = highlightRefs.current[i];
+                                    if (el) el.style.clipPath = 'none';
+                                    resolve();
+                                }
+                            });
+                        });
                     }
                 }
-            });
+
+                if (pendingPlayouts.current !== 999) {
+                    pendingPlayouts.current--;
+                }
+
+                if (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
+                    setActiveSentenceIndex(-1);
+                    await new Promise(r => setTimeout(r, 3000));
+                }
+            }
+            setIsPlaying(false);
+            setActiveSentenceIndex(-1);
         };
 
-        playNext();
-    }, [fullRoomId]);
+        playMessageCycles();
+    }, [fullRoomId, selectedVoice]);
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;
@@ -301,6 +322,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         return () => {
             isActive = false;
             if (pollingTimer.current) clearTimeout(pollingTimer.current);
+            ttsManager.stop();
+            ttsManager.stopSilentLoop();
         };
     }, [isJoined, fetchMessage]);
 
@@ -315,7 +338,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     useEffect(() => {
         if (!isListening) {
             ttsManager.stop();
+            ttsManager.clearPool();
             pendingPlayouts.current = 0;
+            setIsPlaying(false);
+            setActiveSentenceIndex(-1);
         }
     }, [isListening]);
 
@@ -568,25 +594,36 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 const isActive = sIdx === activeSentenceIndex;
                                 const isPast = activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex;
 
-                                // Calculate the absolute start index of this sentence
-                                const sentenceStartIndex = sentences.slice(0, sIdx).join('').length;
-
                                 return (
-                                    <span
+                                    <div
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`block py-3 md:py-5 w-full break-words select-none text-center ${isActive
+                                        className={`relative block py-3 md:py-5 w-full break-words select-none text-center transition-all duration-700 ${isActive
                                             ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-fuchsia-500 dark:text-fuchsia-400 font-black opacity-100')
                                             : isPast
                                                 ? 'opacity-40'
                                                 : 'opacity-10'
-                                            } ${isSimplifiedMode ? '' : 'transition-opacity duration-500'} ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
+                                            } ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
                                                 currentMsg.text.length > 100 ? 'text-xl md:text-4xl' :
                                                     'text-3xl md:text-6xl'
                                             }`}
                                     >
-                                        {sentence}
-                                    </span>
+                                        <span className="relative inline-block">
+                                            {/* Base Layer */}
+                                            <span className="opacity-30">{sentence}</span>
+                                            {/* Highlight Layer with Clip Path - Directly manipulated via ref */}
+                                            <span
+                                                ref={el => { highlightRefs.current[sIdx] = el; }}
+                                                className="absolute inset-0 text-fuchsia-600 dark:text-fuchsia-400 whitespace-nowrap overflow-hidden pointer-events-none"
+                                                style={{
+                                                    clipPath: isPast ? 'none' : 'inset(0 100% 0 0)',
+                                                    transition: 'clip-path 0.1s linear'
+                                                }}
+                                            >
+                                                {sentence}
+                                            </span>
+                                        </span>
+                                    </div>
                                 );
                             })}
                         </div>

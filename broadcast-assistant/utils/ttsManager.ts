@@ -19,6 +19,7 @@ class TTSManager {
     private isSilentLoopPlaying: boolean = false;
     private currentBlobUrl: string | null = null;
     private metaListener: (() => void) | null = null;
+    private blobPool: Set<string> = new Set();
 
     private constructor() {
         this.audio = new Audio();
@@ -60,6 +61,49 @@ class TTSManager {
         }
     }
 
+    /**
+     * Pre-fetches audio and returns a Blob URL.
+     * Useful for zero-gap sequencing.
+     */
+    public async prefetch(text: string, options: TTSOptions): Promise<string | null> {
+        if (options.engine === 'native') return null;
+
+        try {
+            const blob = await (options.engine === 'fish'
+                ? this.fetchFishBlob(text, options)
+                : this.fetchEdgeBlob(text, options));
+
+            if (!blob) return null;
+            const url = URL.createObjectURL(blob);
+            this.blobPool.add(url);
+            return url;
+        } catch (e) {
+            console.error('Prefetch failed:', e);
+            return null;
+        }
+    }
+
+    /**
+     * Plays a previously prefetched Blob URL.
+     */
+    public async playBlob(url: string, text: string, options: TTSOptions): Promise<void> {
+        this.stop();
+        if (!this.audio) return;
+
+        this.audio.onplay = () => {
+            if (options.onStart) options.onStart();
+            this.simulateBoundaries(text, options, this.audio!);
+        };
+        this.audio.onended = () => {
+            this.clearBoundaryTimer();
+            if (options.onEnd) options.onEnd();
+        };
+
+        this.currentBlobUrl = url;
+        this.audio.src = url;
+        await this.audio.play();
+    }
+
     public stop(): void {
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
@@ -75,9 +119,18 @@ class TTSManager {
         }
         this.clearBoundaryTimer();
         if (this.currentBlobUrl) {
-            URL.revokeObjectURL(this.currentBlobUrl);
+            // We don't revoke immediately in stop() if it's part of the pool
+            // but we ensure it's cleared from active playback.
             this.currentBlobUrl = null;
         }
+    }
+
+    /**
+     * Clear all pooled blobs to free memory.
+     */
+    public clearPool(): void {
+        this.blobPool.forEach(url => URL.revokeObjectURL(url));
+        this.blobPool.clear();
     }
 
     private speakNative(text: string, options: TTSOptions): void {
@@ -112,34 +165,37 @@ class TTSManager {
         window.speechSynthesis.speak(utterance);
     }
 
-    private async speakEdge(text: string, options: TTSOptions): Promise<void> {
+    private async fetchEdgeBlob(text: string, options: TTSOptions): Promise<Blob | null> {
         const proxies = [
             'https://edge-tts.vercel.app/api/tts',
-            'https://tts.cy7.io/api/tts' // Potential fallback proxy
+            'https://tts.cy7.io/api/tts'
         ];
-
-        let lastError: any = null;
 
         for (const proxyBase of proxies) {
             try {
-                const voice = options.voice || 'zh-CN-YunxiNeural';
+                const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
                 const rate = options.rate ? `${Math.round((options.rate - 1) * 100)}%` : '0%';
                 const url = `${proxyBase}?text=${encodeURIComponent(text)}&voice=${voice}&rate=${rate}`;
 
-                if (this.audio) {
-                    this.audio.src = url;
-                    await this.audio.play();
-                    return; // Success!
-                }
+                const resp = await fetch(url);
+                if (resp.ok) return await resp.blob();
             } catch (error) {
-                lastError = error;
-                console.warn(`Edge TTS proxy ${proxyBase} failed, trying next...`);
-                continue;
+                console.warn(`Edge fetch failed via ${proxyBase}`);
             }
         }
+        return null;
+    }
 
-        console.error('All Edge TTS proxies failed:', lastError);
-        this.speakNative(text, options);
+    private async speakEdge(text: string, options: TTSOptions): Promise<void> {
+        const blob = await this.fetchEdgeBlob(text, options);
+        if (blob) {
+            const url = URL.createObjectURL(blob);
+            this.blobPool.add(url);
+            await this.playBlob(url, text, options);
+        } else {
+            console.error('Edge TTS failed, falling back to native');
+            this.speakNative(text, options);
+        }
     }
 
     // Silent audio to keep the browser tab "audible" and prevent background suspension
@@ -169,44 +225,30 @@ class TTSManager {
         }
     }
 
+    private async fetchFishBlob(text: string, options: TTSOptions): Promise<Blob | null> {
+        if (!options.apiKey) return null;
+        const response = await fetch('https://api.fish.audio/v1/tts', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${options.apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text,
+                reference_id: options.fishModelId || '7f92f8afb8ec43bf81f5059e09d961ce',
+                format: 'mp3',
+            }),
+        });
+        return response.ok ? await response.blob() : null;
+    }
+
     private async speakFish(text: string, options: TTSOptions): Promise<void> {
-        if (!options.apiKey) {
-            console.error('Fish Audio API Key is missing');
-            this.speakNative(text, options);
-            return;
-        }
-
-        try {
-            const response = await fetch('https://api.fish.audio/v1/tts', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${options.apiKey}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    text,
-                    reference_id: options.fishModelId || '7f92f8afb8ec43bf81f5059e09d961ce', // Default Fish voice
-                    format: 'mp3',
-                }),
-            });
-
-            if (!response.ok) throw new Error('Fish Audio API request failed');
-
-            const blob = await response.blob();
-
-            // Revoke old URL to prevent memory leak
-            if (this.currentBlobUrl) {
-                URL.revokeObjectURL(this.currentBlobUrl);
-            }
-
-            this.currentBlobUrl = URL.createObjectURL(blob);
-
-            if (this.audio) {
-                this.audio.src = this.currentBlobUrl;
-                await this.audio.play();
-            }
-        } catch (error) {
-            console.error('Fish Audio failed, falling back to native:', error);
+        const blob = await this.fetchFishBlob(text, options);
+        if (blob) {
+            const url = URL.createObjectURL(blob);
+            this.blobPool.add(url);
+            await this.playBlob(url, text, options);
+        } else {
             this.speakNative(text, options);
         }
     }

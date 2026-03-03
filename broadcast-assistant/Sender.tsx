@@ -530,7 +530,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                         ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
                                         : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
-                                    女声
+                                    微软女声
                                 </button>
                                 <button
                                     onClick={() => setSelectedVoice('zh-CN-YunxiNeural')}
@@ -538,7 +538,23 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                         ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
                                         : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
-                                    男声
+                                    微软男声
+                                </button>
+                                <button
+                                    onClick={() => setSelectedVoice('baidu-female')}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'baidu-female'
+                                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
+                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                                >
+                                    百度女声
+                                </button>
+                                <button
+                                    onClick={() => setSelectedVoice('baidu-male')}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'baidu-male'
+                                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                                >
+                                    百度男声
                                 </button>
                             </div>
                         </div>

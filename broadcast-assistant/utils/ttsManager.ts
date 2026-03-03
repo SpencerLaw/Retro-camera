@@ -1,4 +1,4 @@
-export type TTSEngine = 'native' | 'edge' | 'fish';
+export type TTSEngine = 'native' | 'edge' | 'fish' | 'baidu';
 
 export interface TTSOptions {
     engine: TTSEngine;
@@ -59,6 +59,9 @@ class TTSManager {
                     case 'edge':
                         await this.speakEdge(text, extendedOptions);
                         break;
+                    case 'baidu':
+                        await this.speakBaiduPrimary(text, extendedOptions);
+                        break;
                     case 'native':
                     default:
                         this.speakNative(text, extendedOptions);
@@ -79,9 +82,10 @@ class TTSManager {
         if (options.engine === 'native') return null;
 
         try {
-            const blob = await (options.engine === 'fish'
-                ? this.fetchFishBlob(text, options)
-                : this.fetchEdgeBlob(text, options));
+            let blob: Blob | null = null;
+            if (options.engine === 'fish') blob = await this.fetchFishBlob(text, options);
+            else if (options.engine === 'baidu') blob = await this.fetchBaiduBlob(text, options);
+            else blob = await this.fetchEdgeBlob(text, options);
 
             if (!blob) return null;
             const url = URL.createObjectURL(blob);
@@ -258,8 +262,9 @@ class TTSManager {
     private async fetchBaiduBlob(text: string, options: TTSOptions): Promise<Blob | null> {
         try {
             // per=1 (male), per=0 (female)
-            // Xiaoxiao -> 0, Yunxi -> 1
-            const per = options.voice?.toLowerCase().includes('yunxi') ? 1 : 0;
+            // Xiaoxiao/baidu-female -> 0, Yunxi/baidu-male -> 1
+            const voiceStr = (options.voice || '').toLowerCase();
+            const per = voiceStr.includes('yunxi') || voiceStr.includes('male') && !voiceStr.includes('female') ? 1 : 0;
             const url = `https://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=5&per=${per}&text=${encodeURIComponent(text)}`;
             const resp = await fetch(url);
             if (resp.ok) return await resp.blob();
@@ -267,6 +272,19 @@ class TTSManager {
             console.warn('Baidu TTS fetch failed');
         }
         return null;
+    }
+
+    private async speakBaiduPrimary(text: string, options: TTSOptions): Promise<void> {
+        let blob = await this.fetchBaiduBlob(text, options);
+
+        if (blob) {
+            const url = URL.createObjectURL(blob);
+            this.blobPool.add(url);
+            await this.playBlob(url, text, options);
+        } else {
+            console.error('Baidu TTS primary failed, falling back to Native');
+            this.speakNative(text, options);
+        }
     }
 
     private async speakEdge(text: string, options: TTSOptions): Promise<void> {

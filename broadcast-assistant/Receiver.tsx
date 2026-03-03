@@ -200,9 +200,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                     const sentence = currentSentences[i];
                     const nextSentence = currentSentences[i + 1];
+                    const targetVoice = voiceOverride || (isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice);
+                    const engineType = targetVoice.startsWith('baidu-') ? 'baidu' : 'edge';
+
                     const ttsOptions = {
-                        engine: 'edge' as const,
-                        voice: voiceOverride || (isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice),
+                        engine: engineType as any, // type casting since 'baidu' is not in strict TTSEngine type natively, though will handle dynamically
+                        voice: targetVoice,
                         rate: isEmergency ? 0.85 : 1.0,
                         volume: volumeBoost, // Added volumeBoost here
                     };

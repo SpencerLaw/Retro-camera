@@ -555,7 +555,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                     />
 
                     <div className="flex gap-3 mt-4">
-                        <button onClick={() => setShowImport(false)} className="flex-1 py-3 rounded-xl bg-gray-100 font-bold text-gray-500">{t('broadcast.receiver.voiceSettings.abandon')}</button>
+                        <button onClick={() => setShowImport(false)} className="flex-1 py-3 rounded-xl bg-gray-100 font-bold text-gray-500">{t('broadcast.sender.abandon')}</button>
                         <button onClick={handleImport} disabled={!importText.trim()} className="flex-[2] py-3 rounded-xl bg-indigo-500 text-white font-bold disabled:opacity-30">{t('broadcast.sender.importWordTitle')}</button>
                     </div>
                 </div>

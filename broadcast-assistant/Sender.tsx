@@ -386,7 +386,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                             onClick={() => setEditingChannel(null)}
                             className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-bold hover:bg-gray-200 transition-all"
                         >
-                            {t('broadcast.receiver.voiceSettings.abandon') || '取消'}
+                            {t('broadcast.sender.abandon') || '取消'}
                         </button>
                         <button
                             onClick={saveEdit}

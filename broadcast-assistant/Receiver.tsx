@@ -227,18 +227,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                             ttsManager.playBlob(url as string, sentence, {
                                 ...ttsOptions,
-                                onBoundary: (idx) => {
-                                    if (playbackIdRef.current !== currentPlaybackId) return;
-                                    const progress = (idx / sentence.length) * 100;
-                                    const el = highlightRefs.current[i];
-                                    if (el) el.style.clipPath = `inset(0 ${100 - progress}% 0 0)`;
-                                },
                                 onEnd: () => {
                                     clearInterval(monitor);
-                                    if (playbackIdRef.current === currentPlaybackId) {
-                                        const el = highlightRefs.current[i];
-                                        if (el) el.style.clipPath = 'none';
-                                    }
                                     resolve();
                                 }
                             });
@@ -246,18 +236,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     } else if (playbackIdRef.current === currentPlaybackId) {
                         // FALLBACK: If Edge/Fish prefetch failed, use direct speak (which now has robust fallback)
                         await ttsManager.speak(sentence, {
-                            ...ttsOptions,
-                            onBoundary: (idx) => {
-                                if (playbackIdRef.current !== currentPlaybackId) return;
-                                const progress = (idx / sentence.length) * 100;
-                                const el = highlightRefs.current[i];
-                                if (el) el.style.clipPath = `inset(0 ${100 - progress}% 0 0)`;
-                            }
+                            ...ttsOptions
                         });
-                        if (playbackIdRef.current === currentPlaybackId) {
-                            const el = highlightRefs.current[i];
-                            if (el) el.style.clipPath = 'none';
-                        }
                     }
                 }
 
@@ -640,31 +620,17 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     <div
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`relative block py-3 md:py-5 w-full break-words select-none text-center transition-all duration-700 ${isActive
-                                            ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-fuchsia-500 dark:text-fuchsia-400 font-black opacity-100')
+                                        className={`relative block py-4 md:py-6 w-full break-words select-none text-center transition-all duration-500 ${isActive
+                                            ? (currentMsg.isEmergency ? 'text-white font-black scale-105 drop-shadow-2xl' : 'text-blue-500 dark:text-cyan-400 font-black scale-105 opacity-100')
                                             : isPast
-                                                ? 'opacity-40'
+                                                ? 'opacity-30 blur-[1px]'
                                                 : 'opacity-10'
                                             } ${currentMsg.text.length > 300 ? 'text-lg md:text-2xl' :
                                                 currentMsg.text.length > 100 ? 'text-xl md:text-4xl' :
-                                                    'text-3xl md:text-6xl'
+                                                    'text-3xl md:text-7xl'
                                             }`}
                                     >
-                                        <span className="relative inline-block">
-                                            {/* Base Layer */}
-                                            <span className="opacity-30">{sentence}</span>
-                                            {/* Highlight Layer with Clip Path - Directly manipulated via ref */}
-                                            <span
-                                                ref={el => { highlightRefs.current[sIdx] = el; }}
-                                                className="absolute inset-0 text-fuchsia-600 dark:text-fuchsia-400 whitespace-nowrap overflow-hidden pointer-events-none"
-                                                style={{
-                                                    clipPath: isPast ? 'none' : 'inset(0 100% 0 0)',
-                                                    transition: 'clip-path 0.1s linear'
-                                                }}
-                                            >
-                                                {sentence}
-                                            </span>
-                                        </span>
+                                        {sentence}
                                     </div>
                                 );
                             })}

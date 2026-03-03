@@ -7,6 +7,7 @@ export interface TTSOptions {
     pitch?: number;
     apiKey?: string;
     fishModelId?: string;
+    volume?: number; // 1.0 to 2.5 (gain boost)
     onStart?: () => void;
     onEnd?: () => void;
     onBoundary?: (charIndex: number) => void;
@@ -20,6 +21,11 @@ class TTSManager {
     private currentBlobUrl: string | null = null;
     private metaListener: (() => void) | null = null;
     private blobPool: Set<string> = new Set();
+
+    // Web Audio API for volume boost
+    private audioCtx: AudioContext | null = null;
+    private sourceNode: MediaElementAudioSourceNode | null = null;
+    private gainNode: GainNode | null = null;
 
     private constructor() {
         this.audio = new Audio();
@@ -105,7 +111,39 @@ class TTSManager {
 
         this.currentBlobUrl = url;
         this.audio.src = url;
+
+        // Initialize Web Audio API if a boost is requested
+        if (options.volume && options.volume > 1.0) {
+            this.setupAudioNodes(options.volume);
+        } else if (this.gainNode) {
+            // Reset to normal if no boost
+            this.gainNode.gain.setTargetAtTime(1.0, this.audioCtx!.currentTime, 0.1);
+        }
+
         await this.audio.play();
+    }
+
+    private setupAudioNodes(volumeBoost: number): void {
+        try {
+            if (!this.audioCtx) {
+                this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+                this.gainNode = this.audioCtx.createGain();
+                this.sourceNode = this.audioCtx.createMediaElementSource(this.audio!);
+
+                this.sourceNode.connect(this.gainNode);
+                this.gainNode.connect(this.audioCtx.destination);
+            }
+
+            if (this.audioCtx.state === 'suspended') {
+                this.audioCtx.resume();
+            }
+
+            // Set gain (clamped for safety)
+            const gainValue = Math.min(2.5, Math.max(1.0, volumeBoost));
+            this.gainNode!.gain.setTargetAtTime(gainValue, this.audioCtx.currentTime, 0.1);
+        } catch (e) {
+            console.warn('Web Audio API setup failed:', e);
+        }
     }
 
     public stop(): void {
@@ -154,6 +192,10 @@ class TTSManager {
             const selectedVoice = voices.find(v => v.name === options.voice || v.name.includes(options.voice));
             if (selectedVoice) utterance.voice = selectedVoice;
         }
+
+        // Native volume is 0.0 to 1.0, doesn't support boost > 1.0
+        // But we set it to max if boost > 1.0
+        utterance.volume = options.volume ? Math.min(1.0, options.volume) : 1.0;
 
         utterance.onstart = () => {
             if (options.onStart) options.onStart();

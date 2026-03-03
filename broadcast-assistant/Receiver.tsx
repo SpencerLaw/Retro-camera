@@ -49,11 +49,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         return saved || '';
     });
     const [selectedVoice, setSelectedVoice] = useState(() => localStorage.getItem('br_selected_voice') || 'zh-CN-XiaoxiaoNeural');
+    const [volumeBoost, setVolumeBoost] = useState(() => parseFloat(localStorage.getItem('br_volume_boost') || '1.5'));
     const [showVoiceSettings, setShowVoiceSettings] = useState(false);
 
     useEffect(() => {
         localStorage.setItem('br_selected_voice', selectedVoice);
     }, [selectedVoice]);
+
+    useEffect(() => {
+        localStorage.setItem('br_volume_boost', volumeBoost.toString());
+    }, [volumeBoost]);
     // currentTime removed to prevent whole-page re-renders every second
     const [isListening, setIsListening] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -199,6 +204,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         engine: 'edge' as const,
                         voice: voiceOverride || (isEmergency ? 'zh-CN-YunxiNeural' : selectedVoice),
                         rate: isEmergency ? 0.85 : 1.0,
+                        volume: volumeBoost, // Added volumeBoost here
                     };
 
                     // Pre-fetch next sentence while current one is playing
@@ -563,6 +569,28 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                             {voice.name}
                                         </button>
                                     ))}
+                                </div>
+
+                                <div className="mt-6 pt-6 border-t border-black/5 dark:border-white/10 space-y-4 px-2">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Volume2 size={14} className="text-indigo-500" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">音量自动增强</span>
+                                        </div>
+                                        <span className="text-xs font-black text-indigo-500">{volumeBoost.toFixed(1)}x</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="1.0"
+                                        max="2.5"
+                                        step="0.1"
+                                        value={volumeBoost}
+                                        onChange={(e) => setVolumeBoost(parseFloat(e.target.value))}
+                                        className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                    />
+                                    <p className="text-[9px] leading-relaxed opacity-40 font-bold">
+                                        基于系统音量的数字放大，建议保持在 1.5x - 1.8x 以获得最佳效果。
+                                    </p>
                                 </div>
                             </div>
                         )}

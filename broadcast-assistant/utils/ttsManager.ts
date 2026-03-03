@@ -1,7 +1,7 @@
 export type TTSEngine = 'native' | 'edge' | 'fish';
 
 export interface TTSOptions {
-    engine: TTSEngine;
+    engine?: TTSEngine;
     voice?: string;
     rate?: number;
     pitch?: number;
@@ -38,7 +38,7 @@ class TTSManager {
         return TTSManager.instance;
     }
 
-    public async speak(text: string, options: TTSOptions = {}): Promise<void> {
+    public async speak(text: string, options: Partial<TTSOptions> = {}): Promise<void> {
         this.stop();
         this.startSilentLoop();
 
@@ -245,55 +245,83 @@ class TTSManager {
         };
 
         const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
-        const rate = options.rate ? `${Math.round((options.rate - 1) * 100)}%` : '0%';
+        const rate = options.rate ? `${options.rate > 1 ? '+' : ''}${Math.round((options.rate - 1) * 100)}%` : '+0%';
 
-        // Proxy 1: tts.quest (High quality but requires specific format)
+        if (!window.WebSocket) {
+            console.warn('WebSocket not supported, falling back to Fanyi');
+            return fetchFanyiFallback(text, voice);
+        }
+
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const resp = await fetch('https://api.tts.quest/v3/voice/synthesis', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    text: text,
-                    voiceName: voice,
-                }),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
+            const wsBlob = await new Promise<Blob | null>((resolve) => {
+                const ws = new WebSocket('wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4');
+                let audioData: Blob[] = [];
+                let isResolved = false;
 
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.data?.audioUrl) {
-                    const audioResp = await fetch(data.data.audioUrl);
-                    if (audioResp.ok) {
-                        const blob = await audioResp.blob();
-                        if (blob.size > 100) return blob;
+                const cleanup = (result: Blob | null) => {
+                    if (isResolved) return;
+                    isResolved = true;
+                    clearTimeout(timeout);
+                    if (ws.readyState === WebSocket.OPEN) ws.close();
+                    resolve(result);
+                };
+
+                const timeout = setTimeout(() => {
+                    console.warn('Edge TTS direct WebSocket timeout');
+                    cleanup(null);
+                }, 8000);
+
+                ws.onopen = () => {
+                    const reqId = Date.now().toString(16) + Math.random().toString(16).substring(2);
+                    const config = JSON.stringify({
+                        context: {
+                            synthesis: {
+                                audio: {
+                                    metadataoptions: { sentenceBoundaryEnabled: "false", wordBoundaryEnabled: "true" },
+                                    outputFormat: "audio-24khz-48kbitrate-mono-mp3"
+                                }
+                            }
+                        }
+                    });
+
+                    ws.send(`Content-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n${config}`);
+
+                    const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='zh-CN'><voice name='${voice}'><prosody rate='${rate}' pitch='+0Hz'>${text}</prosody></voice></speak>`;
+                    ws.send(`X-RequestId:${reqId}\r\nContent-Type:application/ssml+xml\r\nPath:ssml\r\n\r\n${ssml}`);
+                };
+
+                ws.onmessage = async (event) => {
+                    if (typeof event.data === 'string') {
+                        if (event.data.includes('Path:turn.end')) {
+                            cleanup(audioData.length > 0 ? new Blob(audioData, { type: 'audio/mp3' }) : null);
+                        }
+                    } else if (event.data instanceof Blob) {
+                        try {
+                            const buffer = await event.data.arrayBuffer();
+                            const view = new DataView(buffer);
+                            const headerLength = view.getUint16(0);
+                            const audioPayload = event.data.slice(2 + headerLength);
+                            audioData.push(audioPayload);
+                        } catch (e) {
+                            console.error('Failed to parse Edge WS audio blob', e);
+                        }
                     }
-                }
-            }
-        } catch (error) {
-            console.warn(`Edge fetch failed via api.tts.quest`);
+                };
+
+                ws.onerror = (e) => {
+                    console.error('Edge WS err:', e);
+                    cleanup(null);
+                };
+            });
+
+            if (wsBlob && wsBlob.size > 100) return wsBlob;
+
+        } catch (err) {
+            console.error('Edge WS init failed', err);
         }
 
-        // Proxy 2: edge-tts.vercel.app (Standard GET)
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const url = `https://edge-tts.vercel.app/api/tts?text=${encodeURIComponent(text)}&voice=${voice}&rate=${rate}`;
-            const resp = await fetch(url, { signal: controller.signal });
-            clearTimeout(timeoutId);
-
-            if (resp.ok) {
-                const blob = await resp.blob();
-                if (blob.size > 100) return blob;
-            }
-        } catch (error) {
-            console.warn(`Edge fetch failed via vercel.app`);
-        }
-
-        // Ultimate fallback: Baidu Fanyi
-        console.warn('All primary Edge proxies failed, attempting Fanyi HTTP fallback...');
+        // Direct WebSocket failed, use Fanyi fallback
+        console.warn('Direct WebSocket failed, using Fanyi fallback...');
         const fanyiBlob = await fetchFanyiFallback(text, voice);
         if (fanyiBlob && fanyiBlob.size > 100) return fanyiBlob;
 

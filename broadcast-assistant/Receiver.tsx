@@ -168,9 +168,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             }, 1000);
         };
 
-        container.addEventListener('scroll', handleScroll, { passive: true });
+        container.addEventListener('wheel', handleScroll, { passive: true });
+        container.addEventListener('touchmove', handleScroll, { passive: true });
         return () => {
-            container.removeEventListener('scroll', handleScroll);
+            container.removeEventListener('wheel', handleScroll);
+            container.removeEventListener('touchmove', handleScroll);
             if (rescueTimeoutRef.current) clearTimeout(rescueTimeoutRef.current);
         };
     }, [isPlaying, scrollToActive]);

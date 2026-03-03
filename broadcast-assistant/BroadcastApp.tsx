@@ -8,6 +8,7 @@ import Sender from './Sender';
 import Receiver from './Receiver';
 import { isBCVerified, verifyLicense, clearBCLicense, getBCLicense } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
+import CustomDialog, { DialogType } from './components/CustomDialog';
 
 const GlassContainer = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
     <div className={`backdrop-blur-2xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] rounded-[2rem] ${className}`}>
@@ -31,6 +32,26 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
     const [licenseInput, setLicenseInput] = useState('');
     const [verifying, setVerifying] = useState(false);
     const [error, setError] = useState('');
+
+    // Custom Dialog State
+    const [dialog, setDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: DialogType;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info',
+        onConfirm: () => { }
+    });
+
+    const closeDialog = () => setDialog(prev => ({ ...prev, isOpen: false }));
+    const openDialog = (title: string, message: string, type: DialogType, onConfirm: () => void) => {
+        setDialog({ isOpen: true, title, message, type, onConfirm });
+    };
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -56,10 +77,16 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
     };
 
     const handleLogout = async () => {
-        if (window.confirm(t('broadcast.logoutConfirm'))) {
-            await clearBCLicense();
-            setMode('selection');
-        }
+        openDialog(
+            t('broadcast.teacherMode'),
+            t('broadcast.logoutConfirm'),
+            'confirm',
+            async () => {
+                await clearBCLicense();
+                setMode('selection');
+                closeDialog();
+            }
+        );
     };
 
     const handleTeacherMode = async () => {
@@ -252,6 +279,16 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                 </main>
 
             </div>
+
+            <CustomDialog
+                isOpen={dialog.isOpen}
+                title={dialog.title}
+                message={dialog.message}
+                type={dialog.type}
+                onConfirm={dialog.onConfirm}
+                onCancel={closeDialog}
+                isDark={theme === 'dark'}
+            />
         </div>
     );
 };

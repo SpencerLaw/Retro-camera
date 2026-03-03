@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Trash2, Clock, CheckCircle2, Check, AlertTriangle, ToggleLeft, ToggleRight, ListTodo, FileText, Upload, Plus, X } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import * as mammoth from 'mammoth';
+import CustomDialog, { DialogType } from './components/CustomDialog';
+import GlassCard from './components/GlassCard';
 
 export interface ScheduleTask {
     id: string;
@@ -18,12 +20,6 @@ interface ScheduleManagerProps {
     isDark: boolean;
 }
 
-export const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.05)] ${className}`}>
-        {children}
-    </div>
-);
-
 const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChannelCode, isDark }) => {
     const t = useTranslations();
     const [tasks, setTasks] = useState<ScheduleTask[]>([]);
@@ -33,6 +29,26 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     const [isSending, setIsSending] = useState(false);
     const [isParsingDocx, setIsParsingDocx] = useState(false);
     const [previewTasks, setPreviewTasks] = useState<ScheduleTask[] | null>(null);
+
+    // Custom Dialog State
+    const [dialog, setDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: DialogType;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info',
+        onConfirm: () => { }
+    });
+
+    const closeDialog = () => setDialog(prev => ({ ...prev, isOpen: false }));
+    const openDialog = (title: string, message: string, type: DialogType, onConfirm: () => void) => {
+        setDialog({ isOpen: true, title, message, type, onConfirm });
+    };
 
     // Initialize from local storage
     useEffect(() => {
@@ -47,21 +63,6 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     }, []);
 
     // Timer logic for automated broadcast
-    useEffect(() => {
-        let timer: NodeJS.Timeout;
-
-        const checkSchedule = async () => {
-            if (!isAutoEnabled) return;
-
-            // Use refs or current state (be careful with closures in setInterval, so we use functional state updates if mutating, 
-            // but since we need to read tasks and then update, let's keep it safe. Actually, better read from localStorage directly 
-            // or use a ref for latest tasks to avoid stale closures, wait, the dependency array has tasks and isAutoEnabled.
-            // But if we put tasks in dependency array, setInterval resets often.
-        };
-
-        return () => clearInterval(timer);
-    }, [isAutoEnabled, tasks, license]);
-
     // We will rewrite the timer to avoid resetting by using a Ref for latest tasks
     const tasksRef = useRef(tasks);
     useEffect(() => { tasksRef.current = tasks; }, [tasks]);
@@ -81,31 +82,13 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 const task = currentTasks[i];
                 if (task.isPlayed) continue;
 
-                // Validate and parse date/time
-                // task.date format expected: YYYY-MM-DD or similar
-                // task.time format expected: HH:mm
                 try {
-                    // Try to parse securely
-                    const dateParts = task.date.split(/[-/.]/);
-                    let year, month, day;
-                    if (dateParts[0].length === 4) {
-                        [year, month, day] = dateParts;
-                    } else if (dateParts.length === 3) {
-                        // Assuming MM/DD/YYYY or DD/MM/YYYY, rely on Date constructor for fallbacks, but let's encourage YYYY-MM-DD
-                        year = new Date().getFullYear().toString(); // Fallback
-                    }
-
-                    // Simple approach: construct a parsable string
                     const formattedDateStr = `${task.date.replace(/\//g, '-')}T${task.time}:00`;
                     const taskDate = new Date(formattedDateStr);
 
-                    if (isNaN(taskDate.getTime())) {
-                        // Try fallback if user entered something like '10月20日'
-                        continue;
-                    }
+                    if (isNaN(taskDate.getTime())) continue;
 
                     if (now >= taskDate) {
-                        // Time to play!
                         setIsSending(true);
                         console.log(`[Auto-Broadcast] Triggering task: ${task.content}`);
 
@@ -123,11 +106,9 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
 
                             const data = await resp.json();
                             if (data.success) {
-                                // Mark as played
                                 updatedTasks[i] = { ...task, isPlayed: true };
                                 hasChanges = true;
 
-                                // Dispatch a custom event so Sender.tsx can update history if needed
                                 window.dispatchEvent(new CustomEvent('br_schedule_played', {
                                     detail: { content: task.content, channelCode: task.channelCode || activeChannelCode }
                                 }));
@@ -139,7 +120,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         }
                     }
                 } catch (e) {
-                    // Ignore parse errors silently in the background
+                    // Ignore parse errors silently
                 }
             }
 
@@ -147,7 +128,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 setTasks(updatedTasks);
                 localStorage.setItem('br_schedule_tasks', JSON.stringify(updatedTasks));
             }
-        }, 10000); // Check every 10 seconds
+        }, 10000);
 
         return () => clearInterval(timer);
     }, [license, activeChannelCode, isSending]);
@@ -161,26 +142,19 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     const handleImport = () => {
         if (!importText.trim()) return;
 
-        // Parse TSV (Tab-Separated Values)
         const lines = importText.trim().split('\n');
         const newTasks: ScheduleTask[] = [];
 
         lines.forEach(line => {
-            // Split by tab or multiple spaces
             const parts = line.split(/\t| {2,}/).map(p => p.trim()).filter(Boolean);
             if (parts.length >= 3) {
-                // Assuming [Date, Time, Content]
                 let date = parts[0];
                 let time = parts[1];
-                let content = parts.slice(2).join(' '); // Rejoin remaining parts as content
-
-                // Clean up date/time (e.g. replace dots with hyphens)
+                let content = parts.slice(2).join(' ');
                 date = date.replace(/\./g, '-').replace(/\//g, '-');
-                // Ensure time is HH:mm format, e.g. fix '8:30' to '08:30'
                 if (time.length === 4 && time.includes(':')) {
                     time = '0' + time;
                 }
-
                 newTasks.push({
                     id: `task_${Date.now()}_${Math.random().toString(36).substring(7)}`,
                     date,
@@ -190,7 +164,6 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                     channelCode: activeChannelCode
                 });
             } else if (parts.length === 2 && parts[0].includes(' ')) {
-                // Maybe they pasted "YYYY-MM-DD HH:mm" in one column, "content" in another
                 const dateTimeParts = parts[0].split(' ');
                 if (dateTimeParts.length === 2) {
                     newTasks.push({
@@ -210,7 +183,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
             setImportText('');
             setShowImport(false);
         } else {
-            alert(t('broadcast.sender.parseFailedExcel'));
+            openDialog(t('broadcast.sender.scheduler'), t('broadcast.sender.parseFailedExcel'), 'error', closeDialog);
         }
     };
 
@@ -225,7 +198,6 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
             const text = result.value;
 
             const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-
             const newTasks: ScheduleTask[] = [];
             let currentWeekStart: Date | null = null;
             let currentDateStr = '';
@@ -279,16 +251,13 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 const dayMatch = line.match(/^周(一|二|三|四|五|六|日)/);
                 if (dayMatch && currentWeekStart) {
                     flushCurrentTask();
-
                     const dayIndex = dayMap[dayMatch[1]];
                     const taskDate = new Date(currentWeekStart);
                     taskDate.setDate(taskDate.getDate() + dayIndex);
-
                     const yyyy = taskDate.getFullYear();
                     const mm = String(taskDate.getMonth() + 1).padStart(2, '0');
                     const dd = String(taskDate.getDate()).padStart(2, '0');
                     currentDateStr = `${yyyy}-${mm}-${dd}`;
-
                     i++;
                     continue;
                 }
@@ -301,7 +270,6 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 if (currentDateStr) {
                     currentContentLines.push(line);
                 }
-
                 i++;
             }
 
@@ -311,12 +279,12 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 setPreviewTasks(newTasks);
                 setShowImport(false);
             } else {
-                alert(t('broadcast.sender.parseFailedWord'));
+                openDialog(t('broadcast.sender.scheduler'), t('broadcast.sender.parseFailedWord'), 'error', closeDialog);
             }
 
         } catch (error) {
             console.error('Docx parse error', error);
-            alert(t('broadcast.sender.parseError'));
+            openDialog(t('broadcast.sender.scheduler'), t('broadcast.sender.parseError'), 'error', closeDialog);
         } finally {
             setIsParsingDocx(false);
             if (e.target) e.target.value = '';
@@ -346,7 +314,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
         localStorage.setItem('br_schedule_tasks', JSON.stringify(combined));
         const addedCount = previewTasks.length;
         setPreviewTasks(null);
-        alert(t('broadcast.sender.importSuccess').replace('{count}', String(addedCount)));
+        openDialog(t('broadcast.sender.scheduler'), t('broadcast.sender.importSuccess').replace('{count}', String(addedCount)), 'success', closeDialog);
     };
 
     const updatePreviewTask = (id: string, field: keyof ScheduleTask, value: string) => {
@@ -360,10 +328,16 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     };
 
     const handleClearAll = () => {
-        if (window.confirm(t('broadcast.sender.clearHistoryConfirm') || '确定清空所有排期数据吗？')) {
-            setTasks([]);
-            localStorage.removeItem('br_schedule_tasks');
-        }
+        openDialog(
+            t('broadcast.sender.scheduler'),
+            t('broadcast.sender.clearHistoryConfirm') || '确定清空所有排期数据吗？',
+            'warning',
+            () => {
+                setTasks([]);
+                localStorage.removeItem('br_schedule_tasks');
+                closeDialog();
+            }
+        );
     };
 
     return (
@@ -611,9 +585,18 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                     </div>
                 </div>
             )}
+
+            <CustomDialog
+                isOpen={dialog.isOpen}
+                title={dialog.title}
+                message={dialog.message}
+                type={dialog.type}
+                onConfirm={dialog.onConfirm}
+                onCancel={closeDialog}
+                isDark={isDark}
+            />
         </GlassCard>
     );
 };
 
 export default ScheduleManager;
-

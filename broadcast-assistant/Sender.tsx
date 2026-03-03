@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Send, History, Trash2, AlertTriangle, CheckCircle2, RefreshCw, Radio, Clock, ChevronRight, Loader2, Copy, Plus, Edit2, Repeat } from 'lucide-react';
+import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, AlertTriangle, CheckCircle2, Copy, RefreshCw, Loader2, Info, Radio, Repeat } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import ScheduleManager from './ScheduleManager';
+import GlassCard from './components/GlassCard';
+import CustomDialog, { DialogType } from './components/CustomDialog';
 
 interface Message {
     id: string;
@@ -19,23 +21,6 @@ interface Channel {
     name: string;
     code: string;
 }
-
-const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div className={`backdrop-blur-2xl bg-white/70 dark:bg-white/10 border border-white/40 dark:border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.05)] ${className}`}>
-        {children}
-    </div>
-);
-
-const ClockDisplay = () => {
-    const [time, setTime] = useState(new Date());
-    useEffect(() => {
-        const timer = setInterval(() => setTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
-    return <span>{time.toLocaleTimeString()}</span>;
-};
-
-
 
 const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
     const t = useTranslations();
@@ -68,7 +53,27 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const [repeatCount, setRepeatCount] = useState<number | string>(1);
 
     const [history, setHistory] = useState<Message[]>([]);
-    const [status, setStatus] = useState<{ type: 'success' | 'error' | 'loading' | null; msg: string }>({ type: null, msg: '' });
+    const [status, setStatus] = useState<{ type: 'loading' | 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
+
+    // Custom Dialog State
+    const [dialog, setDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: DialogType;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info',
+        onConfirm: () => { }
+    });
+
+    const closeDialog = () => setDialog(prev => ({ ...prev, isOpen: false }));
+    const openDialog = (title: string, message: string, type: DialogType, onConfirm: () => void) => {
+        setDialog({ isOpen: true, title, message, type, onConfirm });
+    };
 
     const [showReplayDialog, setShowReplayDialog] = useState(false);
     const [replayData, setReplayData] = useState<{
@@ -130,29 +135,35 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const deleteChannel = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if (channels.length <= 1) return;
-        if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
-            // Find the channel to get its room code
-            const channelToDelete = channels.find(c => c.id === id);
+        openDialog(
+            t('broadcast.sender.deleteChannel'),
+            t('broadcast.sender.clearHistoryConfirm'),
+            'warning',
+            async () => {
+                // Find the channel to get its room code
+                const channelToDelete = channels.find(c => c.id === id);
 
-            // Deactivate the room in the database
-            if (channelToDelete) {
-                try {
-                    await fetch('/api/broadcast/deactivate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ code: channelToDelete.code, license })
-                    });
-                } catch (error) {
-                    console.error('Failed to deactivate room:', error);
+                // Deactivate the room in the database
+                if (channelToDelete) {
+                    try {
+                        await fetch('/api/broadcast/deactivate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code: channelToDelete.code, license })
+                        });
+                    } catch (error) {
+                        console.error('Failed to deactivate room:', error);
+                    }
                 }
-            }
 
-            const nextChannels = channels.filter(c => c.id !== id);
-            setChannels(nextChannels);
-            if (activeChannelId === id) {
-                setActiveChannelId(nextChannels[0].id);
+                const nextChannels = channels.filter(c => c.id !== id);
+                setChannels(nextChannels);
+                if (activeChannelId === id) {
+                    setActiveChannelId(nextChannels[0].id);
+                }
+                closeDialog();
             }
-        }
+        );
     };
 
     const startEditing = (channel: Channel, e: React.MouseEvent) => {
@@ -266,6 +277,9 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         setShowReplayDialog(false);
         setStatus({ type: 'loading', msg: t('broadcast.sender.broadcasting') });
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
+
             const resp = await fetch('/api/broadcast/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -278,8 +292,10 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     repeatCount: replayData.repeatCount,
                     voice: ''
                 }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeoutId);
             const data = await resp.json();
             if (data.success) {
                 const newMessage: Message = {
@@ -296,51 +312,65 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                 setHistory(newHistory);
                 localStorage.setItem('br_sender_history', JSON.stringify(newHistory));
                 setStatus({ type: 'success', msg: t('broadcast.sender.broadcastDelivered') });
-                setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
+                setTimeout(() => setStatus(prev => prev.type === 'success' ? { type: null, msg: '' } : prev), 3000);
             } else {
                 throw new Error(data.error || 'Server Error');
             }
         } catch (err: any) {
-            setStatus({ type: 'error', msg: t('broadcast.sender.failedToSend') });
+            console.error('Replay failed:', err);
+            setStatus({ type: 'error', msg: err.name === 'AbortError' ? '发送超时，请重试' : (t('broadcast.sender.failedToSend') || '发送失败') });
+            setTimeout(() => setStatus(prev => prev.type === 'error' ? { type: null, msg: '' } : prev), 3000);
         }
     };
 
     const clearHistory = () => {
-        if (window.confirm(t('broadcast.sender.clearHistoryConfirm'))) {
-            setHistory([]);
-            localStorage.removeItem('br_sender_history');
-        }
+        openDialog(
+            t('broadcast.sender.timeline'),
+            t('broadcast.sender.clearHistoryConfirm'),
+            'warning',
+            () => {
+                setHistory([]);
+                localStorage.removeItem('br_sender_history');
+                closeDialog();
+            }
+        );
     };
 
     const clearCloudRooms = async () => {
-        if (window.confirm(t('broadcast.sender.clearAllRoomsConfirm'))) {
-            setStatus({ type: 'loading', msg: t('broadcast.sender.clearing') });
-            try {
-                const resp = await fetch('/api/broadcast/cleanup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ license })
-                });
-                const data = await resp.json();
-                if (data.success) {
-                    // Clear local channel list and reset to one default channel
-                    const defaultChannel = {
-                        id: 'default',
-                        name: t('broadcast.sender.unknownClass'),
-                        code: Math.floor(1000 + Math.random() * 9000).toString()
-                    };
-                    setChannels([defaultChannel]);
-                    setActiveChannelId('default');
-                    localStorage.removeItem('br_sender_channels');
-                    setStatus({ type: 'success', msg: t('broadcast.sender.clearSuccess') });
+        openDialog(
+            t('broadcast.sender.manageClasses'),
+            t('broadcast.sender.clearAllRoomsConfirm'),
+            'warning',
+            async () => {
+                closeDialog();
+                setStatus({ type: 'loading', msg: t('broadcast.sender.clearing') });
+                try {
+                    const resp = await fetch('/api/broadcast/cleanup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ license })
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                        const defaultChannel = {
+                            id: 'default',
+                            name: t('broadcast.sender.unknownClass'),
+                            code: Math.floor(1000 + Math.random() * 9000).toString()
+                        };
+                        setChannels([defaultChannel]);
+                        setActiveChannelId('default');
+                        localStorage.removeItem('br_channels');
+                        setStatus({ type: 'success', msg: t('broadcast.sender.clearSuccess') });
+                        setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (err) {
+                    setStatus({ type: 'error', msg: t('broadcast.sender.clearFailed') });
                     setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
-                } else {
-                    throw new Error(data.error);
                 }
-            } catch (err) {
-                setStatus({ type: 'error', msg: t('broadcast.sender.clearFailed') });
             }
-        }
+        );
     };
 
     const copyRoomId = (e: React.MouseEvent) => {
@@ -668,7 +698,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest opacity-30">循环次数</label>
                                     <div className="flex items-center gap-4 bg-gray-100 dark:bg-white/5 p-2 rounded-2xl">
@@ -719,6 +749,16 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                     </GlassCard>
                 </div>
             )}
+
+            <CustomDialog
+                isOpen={dialog.isOpen}
+                title={dialog.title}
+                message={dialog.message}
+                type={dialog.type}
+                onConfirm={dialog.onConfirm}
+                onCancel={closeDialog}
+                isDark={isDark}
+            />
         </div>
     );
 };

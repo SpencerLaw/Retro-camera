@@ -27,6 +27,8 @@ class TTSManager {
     private sourceNode: MediaElementAudioSourceNode | null = null;
     private gainNode: GainNode | null = null;
 
+    private abortController: AbortController | null = null;
+
     private constructor() {
         this.audio = new Audio();
     }
@@ -88,7 +90,11 @@ class TTSManager {
             this.blobPool.add(url);
             return url;
         } catch (e) {
-            console.error('Prefetch failed:', e);
+            if ((e as any).name === 'AbortError') {
+                console.log('Prefetch aborted');
+            } else {
+                console.error('Prefetch failed:', e);
+            }
             return null;
         }
     }
@@ -110,6 +116,7 @@ class TTSManager {
             if (url.startsWith('blob:')) {
                 URL.revokeObjectURL(url);
                 this.blobPool.delete(url);
+                if (this.currentBlobUrl === url) this.currentBlobUrl = null;
             }
             if (options.onEnd) options.onEnd();
         };
@@ -152,12 +159,26 @@ class TTSManager {
     }
 
     public stop(): void {
+        // Cancel any pending fetches
+        if (this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+        }
+
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
         if (this.audio) {
             this.audio.pause();
+            const prevSrc = this.audio.src;
             this.audio.src = '';
+
+            // CRITICAL: Immediate revocation of the blob just used
+            if (prevSrc && prevSrc.startsWith('blob:') && this.blobPool.has(prevSrc)) {
+                URL.revokeObjectURL(prevSrc);
+                this.blobPool.delete(prevSrc);
+            }
+
             // Remove lingering metadata listener if any
             if (this.metaListener) {
                 this.audio.removeEventListener('loadedmetadata', this.metaListener);
@@ -166,8 +187,10 @@ class TTSManager {
         }
         this.clearBoundaryTimer();
         if (this.currentBlobUrl) {
-            // We don't revoke immediately in stop() if it's part of the pool
-            // but we ensure it's cleared from active playback.
+            if (this.blobPool.has(this.currentBlobUrl)) {
+                URL.revokeObjectURL(this.currentBlobUrl);
+                this.blobPool.delete(this.currentBlobUrl);
+            }
             this.currentBlobUrl = null;
         }
     }
@@ -234,6 +257,9 @@ class TTSManager {
         const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
         const rate = options.rate ?? 1.0;
 
+        if (this.abortController) this.abortController.abort();
+        this.abortController = new AbortController();
+
         // Server-side proxy (Vercel function calls Microsoft Edge TTS bypassing GFW)
         // If proxy is unavailable, returns null → speakEdge falls back to native TTS immediately.
         try {
@@ -241,7 +267,7 @@ class TTSManager {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text, voice, rate }),
-                signal: AbortSignal.timeout(10000),
+                signal: this.abortController.signal,
             });
 
             if (resp.ok) {
@@ -249,6 +275,7 @@ class TTSManager {
                 if (blob.size > 100) return blob;
             }
         } catch (e) {
+            if ((e as any).name === 'AbortError') throw e;
             // Proxy unavailable - will fall back to native TTS
         }
 
@@ -297,6 +324,10 @@ class TTSManager {
 
     private async fetchFishBlob(text: string, options: TTSOptions): Promise<Blob | null> {
         if (!options.apiKey) return null;
+
+        if (this.abortController) this.abortController.abort();
+        this.abortController = new AbortController();
+
         const response = await fetch('https://api.fish.audio/v1/tts', {
             method: 'POST',
             headers: {
@@ -308,6 +339,7 @@ class TTSManager {
                 reference_id: options.fishModelId || '7f92f8afb8ec43bf81f5059e09d961ce',
                 format: 'mp3',
             }),
+            signal: this.abortController.signal
         });
         return response.ok ? await response.blob() : null;
     }

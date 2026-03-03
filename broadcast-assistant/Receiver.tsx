@@ -493,7 +493,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 {currentMsg ? (
                     <div
                         ref={scrollContainerRef}
-                        className="w-full h-full flex flex-col items-center animate-in fade-in duration-1000 px-4 overflow-y-auto custom-scrollbar"
+                        className="w-full h-full flex flex-col items-center animate-in fade-in duration-1000 px-4 overflow-y-auto scrollbar-hide"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
                         {currentMsg.isEmergency && (
                             <div className="flex flex-col items-center gap-4 md:gap-6 animate-pulse shrink-0">
@@ -506,7 +507,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center justify-center w-full max-w-6xl mx-auto min-h-full py-8 pb-32">
+                        <div className="flex flex-col items-center w-full max-w-5xl mx-auto my-auto py-20 pb-40">
                             {sentences.map((sentence, sIdx) => {
                                 const isActive = sIdx === activeSentenceIndex;
                                 const isPast = activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex;
@@ -518,7 +519,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     <span
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
-                                        className={`block transition-all duration-500 py-6 md:py-10 w-full break-words select-none text-center ${isActive
+                                        className={`block transition-all duration-500 py-3 md:py-5 w-full break-words select-none text-center ${isActive
                                             ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-sky-500 font-black opacity-100')
                                             : isPast
                                                 ? 'opacity-50 blur-[0.3px]'

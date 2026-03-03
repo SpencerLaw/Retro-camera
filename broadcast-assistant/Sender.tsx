@@ -24,6 +24,15 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode, cl
     </div>
 );
 
+const ClockDisplay = () => {
+    const [time, setTime] = useState(new Date());
+    useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+    return <span>{time.toLocaleTimeString()}</span>;
+};
+
 const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
     const t = useTranslations();
     const licensePrefix = getLicensePrefix(license);
@@ -49,7 +58,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const [editCode, setEditCode] = useState('');
 
     const [inputText, setInputText] = useState('');
-    const [currentTime, setCurrentTime] = useState(new Date());
+    // currentTime removed to prevent whole-page re-renders every second
     const [isEmergency, setIsEmergency] = useState(false);
     const [isLooping, setIsLooping] = useState(false);
     const [repeatCount, setRepeatCount] = useState<number | string>(1);
@@ -60,8 +69,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
     const channelCode = activeChannel?.code || '';
 
     useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
+        // Clock moved to separate component
     }, []);
 
     useEffect(() => {

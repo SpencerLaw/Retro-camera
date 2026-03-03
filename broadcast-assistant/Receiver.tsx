@@ -18,6 +18,27 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode, cl
     </div>
 );
 
+const ClockDisplay = () => {
+    const [time, setTime] = useState(new Date());
+    useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+    return <span>{time.toLocaleTimeString()}</span>;
+};
+
+const BackgroundAmbience = React.memo(({ isDark, isEmergency }: { isDark: boolean; isEmergency: boolean }) => {
+    if (isEmergency) return null;
+    return (
+        <div className="absolute inset-0 z-0 transition-all duration-1000 pointer-events-none overflow-hidden">
+            <div className={`absolute top-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[80px] ${isDark ? 'opacity-10 bg-blue-900' : 'opacity-30 bg-pink-300'}`}></div>
+            <div className={`absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[80px] ${isDark ? 'opacity-10 bg-purple-900' : 'opacity-20 bg-purple-300'}`}></div>
+            <div className={`absolute top-[30%] left-[10%] w-[40%] h-[40%] rounded-full blur-[60px] ${isDark ? 'opacity-5 bg-indigo-900' : 'opacity-10 bg-blue-200'}`}></div>
+        </div>
+    );
+});
+BackgroundAmbience.displayName = 'BackgroundAmbience';
+
 const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () => void }> = ({ isDark, toggleTheme, onExit }) => {
     const t = useTranslations();
     const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
@@ -27,7 +48,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         const saved = localStorage.getItem(`br_synced_name_${localStorage.getItem('br_last_full_room_rx') || ''}`);
         return saved || '';
     });
-    const [currentTime, setCurrentTime] = useState(new Date());
+    // currentTime removed to prevent whole-page re-renders every second
     const [isListening, setIsListening] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -70,12 +91,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             if (savedLastId) lastPlayedId.current = savedLastId;
         }
 
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
-            clearInterval(timer);
         };
     }, []);
 
@@ -427,13 +445,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             : (isDark ? 'bg-[#050505] text-white' : 'bg-[#F5F5F7] text-black')
             }`}>
             {/* Background Ambience - Gradient Pink in Light Mode */}
-            {!currentMsg?.isEmergency && (
-                <div className="absolute inset-0 z-0 transition-all duration-1000 pointer-events-none overflow-hidden">
-                    <div className={`absolute top-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] ${isDark ? 'opacity-10 bg-blue-900' : 'opacity-30 bg-pink-300'}`}></div>
-                    <div className={`absolute bottom-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] ${isDark ? 'opacity-10 bg-purple-900' : 'opacity-20 bg-purple-300'}`}></div>
-                    <div className={`absolute top-[30%] left-[10%] w-[40%] h-[40%] rounded-full blur-[120px] ${isDark ? 'opacity-5 bg-indigo-900' : 'opacity-10 bg-blue-200'}`}></div>
-                </div>
-            )}
+            <BackgroundAmbience isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
+
             {/* HUD Header for Active Room (kept as overlay) */}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-50 pointer-events-none">
                 <div className="flex items-center gap-6 pointer-events-auto">
@@ -441,7 +454,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         <div className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
                             {(() => {
-                                const hour = currentTime.getHours();
+                                const hour = new Date().getHours();
                                 let greeting = "您好";
                                 if (hour >= 5 && hour < 12) greeting = "上午好";
                                 else if (hour >= 12 && hour < 18) greeting = "下午好";
@@ -453,9 +466,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </span>
                     </div>
                     {/* Receiver Digital Clock */}
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md font-mono text-sm font-black tabular-nums min-w-[100px] justify-center">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md font-mono text-sm font-black tabular-nums min-w-[120px] justify-center pointer-events-auto">
                         <Clock size={16} className="opacity-40" />
-                        {currentTime.toLocaleTimeString([], { hour12: false })}
+                        <ClockDisplay />
                     </div>
                     <button
                         onClick={() => setIsListening(!isListening)}
@@ -520,7 +533,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                         key={sIdx}
                                         ref={isActive ? activeSentenceRef : null}
                                         className={`block transition-all duration-500 py-3 md:py-5 w-full break-words select-none text-center ${isActive
-                                            ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-sky-500 font-black opacity-100')
+                                            ? (currentMsg.isEmergency ? 'text-white font-black opacity-100' : 'text-fuchsia-500 dark:text-fuchsia-400 font-black opacity-100')
                                             : isPast
                                                 ? 'opacity-50 blur-[0.3px]'
                                                 : 'opacity-20 blur-[1px]'
@@ -601,7 +614,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                         className="flex-none w-56 text-left p-3 rounded-xl bg-white/50 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-all border border-transparent hover:border-white/30 group active:scale-[0.98] snap-start shadow-sm"
                                     >
                                         <div className="flex justify-between items-center mb-1.5">
-                                            <span className="text-[9px] font-bold opacity-50">{new Date(parseInt(msg.timestamp)).toLocaleTimeString()}</span>
+                                            <span className="text-[9px] font-bold opacity-50">{new Date(msg.timestamp && !isNaN(parseInt(msg.timestamp)) ? parseInt(msg.timestamp) : Date.now()).toLocaleTimeString()}</span>
+
                                             {msg.isEmergency && <span className="text-[8px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full uppercase scale-75 origin-right">SOS</span>}
                                         </div>
                                         <p className="text-[11px] font-bold truncate leading-relaxed text-gray-800 dark:text-gray-200">{msg.text}</p>

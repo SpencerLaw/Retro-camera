@@ -17,6 +17,8 @@ class TTSManager {
     private audio: HTMLAudioElement | null = null;
     private silentAudio: HTMLAudioElement | null = null;
     private isSilentLoopPlaying: boolean = false;
+    private currentBlobUrl: string | null = null;
+    private metaListener: (() => void) | null = null;
 
     private constructor() {
         this.audio = new Audio();
@@ -65,6 +67,16 @@ class TTSManager {
         if (this.audio) {
             this.audio.pause();
             this.audio.src = '';
+            // Remove lingering metadata listener if any
+            if (this.metaListener) {
+                this.audio.removeEventListener('loadedmetadata', this.metaListener);
+                this.metaListener = null;
+            }
+        }
+        this.clearBoundaryTimer();
+        if (this.currentBlobUrl) {
+            URL.revokeObjectURL(this.currentBlobUrl);
+            this.currentBlobUrl = null;
         }
     }
 
@@ -181,10 +193,16 @@ class TTSManager {
             if (!response.ok) throw new Error('Fish Audio API request failed');
 
             const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
+
+            // Revoke old URL to prevent memory leak
+            if (this.currentBlobUrl) {
+                URL.revokeObjectURL(this.currentBlobUrl);
+            }
+
+            this.currentBlobUrl = URL.createObjectURL(blob);
 
             if (this.audio) {
-                this.audio.src = url;
+                this.audio.src = this.currentBlobUrl;
                 await this.audio.play();
             }
         } catch (error) {
@@ -226,9 +244,18 @@ class TTSManager {
             const msPerChar = (el.duration * 1000 * 0.92) / text.length;
             startSimulation(msPerChar);
         } else if (el) {
+            // Remove previous metadata listener if still waiting
+            if (this.metaListener) {
+                el.removeEventListener('loadedmetadata', this.metaListener);
+            }
+
             // Wait for metadata to load, then compute the rate
-            const onMeta = () => {
-                el.removeEventListener('loadedmetadata', onMeta);
+            this.metaListener = () => {
+                if (this.metaListener) {
+                    el.removeEventListener('loadedmetadata', this.metaListener);
+                    this.metaListener = null;
+                }
+
                 if (el.duration && isFinite(el.duration) && el.duration > 0) {
                     const msPerChar = (el.duration * 1000 * 0.92) / text.length;
                     startSimulation(msPerChar);
@@ -238,7 +265,7 @@ class TTSManager {
                     startSimulation(300 / rate);
                 }
             };
-            el.addEventListener('loadedmetadata', onMeta);
+            el.addEventListener('loadedmetadata', this.metaListener);
         } else {
             // Last resort fallback
             const rate = options.rate || 1.0;

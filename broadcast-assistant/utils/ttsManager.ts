@@ -27,7 +27,7 @@ class TTSManager {
     private sourceNode: MediaElementAudioSourceNode | null = null;
     private gainNode: GainNode | null = null;
 
-    private abortController: AbortController | null = null;
+
 
     private constructor() {
         this.audio = new Audio();
@@ -159,11 +159,9 @@ class TTSManager {
     }
 
     public stop(): void {
-        // Cancel any pending fetches
-        if (this.abortController) {
-            this.abortController.abort();
-            this.abortController = null;
-        }
+        // Since we now use per-fetch abort controllers with timeouts, 
+        // we rely on the caller (Receiver.tsx) to manage high-level orchestration 
+        // using playbackIdRef for sequence control.
 
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
@@ -257,26 +255,29 @@ class TTSManager {
         const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
         const rate = options.rate ?? 1.0;
 
-        if (this.abortController) this.abortController.abort();
-        this.abortController = new AbortController();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-        // Server-side proxy (Vercel function calls Microsoft Edge TTS bypassing GFW)
-        // If proxy is unavailable, returns null → speakEdge falls back to native TTS immediately.
         try {
             const resp = await fetch('/api/broadcast/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text, voice, rate }),
-                signal: this.abortController.signal,
+                signal: controller.signal,
             });
 
+            clearTimeout(timeoutId);
             if (resp.ok) {
                 const blob = await resp.blob();
                 if (blob.size > 100) return blob;
             }
         } catch (e) {
-            if ((e as any).name === 'AbortError') throw e;
-            // Proxy unavailable - will fall back to native TTS
+            if ((e as any).name === 'AbortError') {
+                console.log('TTS fetch timed out or aborted');
+            }
+            // Proxy unavailable or error - will fall back to native TTS
+        } finally {
+            clearTimeout(timeoutId);
         }
 
         return null;
@@ -325,23 +326,29 @@ class TTSManager {
     private async fetchFishBlob(text: string, options: TTSOptions): Promise<Blob | null> {
         if (!options.apiKey) return null;
 
-        if (this.abortController) this.abortController.abort();
-        this.abortController = new AbortController();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-        const response = await fetch('https://api.fish.audio/v1/tts', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${options.apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                text,
-                reference_id: options.fishModelId || '7f92f8afb8ec43bf81f5059e09d961ce',
-                format: 'mp3',
-            }),
-            signal: this.abortController.signal
-        });
-        return response.ok ? await response.blob() : null;
+        try {
+            const response = await fetch('https://api.fish.audio/v1/tts', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${options.apiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text,
+                    reference_id: options.fishModelId || '7f92f8afb8ec43bf81f5059e09d961ce',
+                    format: 'mp3',
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            return response.ok ? await response.blob() : null;
+        } catch (e) {
+            clearTimeout(timeoutId);
+            return null;
+        }
     }
 
     private async speakFish(text: string, options: TTSOptions): Promise<void> {

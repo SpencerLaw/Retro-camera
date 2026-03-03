@@ -523,39 +523,42 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                                 </div>
                             )}
 
-                            <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm ml-auto sm:ml-0">
-                                <button
-                                    onClick={() => setSelectedVoice('zh-CN-XiaoxiaoNeural')}
-                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-XiaoxiaoNeural'
-                                        ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
-                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                            <div className="flex-1 min-w-[140px]">
+                                <select
+                                    value={selectedVoice}
+                                    onChange={(e) => setSelectedVoice(e.target.value as any)}
+                                    className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 py-3 px-3 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5"
+                                    style={{
+                                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                                        backgroundPosition: `right 0.5rem center`,
+                                        backgroundRepeat: `no-repeat`,
+                                        backgroundSize: `1.5em 1.5em`
+                                    }}
                                 >
-                                    微软女声
-                                </button>
-                                <button
-                                    onClick={() => setSelectedVoice('zh-CN-YunxiNeural')}
-                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-YunxiNeural'
-                                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
-                                >
-                                    微软男声
-                                </button>
-                                <button
-                                    onClick={() => setSelectedVoice('zh-CN-XiaoyiNeural')}
-                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-XiaoyiNeural'
-                                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
-                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
-                                >
-                                    备用女声
-                                </button>
-                                <button
-                                    onClick={() => setSelectedVoice('zh-CN-YunjianNeural')}
-                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedVoice === 'zh-CN-YunjianNeural'
-                                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                                        : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
-                                >
-                                    备用男声
-                                </button>
+                                    <optgroup label="通用 (标准)">
+                                        <option value="zh-CN-XiaoxiaoNeural">晓晓 (女声, 温暖)</option>
+                                        <option value="zh-CN-XiaoyiNeural">晓伊 (女声, 甜美)</option>
+                                        <option value="zh-CN-YunxiNeural">云希 (男声, 活力)</option>
+                                        <option value="zh-CN-YunjianNeural">云健 (男声, 稳重)</option>
+                                        <option value="zh-CN-YunyangNeural">云扬 (男声, 新闻)</option>
+                                    </optgroup>
+                                    <optgroup label="情感 & 角色">
+                                        <option value="zh-CN-XiaozhenNeural">晓甄 (女声, 儿童)</option>
+                                        <option value="zh-CN-YunxiaNeural">云夏 (男声, 少年)</option>
+                                        <option value="zh-CN-XiaomoNeural">晓墨 (女声, 严肃)</option>
+                                        <option value="zh-CN-XiaoruiNeural">晓睿 (女声, 可爱)</option>
+                                        <option value="zh-CN-XiaoshuangNeural">晓双 (女声, 儿童)</option>
+                                    </optgroup>
+                                    <optgroup label="地方口音">
+                                        <option value="zh-CN-liaoning-XiaobeiNeural">东北话 (辽宁女声)</option>
+                                        <option value="zh-CN-shaanxi-XiaoniNeural">陕西话 (西安女声)</option>
+                                        <option value="zh-CN-sichuan-YunxiNeural">四川话 (成都男声)</option>
+                                        <option value="zh-HK-HiuMaanNeural">粤语 (香港女声)</option>
+                                        <option value="zh-HK-WanLungNeural">粤语 (香港男声)</option>
+                                        <option value="zh-TW-HsiaoChenNeural">繁体 (台湾女声)</option>
+                                        <option value="zh-TW-YunJheNeural">繁体 (台湾男声)</option>
+                                    </optgroup>
+                                </select>
                             </div>
                         </div>
                     </div>

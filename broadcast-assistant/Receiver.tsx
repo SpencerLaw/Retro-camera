@@ -537,64 +537,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 </div>
 
                 <div className="flex gap-4 pointer-events-auto">
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-                            className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all bg-white/20 hover:scale-110 active:scale-95 cursor-pointer ${showVoiceSettings ? 'text-indigo-400 scale-110' : 'text-gray-400'}`}
-                            title={t('broadcast.receiver.voiceSettings.title')}
-                        >
-                            <Settings size={24} className={showVoiceSettings ? 'animate-spin-slow' : ''} />
-                        </button>
 
-                        {showVoiceSettings && (
-                            <div className="absolute bottom-16 right-0 w-64 p-4 rounded-3xl bg-white dark:bg-gray-900 shadow-2xl border border-black/10 dark:border-white/10 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-200">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4 px-2">{t('broadcast.receiver.voiceSettings.title')}</h4>
-                                <div className="space-y-1">
-                                    {[
-                                        { id: 'zh-CN-XiaoxiaoNeural', name: t('broadcast.receiver.voiceSettings.xiaoxiao') },
-                                        { id: 'zh-CN-YunxiNeural', name: t('broadcast.receiver.voiceSettings.yunxi') },
-                                        { id: 'zh-CN-YunjianNeural', name: t('broadcast.receiver.voiceSettings.yunjian') }
-                                    ].map(voice => (
-                                        <button
-                                            key={voice.id}
-                                            onClick={() => {
-                                                setSelectedVoice(voice.id);
-                                                setShowVoiceSettings(false);
-                                            }}
-                                            className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all ${selectedVoice === voice.id
-                                                ? 'bg-indigo-500 text-white'
-                                                : 'hover:bg-gray-100 dark:hover:bg-white/5 opacity-60 hover:opacity-100'
-                                                }`}
-                                        >
-                                            {voice.name}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className="mt-6 pt-6 border-t border-black/5 dark:border-white/10 space-y-4 px-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Volume2 size={14} className="text-indigo-500" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">音量自动增强</span>
-                                        </div>
-                                        <span className="text-xs font-black text-indigo-500">{volumeBoost.toFixed(1)}x</span>
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min="1.0"
-                                        max="2.5"
-                                        step="0.1"
-                                        value={volumeBoost}
-                                        onChange={(e) => setVolumeBoost(parseFloat(e.target.value))}
-                                        className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                                    />
-                                    <p className="text-[9px] leading-relaxed opacity-40 font-bold">
-                                        基于系统音量的数字放大，建议保持在 1.5x - 1.8x 以获得最佳效果。
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
                     <button
                         onClick={toggleTheme}
                         className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/20 text-orange-500 cursor-pointer"

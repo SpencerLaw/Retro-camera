@@ -41,7 +41,17 @@ BackgroundAmbience.displayName = 'BackgroundAmbience';
 
 const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () => void }> = ({ isDark, toggleTheme, onExit }) => {
     const t = useTranslations();
-    const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_receiver_room') || '');
+
+    // Support URL params: ?room=1234&autostart=1
+    // This lets classroom computers open with a pre-configured room URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRoom = urlParams.get('room')?.toUpperCase().trim() || '';
+    const urlAutoStart = urlParams.get('autostart') === '1';
+
+    const [fullRoomId, setFullRoomId] = useState(() => {
+        // URL param takes priority over localStorage
+        return urlRoom || localStorage.getItem('br_receiver_room') || '';
+    });
     const [isJoined, setIsJoined] = useState(false);
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
     const [syncedChannelName, setSyncedChannelName] = useState<string>(() => {
@@ -113,12 +123,17 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
     }, [fullRoomId, isJoined]);
 
-    // Check for saved room on mount, but don't auto-start without gesture (browser blocks audio)
-    useEffect(() => {
-        // Just keeping it here for reference, UI will handle the "quick start"
-    }, []);
-
+    // Auto-join if ?autostart=1 is in URL and there's a remembered room (from URL or localStorage)
     const pendingPlayouts = useRef<number>(0);
+    useEffect(() => {
+        if (urlAutoStart && fullRoomId && !isJoined) {
+            localStorage.setItem('br_receiver_room', fullRoomId);
+            // Auto-join with a slight delay to let the component fully mount
+            const timer = setTimeout(() => setIsJoined(true), 500);
+            return () => clearTimeout(timer);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Helper to split text into sentences for Karaoke effect
     const sentences = React.useMemo(() => {
@@ -467,6 +482,19 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             <h2 className="text-3xl font-extrabold tracking-tight dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
                             <p className="text-sm text-gray-500 dark:text-gray-400">{t('broadcast.receiver.joinDesc')}</p>
                         </div>
+
+                        {/* ONE-CLICK shortcut when autostart+saved room */}
+                        {urlAutoStart && fullRoomId && (
+                            <button
+                                onClick={handleStart}
+                                className="w-full py-8 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl font-black text-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-purple-500/30 flex flex-col items-center justify-center gap-2 animate-pulse"
+                                style={{ animationDuration: '2s' }}
+                            >
+                                <Radio size={32} />
+                                <span>一键进入教室</span>
+                                <span className="text-lg opacity-80 tracking-widest font-mono">{fullRoomId}</span>
+                            </button>
+                        )}
 
                         {/* Input Section */}
                         <div className="w-full space-y-4">

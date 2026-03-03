@@ -9,7 +9,7 @@
 ' ============================================
 
 Dim BASE_URL
-BASE_URL = "https://www.anypok.com/broadcast"
+BASE_URL = "https://www.anypok.com/broadcast?receiver=1&autostart=1"
 
 ' --- Find Browser ---
 Dim objFSO, objShell

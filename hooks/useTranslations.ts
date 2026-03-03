@@ -18,8 +18,8 @@ const translations: Record<GlobalLanguage, any> = {
 export const useTranslations = () => {
   const { language } = useLanguage();
   const t = translations[language] || translations['en'];
-  
-  return (key: string): string => {
+
+  return React.useCallback((key: string): string => {
     const keys = key.split('.');
     let value: any = t;
     for (const k of keys) {
@@ -27,6 +27,6 @@ export const useTranslations = () => {
       if (value === undefined) break;
     }
     return typeof value === 'string' ? value : key;
-  };
+  }, [t]);
 };
 

@@ -18,39 +18,35 @@ export default async function handler(
     try {
         const cleanCode = code.toUpperCase().trim();
 
-        // 1. Check if room is active/registered
-        // Unified Search: Look through all license:* keys
-        const licenseKeys = await kv.keys('license:*');
+        // 1. Efficient Room Validation (Unified)
         let isValidRoom = false;
 
-        for (const lKey of licenseKeys) {
-            const data: any = await kv.get(lKey);
-            const rooms = data?.r || data?.rooms || [];
-            if (rooms.includes(cleanCode)) {
-                isValidRoom = true;
-                break;
-            }
-        }
-
-        // Search through legacy br:rooms:* keys if not found
-        if (!isValidRoom) {
-            const roomKeys = await kv.keys('br:rooms:*');
-            for (const key of roomKeys) {
-                const data = await kv.get<{ rooms: string[], updatedAt: number }>(key);
-                if (data && data.rooms && data.rooms.includes(cleanCode)) {
+        // Optimized lookup if license is provided
+        if (license) {
+            const licPrefix = license.replace(/[-\s]/g, '').substring(0, 8).toUpperCase();
+            const licenseData: any = await kv.get(`license:${licPrefix}`);
+            if (licenseData) {
+                const rooms = licenseData.r || licenseData.rooms || [];
+                if (rooms.includes(cleanCode)) {
                     isValidRoom = true;
-                    break;
                 }
             }
         }
 
-        // Fallback: Check legacy format for backward compatibility
+        // Broad scan fallback only if not yet found (limited scope)
         if (!isValidRoom) {
-            const legacyKeyPattern = `br:lic:*:rm:${cleanCode}:act`;
-            const keys = await kv.keys(legacyKeyPattern);
+            // Check legacy active room keys directly instead of scanning all licenses
+            const legacyActiveKey = `br:lic:*:rm:${cleanCode}:act`;
+            const keys = await kv.keys(legacyActiveKey);
             if (keys.length > 0) {
                 isValidRoom = true;
             }
+        }
+
+        // Final safety fallback: check room index if it exists
+        if (!isValidRoom) {
+            const roomMeta: any = await kv.get(`br:room:${cleanCode}:meta`);
+            if (roomMeta) isValidRoom = true;
         }
 
         if (!isValidRoom) {

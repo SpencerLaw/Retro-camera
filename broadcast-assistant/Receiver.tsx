@@ -214,7 +214,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     }, [isPlaying, scrollToActive]);
 
     const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string, voiceOverride?: string) => {
-        if (lastPlayedId.current === id && isPlaying) return;
+        if (lastPlayedId.current === id && isPlayingRef.current) return;
         lastPlayedId.current = id;
         if (fullRoomId) {
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
@@ -223,6 +223,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         const currentPlaybackId = ++playbackIdRef.current;
         pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
         setIsPlaying(true);
+        isPlayingRef.current = true;
         setReceiverStatus('playing');
         ttsManager.clearPool();
         prefetchedBlobs.current = {};
@@ -305,13 +306,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             if (playbackIdRef.current === currentPlaybackId) {
                 setIsPlaying(false);
+                isPlayingRef.current = false;
                 setActiveSentenceIndex(-1);
                 setReceiverStatus('listening');
             }
         };
 
         playMessageCycles();
-    }, [fullRoomId, volumeBoost]);
+    }, [fullRoomId, volumeBoost]); // t is removed from here as it's now stable or unused in the core loop
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;
@@ -363,7 +365,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             console.error('Polling error:', err);
             setReceiverStatus('error');
         }
-    }, [fullRoomId, speak, t]);
+    }, [fullRoomId, speak]); // t removed from dependencies
 
     useEffect(() => {
         let isActive = true;

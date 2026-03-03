@@ -79,12 +79,11 @@ class TTSManager {
      * Useful for zero-gap sequencing.
      */
     public async prefetch(text: string, options: TTSOptions): Promise<string | null> {
-        if (options.engine === 'native') return null;
+        if (options.engine === 'native' || options.engine === 'baidu') return null;
 
         try {
             let blob: Blob | null = null;
             if (options.engine === 'fish') blob = await this.fetchFishBlob(text, options);
-            else if (options.engine === 'baidu') blob = await this.fetchBaiduBlob(text, options);
             else blob = await this.fetchEdgeBlob(text, options);
 
             if (!blob) return null;
@@ -259,30 +258,42 @@ class TTSManager {
         return null;
     }
 
-    private async fetchBaiduBlob(text: string, options: TTSOptions): Promise<Blob | null> {
-        try {
-            // per=1 (male), per=0 (female)
-            // Xiaoxiao/baidu-female -> 0, Yunxi/baidu-male -> 1
-            const voiceStr = (options.voice || '').toLowerCase();
-            const per = voiceStr.includes('yunxi') || voiceStr.includes('male') && !voiceStr.includes('female') ? 1 : 0;
-            const url = `https://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=5&per=${per}&text=${encodeURIComponent(text)}`;
-            const resp = await fetch(url);
-            if (resp.ok) return await resp.blob();
-        } catch (e) {
-            console.warn('Baidu TTS fetch failed');
-        }
-        return null;
-    }
-
     private async speakBaiduPrimary(text: string, options: TTSOptions): Promise<void> {
-        let blob = await this.fetchBaiduBlob(text, options);
+        this.stop();
+        if (!this.audio) return;
 
-        if (blob) {
-            const url = URL.createObjectURL(blob);
-            this.blobPool.add(url);
-            await this.playBlob(url, text, options);
-        } else {
-            console.error('Baidu TTS primary failed, falling back to Native');
+        const voiceStr = (options.voice || '').toLowerCase();
+        const per = voiceStr.includes('yunxi') || voiceStr.includes('male') && !voiceStr.includes('female') ? 1 : 0;
+        const url = `https://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=5&per=${per}&text=${encodeURIComponent(text)}`;
+
+        this.currentBlobUrl = url;
+        this.audio.src = url;
+
+        this.audio.onplay = () => {
+            if (options.onStart) options.onStart();
+            this.simulateBoundaries(text, options, this.audio!);
+        };
+
+        this.audio.onended = () => {
+            this.clearBoundaryTimer();
+            if (options.onEnd) options.onEnd();
+        };
+
+        this.audio.onerror = () => {
+            console.error('Baidu TTS direct playback failed, falling back to Native');
+            this.speakNative(text, options);
+        };
+
+        if (options.volume && options.volume > 1.0) {
+            this.setupAudioNodes(options.volume);
+        } else if (this.gainNode) {
+            this.gainNode.gain.setTargetAtTime(1.0, this.audioCtx!.currentTime, 0.1);
+        }
+
+        try {
+            await this.audio.play();
+        } catch (e) {
+            console.error('Baidu play error:', e);
             this.speakNative(text, options);
         }
     }
@@ -292,8 +303,9 @@ class TTSManager {
 
         // Secondary fallback: Baidu (Very stable for default male/female)
         if (!blob && options.voice?.includes('zh-CN')) {
-            console.warn('Edge TTS failed, falling back to Baidu');
-            blob = await this.fetchBaiduBlob(text, options);
+            console.warn('Edge TTS failed, falling back to Baidu via direct Audio element playback');
+            await this.speakBaiduPrimary(text, options);
+            return;
         }
 
         if (blob) {

@@ -211,7 +211,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     };
 
                     // Pre-fetch next sentence while current one is playing
-                    if (nextSentence && !prefetchedBlobs.current[nextSentence]) {
+                    if (nextSentence && !prefetchedBlobs.current[nextSentence] && engineType !== 'baidu') {
                         ttsManager.prefetch(nextSentence, ttsOptions).then(url => {
                             if (url && playbackIdRef.current === currentPlaybackId) {
                                 prefetchedBlobs.current[nextSentence] = url;
@@ -244,7 +244,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             });
                         });
                     } else if (playbackIdRef.current === currentPlaybackId) {
-                        // FALLBACK: If Edge/Fish prefetch failed, use direct speak (which now has robust fallback)
+                        // FALLBACK or Direct Play engines (like Baidu): 
+                        // If prefetch failed or bypassed, use direct speak
                         await ttsManager.speak(sentence, {
                             ...ttsOptions
                         });

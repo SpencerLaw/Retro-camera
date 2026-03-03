@@ -60,7 +60,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
         if (savedEnabled === 'true') {
             setIsAutoEnabled(true);
         }
-    }, []);
+    }, [license]);
 
     // Timer logic for automated broadcast
     // We will rewrite the timer to avoid resetting by using a Ref for latest tasks

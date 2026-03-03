@@ -313,7 +313,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
 
         playMessageCycles();
-    }, [fullRoomId, volumeBoost]); // t is removed from here as it's now stable or unused in the core loop
+    }, [fullRoomId, volumeBoost, t]);
 
     const fetchMessage = useCallback(async () => {
         if (!fullRoomId.trim()) return;
@@ -365,7 +365,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             console.error('Polling error:', err);
             setReceiverStatus('error');
         }
-    }, [fullRoomId, speak]); // t removed from dependencies
+    }, [fullRoomId, speak, t]);
 
     useEffect(() => {
         let isActive = true;
@@ -397,6 +397,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     useEffect(() => {
         return () => {
             ttsManager.stop();
+            ttsManager.clearPool();
             ttsManager.stopSilentLoop();
         };
     }, []);

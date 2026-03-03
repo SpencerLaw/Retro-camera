@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft, RefreshCw, History, Clock, Settings } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, Wifi, WifiOff, X, Copy, Info, Sun, Moon, ArrowLeft, RefreshCw, History, Clock, Settings, Radio } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { ttsManager } from './utils/ttsManager';
 
@@ -107,13 +107,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         };
     }, [fullRoomId, isJoined]);
 
-    // Auto-login on load if credentials exist
+    // Check for saved room on mount, but don't auto-start without gesture (browser blocks audio)
     useEffect(() => {
-        const savedRoom = localStorage.getItem('br_receiver_room');
-        if (savedRoom && !isJoined) {
-            handleStart();
-        }
-    }, []); // Only once on mount
+        // Just keeping it here for reference, UI will handle the "quick start"
+    }, []);
 
     const pendingPlayouts = useRef<number>(0);
 
@@ -466,18 +463,21 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 <input
                                     type="text"
                                     value={fullRoomId}
-                                    onChange={(e) => {
-                                        const start = e.target.selectionStart;
-                                        const end = e.target.selectionEnd;
-                                        const val = e.target.value.toUpperCase();
-                                        setFullRoomId(val);
-                                        requestAnimationFrame(() => {
-                                            if (e.target) e.target.setSelectionRange(start, end);
-                                        });
-                                    }}
+                                    onChange={(e) => setFullRoomId(e.target.value.toUpperCase())}
                                     placeholder={t('broadcast.receiver.channelPlaceholder')}
-                                    className="w-full h-14 bg-gray-100 dark:bg-white/5 border-none rounded-2xl px-6 text-center text-lg font-mono font-bold tracking-widest focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all uppercase"
+                                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-6 text-2xl font-black text-center outline-none focus:ring-4 focus:ring-blue-500/20 transition-all placeholder:opacity-20 dark:text-white uppercase tracking-widest"
+                                    maxLength={8}
                                 />
+
+                                <button
+                                    onClick={handleStart}
+                                    className="w-full mt-4 py-6 bg-black dark:bg-white text-white dark:text-black rounded-3xl font-black text-xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-3 group"
+                                >
+                                    <Radio size={24} className="group-hover:animate-pulse" />
+                                    {localStorage.getItem('br_receiver_room') === fullRoomId
+                                        ? (t('broadcast.sender.on') || '继续进入')
+                                        : t('broadcast.receiver.initializeLive')}
+                                </button>
                             </div>
 
                             {error && (
@@ -487,15 +487,6 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 </div>
                             )}
                         </div>
-
-                        {/* Action Button */}
-                        <button
-                            onClick={handleStart}
-                            className="w-full py-4 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-bold text-lg shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3"
-                        >
-                            <Volume2 size={20} />
-                            {t('broadcast.receiver.initializeLive')}
-                        </button>
                     </div>
                 </GlassCard>
             </div>

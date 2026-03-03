@@ -252,6 +252,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
             const data = await resp.json();
             if (data.success) {
                 setStatus({ type: 'success', msg: t('broadcast.sender.broadcastDelivered') });
+
                 setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
             } else {
                 throw new Error(data.error);

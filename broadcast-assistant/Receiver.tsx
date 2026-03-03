@@ -287,12 +287,17 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             ttsManager.playBlob(url as string, sentence, {
                                 ...ttsOptions,
                                 onEnd: settle
-                            }).catch(() => settle());
+                            }).catch(() => {
+                                // Add a 2-second sleep so failing play requests don't instantly loop and CPU spike
+                                setTimeout(settle, 2000);
+                            });
                         });
                     } else if (playbackIdRef.current === currentPlaybackId) {
                         const speakPromise = ttsManager.speak(sentence, ttsOptions).catch(e => console.error('Sentence play error:', e));
                         const timeoutPromise = new Promise<void>(r => setTimeout(r, 15000)); // 15 seconds timeout
                         await Promise.race([speakPromise, timeoutPromise]);
+                        // Sleep briefly to prevent instant loops if native fallback also fails silently
+                        await new Promise(r => setTimeout(r, 500));
                     }
                 }
 

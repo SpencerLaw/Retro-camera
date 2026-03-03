@@ -94,6 +94,9 @@ export default async function handler(
         // Save back to license key
         await kv.set(licenseKey, data);
 
+        // Global activation key for Receiver validity check
+        await kv.set(`br:room_active:${cleanCode}`, true, { ex: 86400 * 7 });
+
         // CLEANUP: If old separate key exists, remove it
         await kv.del(`br:rooms:${cleanLicense}`);
 

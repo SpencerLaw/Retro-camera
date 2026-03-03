@@ -35,10 +35,10 @@ export default async function handler(
             voice: voice || null,
         };
 
-        // V2: Global Shared Pool for 4-digit codes
-        // Key format: br:v2:room:{CODE}
+        // V2: Global Shared Pool
         const key = `br:v2:room:${code.toUpperCase().trim()}`;
         await kv.set(key, messageData, { ex: 60 });
+        await kv.set(`br:room_active:${code.toUpperCase().trim()}`, true, { ex: 86400 * 7 });
 
         return response.status(200).json({ success: true, messageId });
     } catch (error: any) {

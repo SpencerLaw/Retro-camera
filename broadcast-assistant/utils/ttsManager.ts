@@ -114,37 +114,49 @@ class TTSManager {
     /**
      * Plays a previously prefetched Blob URL.
      */
-    public async playBlob(url: string, text: string, options: TTSOptions): Promise<void> {
+    public playBlob(url: string, text: string, options: TTSOptions): Promise<void> {
         this.stop();
-        if (!this.audio) return;
+        if (!this.audio) return Promise.resolve();
 
-        this.audio.onplay = () => {
-            if (options.onStart) options.onStart();
-            this.simulateBoundaries(text, options, this.audio!);
-        };
-        this.audio.onended = () => {
-            this.clearBoundaryTimer();
-            // Automatically clean up blob memory to prevent leaks
-            if (url.startsWith('blob:')) {
-                URL.revokeObjectURL(url);
-                this.blobPool.delete(url);
-                if (this.currentBlobUrl === url) this.currentBlobUrl = null;
+        return new Promise((resolve, reject) => {
+            this.audio!.onplay = () => {
+                if (options.onStart) options.onStart();
+                this.simulateBoundaries(text, options, this.audio!);
+            };
+            this.audio!.onended = () => {
+                this.clearBoundaryTimer();
+                // Automatically clean up blob memory to prevent leaks
+                if (url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                    this.blobPool.delete(url);
+                    if (this.currentBlobUrl === url) this.currentBlobUrl = null;
+                }
+                if (options.onEnd) options.onEnd();
+                resolve();
+            };
+
+            this.currentBlobUrl = url;
+            this.audio!.src = url;
+
+            // Initialize Web Audio API if a boost is requested
+            if (options.volume && options.volume > 1.0) {
+                this.setupAudioNodes(options.volume);
+            } else if (this.gainNode) {
+                // Reset to normal if no boost
+                this.gainNode.gain.setTargetAtTime(1.0, this.audioCtx!.currentTime, 0.1);
             }
-            if (options.onEnd) options.onEnd();
-        };
 
-        this.currentBlobUrl = url;
-        this.audio.src = url;
-
-        // Initialize Web Audio API if a boost is requested
-        if (options.volume && options.volume > 1.0) {
-            this.setupAudioNodes(options.volume);
-        } else if (this.gainNode) {
-            // Reset to normal if no boost
-            this.gainNode.gain.setTargetAtTime(1.0, this.audioCtx!.currentTime, 0.1);
-        }
-
-        await this.audio.play();
+            this.audio!.play().catch((e) => {
+                console.warn('Audio play blocked/failed:', e);
+                // CRITICAL: Clean up blob to prevent massive memory leak on retry loops
+                if (url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                    this.blobPool.delete(url);
+                    if (this.currentBlobUrl === url) this.currentBlobUrl = null;
+                }
+                reject(e);
+            });
+        });
     }
 
     private setupAudioNodes(volumeBoost: number): void {

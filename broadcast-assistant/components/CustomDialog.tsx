@@ -43,7 +43,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onCancel}></div>
 
-            <GlassCard className={`relative w-full max-w-md p-8 space-y-6 shadow-2xl border border-white/10 scale-100 animate-in zoom-in-95 duration-300 ${isDark ? 'text-white' : 'text-black'}`}>
+            <div className={`relative w-full max-w-md p-8 space-y-6 shadow-2xl rounded-[2rem] border scale-100 animate-in zoom-in-95 duration-300 ${isDark ? 'bg-zinc-900 border-white/10 text-white' : 'bg-white border-black/10 text-black'}`}>
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
@@ -89,7 +89,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
                         </button>
                     )}
                 </div>
-            </GlassCard>
+            </div>
         </div>
     );
 };

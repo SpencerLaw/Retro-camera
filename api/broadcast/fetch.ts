@@ -21,8 +21,12 @@ export default async function handler(
         // 1. Efficient Room Validation (Unified)
         let isValidRoom = false;
 
+        // Fast path: Check global active key
+        const isActive = await kv.get(`br:room_active:${cleanCode}`);
+        if (isActive) isValidRoom = true;
+
         // Optimized lookup if license is provided
-        if (license) {
+        if (!isValidRoom && license) {
             const licPrefix = license.replace(/[-\s]/g, '').substring(0, 8).toUpperCase();
             const licenseData: any = await kv.get(`license:${licPrefix}`);
             if (licenseData) {

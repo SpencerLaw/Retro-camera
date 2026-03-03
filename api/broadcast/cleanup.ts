@@ -23,6 +23,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const data: any = await kv.get(licenseKey);
 
         if (data) {
+            let rooms = data.r || data.rooms || [];
+
+            // Delete active status and queued messages for all those rooms
+            for (const roomCode of rooms) {
+                const cleanCode = roomCode.toUpperCase().trim();
+                await kv.del(`br:room_active:${cleanCode}`);
+                await kv.del(`br:v2:room:${cleanCode}`);
+            }
+
             if (data.d) {
                 delete data.r;
             } else {

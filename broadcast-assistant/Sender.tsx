@@ -35,7 +35,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                 return [];
             }
         }
-        return [{ id: 'default', name: t('broadcast.sender.unknownClass'), code: Math.floor(1000 + Math.random() * 9000).toString() }];
+        return [{ id: 'default', name: t('broadcast.sender.unknownClass'), code: Math.floor(100000 + Math.random() * 900000).toString() }];
     });
 
     const [activeChannelId, setActiveChannelId] = useState(() => {
@@ -126,7 +126,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
         const newChannel: Channel = {
             id: newId,
             name: `${t('broadcast.sender.addClass')} ${channels.length + 1}`,
-            code: Math.floor(1000 + Math.random() * 9000).toString()
+            code: Math.floor(100000 + Math.random() * 900000).toString()
         };
         setChannels([...channels, newChannel]);
         setActiveChannelId(newId);
@@ -204,7 +204,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
     const generateRandomChannel = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+        const newCode = Math.floor(100000 + Math.random() * 900000).toString();
         setEditCode(newCode);
     };
 
@@ -355,7 +355,7 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         const defaultChannel = {
                             id: 'default',
                             name: t('broadcast.sender.unknownClass'),
-                            code: Math.floor(1000 + Math.random() * 9000).toString()
+                            code: Math.floor(100000 + Math.random() * 900000).toString()
                         };
                         setChannels([defaultChannel]);
                         setActiveChannelId('default');

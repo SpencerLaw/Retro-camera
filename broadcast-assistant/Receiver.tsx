@@ -75,7 +75,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         localStorage.setItem('br_volume_boost', volumeBoost.toString());
     }, [volumeBoost]);
 
-    const [isListening, setIsListening] = useState(true);
+    const [isListening, setIsListening] = useState(() => localStorage.getItem('br_listening') !== 'false');
+    useEffect(() => {
+        localStorage.setItem('br_listening', isListening ? 'true' : 'false');
+    }, [isListening]);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -223,13 +226,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 for (let i = 0; i < currentSentences.length; i++) {
                     if (playbackIdRef.current !== currentPlaybackId) break;
 
+                    // Ensure UI update before starting long-running await
                     setActiveSentenceIndex(i);
+                    await new Promise(r => setTimeout(r, 50));
                     const sentence = currentSentences[i];
                     const nextSentence = currentSentences[i + 1];
-                    const targetVoice = voiceOverride || 'native';
+                    const targetVoice = voiceOverride || 'zh-CN-XiaoxiaoNeural';
+                    const useNative = !voiceOverride || voiceOverride === 'native';
 
                     const ttsOptions = {
-                        engine: 'edge' as const,
+                        engine: useNative ? 'native' as const : 'edge' as const,
                         voice: targetVoice,
                         rate: isEmergency ? 0.85 : 1.0,
                         volume: volumeBoost,
@@ -345,7 +351,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             await fetchMessage();
             if (isActive) pollingTimer.current = setTimeout(poll, 3000);
         };
-        if (isJoined) poll();
+        if (isJoined) {
+            poll();
+            // Try to start silent loop for auto-play (might be blocked until first click)
+            ttsManager.startSilentLoop();
+        }
         return () => {
             isActive = false;
             if (pollingTimer.current) clearTimeout(pollingTimer.current);

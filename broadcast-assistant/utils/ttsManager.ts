@@ -45,11 +45,23 @@ class TTSManager {
         this.startSilentLoop();
 
         return new Promise<void>(async (resolve) => {
+            let settled = false;
+            const settle = () => {
+                if (settled) return;
+                settled = true;
+                resolve();
+            };
+
+            // Safety timeout: if audio is blocked by policy and never starts, 
+            // we must still resolve to prevent deadlocking the UI sequence.
+            const timeout = setTimeout(settle, 12000);
+
             const extendedOptions = {
                 ...options,
                 onEnd: () => {
+                    clearTimeout(timeout);
                     if (options.onEnd) options.onEnd();
-                    resolve();
+                    settle();
                 }
             };
 
@@ -67,7 +79,7 @@ class TTSManager {
                         break;
                 }
             } catch (e) {
-                console.error('TTS execution failed, trying native fallback:', e);
+                console.error('TTS execution failed, falling back to native:', e);
                 this.speakNative(text, extendedOptions);
             }
         });

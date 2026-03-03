@@ -1,66 +1,63 @@
-' ====================================================
-'  广播助手 - Windows 开机自动启动脚本
-'  支持: Windows 7 / 8 / 10 / 11
-'  使用方法: 双击运行 或 放入任务计划程序
-' ====================================================
+' Broadcast Assistant - Auto-Setup & Launch
+' ============================================
+' Run this ONCE on the classroom computer.
+' It will:
+'   1. Open the broadcast page right now
+'   2. Add itself to Windows Startup so it opens automatically on every boot
+'
+' To change the URL: right-click -> Edit with Notepad, change BASE_URL below.
+' ============================================
 
-' ============ 🔧 请在这里修改配置 ============
-Dim broadcastUrl
-Dim browserPath
-Dim profileArg
+Dim BASE_URL
+BASE_URL = "https://www.anypok.com/broadcast"
 
-' 广播助手网址 (改成你的实际地址)
-broadcastUrl = "https://www.anypok.com/broadcast"
-
-' 浏览器路径 (自动检测，优先 Edge > Chrome > Firefox)
-browserPath = ""
-profileArg = ""
-
-' ============ 自动检测浏览器 ============
+' --- Find Browser ---
 Dim objFSO, objShell
 Set objFSO = CreateObject("Scripting.FileSystemObject")
 Set objShell = CreateObject("WScript.Shell")
 
-Dim edgePaths(2)
-edgePaths(0) = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-edgePaths(1) = "C:\Program Files\Microsoft\Edge\Application\msedge.exe"
-edgePaths(2) = objShell.ExpandEnvironmentStrings("%LocalAppData%") & "\Microsoft\Edge\Application\msedge.exe"
+Dim browserPath
+browserPath = ""
 
-Dim chromePaths(2)
-chromePaths(0) = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-chromePaths(1) = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-chromePaths(2) = objShell.ExpandEnvironmentStrings("%LocalAppData%") & "\Google\Chrome\Application\chrome.exe"
+Dim e1, e2, e3, c1, c2, c3
+e1 = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+e2 = "C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+e3 = objShell.ExpandEnvironmentStrings("%LocalAppData%") & "\Microsoft\Edge\Application\msedge.exe"
+c1 = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+c2 = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+c3 = objShell.ExpandEnvironmentStrings("%LocalAppData%") & "\Google\Chrome\Application\chrome.exe"
 
-Dim i
-' 优先使用 Edge
-For i = 0 To 2
-    If objFSO.FileExists(edgePaths(i)) Then
-        browserPath = edgePaths(i)
-        profileArg = " --profile-directory=Default"
-        Exit For
-    End If
-Next
-
-' 没有 Edge 就用 Chrome
-If browserPath = "" Then
-    For i = 0 To 2
-        If objFSO.FileExists(chromePaths(i)) Then
-            browserPath = chromePaths(i)
-            profileArg = " --profile-directory=Default"
-            Exit For
-        End If
-    Next
+If objFSO.FileExists(e1) Then
+    browserPath = e1
+ElseIf objFSO.FileExists(e2) Then
+    browserPath = e2
+ElseIf objFSO.FileExists(e3) Then
+    browserPath = e3
+ElseIf objFSO.FileExists(c1) Then
+    browserPath = c1
+ElseIf objFSO.FileExists(c2) Then
+    browserPath = c2
+ElseIf objFSO.FileExists(c3) Then
+    browserPath = c3
 End If
 
-' 最后用系统默认浏览器打开
+' --- Step 1: Add to Windows Startup Folder (runs on every boot) ---
+Dim startupFolder, thisScript, destPath
+startupFolder = objShell.SpecialFolders("Startup")
+thisScript = WScript.ScriptFullName
+destPath = startupFolder & "\" & objFSO.GetFileName(thisScript)
+
+If Not objFSO.FileExists(destPath) Then
+    On Error Resume Next
+    objFSO.CopyFile thisScript, destPath
+    On Error GoTo 0
+End If
+
+' --- Step 2: Open the broadcast page now ---
 If browserPath = "" Then
-    objShell.Run "cmd /c start " & broadcastUrl, 0, False
+    objShell.Run "explorer " & BASE_URL, 1, False
 Else
-    ' 以全屏 Kiosk 模式打开 (老师专用, 无地址栏)
-    ' 如果需要显示地址栏，把 --kiosk 改成 --start-maximized
-    Dim launchCmd
-    launchCmd = """" & browserPath & """" & profileArg & " --app=" & broadcastUrl & " --start-maximized"
-    objShell.Run launchCmd, 1, False
+    objShell.Run """" & browserPath & """ --app=" & BASE_URL & " --start-maximized", 1, False
 End If
 
 Set objFSO = Nothing

@@ -13,7 +13,7 @@ export default async function handler(
     }
 
 
-    const { code, text, isEmergency, license, repeatCount, channelName } = request.body;
+    const { code, text, isEmergency, license, repeatCount, channelName, voice } = request.body;
 
     if (!license) {
         return response.status(401).json({ error: '未提供有效的授权码' });
@@ -32,6 +32,7 @@ export default async function handler(
             timestamp: messageId,
             repeatCount: repeatCount !== undefined ? repeatCount : 1,
             channelName: channelName || '',
+            voice: voice || null,
         };
 
         // V2: Global Shared Pool for 4-digit codes

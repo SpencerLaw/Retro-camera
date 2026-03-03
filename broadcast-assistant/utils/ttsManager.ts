@@ -226,15 +226,12 @@ class TTSManager {
 
         if (options.voice) {
             const voices = window.speechSynthesis.getVoices();
-            // Try better matching for native voices
+            // Try specific matches first
             let selectedVoice = voices.find(v => v.name === options.voice || v.name.includes(options.voice));
 
-            // If it's a known male voice name but not found, try searching for any male voice
-            if (!selectedVoice && (options.voice.toLowerCase().includes('yunxi') || options.voice.toLowerCase().includes('yunjian') || options.voice.toLowerCase().includes('kangkang'))) {
-                selectedVoice = voices.find(v =>
-                    (v.lang.startsWith('zh') || v.lang.startsWith('en')) &&
-                    (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('kangkang') || v.name.toLowerCase().includes('jiayue'))
-                );
+            // Fallback: If it's a known Chinese voice request, find any Chinese voice
+            if (!selectedVoice && (options.voice.toLowerCase().includes('xiaoxiao') || options.voice.toLowerCase().includes('yunxi') || utterance.lang.startsWith('zh'))) {
+                selectedVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
             }
 
             if (selectedVoice) utterance.voice = selectedVoice;

@@ -75,7 +75,13 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         localStorage.setItem('br_volume_boost', volumeBoost.toString());
     }, [volumeBoost]);
 
-    const [isListening, setIsListening] = useState(() => localStorage.getItem('br_listening') !== 'false');
+    const [isListening, setIsListening] = useState(() => {
+        const saved = localStorage.getItem('br_listening');
+        return saved === null ? true : saved !== 'false';
+    });
+    const [needsInteraction, setNeedsInteraction] = useState(false);
+    const [receiverStatus, setReceiverStatus] = useState<'idle' | 'listening' | 'playing' | 'error'>('listening');
+
     useEffect(() => {
         localStorage.setItem('br_listening', isListening ? 'true' : 'false');
     }, [isListening]);
@@ -208,6 +214,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     }, [isPlaying, scrollToActive]);
 
     const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string, voiceOverride?: string) => {
+        if (lastPlayedId.current === id && isPlaying) return;
         lastPlayedId.current = id;
         if (fullRoomId) {
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
@@ -216,6 +223,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         const currentPlaybackId = ++playbackIdRef.current;
         pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
         setIsPlaying(true);
+        setReceiverStatus('playing');
         ttsManager.clearPool();
         prefetchedBlobs.current = {};
 
@@ -281,7 +289,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             }).catch(() => settle());
                         });
                     } else if (playbackIdRef.current === currentPlaybackId) {
-                        await ttsManager.speak(sentence, ttsOptions);
+                        const speakPromise = ttsManager.speak(sentence, ttsOptions).catch(e => console.error('Sentence play error:', e));
+                        const timeoutPromise = new Promise<void>(r => setTimeout(r, 15000)); // 15 seconds timeout
+                        await Promise.race([speakPromise, timeoutPromise]);
                     }
                 }
 
@@ -296,6 +306,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             if (playbackIdRef.current === currentPlaybackId) {
                 setIsPlaying(false);
                 setActiveSentenceIndex(-1);
+                setReceiverStatus('listening');
             }
         };
 
@@ -339,14 +350,18 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     });
                 }
                 if (isListeningRef.current && msg.id !== lastPlayedId.current) {
+                    // Update ID early to prevent double trigging
+                    lastPlayedId.current = msg.id;
                     speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice);
                 }
             } else if (!isPlayingRef.current && pendingPlayouts.current <= 0) {
                 setCurrentMsg(null);
+                setReceiverStatus('listening');
             }
             setError(null);
         } catch (err) {
             console.error('Polling error:', err);
+            setReceiverStatus('error');
         }
     }, [fullRoomId, speak, t]);
 
@@ -360,6 +375,13 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         if (isJoined) {
             poll();
             ttsManager.startSilentLoop();
+            // Detect if blocked
+            setTimeout(() => {
+                const audio = (ttsManager as any).silentAudio;
+                if (audio && (audio.paused || audio.volume === 0)) {
+                    setNeedsInteraction(true);
+                }
+            }, 1000);
         }
         return () => {
             isActive = false;
@@ -471,8 +493,37 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     return (
         <div className={`fixed inset-0 z-[100] flex flex-col transition-colors duration-1000 ${currentMsg?.isEmergency ? 'bg-red-600 text-white' : (isDark ? 'bg-[#050505] text-white' : 'bg-[#F5F5F7] text-black')}`}>
             <BackgroundAmbience isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
+
+            {/* Interaction Wake-up Overlay */}
+            {needsInteraction && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xl animate-in fade-in duration-500">
+                    <div className="text-center space-y-8 p-10 max-w-md">
+                        <div className="w-24 h-24 rounded-full bg-blue-500 mx-auto flex items-center justify-center text-white animate-bounce shadow-2xl shadow-blue-500/50">
+                            <Volume2 size={40} />
+                        </div>
+                        <div className="space-y-4">
+                            <h2 className="text-3xl font-black text-white">点击唤醒系统</h2>
+                            <p className="text-white/60 text-lg">由于浏览器安全策略，请点击下方按钮以激活音频播报功能</p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                ttsManager.startSilentLoop();
+                                setNeedsInteraction(false);
+                            }}
+                            className="w-full py-6 bg-white text-blue-600 rounded-3xl font-black text-xl hover:scale-[1.05] active:scale-95 transition shadow-2xl shadow-black/20"
+                        >
+                            立即激活
+                        </button>
+                    </div>
+                </div>
+            )}
             <div className="p-8 flex justify-between items-center bg-transparent relative z-50 pointer-events-none">
                 <div className="flex items-center gap-6 pointer-events-auto">
+                    <div className="flex items-center gap-4 bg-black/10 dark:bg-white/10 px-6 py-3 rounded-2xl backdrop-blur-md">
+                        <Radio size={20} className={isJoined ? 'text-green-500 animate-pulse' : 'text-gray-400'} />
+                        <span className="text-xl font-black tracking-widest">{fullRoomId || '---'}</span>
+                        <div className={`w-2 h-2 rounded-full ${receiverStatus === 'playing' ? 'bg-blue-500 animate-ping' : receiverStatus === 'error' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                    </div>
                     <div className="flex items-center gap-3 px-6 py-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-[8px]">
                         <div className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">

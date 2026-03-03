@@ -20,6 +20,7 @@ const App: React.FC = () => {
           <Route path="/doraemon" element={<DoraemonMonitorApp />} />
           <Route path="/group-maker" element={<GroupMakerApp />} />
           <Route path="/broadcast" element={<BroadcastApp />} />
+          <Route path="/broadcast/receiver" element={<BroadcastApp forceReceiver />} />
           <Route path="/kiddie-plan" element={<KiddiePlanApp />} />
         </Routes>
       </BrowserRouter>

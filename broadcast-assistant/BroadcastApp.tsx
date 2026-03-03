@@ -15,11 +15,11 @@ const GlassContainer = ({ children, className = "" }: { children: React.ReactNod
     </div>
 );
 
-const BroadcastApp: React.FC = () => {
+const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = false }) => {
     const navigate = useNavigate();
     const t = useTranslations();
     const [mode, setMode] = useState<'selection' | 'sender' | 'receiver' | 'license'>(() => {
-        // If ?receiver=1 is in the URL, go straight to receiver mode (for classroom auto-start)
+        if (forceReceiver) return 'receiver';
         const params = new URLSearchParams(window.location.search);
         if (params.get('receiver') === '1') return 'receiver';
         return 'selection';

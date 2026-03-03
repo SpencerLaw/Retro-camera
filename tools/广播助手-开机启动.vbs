@@ -9,7 +9,7 @@
 ' ============================================
 
 Dim BASE_URL
-BASE_URL = "https://lovedare.baby/broadcast?receiver=1&autostart=1"
+BASE_URL = "https://lovedare.baby/broadcast/receiver?autostart=1"
 
 ' --- Find Browser ---
 Dim objFSO, objShell

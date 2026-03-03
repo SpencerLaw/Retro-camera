@@ -87,7 +87,7 @@ const BroadcastApp: React.FC = () => {
             <div className={`min-h-screen flex items-center justify-center p-6 transition-colors duration-500 ${theme === 'dark' ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`}>
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className={`absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-400'}`}></div>
-                    <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${theme === 'dark' ? 'bg-cyan-600' : 'bg-cyan-400'}`}></div>
+                    <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${theme === 'dark' ? 'bg-purple-600' : 'bg-pink-400'}`}></div>
                 </div>
 
                 <GlassContainer className="max-w-2xl w-full p-10 rounded-[2.5rem] relative">
@@ -157,7 +157,7 @@ const BroadcastApp: React.FC = () => {
             {/* iOS 26 极简背景氛围 */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className={`absolute top-0 right-0 w-[50%] h-[50%] rounded-full blur-[120px] opacity-[0.03] transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-200'}`}></div>
-                <div className={`absolute bottom-0 left-0 w-[50%] h-[50%] rounded-full blur-[120px] opacity-[0.03] transition-colors ${theme === 'dark' ? 'bg-cyan-600' : 'bg-cyan-200'}`}></div>
+                <div className={`absolute bottom-0 left-0 w-[50%] h-[50%] rounded-full blur-[120px] opacity-[0.03] transition-colors ${theme === 'dark' ? 'bg-purple-600' : 'bg-purple-200'}`}></div>
             </div>
 
             <div className="relative z-10 max-w-5xl mx-auto px-6 py-10 lg:py-16">
@@ -215,7 +215,7 @@ const BroadcastApp: React.FC = () => {
                                     sub: t('broadcast.classroomSubtitle'),
                                     desc: t('broadcast.classroomDesc'),
                                     icon: <Tv size={72} />,
-                                    color: 'from-cyan-500 to-blue-600',
+                                    color: 'from-purple-500 to-pink-600',
                                     handler: () => setMode('receiver')
                                 }
                             ].map((item) => (

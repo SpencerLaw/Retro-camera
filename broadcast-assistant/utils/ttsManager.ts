@@ -415,10 +415,11 @@ class TTSManager {
                 el.removeEventListener('loadedmetadata', this.metaListener);
             }
 
-            // Wait for metadata to load, then compute the rate
-            this.metaListener = () => {
-                if (this.metaListener) {
-                    el.removeEventListener('loadedmetadata', this.metaListener);
+            // Define a local reference to the listener function
+            const listener = () => {
+                // Ensure we only remove the listener if it's the current one
+                if (this.metaListener === listener) {
+                    el.removeEventListener('loadedmetadata', listener);
                     this.metaListener = null;
                 }
 
@@ -426,14 +427,14 @@ class TTSManager {
                     const msPerChar = (el.duration * 1000 * 0.92) / text.length;
                     startSimulation(msPerChar);
                 } else {
-                    // Fallback: safe conservative estimate (300ms/char ≈ 3.3 chars/sec)
                     const rate = options.rate || 1.0;
                     startSimulation(300 / rate);
                 }
             };
-            el.addEventListener('loadedmetadata', this.metaListener);
+
+            this.metaListener = listener;
+            el.addEventListener('loadedmetadata', listener);
         } else {
-            // Last resort fallback
             const rate = options.rate || 1.0;
             startSimulation(300 / rate);
         }

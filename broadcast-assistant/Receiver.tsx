@@ -67,6 +67,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const prefetchedBlobs = useRef<Record<string, string>>({});
     const highlightRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
+    const isPlayingRef = useRef(false);
+    const playbackIdRef = useRef(0);
     const lastPlayedId = useRef<string | null>(null);
     const pollingTimer = useRef<NodeJS.Timeout | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -168,6 +170,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
         }
 
+        const currentPlaybackId = ++playbackIdRef.current;
         pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
         setIsPlaying(true);
         ttsManager.clearPool();
@@ -175,11 +178,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
         const playMessageCycles = async () => {
             while (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
+                if (playbackIdRef.current !== currentPlaybackId) break;
                 // Split current sentences (local snapshot to be safe)
                 const currentSentences = text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [text];
 
                 for (let i = 0; i < currentSentences.length; i++) {
-                    if (!isPlaying) break; // Check if stopped
+                    if (playbackIdRef.current !== currentPlaybackId) break;
 
                     setActiveSentenceIndex(i);
 
@@ -194,7 +198,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     // Pre-fetch next sentence while current one is playing
                     if (nextSentence && !prefetchedBlobs.current[nextSentence]) {
                         ttsManager.prefetch(nextSentence, ttsOptions).then(url => {
-                            if (url) prefetchedBlobs.current[nextSentence] = url;
+                            if (url && playbackIdRef.current === currentPlaybackId) {
+                                prefetchedBlobs.current[nextSentence] = url;
+                            }
                         });
                     }
 
@@ -204,18 +210,30 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         url = await ttsManager.prefetch(sentence, ttsOptions) || '';
                     }
 
-                    if (url) {
+                    if (url && playbackIdRef.current === currentPlaybackId) {
                         await new Promise<void>((resolve) => {
+                            const monitor = setInterval(() => {
+                                if (playbackIdRef.current !== currentPlaybackId) {
+                                    ttsManager.stop();
+                                    clearInterval(monitor);
+                                    resolve();
+                                }
+                            }, 100);
+
                             ttsManager.playBlob(url, sentence, {
                                 ...ttsOptions,
                                 onBoundary: (idx) => {
+                                    if (playbackIdRef.current !== currentPlaybackId) return;
                                     const progress = (idx / sentence.length) * 100;
                                     const el = highlightRefs.current[i];
                                     if (el) el.style.clipPath = `inset(0 ${100 - progress}% 0 0)`;
                                 },
                                 onEnd: () => {
-                                    const el = highlightRefs.current[i];
-                                    if (el) el.style.clipPath = 'none';
+                                    clearInterval(monitor);
+                                    if (playbackIdRef.current === currentPlaybackId) {
+                                        const el = highlightRefs.current[i];
+                                        if (el) el.style.clipPath = 'none';
+                                    }
                                     resolve();
                                 }
                             });
@@ -228,12 +246,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 }
 
                 if (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
+                    if (playbackIdRef.current !== currentPlaybackId) break;
                     setActiveSentenceIndex(-1);
                     await new Promise(r => setTimeout(r, 3000));
                 }
             }
-            setIsPlaying(false);
-            setActiveSentenceIndex(-1);
+            if (playbackIdRef.current === currentPlaybackId) {
+                setIsPlaying(false);
+                isPlayingRef.current = false;
+                setActiveSentenceIndex(-1);
+            }
         };
 
         playMessageCycles();
@@ -337,10 +359,12 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     useEffect(() => {
         if (!isListening) {
+            playbackIdRef.current++; // Interrupt any active loop
             ttsManager.stop();
             ttsManager.clearPool();
             pendingPlayouts.current = 0;
             setIsPlaying(false);
+            isPlayingRef.current = false;
             setActiveSentenceIndex(-1);
         }
     }, [isListening]);

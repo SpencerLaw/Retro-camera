@@ -363,7 +363,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     <button
                         onClick={handleToggleAuto}
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all shadow-sm border ${isAutoEnabled
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 rounded-2xl font-bold text-xs sm:text-sm transition shadow-sm border ${isAutoEnabled
                             ? 'bg-green-500 text-white border-green-400 shadow-green-500/20'
                             : 'bg-white dark:bg-white/5 text-gray-400 border-black/5 hover:border-black/10'}`}
                     >
@@ -373,7 +373,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                     {tasks.length > 0 && (
                         <button
                             onClick={handleClearAll}
-                            className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all border border-transparent hover:border-red-500/20 shrink-0"
+                            className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition border border-transparent hover:border-red-500/20 shrink-0"
                             title={t('broadcast.sender.clearAll')}
                         >
                             <Trash2 size={20} />
@@ -387,7 +387,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     <button
                         onClick={() => setShowImport(true)}
-                        className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition-all text-indigo-500 overflow-hidden text-left sm:text-center"
+                        className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition text-indigo-500 overflow-hidden text-left sm:text-center"
                     >
                         <Upload size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
                         <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">{t('broadcast.sender.importExcelTitle')}</span>
@@ -396,7 +396,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         </div>
                     </button>
 
-                    <label className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all text-emerald-600 dark:text-emerald-400 cursor-pointer overflow-hidden text-left sm:text-center">
+                    <label className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition text-emerald-600 dark:text-emerald-400 cursor-pointer overflow-hidden text-left sm:text-center">
                         {isParsingDocx ? (
                             <div className="flex items-center mr-4 sm:mr-0">
                                 <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin sm:mb-3"></span>
@@ -469,7 +469,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                                             />
                                             <button
                                                 onClick={() => deletePreviewTask(pt.id)}
-                                                className="sm:opacity-0 sm:group-hover:opacity-100 flex-none p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                                                className="sm:opacity-0 sm:group-hover:opacity-100 flex-none p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -525,7 +525,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         onChange={(e) => setImportText(e.target.value)}
                         placeholder={t('broadcast.sender.pastePlaceholder')}
                         rows={6}
-                        className="w-full bg-white dark:bg-black/40 border border-indigo-500/20 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all dark:text-gray-200"
+                        className="w-full bg-white dark:bg-black/40 border border-indigo-500/20 rounded-2xl p-4 font-mono text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 transition dark:text-gray-200"
                     />
 
                     <div className="flex gap-3 mt-4">
@@ -547,7 +547,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         {tasks.map((task) => (
                             <div
                                 key={task.id}
-                                className={`group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all flex flex-row items-center gap-3 sm:gap-4 ${task.isPlayed
+                                className={`group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition flex flex-row items-center gap-3 sm:gap-4 ${task.isPlayed
                                     ? 'bg-gray-50/50 dark:bg-white/[0.02] border-transparent opacity-50 grayscale'
                                     : 'bg-white dark:bg-white/5 border-black/5 dark:border-white/10 hover:border-indigo-500/40 hover:shadow-md'
                                     }`}
@@ -576,7 +576,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                                 </div>
                                 <button
                                     onClick={() => handleDelete(task.id)}
-                                    className="p-2 sm:p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all sm:opacity-0 group-hover:opacity-100 shrink-0"
+                                    className="p-2 sm:p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition sm:opacity-0 group-hover:opacity-100 shrink-0"
                                 >
                                     <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
                                 </button>

@@ -43,7 +43,7 @@ const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, text
     return (
         <div
             ref={isActive ? activeSentenceRef : null}
-            className={`relative block py-4 md:py-6 w-full break-words select-none text-center transform-gpu transition-all duration-500 ${isActive ? (isEmergency ? 'text-white font-black scale-105' : 'text-blue-500 dark:text-cyan-400 font-black scale-105') : isPast ? 'opacity-30' : 'opacity-10'} ${textLength > 300 ? 'text-lg md:text-2xl' : textLength > 100 ? 'text-xl md:text-4xl' : 'text-3xl md:text-7xl'}`}
+            className={`relative block py-4 md:py-6 w-full break-words select-none text-center transform-gpu transition duration-500 ${isActive ? (isEmergency ? 'text-white font-black scale-105' : 'text-blue-500 dark:text-cyan-400 font-black scale-105') : isPast ? 'opacity-30' : 'opacity-10'} ${textLength > 300 ? 'text-lg md:text-2xl' : textLength > 100 ? 'text-xl md:text-4xl' : 'text-3xl md:text-7xl'}`}
         >
             {sentence}
         </div>
@@ -406,10 +406,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     <div className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 ${isDark ? 'bg-purple-600' : 'bg-pink-400'}`}></div>
                 </div>
                 <GlassCard className="max-w-2xl w-full p-10 rounded-[2.5rem] relative z-50 animate-in zoom-in duration-500">
-                    <button onClick={onExit} className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all active:scale-95 cursor-pointer z-50">
+                    <button onClick={onExit} className="absolute top-8 left-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition active:scale-95 cursor-pointer z-50">
                         <ArrowLeft size={24} />
                     </button>
-                    <button onClick={toggleTheme} className="absolute top-8 right-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-orange-500 transition-all active:scale-95">
+                    <button onClick={toggleTheme} className="absolute top-8 right-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-orange-500 transition active:scale-95">
                         {isDark ? <Sun size={24} /> : <Moon size={24} />}
                     </button>
                     <div className="flex flex-col items-center text-center space-y-8 mt-4">
@@ -421,7 +421,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             <p className="text-sm text-gray-500 dark:text-gray-400">{t('broadcast.receiver.joinDesc')}</p>
                         </div>
                         {urlAutoStart && fullRoomId && (
-                            <button onClick={handleStart} className="w-full py-8 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl font-black text-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-purple-500/30 flex flex-col items-center justify-center gap-2 animate-pulse" style={{ animationDuration: '2s' }}>
+                            <button onClick={handleStart} className="w-full py-8 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl font-black text-2xl hover:scale-[1.02] active:scale-95 transition shadow-2xl shadow-purple-500/30 flex flex-col items-center justify-center gap-2 animate-pulse" style={{ animationDuration: '2s' }}>
                                 <Radio size={32} />
                                 <span>一键进入教室</span>
                                 <span className="text-lg opacity-80 tracking-widest font-mono">{fullRoomId}</span>
@@ -429,8 +429,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         )}
                         <div className="w-full space-y-4">
                             <div className="relative">
-                                <input type="text" value={fullRoomId} onChange={(e) => setFullRoomId(e.target.value.toUpperCase())} placeholder={t('broadcast.receiver.channelPlaceholder')} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-6 text-2xl font-black text-center outline-none focus:ring-4 focus:ring-blue-500/20 transition-all placeholder:opacity-20 dark:text-white uppercase tracking-widest" maxLength={8} />
-                                <button onClick={handleStart} className="w-full mt-4 py-6 bg-black dark:bg-white text-white dark:text-black rounded-3xl font-black text-xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-3 group">
+                                <input type="text" value={fullRoomId} onChange={(e) => setFullRoomId(e.target.value.toUpperCase())} placeholder={t('broadcast.receiver.channelPlaceholder')} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-6 text-2xl font-black text-center outline-none focus:ring-4 focus:ring-blue-500/20 transition placeholder:opacity-20 dark:text-white uppercase tracking-widest" maxLength={8} />
+                                <button onClick={handleStart} className="w-full mt-4 py-6 bg-black dark:bg-white text-white dark:text-black rounded-3xl font-black text-xl hover:scale-[1.02] active:scale-95 transition shadow-xl shadow-black/10 flex items-center justify-center gap-3 group">
                                     <Radio size={24} className="group-hover:animate-pulse" />
                                     {localStorage.getItem('br_receiver_room') === fullRoomId ? (t('broadcast.sender.on') || '继续进入') : t('broadcast.receiver.initializeLive')}
                                 </button>
@@ -466,19 +466,19 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         <Clock size={16} className="opacity-40" />
                         <ClockDisplay />
                     </div>
-                    <button onClick={() => setIsListening(!isListening)} className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition-all bg-white/5 backdrop-blur-[8px] hover:scale-110 active:scale-95 cursor-pointer ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}>
+                    <button onClick={() => setIsListening(!isListening)} className={`w-12 h-12 rounded-full border border-white/20 flex items-center justify-center transition bg-white/5 backdrop-blur-[8px] hover:scale-110 active:scale-95 cursor-pointer ${isListening ? 'text-green-500 scale-110 shadow-lg shadow-green-500/20' : 'text-gray-400'}`}>
                         {isListening ? <Volume2 size={24} /> : <VolumeX size={24} />}
                     </button>
 
                 </div>
                 <div className="flex gap-4 pointer-events-auto">
-                    <button onClick={toggleTheme} className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/20 text-orange-500 cursor-pointer">
+                    <button onClick={toggleTheme} className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition bg-white/20 text-orange-500 cursor-pointer">
                         {isDark ? <Sun size={24} /> : <Moon size={24} />}
                     </button>
-                    <button onClick={toggleFullscreen} className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition-all bg-white/20 cursor-pointer text-gray-400">
+                    <button onClick={toggleFullscreen} className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-95 transition bg-white/20 cursor-pointer text-gray-400">
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>
-                    <button onClick={() => { setIsJoined(false); setIsListening(false); localStorage.removeItem('br_receiver_room'); }} className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500/80 hover:scale-110 active:scale-95 hover:text-white transition-all bg-white/20 cursor-pointer text-gray-400">
+                    <button onClick={() => { setIsJoined(false); setIsListening(false); localStorage.removeItem('br_receiver_room'); }} className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500/80 hover:scale-110 active:scale-95 hover:text-white transition bg-white/20 cursor-pointer text-gray-400">
                         <X size={24} />
                     </button>
                 </div>
@@ -531,14 +531,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         <div className="flex items-center justify-between mb-3 shrink-0 px-2">
                             <h4 className="text-[10px] font-black uppercase tracking-widest opacity-80 flex items-center gap-2 text-orange-500"><History size={14} /> {t('broadcast.sender.timeline')}</h4>
                             {isPlaying && <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-500 animate-pulse"><RefreshCw size={12} className="animate-spin" />同步中...</div>}
-                            <button onClick={() => { openDialog(t('broadcast.sender.timeline'), '确定清空所有历史记录吗？', 'warning', () => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); closeDialog(); }); }} className="text-[10px] font-bold text-red-500 hover:opacity-100 opacity-60 px-3 py-1 rounded-full hover:bg-red-500/10 transition-all uppercase tracking-widest">清除</button>
+                            <button onClick={() => { openDialog(t('broadcast.sender.timeline'), '确定清空所有历史记录吗？', 'warning', () => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); closeDialog(); }); }} className="text-[10px] font-bold text-red-500 hover:opacity-100 opacity-60 px-3 py-1 rounded-full hover:bg-red-500/10 transition uppercase tracking-widest">清除</button>
                         </div>
                         <div className="flex flex-row gap-3 overflow-x-auto custom-scrollbar pb-1 px-1 snap-x">
                             {receivedHistory.length === 0 ? (
                                 <div className="flex items-center justify-center py-4 px-6 opacity-40 italic w-full"><p className="text-[10px] font-bold">暂无历史播报</p></div>
                             ) : (
                                 [...receivedHistory].reverse().map((msg) => (
-                                    <button key={msg.id} onClick={() => { const performSwitch = () => { setCurrentMsg(msg); speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice); closeDialog(); }; if (!isPlaying) performSwitch(); else openDialog(t('broadcast.sender.history'), '当前正在播放，确定要切换到这条历史记录吗？', 'warning', performSwitch); }} className="flex-none w-56 text-left p-3 rounded-xl bg-white/50 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-all border border-transparent hover:border-white/30 group active:scale-[0.98] snap-start shadow-sm">
+                                    <button key={msg.id} onClick={() => { const performSwitch = () => { setCurrentMsg(msg); speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice); closeDialog(); }; if (!isPlaying) performSwitch(); else openDialog(t('broadcast.sender.history'), '当前正在播放，确定要切换到这条历史记录吗？', 'warning', performSwitch); }} className="flex-none w-56 text-left p-3 rounded-xl bg-white/50 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition border border-transparent hover:border-white/30 group active:scale-[0.98] snap-start shadow-sm">
                                         <div className="flex justify-between items-center mb-1.5"><span className="text-[9px] font-bold opacity-50">{new Date(msg.timestamp && !isNaN(parseInt(msg.timestamp)) ? parseInt(msg.timestamp) : Date.now()).toLocaleTimeString()}</span>{msg.isEmergency && <span className="text-[8px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full uppercase scale-75 origin-right">SOS</span>}</div>
                                         <p className="text-[11px] font-bold truncate leading-relaxed text-gray-800 dark:text-gray-200">{msg.text}</p>
                                     </button>

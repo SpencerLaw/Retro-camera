@@ -65,13 +65,13 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
                         <>
                             <button
                                 onClick={onCancel}
-                                className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-black uppercase tracking-widest text-xs hover:bg-gray-200 dark:hover:bg-white/10 transition-all text-gray-500 dark:text-gray-400"
+                                className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-black uppercase tracking-widest text-xs hover:bg-gray-200 dark:hover:bg-white/10 transition text-gray-500 dark:text-gray-400"
                             >
                                 {cancelText}
                             </button>
                             <button
                                 onClick={onConfirm}
-                                className={`flex-[1.5] py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-white ${type === 'warning' ? 'bg-red-500 shadow-red-500/20' : 'bg-blue-500 shadow-blue-500/20'
+                                className={`flex-[1.5] py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'warning' ? 'bg-red-500 shadow-red-500/20' : 'bg-blue-500 shadow-blue-500/20'
                                     }`}
                             >
                                 {confirmText}
@@ -80,9 +80,9 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
                     ) : (
                         <button
                             onClick={onConfirm}
-                            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-white ${type === 'error' ? 'bg-red-500 shadow-red-500/20' :
-                                    type === 'success' ? 'bg-green-600 shadow-green-600/20' :
-                                        'bg-blue-500 shadow-blue-500/20'
+                            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'error' ? 'bg-red-500 shadow-red-500/20' :
+                                type === 'success' ? 'bg-green-600 shadow-green-600/20' :
+                                    'bg-blue-500 shadow-blue-500/20'
                                 }`}
                         >
                             已明白

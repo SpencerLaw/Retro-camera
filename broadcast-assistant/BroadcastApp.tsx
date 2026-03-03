@@ -134,7 +134,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
 
                     <button
                         onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                        className="absolute top-8 right-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-orange-500 transition-all active:scale-95"
+                        className="absolute top-8 right-8 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-orange-500 transition active:scale-95"
                     >
                         {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
                     </button>
@@ -154,7 +154,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                                 value={licenseInput}
                                 onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
                                 placeholder={t('broadcast.licensePlaceholder')}
-                                className="w-full h-14 bg-gray-100 dark:bg-white/5 border-none rounded-2xl px-6 text-center font-mono text-lg font-bold tracking-widest focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition-all uppercase"
+                                className="w-full h-14 bg-gray-100 dark:bg-white/5 border-none rounded-2xl px-6 text-center font-mono text-lg font-bold tracking-widest focus:ring-2 focus:ring-blue-500 outline-none dark:text-white transition uppercase"
                             />
                             {error && (
                                 <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium flex items-center justify-center gap-2">
@@ -167,7 +167,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                         <button
                             onClick={handleVerify}
                             disabled={verifying}
-                            className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                            className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold text-lg hover:opacity-90 transition flex items-center justify-center gap-2 group disabled:opacity-50"
                         >
                             {verifying ? <Loader2 size={24} className="animate-spin" /> : <CheckCircle2 size={22} className="group-hover:scale-110 transition-transform" />}
                             {verifying ? t('broadcast.verifying') : t('broadcast.verify')}
@@ -201,7 +201,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                 <header className="flex items-center justify-between mb-16 px-4">
                     <button
                         onClick={() => mode === 'selection' ? navigate('/') : setMode('selection')}
-                        className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:scale-110 active:scale-95 transition-all dark:bg-white/10"
+                        className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:scale-110 active:scale-95 transition dark:bg-white/10"
                     >
                         <ArrowLeft size={20} />
                     </button>
@@ -217,14 +217,14 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                     <div className="flex gap-3">
                         <button
                             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                            className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-white/40 dark:hover:bg-white/20 transition-all text-orange-500"
+                            className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-white/40 dark:hover:bg-white/20 transition text-orange-500"
                         >
                             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
                         {isBCVerified() && (
                             <button
                                 onClick={handleLogout}
-                                className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-all"
+                                className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition"
                             >
                                 <LogOut size={20} />
                             </button>
@@ -259,7 +259,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                                 <button
                                     key={item.m}
                                     onClick={item.handler}
-                                    className="group relative h-[550px] p-16 rounded-[4rem] overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col text-left border border-white/10"
+                                    className="group relative h-[550px] p-16 rounded-[4rem] overflow-hidden transition duration-500 hover:-translate-y-4 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col text-left border border-white/10"
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-[0.03] group-hover:opacity-10 dark:opacity-[0.08] dark:group-hover:opacity-20 transition-opacity`}></div>
                                     <div className="relative z-10 flex-1">

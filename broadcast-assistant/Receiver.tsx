@@ -40,11 +40,11 @@ BackgroundAmbience.displayName = 'BackgroundAmbience';
 
 const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () => void }> = ({ isDark, toggleTheme, onExit }) => {
     const t = useTranslations();
-    const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_last_full_room_rx') || '');
+    const [fullRoomId, setFullRoomId] = useState(localStorage.getItem('br_receiver_room') || '');
     const [isJoined, setIsJoined] = useState(false);
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
     const [syncedChannelName, setSyncedChannelName] = useState<string>(() => {
-        const saved = localStorage.getItem(`br_synced_name_${localStorage.getItem('br_last_full_room_rx') || ''}`);
+        const saved = localStorage.getItem(`br_synced_name_${localStorage.getItem('br_receiver_room') || ''}`);
         return saved || '';
     });
     const [selectedVoice, setSelectedVoice] = useState(() => localStorage.getItem('br_selected_voice') || 'zh-CN-XiaoxiaoNeural');
@@ -105,7 +105,15 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, []);
+    }, [fullRoomId, isJoined]);
+
+    // Auto-login on load if credentials exist
+    useEffect(() => {
+        const savedRoom = localStorage.getItem('br_receiver_room');
+        if (savedRoom && !isJoined) {
+            handleStart();
+        }
+    }, []); // Only once on mount
 
     const pendingPlayouts = useRef<number>(0);
 
@@ -585,7 +593,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                     </button>
                     <button
-                        onClick={() => setIsJoined(false)}
+                        onClick={() => {
+                            setIsJoined(false);
+                            setIsListening(false);
+                            localStorage.removeItem('br_receiver_room'); // Clear persistence on explicit exit
+                        }}
                         className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500/80 hover:scale-110 active:scale-95 hover:text-white transition-all bg-white/20 cursor-pointer text-gray-400"
                     >
                         <X size={24} />

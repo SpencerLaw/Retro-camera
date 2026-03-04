@@ -22,7 +22,7 @@ interface Channel {
     code: string;
 }
 
-const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDark }) => {
+const Sender: React.FC<{ license: string, isDark: boolean, onExitToSelection?: () => void }> = ({ license, isDark, onExitToSelection }) => {
     const t = useTranslations();
     const licensePrefix = getLicensePrefix(license);
 
@@ -361,7 +361,10 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
                         setActiveChannelId('default');
                         localStorage.removeItem('br_channels');
                         setStatus({ type: 'success', msg: t('broadcast.sender.clearSuccess') });
-                        setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
+                        setTimeout(() => {
+                            setStatus({ type: null, msg: '' });
+                            onExitToSelection?.();
+                        }, 1500);
                     } else {
                         throw new Error(data.error);
                     }

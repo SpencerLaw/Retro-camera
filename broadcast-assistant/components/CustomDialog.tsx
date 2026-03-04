@@ -1,6 +1,5 @@
 import React from 'react';
-import { X, AlertCircle, CheckCircle2, Info, HelpCircle } from 'lucide-react';
-import GlassCard from './GlassCard';
+import { AlertCircle, CheckCircle2, Info, HelpCircle } from 'lucide-react';
 
 export type DialogType = 'info' | 'confirm' | 'error' | 'success' | 'warning';
 
@@ -14,6 +13,7 @@ interface CustomDialogProps {
     onConfirm: () => void;
     onCancel: () => void;
     isDark?: boolean;
+    isEmergency?: boolean;
 }
 
 const CustomDialog: React.FC<CustomDialogProps> = ({
@@ -25,74 +25,98 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
     cancelText = '取消',
     onConfirm,
     onCancel,
-    isDark = true
 }) => {
     if (!isOpen) return null;
 
     const getIcon = () => {
         switch (type) {
-            case 'success': return <CheckCircle2 size={32} className="text-green-500" />;
-            case 'error': return <AlertCircle size={32} className="text-red-500" />;
-            case 'warning': return <AlertCircle size={32} className="text-orange-500" />;
-            case 'confirm': return <HelpCircle size={32} className="text-blue-500" />;
-            default: return <Info size={32} className="text-blue-500" />;
+            case 'success': return <CheckCircle2 size={28} className="text-green-500" />;
+            case 'error': return <AlertCircle size={28} className="text-red-500" />;
+            case 'warning': return <AlertCircle size={28} className="text-orange-500" />;
+            case 'confirm': return <HelpCircle size={28} className="text-blue-500" />;
+            default: return <Info size={28} className="text-blue-500" />;
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-500">
-            <div className="absolute inset-0 bg-white/60 backdrop-blur-3xl" onClick={onCancel}></div>
+    const iconBg =
+        type === 'error' ? 'bg-red-50' :
+            type === 'success' ? 'bg-green-50' :
+                type === 'warning' ? 'bg-orange-50' :
+                    'bg-blue-50';
 
-            <div className="relative w-full max-w-lg p-10 space-y-10 shadow-[0_40px_120px_-20px_rgba(0,0,0,0.15)] rounded-[3rem] border border-black/5 bg-white text-slate-900 animate-in zoom-in-95 duration-300">
-                <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-6">
-                        <div className={`w-16 h-16 rounded-[2rem] flex items-center justify-center shadow-xl rotate-3 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
+    const accentBar =
+        type === 'warning' || type === 'error'
+            ? 'from-red-500 to-rose-500'
+            : type === 'success'
+                ? 'from-green-500 to-emerald-500'
+                : 'from-blue-500 to-indigo-500';
+
+    const confirmCls =
+        type === 'warning' || type === 'error'
+            ? 'bg-gradient-to-r from-red-600 to-rose-600 shadow-red-600/20'
+            : type === 'success'
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-600/20'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-600/20';
+
+    return (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-10">
+            {/* Dark scrim – always dark so white card always pops against any bg */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={onCancel}
+            />
+
+            {/* Card */}
+            <div className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_32px_80px_-8px_rgba(0,0,0,0.35)] border border-black/[0.06] overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+
+                {/* Colour-coded top strip */}
+                <div className={`h-1 w-full bg-gradient-to-r ${accentBar}`} />
+
+                <div className="p-8 space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center gap-4">
+                        <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center flex-shrink-0`}>
                             {getIcon()}
                         </div>
-                        <div className="space-y-1">
-                            <h3 className="text-2xl font-black tracking-tight">{title}</h3>
-                            <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full animate-pulse ${type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500'}`} />
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 italic">{type.toUpperCase()} NOTIFICATION</p>
-                            </div>
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight">{title}</h3>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-0.5">
+                                {type.toUpperCase()} · NOTIFICATION
+                            </p>
                         </div>
                     </div>
-                </div>
 
-                <div className="space-y-6">
-                    <div className={`p-6 rounded-3xl border ${isDark ? 'bg-black/20 border-white/5' : 'bg-gray-100/50 border-white/20'}`}>
-                        <p className="text-lg font-bold leading-relaxed opacity-80 whitespace-pre-wrap">{message}</p>
+                    {/* Body */}
+                    <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                        <p className="text-base font-semibold text-slate-700 leading-relaxed whitespace-pre-wrap">{message}</p>
                     </div>
-                </div>
 
-                <div className="flex gap-4 pt-4">
-                    {type === 'confirm' || type === 'warning' ? (
-                        <>
-                            <button
-                                onClick={onCancel}
-                                className="flex-1 py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] hover:bg-red-500/10 hover:text-red-500 transition-all border border-transparent text-gray-400"
-                            >
-                                {cancelText}
-                            </button>
+                    {/* Actions */}
+                    <div className="flex gap-3 pt-1">
+                        {(type === 'confirm' || type === 'warning') ? (
+                            <>
+                                <button
+                                    onClick={onCancel}
+                                    className="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-500 font-black text-xs uppercase tracking-widest hover:bg-slate-200 active:scale-95 transition-all"
+                                >
+                                    {cancelText}
+                                </button>
+                                <button
+                                    onClick={onConfirm}
+                                    className={`flex-[1.5] py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${confirmCls}`}
+                                >
+                                    {confirmText}
+                                </button>
+                            </>
+                        ) : (
                             <button
                                 onClick={onConfirm}
-                                className={`flex-[1.5] py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] shadow-2xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'warning' ? 'bg-gradient-to-r from-red-600 to-rose-600 shadow-red-600/20' : 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-600/20'
-                                    }`}
+                                className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${confirmCls}`}
                             >
-                                {confirmText}
+                                已明白
                             </button>
-                        </>
-                    ) : (
-                        <button
-                            onClick={onConfirm}
-                            className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] shadow-2xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'error' ? 'bg-gradient-to-r from-red-600 to-rose-600 shadow-red-600/20' :
-                                type === 'success' ? 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-600/20' :
-                                    'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-600/20'
-                                }`}
-                        >
-                            已明白
-                        </button>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

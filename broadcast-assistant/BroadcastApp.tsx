@@ -280,7 +280,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                         </div>
                     )}
 
-                    {mode === 'sender' && <Sender license={getBCLicense() || 'DEMO-ONLY'} isDark={theme === 'dark'} />}
+                    {mode === 'sender' && <Sender license={getBCLicense() || 'DEMO-ONLY'} isDark={theme === 'dark'} onExitToSelection={() => setMode('selection')} />}
                 </main>
 
             </div>

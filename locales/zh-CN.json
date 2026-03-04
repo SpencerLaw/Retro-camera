@@ -235,6 +235,8 @@
       "pastePlaceholder": "请在此处粘贴表格内容...",
       "copySuccess": "房间 ID 已复制",
       "room": "房间",
+      "roomCode": "房间号码",
+      "deleteChannel": "删除该频道",
       "queueHeader": "待播报任务队列"
     },
     "receiver": {

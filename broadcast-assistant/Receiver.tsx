@@ -25,17 +25,9 @@ const ClockDisplay = () => {
 };
 
 const BackgroundAmbience = React.memo(({ isDark, isEmergency }: { isDark: boolean; isEmergency: boolean }) => {
-    if (isEmergency) return <div className={`absolute inset-0 z-0 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`} />;
-    return (
-        <div
-            className="absolute inset-0 z-0 transition-opacity duration-1000 pointer-events-none overflow-hidden"
-            style={{
-                background: isDark
-                    ? 'radial-gradient(circle at 70% 20%, rgba(30, 58, 138, 0.05), transparent 50%), radial-gradient(circle at 20% 80%, rgba(88, 28, 135, 0.05), transparent 50%)'
-                    : 'radial-gradient(circle at 70% 20%, rgba(219, 39, 119, 0.1), transparent 50%), radial-gradient(circle at 20% 80%, rgba(147, 51, 234, 0.08), transparent 50%)'
-            }}
-        />
-    );
+    // Completely remove background effects during normal broadcast to save GPU/CPU
+    if (!isEmergency) return null;
+    return <div className={`absolute inset-0 z-0 bg-red-600 animate-pulse`} />;
 });
 BackgroundAmbience.displayName = 'BackgroundAmbience';
 
@@ -43,7 +35,7 @@ const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, text
     return (
         <div
             ref={isActive ? activeSentenceRef : null}
-            className={`relative block py-4 md:py-6 w-full break-words select-none text-center transform-gpu transition duration-500 ${isActive ? (isEmergency ? 'text-white font-black scale-105' : 'text-blue-500 dark:text-cyan-400 font-black scale-105') : isPast ? 'opacity-30' : 'opacity-10'} ${textLength > 300 ? 'text-lg md:text-2xl' : textLength > 100 ? 'text-xl md:text-4xl' : 'text-3xl md:text-7xl'}`}
+            className={`relative block py-4 md:py-6 w-full break-words select-none text-center transition-all ${isActive ? (isEmergency ? 'text-white font-black scale-105' : 'text-blue-500 dark:text-cyan-400 font-black scale-105') : isPast ? 'opacity-30' : 'opacity-10'} ${textLength > 300 ? 'text-lg md:text-2xl' : textLength > 100 ? 'text-xl md:text-4xl' : 'text-3xl md:text-7xl'}`}
         >
             {sentence}
         </div>
@@ -174,14 +166,16 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         return parts ? parts : [currentMsg.text];
     }, [currentMsg?.text]);
 
-    const scrollToActive = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const scrollToActive = useCallback((behavior: ScrollBehavior = 'auto') => {
         if (activeSentenceRef.current && !isUserScrollingRef.current) {
-            activeSentenceRef.current.scrollIntoView({ behavior, block: 'center' });
+            // ALWAYS use 'auto' (instant) to avoid locking UI thread
+            activeSentenceRef.current.scrollIntoView({ behavior: 'auto', block: 'center' });
         }
     }, []);
 
     useEffect(() => {
-        scrollToActive('smooth');
+        // Debounce or at least use auto to prevent layout thrashing
+        scrollToActive('auto');
     }, [activeSentenceIndex, scrollToActive]);
 
     useEffect(() => {
@@ -215,7 +209,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string, voiceOverride?: string) => {
         if (lastPlayedId.current === id && isPlayingRef.current) return;
         
-        // Stop any current playback and cancel pending loops by incrementing ID
+        console.log(`[BROADCAST-DEBUG] Starting speak sequence for ID: ${id}`);
         ttsManager.cancelAll();
         const currentPlaybackId = ttsManager.getActivePlaybackId();
         
@@ -224,77 +218,69 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
         }
 
-        pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
+        const countLimit = (repeatCount === -1 || repeatCount > 100) ? 999 : Math.max(1, repeatCount);
+        pendingPlayouts.current = countLimit;
+
         setIsPlaying(true);
         isPlayingRef.current = true;
         setReceiverStatus('playing');
-        prefetchedBlobs.current = {};
 
         const playMessageCycles = async () => {
             const currentSentences = text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [text];
+            if (currentSentences.length === 0) return;
             
             try {
+                let cycle = 0;
                 while (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
+                    cycle++;
                     if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
 
                     for (let i = 0; i < currentSentences.length; i++) {
                         if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
 
-                        // CRITICAL: Set highlight index BEFORE speak call
+                        // Force a yield to browser before each sentence to prevent freeze
+                        await new Promise(r => setTimeout(r, 50));
+                        
                         setActiveSentenceIndex(i);
                         
-                        const sentence = currentSentences[i];
-                        const nextSentence = currentSentences[i + 1];
-                        const targetVoice = voiceOverride || 'zh-CN-XiaoxiaoNeural';
-                        const useNative = voiceOverride === 'native';
+                        const sentence = currentSentences[i].trim();
+                        if (!sentence) continue;
 
+                        const targetVoice = voiceOverride || 'zh-CN-XiaoxiaoNeural';
                         const ttsOptions = {
-                            engine: useNative ? 'native' as const : 'edge' as const,
+                            engine: voiceOverride === 'native' ? 'native' as const : 'edge' as const,
                             voice: targetVoice,
                             rate: isEmergency ? 0.85 : 1.0,
                             volume: volumeBoost,
-                            // Ensure boundaries update active index if needed (though we set it manually for reliability)
-                            onBoundary: () => {} 
                         };
 
-                        // Prefetch next sentence
-                        if (nextSentence && !prefetchedBlobs.current[nextSentence]) {
-                            ttsManager.prefetch(nextSentence, ttsOptions, currentPlaybackId).then(url => {
-                                if (url && ttsManager.getActivePlaybackId() === currentPlaybackId) {
-                                    prefetchedBlobs.current[nextSentence] = url;
-                                }
-                            });
-                        }
-
-                        let url = prefetchedBlobs.current[sentence];
-
                         try {
-                            if (url && ttsManager.getActivePlaybackId() === currentPlaybackId) {
-                                await ttsManager.playBlob(url as string, sentence, ttsOptions, currentPlaybackId);
-                                delete prefetchedBlobs.current[sentence];
-                            } else if (ttsManager.getActivePlaybackId() === currentPlaybackId) {
-                                await ttsManager.speak(sentence, ttsOptions);
+                            // Prefetch next only if this is a long broadcast
+                            if (currentSentences[i + 1] && currentSentences.length > 3) {
+                                ttsManager.prefetch(currentSentences[i + 1], ttsOptions, currentPlaybackId);
                             }
+
+                            await ttsManager.speak(sentence, ttsOptions);
                         } catch (e) {
-                            console.error('Sentence error:', e);
-                            // Brief wait on error to prevent CPU spin if many sentences fail rapidly
+                            console.error('[BROADCAST-DEBUG] Sentence play error:', e);
                             await new Promise(r => setTimeout(r, 1000));
                         }
-                        
-                        // Small break between sentences
-                        if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
-                        await new Promise(r => setTimeout(r, 200));
                     }
 
-                    if (pendingPlayouts.current !== 999) pendingPlayouts.current--;
+                    if (pendingPlayouts.current !== 999) {
+                        pendingPlayouts.current--;
+                    }
+
                     if (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
                         if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
                         setActiveSentenceIndex(-1);
+                        // Mandatory yield
                         await new Promise(r => setTimeout(r, 2000));
                     }
                 }
+            } catch (err) {
+                console.error('[BROADCAST-DEBUG] Cycle crash:', err);
             } finally {
-                // Ensure state is reset if this is still the active playback
                 if (ttsManager.getActivePlaybackId() === currentPlaybackId) {
                     setIsPlaying(false);
                     isPlayingRef.current = false;
@@ -303,6 +289,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 }
             }
         };
+
+        // Add a safety global killer to window for user rescue
+        (window as any).stopBroadcast = () => ttsManager.cancelAll();
 
         playMessageCycles();
     }, [fullRoomId, volumeBoost, t]);

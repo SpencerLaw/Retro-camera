@@ -6,7 +6,7 @@ import crypto from 'crypto';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     const url = req.url || '';
     let action = '';
-    
+
     if (url.includes('/fetch')) action = 'fetch';
     else if (url.includes('/send')) action = 'send';
     else if (url.includes('/tts')) action = 'tts';
@@ -47,6 +47,13 @@ async function handleTTS(req: VercelRequest, res: VercelResponse) {
 async function handleFetch(req: VercelRequest, res: VercelResponse) {
     const code = (req.query.code as string)?.toUpperCase();
     if (!code) return res.status(400).json({ error: 'Missing code' });
+
+    // 检查房间是否处于活跃状态 (教师端 activate 才会创建此标记，cleanup 会清除)
+    const isActive = await kv.get(`br:room_active:${code}`);
+    if (!isActive) {
+        return res.status(200).json({ message: null, notFound: true });
+    }
+
     const message = await kv.get(`br:v2:room:${code}`);
     return res.status(200).json({ message: message || null });
 }
@@ -72,7 +79,20 @@ async function handleDeactivate(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleCleanup(req: VercelRequest, res: VercelResponse) {
-    return res.status(200).json({ success: true });
+    try {
+        // 扫描并删除所有活跃房间标记和消息数据
+        const activeKeys = await kv.keys('br:room_active:*');
+        const roomKeys = await kv.keys('br:v2:room:*');
+        const allKeys = [...activeKeys, ...roomKeys];
+
+        if (allKeys.length > 0) {
+            await Promise.all(allKeys.map(k => kv.del(k)));
+        }
+
+        return res.status(200).json({ success: true, deleted: allKeys.length });
+    } catch (e: any) {
+        return res.status(500).json({ success: false, error: e.message });
+    }
 }
 
 async function getEdgeTTS(text: string, voice: string, rate: number): Promise<Buffer> {

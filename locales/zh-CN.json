@@ -237,7 +237,20 @@
       "room": "房间",
       "roomCode": "房间号码",
       "deleteChannel": "删除该频道",
-      "queueHeader": "待播报任务队列"
+      "queueHeader": "待播报任务队列",
+      "activeRoom": "当前活跃频道",
+      "messageContent": "播报内容",
+      "repeatTime": "重复次数",
+      "repeatStrategy": "循环策略",
+      "initBroadcast": "发起播报",
+      "emergency": "紧急播报",
+      "history": "播报历史",
+      "clearHistory": "清空历史",
+      "noHistory": "暂无播报记录",
+      "cancel": "取消",
+      "save": "保存",
+      "inputPlaceholder": "今天要播报什么内容？",
+      "unknownChannelName": "等待频道识别"
     },
     "receiver": {
       "joinChannel": "进入通道",

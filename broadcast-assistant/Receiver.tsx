@@ -63,9 +63,17 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
                 }} />
 
             {/* ── Leading edge dot (sweeps with the beam) ── */}
+            {/* Note: The dot's inline transform must include translateX to avoid overriding Tailwind's -translate-x-1/2 */}
             <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 8 }}>
-                <div className="absolute w-2.5 h-2.5 rounded-full top-[1px] left-1/2 -translate-x-1/2 shadow-lg"
-                    style={{ background: accent, boxShadow: `0 0 12px 4px ${accentAlpha(0.7)}`, transform: 'rotate(-11deg)' }} />
+                <div className="absolute w-3 h-3 rounded-full shadow-lg"
+                    style={{
+                        top: 0,
+                        left: '50%',
+                        background: accent,
+                        boxShadow: `0 0 16px 6px ${accentAlpha(0.8)}`,
+                        transform: 'translateX(-50%) translateY(-50%)',
+                        transformOrigin: 'center center',
+                    }} />
             </div>
 
             {/* ── Orbit tick marks ── */}
@@ -218,8 +226,26 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
             if (!engine.current.isJoined) return;
             try {
                 const r = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);
+
+                // 检测房间是否已被教师端删除
+                if (r.status === 404) {
+                    engine.current.isJoined = false;
+                    ttsManager.cancelAll();
+                    setIsJoined(false);
+                    return;
+                }
+
                 if (r.ok) {
                     const data = await r.json();
+
+                    // 服务端返回 roomDeleted / notFound 标志
+                    if (data.roomDeleted || data.notFound) {
+                        engine.current.isJoined = false;
+                        ttsManager.cancelAll();
+                        setIsJoined(false);
+                        return;
+                    }
+
                     const msg = data.message as Message;
                     if (msg && msg.id !== engine.current.lastId) {
                         engine.current.lastId = msg.id;
@@ -442,7 +468,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                         <div className="text-center space-y-4">
                             <div className="space-y-1">
                                 <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-violet-500/60 animate-pulse mb-8`}>
-                                    Scanning for Signal
+                                    正在扫描信号...
                                 </p>
                                 <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                                     信号捕获中...
@@ -451,7 +477,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                             <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${theme === 'dark' ? 'text-white/15' : 'text-slate-400'}`}>
                                 <ClockDisplay />
                                 <span className="opacity-30">·</span>
-                                CHANNEL {fullRoomId}
+                                频道 {fullRoomId}
                             </div>
                         </div>
                     </div>

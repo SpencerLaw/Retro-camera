@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
@@ -65,6 +65,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
     const [history, setHistory] = useState<Message[]>([]);
     const [status, setStatus] = useState<{ type: 'loading' | 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
+    const [isLoadingCloud, setIsLoadingCloud] = useState(true);
 
     const [showReplayDialog, setShowReplayDialog] = useState(false);
     const [replayData, setReplayData] = useState<{
@@ -74,6 +75,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         isEmergency: boolean;
         channelName?: string;
     } | null>(null);
+
+    const hasSyncedFromCloud = useRef(false);
 
     // Lock body scroll when replay dialog is open to prevent underlying page from scrolling
     useEffect(() => {
@@ -106,20 +109,25 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
     // Initial cloud sync: Load channels for this license from cloud
     useEffect(() => {
-        if (!license) return;
+        if (!license) {
+            setIsLoadingCloud(false);
+            return;
+        }
         const syncFromCloud = async () => {
             try {
                 const resp = await fetch(`/api/broadcast/get-channels?license=${license}`);
                 const data = await resp.json();
                 if (data.channels && Array.isArray(data.channels) && data.channels.length > 0) {
+                    hasSyncedFromCloud.current = true; // Mark as coming from cloud
                     setChannels(data.channels);
-                    // If current active room is default and we have cloud rooms, pick the first cloud room
                     if (activeChannelId === 'default' || !data.channels.find((c: any) => c.id === activeChannelId)) {
                         setActiveChannelId(data.channels[0].id);
                     }
                 }
             } catch (err) {
                 console.error('Cloud sync failed:', err);
+            } finally {
+                setIsLoadingCloud(false);
             }
         };
         syncFromCloud();
@@ -128,6 +136,15 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     // Save to cloud whenever channels change
     useEffect(() => {
         localStorage.setItem('br_channels', JSON.stringify(channels));
+
+        // Don't save if we are still initial loading from cloud or if the change itself came from cloud
+        if (isLoadingCloud) return;
+
+        if (hasSyncedFromCloud.current) {
+            hasSyncedFromCloud.current = false;
+            return; // Skip one save cycle to avoid circular sync
+        }
+
         if (license) {
             fetch('/api/broadcast/save-channels', {
                 method: 'POST',
@@ -135,7 +152,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 body: JSON.stringify({ license, channels })
             }).catch(e => console.error('Cloud save failed:', e));
         }
-    }, [channels, license]);
+    }, [channels, license, isLoadingCloud]);
 
     // Auto-activate room on server
     useEffect(() => {
@@ -152,33 +169,40 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         const newId = Date.now().toString();
         setStatus({ type: 'loading', msg: '正在分配唯一房间号...' });
 
-        let uniqueCode = '';
-        let attempts = 0;
-        while (attempts < 10) {
-            const candidate = Math.floor(100000 + Math.random() * 900000).toString();
-            const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
-            const { inUse } = await resp.json();
-            if (!inUse) {
-                uniqueCode = candidate;
-                break;
+        try {
+            let uniqueCode = '';
+            let attempts = 0;
+            while (attempts < 10) {
+                const candidate = Math.floor(100000 + Math.random() * 900000).toString();
+                const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
+                if (!resp.ok) throw new Error('Network response was not ok');
+                const { inUse } = await resp.json();
+                if (!inUse) {
+                    uniqueCode = candidate;
+                    break;
+                }
+                attempts++;
             }
-            attempts++;
-        }
 
-        if (!uniqueCode) {
-            setStatus({ type: 'error', msg: '生成唯一房间号失败，请重试' });
-            return;
-        }
+            if (!uniqueCode) {
+                setStatus({ type: 'error', msg: '生成唯一房间号失败，请重试' });
+                return;
+            }
 
-        const newChannel: Channel = {
-            id: newId,
-            name: `${t('broadcast.sender.addClass')} ${channels.length + 1}`,
-            code: uniqueCode
-        };
-        setChannels([...channels, newChannel]);
-        setActiveChannelId(newId);
-        setStatus({ type: 'success', msg: '新房间已创建并同步至云端' });
-        setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
+            const newChannel: Channel = {
+                id: newId,
+                name: `${t('broadcast.sender.addClass')} ${channels.length + 1}`,
+                code: uniqueCode
+            };
+            setChannels([...channels, newChannel]);
+            setActiveChannelId(newId);
+            setStatus({ type: 'success', msg: '新房间已创建并同步至云端' });
+            setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
+        } catch (err) {
+            console.error('Failed to add channel:', err);
+            setStatus({ type: 'error', msg: '连接服务器失败，请检查网络' });
+            setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
+        }
     };
 
     const deleteChannel = async (id: string, e: React.MouseEvent) => {
@@ -225,10 +249,17 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         // Unique check if code changed
         const currentChannel = channels.find(c => c.id === editingChannel);
         if (currentChannel && currentChannel.code !== newCode) {
-            const checkResp = await fetch(`/api/broadcast/check-code?code=${newCode}`);
-            const { inUse } = await checkResp.json();
-            if (inUse) {
-                setStatus({ type: 'error', msg: '该房间号已被其他教室占用，请更换' });
+            try {
+                const checkResp = await fetch(`/api/broadcast/check-code?code=${newCode}`);
+                if (!checkResp.ok) throw new Error('Network error');
+                const { inUse } = await checkResp.json();
+                if (inUse) {
+                    setStatus({ type: 'error', msg: '该房间号已被其他教室占用，请更换' });
+                    return;
+                }
+            } catch (err) {
+                console.error('Check code failed:', err);
+                setStatus({ type: 'error', msg: '验证房间号失败，请检查网络' });
                 return;
             }
         }
@@ -259,23 +290,29 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     const generateRandomChannel = async (e: React.MouseEvent) => {
         e.stopPropagation();
         setStatus({ type: 'loading', msg: '检索可用号码...' });
-        let uniqueCode = '';
-        let attempts = 0;
-        while (attempts < 10) {
-            const candidate = Math.floor(100000 + Math.random() * 900000).toString();
-            const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
-            const { inUse } = await resp.json();
-            if (!inUse) {
-                uniqueCode = candidate;
-                break;
+        try {
+            let uniqueCode = '';
+            let attempts = 0;
+            while (attempts < 10) {
+                const candidate = Math.floor(100000 + Math.random() * 900000).toString();
+                const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
+                if (!resp.ok) throw new Error('Network error');
+                const { inUse } = await resp.json();
+                if (!inUse) {
+                    uniqueCode = candidate;
+                    break;
+                }
+                attempts++;
             }
-            attempts++;
-        }
-        if (uniqueCode) {
-            setEditCode(uniqueCode);
-            setStatus({ type: null, msg: '' });
-        } else {
-            setStatus({ type: 'error', msg: '未找到可用号码' });
+            if (uniqueCode) {
+                setEditCode(uniqueCode);
+                setStatus({ type: null, msg: '' });
+            } else {
+                setStatus({ type: 'error', msg: '未找到可用号码' });
+            }
+        } catch (err) {
+            console.error('Generate random failed:', err);
+            setStatus({ type: 'error', msg: '查询失败，请检查网络' });
         }
     };
 

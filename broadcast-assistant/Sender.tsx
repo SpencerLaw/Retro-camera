@@ -510,66 +510,68 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     </div>
 
                     {/* ─ 重复次数 + 循环策略 合并一行 ─ */}
-                    <div className="flex items-center gap-3 p-2 rounded-2xl bg-slate-50 border border-slate-100">
-                        {/* 减少 */}
-                        <button
-                            onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
-                            disabled={isLooping}
-                            className="w-10 h-10 shrink-0 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
-                        >
-                            <ChevronRight className="rotate-180" size={18} />
-                        </button>
+                    <div className="flex items-center justify-between gap-1 p-1.5 sm:p-2 rounded-2xl bg-slate-50 border border-slate-100 mb-3 overflow-x-auto scrollbar-hide">
+                        {/* 减少, 数值, 增加 */}
+                        <div className="flex items-center gap-1 shrink-0">
+                            <button
+                                onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
+                                disabled={isLooping}
+                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
+                            >
+                                <ChevronRight className="rotate-180" size={18} />
+                            </button>
 
-                        {/* 数值 */}
-                        <div className="flex-1 flex flex-col items-center">
-                            <span className={`font-black text-2xl tabular-nums leading-none ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
-                                {isLooping ? '∞' : repeatCount}
-                            </span>
-                            <span className="text-[8px] font-black text-slate-300 tracking-tight mt-0.5">{t('broadcast.sender.repeatCount')}</span>
+                            <div className="w-12 sm:w-16 flex flex-col items-center justify-center">
+                                <span className={`font-black text-2xl leading-none ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
+                                    {isLooping ? '∞' : repeatCount}
+                                </span>
+                                <span className="text-[10px] font-black text-slate-400 whitespace-nowrap scale-[0.85] origin-top mt-1">
+                                    {t('broadcast.sender.repeatCount')}
+                                </span>
+                            </div>
+
+                            <button
+                                onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
+                                disabled={isLooping}
+                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
+                            >
+                                <ChevronRight size={18} />
+                            </button>
                         </div>
 
-                        {/* 增加 */}
-                        <button
-                            onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
-                            disabled={isLooping}
-                            className="w-10 h-10 shrink-0 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
-                        >
-                            <ChevronRight size={18} />
-                        </button>
-
                         {/* 分隔 */}
-                        <div className="w-px h-8 bg-slate-200 shrink-0" />
+                        <div className="w-px h-6 sm:h-8 bg-slate-200 shrink-0 mx-1 sm:mx-2" />
 
-                        {/* 策略：固定次数 */}
-                        <button
-                            onClick={() => setIsLooping(false)}
-                            className={`w-10 h-10 shrink-0 rounded-xl border-2 flex items-center justify-center transition-all ${!isLooping ? 'bg-blue-500 border-blue-400 text-white' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-100'}`}
-                        >
-                            <Repeat size={16} />
-                        </button>
-
-                        {/* 策略：无限循环 */}
-                        <button
-                            onClick={() => setIsLooping(true)}
-                            className={`w-10 h-10 shrink-0 rounded-xl border-2 flex items-center justify-center transition-all ${isLooping ? 'bg-blue-500 border-blue-400 text-white' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-100'}`}
-                        >
-                            <span className="text-lg font-black leading-none">∞</span>
-                        </button>
+                        {/* 策略切换 */}
+                        <div className="flex items-center gap-1 shrink-0 bg-white p-1 rounded-xl border border-slate-100">
+                            <button
+                                onClick={() => setIsLooping(false)}
+                                className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl border-2 flex items-center justify-center transition-all ${!isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
+                            >
+                                <Repeat size={16} />
+                            </button>
+                            <button
+                                onClick={() => setIsLooping(true)}
+                                className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl border-2 flex items-center justify-center transition-all ${isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
+                            >
+                                <span className="text-xl font-black leading-none">∞</span>
+                            </button>
+                        </div>
                     </div>
 
                     {/* ─ 紧急 + 发起 ─ */}
-                    <div className="flex gap-3">
+                    <div className="flex items-stretch gap-2 sm:gap-3">
                         {/* 紧急播报（图标+文字，不换行） */}
                         <button
                             onClick={() => setIsEmergency(!isEmergency)}
-                            className={`shrink-0 flex items-center gap-2 px-4 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-500 border-2 whitespace-nowrap ${isEmergency
-                                ? 'bg-red-500 border-red-400 text-white'
-                                : 'bg-slate-50 border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
+                            className={`shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all duration-500 border-2 whitespace-nowrap ${isEmergency
+                                ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/20'
+                                : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-slate-100'}`}
                         >
                             <AlertTriangle size={16} className={isEmergency ? 'animate-pulse' : ''} />
                             <span>{t('broadcast.sender.emergency')}</span>
-                            <div className={`w-7 h-4 rounded-full relative transition-colors shrink-0 ${isEmergency ? 'bg-white/30' : 'bg-gray-400/30'}`}>
-                                <div className={`absolute top-0.5 w-3 h-3 rounded-full transition-all duration-300 ${isEmergency ? 'right-0.5 bg-white' : 'left-0.5 bg-gray-400'}`} />
+                            <div className={`ml-1 w-7 h-4 rounded-full relative transition-colors shrink-0 ${isEmergency ? 'bg-white/30' : 'bg-gray-300'}`}>
+                                <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all duration-300 shadow-sm ${isEmergency ? 'right-0.5' : 'left-0.5'}`} />
                             </div>
                         </button>
 
@@ -577,7 +579,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         <button
                             onClick={handleSend}
                             disabled={status.type === 'loading'}
-                            className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black text-xs uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group whitespace-nowrap"
+                            className="flex-1 rounded-xl sm:rounded-2xl bg-blue-600 text-white font-black text-[10px] sm:text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-500 active:scale-95 transition-all flex items-center justify-center gap-2 group whitespace-nowrap"
                         >
                             {status.type === 'loading' ? (
                                 <Loader2 className="animate-spin" size={18} />
@@ -731,8 +733,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             <button
                                 onClick={() => setReplayData({ ...replayData, isEmergency: !replayData.isEmergency })}
                                 className={`flex items-center gap-2 h-14 px-5 rounded-2xl font-bold text-sm transition-all whitespace-nowrap shrink-0 group ${replayData.isEmergency
-                                        ? 'bg-red-50 dark:bg-red-500/20 text-red-600 border border-red-200 dark:border-red-500/30'
-                                        : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200'
+                                    ? 'bg-red-50 dark:bg-red-500/20 text-red-600 border border-red-200 dark:border-red-500/30'
+                                    : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200'
                                     }`}
                             >
                                 <AlertTriangle size={18} className={replayData.isEmergency ? 'animate-pulse' : ''} />

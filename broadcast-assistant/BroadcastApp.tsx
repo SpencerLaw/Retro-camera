@@ -303,7 +303,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                 title={dialog.title}
                 message={dialog.message}
                 type={dialog.type}
-                onConfirm={dialog.onConfirm}
+                onConfirm={() => { dialog.onConfirm(); closeDialog(); }}
                 onCancel={closeDialog}
                 isDark={theme === 'dark'}
             />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, AlertTriangle, CheckCircle2, Copy, RefreshCw, Loader2, Info, Radio, Repeat } from 'lucide-react';
+import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import ScheduleManager from './ScheduleManager';
@@ -525,7 +525,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                     <span className={`font-black text-3xl tabular-nums ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
                                         {isLooping ? '∞' : repeatCount}
                                     </span>
-                                    <span className="text-[8px] font-black uppercase text-slate-300 tracking-tighter">Repeat Count</span>
+                                    <span className="text-[8px] font-black uppercase text-slate-300 tracking-tighter">{t('broadcast.sender.repeatCount')}</span>
                                 </div>
                                 <button
                                     onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
@@ -642,6 +642,13 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 </div>
             </div>
 
+            {/* Schedule Manager Section */}
+            <ScheduleManager
+                license={license}
+                activeChannelCode={channelCode}
+                isDark={isDark}
+            />
+
             {/* Status Toast */}
             {status.msg && (
                 <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-bottom-4">
@@ -713,7 +720,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                             <span className="font-black text-3xl tabular-nums text-blue-500">
                                                 {replayData.repeatCount === -1 ? '∞' : replayData.repeatCount}
                                             </span>
-                                            <span className="text-[8px] font-black uppercase text-slate-300 tracking-tighter">Repeat Count</span>
+                                            <span className="text-[8px] font-black uppercase text-slate-300 tracking-tighter">{t('broadcast.sender.repeatCount')}</span>
                                         </div>
                                         <button
                                             onClick={() => setReplayData({ ...replayData, repeatCount: Math.min(99, replayData.repeatCount + 1) })}

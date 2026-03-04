@@ -59,9 +59,17 @@ async function handleFetch(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleSend(req: VercelRequest, res: VercelResponse) {
-    const { code, text, isEmergency, repeatCount, voice } = req.body;
+    const { code, text, isEmergency, repeatCount, voice, channelName } = req.body;
     const messageId = Date.now().toString();
-    const data = { id: messageId, text, isEmergency, timestamp: messageId, repeatCount: repeatCount || 1, voice };
+    const data = {
+        id: messageId,
+        text,
+        isEmergency,
+        timestamp: messageId,
+        repeatCount: repeatCount || 1,
+        voice,
+        channelName: channelName || ''
+    };
     await kv.set(`br:v2:room:${code.toUpperCase()}`, data, { ex: 60 });
     return res.status(200).json({ success: true, messageId });
 }

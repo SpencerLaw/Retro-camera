@@ -67,7 +67,7 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
             {/* ── Leading edge dot (sweeps with the beam) ── */}
             <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 8 }}>
                 <div className="absolute w-2.5 h-2.5 rounded-full top-[1px] left-1/2 -translate-x-1/2 shadow-lg"
-                    style={{ background: accent, boxShadow: `0 0 12px 4px ${accentAlpha(0.7)}`, transform: 'rotate(-4deg)' }} />
+                    style={{ background: accent, boxShadow: `0 0 12px 4px ${accentAlpha(0.7)}`, transform: 'rotate(-7deg)' }} />
             </div>
 
             {/* ── Orbit tick marks ── */}
@@ -250,7 +250,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     }
                 }
             } catch (e) { }
-            if (engine.current.isJoined) setTimeout(poll, 3000);
+            if (engine.current.isJoined) setTimeout(poll, 2000);
         };
         poll();
         ttsManager.startSilentLoop();

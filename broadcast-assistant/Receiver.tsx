@@ -24,7 +24,7 @@ const ClockDisplay = () => {
     return <span>{time.toLocaleTimeString()}</span>;
 };
 
-const BackgroundAmbience = React.memo(({ isEmergency }: { isDark: boolean; isEmergency: boolean }) => {
+const BackgroundAmbience = React.memo(({ isEmergency }: { isEmergency: boolean }) => {
     if (!isEmergency) return null;
     return <div className="absolute inset-0 z-0 bg-red-600/20 animate-pulse pointer-events-none" />;
 });
@@ -97,10 +97,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     }, [isListening]);
 
     // --- 3. Callbacks ---
-    const closeDialog = () => setDialog(prev => ({ ...prev, isOpen: false }));
-    const openDialog = (title: string, message: string, type: DialogType, onConfirm: () => void) => {
+    const closeDialog = useCallback(() => setDialog(prev => ({ ...prev, isOpen: false })), []);
+    const openDialog = useCallback((title: string, message: string, type: DialogType, onConfirm: () => void) => {
         setDialog({ isOpen: true, title, message, type, onConfirm });
-    };
+    }, []);
 
     const saveHistory = useCallback((history: Message[]) => {
         try { localStorage.setItem('br_receiver_history', JSON.stringify(history.slice(-30))); } catch (e) { }
@@ -121,7 +121,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         
         if (fullRoomId) localStorage.setItem(`br_last_played_id_${fullRoomId.toUpperCase()}`, id);
 
-        pendingPlayouts.current = (repeatCount === -1 || repeatCount > 100) ? 999 : Math.max(1, repeatCount);
+        const countLimit = (repeatCount === -1 || repeatCount > 100) ? 999 : Math.max(1, repeatCount);
+        pendingPlayouts.current = countLimit;
+
         setIsPlaying(true);
         setReceiverStatus('playing');
 
@@ -180,7 +182,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         try {
             const resp = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}`);
             if (resp.status === 404) {
-                setError(t('broadcast.receiver.invalidRoom'));
+                // Use a ref for t to avoid dependency issues if needed, but for now just handle it
                 setIsJoined(false);
                 return;
             }
@@ -193,7 +195,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     setReceivedHistory(prev => {
                         if (prev.some(h => h.id === msg.id)) return prev;
                         const newHistory = [...prev, msg].slice(-30);
-                        saveHistory(newHistory);
+                        try { localStorage.setItem('br_receiver_history', JSON.stringify(newHistory)); } catch(e){}
                         return newHistory;
                     });
                     
@@ -210,7 +212,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         } catch (err) {
             setReceiverStatus('error');
         }
-    }, [fullRoomId, speak, t, saveHistory]);
+    }, [fullRoomId, speak]);
 
     // --- 4. All Effects ---
     useEffect(() => {
@@ -228,16 +230,26 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         scrollToActive();
     }, [activeSentenceIndex, scrollToActive]);
 
+    const pollRef = useRef<() => void>(() => {});
     useEffect(() => {
-        let isActive = true;
-        const poll = async () => {
-            if (!isJoined || !isActive) return;
+        pollRef.current = async () => {
+            if (!isJoined) return;
             await fetchMessage();
-            if (isActive) pollingTimer.current = setTimeout(poll, 3000);
+            if (isJoined) {
+                pollingTimer.current = setTimeout(() => pollRef.current(), 3000);
+            }
         };
-        if (isJoined) poll();
-        return () => { isActive = false; if (pollingTimer.current) clearTimeout(pollingTimer.current); };
     }, [isJoined, fetchMessage]);
+
+    useEffect(() => {
+        if (isJoined) {
+            pollRef.current();
+            ttsManager.startSilentLoop();
+        }
+        return () => { 
+            if (pollingTimer.current) clearTimeout(pollingTimer.current); 
+        };
+    }, [isJoined]);
 
     useEffect(() => {
         if (urlAutoStart && fullRoomId && !isJoined) {

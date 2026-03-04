@@ -263,6 +263,18 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const sentences = useMemo(() => splitSentences(currentMsg?.text || ''), [currentMsg?.text, splitSentences]);
 
+    const greeting = useMemo(() => {
+        const h = new Date().getHours();
+        if (h < 6) return '凌晨好';
+        if (h < 12) return '上午好';
+        if (h < 14) return '中午好';
+        if (h < 18) return '下午好';
+        return '晚上好';
+    }, []);
+
+    // The most recently known channel name
+    const channelName = currentMsg?.channelName || receivedHistory[receivedHistory.length - 1]?.channelName || '';
+
     // ── Join Screen ──────────────────────────────────────────────────────────
     if (!isJoined) {
         return (
@@ -389,6 +401,18 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     /* ── Playing: scrolling sentences ── */
                     <div className="w-full h-full overflow-y-auto scrollbar-hide flex flex-col">
                         <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col justify-center py-8">
+                            {/* Class name + greeting badge */}
+                            {channelName && (
+                                <div className="flex justify-center mb-6">
+                                    <div className={`flex items-center gap-2 px-5 py-2 rounded-full border text-sm font-black ${emergency
+                                            ? 'bg-red-500/10 border-red-500/20 text-red-300'
+                                            : (isDark ? 'bg-violet-500/10 border-violet-500/20 text-violet-300' : 'bg-violet-100 border-violet-200 text-violet-700')
+                                        }`}>
+                                        <Radio size={12} className="animate-pulse" />
+                                        <span>{channelName}</span>
+                                    </div>
+                                </div>
+                            )}
                             {/* Live EQ bars */}
                             {isPlaying && (
                                 <div className="flex justify-center mb-10">
@@ -412,8 +436,15 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     /* ── Idle: radar + status ── */
                     <div className="flex flex-col items-center justify-center gap-10">
                         <IdleVisualizer isEmergency={false} />
-                        <div className="text-center space-y-3">
-                            <p className={`text-sm font-black uppercase tracking-[0.5em] ${isDark ? 'text-white/15' : 'text-slate-400/60'} animate-pulse`}>
+                        <div className="text-center space-y-4">
+                            {/* Greeting + class name */}
+                            <div className="space-y-1">
+                                <p className={`text-2xl md:text-3xl font-black tracking-tight ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
+                                    {greeting}！
+                                    {channelName && <span className={`ml-1 ${isDark ? 'text-violet-400' : 'text-violet-600'}`}>{channelName}</span>}
+                                </p>
+                            </div>
+                            <p className={`text-xs font-black uppercase tracking-[0.5em] ${isDark ? 'text-white/15' : 'text-slate-400/60'} animate-pulse`}>
                                 等待广播信号
                             </p>
                             <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${isDark ? 'text-white/10' : 'text-slate-300'}`}>

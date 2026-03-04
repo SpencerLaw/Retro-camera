@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/broadcast/:path*",
+      "destination": "/api/broadcast/index"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     },

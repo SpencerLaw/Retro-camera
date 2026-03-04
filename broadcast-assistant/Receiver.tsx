@@ -182,18 +182,18 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         try {
             const resp = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}`);
             if (resp.status === 404) {
-                // Use a ref for t to avoid dependency issues if needed, but for now just handle it
                 setIsJoined(false);
                 return;
             }
             const data = await resp.json();
-            if (data.message) {
+            if (data && data.message) {
                 const msg = data.message as Message;
                 if (msg.channelName) setSyncedChannelName(msg.channelName);
                 
                 if (msg.id !== lastPlayedId.current) {
+                    // Avoid setState for historical messages if identical
                     setReceivedHistory(prev => {
-                        if (prev.some(h => h.id === msg.id)) return prev;
+                        if (prev.length > 0 && prev[prev.length - 1].id === msg.id) return prev;
                         const newHistory = [...prev, msg].slice(-30);
                         try { localStorage.setItem('br_receiver_history', JSON.stringify(newHistory)); } catch(e){}
                         return newHistory;
@@ -201,6 +201,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     
                     setCurrentMsg(msg);
                     if (isListeningRef.current) {
+                        // CRITICAL: Non-blocking call
                         speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice);
                     }
                 }
@@ -210,6 +211,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             }
             setError(null);
         } catch (err) {
+            console.error('Fetch error:', err);
             setReceiverStatus('error');
         }
     }, [fullRoomId, speak]);
@@ -269,10 +271,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         setIsListening(true);
     };
 
-    const sentences = useMemo(() => {
-        if (!currentMsg?.text) return [];
-        return currentMsg.text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [currentMsg.text];
-    }, [currentMsg?.text]);
+    const sentences = (currentMsg?.text || '').match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [currentMsg?.text || ''];
 
     if (!isJoined) {
         return (

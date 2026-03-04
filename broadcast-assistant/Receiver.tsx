@@ -190,7 +190,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
         isListening: true
     });
 
-    const fullRoomId = roomId.padStart(4, '0');
+    const fullRoomId = roomId.padStart(6, '0');
 
     const toggleTheme = useCallback(() => {
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
@@ -314,17 +314,17 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                         加入接收端
                     </h1>
                     <p className={`text-center mb-10 text-sm font-medium ${theme === 'dark' ? 'text-white/30' : 'text-slate-500'}`}>
-                        输入 4 位房间号码开始接收广播
+                        输入 6 位房间号码开始接收广播
                     </p>
 
                     <div className="space-y-6">
                         <div className="relative">
                             <input
                                 type="text"
-                                maxLength={4}
+                                maxLength={6}
                                 value={roomId}
                                 onChange={(e) => setRoomId(e.target.value.replace(/\D/g, ''))}
-                                placeholder="0000"
+                                placeholder="000000"
                                 className={`w-full h-24 text-center text-6xl font-black rounded-3xl border-2 transition-all outline-none ${theme === 'dark'
                                     ? 'bg-black/20 border-white/5 text-white focus:border-violet-500/50'
                                     : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-violet-400 focus:bg-white'
@@ -336,12 +336,12 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                         </div>
 
                         <button
-                            disabled={roomId.length < 4}
+                            disabled={roomId.length < 6}
                             onClick={() => {
                                 engine.current.isJoined = true;
                                 setIsJoined(true);
                             }}
-                            className={`w-full py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl ${roomId.length === 4
+                            className={`w-full py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl ${roomId.length === 6
                                 ? 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white shadow-violet-500/25 hover:scale-[1.02] active:scale-95'
                                 : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-50'
                                 }`}

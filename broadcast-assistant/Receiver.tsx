@@ -106,12 +106,24 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const [isPlaying, setIsPlaying] = useState(false);
 
+    const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>(() => {
         try {
             const saved = localStorage.getItem('br_receiver_history');
             return saved ? JSON.parse(saved).slice(-30) : [];
         } catch (e) { return []; }
     });
+
+    const prefetchedBlobs = useRef<Record<string, string>>({});
+    const lastPlayedId = useRef<string | null>(null);
+    const pollingTimer = useRef<NodeJS.Timeout | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const activeSentenceRef = useRef<HTMLSpanElement>(null);
+    const rescueTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isUserScrollingRef = useRef(false);
+    
+    const [needsInteraction, setNeedsInteraction] = useState(false);
+    const [receiverStatus, setReceiverStatus] = useState<'idle' | 'listening' | 'playing' | 'error'>('listening');
 
     // Remove the [receivedHistory] dependency effect to prevent save-loop
     const saveHistory = useCallback((history: Message[]) => {

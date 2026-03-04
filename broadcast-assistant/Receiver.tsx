@@ -62,38 +62,16 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
                     filter: 'blur(1.5px)',
                 }} />
 
-            {/* ── Leading edge dot (sweeps with the beam) ── */}
-            {/* Note: The dot's inline transform must include translateX to avoid overriding Tailwind's -translate-x-1/2 */}
-            <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 8 }}>
-                <div className="absolute w-3 h-3 rounded-full shadow-lg"
+            {/* ── Leading edge dot (sweeps with the beam, same layer as sweep) ── */}
+            <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 0 }}>
+                <div className="absolute w-3 h-3 rounded-full"
                     style={{
-                        top: 0,
+                        top: '-6px',
                         left: '50%',
                         background: accent,
-                        boxShadow: `0 0 16px 6px ${accentAlpha(0.8)}`,
-                        transform: 'translateX(-50%) translateY(-50%)',
-                        transformOrigin: 'center center',
+                        boxShadow: `0 0 18px 8px ${accentAlpha(0.9)}`,
+                        transform: 'translateX(-50%)',
                     }} />
-            </div>
-
-            {/* ── Orbit tick marks ── */}
-            <div className="absolute inset-0 animate-[spin_80s_linear_infinite]">
-                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-                    <div key={deg} className="absolute w-1 h-1 rounded-full top-[-2px] left-1/2 -translate-x-1/2"
-                        style={{
-                            background: accentAlpha(0.4),
-                            transform: `rotate(${deg}deg) translateY(${140 - 2}px) translateX(-50%)`,
-                            transformOrigin: '50% 142px',
-                        }} />
-                ))}
-            </div>
-
-            {/* ── Fixed Compass Text ── */}
-            <div className="absolute inset-0 border border-white/[0.03] rounded-full pointer-events-none">
-                <span className="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">12</span>
-                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">06</span>
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">09</span>
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">03</span>
             </div>
 
             {/* ── Core orb ── */}
@@ -535,7 +513,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <span className={`text-[9px] font-black uppercase tracking-widest font-mono ${theme === 'dark' || emergency ? 'text-white/25' : 'text-slate-400'}`}>
-                                            {m.timestamp}
+                                            {(() => {
+                                                const ts = parseInt(m.timestamp);
+                                                return isNaN(ts) ? m.timestamp : new Date(ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                                            })()}
                                         </span>
                                         <div className="flex items-center gap-1.5">
                                             {m.isEmergency && <Zap size={10} className="text-red-400 fill-red-400" />}

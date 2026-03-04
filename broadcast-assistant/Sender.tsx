@@ -392,7 +392,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             key={channel.id}
                             onClick={() => setActiveChannelId(channel.id)}
                             className={`flex-none px-6 py-4 rounded-3xl border transition duration-300 flex items-center gap-3 relative group ${activeChannelId === channel.id
-                                ? 'bg-gradient-to-r from-pink-500/90 to-rose-500/90 backdrop-blur-md border-pink-500/30 text-white shadow-xl scale-105 shadow-pink-500/20'
+                                ? 'bg-gradient-to-r from-pink-500/90 to-rose-500/90 backdrop-blur-md border-pink-500/30 text-white scale-105'
                                 : 'bg-white/50 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-400 hover:bg-white/80 dark:hover:bg-white/10'
                                 }`}
                         >

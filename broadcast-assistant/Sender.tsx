@@ -509,80 +509,81 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">
-                                <Plus size={10} /> {t('broadcast.sender.repeatTime')}
-                            </label>
-                            <div className="flex items-center p-2 rounded-2xl border bg-slate-50 border-slate-100">
-                                <button
-                                    onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
-                                    className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm text-blue-600 hover:bg-blue-50 active:scale-90 transition-all"
-                                >
-                                    <ChevronRight className="rotate-180" size={20} />
-                                </button>
-                                <div className="flex-1 flex flex-col items-center">
-                                    <span className={`font-black text-3xl tabular-nums ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
-                                        {isLooping ? '∞' : repeatCount}
-                                    </span>
-                                    <span className="text-[8px] font-black uppercase text-slate-300 tracking-tighter">{t('broadcast.sender.repeatCount')}</span>
-                                </div>
-                                <button
-                                    onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
-                                    className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm text-blue-600 hover:bg-blue-50 active:scale-90 transition-all"
-                                >
-                                    <ChevronRight size={20} />
-                                </button>
-                            </div>
+                    {/* ─ 重复次数 + 循环策略 合并一行 ─ */}
+                    <div className="flex items-center gap-3 p-2 rounded-2xl bg-slate-50 border border-slate-100">
+                        {/* 减少 */}
+                        <button
+                            onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
+                            disabled={isLooping}
+                            className="w-10 h-10 shrink-0 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
+                        >
+                            <ChevronRight className="rotate-180" size={18} />
+                        </button>
+
+                        {/* 数值 */}
+                        <div className="flex-1 flex flex-col items-center">
+                            <span className={`font-black text-2xl tabular-nums leading-none ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
+                                {isLooping ? '∞' : repeatCount}
+                            </span>
+                            <span className="text-[8px] font-black text-slate-300 tracking-tight mt-0.5">{t('broadcast.sender.repeatCount')}</span>
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">
-                                <Plus size={10} /> {t('broadcast.sender.repeatStrategy')}
-                            </label>
-                            <div className="grid grid-cols-2 gap-2 h-16">
-                                <button
-                                    onClick={() => setIsLooping(false)}
-                                    className={`rounded-2xl border-2 flex items-center justify-center transition-all ${!isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-50 border-slate-100 text-slate-400 hover:bg-slate-100'}`}
-                                >
-                                    <Repeat size={18} />
-                                </button>
-                                <button
-                                    onClick={() => setIsLooping(true)}
-                                    className={`rounded-2xl border-2 flex items-center justify-center transition-all ${isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-50 border-slate-100 text-slate-400 hover:bg-slate-100'}`}
-                                >
-                                    <span className="text-xl font-black">∞</span>
-                                </button>
-                            </div>
-                        </div>
+                        {/* 增加 */}
+                        <button
+                            onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
+                            disabled={isLooping}
+                            className="w-10 h-10 shrink-0 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
+
+                        {/* 分隔 */}
+                        <div className="w-px h-8 bg-slate-200 shrink-0" />
+
+                        {/* 策略：固定次数 */}
+                        <button
+                            onClick={() => setIsLooping(false)}
+                            className={`w-10 h-10 shrink-0 rounded-xl border-2 flex items-center justify-center transition-all ${!isLooping ? 'bg-blue-500 border-blue-400 text-white' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-100'}`}
+                        >
+                            <Repeat size={16} />
+                        </button>
+
+                        {/* 策略：无限循环 */}
+                        <button
+                            onClick={() => setIsLooping(true)}
+                            className={`w-10 h-10 shrink-0 rounded-xl border-2 flex items-center justify-center transition-all ${isLooping ? 'bg-blue-500 border-blue-400 text-white' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-100'}`}
+                        >
+                            <span className="text-lg font-black leading-none">∞</span>
+                        </button>
                     </div>
 
-                    <div className="flex gap-4">
+                    {/* ─ 紧急 + 发起 ─ */}
+                    <div className="flex gap-3">
+                        {/* 紧急播报（图标+文字，不换行） */}
                         <button
                             onClick={() => setIsEmergency(!isEmergency)}
-                            className={`flex-[1] group flex items-center justify-between px-8 py-6 rounded-[2rem] font-black text-xs uppercase tracking-widest transition-all duration-500 border-2 ${isEmergency
-                                ? 'bg-red-500 border-red-400 text-white shadow-2xl shadow-red-500/40'
+                            className={`shrink-0 flex items-center gap-2 px-4 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-500 border-2 whitespace-nowrap ${isEmergency
+                                ? 'bg-red-500 border-red-400 text-white'
                                 : 'bg-slate-50 border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
                         >
-                            <div className="flex items-center gap-3">
-                                <AlertTriangle size={20} className={isEmergency ? 'animate-pulse' : ''} />
-                                <span>{t('broadcast.sender.emergency')}</span>
-                            </div>
-                            <div className={`w-10 h-5 rounded-full relative transition-colors ${isEmergency ? 'bg-white/30' : 'bg-gray-500/20'}`}>
-                                <div className={`absolute top-1 w-3 h-3 rounded-full transition-all duration-300 ${isEmergency ? 'right-1 bg-white' : 'left-1 bg-gray-400'}`} />
+                            <AlertTriangle size={16} className={isEmergency ? 'animate-pulse' : ''} />
+                            <span>{t('broadcast.sender.emergency')}</span>
+                            <div className={`w-7 h-4 rounded-full relative transition-colors shrink-0 ${isEmergency ? 'bg-white/30' : 'bg-gray-400/30'}`}>
+                                <div className={`absolute top-0.5 w-3 h-3 rounded-full transition-all duration-300 ${isEmergency ? 'right-0.5 bg-white' : 'left-0.5 bg-gray-400'}`} />
                             </div>
                         </button>
 
+                        {/* 发起播报 */}
                         <button
                             onClick={handleSend}
                             disabled={status.type === 'loading'}
-                            className="flex-[2] py-6 rounded-[2rem] bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black uppercase tracking-widest text-[10px] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 group"
+                            className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black text-xs uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group whitespace-nowrap"
                         >
                             {status.type === 'loading' ? (
-                                <Loader2 className="animate-spin" size={20} />
+                                <Loader2 className="animate-spin" size={18} />
                             ) : (
                                 <>
-                                    <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                    <Send size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                                     <span>{t('broadcast.sender.initBroadcast')}</span>
                                 </>
                             )}

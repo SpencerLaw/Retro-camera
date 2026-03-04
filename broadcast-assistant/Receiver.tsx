@@ -273,35 +273,30 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     }
 
                     const msg = data.message as Message;
-                    if (msg && msg.id !== engine.current.lastId) {
-                        engine.current.lastId = msg.id;
-                        // 更新 channelName（无论 text 是否为空）
-                        if (msg.channelName) setDisplayChannelName(msg.channelName);
 
-                        if (msg.text && msg.text.trim()) {
-                            // 有实际内容：更新消息、加入历史、触发播报
-                            setCurrentMsg(msg);
-                            // 外层 if 已经判定了 msg.id !== engine.current.lastId (是新消息)
-                            // 这里只要引擎处在监听状态，就直接执行播放
-                            if (engine.current.isListening) {
-                                runPlayback(msg);
-                            }
-                            setReceivedHistory(prev => {
-                                const next = [...prev, msg].slice(-20);
-                                setTimeout(() => localStorage.setItem('br_receiver_history', JSON.stringify(next)), 0);
-                                return next;
-                            });
-                        } else {
-                            // 收到的是空消息
-                            // 检查有没有正在播的旧消息，有的话它没过期就继续播
-                            // 如果 isPlayingRef 为 false，说明此时闲置，那么清掉残余的 currentMsg 显示雷达。
-                            if (!isPlayingRef.current && currentMsg) {
-                                setCurrentMsg(null);
+                    if (msg) {
+                        // 有效消息：判断是不是新消息
+                        if (msg.id !== engine.current.lastId) {
+                            engine.current.lastId = msg.id;
+                            if (msg.channelName) setDisplayChannelName(msg.channelName);
+                            if (msg.text && msg.text.trim()) {
+                                setCurrentMsg(msg);
+                                if (engine.current.isListening) {
+                                    runPlayback(msg);
+                                }
+                                setReceivedHistory(prev => {
+                                    const next = [...prev, msg].slice(-20);
+                                    setTimeout(() => localStorage.setItem('br_receiver_history', JSON.stringify(next)), 0);
+                                    return next;
+                                });
                             }
                         }
-                    } else if (!msg && !isPlayingRef.current) {
-                        // 消息已过期且当前不在播报中：回到 idle
-                        setCurrentMsg(null);
+                    } else {
+                        // 如果后端返回 message 为 null (即 KV 被清除或过期)
+                        // 且当前没有任何播报在进行中，那么我们回到安全的 idle 状态
+                        if (!isPlayingRef.current) {
+                            setCurrentMsg(null);
+                        }
                     }
                 }
             } catch (e) { }
@@ -316,8 +311,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         if (activeRef.current) activeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, [activeSentenceIndex]);
 
-    const splitSentences = (text: string) => text.split(/[。！？；\n]/).filter(s => s.trim().length > 0);
-    const sentences = useMemo(() => splitSentences(currentMsg?.text || ''), [currentMsg?.text]);
+
 
     const greeting = useMemo(() => {
         const h = new Date().getHours();

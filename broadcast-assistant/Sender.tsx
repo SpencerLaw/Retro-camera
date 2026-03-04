@@ -423,8 +423,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
             {/* Active Channel Details / Editor */}
             {editingChannel ? (
-                <GlassCard className="p-8 space-y-6 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
-                    <div className="grid grid-cols-2 gap-6">
+                <GlassCard className="p-6 space-y-5 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
+                    <div className="flex flex-col gap-4">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.className')}</label>
                             <input
@@ -447,7 +447,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 />
                                 <button
                                     onClick={generateRandomChannel}
-                                    className="p-4 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+                                    className="p-4 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors shrink-0"
                                 >
                                     <RefreshCw size={18} />
                                 </button>

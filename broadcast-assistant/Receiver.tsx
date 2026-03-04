@@ -62,14 +62,14 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
                     filter: 'blur(1.5px)',
                 }} />
 
-            {/* ── Leading edge dot (sweeps with the beam, same layer as sweep) ── */}
-            <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 0 }}>
+            {/* ── Leading edge dot (same inset as sweep so positions match exactly) ── */}
+            <div className="absolute z-50 animate-[spin_3s_linear_infinite]" style={{ inset: 8 }}>
                 <div className="absolute w-3 h-3 rounded-full"
                     style={{
                         top: '-6px',
                         left: '50%',
                         background: accent,
-                        boxShadow: `0 0 18px 8px ${accentAlpha(0.9)}`,
+                        boxShadow: `0 0 20px 8px ${accentAlpha(1)}`,
                         transform: 'translateX(-50%)',
                     }} />
             </div>
@@ -165,8 +165,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [theme, setTheme] = useState<'light' | 'dark'>(isDark ? 'dark' : 'light');
+    const [displayChannelName, setDisplayChannelName] = useState('');
 
     const activeRef = useRef<HTMLDivElement>(null);
+    const isPlayingRef = useRef(false);
     const engine = useRef({
         lastId: '',
         isJoined: !!localStorage.getItem('br_receiver_roomId'),
@@ -186,6 +188,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
 
     const runPlayback = useCallback(async (msg: Message) => {
         if (!engine.current.isListening) return;
+        isPlayingRef.current = true;
         setIsPlaying(true);
         setActiveSentenceIndex(-1);
 
@@ -194,11 +197,13 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
 
         for (let r = 0; r < (repeat === -1 ? 999 : repeat); r++) {
             for (let i = 0; i < sentences.length; i++) {
+                if (!engine.current.isJoined) break;
                 setActiveSentenceIndex(i);
                 await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
             }
         }
 
+        isPlayingRef.current = false;
         setIsPlaying(false);
         setActiveSentenceIndex(-1);
     }, []);
@@ -234,14 +239,22 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                     const msg = data.message as Message;
                     if (msg && msg.id !== engine.current.lastId) {
                         engine.current.lastId = msg.id;
-                        setCurrentMsg(msg);
-                        setReceivedHistory(prev => {
-                            const next = [...prev, msg].slice(-20);
-                            setTimeout(() => localStorage.setItem('br_receiver_history', JSON.stringify(next)), 0);
-                            return next;
-                        });
-                        if (engine.current.isListening) runPlayback(msg);
-                    } else if (!msg && !isPlaying) {
+                        // 更新 channelName（无论 text 是否为空）
+                        if (msg.channelName) setDisplayChannelName(msg.channelName);
+
+                        if (msg.text && msg.text.trim()) {
+                            // 有实际内容：更新消息、加入历史、触发播报
+                            setCurrentMsg(msg);
+                            setReceivedHistory(prev => {
+                                const next = [...prev, msg].slice(-20);
+                                setTimeout(() => localStorage.setItem('br_receiver_history', JSON.stringify(next)), 0);
+                                return next;
+                            });
+                            if (engine.current.isListening) runPlayback(msg);
+                        }
+                        // 空 text 的 channelName 更新消息：只更新名称，不触发播报
+                    } else if (!msg && !isPlayingRef.current) {
+                        // 消息已过期且当前不在播报中：回到 idle
                         setCurrentMsg(null);
                     }
                 }
@@ -269,8 +282,8 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
         return '晚上好';
     }, []);
 
-    // The most recently known channel name
-    const channelName = currentMsg?.channelName || receivedHistory[receivedHistory.length - 1]?.channelName || '';
+    // The most recently known channel name comes from displayChannelName state
+    const channelName = displayChannelName || receivedHistory[receivedHistory.length - 1]?.channelName || '';
 
     // ── Join Screen ──────────────────────────────────────────────────────────
     if (!isJoined) {
@@ -415,26 +428,30 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
             </header>
 
             {/* ── Main Content ────────────────────────────────────────────── */}
-            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-y-auto scrollbar-hide z-10 px-8 pb-14">
+            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10">
                 {currentMsg && currentMsg.text.trim() ? (
-                    <div className="w-full h-full overflow-y-auto scrollbar-hide flex flex-col">
-                        <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col justify-center py-8">
+                    /* ── Playback view: teleprompter style centered highlight ── */
+                    <div className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col" style={{ scrollBehavior: 'smooth' }}>
+                        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col justify-center py-24 px-8 space-y-2">
+                            {/* 班级频道标签 */}
                             {channelName && (
-                                <div className="flex justify-center mb-6">
+                                <div className="flex justify-center mb-8">
                                     <div className={`flex items-center gap-2 px-5 py-2 rounded-full border text-sm font-black ${emergency
                                         ? 'bg-red-500/10 border-red-500/20 text-red-300'
-                                        : (theme === 'dark' ? 'bg-violet-500/10 border-violet-500/20 text-violet-300' : 'bg-violet-100 border-violet-200 text-violet-700')
+                                        : (theme === 'dark' ? 'bg-pink-500/10 border-pink-500/20 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-600')
                                         }`}>
                                         <Radio size={12} className="animate-pulse" />
                                         <span>{channelName}</span>
                                     </div>
                                 </div>
                             )}
+                            {/* 音频可视化 */}
                             {isPlaying && (
-                                <div className="flex justify-center mb-10">
+                                <div className="flex justify-center mb-8">
                                     <ActiveVisualizer isEmergency={emergency} />
                                 </div>
                             )}
+                            {/* 句子列表：当前句居中高亮 */}
                             {splitSentences(currentMsg.text).map((s, i) => (
                                 <SentenceItem
                                     key={`${currentMsg.id}-${i}`}
@@ -449,11 +466,12 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center gap-12">
+                    /* ── Idle view: radar ── */
+                    <div className="flex flex-col items-center justify-center gap-12 px-8">
                         <IdleVisualizer isEmergency={false} />
                         <div className="text-center space-y-4">
                             <div className="space-y-1">
-                                <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-violet-500/60 animate-pulse mb-8`}>
+                                <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-pink-500/60 animate-pulse mb-8`}>
                                     正在扫描信号...
                                 </p>
                                 <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
@@ -470,68 +488,70 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                 )}
             </main>
 
-            {/* ── History Footer ───────────────────────────────────────────── */}
-            <footer className={`absolute bottom-0 left-0 right-0 z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-44px)]'} ${theme === 'dark' || emergency ? 'border-white/5 bg-black/60 backdrop-blur-3xl' : 'border-black/5 bg-white/70 backdrop-blur-3xl'}`}>
-                <button
-                    onClick={() => setShowHistory(!showHistory)}
-                    className={`absolute -top-6 left-1/2 -translate-x-1/2 h-12 px-8 rounded-t-[2rem] flex items-center gap-3 text-sm font-black uppercase tracking-widest transition border border-b-0 ${theme === 'dark' || emergency ? 'bg-black/60 backdrop-blur-3xl border-white/10 text-white/50 hover:text-white' : 'bg-white/70 backdrop-blur-3xl border-black/5 text-slate-500 hover:text-slate-800'}`}
-                >
-                    <History size={14} />
-                    <span>播报记录</span>
-                    {showHistory ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-                </button>
+            {/* ── History Footer：只在 idle 状态显示 ───────────────────────── */}
+            {!isPlaying && !currentMsg && (
+                <footer className={`absolute bottom-0 left-0 right-0 z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-44px)]'} ${theme === 'dark' || emergency ? 'border-white/5 bg-black/60 backdrop-blur-3xl' : 'border-black/5 bg-white/70 backdrop-blur-3xl'}`}>
+                    <button
+                        onClick={() => setShowHistory(!showHistory)}
+                        className={`absolute -top-6 left-1/2 -translate-x-1/2 h-12 px-8 rounded-t-[2rem] flex items-center gap-3 text-sm font-black uppercase tracking-widest transition border border-b-0 ${theme === 'dark' || emergency ? 'bg-black/60 backdrop-blur-3xl border-white/10 text-white/50 hover:text-white' : 'bg-white/70 backdrop-blur-3xl border-black/5 text-slate-500 hover:text-slate-800'}`}
+                    >
+                        <History size={14} />
+                        <span>播报记录</span>
+                        {showHistory ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                    </button>
 
-                <div className="max-w-screen-xl mx-auto p-5">
-                    <div className="flex items-center justify-between mb-4 px-1">
-                        <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' || emergency ? 'text-white/20' : 'text-slate-400'}`}>
-                            最近 {receivedHistory.length} 条广播
-                        </span>
-                        <button
-                            onClick={() => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); }}
-                            className="text-[10px] font-black text-red-500/30 hover:text-red-500 transition px-3 py-1.5 rounded-xl border border-red-500/10 hover:border-red-500/30 hover:bg-red-500/5"
-                        >
-                            清空记录
-                        </button>
-                    </div>
+                    <div className="max-w-screen-xl mx-auto p-5">
+                        <div className="flex items-center justify-between mb-4 px-1">
+                            <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' || emergency ? 'text-white/20' : 'text-slate-400'}`}>
+                                最近 {receivedHistory.length} 条广播
+                            </span>
+                            <button
+                                onClick={() => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); }}
+                                className="text-[10px] font-black text-red-500/30 hover:text-red-500 transition px-3 py-1.5 rounded-xl border border-red-500/10 hover:border-red-500/30 hover:bg-red-500/5"
+                            >
+                                清空记录
+                            </button>
+                        </div>
 
-                    <div className="flex flex-row gap-4 overflow-x-auto pb-1 snap-x scrollbar-hide min-h-[100px] items-center">
-                        {receivedHistory.length === 0 ? (
-                            <div className={`w-full text-center py-10 text-xs font-black uppercase tracking-[0.4em] ${theme === 'dark' || emergency ? 'text-white/10' : 'text-slate-300'}`}>
-                                暂无广播记录
-                            </div>
-                        ) : (
-                            [...receivedHistory].reverse().map(m => (
-                                <button
-                                    key={m.id}
-                                    onClick={() => runPlayback(m)}
-                                    className={`flex-none w-72 p-5 rounded-2xl text-left transition-all border group snap-start ${m.isEmergency
-                                        ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
-                                        : (theme === 'dark'
-                                            ? 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-violet-500/25'
-                                            : 'bg-white/60 border-white hover:bg-white hover:border-violet-300 shadow-sm')
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className={`text-[9px] font-black uppercase tracking-widest font-mono ${theme === 'dark' || emergency ? 'text-white/25' : 'text-slate-400'}`}>
-                                            {(() => {
-                                                const ts = parseInt(m.timestamp);
-                                                return isNaN(ts) ? m.timestamp : new Date(ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-                                            })()}
-                                        </span>
-                                        <div className="flex items-center gap-1.5">
-                                            {m.isEmergency && <Zap size={10} className="text-red-400 fill-red-400" />}
-                                            <div className={`w-1.5 h-1.5 rounded-full group-hover:scale-125 transition-transform ${m.isEmergency ? 'bg-red-400' : 'bg-violet-400'}`} />
+                        <div className="flex flex-row gap-4 overflow-x-auto pb-1 snap-x scrollbar-hide min-h-[100px] items-center">
+                            {receivedHistory.length === 0 ? (
+                                <div className={`w-full text-center py-10 text-xs font-black uppercase tracking-[0.4em] ${theme === 'dark' || emergency ? 'text-white/10' : 'text-slate-300'}`}>
+                                    暂无广播记录
+                                </div>
+                            ) : (
+                                [...receivedHistory].reverse().map(m => (
+                                    <button
+                                        key={m.id}
+                                        onClick={() => runPlayback(m)}
+                                        className={`flex-none w-72 p-5 rounded-2xl text-left transition-all border group snap-start ${m.isEmergency
+                                            ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
+                                            : (theme === 'dark'
+                                                ? 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-violet-500/25'
+                                                : 'bg-white/60 border-white hover:bg-white hover:border-violet-300 shadow-sm')
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className={`text-[9px] font-black uppercase tracking-widest font-mono ${theme === 'dark' || emergency ? 'text-white/25' : 'text-slate-400'}`}>
+                                                {(() => {
+                                                    const ts = parseInt(m.timestamp);
+                                                    return isNaN(ts) ? m.timestamp : new Date(ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                                                })()}
+                                            </span>
+                                            <div className="flex items-center gap-1.5">
+                                                {m.isEmergency && <Zap size={10} className="text-red-400 fill-red-400" />}
+                                                <div className={`w-1.5 h-1.5 rounded-full group-hover:scale-125 transition-transform ${m.isEmergency ? 'bg-red-400' : 'bg-pink-400'}`} />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <p className={`text-sm font-semibold line-clamp-2 leading-relaxed transition-colors ${m.isEmergency ? 'text-red-300' : (theme === 'dark' ? 'text-white/60 group-hover:text-violet-300' : 'text-slate-600 group-hover:text-violet-600')}`}>
-                                        {m.text}
-                                    </p>
-                                </button>
-                            ))
-                        )}
+                                        <p className={`text-sm font-semibold line-clamp-2 leading-relaxed transition-colors ${m.isEmergency ? 'text-red-300' : (theme === 'dark' ? 'text-white/60 group-hover:text-pink-300' : 'text-slate-600 group-hover:text-pink-600')}`}>
+                                            {m.text}
+                                        </p>
+                                    </button>
+                                ))
+                            )}
+                        </div>
                     </div>
-                </div>
-            </footer>
+                </footer>
+            )}
         </div>
     );
 };

@@ -70,7 +70,7 @@ async function handleSend(req: VercelRequest, res: VercelResponse) {
         voice,
         channelName: channelName || ''
     };
-    await kv.set(`br:v2:room:${code.toUpperCase()}`, data, { ex: 60 });
+    await kv.set(`br:v2:room:${code.toUpperCase()}`, data, { ex: 300 });
     return res.status(200).json({ success: true, messageId });
 }
 

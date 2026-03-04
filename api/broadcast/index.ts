@@ -13,6 +13,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     else if (url.includes('/activate')) action = 'activate';
     else if (url.includes('/deactivate')) action = 'deactivate';
     else if (url.includes('/cleanup')) action = 'cleanup';
+    else if (url.includes('/get-channels')) action = 'get-channels';
+    else if (url.includes('/save-channels')) action = 'save-channels';
+    else if (url.includes('/check-code')) action = 'check-code';
+    else if (url.includes('/clear-license-data')) action = 'clear-license-data';
 
     if (!action) {
         const parts = url.split('?')[0].split('/').filter(Boolean);
@@ -27,6 +31,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             case 'activate': return handleActivate(req, res);
             case 'deactivate': return handleDeactivate(req, res);
             case 'cleanup': return handleCleanup(req, res);
+            case 'get-channels': return handleGetChannels(req, res);
+            case 'save-channels': return handleSaveChannels(req, res);
+            case 'check-code': return handleCheckCode(req, res);
+            case 'clear-license-data': return handleClearLicenseData(req, res);
             default: return res.status(404).json({ error: 'Unknown action: ' + action });
         }
     } catch (e: any) {
@@ -106,6 +114,49 @@ async function handleCleanup(req: VercelRequest, res: VercelResponse) {
     } catch (e: any) {
         return res.status(500).json({ success: false, error: e.message });
     }
+}
+
+async function handleGetChannels(req: VercelRequest, res: VercelResponse) {
+    const license = req.query.license as string;
+    if (!license) return res.status(400).json({ error: 'Missing license' });
+    const channels = await kv.get(`br:sync:channels:${license}`);
+    return res.status(200).json({ channels: channels || [] });
+}
+
+async function handleSaveChannels(req: VercelRequest, res: VercelResponse) {
+    const { license, channels } = req.body;
+    if (!license) return res.status(400).json({ error: 'Missing license' });
+    await kv.set(`br:sync:channels:${license}`, channels, { ex: 86400 * 30 }); // 30 days
+    return res.status(200).json({ success: true });
+}
+
+async function handleCheckCode(req: VercelRequest, res: VercelResponse) {
+    const code = (req.query.code as string)?.toUpperCase();
+    if (!code) return res.status(400).json({ error: 'Missing code' });
+    const isActive = await kv.get(`br:room_active:${code}`);
+    return res.status(200).json({ inUse: !!isActive });
+}
+
+async function handleClearLicenseData(req: VercelRequest, res: VercelResponse) {
+    const { license } = req.body;
+    if (!license) return res.status(400).json({ error: 'Missing license' });
+
+    // 1. Get current channels to know which rooms to clean up
+    const channels = await kv.get(`br:sync:channels:${license}`) as any[];
+    if (channels && Array.isArray(channels)) {
+        const keysToDelete = channels.flatMap(c => [
+            `br:room_active:${c.code.toUpperCase()}`,
+            `br:v2:room:${c.code.toUpperCase()}`
+        ]);
+        if (keysToDelete.length > 0) {
+            await Promise.all(keysToDelete.map(k => kv.del(k)));
+        }
+    }
+
+    // 2. Delete the sync list itself
+    await kv.del(`br:sync:channels:${license}`);
+
+    return res.status(200).json({ success: true });
 }
 
 async function getEdgeTTS(text: string, voice: string, rate: number): Promise<Buffer> {

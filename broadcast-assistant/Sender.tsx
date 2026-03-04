@@ -101,12 +101,41 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('br_channels', JSON.stringify(channels));
-    }, [channels]);
-
-    useEffect(() => {
         localStorage.setItem('br_active_channel_id', activeChannelId);
     }, [activeChannelId]);
+
+    // Initial cloud sync: Load channels for this license from cloud
+    useEffect(() => {
+        if (!license) return;
+        const syncFromCloud = async () => {
+            try {
+                const resp = await fetch(`/api/broadcast/get-channels?license=${license}`);
+                const data = await resp.json();
+                if (data.channels && Array.isArray(data.channels) && data.channels.length > 0) {
+                    setChannels(data.channels);
+                    // If current active room is default and we have cloud rooms, pick the first cloud room
+                    if (activeChannelId === 'default' || !data.channels.find((c: any) => c.id === activeChannelId)) {
+                        setActiveChannelId(data.channels[0].id);
+                    }
+                }
+            } catch (err) {
+                console.error('Cloud sync failed:', err);
+            }
+        };
+        syncFromCloud();
+    }, [license]);
+
+    // Save to cloud whenever channels change
+    useEffect(() => {
+        localStorage.setItem('br_channels', JSON.stringify(channels));
+        if (license && channels.length > 0) {
+            fetch('/api/broadcast/save-channels', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ license, channels })
+            }).catch(e => console.error('Cloud save failed:', e));
+        }
+    }, [channels, license]);
 
     // Auto-activate room on server
     useEffect(() => {
@@ -119,15 +148,37 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         }
     }, [channelCode, license]);
 
-    const addChannel = () => {
+    const addChannel = async () => {
         const newId = Date.now().toString();
+        setStatus({ type: 'loading', msg: '正在分配唯一房间号...' });
+
+        let uniqueCode = '';
+        let attempts = 0;
+        while (attempts < 5) {
+            const candidate = Math.floor(100000 + Math.random() * 900000).toString();
+            const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
+            const { inUse } = await resp.json();
+            if (!inUse) {
+                uniqueCode = candidate;
+                break;
+            }
+            attempts++;
+        }
+
+        if (!uniqueCode) {
+            setStatus({ type: 'error', msg: '生成唯一房间号失败，请重试' });
+            return;
+        }
+
         const newChannel: Channel = {
             id: newId,
             name: `${t('broadcast.sender.addClass')} ${channels.length + 1}`,
-            code: Math.floor(100000 + Math.random() * 900000).toString()
+            code: uniqueCode
         };
         setChannels([...channels, newChannel]);
         setActiveChannelId(newId);
+        setStatus({ type: 'success', msg: '新房间已创建并同步至云端' });
+        setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
     };
 
     const deleteChannel = async (id: string, e: React.MouseEvent) => {
@@ -171,6 +222,17 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         const newName = editName.trim() || t('broadcast.sender.unknownClass');
         const newCode = editCode.toUpperCase().trim();
 
+        // Unique check if code changed
+        const currentChannel = channels.find(c => c.id === editingChannel);
+        if (currentChannel && currentChannel.code !== newCode) {
+            const checkResp = await fetch(`/api/broadcast/check-code?code=${newCode}`);
+            const { inUse } = await checkResp.json();
+            if (inUse) {
+                setStatus({ type: 'error', msg: '该房间号已被其他教室占用，请更换' });
+                return;
+            }
+        }
+
         setChannels(channels.map(c =>
             c.id === editingChannel ? { ...c, name: newName, code: newCode } : c
         ));
@@ -194,10 +256,27 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         setEditingChannel(null);
     };
 
-    const generateRandomChannel = (e: React.MouseEvent) => {
+    const generateRandomChannel = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        const newCode = Math.floor(100000 + Math.random() * 900000).toString();
-        setEditCode(newCode);
+        setStatus({ type: 'loading', msg: '检索可用号码...' });
+        let uniqueCode = '';
+        let attempts = 0;
+        while (attempts < 5) {
+            const candidate = Math.floor(100000 + Math.random() * 900000).toString();
+            const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
+            const { inUse } = await resp.json();
+            if (!inUse) {
+                uniqueCode = candidate;
+                break;
+            }
+            attempts++;
+        }
+        if (uniqueCode) {
+            setEditCode(uniqueCode);
+            setStatus({ type: null, msg: '' });
+        } else {
+            setStatus({ type: 'error', msg: '未找到可用号码' });
+        }
     };
 
     const handleSend = async () => {
@@ -336,13 +415,10 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
             async () => {
                 setStatus({ type: 'loading', msg: t('broadcast.sender.clearing') });
                 try {
-                    const resp = await fetch('/api/broadcast/cleanup', {
+                    const resp = await fetch('/api/broadcast/clear-license-data', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            license,
-                            codes: channels.map(c => c.code)
-                        })
+                        body: JSON.stringify({ license })
                     });
                     const data = await resp.json();
                     if (data.success) {

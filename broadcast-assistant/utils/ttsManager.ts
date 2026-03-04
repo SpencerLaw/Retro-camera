@@ -42,7 +42,8 @@ class TTSManager {
     }
 
     public async speak(text: string, options: Partial<TTSOptions> = {}): Promise<void> {
-        this.stop(false); // Only stop current audio, do NOT increment sequence ID
+        console.log(`[BROADCAST-DEBUG] TTS speak start: "${text.substring(0, 30)}..."`, { engine: options.engine, playbackId: this.activePlaybackId });
+        this.stop(false); 
         this.startSilentLoop();
 
         const playbackId = this.activePlaybackId;
@@ -136,11 +137,13 @@ class TTSManager {
      * Plays a previously prefetched Blob URL.
      */
     public playBlob(url: string, text: string, options: TTSOptions, playbackId?: number): Promise<void> {
-        this.stop(false); // Stop current but don't clear everything if we're in sequence
+        console.log(`[BROADCAST-DEBUG] PlayBlob start: "${text.substring(0, 20)}..."`, { url, playbackId });
+        this.stop(false); 
         if (!this.audio) return Promise.resolve();
 
         return new Promise((resolve, reject) => {
             const onEnded = () => {
+                console.log(`[BROADCAST-DEBUG] Audio ended/stopped: "${text.substring(0, 20)}..."`);
                 this.clearBoundaryTimer();
                 // Automatically clean up blob memory to prevent leaks
                 if (url.startsWith('blob:')) {
@@ -219,6 +222,7 @@ class TTSManager {
      * Increments activePlaybackId to invalidate any running async loops.
      */
     public cancelAll(): void {
+        console.log(`[BROADCAST-DEBUG] CANCEL ALL called. Incrementing ID to: ${this.activePlaybackId + 1}`);
         this.activePlaybackId++;
         this.stop(true);
     }
@@ -328,11 +332,13 @@ class TTSManager {
     private async fetchEdgeBlob(text: string, options: TTSOptions): Promise<Blob | null> {
         const voice = options.voice || 'zh-CN-XiaoxiaoNeural';
         const rate = options.rate ?? 1.0;
+        console.log(`[BROADCAST-DEBUG] Fetching Edge TTS: "${text.substring(0, 20)}..."`);
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         try {
+            const startTime = Date.now();
             const resp = await fetch('/api/broadcast/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -340,16 +346,18 @@ class TTSManager {
                 signal: controller.signal,
             });
 
+            console.log(`[BROADCAST-DEBUG] TTS API Response: ${resp.status} (${Date.now() - startTime}ms)`);
             clearTimeout(timeoutId);
             if (resp.ok) {
                 const blob = await resp.blob();
+                console.log(`[BROADCAST-DEBUG] Blob received: ${blob.size} bytes`);
                 if (blob.size > 100) return blob;
+            } else {
+                const errText = await resp.text();
+                console.error(`[BROADCAST-DEBUG] TTS API Error Details:`, errText);
             }
         } catch (e) {
-            if ((e as any).name === 'AbortError') {
-                console.log('TTS fetch timed out or aborted');
-            }
-            // Proxy unavailable or error - will fall back to native TTS
+            console.error(`[BROADCAST-DEBUG] TTS Fetch Exception:`, e);
         } finally {
             clearTimeout(timeoutId);
         }

@@ -187,7 +187,7 @@
       "className": "班级名称",
       "active": "在线",
       "unknownClass": "未知班级",
-      "roomCodePlaceholder": "4位数字",
+      "roomCodePlaceholder": "6位数字",
       "classNamePlaceholder": "输入班级名称",
       "autoLoop": "自动循环",
       "repeatCount": "播报次数",

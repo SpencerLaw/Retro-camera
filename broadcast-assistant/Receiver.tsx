@@ -199,6 +199,16 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     }, []);
 
+    // Effect for auto-scrolling to the active sentence
+    useEffect(() => {
+        if (activeSentenceIndex !== -1 && activeRef.current) {
+            activeRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            });
+        }
+    }, [activeSentenceIndex]);
+
     useEffect(() => {
         const savedHistory = localStorage.getItem('br_receiver_history');
         if (savedHistory) setReceivedHistory(JSON.parse(savedHistory));
@@ -476,8 +486,8 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10">
                 {currentMsg && currentMsg.text.trim() ? (
                     /* ── Playback view: teleprompter style centered highlight ── */
-                    <div className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col" style={{ scrollBehavior: 'smooth' }}>
-                        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col justify-center py-24 px-8 space-y-2">
+                    <div className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col pt-[30vh] pb-[40vh]" style={{ scrollBehavior: 'smooth' }}>
+                        <div className="max-w-4xl mx-auto w-full flex-none flex flex-col px-8 space-y-2">
                             {/* 班级频道标签 */}
                             {channelName && (
                                 <div className="flex justify-center mb-8">

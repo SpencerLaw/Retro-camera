@@ -132,7 +132,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         hasSyncedFromCloud.current = true;
                         setChannels(data.channels);
                         if (activeChannelId === 'default' || !data.channels.find((c: any) => c.id === activeChannelId)) {
-                            setActiveChannelId(data.channels[cloudLen - 1].id);
+                            setActiveChannelId(data.channels[0].id);
                         }
                     }
                 }

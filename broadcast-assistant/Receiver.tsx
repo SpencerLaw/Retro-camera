@@ -146,10 +146,11 @@ const SentenceItem: React.FC<SentenceItemProps> = ({
 // ─── Main Component ──────────────────────────────────────────────────────────
 interface ReceiverProps {
     isDark: boolean;
+    onExit?: () => void;
     onOpenDialog?: (title: string, msg: string, type: DialogType, onConfirm: () => void) => void;
 }
 
-const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
+const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => {
     const t = useTranslations();
     const [isJoined, setIsJoined] = useState(() => {
         const saved = localStorage.getItem('br_receiver_roomId');
@@ -289,6 +290,16 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
     if (!isJoined) {
         return (
             <div className={`fixed inset-0 flex items-center justify-center p-6 transition-colors duration-1000 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-slate-100'}`}>
+                {/* 退出按钮 */}
+                {onExit && (
+                    <button
+                        onClick={onExit}
+                        className={`absolute top-8 left-8 z-50 w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm border ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white/80 border-slate-200 text-slate-500 hover:text-slate-800'}`}
+                    >
+                        <X size={20} />
+                    </button>
+                )}
+
                 {/* bg blobs */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
                     <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-pink-600/10 blur-[160px] rounded-full animate-pulse" />

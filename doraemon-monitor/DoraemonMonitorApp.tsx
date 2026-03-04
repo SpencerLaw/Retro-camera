@@ -115,8 +115,16 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const initApp = async () => {
     setIsLoading(true);
+
+    // 兼容旧浏览器/HTTP环境：mediaDevices 可能不存在
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError(t('doraemon.errors.startFailed') + t('doraemon.errors.browserNotSupported'));
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const AC = window.AudioContext || (window as any).webkitAudioContext;
       const context = new AC();
       audioContextRef.current = context;
@@ -131,7 +139,16 @@ const DoraemonMonitorApp: React.FC = () => {
       muteGain.connect(context.destination);
       setIsStarted(true);
       workerRef.current?.postMessage('start');
-    } catch (err: any) { setError(t('doraemon.authFailed') + err.message); } finally { setIsLoading(false); }
+    } catch (err: any) {
+      const name = err.name || '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        setError(t('doraemon.errors.startFailed') + t('doraemon.errors.permissionDenied'));
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'DeviceNotFoundError') {
+        setError(t('doraemon.errors.startFailed') + t('doraemon.errors.noMicFound'));
+      } else {
+        setError(t('doraemon.errors.startFailed') + t('doraemon.errors.unknownError') + err.message);
+      }
+    } finally { setIsLoading(false); }
   };
 
   const playAlarmSound = () => {

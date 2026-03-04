@@ -173,8 +173,13 @@ interface ReceiverProps {
 
 const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
     const t = useTranslations();
-    const [isJoined, setIsJoined] = useState(false);
-    const [roomId, setRoomId] = useState('');
+    const [isJoined, setIsJoined] = useState(() => {
+        const saved = localStorage.getItem('br_receiver_roomId');
+        return !!saved && saved.length >= 6;
+    });
+    const [roomId, setRoomId] = useState(() => {
+        return localStorage.getItem('br_receiver_roomId') || '';
+    });
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
     const [showHistory, setShowHistory] = useState(false);
@@ -186,7 +191,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
     const activeRef = useRef<HTMLDivElement>(null);
     const engine = useRef({
         lastId: '',
-        isJoined: false,
+        isJoined: !!localStorage.getItem('br_receiver_roomId'),
         isListening: true
     });
 
@@ -231,6 +236,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                 if (r.status === 404) {
                     engine.current.isJoined = false;
                     ttsManager.cancelAll();
+                    localStorage.removeItem('br_receiver_roomId');
                     setIsJoined(false);
                     return;
                 }
@@ -242,6 +248,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                     if (data.roomDeleted || data.notFound) {
                         engine.current.isJoined = false;
                         ttsManager.cancelAll();
+                        localStorage.removeItem('br_receiver_roomId');
                         setIsJoined(false);
                         return;
                     }
@@ -338,6 +345,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                         <button
                             disabled={roomId.length < 6}
                             onClick={() => {
+                                localStorage.setItem('br_receiver_roomId', roomId);
                                 engine.current.isJoined = true;
                                 setIsJoined(true);
                             }}

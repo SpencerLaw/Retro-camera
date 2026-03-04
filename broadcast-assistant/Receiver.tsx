@@ -85,6 +85,31 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         isPlayingRef.current = isPlaying; 
     }, [isPlaying]);
 
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [showSettings, setShowSettings] = useState(false);
+
+    // Custom Dialog State
+    const [dialog, setDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: DialogType;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info',
+        onConfirm: () => { }
+    });
+
+    const closeDialog = () => setDialog(prev => ({ ...prev, isOpen: false }));
+    const openDialog = (title: string, message: string, type: DialogType, onConfirm: () => void) => {
+        setDialog({ isOpen: true, title, message, type, onConfirm });
+    };
+
     const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>(() => {
         try {

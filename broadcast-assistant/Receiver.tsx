@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, AlertCircle, Tv, Signal, X, History, Clock, Radio } from 'lucide-react';
+import { Volume2, VolumeX, AlertCircle, Tv, Signal, X, History, Clock, Radio } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { ttsManager } from './utils/ttsManager';
 import CustomDialog, { DialogType } from './components/CustomDialog';
@@ -15,212 +15,190 @@ interface Message {
     voice?: string;
 }
 
-const ClockDisplay = () => {
+const ClockDisplay = React.memo(() => {
     const [time, setTime] = useState(new Date());
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
-    return <span>{time.toLocaleTimeString()}</span>;
-};
-
-const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef }: { sentence: string, isActive: boolean, isPast: boolean, isEmergency: boolean, textLength: number, activeSentenceRef: React.RefObject<HTMLDivElement> }) => {
-    return (
-        <div
-            ref={isActive ? activeSentenceRef : null}
-            className={`relative block py-4 md:py-6 w-full break-words select-none text-center ${isActive ? (isEmergency ? 'text-white font-black' : 'text-blue-600 dark:text-cyan-400 font-black') : isPast ? 'opacity-30' : 'opacity-10'} ${textLength > 300 ? 'text-lg md:text-2xl' : textLength > 100 ? 'text-xl md:text-4xl' : 'text-3xl md:text-7xl'}`}
-        >
-            {sentence}
-        </div>
-    );
+    return <span className="tabular-nums">{time.toLocaleTimeString()}</span>;
 });
-SentenceItem.displayName = 'SentenceItem';
+
+const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef }: any) => (
+    <div
+        ref={isActive ? activeSentenceRef : null}
+        className={`py-4 w-full text-center transition-all ${isActive ? (isEmergency ? 'text-white font-black scale-105' : 'text-blue-600 font-black scale-105') : isPast ? 'opacity-30' : 'opacity-10'} ${textLength > 300 ? 'text-2xl' : 'text-4xl'}`}
+    >
+        {sentence}
+    </div>
+));
 
 const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () => void }> = ({ isDark, toggleTheme, onExit }) => {
     const t = useTranslations();
     const urlParams = new URLSearchParams(window.location.search);
-    const urlRoom = urlParams.get('room')?.toUpperCase().trim() || '';
-    const urlAutoStart = urlParams.get('autostart') === '1';
+    const roomFromUrl = urlParams.get('room')?.toUpperCase().trim();
 
-    // Core States
-    const [fullRoomId, setFullRoomId] = useState(() => urlRoom || localStorage.getItem('br_receiver_room') || '');
-    const [isJoined, setIsJoined] = useState(() => !!urlRoom || !!localStorage.getItem('br_receiver_room'));
+    // 1. Minimal State
+    const [fullRoomId, setFullRoomId] = useState(() => roomFromUrl || localStorage.getItem('br_receiver_room') || '');
+    const [isJoined, setIsJoined] = useState(!!roomFromUrl || !!localStorage.getItem('br_receiver_room'));
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
-    const [syncedChannelName, setSyncedChannelName] = useState(() => localStorage.getItem(`br_synced_name_${localStorage.getItem('br_receiver_room') || ''}`) || '');
     const [isPlaying, setIsPlaying] = useState(false);
     const [isListening, setIsListening] = useState(() => localStorage.getItem('br_listening') !== 'false');
-    const [isFullscreen, setIsFullscreen] = useState(false);
     const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
-    const [receiverStatus, setReceiverStatus] = useState<'idle' | 'listening' | 'playing' | 'error'>('listening');
-    const [error, setError] = useState<string | null>(null);
     const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '', type: 'info' as DialogType, onConfirm: () => {} });
 
-    // Refs
-    const isPlayingRef = useRef(false);
-    const isListeningRef = useRef(isListening);
-    const lastPlayedId = useRef<string | null>(null);
-    const pollingTimer = useRef<any>(null);
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const activeSentenceRef = useRef<HTMLDivElement>(null);
-    const pendingPlayouts = useRef<number>(0);
+    // 2. Control Refs (Not triggering re-renders)
+    const engine = useRef({
+        lastId: '',
+        isJoined: isJoined,
+        isListening: isListening,
+        currentPlaybackId: 0,
+        polling: false
+    });
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const activeRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+    // Sync Ref
+    useEffect(() => { engine.current.isJoined = isJoined; }, [isJoined]);
     useEffect(() => { 
-        isListeningRef.current = isListening; 
+        engine.current.isListening = isListening;
         localStorage.setItem('br_listening', isListening ? 'true' : 'false');
     }, [isListening]);
 
+    // Initial Load
     useEffect(() => {
-        const savedHistory = localStorage.getItem('br_receiver_history');
-        if (savedHistory) try { setReceivedHistory(JSON.parse(savedHistory).slice(-30)); } catch(e){}
+        const saved = localStorage.getItem('br_receiver_history');
+        if (saved) try { setReceivedHistory(JSON.parse(saved).slice(-20)); } catch(e){}
     }, []);
 
-    const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string, voiceOverride?: string) => {
-        if (lastPlayedId.current === id && isPlayingRef.current) return;
-        
+    // 3. Play Logic
+    const runPlayback = useCallback(async (msg: Message) => {
         ttsManager.cancelAll();
-        const currentPlaybackId = ttsManager.getActivePlaybackId();
-        lastPlayedId.current = id;
+        const pId = ttsManager.getActivePlaybackId();
+        engine.current.currentPlaybackId = pId;
         
-        const countLimit = (repeatCount === -1 || repeatCount > 50) ? 99 : Math.max(1, repeatCount);
-        pendingPlayouts.current = countLimit;
         setIsPlaying(true);
-        setReceiverStatus('playing');
+        const sentences = msg.text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [msg.text];
+        let repeats = (msg.repeatCount === -1 || msg.repeatCount! > 50) ? 99 : (msg.repeatCount || 1);
 
-        const playMessageCycles = async () => {
-            const currentSentences = text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [text];
-            try {
-                while (pendingPlayouts.current > 0) {
-                    if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
-                    for (let i = 0; i < currentSentences.length; i++) {
-                        if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
-                        setActiveSentenceIndex(i);
-                        await new Promise(r => setTimeout(r, 100)); // Yield to UI
-                        
-                        const sentence = currentSentences[i].trim();
-                        if (!sentence) continue;
-
-                        await ttsManager.speak(sentence, {
-                            engine: voiceOverride === 'native' ? 'native' : 'edge',
-                            voice: voiceOverride || 'zh-CN-XiaoxiaoNeural',
-                            rate: isEmergency ? 0.85 : 1.0,
-                            volume: 1.5,
-                        });
-                    }
-                    pendingPlayouts.current--;
-                    if (pendingPlayouts.current > 0 && ttsManager.getActivePlaybackId() === currentPlaybackId) {
-                        setActiveSentenceIndex(-1);
-                        await new Promise(r => setTimeout(r, 2000));
-                    }
+        try {
+            while (repeats > 0 && ttsManager.getActivePlaybackId() === pId) {
+                for (let i = 0; i < sentences.length; i++) {
+                    if (ttsManager.getActivePlaybackId() !== pId) break;
+                    setActiveSentenceIndex(i);
+                    await new Promise(r => setTimeout(r, 100)); // Browser breath
+                    await ttsManager.speak(sentences[i].trim(), {
+                        engine: 'edge',
+                        voice: msg.voice || 'zh-CN-XiaoxiaoNeural',
+                        rate: msg.isEmergency ? 0.85 : 1.0,
+                        volume: 1.5
+                    });
                 }
-            } finally {
-                if (ttsManager.getActivePlaybackId() === currentPlaybackId) {
-                    setIsPlaying(false);
+                repeats--;
+                if (repeats > 0 && ttsManager.getActivePlaybackId() === pId) {
                     setActiveSentenceIndex(-1);
-                    setReceiverStatus('listening');
+                    await new Promise(r => setTimeout(r, 2000));
                 }
             }
-        };
-        playMessageCycles();
+        } finally {
+            if (ttsManager.getActivePlaybackId() === pId) {
+                setIsPlaying(false);
+                setActiveSentenceIndex(-1);
+            }
+        }
     }, []);
 
-    const fetchMessage = useCallback(async () => {
-        if (!fullRoomId.trim()) return;
-        try {
-            const resp = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);
-            if (resp.status === 404) return;
-            const data = await resp.json();
-            if (data && data.message) {
-                const msg = data.message as Message;
-                if (msg.id !== lastPlayedId.current) {
-                    lastPlayedId.current = msg.id;
-                    setCurrentMsg(msg);
-                    setReceivedHistory(prev => {
-                        const newHist = [...prev, msg].slice(-30);
-                        localStorage.setItem('br_receiver_history', JSON.stringify(newHist));
-                        return newHist;
-                    });
-                    if (isListeningRef.current) speak(msg.text, msg.isEmergency, msg.repeatCount || 1, msg.id, msg.voice);
-                }
-            } else if (!isPlayingRef.current) {
-                setCurrentMsg(null);
-                setReceiverStatus('listening');
-            }
-        } catch (err) {}
-    }, [fullRoomId, speak]);
-
+    // 4. Unified Engine Effect
     useEffect(() => {
         if (!isJoined) return;
+
         const poll = async () => {
-            await fetchMessage();
-            pollingTimer.current = setTimeout(poll, 3000);
+            if (!engine.current.isJoined) return;
+            try {
+                const r = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);
+                if (r.ok) {
+                    const data = await r.json();
+                    const msg = data.message as Message;
+                    if (msg && msg.id !== engine.current.lastId) {
+                        engine.current.lastId = msg.id;
+                        setCurrentMsg(msg);
+                        setReceivedHistory(prev => {
+                            const next = [...prev, msg].slice(-20);
+                            setTimeout(() => localStorage.setItem('br_receiver_history', JSON.stringify(next)), 0);
+                            return next;
+                        });
+                        if (engine.current.isListening) runPlayback(msg);
+                    } else if (!msg && !isPlaying) {
+                        setCurrentMsg(null);
+                    }
+                }
+            } catch (e) {}
+            if (engine.current.isJoined) setTimeout(poll, 3000);
         };
+
         poll();
         ttsManager.startSilentLoop();
-        return () => { if (pollingTimer.current) clearTimeout(pollingTimer.current); };
-    }, [isJoined, fetchMessage]);
+        return () => { engine.current.isJoined = false; ttsManager.cancelAll(); };
+    }, [isJoined, fullRoomId, runPlayback]);
 
+    // Scroll
     useEffect(() => {
-        if (activeSentenceRef.current) activeSentenceRef.current.scrollIntoView({ behavior: 'auto', block: 'center' });
+        if (activeRef.current) activeRef.current.scrollIntoView({ behavior: 'auto', block: 'center' });
     }, [activeSentenceIndex]);
-
-    const handleStart = () => {
-        if (!fullRoomId.trim()) return;
-        setIsJoined(true);
-        localStorage.setItem('br_receiver_room', fullRoomId.toUpperCase());
-    };
 
     const sentences = useMemo(() => (currentMsg?.text || '').match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [currentMsg?.text || ''], [currentMsg?.text]);
 
     if (!isJoined) {
         return (
             <div className={`fixed inset-0 flex items-center justify-center ${isDark ? 'bg-black' : 'bg-gray-100'}`}>
-                <div className="max-w-md w-full p-8 bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl text-center">
-                    <Tv size={48} className="mx-auto mb-6 text-blue-500" />
-                    <h2 className="text-2xl font-bold mb-6 dark:text-white">{t('broadcast.receiver.joinChannel')}</h2>
-                    <input type="text" value={fullRoomId} onChange={(e) => setFullRoomId(e.target.value.toUpperCase())} className="w-full p-4 mb-4 rounded-xl border dark:bg-black dark:text-white text-center text-xl font-bold" placeholder="ROOM CODE" />
-                    <button onClick={handleStart} className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg">ENTER</button>
+                <div className="p-10 bg-white dark:bg-zinc-900 rounded-[3rem] shadow-2xl text-center w-full max-w-lg">
+                    <Tv size={64} className="mx-auto mb-8 text-blue-500" />
+                    <input type="text" value={fullRoomId} onChange={e => setFullRoomId(e.target.value.toUpperCase())} className="w-full p-6 mb-6 rounded-3xl border-2 dark:bg-black dark:text-white text-center text-3xl font-black" placeholder="ROOM CODE" maxLength={8} />
+                    <button onClick={() => { if(fullRoomId) { setIsJoined(true); localStorage.setItem('br_receiver_room', fullRoomId); } }} className="w-full py-6 bg-blue-600 text-white rounded-3xl font-black text-2xl hover:scale-[1.02] active:scale-95 transition">JOIN CLASSROOM</button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={`fixed inset-0 flex flex-col ${currentMsg?.isEmergency ? 'bg-red-600 text-white' : (isDark ? 'bg-black text-white' : 'bg-gray-50 text-black')}`}>
-            <div className="p-6 flex justify-between items-center bg-black/5">
-                <div className="flex items-center gap-4">
-                    <div className="px-4 py-2 bg-white/10 rounded-lg font-bold">{fullRoomId}</div>
-                    <div className={`w-3 h-3 rounded-full ${receiverStatus === 'playing' ? 'bg-blue-500 animate-ping' : 'bg-green-500'}`} />
-                    <ClockDisplay />
-                    <button onClick={() => setIsListening(!isListening)} className="p-2 bg-white/10 rounded-full">{isListening ? <Volume2 size={20} /> : <VolumeX size={20} />}</button>
+        <div className={`fixed inset-0 flex flex-col transition-colors duration-500 ${currentMsg?.isEmergency ? 'bg-red-600 text-white' : (isDark ? 'bg-black text-white' : 'bg-gray-50 text-black')}`}>
+            <div className="p-8 flex justify-between items-center bg-black/5">
+                <div className="flex items-center gap-6">
+                    <div className="px-6 py-3 bg-white/10 rounded-2xl font-black text-xl tracking-widest">{fullRoomId}</div>
+                    <div className={`w-4 h-4 rounded-full ${isPlaying ? 'bg-blue-500 animate-ping' : 'bg-green-500'}`} />
+                    <div className="text-xl font-mono font-bold opacity-60"><ClockDisplay /></div>
+                    <button onClick={() => setIsListening(!isListening)} className={`p-4 rounded-full transition ${isListening ? 'bg-green-500 text-white' : 'bg-white/10 text-gray-400'}`}>{isListening ? <Volume2 size={28} /> : <VolumeX size={28} />}</button>
                 </div>
-                <button onClick={() => { setIsJoined(false); ttsManager.cancelAll(); }} className="p-2 bg-red-500/20 text-red-500 rounded-full"><X size={20} /></button>
+                <button onClick={() => { setIsJoined(false); ttsManager.cancelAll(); }} className="p-4 bg-red-500/20 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition"><X size={28} /></button>
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
+            <div className="flex-1 flex flex-col items-center justify-center p-10 overflow-hidden relative">
                 {currentMsg ? (
-                    <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto pb-[200px]">
-                        <div className="max-w-4xl mx-auto pt-20">
-                            {sentences.map((sentence, sIdx) => (
-                                <SentenceItem key={sIdx} sentence={sentence} isActive={sIdx === activeSentenceIndex} isPast={activeSentenceIndex === -1 ? false : sIdx < activeSentenceIndex} isEmergency={!!currentMsg.isEmergency} textLength={currentMsg.text.length} activeSentenceRef={activeSentenceRef} />
+                    <div className="w-full h-full overflow-y-auto scrollbar-hide">
+                        <div className="max-w-5xl mx-auto py-40">
+                            {sentences.map((s, i) => (
+                                <SentenceItem key={i} sentence={s} isActive={i === activeSentenceIndex} isPast={activeSentenceIndex !== -1 && i < activeSentenceIndex} isEmergency={!!currentMsg.isEmergency} textLength={currentMsg.text.length} activeSentenceRef={activeRef} />
                             ))}
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center opacity-20"><Signal size={64} className="mx-auto mb-4 animate-pulse" /><p className="text-2xl font-black">WAITING FOR SIGNAL...</p></div>
+                    <div className="text-center opacity-10"><Signal size={120} className="mx-auto mb-8 animate-pulse" /><p className="text-5xl font-black tracking-widest">LISTENING...</p></div>
                 )}
             </div>
 
-            <div className="p-4 bg-black/5 backdrop-blur-sm">
-                <div className="max-w-4xl mx-auto flex gap-3 overflow-x-auto">
-                    {receivedHistory.slice().reverse().map(msg => (
-                        <div key={msg.id} className="flex-none w-48 p-3 bg-white/10 rounded-lg text-sm truncate opacity-60">{msg.text}</div>
+            <div className="p-6 bg-black/5">
+                <div className="max-w-6xl mx-auto flex gap-4 overflow-x-auto pb-2">
+                    {receivedHistory.slice().reverse().map(m => (
+                        <button key={m.id} onClick={() => runPlayback(m)} className="flex-none w-64 p-4 bg-white/5 rounded-2xl text-left hover:bg-white/10 transition border border-white/5">
+                            <div className="text-[10px] opacity-40 mb-1 font-bold">{new Date(parseInt(m.timestamp) || Date.now()).toLocaleTimeString()}</div>
+                            <div className="text-sm font-bold truncate">{m.text}</div>
+                        </button>
                     ))}
                 </div>
             </div>
 
-            <CustomDialog isOpen={dialog.isOpen} title={dialog.title} message={dialog.message} type={dialog.type} onConfirm={dialog.onConfirm} onCancel={() => setDialog({ ...dialog, isOpen: false })} isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
+            <CustomDialog isOpen={dialog.isOpen} title={dialog.title} message={dialog.message} type={dialog.type} onConfirm={dialog.onConfirm} onCancel={() => setDialog({...dialog, isOpen: false})} isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
         </div>
     );
 };

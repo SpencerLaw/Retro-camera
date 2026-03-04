@@ -20,12 +20,13 @@ class TTSManager {
     private isSilentLoopPlaying: boolean = false;
     private currentBlobUrl: string | null = null;
     private metaListener: (() => void) | null = null;
-    private blobPool: Set<string> = new Set();
+    private blobPool: Map<string, string> = new Map(); // Map sentence to URL for better cleanup
 
     // Web Audio API for volume boost
     private audioCtx: AudioContext | null = null;
     private sourceNode: MediaElementAudioSourceNode | null = null;
     private gainNode: GainNode | null = null;
+    private activePlaybackId: number = 0;
 
 
 
@@ -41,8 +42,10 @@ class TTSManager {
     }
 
     public async speak(text: string, options: Partial<TTSOptions> = {}): Promise<void> {
-        this.stop();
+        this.stop(false); // Stop current but don't clear everything if we're in sequence
         this.startSilentLoop();
+
+        const playbackId = this.activePlaybackId;
 
         return new Promise<void>(async (resolve) => {
             let settled = false;
@@ -52,9 +55,8 @@ class TTSManager {
                 resolve();
             };
 
-            // Safety timeout: if audio is blocked by policy and never starts, 
-            // we must still resolve to prevent deadlocking the UI sequence.
-            const timeout = setTimeout(settle, 12000);
+            // Safety timeout
+            const timeout = setTimeout(settle, 15000);
 
             const extendedOptions = {
                 ...options,
@@ -66,12 +68,14 @@ class TTSManager {
             };
 
             try {
+                if (this.activePlaybackId !== playbackId) { settle(); return; }
+
                 switch (options.engine) {
                     case 'fish':
                         await this.speakFish(text, extendedOptions);
                         break;
                     case 'edge':
-                        await this.speakEdge(text, extendedOptions);
+                        await this.speakEdge(text, extendedOptions, playbackId);
                         break;
                     case 'native':
                     default:
@@ -80,7 +84,11 @@ class TTSManager {
                 }
             } catch (e) {
                 console.error('TTS execution failed, falling back to native:', e);
-                this.speakNative(text, extendedOptions);
+                if (this.activePlaybackId === playbackId) {
+                    this.speakNative(text, extendedOptions);
+                } else {
+                    settle();
+                }
             }
         });
     }
@@ -89,8 +97,11 @@ class TTSManager {
      * Pre-fetches audio and returns a Blob URL.
      * Useful for zero-gap sequencing.
      */
-    public async prefetch(text: string, options: TTSOptions): Promise<string | null> {
+    public async prefetch(text: string, options: TTSOptions, playbackId?: number): Promise<string | null> {
         if (options.engine === 'native') return null;
+        
+        // If prefetch is for a stale playback, abort immediately
+        if (playbackId !== undefined && playbackId !== this.activePlaybackId) return null;
 
         try {
             let blob: Blob | null = null;
@@ -98,8 +109,12 @@ class TTSManager {
             else blob = await this.fetchEdgeBlob(text, options);
 
             if (!blob) return null;
+            
+            // Final check before creating URL
+            if (playbackId !== undefined && playbackId !== this.activePlaybackId) return null;
+
             const url = URL.createObjectURL(blob);
-            this.blobPool.add(url);
+            this.blobPool.set(text, url);
             return url;
         } catch (e) {
             if ((e as any).name === 'AbortError') {
@@ -114,25 +129,37 @@ class TTSManager {
     /**
      * Plays a previously prefetched Blob URL.
      */
-    public playBlob(url: string, text: string, options: TTSOptions): Promise<void> {
-        this.stop();
+    public playBlob(url: string, text: string, options: TTSOptions, playbackId?: number): Promise<void> {
+        this.stop(false); // Stop current but don't clear everything if we're in sequence
         if (!this.audio) return Promise.resolve();
 
         return new Promise((resolve, reject) => {
-            this.audio!.onplay = () => {
-                if (options.onStart) options.onStart();
-                this.simulateBoundaries(text, options, this.audio!);
-            };
-            this.audio!.onended = () => {
+            const onEnded = () => {
                 this.clearBoundaryTimer();
                 // Automatically clean up blob memory to prevent leaks
                 if (url.startsWith('blob:')) {
                     URL.revokeObjectURL(url);
-                    this.blobPool.delete(url);
+                    // Find and remove from pool by value
+                    for (let [key, val] of this.blobPool.entries()) {
+                        if (val === url) {
+                            this.blobPool.delete(key);
+                            break;
+                        }
+                    }
                     if (this.currentBlobUrl === url) this.currentBlobUrl = null;
                 }
                 if (options.onEnd) options.onEnd();
                 resolve();
+            };
+
+            this.audio!.onplay = () => {
+                if (options.onStart) options.onStart();
+                this.simulateBoundaries(text, options, this.audio!);
+            };
+            this.audio!.onended = onEnded;
+            this.audio!.onerror = (e) => {
+                console.error('Audio element error:', e);
+                onEnded();
             };
 
             this.currentBlobUrl = url;
@@ -146,15 +173,14 @@ class TTSManager {
                 this.gainNode.gain.setTargetAtTime(1.0, this.audioCtx!.currentTime, 0.1);
             }
 
+            if (playbackId !== undefined && playbackId !== this.activePlaybackId) {
+                onEnded();
+                return;
+            }
+
             this.audio!.play().catch((e) => {
                 console.warn('Audio play blocked/failed:', e);
-                // CRITICAL: Clean up blob to prevent massive memory leak on retry loops
-                if (url.startsWith('blob:')) {
-                    URL.revokeObjectURL(url);
-                    this.blobPool.delete(url);
-                    if (this.currentBlobUrl === url) this.currentBlobUrl = null;
-                }
-                reject(e);
+                onEnded();
             });
         });
     }
@@ -182,23 +208,29 @@ class TTSManager {
         }
     }
 
-    public stop(): void {
-        // Since we now use per-fetch abort controllers with timeouts, 
-        // we rely on the caller (Receiver.tsx) to manage high-level orchestration 
-        // using playbackIdRef for sequence control.
+    public stop(clearPool: boolean = true): void {
+        this.activePlaybackId++; // Invalidate any current async sequences
 
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
         if (this.audio) {
+            this.audio.onended = null;
+            this.audio.onerror = null;
             this.audio.pause();
             const prevSrc = this.audio.src;
             this.audio.src = '';
 
-            // CRITICAL: Immediate revocation of the blob just used
-            if (prevSrc && prevSrc.startsWith('blob:') && this.blobPool.has(prevSrc)) {
+            // Immediate revocation of the blob just used
+            if (prevSrc && prevSrc.startsWith('blob:')) {
                 URL.revokeObjectURL(prevSrc);
-                this.blobPool.delete(prevSrc);
+                // Clean from map
+                for (let [key, val] of this.blobPool.entries()) {
+                    if (val === prevSrc) {
+                        this.blobPool.delete(key);
+                        break;
+                    }
+                }
             }
 
             // Remove lingering metadata listener if any
@@ -209,19 +241,25 @@ class TTSManager {
         }
         this.clearBoundaryTimer();
         if (this.currentBlobUrl) {
-            if (this.blobPool.has(this.currentBlobUrl)) {
-                URL.revokeObjectURL(this.currentBlobUrl);
-                this.blobPool.delete(this.currentBlobUrl);
-            }
+            URL.revokeObjectURL(this.currentBlobUrl);
             this.currentBlobUrl = null;
         }
+        if (clearPool) {
+            this.clearPool();
+        }
+    }
+
+    public getActivePlaybackId(): number {
+        return this.activePlaybackId;
     }
 
     /**
      * Clear all pooled blobs to free memory.
      */
     public clearPool(): void {
-        this.blobPool.forEach(url => URL.revokeObjectURL(url));
+        this.blobPool.forEach(url => {
+            try { URL.revokeObjectURL(url); } catch (e) { }
+        });
         this.blobPool.clear();
     }
 
@@ -304,14 +342,16 @@ class TTSManager {
         return null;
     }
 
-    private async speakEdge(text: string, options: TTSOptions): Promise<void> {
+    private async speakEdge(text: string, options: TTSOptions, playbackId?: number): Promise<void> {
         let blob = await this.fetchEdgeBlob(text, options);
 
         if (blob) {
+            if (playbackId !== undefined && playbackId !== this.activePlaybackId) return;
             const url = URL.createObjectURL(blob);
-            this.blobPool.add(url);
-            await this.playBlob(url, text, options);
+            this.blobPool.set(text, url);
+            await this.playBlob(url, text, options, playbackId);
         } else {
+            if (playbackId !== undefined && playbackId !== this.activePlaybackId) return;
             console.error('All cloud TTS engines failed, falling back to native');
             this.speakNative(text, options);
         }

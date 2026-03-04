@@ -116,7 +116,6 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
 
     const prefetchedBlobs = useRef<Record<string, string>>({});
-    const playbackIdRef = useRef(0);
     const lastPlayedId = useRef<string | null>(null);
     const pollingTimer = useRef<NodeJS.Timeout | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -215,105 +214,86 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string, voiceOverride?: string) => {
         if (lastPlayedId.current === id && isPlayingRef.current) return;
+        
+        // Stop any current playback and clear previous loops
+        ttsManager.stop(true);
+        const currentPlaybackId = ttsManager.getActivePlaybackId();
+        
         lastPlayedId.current = id;
         if (fullRoomId) {
             localStorage.setItem(`br_last_played_id_${fullRoomId.trim().toUpperCase()}`, id);
         }
 
-        const currentPlaybackId = ++playbackIdRef.current;
         pendingPlayouts.current = repeatCount === -1 ? 999 : repeatCount;
         setIsPlaying(true);
         isPlayingRef.current = true;
         setReceiverStatus('playing');
-        ttsManager.clearPool();
         prefetchedBlobs.current = {};
 
         const playMessageCycles = async () => {
             const currentSentences = text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g) || [text];
-            while (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
-                if (playbackIdRef.current !== currentPlaybackId) break;
+            
+            try {
+                while (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
+                    if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
 
-                if (playbackIdRef.current !== currentPlaybackId) {
-                    ttsManager.stop();
-                    break;
-                }
+                    for (let i = 0; i < currentSentences.length; i++) {
+                        if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
 
-                for (let i = 0; i < currentSentences.length; i++) {
-                    if (playbackIdRef.current !== currentPlaybackId) break;
+                        setActiveSentenceIndex(i);
+                        // Small delay for UI to catch up
+                        await new Promise(r => setTimeout(r, 100));
+                        
+                        const sentence = currentSentences[i];
+                        const nextSentence = currentSentences[i + 1];
+                        const targetVoice = voiceOverride || 'zh-CN-XiaoxiaoNeural';
+                        const useNative = voiceOverride === 'native';
 
-                    // Ensure UI update before starting long-running await
-                    setActiveSentenceIndex(i);
-                    await new Promise(r => setTimeout(r, 50));
-                    const sentence = currentSentences[i];
-                    const nextSentence = currentSentences[i + 1];
-                    const targetVoice = voiceOverride || 'zh-CN-XiaoxiaoNeural';
-                    const useNative = !voiceOverride || voiceOverride === 'native';
+                        const ttsOptions = {
+                            engine: useNative ? 'native' as const : 'edge' as const,
+                            voice: targetVoice,
+                            rate: isEmergency ? 0.85 : 1.0,
+                            volume: volumeBoost,
+                        };
 
-                    const ttsOptions = {
-                        engine: useNative ? 'native' as const : 'edge' as const,
-                        voice: targetVoice,
-                        rate: isEmergency ? 0.85 : 1.0,
-                        volume: volumeBoost,
-                    };
-
-                    // Handle Prefetching
-                    if (nextSentence && !prefetchedBlobs.current[nextSentence]) {
-                        ttsManager.prefetch(nextSentence, ttsOptions).then(url => {
-                            if (url && playbackIdRef.current === currentPlaybackId) {
-                                prefetchedBlobs.current[nextSentence] = url;
-                            }
-                        });
-                    }
-
-                    let url = prefetchedBlobs.current[sentence];
-
-                    if (url && playbackIdRef.current === currentPlaybackId) {
-                        await new Promise<void>((resolve) => {
-                            let settled = false;
-                            const settle = () => {
-                                if (settled) return;
-                                settled = true;
-                                clearInterval(monitor);
-                                // CRITICAL: Revoke after use and prevent reuse of stale blob
-                                delete prefetchedBlobs.current[sentence];
-                                resolve();
-                            };
-                            const monitor = setInterval(() => {
-                                if (playbackIdRef.current !== currentPlaybackId) {
-                                    ttsManager.stop();
-                                    settle();
+                        // Prefetch next sentence
+                        if (nextSentence && !prefetchedBlobs.current[nextSentence]) {
+                            ttsManager.prefetch(nextSentence, ttsOptions, currentPlaybackId).then(url => {
+                                if (url && ttsManager.getActivePlaybackId() === currentPlaybackId) {
+                                    prefetchedBlobs.current[nextSentence] = url;
                                 }
-                            }, 200);
-                            ttsManager.playBlob(url as string, sentence, {
-                                ...ttsOptions,
-                                onEnd: settle
-                            }).catch(() => {
-                                // Add a 2-second sleep so failing play requests don't instantly loop and CPU spike
-                                setTimeout(settle, 2000);
                             });
-                        });
-                    } else if (playbackIdRef.current === currentPlaybackId) {
-                        const speakPromise = ttsManager.speak(sentence, ttsOptions).catch(e => console.error('Sentence play error:', e));
-                        const timeoutPromise = new Promise<void>(r => setTimeout(r, 15000)); // 15 seconds timeout
-                        await Promise.race([speakPromise, timeoutPromise]);
-                        // Sleep briefly to prevent instant loops if native fallback also fails silently
-                        await new Promise(r => setTimeout(r, 500));
+                        }
+
+                        let url = prefetchedBlobs.current[sentence];
+
+                        if (url && ttsManager.getActivePlaybackId() === currentPlaybackId) {
+                            await ttsManager.playBlob(url as string, sentence, ttsOptions, currentPlaybackId);
+                            delete prefetchedBlobs.current[sentence];
+                        } else if (ttsManager.getActivePlaybackId() === currentPlaybackId) {
+                            await ttsManager.speak(sentence, { ...ttsOptions, onEnd: () => {} });
+                        }
+                        
+                        // Break between sentences
+                        if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
+                        await new Promise(r => setTimeout(r, 200));
+                    }
+
+                    if (pendingPlayouts.current !== 999) pendingPlayouts.current--;
+                    if (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
+                        if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
+                        setActiveSentenceIndex(-1);
+                        await new Promise(r => setTimeout(r, 2000));
                     }
                 }
-
-                if (pendingPlayouts.current !== 999) pendingPlayouts.current--;
-                if (pendingPlayouts.current > 0 || pendingPlayouts.current === 999) {
-                    if (playbackIdRef.current !== currentPlaybackId) break;
+            } finally {
+                // Ensure state is reset if this is still the active playback
+                if (ttsManager.getActivePlaybackId() === currentPlaybackId) {
+                    setIsPlaying(false);
+                    isPlayingRef.current = false;
                     setActiveSentenceIndex(-1);
-                    await new Promise(r => setTimeout(r, 3000));
+                    setReceiverStatus('listening');
                 }
-            }
-
-            if (playbackIdRef.current === currentPlaybackId) {
-                setIsPlaying(false);
-                isPlayingRef.current = false;
-                setActiveSentenceIndex(-1);
-                setReceiverStatus('listening');
             }
         };
 
@@ -403,9 +383,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     // Global cleanup on unmount
     useEffect(() => {
         return () => {
-            playbackIdRef.current++; // Kill any async speak loops
-            ttsManager.stop();
-            ttsManager.clearPool();
+            ttsManager.stop(true); // Stop all and clear pool
             ttsManager.stopSilentLoop();
         };
     }, []);
@@ -421,9 +399,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     useEffect(() => {
         if (!isListening) {
-            playbackIdRef.current++;
-            ttsManager.stop();
-            ttsManager.clearPool();
+            ttsManager.stop(true);
             pendingPlayouts.current = 0;
             setIsPlaying(false);
             setActiveSentenceIndex(-1);

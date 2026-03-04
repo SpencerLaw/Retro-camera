@@ -24,73 +24,92 @@ const ClockDisplay = React.memo(() => {
     return <span className="tabular-nums">{time.toLocaleTimeString()}</span>;
 });
 
-// ─── Premium Idle Visualizer ─────────────────────────────────────────────────
+// ─── Premium Radar Visualizer ────────────────────────────────────────────────
 const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) => {
-    const c = isEmergency ? {
-        ring1: 'border-red-500/15',
-        ring2: 'border-red-400/10',
-        ring3: 'border-red-300/5',
-        beam: 'rgba(239,68,68,0.5)',
-        glow: 'bg-red-500',
-        core: 'from-red-500 via-rose-600 to-red-800',
-        shadow: 'shadow-[0_0_80px_20px_rgba(239,68,68,0.25)]',
-        dot: 'bg-red-400',
-    } : {
-        ring1: 'border-violet-500/15',
-        ring2: 'border-indigo-400/10',
-        ring3: 'border-blue-300/5',
-        beam: 'rgba(139,92,246,0.5)',
-        glow: 'bg-violet-600',
-        core: 'from-violet-600 via-indigo-600 to-blue-700',
-        shadow: 'shadow-[0_0_80px_20px_rgba(139,92,246,0.2)]',
-        dot: 'bg-violet-400',
-    };
+    const accent = isEmergency ? '#ef4444' : '#8b5cf6';
+    const accentAlpha = (a: number) => isEmergency ? `rgba(239,68,68,${a})` : `rgba(139,92,246,${a})`;
 
     return (
-        <div className="relative flex items-center justify-center" style={{ width: 340, height: 340 }}>
-            {/* Ambient glow */}
-            <div className={`absolute rounded-full ${c.glow} opacity-10 blur-[100px]`} style={{ width: 500, height: 500 }} />
+        <div className="relative flex items-center justify-center select-none" style={{ width: 360, height: 360 }}>
 
-            {/* Ring 1 – slow CW */}
-            <div className={`absolute inset-0 rounded-full border-2 border-dashed ${c.ring1} animate-[spin_70s_linear_infinite]`} style={{ borderSpacing: 8 }} />
-            {/* Ring 2 – medium CCW */}
-            <div className={`absolute rounded-full border border-dashed ${c.ring2} animate-[spin_35s_linear_infinite_reverse]`} style={{ inset: '14px' }} />
-            {/* Ring 3 – fast CW */}
-            <div className={`absolute rounded-full border ${c.ring3} animate-[spin_18s_linear_infinite]`} style={{ inset: '30px' }} />
+            {/* ── Ambient glow ── */}
+            <div className="absolute rounded-full blur-[120px] opacity-15 animate-pulse"
+                style={{ width: 500, height: 500, background: accent }} />
 
-            {/* Conic sweep */}
-            <div
-                className="absolute rounded-full animate-[spin_4s_linear_infinite]"
-                style={{
-                    inset: '10px',
-                    background: `conic-gradient(from 0deg, transparent 0%, transparent 75%, ${c.beam} 100%)`,
-                    filter: 'blur(3px)',
-                }}
-            />
+            {/* ── Ring 1: outermost slow CW ── */}
+            <div className="absolute inset-0 rounded-full animate-[spin_80s_linear_infinite]"
+                style={{ border: `1px dashed ${accentAlpha(0.18)}` }} />
 
-            {/* Inner solid ring */}
-            <div className="absolute rounded-full border border-white/[0.06]" style={{ inset: '60px' }} />
+            {/* ── Ring 2: medium CCW ── */}
+            <div className="absolute rounded-full animate-[spin_38s_linear_infinite_reverse]"
+                style={{ inset: 18, border: `1px solid ${accentAlpha(0.12)}` }} />
 
-            {/* Core orb */}
-            <div className={`relative z-10 flex items-center justify-center rounded-full ${c.shadow} bg-gradient-to-br ${c.core} border border-white/10`}
-                style={{ width: 140, height: 140 }}>
-                <div className="absolute inset-0 rounded-full bg-white/10 animate-pulse" />
-                <div className="absolute rounded-full bg-white/20 blur-2xl" style={{ width: '80%', height: '60%', top: '-10%' }} />
-                <Signal size={52} className="relative z-10 text-white opacity-60 animate-pulse" />
+            {/* ── Ring 3: solid inner ── */}
+            <div className="absolute rounded-full"
+                style={{ inset: 38, border: `1px solid ${accentAlpha(0.08)}` }} />
+
+            {/* ── Crosshair lines ── */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {/* horizontal */}
+                <div className="absolute w-full h-px" style={{ background: `linear-gradient(to right, transparent 0%, ${accentAlpha(0.12)} 20%, ${accentAlpha(0.25)} 50%, ${accentAlpha(0.12)} 80%, transparent 100%)` }} />
+                {/* vertical */}
+                <div className="absolute h-full w-px" style={{ background: `linear-gradient(to bottom, transparent 0%, ${accentAlpha(0.12)} 20%, ${accentAlpha(0.25)} 50%, ${accentAlpha(0.12)} 80%, transparent 100%)` }} />
             </div>
 
-            {/* Orbit dots */}
-            {[0, 60, 120, 180, 240, 300].map((deg, i) => (
-                <div
-                    key={i}
-                    className={`absolute w-1.5 h-1.5 rounded-full ${c.dot} opacity-40`}
-                    style={{
-                        top: '50%',
-                        left: '50%',
-                        transform: `rotate(${deg}deg) translateX(145px) translateY(-50%)`,
-                    }}
-                />
-            ))}
+            {/* ── Radar sweep (comet tail) ── */}
+            <div className="absolute rounded-full animate-[spin_3s_linear_infinite]"
+                style={{
+                    inset: 12,
+                    background: `conic-gradient(from 0deg, ${accentAlpha(0)} 0%, ${accentAlpha(0)} 55%, ${accentAlpha(0.3)} 78%, ${accentAlpha(0.8)} 98%, ${accentAlpha(0)} 100%)`,
+                    filter: 'blur(1.5px)',
+                }} />
+
+            {/* ── Leading edge dot (sweeps with the beam) ── */}
+            <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 12 }}>
+                <div className="absolute w-3 h-3 rounded-full top-[4px] left-1/2 -translate-x-1/2 shadow-lg"
+                    style={{ background: accent, boxShadow: `0 0 10px 4px ${accentAlpha(0.6)}` }} />
+            </div>
+
+            {/* ── Orbit tick marks ── */}
+            <div className="absolute inset-0 animate-[spin_80s_linear_infinite]">
+                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                    <div key={deg} className="absolute w-1.5 h-1.5 rounded-full top-[-3px] left-1/2 -translate-x-1/2"
+                        style={{
+                            background: accentAlpha(0.4),
+                            transform: `rotate(${deg}deg) translateY(${180 - 3}px) translateX(-50%)`,
+                            transformOrigin: '50% 183px',
+                        }} />
+                ))}
+            </div>
+
+            {/* ── Data readout decorations ── */}
+            {['12', '03', '06', '09'].map((label, i) => {
+                const positions = [
+                    { top: '4px', left: '50%', transform: 'translateX(-50%)' },
+                    { top: '50%', right: '4px', transform: 'translateY(-50%)' },
+                    { bottom: '4px', left: '50%', transform: 'translateX(-50%)' },
+                    { top: '50%', left: '4px', transform: 'translateY(-50%)' },
+                ] as const;
+                return (
+                    <div key={label} className="absolute font-mono text-[8px] font-black tracking-widest"
+                        style={{ color: accentAlpha(0.25), ...positions[i] }}>
+                        {label}
+                    </div>
+                );
+            })}
+
+            {/* ── Core orb ── */}
+            <div className="relative z-10 flex items-center justify-center rounded-full border border-white/10"
+                style={{
+                    width: 120,
+                    height: 120,
+                    background: `radial-gradient(circle at 35% 35%, ${accentAlpha(0.8)}, ${accentAlpha(0.5)} 50%, ${accentAlpha(0.3)})`,
+                    boxShadow: `0 0 0 1px ${accentAlpha(0.2)}, 0 0 40px 8px ${accentAlpha(0.2)}, inset 0 1px 0 rgba(255,255,255,0.15)`,
+                }}>
+                {/* Highlight */}
+                <div className="absolute rounded-full bg-white/15 blur-sm" style={{ width: '60%', height: '40%', top: '12%', left: '15%' }} />
+                <Signal size={42} className="relative z-10 text-white animate-pulse" style={{ opacity: 0.55 }} />
+            </div>
         </div>
     );
 });
@@ -124,12 +143,12 @@ const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, text
     <div
         ref={isActive ? activeSentenceRef : null}
         className={`py-8 px-4 w-full text-center transition-all duration-700 transform origin-center ${isActive
-                ? (isEmergency
-                    ? 'text-white font-black scale-110'
-                    : 'text-violet-400 font-black scale-110 drop-shadow-[0_0_40px_rgba(139,92,246,0.5)]')
-                : isPast
-                    ? 'opacity-20 scale-95 blur-[0.5px]'
-                    : 'opacity-8 scale-90'
+            ? (isEmergency
+                ? 'text-white font-black scale-110'
+                : 'text-violet-400 font-black scale-110 drop-shadow-[0_0_40px_rgba(139,92,246,0.5)]')
+            : isPast
+                ? 'opacity-20 scale-95 blur-[0.5px]'
+                : 'opacity-8 scale-90'
             } ${textLength > 300 ? 'text-2xl md:text-4xl' : 'text-4xl md:text-7xl'}`}
     >
         {sentence}
@@ -152,7 +171,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '', type: 'info' as DialogType, onConfirm: () => { } });
-    const [showHistory, setShowHistory] = useState(true);
+    const [showHistory, setShowHistory] = useState(false);
 
     // Engine Control Ref
     const engine = useRef({ lastId: '', isJoined: isJoined, isListening: isListening, pId: 0 });
@@ -445,10 +464,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     key={m.id}
                                     onClick={() => runPlayback(m)}
                                     className={`flex-none w-72 p-5 rounded-2xl text-left transition-all border group snap-start ${m.isEmergency
-                                            ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
-                                            : (isDark
-                                                ? 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-violet-500/25'
-                                                : 'bg-white/60 border-white hover:bg-white hover:border-violet-300 shadow-sm')
+                                        ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
+                                        : (isDark
+                                            ? 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-violet-500/25'
+                                            : 'bg-white/60 border-white hover:bg-white hover:border-violet-300 shadow-sm')
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">

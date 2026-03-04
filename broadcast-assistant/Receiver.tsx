@@ -123,6 +123,17 @@ const SentenceItem: React.FC<SentenceItemProps> = ({
 }) => {
     const scaleFactor = Math.max(0.6, Math.min(1.2, 200 / (textLength || 1)));
 
+    let textColorClass = '';
+    if (isEmergency) {
+        textColorClass = isActive ? 'text-red-300' : 'text-red-900/40';
+    } else {
+        if (theme === 'dark') {
+            textColorClass = isActive ? 'text-white' : 'text-white/20';
+        } else {
+            textColorClass = isActive ? 'text-slate-800' : 'text-slate-300';
+        }
+    }
+
     return (
         <div
             ref={isActive ? activeSentenceRef : null}
@@ -133,13 +144,7 @@ const SentenceItem: React.FC<SentenceItemProps> = ({
         >
             <p
                 style={{ fontSize: `${scaleFactor * (isActive ? 32 : 24)}px` }}
-                className={`font-black tracking-tight leading-relaxed transition-colors duration-500 ${isEmergency
-                    ? (isActive ? 'text-red-300' : 'text-red-900/40')
-                    : (theme === 'dark'
-                        ? (isActive ? 'text-white' : 'text-white/20')
-                        : (isActive ? 'text-slate-800' : 'text-slate-300')
-                    )
-                    }`}
+                className={`font-black tracking-tight leading-relaxed transition-colors duration-500 ${textColorClass}`}
             >
                 {sentence}
             </p>

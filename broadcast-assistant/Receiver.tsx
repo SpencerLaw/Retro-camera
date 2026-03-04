@@ -24,68 +24,119 @@ const ClockDisplay = React.memo(() => {
     return <span className="tabular-nums">{time.toLocaleTimeString()}</span>;
 });
 
-const RadarScanner = React.memo(({ isPlaying, isEmergency }: { isPlaying: boolean; isEmergency: boolean }) => {
+// ─── Premium Idle Visualizer ─────────────────────────────────────────────────
+const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) => {
+    const c = isEmergency ? {
+        ring1: 'border-red-500/15',
+        ring2: 'border-red-400/10',
+        ring3: 'border-red-300/5',
+        beam: 'rgba(239,68,68,0.5)',
+        glow: 'bg-red-500',
+        core: 'from-red-500 via-rose-600 to-red-800',
+        shadow: 'shadow-[0_0_80px_20px_rgba(239,68,68,0.25)]',
+        dot: 'bg-red-400',
+    } : {
+        ring1: 'border-violet-500/15',
+        ring2: 'border-indigo-400/10',
+        ring3: 'border-blue-300/5',
+        beam: 'rgba(139,92,246,0.5)',
+        glow: 'bg-violet-600',
+        core: 'from-violet-600 via-indigo-600 to-blue-700',
+        shadow: 'shadow-[0_0_80px_20px_rgba(139,92,246,0.2)]',
+        dot: 'bg-violet-400',
+    };
+
     return (
-        <div className="relative flex items-center justify-center w-72 h-72 md:w-96 md:h-96">
-            {/* Background Glow */}
-            <div className={`absolute -inset-20 blur-[100px] opacity-20 rounded-full ${isEmergency ? 'bg-red-600' : 'bg-blue-600'} animate-pulse`} />
+        <div className="relative flex items-center justify-center" style={{ width: 340, height: 340 }}>
+            {/* Ambient glow */}
+            <div className={`absolute rounded-full ${c.glow} opacity-10 blur-[100px]`} style={{ width: 500, height: 500 }} />
 
-            {/* Outer Rotating Circles */}
-            <div className={`absolute inset-0 rounded-full border border-dashed ${isEmergency ? 'border-red-500/20' : 'border-blue-500/20'} animate-[spin_60s_linear_infinite]`} />
-            <div className={`absolute inset-6 rounded-full border-2 border-dashed ${isEmergency ? 'border-red-400/10' : 'border-blue-400/10'} animate-[spin_30s_linear_infinite_reverse] opacity-50`} />
-            <div className={`absolute inset-12 rounded-full border border-white/5 animate-[spin_40s_linear_infinite]`} />
+            {/* Ring 1 – slow CW */}
+            <div className={`absolute inset-0 rounded-full border-2 border-dashed ${c.ring1} animate-[spin_70s_linear_infinite]`} style={{ borderSpacing: 8 }} />
+            {/* Ring 2 – medium CCW */}
+            <div className={`absolute rounded-full border border-dashed ${c.ring2} animate-[spin_35s_linear_infinite_reverse]`} style={{ inset: '14px' }} />
+            {/* Ring 3 – fast CW */}
+            <div className={`absolute rounded-full border ${c.ring3} animate-[spin_18s_linear_infinite]`} style={{ inset: '30px' }} />
 
-            {/* Glass Rings */}
-            <div className={`absolute inset-16 rounded-full border border-white/10 backdrop-blur-[2px] shadow-inner`} />
-            <div className={`absolute inset-24 rounded-full border border-white/5`} />
+            {/* Conic sweep */}
+            <div
+                className="absolute rounded-full animate-[spin_4s_linear_infinite]"
+                style={{
+                    inset: '10px',
+                    background: `conic-gradient(from 0deg, transparent 0%, transparent 75%, ${c.beam} 100%)`,
+                    filter: 'blur(3px)',
+                }}
+            />
 
-            {/* Dynamic Scanning Beam */}
-            {!isPlaying && (
-                <div className="absolute inset-4 rounded-full animate-[spin_3s_linear_infinite]"
-                    style={{
-                        background: `conic-gradient(from 0deg, transparent 0%, transparent 70%, ${isEmergency ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)'} 100%)`,
-                        filter: 'blur(2px)'
-                    }} />
-            )}
+            {/* Inner solid ring */}
+            <div className="absolute rounded-full border border-white/[0.06]" style={{ inset: '60px' }} />
 
-            {/* Core Shield */}
-            <div className={`relative z-10 w-36 h-36 md:w-48 md:h-48 rounded-full flex items-center justify-center overflow-hidden transition-all duration-1000 ${isEmergency
-                ? 'bg-gradient-to-br from-red-500 to-rose-700 shadow-[0_0_50px_rgba(239,68,68,0.4)]'
-                : 'bg-gradient-to-br from-blue-500 to-indigo-700 shadow-[0_0_50px_rgba(59,130,246,0.3)]'
-                } ${isPlaying ? 'scale-110' : 'scale-100 opacity-90'} border border-white/20`}>
-                {/* Internal Reflections */}
-                <div className="absolute inset-0 bg-white/10 animate-pulse" />
-                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white/20 rotate-45 blur-xl" />
-
-                <Signal size={isPlaying ? 80 : 64} className={`text-white transition-all duration-700 ${isPlaying ? 'animate-bounce drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'animate-pulse opacity-60'}`} />
+            {/* Core orb */}
+            <div className={`relative z-10 flex items-center justify-center rounded-full ${c.shadow} bg-gradient-to-br ${c.core} border border-white/10`}
+                style={{ width: 140, height: 140 }}>
+                <div className="absolute inset-0 rounded-full bg-white/10 animate-pulse" />
+                <div className="absolute rounded-full bg-white/20 blur-2xl" style={{ width: '80%', height: '60%', top: '-10%' }} />
+                <Signal size={52} className="relative z-10 text-white opacity-60 animate-pulse" />
             </div>
 
-            {/* Active Particles */}
-            {isPlaying && (
-                <div className="absolute inset-[-20%]">
-                    {[...Array(4)].map((_, i) => (
-                        <div key={i} className={`absolute w-2 h-2 rounded-full ${isEmergency ? 'bg-red-400' : 'bg-blue-400'} animate-ping`}
-                            style={{
-                                top: `${Math.random() * 100}%`,
-                                left: `${Math.random() * 100}%`,
-                                animationDelay: `${i * 0.5}s`
-                            }} />
-                    ))}
-                </div>
-            )}
+            {/* Orbit dots */}
+            {[0, 60, 120, 180, 240, 300].map((deg, i) => (
+                <div
+                    key={i}
+                    className={`absolute w-1.5 h-1.5 rounded-full ${c.dot} opacity-40`}
+                    style={{
+                        top: '50%',
+                        left: '50%',
+                        transform: `rotate(${deg}deg) translateX(145px) translateY(-50%)`,
+                    }}
+                />
+            ))}
         </div>
     );
 });
 
+// ─── Active Visualizer (playing state) ───────────────────────────────────────
+const ActiveVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) => {
+    const bars = isEmergency ? 9 : 7;
+    const c = isEmergency
+        ? { bar: 'bg-gradient-to-t from-red-600 to-rose-400', shadow: 'shadow-[0_0_30px_rgba(239,68,68,0.5)]' }
+        : { bar: 'bg-gradient-to-t from-violet-600 to-cyan-400', shadow: 'shadow-[0_0_30px_rgba(139,92,246,0.4)]' };
+
+    return (
+        <div className={`flex items-end justify-center gap-2 h-24 ${c.shadow}`}>
+            {Array.from({ length: bars }).map((_, i) => (
+                <div
+                    key={i}
+                    className={`w-2 rounded-full ${c.bar} animate-bounce`}
+                    style={{
+                        height: `${30 + Math.sin((i / bars) * Math.PI) * 55}%`,
+                        animationDelay: `${i * 0.1}s`,
+                        animationDuration: `${0.6 + (i % 3) * 0.2}s`,
+                    }}
+                />
+            ))}
+        </div>
+    );
+});
+
+// ─── Sentence Item ────────────────────────────────────────────────────────────
 const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef }: any) => (
     <div
         ref={isActive ? activeSentenceRef : null}
-        className={`py-8 px-4 w-full text-center transition-all duration-700 transform origin-center ${isActive ? (isEmergency ? 'text-white font-black scale-110' : 'text-blue-600 dark:text-cyan-400 font-black scale-110 drop-shadow-[0_0_30px_rgba(37,99,235,0.3)]') : isPast ? 'opacity-30 scale-95 blur-[0.5px]' : 'opacity-10 scale-90'} ${textLength > 300 ? 'text-2xl md:text-4xl' : 'text-4xl md:text-7xl'}`}
+        className={`py-8 px-4 w-full text-center transition-all duration-700 transform origin-center ${isActive
+                ? (isEmergency
+                    ? 'text-white font-black scale-110'
+                    : 'text-violet-400 font-black scale-110 drop-shadow-[0_0_40px_rgba(139,92,246,0.5)]')
+                : isPast
+                    ? 'opacity-20 scale-95 blur-[0.5px]'
+                    : 'opacity-8 scale-90'
+            } ${textLength > 300 ? 'text-2xl md:text-4xl' : 'text-4xl md:text-7xl'}`}
     >
         {sentence}
     </div>
 ));
 
+// ─── Main component ───────────────────────────────────────────────────────────
 const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () => void }> = ({ isDark, toggleTheme, onExit }) => {
     const t = useTranslations();
     const urlParams = new URLSearchParams(window.location.search);
@@ -193,118 +244,225 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const sentences = useMemo(() => splitSentences(currentMsg?.text || ''), [currentMsg?.text, splitSentences]);
 
+    // ── Join Screen ──────────────────────────────────────────────────────────
     if (!isJoined) {
         return (
-            <div className={`fixed inset-0 flex items-center justify-center p-6 transition-colors duration-1000 ${isDark ? 'bg-[#050505]' : 'bg-[#F5F5F7]'}`}>
-                <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden">
-                    <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" />
-                    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" />
+            <div className={`fixed inset-0 flex items-center justify-center p-6 transition-colors duration-1000 ${isDark ? 'bg-[#0a0a0f]' : 'bg-slate-100'}`}>
+                {/* bg blobs */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-violet-600/10 blur-[160px] rounded-full animate-pulse" />
+                    <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[160px] rounded-full animate-pulse" />
                 </div>
-                <GlassCard className="max-w-xl w-full p-12 rounded-[3.5rem] relative z-10 border border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)]">
-                    <div className="flex flex-col items-center text-center space-y-10">
-                        <div className="w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-xl rotate-3">
-                            <Tv size={48} />
-                        </div>
-                        <h2 className="text-4xl font-black tracking-tight dark:text-white">欢迎，接入点已就绪</h2>
-                        <div className="w-full space-y-6">
-                            <input type="text" value={fullRoomId} onChange={e => setFullRoomId(e.target.value.toUpperCase())} className="w-full bg-black/5 dark:bg-white/5 border-2 border-transparent focus:border-blue-500 rounded-3xl p-8 text-4xl font-black text-center outline-none transition dark:text-white uppercase tracking-[0.2em] shadow-inner" placeholder="ROOM" maxLength={8} />
-                            <button onClick={() => { if (fullRoomId) { setIsJoined(true); localStorage.setItem('br_receiver_room', fullRoomId); } }} className="w-full py-8 bg-blue-600 hover:bg-blue-500 text-white rounded-3xl font-black text-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-500/30 flex items-center justify-center gap-4">
-                                <Radio size={32} /> 进入教室
-                            </button>
+
+                <div className={`relative z-10 w-full max-w-md p-10 rounded-[3rem] border backdrop-blur-2xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] ${isDark ? 'bg-white/[0.04] border-white/10' : 'bg-white/70 border-white'}`}>
+                    {/* Icon */}
+                    <div className="flex justify-center mb-10">
+                        <div className="relative">
+                            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center text-white shadow-[0_12px_40px_rgba(139,92,246,0.4)] rotate-6">
+                                <Tv size={44} />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/40">
+                                <Radio size={14} className="text-white animate-pulse" />
+                            </div>
                         </div>
                     </div>
-                </GlassCard>
+
+                    <div className="text-center mb-8 space-y-2">
+                        <h1 className={`text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>接入课堂广播</h1>
+                        <p className={`text-sm font-medium ${isDark ? 'text-white/30' : 'text-slate-400'}`}>输入您的教室代码以连接至广播频道</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className={`rounded-2xl p-1 border ${isDark ? 'bg-white/5 border-white/5' : 'bg-slate-100 border-slate-200'}`}>
+                            <input
+                                type="text"
+                                value={fullRoomId}
+                                onChange={e => setFullRoomId(e.target.value.toUpperCase())}
+                                className={`w-full bg-transparent p-5 text-3xl font-black text-center outline-none uppercase tracking-[0.3em] ${isDark ? 'text-white placeholder:text-white/15' : 'text-slate-900 placeholder:text-slate-300'}`}
+                                placeholder="XXXXXX"
+                                maxLength={8}
+                            />
+                        </div>
+                        <button
+                            onClick={() => { if (fullRoomId) { setIsJoined(true); localStorage.setItem('br_receiver_room', fullRoomId); } }}
+                            className="w-full py-6 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-2xl font-black text-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_12px_32px_rgba(139,92,246,0.35)] flex items-center justify-center gap-3"
+                        >
+                            <Radio size={24} /> 进入教室
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
 
+    // ── Classroom Screen ─────────────────────────────────────────────────────
+    const emergency = !!currentMsg?.isEmergency;
+
     return (
-        <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-colors duration-1000 ${currentMsg?.isEmergency ? 'bg-red-600 text-white' : (isDark ? 'bg-[#050505] text-white' : 'bg-[#F5F5F7] text-black')}`}>
-            {/* Atmospheric Background */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
-                <div className={`absolute top-0 left-0 w-full h-full ${isDark ? 'bg-gradient-to-br from-blue-900/20 via-black to-purple-900/20' : 'bg-gradient-to-br from-blue-50 via-white to-pink-50'}`} />
+        <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-all duration-1000 ${emergency ? 'bg-red-950 text-white' : (isDark ? 'bg-[#0a0a0f] text-white' : 'bg-slate-100 text-slate-900')}`}>
+
+            {/* ── Atmospheric BG ─────────────────────────────────────────── */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                {emergency ? (
+                    <>
+                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-900/80 via-red-950 to-black" />
+                        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-red-500/20 blur-[120px] animate-pulse" />
+                        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-red-600/15 blur-[120px] animate-pulse" />
+                    </>
+                ) : isDark ? (
+                    <>
+                        <div className="absolute -top-60 -left-40 w-[700px] h-[700px] rounded-full bg-violet-900/20 blur-[160px] animate-pulse" />
+                        <div className="absolute -bottom-60 -right-40 w-[700px] h-[700px] rounded-full bg-blue-900/20 blur-[160px] animate-pulse" />
+                    </>
+                ) : (
+                    <>
+                        <div className="absolute -top-60 left-0 w-full h-[500px] bg-gradient-to-b from-violet-100/60 to-transparent" />
+                    </>
+                )}
                 {isPlaying && (
-                    <div className={`absolute inset-0 ${currentMsg?.isEmergency ? 'bg-red-500/10' : 'bg-blue-500/5'} animate-pulse`} />
+                    <div className={`absolute inset-0 ${emergency ? 'bg-red-500/5' : 'bg-violet-500/3'} animate-pulse`} />
                 )}
             </div>
 
-            {/* Top Navigation */}
-            <header className="relative z-50 p-8 flex justify-between items-center bg-gradient-to-b from-black/5 to-transparent">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-4 bg-white/10 dark:bg-black/40 border border-white/20 px-8 py-4 rounded-[2rem] backdrop-blur-2xl shadow-xl">
-                        <Radio size={24} className={isJoined ? 'text-green-500 animate-pulse' : 'text-gray-400'} />
-                        <span className="text-2xl font-black tracking-widest">{fullRoomId}</span>
-                        <div className={`w-3 h-3 rounded-full ${isPlaying ? 'bg-blue-500 animate-ping' : 'bg-green-500'}`} />
+            {/* ── Header ─────────────────────────────────────────────────── */}
+            <header className="relative z-50 flex items-center justify-between px-6 py-4">
+                {/* Left: room badge + clock + mute */}
+                <div className="flex items-center gap-3">
+                    {/* Room badge */}
+                    <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl border backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10' : 'bg-white/60 border-white shadow-sm'}`}>
+                        <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-blue-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
+                        <Radio size={16} className={emergency ? 'text-red-400' : 'text-violet-400'} />
+                        <span className={`text-base font-black tracking-[0.2em] ${isDark || emergency ? 'text-white' : 'text-slate-800'}`}>{fullRoomId}</span>
                     </div>
-                    <div className="px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl font-mono text-lg font-bold opacity-80 shadow-inner">
+                    {/* Clock */}
+                    <div className={`px-4 py-3 rounded-2xl border backdrop-blur-xl font-mono text-sm font-bold ${isDark || emergency ? 'bg-white/5 border-white/10 text-white/50' : 'bg-white/60 border-white text-slate-500 shadow-sm'}`}>
                         <ClockDisplay />
                     </div>
-                    <button onClick={() => setIsListening(!isListening)} className={`w-16 h-16 rounded-full border border-white/20 flex items-center justify-center transition-all duration-500 backdrop-blur-2xl hover:scale-110 active:scale-95 ${isListening ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'bg-white/5 text-gray-400'}`}>
-                        {isListening ? <Volume2 size={32} /> : <VolumeX size={32} />}
+                    {/* Mute toggle */}
+                    <button
+                        onClick={() => setIsListening(!isListening)}
+                        className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-2xl ${isListening ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30' : (isDark || emergency ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/60 border-white text-slate-400 shadow-sm')}`}
+                    >
+                        {isListening ? <Volume2 size={20} /> : <VolumeX size={20} />}
                     </button>
                 </div>
-                <div className="flex gap-4">
-                    <button onClick={toggleTheme} className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition backdrop-blur-2xl">
-                        {isDark ? <Sun size={24} className="text-orange-400" /> : <Moon size={24} />}
+
+                {/* Right: theme + exit */}
+                <div className="flex gap-2">
+                    <button
+                        onClick={toggleTheme}
+                        className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/60 border-white shadow-sm hover:bg-white'}`}
+                    >
+                        {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-slate-500" />}
                     </button>
-                    <button onClick={() => { setIsJoined(false); ttsManager.cancelAll(); }} className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition backdrop-blur-2xl text-gray-400">
-                        <X size={24} />
+                    <button
+                        onClick={() => { setIsJoined(false); ttsManager.cancelAll(); }}
+                        className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' : 'bg-white/60 border-white text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500'}`}
+                    >
+                        <X size={18} />
                     </button>
                 </div>
             </header>
 
-            {/* Main Content Area - FLEX GROW to push history down */}
-            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10 px-10 py-20 pb-10">
+            {/* ── Main Content ────────────────────────────────────────────── */}
+            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10 px-8">
                 {currentMsg ? (
-                    <div className="w-full h-full overflow-y-auto scrollbar-hide px-4 flex flex-col">
-                        <div className="max-w-6xl mx-auto py-10 pb-32 w-full flex-1 flex flex-col justify-center">
+                    /* ── Playing: scrolling sentences ── */
+                    <div className="w-full h-full overflow-y-auto scrollbar-hide flex flex-col">
+                        <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col justify-center py-8">
+                            {/* Live EQ bars */}
+                            {isPlaying && (
+                                <div className="flex justify-center mb-10">
+                                    <ActiveVisualizer isEmergency={emergency} />
+                                </div>
+                            )}
                             {sentences.map((s, i) => (
-                                <SentenceItem key={`${currentMsg.id}-${i}`} sentence={s} isActive={i === activeSentenceIndex} isPast={activeSentenceIndex !== -1 && i < activeSentenceIndex} isEmergency={!!currentMsg.isEmergency} textLength={currentMsg.text.length} activeSentenceRef={activeRef} />
+                                <SentenceItem
+                                    key={`${currentMsg.id}-${i}`}
+                                    sentence={s}
+                                    isActive={i === activeSentenceIndex}
+                                    isPast={activeSentenceIndex !== -1 && i < activeSentenceIndex}
+                                    isEmergency={emergency}
+                                    textLength={currentMsg.text.length}
+                                    activeSentenceRef={activeRef}
+                                />
                             ))}
                         </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center gap-12 scale-[0.85] md:scale-100 lg:scale-110 transition-transform duration-700">
-                        <RadarScanner isPlaying={false} isEmergency={false} />
-                        <div className="space-y-4 text-center mt-4">
-                            <p className="text-3xl md:text-5xl font-black tracking-[0.4em] uppercase italic opacity-20 animate-pulse bg-gradient-to-r from-transparent via-current to-transparent bg-clip-text">正在监听下行链路</p>
-                            <div className="flex items-center justify-center gap-2">
-                                <div className="h-[1px] w-8 bg-current opacity-20" />
-                                <p className="text-xs font-mono font-bold opacity-30 tracking-widest uppercase">Secure Channel Active // {fullRoomId}</p>
-                                <div className="h-[1px] w-8 bg-current opacity-20" />
+                    /* ── Idle: radar + status ── */
+                    <div className="flex flex-col items-center justify-center gap-10">
+                        <IdleVisualizer isEmergency={false} />
+                        <div className="text-center space-y-3">
+                            <p className={`text-sm font-black uppercase tracking-[0.5em] ${isDark ? 'text-white/15' : 'text-slate-400/60'} animate-pulse`}>
+                                等待广播信号
+                            </p>
+                            <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${isDark ? 'text-white/10' : 'text-slate-300'}`}>
+                                <span className="inline-block w-12 h-px bg-current" />
+                                CHANNEL · {fullRoomId} · ACTIVE
+                                <span className="inline-block w-12 h-px bg-current" />
                             </div>
                         </div>
                     </div>
                 )}
             </main>
 
-            {/* History Section - FIXED at bottom but part of layout flow */}
-            <footer className={`relative z-50 p-6 bg-black/5 backdrop-blur-md border-t border-white/10 transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[85%]'}`}>
-                {/* Toggle Button */}
-                <button onClick={() => setShowHistory(!showHistory)} className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-6 bg-white/10 backdrop-blur-xl border border-white/20 border-b-0 rounded-t-xl flex items-center justify-center text-white/40 hover:text-white transition-colors">
-                    {showHistory ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+            {/* ── History Footer ───────────────────────────────────────────── */}
+            <footer className={`relative z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-48px)]'} ${isDark || emergency ? 'border-white/5 bg-black/30 backdrop-blur-2xl' : 'border-black/5 bg-white/40 backdrop-blur-2xl'}`}>
+                {/* Collapse toggle pill */}
+                <button
+                    onClick={() => setShowHistory(!showHistory)}
+                    className={`absolute -top-5 left-1/2 -translate-x-1/2 h-10 px-6 rounded-t-2xl flex items-center gap-2 text-xs font-black uppercase tracking-widest transition border border-b-0 ${isDark || emergency ? 'bg-black/30 backdrop-blur-2xl border-white/5 text-white/30 hover:text-white/60' : 'bg-white/60 backdrop-blur-2xl border-black/5 text-slate-400 hover:text-slate-600'}`}
+                >
+                    <History size={12} />
+                    <span>播报记录</span>
+                    {showHistory ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
                 </button>
 
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-center justify-between mb-6 px-4">
-                        <div className="flex items-center gap-3">
-                            <History size={18} className="text-blue-500" />
-                            <h4 className="text-xs font-black uppercase tracking-[0.3em] opacity-60">播报历史轨迹</h4>
-                        </div>
-                        <button onClick={() => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); }} className="text-[10px] font-black text-red-500/40 hover:text-red-500 transition px-4 py-2 rounded-full border border-red-500/10 hover:bg-red-500/5">重置历史记录</button>
+                <div className="max-w-screen-xl mx-auto p-5">
+                    {/* Header row */}
+                    <div className="flex items-center justify-between mb-4 px-1">
+                        <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark || emergency ? 'text-white/20' : 'text-slate-400'}`}>
+                            最近 {receivedHistory.length} 条广播
+                        </span>
+                        <button
+                            onClick={() => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); }}
+                            className="text-[10px] font-black text-red-500/30 hover:text-red-500 transition px-3 py-1.5 rounded-xl border border-red-500/10 hover:border-red-500/30 hover:bg-red-500/5"
+                        >
+                            清空记录
+                        </button>
                     </div>
 
-                    <div className="flex flex-row gap-6 overflow-x-auto pb-4 px-2 snap-x custom-scrollbar min-h-[120px]">
+                    {/* History cards */}
+                    <div className="flex flex-row gap-4 overflow-x-auto pb-1 snap-x scrollbar-hide min-h-[100px] items-center">
                         {receivedHistory.length === 0 ? (
-                            <div className="py-12 px-6 opacity-10 italic w-full text-center font-black tracking-[0.5em] text-lg uppercase">当前暂无数据包</div>
+                            <div className={`w-full text-center py-10 text-xs font-black uppercase tracking-[0.4em] ${isDark || emergency ? 'text-white/10' : 'text-slate-300'}`}>
+                                暂无广播记录
+                            </div>
                         ) : (
                             [...receivedHistory].reverse().map(m => (
-                                <button key={m.id} onClick={() => runPlayback(m)} className="flex-none w-80 p-6 bg-white/5 dark:bg-white/5 rounded-[2rem] text-left hover:bg-blue-500/5 dark:hover:bg-white/10 transition-all border border-white/5 hover:border-blue-500/30 group snap-start shadow-xl">
-                                    <div className="flex justify-between items-center mb-3 font-mono text-[10px] opacity-40 font-black tracking-widest uppercase">
-                                        {new Date(parseInt(m.timestamp) || Date.now()).toLocaleTimeString()}
-                                        {m.isEmergency && <Zap size={12} className="text-red-500 fill-red-500" />}
+                                <button
+                                    key={m.id}
+                                    onClick={() => runPlayback(m)}
+                                    className={`flex-none w-72 p-5 rounded-2xl text-left transition-all border group snap-start ${m.isEmergency
+                                            ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
+                                            : (isDark
+                                                ? 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-violet-500/25'
+                                                : 'bg-white/60 border-white hover:bg-white hover:border-violet-300 shadow-sm')
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className={`text-[9px] font-black uppercase tracking-widest font-mono ${isDark || emergency ? 'text-white/25' : 'text-slate-400'}`}>
+                                            {new Date(parseInt(m.timestamp) || Date.now()).toLocaleTimeString()}
+                                        </span>
+                                        <div className="flex items-center gap-1.5">
+                                            {m.isEmergency && <Zap size={10} className="text-red-400 fill-red-400" />}
+                                            <div className={`w-1.5 h-1.5 rounded-full group-hover:scale-125 transition-transform ${m.isEmergency ? 'bg-red-400' : 'bg-violet-400'}`} />
+                                        </div>
                                     </div>
-                                    <div className="text-base font-bold text-gray-800 dark:text-gray-200 line-clamp-2 leading-relaxed group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">{m.text}</div>
+                                    <p className={`text-sm font-semibold line-clamp-2 leading-relaxed transition-colors ${m.isEmergency ? 'text-red-300' : (isDark ? 'text-white/60 group-hover:text-violet-300' : 'text-slate-600 group-hover:text-violet-600')}`}>
+                                        {m.text}
+                                    </p>
                                 </button>
                             ))
                         )}

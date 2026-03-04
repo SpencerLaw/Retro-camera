@@ -71,12 +71,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         const saved = localStorage.getItem('br_listening');
         return saved === null ? true : saved !== 'false';
     });
-    const [needsInteraction, setNeedsInteraction] = useState(false);
-    const [receiverStatus, setReceiverStatus] = useState<'idle' | 'listening' | 'playing' | 'error'>('listening');
-
-    useEffect(() => {
+    const isListeningRef = useRef(isListening);
+    useEffect(() => { 
+        isListeningRef.current = isListening;
         localStorage.setItem('br_listening', isListening ? 'true' : 'false');
     }, [isListening]);
+
+    const isPlayingRef = useRef(isPlaying);
+    useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -104,33 +106,19 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     const [isPlaying, setIsPlaying] = useState(false);
 
-    const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
-    const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
+    const [receivedHistory, setReceivedHistory] = useState<Message[]>(() => {
+        try {
+            const saved = localStorage.getItem('br_receiver_history');
+            return saved ? JSON.parse(saved).slice(-30) : [];
+        } catch (e) { return []; }
+    });
 
-    const prefetchedBlobs = useRef<Record<string, string>>({});
-    const lastPlayedId = useRef<string | null>(null);
-    const pollingTimer = useRef<NodeJS.Timeout | null>(null);
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const activeSentenceRef = useRef<HTMLSpanElement>(null);
-    const rescueTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const isUserScrollingRef = useRef(false);
-
-    // Refs for stable polling logic without re-triggering effects
-    const isPlayingRef = useRef(false);
-    useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
-    const isListeningRef = useRef(false);
-    useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
-
-    useEffect(() => {
-        const savedHistory = localStorage.getItem('br_receiver_history');
-        if (savedHistory) {
-            try { setReceivedHistory(JSON.parse(savedHistory)); } catch (e) { setReceivedHistory([]); }
-        }
+    // Remove the [receivedHistory] dependency effect to prevent save-loop
+    const saveHistory = useCallback((history: Message[]) => {
+        try {
+            localStorage.setItem('br_receiver_history', JSON.stringify(history.slice(-30)));
+        } catch (e) { }
     }, []);
-
-    useEffect(() => {
-        localStorage.setItem('br_receiver_history', JSON.stringify(receivedHistory.slice(-30)));
-    }, [receivedHistory]);
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -322,7 +310,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     setReceivedHistory(prev => {
                         const exists = prev.some(h => h.id === msg.id);
                         if (exists) return prev;
-                        return [...prev, msg].slice(-30);
+                        const newHistory = [...prev, msg].slice(-30);
+                        saveHistory(newHistory);
+                        return newHistory;
                     });
                 }
                 setCurrentMsg(msg);

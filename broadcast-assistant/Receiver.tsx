@@ -245,7 +245,17 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                 for (let i = 0; i < sentences.length; i++) {
                     if (!engine.current.isJoined) break;
                     setActiveSentenceIndex(i);
-                    await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
+
+                    try {
+                        await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
+                    } catch (ttsErr) {
+                        console.warn('TTS Speak Failed (Autoplay blocked?):', ttsErr);
+                        // 如果因为浏览器拦截导致发音秒拒，不能把外层循环摧毁，否则消息会瞬间消失
+                        // 平滑降级：按文字长度给出一个视觉阅读的停留时间，再进入下一句
+                        if (!engine.current.isJoined) break;
+                        const delayMs = Math.max(2500, sentences[i].length * 200);
+                        await new Promise(res => setTimeout(res, delayMs));
+                    }
                 }
             }
         } catch (e) {

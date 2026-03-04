@@ -30,7 +30,7 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
     const accentAlpha = (a: number) => isEmergency ? `rgba(239,68,68,${a})` : `rgba(139,92,246,${a})`;
 
     return (
-        <div className="relative flex items-center justify-center select-none" style={{ width: 360, height: 360 }}>
+        <div className="relative flex items-center justify-center select-none" style={{ width: 280, height: 280 }}>
 
             {/* ── Ambient glow ── */}
             <div className="absolute rounded-full blur-[120px] opacity-15 animate-pulse"
@@ -42,11 +42,11 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
 
             {/* ── Ring 2: medium CCW ── */}
             <div className="absolute rounded-full animate-[spin_38s_linear_infinite_reverse]"
-                style={{ inset: 18, border: `1px solid ${accentAlpha(0.12)}` }} />
+                style={{ inset: 14, border: `1px solid ${accentAlpha(0.12)}` }} />
 
             {/* ── Ring 3: solid inner ── */}
             <div className="absolute rounded-full"
-                style={{ inset: 38, border: `1px solid ${accentAlpha(0.08)}` }} />
+                style={{ inset: 30, border: `1px solid ${accentAlpha(0.08)}` }} />
 
             {/* ── Crosshair lines ── */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -59,25 +59,25 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
             {/* ── Radar sweep (comet tail) ── */}
             <div className="absolute rounded-full animate-[spin_3s_linear_infinite]"
                 style={{
-                    inset: 12,
+                    inset: 8,
                     background: `conic-gradient(from 0deg, ${accentAlpha(0)} 0%, ${accentAlpha(0)} 55%, ${accentAlpha(0.3)} 78%, ${accentAlpha(0.8)} 98%, ${accentAlpha(0)} 100%)`,
                     filter: 'blur(1.5px)',
                 }} />
 
             {/* ── Leading edge dot (sweeps with the beam) ── */}
-            <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 12 }}>
-                <div className="absolute w-3 h-3 rounded-full top-[4px] left-1/2 -translate-x-1/2 shadow-lg"
-                    style={{ background: accent, boxShadow: `0 0 10px 4px ${accentAlpha(0.6)}` }} />
+            <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 8 }}>
+                <div className="absolute w-2.5 h-2.5 rounded-full top-[3px] left-1/2 -translate-x-1/2 shadow-lg"
+                    style={{ background: accent, boxShadow: `0 0 8px 3px ${accentAlpha(0.6)}` }} />
             </div>
 
             {/* ── Orbit tick marks ── */}
             <div className="absolute inset-0 animate-[spin_80s_linear_infinite]">
                 {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-                    <div key={deg} className="absolute w-1.5 h-1.5 rounded-full top-[-3px] left-1/2 -translate-x-1/2"
+                    <div key={deg} className="absolute w-1 h-1 rounded-full top-[-2px] left-1/2 -translate-x-1/2"
                         style={{
                             background: accentAlpha(0.4),
-                            transform: `rotate(${deg}deg) translateY(${180 - 3}px) translateX(-50%)`,
-                            transformOrigin: '50% 183px',
+                            transform: `rotate(${deg}deg) translateY(${140 - 2}px) translateX(-50%)`,
+                            transformOrigin: '50% 142px',
                         }} />
                 ))}
             </div>
@@ -101,14 +101,14 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
             {/* ── Core orb ── */}
             <div className="relative z-10 flex items-center justify-center rounded-full border border-white/10"
                 style={{
-                    width: 120,
-                    height: 120,
+                    width: 96,
+                    height: 96,
                     background: `radial-gradient(circle at 35% 35%, ${accentAlpha(0.8)}, ${accentAlpha(0.5)} 50%, ${accentAlpha(0.3)})`,
-                    boxShadow: `0 0 0 1px ${accentAlpha(0.2)}, 0 0 40px 8px ${accentAlpha(0.2)}, inset 0 1px 0 rgba(255,255,255,0.15)`,
+                    boxShadow: `0 0 0 1px ${accentAlpha(0.2)}, 0 0 30px 6px ${accentAlpha(0.2)}, inset 0 1px 0 rgba(255,255,255,0.15)`,
                 }}>
                 {/* Highlight */}
                 <div className="absolute rounded-full bg-white/15 blur-sm" style={{ width: '60%', height: '40%', top: '12%', left: '15%' }} />
-                <Signal size={42} className="relative z-10 text-white animate-pulse" style={{ opacity: 0.55 }} />
+                <Signal size={34} className="relative z-10 text-white animate-pulse" style={{ opacity: 0.55 }} />
             </div>
         </div>
     );
@@ -396,7 +396,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             </header>
 
             {/* ── Main Content ────────────────────────────────────────────── */}
-            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10 px-8">
+            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-y-auto scrollbar-hide z-10 px-8 pb-14">
                 {currentMsg ? (
                     /* ── Playing: scrolling sentences ── */
                     <div className="w-full h-full overflow-y-auto scrollbar-hide flex flex-col">
@@ -405,8 +405,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             {channelName && (
                                 <div className="flex justify-center mb-6">
                                     <div className={`flex items-center gap-2 px-5 py-2 rounded-full border text-sm font-black ${emergency
-                                            ? 'bg-red-500/10 border-red-500/20 text-red-300'
-                                            : (isDark ? 'bg-violet-500/10 border-violet-500/20 text-violet-300' : 'bg-violet-100 border-violet-200 text-violet-700')
+                                        ? 'bg-red-500/10 border-red-500/20 text-red-300'
+                                        : (isDark ? 'bg-violet-500/10 border-violet-500/20 text-violet-300' : 'bg-violet-100 border-violet-200 text-violet-700')
                                         }`}>
                                         <Radio size={12} className="animate-pulse" />
                                         <span>{channelName}</span>
@@ -458,7 +458,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             </main>
 
             {/* ── History Footer ───────────────────────────────────────────── */}
-            <footer className={`relative z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-48px)]'} ${isDark || emergency ? 'border-white/5 bg-black/30 backdrop-blur-2xl' : 'border-black/5 bg-white/40 backdrop-blur-2xl'}`}>
+            <footer className={`absolute bottom-0 left-0 right-0 z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-44px)]'} ${isDark || emergency ? 'border-white/5 bg-black/60 backdrop-blur-3xl' : 'border-black/5 bg-white/70 backdrop-blur-3xl'}`}>
                 {/* Collapse toggle pill */}
                 <button
                     onClick={() => setShowHistory(!showHistory)}

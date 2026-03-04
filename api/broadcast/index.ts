@@ -82,22 +82,27 @@ async function handleActivate(req: VercelRequest, res: VercelResponse) {
 
 async function handleDeactivate(req: VercelRequest, res: VercelResponse) {
     const { code } = req.body;
-    await kv.del(`br:v2:room:${code.toUpperCase()}`);
+    if (code) {
+        const uppercaseCode = code.toUpperCase();
+        await kv.del(`br:v2:room:${uppercaseCode}`);
+        await kv.del(`br:room_active:${uppercaseCode}`);
+    }
     return res.status(200).json({ success: true });
 }
 
 async function handleCleanup(req: VercelRequest, res: VercelResponse) {
     try {
-        // 扫描并删除所有活跃房间标记和消息数据
-        const activeKeys = await kv.keys('br:room_active:*');
-        const roomKeys = await kv.keys('br:v2:room:*');
-        const allKeys = [...activeKeys, ...roomKeys];
-
-        if (allKeys.length > 0) {
-            await Promise.all(allKeys.map(k => kv.del(k)));
+        const { codes } = req.body;
+        // 如果传入了具体需要清理的 roomCodes（数组），只清理它们；
+        // 否则不执行全局扫描（避免删掉其他用户的房间），依靠 Redis 默认的 TTL（7天）自动回收垃圾
+        let deleted = 0;
+        if (Array.isArray(codes) && codes.length > 0) {
+            const keysToDelete = codes.flatMap(c => [`br:room_active:${c.toUpperCase()}`, `br:v2:room:${c.toUpperCase()}`]);
+            await Promise.all(keysToDelete.map(k => kv.del(k)));
+            deleted = keysToDelete.length;
         }
 
-        return res.status(200).json({ success: true, deleted: allKeys.length });
+        return res.status(200).json({ success: true, deleted });
     } catch (e: any) {
         return res.status(500).json({ success: false, error: e.message });
     }

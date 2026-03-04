@@ -47,7 +47,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 return [];
             }
         }
-        return [{ id: 'default', name: t('broadcast.sender.unknownClass'), code: Math.floor(100000 + Math.random() * 900000).toString() }];
+        return [];
     });
 
     const [activeChannelId, setActiveChannelId] = useState(() => {
@@ -121,7 +121,6 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
     const deleteChannel = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (channels.length <= 1) return;
         openDialog(
             t('broadcast.sender.deleteChannel'),
             t('broadcast.sender.clearHistoryConfirm'),
@@ -143,7 +142,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 const nextChannels = channels.filter(c => c.id !== id);
                 setChannels(nextChannels);
                 if (activeChannelId === id) {
-                    setActiveChannelId(nextChannels[0].id);
+                    setActiveChannelId(nextChannels.length > 0 ? nextChannels[0].id : '');
                 }
             }
         );
@@ -328,17 +327,15 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     const resp = await fetch('/api/broadcast/cleanup', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ license })
+                        body: JSON.stringify({
+                            license,
+                            codes: channels.map(c => c.code)
+                        })
                     });
                     const data = await resp.json();
                     if (data.success) {
-                        const defaultChannel = {
-                            id: 'default',
-                            name: t('broadcast.sender.unknownClass'),
-                            code: Math.floor(100000 + Math.random() * 900000).toString()
-                        };
-                        setChannels([defaultChannel]);
-                        setActiveChannelId('default');
+                        setChannels([]);
+                        setActiveChannelId('');
                         localStorage.removeItem('br_channels');
                         setStatus({ type: 'success', msg: t('broadcast.sender.clearSuccess') });
                         setTimeout(() => {
@@ -421,8 +418,27 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 </div>
             </div>
 
-            {/* Active Channel Details / Editor */}
-            {editingChannel ? (
+            {/* Active Channel Details / Editor / Empty State */}
+            {channels.length === 0 ? (
+                <GlassCard className="p-12 space-y-6 text-center shadow-2xl overflow-hidden relative group border-2 border-dashed border-slate-200 dark:border-white/10">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] dark:opacity-[0.05] pointer-events-none">
+                        <Radio size={240} />
+                    </div>
+                    <div className="relative z-10 space-y-4">
+                        <h2 className="text-2xl font-black text-slate-700 dark:text-slate-200">欢迎使用广播助手</h2>
+                        <p className="text-sm font-semibold text-slate-500 max-w-sm mx-auto leading-relaxed">
+                            目前您还没有任何广播频道。请先创建一个频道（虚拟房间），以便学生们通过 6 位房间码加入接收广播。
+                        </p>
+                        <button
+                            onClick={addChannel}
+                            className="mt-4 px-8 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all inline-flex items-center gap-2"
+                        >
+                            <Plus size={16} />
+                            {t('broadcast.sender.addClass')}
+                        </button>
+                    </div>
+                </GlassCard>
+            ) : editingChannel ? (
                 <GlassCard className="p-6 space-y-5 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
                     <div className="flex flex-col gap-4">
                         <div className="space-y-2">
@@ -646,11 +662,13 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
             </div>
 
             {/* Schedule Manager Section */}
-            <ScheduleManager
-                license={license}
-                activeChannelCode={channelCode}
-                isDark={isDark}
-            />
+            {channels.length > 0 && (
+                <ScheduleManager
+                    license={license}
+                    activeChannelCode={channelCode}
+                    isDark={isDark}
+                />
+            )}
 
             {/* Status Toast */}
             {status.msg && (

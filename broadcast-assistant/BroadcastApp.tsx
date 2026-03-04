@@ -186,11 +186,11 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
     }
 
     if (mode === 'receiver') {
-        return <Receiver isDark={theme === 'dark'} toggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')} onExit={() => setMode('selection')} />;
+        return <Receiver isDark={theme === 'dark'} toggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')} onExit={() => setMode('selection')} onOpenDialog={openDialog} />;
     }
 
     return (
-        <div className={`min-h-screen transition-colors duration-700 ${theme === 'dark' ? 'bg-[#050505] text-white' : 'bg-white text-[#1D1D1F]'} font-sans`}>
+        <div className={`min-h-screen transition-colors duration-1000 ${theme === 'dark' ? 'bg-[#0a0a0f] text-white' : 'bg-slate-50 text-slate-900'} font-sans`}>
             {/* iOS 26 极简背景氛围 */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className={`absolute top-0 right-0 w-[50%] h-[50%] rounded-full blur-[120px] opacity-[0.03] transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-200'}`}></div>
@@ -280,7 +280,20 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                         </div>
                     )}
 
-                    {mode === 'sender' && <Sender license={getBCLicense() || 'DEMO-ONLY'} isDark={theme === 'dark'} onExitToSelection={() => setMode('selection')} />}
+                    {mode === 'sender' && (
+                        <Sender
+                            license={getBCLicense() || 'DEMO-ONLY'}
+                            isDark={theme === 'dark'}
+                            onExitToSelection={() => setMode('selection')}
+                            onOpenDialog={openDialog}
+                        />
+                    )}
+                    {mode === 'receiver' && (
+                        <Receiver
+                            isDark={theme === 'dark'}
+                            onOpenDialog={openDialog}
+                        />
+                    )}
                 </main>
 
             </div>

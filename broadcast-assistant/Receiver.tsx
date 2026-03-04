@@ -34,7 +34,7 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
 
             {/* ── Ambient glow ── */}
             <div className="absolute rounded-full blur-[120px] opacity-15 animate-pulse"
-                style={{ width: 500, height: 500, background: accent }} />
+                style={{ width: '140%', height: '140%', background: `radial-gradient(circle, ${accentAlpha(0.25)}, transparent 70%)` }} />
 
             {/* ── Ring 1: outermost slow CW ── */}
             <div className="absolute inset-0 rounded-full animate-[spin_80s_linear_infinite]"
@@ -50,10 +50,8 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
 
             {/* ── Crosshair lines ── */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {/* horizontal */}
-                <div className="absolute w-full h-px" style={{ background: `linear-gradient(to right, transparent 0%, ${accentAlpha(0.12)} 20%, ${accentAlpha(0.25)} 50%, ${accentAlpha(0.12)} 80%, transparent 100%)` }} />
-                {/* vertical */}
-                <div className="absolute h-full w-px" style={{ background: `linear-gradient(to bottom, transparent 0%, ${accentAlpha(0.12)} 20%, ${accentAlpha(0.25)} 50%, ${accentAlpha(0.12)} 80%, transparent 100%)` }} />
+                <div className="absolute w-full h-[0.5px] opacity-[0.05]" style={{ background: accent }} />
+                <div className="absolute h-full w-[0.5px] opacity-[0.05]" style={{ background: accent }} />
             </div>
 
             {/* ── Radar sweep (comet tail) ── */}
@@ -67,7 +65,7 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
             {/* ── Leading edge dot (sweeps with the beam) ── */}
             <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 8 }}>
                 <div className="absolute w-2.5 h-2.5 rounded-full top-[1px] left-1/2 -translate-x-1/2 shadow-lg"
-                    style={{ background: accent, boxShadow: `0 0 12px 4px ${accentAlpha(0.7)}`, transform: 'rotate(-7deg)' }} />
+                    style={{ background: accent, boxShadow: `0 0 12px 4px ${accentAlpha(0.7)}`, transform: 'rotate(-11deg)' }} />
             </div>
 
             {/* ── Orbit tick marks ── */}
@@ -82,21 +80,13 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
                 ))}
             </div>
 
-            {/* ── Data readout decorations ── */}
-            {['12', '03', '06', '09'].map((label, i) => {
-                const positions = [
-                    { top: '4px', left: '50%', transform: 'translateX(-50%)' },
-                    { top: '50%', right: '4px', transform: 'translateY(-50%)' },
-                    { bottom: '4px', left: '50%', transform: 'translateX(-50%)' },
-                    { top: '50%', left: '4px', transform: 'translateY(-50%)' },
-                ] as const;
-                return (
-                    <div key={label} className="absolute font-mono text-[8px] font-black tracking-widest"
-                        style={{ color: accentAlpha(0.25), ...positions[i] }}>
-                        {label}
-                    </div>
-                );
-            })}
+            {/* ── Fixed Compass Text ── */}
+            <div className="absolute inset-0 border border-white/[0.03] rounded-full pointer-events-none">
+                <span className="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">12</span>
+                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">06</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">09</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-[0.15] tracking-widest uppercase">03</span>
+            </div>
 
             {/* ── Core orb ── */}
             <div className="relative z-10 flex items-center justify-center rounded-full border border-white/10"
@@ -114,118 +104,113 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
     );
 });
 
-// ─── Active Visualizer (playing state) ───────────────────────────────────────
-const ActiveVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) => {
-    const bars = isEmergency ? 9 : 7;
-    const c = isEmergency
-        ? { bar: 'bg-gradient-to-t from-red-600 to-rose-400', shadow: 'shadow-[0_0_30px_rgba(239,68,68,0.5)]' }
-        : { bar: 'bg-gradient-to-t from-violet-600 to-cyan-400', shadow: 'shadow-[0_0_30px_rgba(139,92,246,0.4)]' };
+// ─── Active EQ Visualizer ───
+const ActiveVisualizer = ({ isEmergency }: { isEmergency: boolean }) => (
+    <div className="flex items-center justify-center gap-1.5 h-16 pointer-events-none">
+        {[0.6, 1, 0.8, 1.2, 0.7].map((h, i) => (
+            <div
+                key={i}
+                className={`w-3 rounded-full animate-[pulse_1s_ease-in-out_infinite] ${isEmergency ? 'bg-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.5)]'}`}
+                style={{
+                    height: `${h * 100}%`,
+                    animationDelay: `${i * 0.15}s`,
+                    opacity: 0.8 - i * 0.1
+                }}
+            />
+        ))}
+    </div>
+);
+
+// ─── Sentence Item ───
+interface SentenceItemProps {
+    sentence: string;
+    isActive: boolean;
+    isPast: boolean;
+    isEmergency: boolean;
+    textLength: number;
+    activeSentenceRef: React.RefObject<HTMLDivElement>;
+}
+
+const SentenceItem: React.FC<SentenceItemProps> = ({
+    sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef
+}) => {
+    const scaleFactor = Math.max(0.6, Math.min(1.2, 200 / (textLength || 1)));
 
     return (
-        <div className={`flex items-end justify-center gap-2 h-24 ${c.shadow}`}>
-            {Array.from({ length: bars }).map((_, i) => (
-                <div
-                    key={i}
-                    className={`w-2 rounded-full ${c.bar} animate-bounce`}
-                    style={{
-                        height: `${30 + Math.sin((i / bars) * Math.PI) * 55}%`,
-                        animationDelay: `${i * 0.1}s`,
-                        animationDuration: `${0.6 + (i % 3) * 0.2}s`,
-                    }}
-                />
-            ))}
+        <div
+            ref={isActive ? activeSentenceRef : null}
+            className={`transition-all duration-700 py-6 px-10 text-center select-none ${isActive
+                ? 'scale-110 opacity-100'
+                : isPast ? 'scale-90 opacity-40 blur-[1px]' : 'scale-95 opacity-20'
+                }`}
+        >
+            <p
+                style={{ fontSize: `${scaleFactor * (isActive ? 32 : 24)}px` }}
+                className={`font-black tracking-tight leading-relaxed transition-colors duration-500 ${isEmergency
+                    ? (isActive ? 'text-red-300' : 'text-red-900/40')
+                    : (isActive ? 'text-white' : 'text-white/20')
+                    }`}
+            >
+                {sentence}
+            </p>
         </div>
     );
-});
+};
 
-// ─── Sentence Item ────────────────────────────────────────────────────────────
-const SentenceItem = React.memo(({ sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef }: any) => (
-    <div
-        ref={isActive ? activeSentenceRef : null}
-        className={`py-8 px-4 w-full text-center transition-all duration-700 transform origin-center ${isActive
-            ? (isEmergency
-                ? 'text-white font-black scale-110'
-                : 'text-violet-400 font-black scale-110 drop-shadow-[0_0_40px_rgba(139,92,246,0.5)]')
-            : isPast
-                ? 'opacity-20 scale-95 blur-[0.5px]'
-                : 'opacity-8 scale-90'
-            } ${textLength > 300 ? 'text-2xl md:text-4xl' : 'text-4xl md:text-7xl'}`}
-    >
-        {sentence}
-    </div>
-));
+// ─── Main Component ──────────────────────────────────────────────────────────
+interface ReceiverProps {
+    isDark: boolean;
+    onOpenDialog?: (title: string, msg: string, type: DialogType, onConfirm: () => void) => void;
+}
 
-// ─── Main component ───────────────────────────────────────────────────────────
-const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () => void }> = ({ isDark, toggleTheme, onExit }) => {
+const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
     const t = useTranslations();
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomFromUrl = urlParams.get('room')?.toUpperCase().trim();
-
-    // Core States
-    const [fullRoomId, setFullRoomId] = useState(() => roomFromUrl || localStorage.getItem('br_receiver_room') || '');
-    const [isJoined, setIsJoined] = useState(!!roomFromUrl || !!localStorage.getItem('br_receiver_room'));
+    const [isJoined, setIsJoined] = useState(false);
+    const [roomId, setRoomId] = useState('');
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isListening, setIsListening] = useState(() => localStorage.getItem('br_listening') !== 'false');
-    const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '', type: 'info' as DialogType, onConfirm: () => { } });
     const [showHistory, setShowHistory] = useState(false);
+    const [isListening, setIsListening] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
+    const [theme, setTheme] = useState<'light' | 'dark'>(isDark ? 'dark' : 'light');
 
-    // Engine Control Ref
-    const engine = useRef({ lastId: '', isJoined: isJoined, isListening: isListening, pId: 0 });
     const activeRef = useRef<HTMLDivElement>(null);
+    const engine = useRef({
+        lastId: '',
+        isJoined: false,
+        isListening: true
+    });
 
-    useEffect(() => { engine.current.isJoined = isJoined; }, [isJoined]);
-    useEffect(() => { engine.current.isListening = isListening; localStorage.setItem('br_listening', isListening ? 'true' : 'false'); }, [isListening]);
+    const fullRoomId = roomId.padStart(4, '0');
 
-    useEffect(() => {
-        const saved = localStorage.getItem('br_receiver_history');
-        if (saved) try { setReceivedHistory(JSON.parse(saved).slice(-20)); } catch (e) { }
+    const toggleTheme = useCallback(() => {
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
     }, []);
 
-    const splitSentences = useCallback((text: string) => {
-        if (!text) return [];
-        return text.match(/[^。！？；\.!\?;]+[。！？；\.!\?;]*/g)?.map(p => p.trim()).filter(p => p.length > 0) || [text];
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('br_receiver_history');
+        if (savedHistory) setReceivedHistory(JSON.parse(savedHistory));
     }, []);
 
     const runPlayback = useCallback(async (msg: Message) => {
-        ttsManager.cancelAll();
-        const pId = ttsManager.getActivePlaybackId();
-        engine.current.pId = pId;
+        if (!engine.current.isListening) return;
         setIsPlaying(true);
-        const sentences = splitSentences(msg.text);
-        let repeats = (msg.repeatCount === -1 || msg.repeatCount! > 50) ? 99 : (msg.repeatCount || 1);
+        setActiveSentenceIndex(-1);
 
-        try {
-            while (repeats > 0 && ttsManager.getActivePlaybackId() === pId) {
-                for (let i = 0; i < sentences.length; i++) {
-                    if (ttsManager.getActivePlaybackId() !== pId) break;
-                    setActiveSentenceIndex(i);
-                    await new Promise(r => setTimeout(r, 100));
-                    await ttsManager.speak(sentences[i], {
-                        engine: 'edge',
-                        voice: msg.voice || 'zh-CN-XiaoxiaoNeural',
-                        rate: msg.isEmergency ? 0.85 : 1.0,
-                        volume: 1.5
-                    });
-                    if (ttsManager.getActivePlaybackId() !== pId) break;
-                    await new Promise(r => setTimeout(r, 300));
-                }
-                repeats--;
-                if (repeats > 0 && ttsManager.getActivePlaybackId() === pId) {
-                    setActiveSentenceIndex(-1);
-                    await new Promise(r => setTimeout(r, 2000));
-                }
-            }
-        } finally {
-            if (ttsManager.getActivePlaybackId() === pId) {
-                setIsPlaying(false);
-                setActiveSentenceIndex(-1);
+        const sentences = (msg.text || '').split(/[。！？；\n]/).filter(s => s.trim().length > 0);
+        const repeat = msg.repeatCount || 1;
+
+        for (let r = 0; r < (repeat === -1 ? 999 : repeat); r++) {
+            for (let i = 0; i < sentences.length; i++) {
+                setActiveSentenceIndex(i);
+                await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
             }
         }
-    }, [splitSentences]);
+
+        setIsPlaying(false);
+        setActiveSentenceIndex(-1);
+    }, []);
 
     useEffect(() => {
         if (!isJoined) return;
@@ -261,7 +246,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         if (activeRef.current) activeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, [activeSentenceIndex]);
 
-    const sentences = useMemo(() => splitSentences(currentMsg?.text || ''), [currentMsg?.text, splitSentences]);
+    const splitSentences = (text: string) => text.split(/[。！？；\n]/).filter(s => s.trim().length > 0);
+    const sentences = useMemo(() => splitSentences(currentMsg?.text || ''), [currentMsg?.text]);
 
     const greeting = useMemo(() => {
         const h = new Date().getHours();
@@ -278,14 +264,14 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     // ── Join Screen ──────────────────────────────────────────────────────────
     if (!isJoined) {
         return (
-            <div className={`fixed inset-0 flex items-center justify-center p-6 transition-colors duration-1000 ${isDark ? 'bg-[#0a0a0f]' : 'bg-slate-100'}`}>
+            <div className={`fixed inset-0 flex items-center justify-center p-6 transition-colors duration-1000 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-slate-100'}`}>
                 {/* bg blobs */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
                     <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-violet-600/10 blur-[160px] rounded-full animate-pulse" />
                     <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[160px] rounded-full animate-pulse" />
                 </div>
 
-                <div className={`relative z-10 w-full max-w-md p-10 rounded-[3rem] border backdrop-blur-2xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] ${isDark ? 'bg-white/[0.04] border-white/10' : 'bg-white/70 border-white'}`}>
+                <div className={`relative z-10 w-full max-w-md p-10 rounded-[3rem] border backdrop-blur-2xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] ${theme === 'dark' ? 'bg-white/[0.04] border-white/10' : 'bg-white/70 border-white'}`}>
                     {/* Icon */}
                     <div className="flex justify-center mb-10">
                         <div className="relative">
@@ -298,27 +284,43 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </div>
                     </div>
 
-                    <div className="text-center mb-8 space-y-2">
-                        <h1 className={`text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>接入课堂广播</h1>
-                        <p className={`text-sm font-medium ${isDark ? 'text-white/30' : 'text-slate-400'}`}>输入您的教室代码以连接至广播频道</p>
-                    </div>
+                    <h1 className={`text-4xl font-extrabold text-center mb-3 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        加入接收端
+                    </h1>
+                    <p className={`text-center mb-10 text-sm font-medium ${theme === 'dark' ? 'text-white/30' : 'text-slate-500'}`}>
+                        输入 4 位房间号码开始接收广播
+                    </p>
 
-                    <div className="space-y-4">
-                        <div className={`rounded-2xl p-1 border ${isDark ? 'bg-white/5 border-white/5' : 'bg-slate-100 border-slate-200'}`}>
+                    <div className="space-y-6">
+                        <div className="relative">
                             <input
                                 type="text"
-                                value={fullRoomId}
-                                onChange={e => setFullRoomId(e.target.value.toUpperCase())}
-                                className={`w-full bg-transparent p-5 text-3xl font-black text-center outline-none uppercase tracking-[0.3em] ${isDark ? 'text-white placeholder:text-white/15' : 'text-slate-900 placeholder:text-slate-300'}`}
-                                placeholder="XXXXXX"
-                                maxLength={8}
+                                maxLength={4}
+                                value={roomId}
+                                onChange={(e) => setRoomId(e.target.value.replace(/\D/g, ''))}
+                                placeholder="0000"
+                                className={`w-full h-24 text-center text-6xl font-black rounded-3xl border-2 transition-all outline-none ${theme === 'dark'
+                                    ? 'bg-black/20 border-white/5 text-white focus:border-violet-500/50'
+                                    : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-violet-400 focus:bg-white'
+                                    }`}
                             />
+                            <div className="absolute -right-3 -top-3 w-10 h-10 rounded-2xl bg-violet-600 flex items-center justify-center text-white shadow-lg animate-bounce">
+                                <Zap size={16} />
+                            </div>
                         </div>
+
                         <button
-                            onClick={() => { if (fullRoomId) { setIsJoined(true); localStorage.setItem('br_receiver_room', fullRoomId); } }}
-                            className="w-full py-6 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-2xl font-black text-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_12px_32px_rgba(139,92,246,0.35)] flex items-center justify-center gap-3"
+                            disabled={roomId.length < 4}
+                            onClick={() => {
+                                engine.current.isJoined = true;
+                                setIsJoined(true);
+                            }}
+                            className={`w-full py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl ${roomId.length === 4
+                                ? 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white shadow-violet-500/25 hover:scale-[1.02] active:scale-95'
+                                : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-50'
+                                }`}
                         >
-                            <Radio size={24} /> 进入教室
+                            初始化信号接收
                         </button>
                     </div>
                 </div>
@@ -326,11 +328,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
         );
     }
 
-    // ── Classroom Screen ─────────────────────────────────────────────────────
     const emergency = !!currentMsg?.isEmergency;
 
     return (
-        <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-all duration-1000 ${emergency ? 'bg-red-950 text-white' : (isDark ? 'bg-[#0a0a0f] text-white' : 'bg-slate-100 text-slate-900')}`}>
+        <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-all duration-1000 ${emergency ? 'bg-red-950 text-white' : (theme === 'dark' ? 'bg-[#0a0a0f] text-white' : 'bg-slate-100 text-slate-900')}`}>
 
             {/* ── Atmospheric BG ─────────────────────────────────────────── */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -340,7 +341,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-red-500/20 blur-[120px] animate-pulse" />
                         <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-red-600/15 blur-[120px] animate-pulse" />
                     </>
-                ) : isDark ? (
+                ) : theme === 'dark' ? (
                     <>
                         <div className="absolute -top-60 -left-40 w-[700px] h-[700px] rounded-full bg-violet-900/20 blur-[160px] animate-pulse" />
                         <div className="absolute -bottom-60 -right-40 w-[700px] h-[700px] rounded-full bg-blue-900/20 blur-[160px] animate-pulse" />
@@ -357,15 +358,15 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             {/* ── Header ─────────────────────────────────────────────────── */}
             <header className="relative z-50 flex items-center justify-between px-6 py-4">
-                {/* Left: greeting + room info */}
                 <div className="flex items-center gap-4">
-                    {/* Greeting & Class */}
                     <div className="flex flex-col -space-y-1">
-                        <p className={`text-base font-black tracking-tight ${isDark || emergency ? 'text-white' : 'text-slate-800'}`}>
+                        <p className={`text-base font-black tracking-tight ${theme === 'dark' || emergency ? 'text-white' : 'text-slate-800'}`}>
                             {greeting}！
-                            {channelName && <span className={`ml-2 ${isDark || emergency ? 'text-violet-400' : 'text-violet-600'}`}>{channelName}</span>}
+                            <span className={`ml-2 ${theme === 'dark' || emergency ? 'text-violet-400' : 'text-violet-600'}`}>
+                                {channelName || '等待识别频道名...'}
+                            </span>
                         </p>
-                        <div className={`flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase ${isDark || emergency ? 'text-white/20' : 'text-slate-400'}`}>
+                        <div className={`flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase ${theme === 'dark' || emergency ? 'text-white/20' : 'text-slate-400'}`}>
                             <div className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-blue-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
                             ROOM · {fullRoomId}
                         </div>
@@ -373,26 +374,28 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                     <div className="h-8 w-px bg-current opacity-10 mx-2" />
 
-                    {/* Mute toggle */}
                     <button
-                        onClick={() => setIsListening(!isListening)}
-                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-2xl ${isListening ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30' : (isDark || emergency ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/60 border-white text-slate-400 shadow-sm')}`}
+                        onClick={() => {
+                            const val = !isListening;
+                            setIsListening(val);
+                            engine.current.isListening = val;
+                        }}
+                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-2xl ${isListening ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30' : (theme === 'dark' || emergency ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/60 border-white text-slate-400 shadow-sm')}`}
                     >
                         {isListening ? <Volume2 size={18} /> : <VolumeX size={18} />}
                     </button>
                 </div>
 
-                {/* Right: theme + exit */}
                 <div className="flex gap-2">
                     <button
                         onClick={toggleTheme}
-                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/60 border-white shadow-sm hover:bg-white'}`}
+                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${theme === 'dark' || emergency ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/60 border-white shadow-sm hover:bg-white'}`}
                     >
-                        {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-slate-500" />}
+                        {theme === 'dark' ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-slate-500" />}
                     </button>
                     <button
-                        onClick={() => { setIsJoined(false); ttsManager.cancelAll(); }}
-                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' : 'bg-white/60 border-white text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500'}`}
+                        onClick={() => { engine.current.isJoined = false; setIsJoined(false); ttsManager.cancelAll(); }}
+                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${theme === 'dark' || emergency ? 'bg-white/5 border-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' : 'bg-white/60 border-white text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500'}`}
                     >
                         <X size={16} />
                     </button>
@@ -401,29 +404,26 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             {/* ── Main Content ────────────────────────────────────────────── */}
             <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-y-auto scrollbar-hide z-10 px-8 pb-14">
-                {currentMsg ? (
-                    /* ── Playing: scrolling sentences ── */
+                {currentMsg && currentMsg.text.trim() ? (
                     <div className="w-full h-full overflow-y-auto scrollbar-hide flex flex-col">
                         <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col justify-center py-8">
-                            {/* Class name + greeting badge */}
                             {channelName && (
                                 <div className="flex justify-center mb-6">
                                     <div className={`flex items-center gap-2 px-5 py-2 rounded-full border text-sm font-black ${emergency
                                         ? 'bg-red-500/10 border-red-500/20 text-red-300'
-                                        : (isDark ? 'bg-violet-500/10 border-violet-500/20 text-violet-300' : 'bg-violet-100 border-violet-200 text-violet-700')
+                                        : (theme === 'dark' ? 'bg-violet-500/10 border-violet-500/20 text-violet-300' : 'bg-violet-100 border-violet-200 text-violet-700')
                                         }`}>
                                         <Radio size={12} className="animate-pulse" />
                                         <span>{channelName}</span>
                                     </div>
                                 </div>
                             )}
-                            {/* Live EQ bars */}
                             {isPlaying && (
                                 <div className="flex justify-center mb-10">
                                     <ActiveVisualizer isEmergency={emergency} />
                                 </div>
                             )}
-                            {sentences.map((s, i) => (
+                            {splitSentences(currentMsg.text).map((s, i) => (
                                 <SentenceItem
                                     key={`${currentMsg.id}-${i}`}
                                     sentence={s}
@@ -437,7 +437,6 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </div>
                     </div>
                 ) : (
-                    /* ── Idle: radar + status ── */
                     <div className="flex flex-col items-center justify-center gap-12">
                         <IdleVisualizer isEmergency={false} />
                         <div className="text-center space-y-4">
@@ -445,11 +444,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                 <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-violet-500/60 animate-pulse mb-8`}>
                                     Scanning for Signal
                                 </p>
-                                <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                                     信号捕获中...
                                 </h2>
                             </div>
-                            <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${isDark ? 'text-white/15' : 'text-slate-400'}`}>
+                            <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${theme === 'dark' ? 'text-white/15' : 'text-slate-400'}`}>
                                 <ClockDisplay />
                                 <span className="opacity-30">·</span>
                                 CHANNEL {fullRoomId}
@@ -460,11 +459,10 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             </main>
 
             {/* ── History Footer ───────────────────────────────────────────── */}
-            <footer className={`absolute bottom-0 left-0 right-0 z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-44px)]'} ${isDark || emergency ? 'border-white/5 bg-black/60 backdrop-blur-3xl' : 'border-black/5 bg-white/70 backdrop-blur-3xl'}`}>
-                {/* Collapse toggle pill */}
+            <footer className={`absolute bottom-0 left-0 right-0 z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-44px)]'} ${theme === 'dark' || emergency ? 'border-white/5 bg-black/60 backdrop-blur-3xl' : 'border-black/5 bg-white/70 backdrop-blur-3xl'}`}>
                 <button
                     onClick={() => setShowHistory(!showHistory)}
-                    className={`absolute -top-6 left-1/2 -translate-x-1/2 h-12 px-8 rounded-t-[2rem] flex items-center gap-3 text-sm font-black uppercase tracking-widest transition border border-b-0 ${isDark || emergency ? 'bg-black/60 backdrop-blur-3xl border-white/10 text-white/50 hover:text-white' : 'bg-white/70 backdrop-blur-3xl border-black/5 text-slate-500 hover:text-slate-800'}`}
+                    className={`absolute -top-6 left-1/2 -translate-x-1/2 h-12 px-8 rounded-t-[2rem] flex items-center gap-3 text-sm font-black uppercase tracking-widest transition border border-b-0 ${theme === 'dark' || emergency ? 'bg-black/60 backdrop-blur-3xl border-white/10 text-white/50 hover:text-white' : 'bg-white/70 backdrop-blur-3xl border-black/5 text-slate-500 hover:text-slate-800'}`}
                 >
                     <History size={14} />
                     <span>播报记录</span>
@@ -472,9 +470,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 </button>
 
                 <div className="max-w-screen-xl mx-auto p-5">
-                    {/* Header row */}
                     <div className="flex items-center justify-between mb-4 px-1">
-                        <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark || emergency ? 'text-white/20' : 'text-slate-400'}`}>
+                        <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' || emergency ? 'text-white/20' : 'text-slate-400'}`}>
                             最近 {receivedHistory.length} 条广播
                         </span>
                         <button
@@ -485,10 +482,9 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </button>
                     </div>
 
-                    {/* History cards */}
                     <div className="flex flex-row gap-4 overflow-x-auto pb-1 snap-x scrollbar-hide min-h-[100px] items-center">
                         {receivedHistory.length === 0 ? (
-                            <div className={`w-full text-center py-10 text-xs font-black uppercase tracking-[0.4em] ${isDark || emergency ? 'text-white/10' : 'text-slate-300'}`}>
+                            <div className={`w-full text-center py-10 text-xs font-black uppercase tracking-[0.4em] ${theme === 'dark' || emergency ? 'text-white/10' : 'text-slate-300'}`}>
                                 暂无广播记录
                             </div>
                         ) : (
@@ -498,21 +494,21 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                                     onClick={() => runPlayback(m)}
                                     className={`flex-none w-72 p-5 rounded-2xl text-left transition-all border group snap-start ${m.isEmergency
                                         ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
-                                        : (isDark
+                                        : (theme === 'dark'
                                             ? 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-violet-500/25'
                                             : 'bg-white/60 border-white hover:bg-white hover:border-violet-300 shadow-sm')
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className={`text-[9px] font-black uppercase tracking-widest font-mono ${isDark || emergency ? 'text-white/25' : 'text-slate-400'}`}>
-                                            {new Date(parseInt(m.timestamp) || Date.now()).toLocaleTimeString()}
+                                        <span className={`text-[9px] font-black uppercase tracking-widest font-mono ${theme === 'dark' || emergency ? 'text-white/25' : 'text-slate-400'}`}>
+                                            {m.timestamp}
                                         </span>
                                         <div className="flex items-center gap-1.5">
                                             {m.isEmergency && <Zap size={10} className="text-red-400 fill-red-400" />}
                                             <div className={`w-1.5 h-1.5 rounded-full group-hover:scale-125 transition-transform ${m.isEmergency ? 'bg-red-400' : 'bg-violet-400'}`} />
                                         </div>
                                     </div>
-                                    <p className={`text-sm font-semibold line-clamp-2 leading-relaxed transition-colors ${m.isEmergency ? 'text-red-300' : (isDark ? 'text-white/60 group-hover:text-violet-300' : 'text-slate-600 group-hover:text-violet-600')}`}>
+                                    <p className={`text-sm font-semibold line-clamp-2 leading-relaxed transition-colors ${m.isEmergency ? 'text-red-300' : (theme === 'dark' ? 'text-white/60 group-hover:text-violet-300' : 'text-slate-600 group-hover:text-violet-600')}`}>
                                         {m.text}
                                     </p>
                                 </button>
@@ -521,8 +517,6 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     </div>
                 </div>
             </footer>
-
-            <CustomDialog isOpen={dialog.isOpen} title={dialog.title} message={dialog.message} type={dialog.type} onConfirm={dialog.onConfirm} onCancel={() => setDialog({ ...dialog, isOpen: false })} isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
         </div>
     );
 };

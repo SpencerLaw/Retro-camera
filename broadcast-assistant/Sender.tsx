@@ -107,32 +107,51 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         localStorage.setItem('br_active_channel_id', activeChannelId);
     }, [activeChannelId]);
 
-    // Initial cloud sync: Load channels for this license from cloud
+    // Initial & Polling cloud sync: Load channels for this license from cloud
     useEffect(() => {
         if (!license) {
             setIsLoadingCloud(false);
             return;
         }
+
+        setIsLoadingCloud(true);
         const controller = new AbortController();
-        const syncFromCloud = async () => {
+
+        const syncFromCloud = async (isPoll = false) => {
             try {
-                const resp = await fetch(`/api/broadcast/get-channels?license=${license}`, { signal: controller.signal });
+                const resp = await fetch(`/api/broadcast/get-channels?license=${license}`, {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
                 const data = await resp.json();
-                if (data.channels && Array.isArray(data.channels) && data.channels.length > 0) {
-                    hasSyncedFromCloud.current = true;
-                    setChannels(data.channels);
-                    if (activeChannelId === 'default' || !data.channels.find((c: any) => c.id === activeChannelId)) {
-                        setActiveChannelId(data.channels[0].id);
+                if (data.channels && Array.isArray(data.channels)) {
+                    // Only update if cloud has content AND (it's initial load OR cloud significantly differs)
+                    // This prevents overwriting unsaved local changes during a poll
+                    const cloudLen = data.channels.length;
+                    if (cloudLen > 0) {
+                        hasSyncedFromCloud.current = true;
+                        setChannels(data.channels);
+                        if (activeChannelId === 'default' || !data.channels.find((c: any) => c.id === activeChannelId)) {
+                            setActiveChannelId(data.channels[cloudLen - 1].id);
+                        }
                     }
                 }
             } catch (err: any) {
                 if (err.name !== 'AbortError') console.error('Cloud sync failed:', err);
             } finally {
-                setIsLoadingCloud(false);
+                if (!isPoll) setIsLoadingCloud(false);
             }
         };
-        syncFromCloud();
-        return () => controller.abort();
+
+        syncFromCloud(false);
+
+        // Set up polling every 20 seconds to keep multi-browser sessions in sync
+        const pollInterval = setInterval(() => syncFromCloud(true), 20000);
+
+        return () => {
+            controller.abort();
+            clearInterval(pollInterval);
+        };
     }, [license]);
 
     // Save to cloud whenever channels change
@@ -640,88 +659,90 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
                     </div>
 
-                    {/* ─ 重复次数 + 循环策略 合并一行 ─ */}
-                    <div className="flex items-center justify-between gap-1 p-1.5 sm:p-2 rounded-2xl bg-slate-50 border border-slate-100 mb-3 overflow-x-auto scrollbar-hide">
-                        {/* 减少, 数值, 增加 */}
-                        {/* 竖向: 增加, 数值, 减少 */}
-                        <div className="flex flex-col items-center justify-between shrink-0 bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
-                            <button
-                                onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
-                                disabled={isLooping}
-                                className="w-12 sm:w-16 h-8 sm:h-9 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:bg-blue-100 transition-all disabled:opacity-30"
-                            >
-                                <ChevronUp size={16} />
-                            </button>
-
-                            <div className="w-full flex-1 flex flex-col items-center justify-center py-1 sm:py-2 bg-slate-50 border-y border-slate-50">
-                                <span className={`font-black text-xl sm:text-2xl leading-none ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
-                                    {isLooping ? '∞' : repeatCount}
-                                </span>
-                                <span className="text-[10px] font-black text-slate-400 mt-1 scale-90 whitespace-nowrap">
-                                    {t('broadcast.sender.repeatCount')}
-                                </span>
+                    {/* ─── 核心控制区 ─── */}
+                    <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+                        {/* 左侧：播放次数与模式 (一体化高斯模糊容器) */}
+                        <div className="flex-1 flex items-center bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/10 p-1.5 shadow-sm">
+                            {/* 次数调节器 */}
+                            <div className={`flex items-center gap-1 bg-white/80 dark:bg-zinc-900/50 rounded-xl p-1 transition-all ${isLooping ? 'opacity-40 grayscale pointer-events-none' : 'shadow-sm'}`}>
+                                <button
+                                    onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
+                                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-500"
+                                >
+                                    <ChevronDown size={18} />
+                                </button>
+                                <div className="min-w-[40px] flex flex-col items-center">
+                                    <span className="text-lg font-black text-blue-600 tabular-nums">
+                                        {isLooping ? '∞' : repeatCount}
+                                    </span>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter -mt-1 opacity-60">
+                                        {t('broadcast.sender.repeatCount')}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
+                                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-500"
+                                >
+                                    <ChevronUp size={18} />
+                                </button>
                             </div>
 
+                            {/* 分隔线 */}
+                            <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-3 opacity-50" />
+
+                            {/* 模式切换 (无限循环图标) */}
                             <button
-                                onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
-                                disabled={isLooping}
-                                className="w-12 sm:w-16 h-8 sm:h-9 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:bg-blue-100 transition-all disabled:opacity-30"
+                                onClick={() => setIsLooping(!isLooping)}
+                                className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl transition-all duration-300 ${isLooping
+                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                                    : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'}`}
                             >
-                                <ChevronDown size={16} />
+                                <Repeat
+                                    size={18}
+                                    className={isLooping ? 'animate-spin' : ''}
+                                    style={isLooping ? { animationDuration: '3s' } : {}}
+                                />
+                                <span className={`text-xs font-black uppercase tracking-widest ${isLooping ? 'opacity-100' : 'opacity-60'}`}>
+                                    {isLooping ? t('broadcast.sender.looping') : t('broadcast.sender.once')}
+                                </span>
                             </button>
                         </div>
 
-                        {/* 分隔 */}
-                        <div className="w-px h-6 sm:h-8 bg-slate-200 shrink-0 mx-1 sm:mx-2" />
-
-                        {/* 策略切换 */}
-                        <div className="flex flex-col gap-1 shrink-0 bg-white p-1 rounded-xl border border-slate-100">
+                        {/* 右侧：紧急开关 + 发送按钮 */}
+                        <div className="flex gap-3 items-stretch">
+                            {/* 紧急开关按钮 */}
                             <button
-                                onClick={() => setIsLooping(false)}
-                                className={`w-10 h-8 sm:w-12 sm:h-9 rounded-lg border-2 flex items-center justify-center transition-all ${!isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
+                                onClick={() => setIsEmergency(!isEmergency)}
+                                className={`relative group px-5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-500 border-2 ${isEmergency
+                                    ? 'bg-red-500 border-red-400 text-white shadow-xl shadow-red-500/25 scale-105 z-10'
+                                    : 'bg-white/50 dark:bg-white/5 border-slate-100 dark:border-white/10 text-slate-400 hover:border-red-200 dark:hover:border-red-900/30'}`}
                             >
-                                <Repeat size={14} />
+                                <AlertTriangle size={18} className={isEmergency ? 'animate-bounce' : 'group-hover:text-red-400'} />
+                                <span className="text-[9px] font-black uppercase tracking-tighter opacity-80">
+                                    {t('broadcast.sender.emergency')}
+                                </span>
+                                {isEmergency && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />}
                             </button>
+
+                            {/* 发起播报大按钮 */}
                             <button
-                                onClick={() => setIsLooping(true)}
-                                className={`w-10 h-8 sm:w-12 sm:h-9 rounded-lg border-2 flex items-center justify-center transition-all ${isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
+                                onClick={handleSend}
+                                disabled={status.type === 'loading'}
+                                className="min-w-[140px] sm:min-w-[180px] rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 overflow-hidden group"
                             >
-                                <span className="text-sm font-black leading-none">∞</span>
+                                {status.type === 'loading' ? (
+                                    <Loader2 className="animate-spin" size={20} />
+                                ) : (
+                                    <>
+                                        <div className="relative">
+                                            <Send size={18} className="group-hover:translate-x-12 group-hover:-translate-y-12 transition-all duration-500 ease-in-out" />
+                                            <Send size={18} className="absolute inset-0 -translate-x-12 translate-y-12 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-500 ease-in-out opacity-0 group-hover:opacity-100" />
+                                        </div>
+                                        <span>{t('broadcast.sender.initBroadcast')}</span>
+                                    </>
+                                )}
                             </button>
                         </div>
-                    </div>
-
-                    {/* ─ 紧急 + 发起 ─ */}
-                    <div className="flex items-stretch gap-2 sm:gap-3">
-                        {/* 紧急播报（图标+文字，不换行） */}
-                        <button
-                            onClick={() => setIsEmergency(!isEmergency)}
-                            className={`shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all duration-500 border-2 whitespace-nowrap ${isEmergency
-                                ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/20'
-                                : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-slate-100'}`}
-                        >
-                            <AlertTriangle size={16} className={isEmergency ? 'animate-pulse' : ''} />
-                            <span>{t('broadcast.sender.emergency')}</span>
-                            <div className={`ml-1 w-7 h-4 rounded-full relative transition-colors shrink-0 ${isEmergency ? 'bg-white/30' : 'bg-gray-300'}`}>
-                                <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all duration-300 shadow-sm ${isEmergency ? 'right-0.5' : 'left-0.5'}`} />
-                            </div>
-                        </button>
-
-                        {/* 发起播报 */}
-                        <button
-                            onClick={handleSend}
-                            disabled={status.type === 'loading'}
-                            className="flex-1 rounded-xl sm:rounded-2xl bg-blue-600 text-white font-black text-[10px] sm:text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-500 active:scale-95 transition-all flex items-center justify-center gap-2 group whitespace-nowrap"
-                        >
-                            {status.type === 'loading' ? (
-                                <Loader2 className="animate-spin" size={18} />
-                            ) : (
-                                <>
-                                    <Send size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                    <span>{t('broadcast.sender.initBroadcast')}</span>
-                                </>
-                            )}
-                        </button>
                     </div>
                 </GlassCard>
             )}

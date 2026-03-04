@@ -247,11 +247,18 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     setActiveSentenceIndex(i);
 
                     try {
+                        const startTime = Date.now();
                         await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
+
+                        // 额外防御：如果 speak 瞬间就被 resolve 了（通常是由于浏览器 autoplay 拦截），
+                        // 我们需要手动补足一个视觉展示时间，否则循环瞬间结束，消息会闪现消失。
+                        const duration = Date.now() - startTime;
+                        if (duration < 500) {
+                            const showDelay = Math.max(2500, sentences[i].length * 200);
+                            await new Promise(res => setTimeout(res, showDelay));
+                        }
                     } catch (ttsErr) {
                         console.warn('TTS Speak Failed (Autoplay blocked?):', ttsErr);
-                        // 如果因为浏览器拦截导致发音秒拒，不能把外层循环摧毁，否则消息会瞬间消失
-                        // 平滑降级：按文字长度给出一个视觉阅读的停留时间，再进入下一句
                         if (!engine.current.isJoined) break;
                         const delayMs = Math.max(2500, sentences[i].length * 200);
                         await new Promise(res => setTimeout(res, delayMs));

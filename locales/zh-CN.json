@@ -242,6 +242,8 @@
       "messageContent": "播报内容",
       "repeatTime": "重复次数",
       "repeatStrategy": "循环策略",
+      "once": "单次模式",
+      "looping": "循环模式",
       "initBroadcast": "发起播报",
       "emergency": "紧急播报",
       "history": "播报历史",

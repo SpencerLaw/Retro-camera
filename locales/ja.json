@@ -172,7 +172,7 @@
     "receiver": {
       "joinChannel": "チャンネルに入る",
       "joinDesc": "同期を開始するために、先生から割り当てられた固定チャンネル ID を入力してください。",
-      "channelPlaceholder": "例: 8859",
+      "channelPlaceholder": "例: 160234",
       "initializeLive": "ライブを初期化",
       "missingChannel": "チャンネル番号を入力してください",
       "invalidRoom": "無効なルームコード",

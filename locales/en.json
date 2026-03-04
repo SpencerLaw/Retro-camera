@@ -239,7 +239,7 @@
     "receiver": {
       "joinChannel": "Join Channel",
       "joinDesc": "Enter the persistent channel ID assigned by your instructor to begin syncing.",
-      "channelPlaceholder": "E.G. 8859",
+      "channelPlaceholder": "E.G. 160234",
       "initializeLive": "Initialize Live",
       "missingChannel": "Missing Channel Code",
       "invalidRoom": "Invalid room code",

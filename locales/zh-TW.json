@@ -178,7 +178,7 @@
     "receiver": {
       "joinChannel": "進入通道",
       "joinDesc": "請輸入老師給的通信號碼",
-      "channelPlaceholder": "例如: 8859",
+      "channelPlaceholder": "例如: 160234",
       "initializeLive": "進入通信",
       "missingChannel": "請輸入通道號",
       "invalidRoom": "無效的房間號",

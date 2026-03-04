@@ -113,24 +113,26 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
             setIsLoadingCloud(false);
             return;
         }
+        const controller = new AbortController();
         const syncFromCloud = async () => {
             try {
-                const resp = await fetch(`/api/broadcast/get-channels?license=${license}`);
+                const resp = await fetch(`/api/broadcast/get-channels?license=${license}`, { signal: controller.signal });
                 const data = await resp.json();
                 if (data.channels && Array.isArray(data.channels) && data.channels.length > 0) {
-                    hasSyncedFromCloud.current = true; // Mark as coming from cloud
+                    hasSyncedFromCloud.current = true;
                     setChannels(data.channels);
                     if (activeChannelId === 'default' || !data.channels.find((c: any) => c.id === activeChannelId)) {
                         setActiveChannelId(data.channels[0].id);
                     }
                 }
-            } catch (err) {
-                console.error('Cloud sync failed:', err);
+            } catch (err: any) {
+                if (err.name !== 'AbortError') console.error('Cloud sync failed:', err);
             } finally {
                 setIsLoadingCloud(false);
             }
         };
         syncFromCloud();
+        return () => controller.abort();
     }, [license]);
 
     // Save to cloud whenever channels change
@@ -325,6 +327,9 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         setStatus({ type: 'loading', msg: t('broadcast.sender.broadcasting') });
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
+
             const resp = await fetch('/api/broadcast/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -337,8 +342,10 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                     voice: ''
                 }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeoutId);
             const data = await resp.json();
 
             if (data.success) {
@@ -348,7 +355,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     isEmergency,
                     voice: '',
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
-                    timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
+                    timestamp: new Date().toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' }),
                     channelName: activeChannel.name
                 };
 

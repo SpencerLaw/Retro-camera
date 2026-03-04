@@ -40,38 +40,43 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onCancel}></div>
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-500">
+            <div className={`absolute inset-0 backdrop-blur-3xl transition-opacity duration-700 ${isDark ? 'bg-black/40' : 'bg-white/40'}`} onClick={onCancel}></div>
 
-            <div className={`relative w-full max-w-md p-8 space-y-6 shadow-2xl rounded-[2rem] border scale-100 animate-in zoom-in-95 duration-300 ${isDark ? 'bg-zinc-900 border-white/10 text-white' : 'bg-white border-black/10 text-black'}`}>
+            <div className={`relative w-full max-w-lg p-10 space-y-10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] rounded-[3rem] border transition-all duration-700 scale-100 animate-in zoom-in-95 ${isDark ? 'bg-zinc-900/90 border-white/10 text-white' : 'bg-white/90 border-white text-black'}`}>
                 <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
+                    <div className="flex items-center gap-6">
+                        <div className={`w-16 h-16 rounded-[2rem] flex items-center justify-center shadow-xl rotate-3 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
                             {getIcon()}
                         </div>
-                        <div>
-                            <h3 className="text-xl font-black tracking-tight">{title}</h3>
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">{type.toUpperCase()} MODE</p>
+                        <div className="space-y-1">
+                            <h3 className="text-2xl font-black tracking-tight">{title}</h3>
+                            <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full animate-pulse ${type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500'}`} />
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 italic">{type.toUpperCase()} NOTIFICATION</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    <p className="text-base font-bold leading-relaxed opacity-80 whitespace-pre-wrap">{message}</p>
+                <div className="space-y-6">
+                    <div className={`p-6 rounded-3xl border ${isDark ? 'bg-black/20 border-white/5' : 'bg-gray-100/50 border-white/20'}`}>
+                        <p className="text-lg font-bold leading-relaxed opacity-80 whitespace-pre-wrap">{message}</p>
+                    </div>
                 </div>
 
-                <div className="flex gap-4 pt-2">
+                <div className="flex gap-4 pt-4">
                     {type === 'confirm' || type === 'warning' ? (
                         <>
                             <button
                                 onClick={onCancel}
-                                className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-white/5 font-black uppercase tracking-widest text-xs hover:bg-gray-200 dark:hover:bg-white/10 transition text-gray-500 dark:text-gray-400"
+                                className="flex-1 py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] hover:bg-red-500/10 hover:text-red-500 transition-all border border-transparent text-gray-400"
                             >
                                 {cancelText}
                             </button>
                             <button
                                 onClick={onConfirm}
-                                className={`flex-[1.5] py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'warning' ? 'bg-red-500 shadow-red-500/20' : 'bg-blue-500 shadow-blue-500/20'
+                                className={`flex-[1.5] py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] shadow-2xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'warning' ? 'bg-gradient-to-r from-red-600 to-rose-600 shadow-red-600/20' : 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-600/20'
                                     }`}
                             >
                                 {confirmText}
@@ -80,9 +85,9 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
                     ) : (
                         <button
                             onClick={onConfirm}
-                            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'error' ? 'bg-red-500 shadow-red-500/20' :
-                                type === 'success' ? 'bg-green-600 shadow-green-600/20' :
-                                    'bg-blue-500 shadow-blue-500/20'
+                            className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] shadow-2xl transition hover:scale-[1.02] active:scale-95 text-white ${type === 'error' ? 'bg-gradient-to-r from-red-600 to-rose-600 shadow-red-600/20' :
+                                type === 'success' ? 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-600/20' :
+                                    'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-600/20'
                                 }`}
                         >
                             已明白

@@ -670,83 +670,105 @@ const Sender: React.FC<{ license: string, isDark: boolean }> = ({ license, isDar
 
             {/* Replay/Edit Dialog */}
             {showReplayDialog && replayData && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowReplayDialog(false)}></div>
-                    <GlassCard className="relative w-full max-w-lg p-8 space-y-8 shadow-2xl border-2 border-blue-500/20 scale-100 animate-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-500">
+                    <div className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-xl" onClick={() => setShowReplayDialog(false)}></div>
+                    <div className={`relative w-full max-w-lg p-10 space-y-10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] rounded-[3rem] border transition-all duration-700 scale-100 animate-in zoom-in-95 ${isDark ? 'bg-zinc-900/90 border-white/10 text-white' : 'bg-white/90 border-white text-black'}`}>
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                                    <Edit2 size={24} />
+                            <div className="flex items-center gap-4">
+                                <div className={`w-14 h-14 rounded-3xl flex items-center justify-center shadow-lg rotate-3 ${isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-500 text-white'}`}>
+                                    <Edit2 size={28} />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-black tracking-tight">编辑并重新播报</h3>
-                                    <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">历史记录二次编辑</p>
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-black tracking-tight">编辑内容并重发</h3>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 italic">History Edit Mode</p>
+                                    </div>
                                 </div>
                             </div>
-                            <button onClick={() => setShowReplayDialog(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                                <Plus size={24} className="rotate-45" />
+                            <button onClick={() => setShowReplayDialog(false)} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 transition-all text-gray-400">
+                                <Plus size={28} className="rotate-45" />
                             </button>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">播报内容</label>
-                                <textarea
-                                    value={replayData.text}
-                                    onChange={(e) => setReplayData({ ...replayData, text: e.target.value })}
-                                    className="w-full bg-gray-100 dark:bg-white/5 rounded-2xl p-4 font-bold outline-none focus:ring-2 focus:ring-blue-500/50 transition dark:text-white min-h-[120px] text-lg lg:text-xl"
-                                />
+                        <div className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">
+                                    <Plus size={10} /> 播报报文载荷
+                                </label>
+                                <div className={`relative rounded-[2rem] p-6 transition-all border-2 ${isDark ? 'bg-black/40 border-white/5 focus-within:border-blue-500/50' : 'bg-gray-100 border-transparent focus-within:border-blue-500/30'}`}>
+                                    <textarea
+                                        value={replayData.text}
+                                        onChange={(e) => setReplayData({ ...replayData, text: e.target.value })}
+                                        className="w-full bg-transparent font-bold outline-none resize-none min-h-[140px] text-xl leading-relaxed dark:text-white"
+                                        placeholder="输入播报文字..."
+                                    />
+                                    <div className="absolute bottom-4 right-6 opacity-20 pointer-events-none">
+                                        <History size={48} />
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-30">循环次数</label>
-                                    <div className="flex items-center gap-4 bg-gray-100 dark:bg-white/5 p-2 rounded-2xl">
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">
+                                        <Plus size={10} /> 序列循环周期
+                                    </label>
+                                    <div className={`flex items-center p-2 rounded-2xl border ${isDark ? 'bg-black/20 border-white/5' : 'bg-gray-100/50 border-white'}`}>
                                         <button
                                             onClick={() => setReplayData({ ...replayData, repeatCount: Math.max(1, replayData.repeatCount - 1) })}
-                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition"
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-all active:scale-90 ${isDark ? 'bg-white/5 hover:bg-white/10 text-white' : 'bg-white hover:bg-gray-50 text-blue-600'}`}
                                         >
-                                            -
+                                            <ChevronRight className="rotate-180" size={20} />
                                         </button>
-                                        <span className="flex-1 text-center font-black text-xl text-blue-500">
-                                            {replayData.repeatCount === -1 ? '∞' : replayData.repeatCount}
-                                        </span>
+                                        <div className="flex-1 flex flex-col items-center">
+                                            <span className="font-black text-3xl tabular-nums text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                                                {replayData.repeatCount === -1 ? '∞' : replayData.repeatCount}
+                                            </span>
+                                            <span className="text-[8px] font-black uppercase opacity-20 tracking-tighter">Repeat Count</span>
+                                        </div>
                                         <button
                                             onClick={() => setReplayData({ ...replayData, repeatCount: Math.min(99, replayData.repeatCount + 1) })}
-                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center shadow-sm hover:bg-gray-50 active:scale-95 transition"
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-all active:scale-90 ${isDark ? 'bg-white/5 hover:bg-white/10 text-white' : 'bg-white hover:bg-gray-50 text-blue-600'}`}
                                         >
-                                            +
+                                            <ChevronRight size={20} />
                                         </button>
                                     </div>
-
                                 </div>
                             </div>
 
                             <button
                                 onClick={() => setReplayData({ ...replayData, isEmergency: !replayData.isEmergency })}
-                                className={`w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition ${replayData.isEmergency
-                                    ? 'bg-red-500 text-white shadow-lg'
-                                    : 'bg-gray-100 dark:bg-white/5 text-gray-500'}`}
+                                className={`w-full group flex items-center justify-between px-8 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all duration-500 border-2 ${replayData.isEmergency
+                                    ? 'bg-red-500 border-red-400 text-white shadow-[0_12px_24px_rgba(239,68,68,0.3)]'
+                                    : 'bg-white/5 border-white/5 dark:text-white/40 text-gray-400 hover:bg-white/10'}`}
                             >
-                                <AlertTriangle size={18} /> 紧急模式: {replayData.isEmergency ? '已开启' : '已关闭'}
+                                <div className="flex items-center gap-3">
+                                    <AlertTriangle size={18} className={replayData.isEmergency ? 'animate-pulse' : ''} />
+                                    <span>紧急播报模式</span>
+                                </div>
+                                <div className={`w-10 h-5 rounded-full relative transition-colors ${replayData.isEmergency ? 'bg-white/30' : 'bg-gray-500/20'}`}>
+                                    <div className={`absolute top-1 w-3 h-3 rounded-full transition-all duration-300 ${replayData.isEmergency ? 'right-1 bg-white' : 'left-1 bg-gray-400'}`} />
+                                </div>
                             </button>
                         </div>
 
                         <div className="flex gap-4 pt-4">
                             <button
                                 onClick={() => setShowReplayDialog(false)}
-                                className="flex-1 py-5 rounded-3xl bg-gray-100 dark:bg-white/5 font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition text-gray-400"
+                                className="flex-1 py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] hover:bg-red-500/10 hover:text-red-500 transition-all border border-transparent"
                             >
                                 取消
                             </button>
                             <button
                                 onClick={executeReplay}
-                                className="flex-[2] py-5 rounded-3xl bg-blue-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition"
+                                className="flex-[2] py-5 rounded-[2rem] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 group"
                             >
+                                <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                                 立即重发
                             </button>
                         </div>
-                    </GlassCard>
+                    </div>
                 </div>
             )}
 

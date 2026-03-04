@@ -26,24 +26,53 @@ const ClockDisplay = React.memo(() => {
 
 const RadarScanner = React.memo(({ isPlaying, isEmergency }: { isPlaying: boolean; isEmergency: boolean }) => {
     return (
-        <div className="relative flex items-center justify-center w-64 h-64 md:w-80 md:h-80">
-            {/* Outer Rings */}
-            <div className={`absolute inset-0 rounded-full border-2 border-dashed ${isEmergency ? 'border-red-500/20' : 'border-blue-500/20'} animate-[spin_40s_linear_infinite]`} />
-            <div className={`absolute inset-4 rounded-full border border-dashed ${isEmergency ? 'border-red-400/10' : 'border-blue-400/10'} animate-[spin_20s_linear_infinite_reverse]`} />
-            
-            {/* Pulsing Core */}
-            <div className={`relative z-10 w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center overflow-hidden shadow-2xl transition-all duration-700 ${isEmergency ? 'bg-red-500 shadow-red-500/40' : 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/40'} ${isPlaying ? 'scale-110' : 'scale-100 opacity-80'}`}>
-                <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                <Signal size={isPlaying ? 64 : 48} className={`text-white transition-all duration-500 ${isPlaying ? 'animate-bounce' : 'animate-pulse'}`} />
+        <div className="relative flex items-center justify-center w-72 h-72 md:w-96 md:h-96">
+            {/* Background Glow */}
+            <div className={`absolute -inset-20 blur-[100px] opacity-20 rounded-full ${isEmergency ? 'bg-red-600' : 'bg-blue-600'} animate-pulse`} />
+
+            {/* Outer Rotating Circles */}
+            <div className={`absolute inset-0 rounded-full border border-dashed ${isEmergency ? 'border-red-500/20' : 'border-blue-500/20'} animate-[spin_60s_linear_infinite]`} />
+            <div className={`absolute inset-6 rounded-full border-2 border-dashed ${isEmergency ? 'border-red-400/10' : 'border-blue-400/10'} animate-[spin_30s_linear_infinite_reverse] opacity-50`} />
+            <div className={`absolute inset-12 rounded-full border border-white/5 animate-[spin_40s_linear_infinite]`} />
+
+            {/* Glass Rings */}
+            <div className={`absolute inset-16 rounded-full border border-white/10 backdrop-blur-[2px] shadow-inner`} />
+            <div className={`absolute inset-24 rounded-full border border-white/5`} />
+
+            {/* Dynamic Scanning Beam */}
+            {!isPlaying && (
+                <div className="absolute inset-4 rounded-full animate-[spin_3s_linear_infinite]"
+                    style={{
+                        background: `conic-gradient(from 0deg, transparent 0%, transparent 70%, ${isEmergency ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)'} 100%)`,
+                        filter: 'blur(2px)'
+                    }} />
+            )}
+
+            {/* Core Shield */}
+            <div className={`relative z-10 w-36 h-36 md:w-48 md:h-48 rounded-full flex items-center justify-center overflow-hidden transition-all duration-1000 ${isEmergency
+                ? 'bg-gradient-to-br from-red-500 to-rose-700 shadow-[0_0_50px_rgba(239,68,68,0.4)]'
+                : 'bg-gradient-to-br from-blue-500 to-indigo-700 shadow-[0_0_50px_rgba(59,130,246,0.3)]'
+                } ${isPlaying ? 'scale-110' : 'scale-100 opacity-90'} border border-white/20`}>
+                {/* Internal Reflections */}
+                <div className="absolute inset-0 bg-white/10 animate-pulse" />
+                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white/20 rotate-45 blur-xl" />
+
+                <Signal size={isPlaying ? 80 : 64} className={`text-white transition-all duration-700 ${isPlaying ? 'animate-bounce drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'animate-pulse opacity-60'}`} />
             </div>
 
-            {/* Scanning Beam */}
-            {!isPlaying && (
-                <div className="absolute inset-0 rounded-full animate-[spin_4s_linear_infinite] bg-gradient-to-r from-transparent via-transparent to-blue-500/20" style={{ clipPath: 'conic-gradient(from 0deg, transparent 0%, blue 100%)' }} />
+            {/* Active Particles */}
+            {isPlaying && (
+                <div className="absolute inset-[-20%]">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className={`absolute w-2 h-2 rounded-full ${isEmergency ? 'bg-red-400' : 'bg-blue-400'} animate-ping`}
+                            style={{
+                                top: `${Math.random() * 100}%`,
+                                left: `${Math.random() * 100}%`,
+                                animationDelay: `${i * 0.5}s`
+                            }} />
+                    ))}
+                </div>
             )}
-            
-            {/* Ambient Blobs */}
-            <div className={`absolute -inset-10 blur-3xl opacity-20 rounded-full ${isEmergency ? 'bg-red-600' : 'bg-blue-600'} animate-pulse`} />
         </div>
     );
 });
@@ -71,7 +100,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [receivedHistory, setReceivedHistory] = useState<Message[]>([]);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '', type: 'info' as DialogType, onConfirm: () => {} });
+    const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '', type: 'info' as DialogType, onConfirm: () => { } });
     const [showHistory, setShowHistory] = useState(true);
 
     // Engine Control Ref
@@ -83,7 +112,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     useEffect(() => {
         const saved = localStorage.getItem('br_receiver_history');
-        if (saved) try { setReceivedHistory(JSON.parse(saved).slice(-20)); } catch(e){}
+        if (saved) try { setReceivedHistory(JSON.parse(saved).slice(-20)); } catch (e) { }
     }, []);
 
     const splitSentences = useCallback((text: string) => {
@@ -150,7 +179,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         setCurrentMsg(null);
                     }
                 }
-            } catch (e) {}
+            } catch (e) { }
             if (engine.current.isJoined) setTimeout(poll, 3000);
         };
         poll();
@@ -179,7 +208,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         <h2 className="text-4xl font-black tracking-tight dark:text-white">欢迎，接入点已就绪</h2>
                         <div className="w-full space-y-6">
                             <input type="text" value={fullRoomId} onChange={e => setFullRoomId(e.target.value.toUpperCase())} className="w-full bg-black/5 dark:bg-white/5 border-2 border-transparent focus:border-blue-500 rounded-3xl p-8 text-4xl font-black text-center outline-none transition dark:text-white uppercase tracking-[0.2em] shadow-inner" placeholder="ROOM" maxLength={8} />
-                            <button onClick={() => { if(fullRoomId) { setIsJoined(true); localStorage.setItem('br_receiver_room', fullRoomId); } }} className="w-full py-8 bg-blue-600 hover:bg-blue-500 text-white rounded-3xl font-black text-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-500/30 flex items-center justify-center gap-4">
+                            <button onClick={() => { if (fullRoomId) { setIsJoined(true); localStorage.setItem('br_receiver_room', fullRoomId); } }} className="w-full py-8 bg-blue-600 hover:bg-blue-500 text-white rounded-3xl font-black text-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-500/30 flex items-center justify-center gap-4">
                                 <Radio size={32} /> 进入教室
                             </button>
                         </div>
@@ -225,21 +254,25 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
             </header>
 
             {/* Main Content Area - FLEX GROW to push history down */}
-            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10 px-10">
+            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10 px-10 py-20 pb-10">
                 {currentMsg ? (
                     <div className="w-full h-full overflow-y-auto scrollbar-hide px-4 flex flex-col">
-                        <div className="max-w-6xl mx-auto py-20 pb-40 w-full flex-1 flex flex-col justify-center">
+                        <div className="max-w-6xl mx-auto py-10 pb-32 w-full flex-1 flex flex-col justify-center">
                             {sentences.map((s, i) => (
                                 <SentenceItem key={`${currentMsg.id}-${i}`} sentence={s} isActive={i === activeSentenceIndex} isPast={activeSentenceIndex !== -1 && i < activeSentenceIndex} isEmergency={!!currentMsg.isEmergency} textLength={currentMsg.text.length} activeSentenceRef={activeRef} />
                             ))}
                         </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center gap-16 scale-90 md:scale-100">
+                    <div className="flex flex-col items-center justify-center gap-12 scale-[0.85] md:scale-100 lg:scale-110 transition-transform duration-700">
                         <RadarScanner isPlaying={false} isEmergency={false} />
-                        <div className="space-y-4 text-center">
-                            <p className="text-4xl md:text-6xl font-black tracking-[0.4em] uppercase italic opacity-10 animate-pulse">正在监听下行链路</p>
-                            <p className="text-sm font-mono font-bold opacity-30 tracking-widest">SECURE CHANNEL ACTIVE // {fullRoomId}</p>
+                        <div className="space-y-4 text-center mt-4">
+                            <p className="text-3xl md:text-5xl font-black tracking-[0.4em] uppercase italic opacity-20 animate-pulse bg-gradient-to-r from-transparent via-current to-transparent bg-clip-text">正在监听下行链路</p>
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="h-[1px] w-8 bg-current opacity-20" />
+                                <p className="text-xs font-mono font-bold opacity-30 tracking-widest uppercase">Secure Channel Active // {fullRoomId}</p>
+                                <div className="h-[1px] w-8 bg-current opacity-20" />
+                            </div>
                         </div>
                     </div>
                 )}
@@ -260,7 +293,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                         </div>
                         <button onClick={() => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); }} className="text-[10px] font-black text-red-500/40 hover:text-red-500 transition px-4 py-2 rounded-full border border-red-500/10 hover:bg-red-500/5">重置历史记录</button>
                     </div>
-                    
+
                     <div className="flex flex-row gap-6 overflow-x-auto pb-4 px-2 snap-x custom-scrollbar min-h-[120px]">
                         {receivedHistory.length === 0 ? (
                             <div className="py-12 px-6 opacity-10 italic w-full text-center font-black tracking-[0.5em] text-lg uppercase">当前暂无数据包</div>
@@ -279,7 +312,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 </div>
             </footer>
 
-            <CustomDialog isOpen={dialog.isOpen} title={dialog.title} message={dialog.message} type={dialog.type} onConfirm={dialog.onConfirm} onCancel={() => setDialog({...dialog, isOpen: false})} isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
+            <CustomDialog isOpen={dialog.isOpen} title={dialog.title} message={dialog.message} type={dialog.type} onConfirm={dialog.onConfirm} onCancel={() => setDialog({ ...dialog, isOpen: false })} isDark={isDark} isEmergency={!!currentMsg?.isEmergency} />
         </div>
     );
 };

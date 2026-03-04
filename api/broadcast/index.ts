@@ -40,9 +40,16 @@ async function handleTTS(req: VercelRequest, res: VercelResponse) {
 
     try {
         const audioBuffer = await getEdgeTTS(text, voice, rate);
+        
+        // Cache for 1 day to reduce load and prevent rapid re-fetching
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600');
         res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Length', audioBuffer.length);
+        res.setHeader('Accept-Ranges', 'bytes');
+        
         return res.status(200).send(audioBuffer);
     } catch (error: any) {
+        console.error('TTS Synthesis failed:', error.message);
         return res.status(500).json({ error: 'TTS Synthesis failed: ' + error.message });
     }
 }

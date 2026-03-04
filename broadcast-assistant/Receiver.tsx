@@ -215,8 +215,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     const speak = useCallback(async (text: string, isEmergency: boolean, repeatCount: number = 1, id: string, voiceOverride?: string) => {
         if (lastPlayedId.current === id && isPlayingRef.current) return;
         
-        // Stop any current playback and clear previous loops
-        ttsManager.stop(true);
+        // Stop any current playback and cancel pending loops by incrementing ID
+        ttsManager.cancelAll();
         const currentPlaybackId = ttsManager.getActivePlaybackId();
         
         lastPlayedId.current = id;
@@ -240,9 +240,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     for (let i = 0; i < currentSentences.length; i++) {
                         if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
 
+                        // CRITICAL: Set highlight index BEFORE speak call
                         setActiveSentenceIndex(i);
-                        // Small delay for UI to catch up
-                        await new Promise(r => setTimeout(r, 100));
                         
                         const sentence = currentSentences[i];
                         const nextSentence = currentSentences[i + 1];
@@ -254,6 +253,8 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                             voice: targetVoice,
                             rate: isEmergency ? 0.85 : 1.0,
                             volume: volumeBoost,
+                            // Ensure boundaries update active index if needed (though we set it manually for reliability)
+                            onBoundary: () => {} 
                         };
 
                         // Prefetch next sentence
@@ -267,14 +268,20 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
                         let url = prefetchedBlobs.current[sentence];
 
-                        if (url && ttsManager.getActivePlaybackId() === currentPlaybackId) {
-                            await ttsManager.playBlob(url as string, sentence, ttsOptions, currentPlaybackId);
-                            delete prefetchedBlobs.current[sentence];
-                        } else if (ttsManager.getActivePlaybackId() === currentPlaybackId) {
-                            await ttsManager.speak(sentence, { ...ttsOptions, onEnd: () => {} });
+                        try {
+                            if (url && ttsManager.getActivePlaybackId() === currentPlaybackId) {
+                                await ttsManager.playBlob(url as string, sentence, ttsOptions, currentPlaybackId);
+                                delete prefetchedBlobs.current[sentence];
+                            } else if (ttsManager.getActivePlaybackId() === currentPlaybackId) {
+                                await ttsManager.speak(sentence, ttsOptions);
+                            }
+                        } catch (e) {
+                            console.error('Sentence error:', e);
+                            // Brief wait on error to prevent CPU spin if many sentences fail rapidly
+                            await new Promise(r => setTimeout(r, 1000));
                         }
                         
-                        // Break between sentences
+                        // Small break between sentences
                         if (ttsManager.getActivePlaybackId() !== currentPlaybackId) break;
                         await new Promise(r => setTimeout(r, 200));
                     }
@@ -383,7 +390,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
     // Global cleanup on unmount
     useEffect(() => {
         return () => {
-            ttsManager.stop(true); // Stop all and clear pool
+            ttsManager.cancelAll(); // Stop all and clear pool
             ttsManager.stopSilentLoop();
         };
     }, []);
@@ -399,7 +406,7 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
     useEffect(() => {
         if (!isListening) {
-            ttsManager.stop(true);
+            ttsManager.cancelAll();
             pendingPlayouts.current = 0;
             setIsPlaying(false);
             setActiveSentenceIndex(-1);

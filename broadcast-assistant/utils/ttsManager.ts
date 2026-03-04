@@ -42,7 +42,7 @@ class TTSManager {
     }
 
     public async speak(text: string, options: Partial<TTSOptions> = {}): Promise<void> {
-        this.stop(false); // Stop current but don't clear everything if we're in sequence
+        this.stop(false); // Only stop current audio, do NOT increment sequence ID
         this.startSilentLoop();
 
         const playbackId = this.activePlaybackId;
@@ -56,7 +56,10 @@ class TTSManager {
             };
 
             // Safety timeout
-            const timeout = setTimeout(settle, 15000);
+            const timeout = setTimeout(() => {
+                console.warn('TTS speak timeout for:', text.substring(0, 20));
+                settle();
+            }, 15000);
 
             const extendedOptions = {
                 ...options,
@@ -83,12 +86,15 @@ class TTSManager {
                         break;
                 }
             } catch (e) {
-                console.error('TTS execution failed, falling back to native:', e);
-                if (this.activePlaybackId === playbackId) {
-                    this.speakNative(text, extendedOptions);
-                } else {
-                    settle();
-                }
+                console.error('TTS execution failed:', e);
+                // On failure, wait a bit before settling to prevent rapid retry loops if the caller is in a loop
+                setTimeout(() => {
+                    if (this.activePlaybackId === playbackId) {
+                        this.speakNative(text, extendedOptions);
+                    } else {
+                        settle();
+                    }
+                }, 500);
             }
         });
     }
@@ -208,9 +214,16 @@ class TTSManager {
         }
     }
 
-    public stop(clearPool: boolean = true): void {
-        this.activePlaybackId++; // Invalidate any current async sequences
+    /**
+     * Cancel all current and pending sequences.
+     * Increments activePlaybackId to invalidate any running async loops.
+     */
+    public cancelAll(): void {
+        this.activePlaybackId++;
+        this.stop(true);
+    }
 
+    public stop(clearPool: boolean = false): void {
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
@@ -221,26 +234,28 @@ class TTSManager {
             const prevSrc = this.audio.src;
             this.audio.src = '';
 
-            // Immediate revocation of the blob just used
+            // Immediate revocation if requested or if it's a transient blob
             if (prevSrc && prevSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(prevSrc);
-                // Clean from map
-                for (let [key, val] of this.blobPool.entries()) {
-                    if (val === prevSrc) {
-                        this.blobPool.delete(key);
-                        break;
+                // We only revoke if we're sure it's not needed by other pending sentences
+                // or if clearPool is true
+                if (clearPool) {
+                    URL.revokeObjectURL(prevSrc);
+                    for (let [key, val] of this.blobPool.entries()) {
+                        if (val === prevSrc) {
+                            this.blobPool.delete(key);
+                            break;
+                        }
                     }
                 }
             }
 
-            // Remove lingering metadata listener if any
             if (this.metaListener) {
                 this.audio.removeEventListener('loadedmetadata', this.metaListener);
                 this.metaListener = null;
             }
         }
         this.clearBoundaryTimer();
-        if (this.currentBlobUrl) {
+        if (this.currentBlobUrl && clearPool) {
             URL.revokeObjectURL(this.currentBlobUrl);
             this.currentBlobUrl = null;
         }
@@ -439,11 +454,13 @@ class TTSManager {
 
     // Since Edge/Fish don't provide native boundaries, we sync simulation to the actual audio duration
     private simulateBoundaries(text: string, options: TTSOptions, audioEl?: HTMLAudioElement) {
-        if (!options.onBoundary || options.engine === 'native') return;
+        if (!options.onBoundary || options.engine === 'native' || !text) return;
         this.clearBoundaryTimer();
 
         const startSimulation = (msPerChar: number) => {
             let charIndex = 0;
+            // Cap speed to avoid CPU spike from zero or near-zero msPerChar
+            const safeInterval = Math.max(20, msPerChar);
             this.boundaryTimer = setInterval(() => {
                 if (charIndex >= text.length) {
                     this.clearBoundaryTimer();
@@ -451,7 +468,7 @@ class TTSManager {
                 }
                 charIndex += 1;
                 if (options.onBoundary) options.onBoundary(charIndex);
-            }, msPerChar);
+            }, safeInterval);
         };
 
         const el = audioEl || this.audio;

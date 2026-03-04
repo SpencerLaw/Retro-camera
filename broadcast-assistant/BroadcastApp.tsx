@@ -19,12 +19,25 @@ const GlassContainer = ({ children, className = "" }: { children: React.ReactNod
 const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = false }) => {
     const navigate = useNavigate();
     const t = useTranslations();
-    const [mode, setMode] = useState<'selection' | 'sender' | 'receiver' | 'license'>(() => {
+    const [mode, setModeRaw] = useState<'selection' | 'sender' | 'receiver' | 'license'>(() => {
         if (forceReceiver) return 'receiver';
         const params = new URLSearchParams(window.location.search);
         if (params.get('receiver') === '1') return 'receiver';
+        // 恢复上次的模式（仅恢复 sender 和 receiver，不恢复 selection）
+        const saved = localStorage.getItem('bc_mode') as 'sender' | 'receiver' | null;
+        if (saved === 'sender' || saved === 'receiver') return saved;
         return 'selection';
     });
+
+    // 包裹 setMode，同时持久化到 localStorage
+    const setMode = (m: 'selection' | 'sender' | 'receiver' | 'license') => {
+        if (m === 'sender' || m === 'receiver') {
+            localStorage.setItem('bc_mode', m);
+        } else {
+            localStorage.removeItem('bc_mode');
+        }
+        setModeRaw(m);
+    };
     const [theme, setTheme] = useState<'light' | 'dark'>(
         localStorage.getItem('bc_theme') as 'light' | 'dark' ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')

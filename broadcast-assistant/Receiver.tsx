@@ -281,8 +281,9 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         if (msg.text && msg.text.trim()) {
                             // 有实际内容：更新消息、加入历史、触发播报
                             setCurrentMsg(msg);
-                            // 如果上一次播报没结束，或者是一条相同的消息，打断之前的
-                            if (engine.current.isListening && (!isPlayingRef.current || currentMsg?.id !== msg.id)) {
+                            // 外层 if 已经判定了 msg.id !== engine.current.lastId (是新消息)
+                            // 这里只要引擎处在监听状态，就直接执行播放
+                            if (engine.current.isListening) {
                                 runPlayback(msg);
                             }
                             setReceivedHistory(prev => {

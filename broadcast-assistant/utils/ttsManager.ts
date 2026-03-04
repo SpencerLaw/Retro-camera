@@ -16,7 +16,6 @@ class TTSManager {
     private gainNode: GainNode | null = null;
     private sourceNode: MediaElementAudioSourceNode | null = null;
     private activePlaybackId: number = 0;
-    private blobPool: Map<string, string> = new Map();
 
     private constructor() {
         if (typeof window !== 'undefined') {
@@ -45,22 +44,36 @@ class TTSManager {
     }
 
     public async speak(text: string, options: TTSOptions = {}): Promise<void> {
-        this.stop();
+        this.stop(false); // Stop current but don't increment playback ID
         const playbackId = this.activePlaybackId;
         
-        if (options.engine === 'edge') {
-            try {
-                const blob = await this.fetchEdge(text, options);
-                if (blob && this.activePlaybackId === playbackId) {
-                    const url = URL.createObjectURL(blob);
-                    await this.playUrl(url, options, playbackId);
+        return new Promise(async (resolve) => {
+            const onEnd = () => {
+                if (options.onEnd) options.onEnd();
+                resolve();
+            };
+
+            if (options.engine === 'edge') {
+                try {
+                    const blob = await this.fetchEdge(text, options);
+                    if (blob && this.activePlaybackId === playbackId) {
+                        const url = URL.createObjectURL(blob);
+                        await this.playUrl(url, options, playbackId);
+                        resolve();
+                    } else {
+                        resolve();
+                    }
+                } catch (e) {
+                    if (this.activePlaybackId === playbackId) {
+                        await this.speakNative(text, options);
+                    }
+                    resolve();
                 }
-            } catch (e) {
-                if (this.activePlaybackId === playbackId) this.speakNative(text, options);
+            } else {
+                await this.speakNative(text, options);
+                resolve();
             }
-        } else {
-            this.speakNative(text, options);
-        }
+        });
     }
 
     private async fetchEdge(text: string, options: TTSOptions): Promise<Blob | null> {
@@ -94,22 +107,28 @@ class TTSManager {
             this.audio.onended = cleanup;
             this.audio.onerror = cleanup;
             this.audio.src = url;
-            
             this.audio.play().catch(cleanup);
         });
     }
 
-    private speakNative(text: string, options: TTSOptions) {
-        if (!window.speechSynthesis) return options.onEnd?.();
-        const ut = new SpeechSynthesisUtterance(text);
-        ut.rate = options.rate || 1;
-        ut.onend = () => options.onEnd?.();
-        ut.onerror = () => options.onEnd?.();
-        window.speechSynthesis.speak(ut);
+    private speakNative(text: string, options: TTSOptions): Promise<void> {
+        return new Promise((resolve) => {
+            if (!window.speechSynthesis) return resolve();
+            window.speechSynthesis.cancel();
+            
+            const ut = new SpeechSynthesisUtterance(text);
+            ut.rate = options.rate || 1;
+            ut.onend = () => resolve();
+            ut.onerror = () => resolve();
+            
+            window.speechSynthesis.speak(ut);
+            // Safety timeout for native TTS which sometimes fails to trigger onend
+            setTimeout(resolve, 10000);
+        });
     }
 
-    public stop() {
-        this.activePlaybackId++;
+    public stop(incrementId: boolean = true) {
+        if (incrementId) this.activePlaybackId++;
         if (this.audio) {
             this.audio.pause();
             this.audio.src = '';
@@ -118,15 +137,12 @@ class TTSManager {
     }
 
     public cancelAll() {
-        this.stop();
-        this.blobPool.forEach(url => URL.revokeObjectURL(url));
-        this.blobPool.clear();
+        this.stop(true);
     }
 
     public getActivePlaybackId() { return this.activePlaybackId; }
 
     public startSilentLoop() {
-        // Reduced to minimal to prevent CPU spike
         if (this.audioCtx?.state === 'suspended') this.audioCtx.resume();
     }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import ScheduleManager from './ScheduleManager';
@@ -383,17 +383,17 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     </div>
                 </div>
 
-                <div className="flex flex-nowrap overflow-x-auto gap-4 py-2 px-1 no-scrollbar scroll-smooth">
+                <div className="flex flex-col gap-3 py-2 px-1">
                     {channels.map((channel) => (
                         <button
                             key={channel.id}
                             onClick={() => setActiveChannelId(channel.id)}
-                            className={`flex-none px-6 py-4 rounded-3xl border transition duration-300 flex items-center gap-3 relative group ${activeChannelId === channel.id
-                                ? 'bg-gradient-to-r from-pink-500/90 to-rose-500/90 backdrop-blur-md border-pink-500/30 text-white scale-105'
+                            className={`w-full px-6 py-4 rounded-3xl border transition duration-300 flex items-center justify-between gap-3 relative group ${activeChannelId === channel.id
+                                ? 'bg-gradient-to-r from-pink-500/90 to-rose-500/90 backdrop-blur-md border-pink-500/30 text-white shadow-lg shadow-pink-500/20'
                                 : 'bg-white/50 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-400 hover:bg-white/80 dark:hover:bg-white/10'
                                 }`}
                         >
-                            <div className="text-left">
+                            <div className="text-left flex-1 min-w-0">
                                 <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeChannelId === channel.id ? 'opacity-80 text-white' : 'opacity-40'}`}>{t('broadcast.sender.room')} {channel.code}</p>
                                 <p className="text-sm font-bold truncate max-w-[120px]">{channel.name}</p>
                             </div>
@@ -528,30 +528,31 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     {/* ─ 重复次数 + 循环策略 合并一行 ─ */}
                     <div className="flex items-center justify-between gap-1 p-1.5 sm:p-2 rounded-2xl bg-slate-50 border border-slate-100 mb-3 overflow-x-auto scrollbar-hide">
                         {/* 减少, 数值, 增加 */}
-                        <div className="flex items-center gap-1 shrink-0">
+                        {/* 竖向: 增加, 数值, 减少 */}
+                        <div className="flex flex-col items-center justify-between shrink-0 bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
                             <button
-                                onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
+                                onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
                                 disabled={isLooping}
-                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
+                                className="w-12 sm:w-16 h-8 sm:h-9 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:bg-blue-100 transition-all disabled:opacity-30"
                             >
-                                <ChevronRight className="rotate-180" size={18} />
+                                <ChevronUp size={16} />
                             </button>
 
-                            <div className="w-12 sm:w-16 flex flex-col items-center justify-center">
-                                <span className={`font-black text-2xl leading-none ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
+                            <div className="w-full flex-1 flex flex-col items-center justify-center py-1 sm:py-2 bg-slate-50 border-y border-slate-50">
+                                <span className={`font-black text-xl sm:text-2xl leading-none ${isLooping ? 'text-slate-300' : 'text-blue-500'}`}>
                                     {isLooping ? '∞' : repeatCount}
                                 </span>
-                                <span className="text-[10px] font-black text-slate-400 whitespace-nowrap scale-[0.85] origin-top mt-1">
+                                <span className="text-[10px] font-black text-slate-400 mt-1 scale-90 whitespace-nowrap">
                                     {t('broadcast.sender.repeatCount')}
                                 </span>
                             </div>
 
                             <button
-                                onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
+                                onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
                                 disabled={isLooping}
-                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:scale-90 transition-all disabled:opacity-30"
+                                className="w-12 sm:w-16 h-8 sm:h-9 flex items-center justify-center text-blue-600 hover:bg-blue-50 active:bg-blue-100 transition-all disabled:opacity-30"
                             >
-                                <ChevronRight size={18} />
+                                <ChevronDown size={16} />
                             </button>
                         </div>
 
@@ -559,18 +560,18 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         <div className="w-px h-6 sm:h-8 bg-slate-200 shrink-0 mx-1 sm:mx-2" />
 
                         {/* 策略切换 */}
-                        <div className="flex items-center gap-1 shrink-0 bg-white p-1 rounded-xl border border-slate-100">
+                        <div className="flex flex-col gap-1 shrink-0 bg-white p-1 rounded-xl border border-slate-100">
                             <button
                                 onClick={() => setIsLooping(false)}
-                                className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl border-2 flex items-center justify-center transition-all ${!isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
+                                className={`w-10 h-8 sm:w-12 sm:h-9 rounded-lg border-2 flex items-center justify-center transition-all ${!isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
                             >
-                                <Repeat size={16} />
+                                <Repeat size={14} />
                             </button>
                             <button
                                 onClick={() => setIsLooping(true)}
-                                className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl border-2 flex items-center justify-center transition-all ${isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
+                                className={`w-10 h-8 sm:w-12 sm:h-9 rounded-lg border-2 flex items-center justify-center transition-all ${isLooping ? 'bg-blue-500 border-blue-400 text-white shadow-md shadow-blue-500/20' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-50'}`}
                             >
-                                <span className="text-xl font-black leading-none">∞</span>
+                                <span className="text-sm font-black leading-none">∞</span>
                             </button>
                         </div>
                     </div>
@@ -727,23 +728,23 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0 z-10">
 
                             {/* Loops Control */}
-                            <div className="flex items-center h-14 bg-slate-100 dark:bg-white/5 rounded-2xl p-1 border border-slate-200 dark:border-white/10 w-fit shrink-0">
+                            <div className="flex flex-col items-center justify-between bg-slate-100 dark:bg-white/5 rounded-2xl p-1 border border-slate-200 dark:border-white/10 shrink-0">
                                 <button
-                                    onClick={() => setReplayData({ ...replayData, repeatCount: Math.max(1, replayData.repeatCount - 1) })}
-                                    className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-slate-500 shadow-sm hover:text-indigo-600 transition-colors"
+                                    onClick={() => setReplayData({ ...replayData, repeatCount: Math.min(99, replayData.repeatCount + 1) })}
+                                    className="w-10 h-8 rounded-t-xl bg-white dark:bg-white/10 flex items-center justify-center text-slate-500 shadow-sm hover:text-indigo-600 transition-colors"
                                 >
-                                    <ChevronRight className="rotate-180" size={18} />
+                                    <ChevronUp size={16} />
                                 </button>
-                                <div className="w-12 text-center flex flex-col justify-center">
-                                    <span className="font-bold text-lg leading-none text-slate-800 dark:text-white">
+                                <div className="w-10 flex-[1] flex flex-col justify-center items-center py-1">
+                                    <span className="font-bold text-sm leading-none text-slate-800 dark:text-white">
                                         {replayData.repeatCount === -1 ? '∞' : replayData.repeatCount}
                                     </span>
                                 </div>
                                 <button
-                                    onClick={() => setReplayData({ ...replayData, repeatCount: Math.min(99, replayData.repeatCount + 1) })}
-                                    className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-slate-500 shadow-sm hover:text-indigo-600 transition-colors"
+                                    onClick={() => setReplayData({ ...replayData, repeatCount: Math.max(1, replayData.repeatCount - 1) })}
+                                    className="w-10 h-8 rounded-b-xl bg-white dark:bg-white/10 flex items-center justify-center text-slate-500 shadow-sm hover:text-indigo-600 transition-colors"
                                 >
-                                    <ChevronRight size={18} />
+                                    <ChevronDown size={16} />
                                 </button>
                             </div>
 

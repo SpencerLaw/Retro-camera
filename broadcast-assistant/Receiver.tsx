@@ -115,10 +115,11 @@ interface SentenceItemProps {
     isEmergency: boolean;
     textLength: number;
     activeSentenceRef: React.RefObject<HTMLDivElement>;
+    theme: 'light' | 'dark';
 }
 
 const SentenceItem: React.FC<SentenceItemProps> = ({
-    sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef
+    sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef, theme
 }) => {
     const scaleFactor = Math.max(0.6, Math.min(1.2, 200 / (textLength || 1)));
 
@@ -134,7 +135,10 @@ const SentenceItem: React.FC<SentenceItemProps> = ({
                 style={{ fontSize: `${scaleFactor * (isActive ? 32 : 24)}px` }}
                 className={`font-black tracking-tight leading-relaxed transition-colors duration-500 ${isEmergency
                     ? (isActive ? 'text-red-300' : 'text-red-900/40')
-                    : (isActive ? 'text-white' : 'text-white/20')
+                    : (theme === 'dark'
+                        ? (isActive ? 'text-white' : 'text-white/20')
+                        : (isActive ? 'text-slate-800' : 'text-slate-300')
+                    )
                     }`}
             >
                 {sentence}
@@ -502,6 +506,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                     isEmergency={emergency}
                                     textLength={currentMsg.text.length}
                                     activeSentenceRef={activeRef}
+                                    theme={theme}
                                 />
                             ))}
                         </div>

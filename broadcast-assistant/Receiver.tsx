@@ -123,28 +123,35 @@ const SentenceItem: React.FC<SentenceItemProps> = ({
 }) => {
     const scaleFactor = Math.max(0.6, Math.min(1.2, 200 / (textLength || 1)));
 
-    let textColorClass = '';
+    let textColor = '';
     if (isEmergency) {
-        textColorClass = isActive ? 'text-red-300' : 'text-red-900/40';
+        textColor = isActive ? '#fca5a5' : 'rgba(127, 29, 29, 0.4)';
     } else {
         if (theme === 'dark') {
-            textColorClass = isActive ? 'text-white' : 'text-white/20';
+            textColor = isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.2)';
         } else {
-            textColorClass = isActive ? 'text-slate-800' : 'text-slate-300';
+            textColor = isActive ? '#1e293b' : 'rgba(203, 213, 225, 0.6)';
         }
     }
 
     return (
         <div
             ref={isActive ? activeSentenceRef : null}
-            className={`transition-all duration-700 py-6 px-10 text-center select-none ${isActive
-                ? 'scale-110 opacity-100'
-                : isPast ? 'scale-90 opacity-40 blur-[1px]' : 'scale-95 opacity-20'
-                }`}
+            style={{
+                transform: isActive ? 'scale(1.1)' : isPast ? 'scale(0.9)' : 'scale(0.95)',
+                opacity: isActive ? 1 : isPast ? 0.4 : 0.2,
+                filter: isPast ? 'blur(1px)' : 'none',
+                transition: 'all 0.7s ease-in-out'
+            }}
+            className="py-6 px-10 text-center select-none"
         >
             <p
-                style={{ fontSize: `${scaleFactor * (isActive ? 32 : 24)}px` }}
-                className={`font-black tracking-tight leading-relaxed transition-colors duration-500 ${textColorClass}`}
+                style={{
+                    fontSize: `${scaleFactor * (isActive ? 32 : 24)}px`,
+                    color: textColor,
+                    transition: 'all 0.5s ease-in-out'
+                }}
+                className="font-black tracking-tight leading-relaxed"
             >
                 {sentence}
             </p>

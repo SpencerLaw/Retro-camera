@@ -491,32 +491,15 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         <Radio size={120} />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">{t('broadcast.sender.activeRoom')}</p>
-                            <h2 className="text-3xl font-black">{activeChannel?.name}</h2>
-                        </div>
-                        <div
-                            onClick={copyRoomId}
-                            className="flex flex-col items-end cursor-pointer hover:scale-105 transition-transform"
-                        >
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-1">Code</p>
-                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 border border-slate-200">
-                                <span className="font-mono font-black text-xl tracking-wider text-blue-600">{activeChannel?.code}</span>
-                                <Copy size={14} className="text-slate-400" />
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="space-y-4">
-                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">
-                            <Plus size={10} /> {t('broadcast.sender.messageContent')}
+                        <label className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] opacity-40 ml-2">
+                            <Plus size={12} /> {t('broadcast.sender.messageContent')}
                         </label>
-                        <div className="relative rounded-[2.5rem] p-8 transition-all border-2 bg-slate-50 border-slate-100 focus-within:border-blue-300 focus-within:bg-white group-focus-within:shadow-xl">
+                        <div className="relative rounded-[2.5rem] p-8 transition-all border-2 bg-slate-50 border-slate-100 focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-2xl">
                             <textarea
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
-                                className="w-full bg-transparent font-bold outline-none resize-none min-h-[160px] text-2xl leading-relaxed text-slate-800 placeholder:text-slate-300"
+                                className="w-full bg-transparent font-bold outline-none resize-none min-h-[320px] text-3xl leading-relaxed text-slate-800 placeholder:text-slate-300"
                                 placeholder={t('broadcast.sender.inputPlaceholder')}
                             />
                             <div className="absolute bottom-6 right-8 opacity-10 pointer-events-none group-focus-within:opacity-20 transition-opacity">

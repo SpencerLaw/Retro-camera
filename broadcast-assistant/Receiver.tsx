@@ -214,10 +214,14 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     // Effect for auto-scrolling to the active sentence
     useEffect(() => {
         if (activeSentenceIndex !== -1 && activeRef.current) {
-            activeRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-            });
+            try {
+                activeRef.current.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                });
+            } catch (err) {
+                console.warn('Scroll failed:', err);
+            }
         }
     }, [activeSentenceIndex]);
 
@@ -232,28 +236,32 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         setIsPlaying(true);
         setActiveSentenceIndex(-1);
 
-        const sentences = splitSentences(msg.text);
-        const repeat = msg.repeatCount || 1;
+        try {
+            const sentences = splitSentences(msg.text);
+            const repeat = msg.repeatCount || 1;
 
-        for (let r = 0; r < (repeat === -1 ? 999 : repeat); r++) {
-            for (let i = 0; i < sentences.length; i++) {
-                if (!engine.current.isJoined) break;
-                setActiveSentenceIndex(i);
-                await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
+            for (let r = 0; r < (repeat === -1 ? 999 : repeat); r++) {
+                for (let i = 0; i < sentences.length; i++) {
+                    if (!engine.current.isJoined) break;
+                    setActiveSentenceIndex(i);
+                    await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
+                }
             }
+        } catch (e) {
+            console.error('Playback Error:', e);
+        } finally {
+            isPlayingRef.current = false;
+            setIsPlaying(false);
+            setActiveSentenceIndex(-1);
+
+            // 读完了，如果需要恢复雷达显示，必须清空 currentMsg
+            // 加一点小延迟，让用户在这个句子上停留一会儿再刷掉
+            setTimeout(() => {
+                if (!isPlayingRef.current) {
+                    setCurrentMsg(null);
+                }
+            }, 1500);
         }
-
-        isPlayingRef.current = false;
-        setIsPlaying(false);
-        setActiveSentenceIndex(-1);
-
-        // 读完了，如果需要恢复雷达显示，必须清空 currentMsg
-        // 加一点小延迟，让用户在这个句子上停留一会儿再刷掉
-        setTimeout(() => {
-            if (!isPlayingRef.current) {
-                setCurrentMsg(null);
-            }
-        }, 1500);
     }, []);
 
     useEffect(() => {
@@ -319,11 +327,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         return () => { engine.current.isJoined = false; ttsManager.cancelAll(); };
     }, [isJoined, fullRoomId, runPlayback]);
 
-    useEffect(() => {
-        if (activeRef.current) activeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, [activeSentenceIndex]);
-
-
+    // Duplicate effect removed
 
     const greeting = useMemo(() => {
         const h = new Date().getHours();

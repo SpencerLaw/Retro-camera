@@ -75,6 +75,17 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         channelName?: string;
     } | null>(null);
 
+    // Lock body scroll when replay dialog is open to prevent underlying page from scrolling
+    useEffect(() => {
+        if (showReplayDialog) {
+            const originalStyle = window.getComputedStyle(document.body).overflow;
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = originalStyle;
+            };
+        }
+    }, [showReplayDialog]);
+
     const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0];
     const channelCode = activeChannel?.code || '';
 
@@ -307,11 +318,12 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     const clearHistory = () => {
         openDialog(
             t('broadcast.sender.timeline'),
-            t('broadcast.sender.clearHistoryConfirm'),
+            '确定要清空当前频道的播报记录吗？(其他频道的记录不受影响)',
             'warning',
             () => {
-                setHistory([]);
-                localStorage.removeItem('br_sender_history');
+                const filteredHistory = history.filter(m => m.channelName !== activeChannel?.name);
+                setHistory(filteredHistory);
+                localStorage.setItem('br_sender_history', JSON.stringify(filteredHistory));
             }
         );
     };
@@ -319,7 +331,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     const clearCloudRooms = async () => {
         openDialog(
             t('broadcast.sender.manageClasses'),
-            t('broadcast.sender.clearAllRoomsConfirm'),
+            '确定要清空云端数据库中所有关联的房间吗？此操作不可撤销。(注：该操作是安全的，仅会清理当前设备生成的这些房间数据，不会影响其他用户的房间。)',
             'warning',
             async () => {
                 setStatus({ type: 'loading', msg: t('broadcast.sender.clearing') });
@@ -606,13 +618,17 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     </button>
                 </div>
                 <div className="space-y-3">
-                    {history.length === 0 ? (
-                        <div className="py-20 flex flex-col items-center justify-center text-slate-300 space-y-4">
-                            <History size={48} className="opacity-20" />
-                            <p className="text-xs font-black uppercase tracking-[0.3em] opacity-50">{t('broadcast.sender.noHistory')}</p>
-                        </div>
-                    ) : (
-                        history.map((msg) => (
+                    {(() => {
+                        const filteredHistory = history.filter(msg => msg.channelName === activeChannel?.name);
+                        if (filteredHistory.length === 0) {
+                            return (
+                                <div className="py-20 flex flex-col items-center justify-center text-slate-300 space-y-4">
+                                    <History size={48} className="opacity-20" />
+                                    <p className="text-xs font-black uppercase tracking-[0.3em] opacity-50">{t('broadcast.sender.noHistory')}</p>
+                                </div>
+                            );
+                        }
+                        return filteredHistory.map((msg) => (
                             <button
                                 key={msg.id}
                                 onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName)}
@@ -640,8 +656,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                     <ChevronRight className="text-slate-300" size={20} />
                                 </div>
                             </button>
-                        ))
-                    )}
+                        ));
+                    })()}
                 </div>
             </div>
 

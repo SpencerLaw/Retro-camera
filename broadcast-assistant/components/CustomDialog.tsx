@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AlertCircle, CheckCircle2, Info, HelpCircle } from 'lucide-react';
 
 export type DialogType = 'info' | 'confirm' | 'error' | 'success' | 'warning';
@@ -26,6 +26,16 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
     onConfirm,
     onCancel,
 }) => {
+    useEffect(() => {
+        if (isOpen) {
+            const originalStyle = window.getComputedStyle(document.body).overflow;
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = originalStyle;
+            };
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const getIcon = () => {

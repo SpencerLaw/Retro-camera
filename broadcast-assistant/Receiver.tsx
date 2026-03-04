@@ -96,7 +96,7 @@ const ActiveVisualizer = ({ isEmergency }: { isEmergency: boolean }) => (
         {[0.6, 1, 0.8, 1.2, 0.7].map((h, i) => (
             <div
                 key={i}
-                className={`w-3 rounded-full animate-[pulse_1s_ease-in-out_infinite] ${isEmergency ? 'bg-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.5)]'}`}
+                className={`w-3 rounded-full animate-[pulse_1s_ease-in-out_infinite] ${isEmergency ? 'bg-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.5)]'}`}
                 style={{
                     height: `${h * 100}%`,
                     animationDelay: `${i * 0.15}s`,
@@ -141,6 +141,19 @@ const SentenceItem: React.FC<SentenceItemProps> = ({
             </p>
         </div>
     );
+};
+
+// ─── Shared Sentence Splitter ───
+const splitSentences = (text: string): string[] => {
+    return (text || '').split(/([。！？；.!?;\n])/).reduce((acc: string[], curr: string, i: number, arr: string[]) => {
+        // 合并标点符号到前一个句子
+        if (i % 2 === 1) {
+            if (acc.length > 0) acc[acc.length - 1] += curr;
+        } else if (curr.trim().length > 0) {
+            acc.push(curr.trim());
+        }
+        return acc;
+    }, []).filter(s => s.trim().length > 0);
 };
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -193,7 +206,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         setIsPlaying(true);
         setActiveSentenceIndex(-1);
 
-        const sentences = (msg.text || '').split(/[。！？；\n]/).filter(s => s.trim().length > 0);
+        const sentences = splitSentences(msg.text);
         const repeat = msg.repeatCount || 1;
 
         for (let r = 0; r < (repeat === -1 ? 999 : repeat); r++) {
@@ -207,6 +220,14 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         isPlayingRef.current = false;
         setIsPlaying(false);
         setActiveSentenceIndex(-1);
+
+        // 读完了，如果需要恢复雷达显示，必须清空 currentMsg
+        // 加一点小延迟，让用户在这个句子上停留一会儿再刷掉
+        setTimeout(() => {
+            if (!isPlayingRef.current) {
+                setCurrentMsg(null);
+            }
+        }, 1500);
     }, []);
 
     useEffect(() => {
@@ -246,14 +267,23 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         if (msg.text && msg.text.trim()) {
                             // 有实际内容：更新消息、加入历史、触发播报
                             setCurrentMsg(msg);
+                            // 如果上一次播报没结束，或者是一条相同的消息，打断之前的
+                            if (engine.current.isListening && (!isPlayingRef.current || currentMsg?.id !== msg.id)) {
+                                runPlayback(msg);
+                            }
                             setReceivedHistory(prev => {
                                 const next = [...prev, msg].slice(-20);
                                 setTimeout(() => localStorage.setItem('br_receiver_history', JSON.stringify(next)), 0);
                                 return next;
                             });
-                            if (engine.current.isListening) runPlayback(msg);
+                        } else {
+                            // 收到的是空消息
+                            // 检查有没有正在播的旧消息，有的话它没过期就继续播
+                            // 如果 isPlayingRef 为 false，说明此时闲置，那么清掉残余的 currentMsg 显示雷达。
+                            if (!isPlayingRef.current && currentMsg) {
+                                setCurrentMsg(null);
+                            }
                         }
-                        // 空 text 的 channelName 更新消息：只更新名称，不触发播报
                     } else if (!msg && !isPlayingRef.current) {
                         // 消息已过期且当前不在播报中：回到 idle
                         setCurrentMsg(null);

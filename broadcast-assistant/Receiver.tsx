@@ -278,15 +278,15 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
             <div className={`fixed inset-0 flex items-center justify-center p-6 transition-colors duration-1000 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-slate-100'}`}>
                 {/* bg blobs */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-violet-600/10 blur-[160px] rounded-full animate-pulse" />
-                    <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[160px] rounded-full animate-pulse" />
+                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-pink-600/10 blur-[160px] rounded-full animate-pulse" />
+                    <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-rose-600/10 blur-[160px] rounded-full animate-pulse" />
                 </div>
 
                 <div className={`relative z-10 w-full max-w-md p-10 rounded-[3rem] border backdrop-blur-2xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] ${theme === 'dark' ? 'bg-white/[0.04] border-white/10' : 'bg-white/70 border-white'}`}>
                     {/* Icon */}
                     <div className="flex justify-center mb-10">
                         <div className="relative">
-                            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center text-white shadow-[0_12px_40px_rgba(139,92,246,0.4)] rotate-6">
+                            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-[0_12px_40px_rgba(236,72,153,0.4)] rotate-6">
                                 <Tv size={44} />
                             </div>
                             <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/40">

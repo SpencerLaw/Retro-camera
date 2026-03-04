@@ -26,8 +26,8 @@ const ClockDisplay = React.memo(() => {
 
 // ─── Premium Radar Visualizer ────────────────────────────────────────────────
 const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) => {
-    const accent = isEmergency ? '#ef4444' : '#8b5cf6';
-    const accentAlpha = (a: number) => isEmergency ? `rgba(239,68,68,${a})` : `rgba(139,92,246,${a})`;
+    const accent = isEmergency ? '#ef4444' : '#ec4899';
+    const accentAlpha = (a: number) => isEmergency ? `rgba(239,68,68,${a})` : `rgba(236,72,153,${a})`;
 
     return (
         <div className="relative flex items-center justify-center select-none" style={{ width: 280, height: 280 }}>
@@ -311,11 +311,11 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                                 onChange={(e) => setRoomId(e.target.value.replace(/\D/g, ''))}
                                 placeholder="000000"
                                 className={`w-full h-24 text-center text-6xl font-black rounded-3xl border-2 transition-all outline-none ${theme === 'dark'
-                                    ? 'bg-black/20 border-white/5 text-white focus:border-violet-500/50'
-                                    : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-violet-400 focus:bg-white'
+                                    ? 'bg-black/20 border-white/5 text-white focus:border-pink-500/50'
+                                    : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-pink-400 focus:bg-white'
                                     }`}
                             />
-                            <div className="absolute -right-3 -top-3 w-10 h-10 rounded-2xl bg-violet-600 flex items-center justify-center text-white shadow-lg animate-bounce">
+                            <div className="absolute -right-3 -top-3 w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-lg animate-bounce">
                                 <Zap size={16} />
                             </div>
                         </div>
@@ -328,7 +328,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                                 setIsJoined(true);
                             }}
                             className={`w-full py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl ${roomId.length === 6
-                                ? 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white shadow-violet-500/25 hover:scale-[1.02] active:scale-95'
+                                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-pink-500/25 hover:scale-[1.02] active:scale-95'
                                 : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-50'
                                 }`}
                         >
@@ -355,16 +355,16 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                     </>
                 ) : theme === 'dark' ? (
                     <>
-                        <div className="absolute -top-60 -left-40 w-[700px] h-[700px] rounded-full bg-violet-900/20 blur-[160px] animate-pulse" />
-                        <div className="absolute -bottom-60 -right-40 w-[700px] h-[700px] rounded-full bg-blue-900/20 blur-[160px] animate-pulse" />
+                        <div className="absolute -top-60 -left-40 w-[700px] h-[700px] rounded-full bg-pink-900/20 blur-[160px] animate-pulse" />
+                        <div className="absolute -bottom-60 -right-40 w-[700px] h-[700px] rounded-full bg-rose-900/20 blur-[160px] animate-pulse" />
                     </>
                 ) : (
                     <>
-                        <div className="absolute -top-60 left-0 w-full h-[500px] bg-gradient-to-b from-violet-100/60 to-transparent" />
+                        <div className="absolute -top-60 left-0 w-full h-[500px] bg-gradient-to-b from-pink-100/60 to-transparent" />
                     </>
                 )}
                 {isPlaying && (
-                    <div className={`absolute inset-0 ${emergency ? 'bg-red-500/5' : 'bg-violet-500/3'} animate-pulse`} />
+                    <div className={`absolute inset-0 ${emergency ? 'bg-red-500/5' : 'bg-pink-500/3'} animate-pulse`} />
                 )}
             </div>
 
@@ -374,7 +374,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onOpenDialog }) => {
                     <div className="flex flex-col -space-y-1">
                         <p className={`text-base font-black tracking-tight ${theme === 'dark' || emergency ? 'text-white' : 'text-slate-800'}`}>
                             {greeting}！
-                            <span className={`ml-2 ${theme === 'dark' || emergency ? 'text-violet-400' : 'text-violet-600'}`}>
+                            <span className={`ml-2 ${theme === 'dark' || emergency ? 'text-pink-400' : 'text-pink-500'}`}>
                                 {channelName || '等待识别频道名...'}
                             </span>
                         </p>

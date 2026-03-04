@@ -41,9 +41,9 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
 
     return (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-500">
-            <div className={`absolute inset-0 backdrop-blur-3xl transition-opacity duration-700 ${isDark ? 'bg-black/40' : 'bg-white/40'}`} onClick={onCancel}></div>
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-3xl" onClick={onCancel}></div>
 
-            <div className={`relative w-full max-w-lg p-10 space-y-10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] rounded-[3rem] border transition-all duration-700 scale-100 animate-in zoom-in-95 ${isDark ? 'bg-zinc-900/90 border-white/10 text-white' : 'bg-white/90 border-white text-black'}`}>
+            <div className="relative w-full max-w-lg p-10 space-y-10 shadow-[0_40px_120px_-20px_rgba(0,0,0,0.15)] rounded-[3rem] border border-black/5 bg-white text-slate-900 animate-in zoom-in-95 duration-300">
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-6">
                         <div className={`w-16 h-16 rounded-[2rem] flex items-center justify-center shadow-xl rotate-3 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>

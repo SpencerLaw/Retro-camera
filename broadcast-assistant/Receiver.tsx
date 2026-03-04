@@ -66,8 +66,8 @@ const IdleVisualizer = React.memo(({ isEmergency }: { isEmergency: boolean }) =>
 
             {/* ── Leading edge dot (sweeps with the beam) ── */}
             <div className="absolute animate-[spin_3s_linear_infinite]" style={{ inset: 8 }}>
-                <div className="absolute w-2.5 h-2.5 rounded-full top-[3px] left-1/2 -translate-x-1/2 shadow-lg"
-                    style={{ background: accent, boxShadow: `0 0 8px 3px ${accentAlpha(0.6)}` }} />
+                <div className="absolute w-2.5 h-2.5 rounded-full top-[1px] left-1/2 -translate-x-1/2 shadow-lg"
+                    style={{ background: accent, boxShadow: `0 0 12px 4px ${accentAlpha(0.7)}`, transform: 'rotate(-4deg)' }} />
             </div>
 
             {/* ── Orbit tick marks ── */}
@@ -357,24 +357,28 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
 
             {/* ── Header ─────────────────────────────────────────────────── */}
             <header className="relative z-50 flex items-center justify-between px-6 py-4">
-                {/* Left: room badge + clock + mute */}
-                <div className="flex items-center gap-3">
-                    {/* Room badge */}
-                    <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl border backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10' : 'bg-white/60 border-white shadow-sm'}`}>
-                        <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-blue-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
-                        <Radio size={16} className={emergency ? 'text-red-400' : 'text-violet-400'} />
-                        <span className={`text-base font-black tracking-[0.2em] ${isDark || emergency ? 'text-white' : 'text-slate-800'}`}>{fullRoomId}</span>
+                {/* Left: greeting + room info */}
+                <div className="flex items-center gap-4">
+                    {/* Greeting & Class */}
+                    <div className="flex flex-col -space-y-1">
+                        <p className={`text-base font-black tracking-tight ${isDark || emergency ? 'text-white' : 'text-slate-800'}`}>
+                            {greeting}！
+                            {channelName && <span className={`ml-2 ${isDark || emergency ? 'text-violet-400' : 'text-violet-600'}`}>{channelName}</span>}
+                        </p>
+                        <div className={`flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase ${isDark || emergency ? 'text-white/20' : 'text-slate-400'}`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-blue-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
+                            ROOM · {fullRoomId}
+                        </div>
                     </div>
-                    {/* Clock */}
-                    <div className={`px-4 py-3 rounded-2xl border backdrop-blur-xl font-mono text-sm font-bold ${isDark || emergency ? 'bg-white/5 border-white/10 text-white/50' : 'bg-white/60 border-white text-slate-500 shadow-sm'}`}>
-                        <ClockDisplay />
-                    </div>
+
+                    <div className="h-8 w-px bg-current opacity-10 mx-2" />
+
                     {/* Mute toggle */}
                     <button
                         onClick={() => setIsListening(!isListening)}
-                        className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-2xl ${isListening ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30' : (isDark || emergency ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/60 border-white text-slate-400 shadow-sm')}`}
+                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-2xl ${isListening ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30' : (isDark || emergency ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/60 border-white text-slate-400 shadow-sm')}`}
                     >
-                        {isListening ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                        {isListening ? <Volume2 size={18} /> : <VolumeX size={18} />}
                     </button>
                 </div>
 
@@ -382,15 +386,15 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 <div className="flex gap-2">
                     <button
                         onClick={toggleTheme}
-                        className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/60 border-white shadow-sm hover:bg-white'}`}
+                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/60 border-white shadow-sm hover:bg-white'}`}
                     >
-                        {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-slate-500" />}
+                        {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-slate-500" />}
                     </button>
                     <button
                         onClick={() => { setIsJoined(false); ttsManager.cancelAll(); }}
-                        className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' : 'bg-white/60 border-white text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500'}`}
+                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark || emergency ? 'bg-white/5 border-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' : 'bg-white/60 border-white text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500'}`}
                     >
-                        <X size={18} />
+                        <X size={16} />
                     </button>
                 </div>
             </header>
@@ -434,23 +438,21 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                     </div>
                 ) : (
                     /* ── Idle: radar + status ── */
-                    <div className="flex flex-col items-center justify-center gap-10">
+                    <div className="flex flex-col items-center justify-center gap-12">
                         <IdleVisualizer isEmergency={false} />
                         <div className="text-center space-y-4">
-                            {/* Greeting + class name */}
                             <div className="space-y-1">
-                                <p className={`text-2xl md:text-3xl font-black tracking-tight ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
-                                    {greeting}！
-                                    {channelName && <span className={`ml-1 ${isDark ? 'text-violet-400' : 'text-violet-600'}`}>{channelName}</span>}
+                                <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-violet-500/60 animate-pulse mb-8`}>
+                                    Scanning for Signal
                                 </p>
+                                <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                    信号捕获中...
+                                </h2>
                             </div>
-                            <p className={`text-xs font-black uppercase tracking-[0.5em] ${isDark ? 'text-white/15' : 'text-slate-400/60'} animate-pulse`}>
-                                等待广播信号
-                            </p>
-                            <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${isDark ? 'text-white/10' : 'text-slate-300'}`}>
-                                <span className="inline-block w-12 h-px bg-current" />
-                                CHANNEL · {fullRoomId} · ACTIVE
-                                <span className="inline-block w-12 h-px bg-current" />
+                            <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${isDark ? 'text-white/15' : 'text-slate-400'}`}>
+                                <ClockDisplay />
+                                <span className="opacity-30">·</span>
+                                CHANNEL {fullRoomId}
                             </div>
                         </div>
                     </div>
@@ -462,11 +464,11 @@ const Receiver: React.FC<{ isDark: boolean; toggleTheme: () => void; onExit: () 
                 {/* Collapse toggle pill */}
                 <button
                     onClick={() => setShowHistory(!showHistory)}
-                    className={`absolute -top-5 left-1/2 -translate-x-1/2 h-10 px-6 rounded-t-2xl flex items-center gap-2 text-xs font-black uppercase tracking-widest transition border border-b-0 ${isDark || emergency ? 'bg-black/30 backdrop-blur-2xl border-white/5 text-white/30 hover:text-white/60' : 'bg-white/60 backdrop-blur-2xl border-black/5 text-slate-400 hover:text-slate-600'}`}
+                    className={`absolute -top-6 left-1/2 -translate-x-1/2 h-12 px-8 rounded-t-[2rem] flex items-center gap-3 text-sm font-black uppercase tracking-widest transition border border-b-0 ${isDark || emergency ? 'bg-black/60 backdrop-blur-3xl border-white/10 text-white/50 hover:text-white' : 'bg-white/70 backdrop-blur-3xl border-black/5 text-slate-500 hover:text-slate-800'}`}
                 >
-                    <History size={12} />
+                    <History size={14} />
                     <span>播报记录</span>
-                    {showHistory ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+                    {showHistory ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
                 </button>
 
                 <div className="max-w-screen-xl mx-auto p-5">

@@ -233,6 +233,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const runPlayback = useCallback(async (msg: Message) => {
         if (!engine.current.isListening) return;
         isPlayingRef.current = true;
+        setCurrentMsg(msg);
         setIsPlaying(true);
         setActiveSentenceIndex(-1);
 

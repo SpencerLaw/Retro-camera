@@ -128,7 +128,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     // Save to cloud whenever channels change
     useEffect(() => {
         localStorage.setItem('br_channels', JSON.stringify(channels));
-        if (license && channels.length > 0) {
+        if (license) {
             fetch('/api/broadcast/save-channels', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -154,7 +154,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
         let uniqueCode = '';
         let attempts = 0;
-        while (attempts < 5) {
+        while (attempts < 10) {
             const candidate = Math.floor(100000 + Math.random() * 900000).toString();
             const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
             const { inUse } = await resp.json();
@@ -261,7 +261,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         setStatus({ type: 'loading', msg: '检索可用号码...' });
         let uniqueCode = '';
         let attempts = 0;
-        while (attempts < 5) {
+        while (attempts < 10) {
             const candidate = Math.floor(100000 + Math.random() * 900000).toString();
             const resp = await fetch(`/api/broadcast/check-code?code=${candidate}`);
             const { inUse } = await resp.json();

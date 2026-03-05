@@ -265,7 +265,11 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
 
                     try {
                         const startTime = Date.now();
-                        await ttsManager.speak(sentences[i], { voice: msg.voice || 'zh-CN-XiaoxiaoNeural' });
+                        await ttsManager.speak(sentences[i], {
+                            voice: msg.voice || 'zh-CN-XiaoxiaoNeural',
+                            engine: 'edge',
+                            volume: 1
+                        });
 
                         // 额外防御：如果 speak 瞬间就被 resolve 了（通常是由于浏览器 autoplay 拦截），
                         // 我们需要手动补足一个视觉展示时间，否则循环瞬间结束，消息会闪现消失。

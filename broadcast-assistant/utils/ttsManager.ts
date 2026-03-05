@@ -45,21 +45,17 @@ class TTSManager {
     }
 
     public async speak(text: string, options: TTSOptions = {}): Promise<void> {
-        this.stop(false); // Stop current but don't increment playback ID
+        this.stop(false);
         const playbackId = this.activePlaybackId;
 
         return new Promise(async (resolve) => {
-            const onEnd = () => {
-                if (options.onEnd) options.onEnd();
-                resolve();
-            };
-
             if (options.engine === 'edge') {
                 try {
                     const blob = await this.fetchEdge(text, options);
                     if (blob && this.activePlaybackId === playbackId) {
                         const url = URL.createObjectURL(blob);
                         await this.playUrl(url, options, playbackId);
+                        if (options.onEnd) options.onEnd();
                         resolve();
                     } else {
                         resolve();
@@ -67,11 +63,13 @@ class TTSManager {
                 } catch (e) {
                     if (this.activePlaybackId === playbackId) {
                         await this.speakNative(text, options);
+                        if (options.onEnd) options.onEnd();
                     }
                     resolve();
                 }
             } else {
                 await this.speakNative(text, options);
+                if (options.onEnd) options.onEnd();
                 resolve();
             }
         });
@@ -92,8 +90,9 @@ class TTSManager {
             if (!this.audio) return resolve();
 
             this.initAudioCtx();
-            if (this.gainNode && options.volume) {
-                this.gainNode.gain.setTargetAtTime(options.volume, this.audioCtx!.currentTime, 0.1);
+            if (this.gainNode) {
+                const vol = typeof options.volume === 'number' ? options.volume : 1;
+                this.gainNode.gain.setTargetAtTime(vol, this.audioCtx!.currentTime, 0.1);
             }
 
             const cleanup = () => {
@@ -116,10 +115,12 @@ class TTSManager {
         return new Promise((resolve) => {
             if (!window.speechSynthesis) return resolve();
             window.speechSynthesis.cancel();
+            window.speechSynthesis.resume();
 
             const ut = new SpeechSynthesisUtterance(text);
             this.activeUtterance = ut; // Prevents garbage collection while playing
             ut.rate = options.rate || 1;
+            ut.volume = typeof options.volume === 'number' ? options.volume : 1;
 
             let timer: any = null;
             let resumeInterval: any = null;
@@ -169,7 +170,10 @@ class TTSManager {
     public getActivePlaybackId() { return this.activePlaybackId; }
 
     public startSilentLoop() {
-        if (this.audioCtx?.state === 'suspended') this.audioCtx.resume();
+        this.initAudioCtx();
+        if (this.audioCtx?.state === 'suspended') {
+            this.audioCtx.resume();
+        }
     }
 }
 

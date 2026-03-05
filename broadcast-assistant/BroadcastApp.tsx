@@ -333,6 +333,12 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
             {showFishDebug && (
                 <FishAudioDebug
                     onClose={() => setShowFishDebug(false)}
+                    onSelectVoice={(voiceId) => {
+                        // In global selection mode, we can still set the voice for the current record
+                        // but usually it's better to do it inside Sender.
+                        // For now just close and maybe show a toast.
+                        setShowFishDebug(false);
+                    }}
                     theme={theme}
                 />
             )}

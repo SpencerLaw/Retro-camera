@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="home.morningTree.title">🌳 早读能量树 | Morning Energy Tree</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Animated Clouds -->
+    <div class="cloud-layer">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+
+
+    <a href="/" class="back-home-btn" data-i18n-title="morningTree.backHome">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6" />
+        </svg>
+        <span data-i18n="morningTree.backHome">返回首页</span>
+    </a>
+
+    <!-- DB Meter -->
+    <div class="db-display">
+        <div id="db-value">--</div>
+        <div class="db-label" data-i18n="morningTree.dbLabel">dB</div>
+        <div class="db-status" id="db-status">等待中</div>
+    </div>
+
+    <!-- 1. Security Gatekeeper -->
+    <div id="gatekeeper-screen">
+        <div class="auth-card">
+            <h1 data-i18n="morningTree.gatekeeperTitle">🔒 班级早读系统</h1>
+            <p style="opacity: 0.8; margin-bottom: 20px;" data-i18n="morningTree.gatekeeperSub">请输入授权码以启动</p>
+            <input type="text" id="license-input" class="auth-input" data-i18n-placeholder="morningTree.licensePlaceholder" placeholder="ZD-xxxx-xxxx" autocomplete="off">
+            <button id="verify-btn" class="auth-btn" data-i18n="morningTree.verifyBtn">开启能量树</button>
+            <p id="auth-error" style="color: #ff6b6b; margin-top: 10px; display: none;">无效的授权码 (需以 ZD 开头)</p>
+        </div>
+    </div>
+
+    <!-- 2. Main Application -->
+    <div id="app-container" class="hidden">
+        <!-- Visualization Canvas -->
+        <canvas id="tree-canvas"></canvas>
+
+        <!-- UI Overlay -->
+        <div class="ui-layer">
+
+            <!-- Top: Energy Bar -->
+            <div class="top-bar">
+                <div class="energy-label" data-i18n="morningTree.energyLabel">🍃 早读能量值</div>
+                <div class="energy-container">
+                    <div id="energy-fill"></div>
+                </div>
+
+                <!-- Circular Ring Timer -->
+                <div class="timer-ring-wrap">
+                    <svg viewBox="0 0 140 140" width="140" height="140">
+                        <circle class="ring-bg" cx="70" cy="70" r="65"/>
+                        <circle class="ring-bar" id="ring-bar" cx="70" cy="70" r="65"/>
+                    </svg>
+                    <div class="ring-inner">
+                        <span id="countdown-time">--:--</span>
+                        <div class="timer-label" data-i18n="morningTree.remainingTime">剩余时间</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toast / Notifications Center -->
+            <div id="toast-container"></div>
+
+            <!-- Bottom: Controls -->
+            <div class="bottom-controls">
+                <!-- Mic Toggle -->
+                <button id="mic-toggle-btn" class="icon-btn" data-i18n-title="morningTree.micToggleTitle">
+                    🎤
+                </button>
+
+                <!-- Timer Settings -->
+                <div class="control-group">
+                    <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
+                    <select id="duration-select" class="duration-select">
+                        <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                        <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                        <option value="custom" data-i18n="morningTree.customOption">自定义</option>
+                    </select>
+                    <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
+                        data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
+                </div>
+
+                <!-- Sensitivity 3-level -->
+                <div class="sens-group">
+                    <div class="sens-label">灵敏度</div>
+                    <div class="sens-btns">
+                        <button class="sens-btn" data-sens="30">低</button>
+                        <button class="sens-btn active" data-sens="50">中</button>
+                        <button class="sens-btn" data-sens="75">高</button>
+                    </div>
+                </div>
+
+                    <!-- hidden tooltip still used by script -->
+                    <div id="help-tooltip" class="help-tooltip hidden">
+                        <strong data-i18n="morningTree.helpAdviceTitle">📏 校准建议：</strong>
+                        <ul>
+                            <li><strong data-i18n="morningTree.helpAdviceMute">静音测试</strong><span data-i18n="morningTree.helpAdviceMuteDesc">：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</span></li>
+                            <li><strong data-i18n="morningTree.helpAdviceRead">朗读测试</strong><span data-i18n="morningTree.helpAdviceReadDesc">：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</span></li>
+                        </ul>
+                        <p class="tap-close" data-i18n="morningTree.tapToClose">点击此处关闭</p>
+                    </div>
+
+                <!-- Reset Button -->
+                <button id="reset-btn" class="icon-btn" data-i18n-title="morningTree.resetBtnTitle" style="font-size: 1.2rem;">
+                    🔄
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

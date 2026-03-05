@@ -63,12 +63,12 @@ If Not objFSO.FileExists(destPath) Then
     On Error Resume Next
     objFSO.CopyFile thisScript, destPath
     If Err.Number <> 0 Then
-        MsgBox "⚠️ 无法写入开机启动文件夹：" & vbCrLf & _
+        MsgBox "无法写入开机启动文件夹：" & vbCrLf & _
                Err.Description & vbCrLf & vbCrLf & _
-               "请尝试：右键本脚本 → 以管理员身份运行", _
+               "请尝试：右键本脚本 -> 以管理员身份运行", _
                vbExclamation, "广播助手 - 开机启动设置失败"
     Else
-        MsgBox "✅ 已加入开机启动！" & vbCrLf & _
+        MsgBox "已成功加入开机启动！" & vbCrLf & _
                "下次开机将自动打开广播接收页面。", _
                vbInformation, "广播助手 - 设置成功"
     End If

@@ -197,6 +197,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [theme, setTheme] = useState<'light' | 'dark'>(isDark ? 'dark' : 'light');
     const [displayChannelName, setDisplayChannelName] = useState('');
     const [msgQueue, setMsgQueue] = useState<Message[]>([]);
+    const [needsActivation, setNeedsActivation] = useState(false);
 
     const activeRef = useRef<HTMLDivElement>(null);
     const isPlayingRef = useRef(false);
@@ -211,6 +212,21 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const toggleTheme = useCallback(() => {
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     }, []);
+
+    const handleActivate = useCallback(() => {
+        ttsManager.startSilentLoop();
+        setNeedsActivation(false);
+    }, []);
+
+    // Also resume audio on any global click once joined
+    useEffect(() => {
+        if (!isJoined) return;
+        const autoResume = () => {
+            if (ttsManager.startSilentLoop) ttsManager.startSilentLoop();
+        };
+        window.addEventListener('click', autoResume);
+        return () => window.removeEventListener('click', autoResume);
+    }, [isJoined]);
 
     // Effect for auto-scrolling to the active sentence
     useEffect(() => {
@@ -355,6 +371,12 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         };
         poll();
         ttsManager.startSilentLoop();
+
+        // Initial check for activation
+        if (typeof navigator !== 'undefined' && (navigator as any).userActivation && !(navigator as any).userActivation.hasBeenActive) {
+            setNeedsActivation(true);
+        }
+
         return () => { engine.current.isJoined = false; ttsManager.cancelAll(); setMsgQueue([]); };
     }, [isJoined, fullRoomId, runPlayback]);
 
@@ -650,6 +672,29 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         </div>
                     </div>
                 </footer>
+            )}
+            {/* ── Activation Overlay ────────────────────────────────────── */}
+            {needsActivation && (
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-500">
+                    <div className="max-w-xs w-full text-center space-y-8 p-10">
+                        <div className="relative mx-auto w-24 h-24 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-500 animate-pulse">
+                            <Volume2 size={48} />
+                            <div className="absolute inset-0 rounded-full border-2 border-pink-500/50 animate-ping" />
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-black text-white">激活语音播报</h3>
+                            <p className="text-sm text-white/50 leading-relaxed font-medium">
+                                由于浏览器安全策略限制，需要您点击下方按钮以建立音频连接。
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleActivate}
+                            className="w-full py-5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black uppercase tracking-widest text-xs shadow-2xl shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all"
+                        >
+                            点击激活
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );

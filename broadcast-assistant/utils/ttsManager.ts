@@ -16,6 +16,7 @@ class TTSManager {
     private gainNode: GainNode | null = null;
     private sourceNode: MediaElementAudioSourceNode | null = null;
     private activePlaybackId: number = 0;
+    private activeUtterance: SpeechSynthesisUtterance | null = null;
 
     private constructor() {
         if (typeof window !== 'undefined') {
@@ -117,21 +118,36 @@ class TTSManager {
             window.speechSynthesis.cancel();
 
             const ut = new SpeechSynthesisUtterance(text);
+            this.activeUtterance = ut; // Prevents garbage collection while playing
             ut.rate = options.rate || 1;
 
             let timer: any = null;
+            let resumeInterval: any = null;
+
             const cleanup = () => {
                 if (timer) clearTimeout(timer);
+                if (resumeInterval) clearInterval(resumeInterval);
+                if (this.activeUtterance === ut) this.activeUtterance = null;
                 resolve();
             };
 
             ut.onend = cleanup;
-            ut.onerror = cleanup;
+            ut.onerror = (e) => {
+                console.warn('Native TTS Error:', e);
+                cleanup();
+            };
 
             window.speechSynthesis.speak(ut);
 
-            // 增加安全超时：基础 60s + 每个字符 200ms
-            // 确保长句子（如100字+）有充足时间读完（通常约 30-40s）
+            // 解决 Chrome/Edge 的 15 秒静音 bug：每 10 秒微调一下 pause/resume
+            resumeInterval = setInterval(() => {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.pause();
+                    window.speechSynthesis.resume();
+                }
+            }, 10000);
+
+            // 增加安全超时
             const timeout = Math.max(60000, 10000 + text.length * 200);
             timer = setTimeout(cleanup, timeout);
         });

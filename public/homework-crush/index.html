@@ -1,27 +1,43 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>作业消消乐 - 快乐完成作业！</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/homework-crush/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
     <!-- 0. 验证网关层 -->
-    <div id="gatekeeper-screen" style="position:fixed; inset:0; z-index:9999; background:#000; color:#84fab0; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; font-family:sans-serif;">
-        <div class="gate-loader" id="gate-loader" style="width:60px; height:60px; border:5px solid #222; border-top-color:#84fab0; border-radius:50%; animation:gate-spin 1s linear infinite; margin-bottom:25px;"></div>
+    <div id="gatekeeper-screen"
+        style="position:fixed; inset:0; z-index:9999; background:#000; color:#84fab0; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; font-family:sans-serif;">
+        <div class="gate-loader" id="gate-loader"
+            style="width:60px; height:60px; border:5px solid #222; border-top-color:#84fab0; border-radius:50%; animation:gate-spin 1s linear infinite; margin-bottom:25px;">
+        </div>
         <div id="gate-text" style="font-size:1.5rem">正在开启作业空间...</div>
         <style>
-            @keyframes gate-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            .error-msg { color: #ff416c; }
+            @keyframes gate-spin {
+                from {
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .error-msg {
+                color: #ff416c;
+            }
         </style>
         <script>
             // 绝地保底：无论如何1秒后关闭黑屏
-            setTimeout(function() {
+            setTimeout(function () {
                 var g = document.getElementById('gatekeeper-screen');
                 if (g && g.style.display !== 'none') {
                     g.style.display = 'none';
@@ -54,15 +70,19 @@
                     <h2 id="app-header-title">🏫 作业消消乐</h2>
                     <div class="date-display">
                         <span id="current-date">加载中...</span>
-                        <span id="current-time" style="margin-left: 10px; font-weight: bold; color: var(--primary-pink);"></span>
+                        <span id="current-time"
+                            style="margin-left: 10px; font-weight: bold; color: var(--primary-pink);"></span>
                     </div>
                 </div>
             </div>
             <div class="header-right">
                 <button id="reset-day-btn" class="secondary-btn">🔄 开始新的一天</button>
                 <button id="fullscreen-btn" class="icon-btn" title="全屏显示">
-                    <svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                    <svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                        </path>
                     </svg>
                 </button>
                 <button id="dark-mode-btn" class="icon-btn" title="切换模式">🌞</button>
@@ -147,12 +167,14 @@
             </div>
             <div class="modal-footer" style="justify-content: center; gap: 20px;">
                 <button id="confirm-yes-btn" class="btn-premium btn-primary" style="padding: 10px 30px;">确认</button>
-                <button id="confirm-no-btn" class="btn-premium" style="padding: 10px 30px; background: white; color: #666; border: 2px solid #eee;">取消</button>
+                <button id="confirm-no-btn" class="btn-premium"
+                    style="padding: 10px 30px; background: white; color: #666; border: 2px solid #eee;">取消</button>
             </div>
         </div>
     </div>
 
-    <script src="translations.js"></script>
-    <script src="script.js?v=3"></script>
+    <script src="/homework-crush/translations.js"></script>
+    <script src="/homework-crush/script.js?v=3"></script>
 </body>
+
 </html>

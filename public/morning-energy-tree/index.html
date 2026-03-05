@@ -60,14 +60,14 @@
                             <!-- The mask defines the segments (20 blocks) -->
                             <mask id="timer-mask">
                                 <circle cx="80" cy="80" r="70" fill="none" stroke="white" stroke-width="14"
-                                    stroke-dasharray="4 1" pathLength="100" />
+                                    stroke-dasharray="0.1 4.9" stroke-linecap="round" pathLength="100" />
                             </mask>
                         </defs>
                         <!-- Background: the empty slots -->
                         <circle class="ring-bg" cx="80" cy="80" r="70" />
                         <!-- Foreground: the actual energy blocks filling up -->
                         <circle class="ring-bar" id="ring-bar" cx="80" cy="80" r="70" pathLength="100"
-                            mask="url(#timer-mask)" />
+                            mask="url(#timer-mask)" stroke-linecap="round" />
                     </svg>
                     <div class="ring-inner">
                         <span id="countdown-time">--:--</span>

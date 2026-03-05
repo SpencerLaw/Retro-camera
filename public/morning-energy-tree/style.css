@@ -225,8 +225,8 @@ canvas {
 /* ── Circular Ring Timer (Responsive & Segmented) ── */
 .timer-ring-wrap {
     position: fixed;
-    /* Position exactly below the dB display */
-    top: calc(var(--top-gap) + var(--db-size) + 15px);
+    /* Increased gap: dB size + top gap + 40px padding */
+    top: calc(var(--top-gap) + var(--db-size) + 40px);
     right: var(--side-gap);
     width: var(--ring-size);
     height: var(--ring-size);
@@ -249,20 +249,20 @@ canvas {
 
 .ring-bg {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.12);
+    stroke: rgba(255, 255, 255, 0.08);
+    /* Sophisticated subtle background */
     stroke-width: 10%;
-    /* Responsive stroke width */
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.05));
 }
 
 .ring-bar {
     fill: none;
     stroke: #f39c12;
     stroke-width: 10%;
-    stroke-linecap: butt;
-    /* Flat edges for blocks */
-    /* JS updates stroke-dasharray based on pathLength="100" */
-    filter: drop-shadow(0 0 6px rgba(243, 156, 18, 0.9));
-    transition: stroke-dasharray 0.3s ease-out;
+    stroke-linecap: round;
+    /* Neon Glow effect */
+    filter: drop-shadow(0 0 12px rgba(243, 156, 18, 0.8));
+    transition: stroke-dasharray 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ring-inner {

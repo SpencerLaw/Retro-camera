@@ -343,33 +343,29 @@ class Cloud {
         this.x = Math.random() * canvas.width;
     }
     reset() {
-        this.x = -200 - Math.random() * 200;
-        this.y = Math.random() * (canvas.height / 3);
-        this.speed = Math.random() * 0.3 + 0.1;
-        this.size = Math.random() * 0.6 + 0.6;
-        this.puffs = [];
-        const count = Math.floor(Math.random() * 3) + 3;
-        for (let i = 0; i < count; i++) {
-            this.puffs.push({
-                x: (Math.random() - 0.5) * 60,
-                y: (Math.random() - 0.5) * 30,
-                r: 30 + Math.random() * 20
-            });
-        }
+        this.x = -250 - Math.random() * 200;
+        this.y = Math.random() * (canvas.height / 3.5);
+        this.speed = Math.random() * 0.2 + 0.15;
+        this.size = Math.random() * 0.5 + 0.4;
+        this.opacity = Math.random() * 0.2 + 0.1;
     }
     update() {
         this.x += this.speed;
-        if (this.x > canvas.width + 100) this.reset();
+        this.y += Math.sin(Date.now() / 3000 + this.x) * 0.05; // Subtle bobbing
+        if (this.x > canvas.width + 250) this.reset();
     }
     draw() {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.scale(this.size, this.size);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+
         ctx.beginPath();
-        this.puffs.forEach(puff => {
-            ctx.arc(puff.x, puff.y, puff.r, 0, Math.PI * 2);
-        });
+        ctx.moveTo(0, 40);
+        ctx.bezierCurveTo(-50, 40, -50, 0, 0, 0);
+        ctx.bezierCurveTo(20, -35, 80, -35, 100, 0);
+        ctx.bezierCurveTo(160, 0, 160, 40, 100, 40);
+        ctx.closePath();
         ctx.fill();
         ctx.restore();
     }

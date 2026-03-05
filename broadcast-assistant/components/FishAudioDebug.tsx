@@ -75,7 +75,7 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
             if (resp.ok) {
                 const data = await resp.json();
                 if (data && data.credit !== undefined) {
-                    setWalletBalance(data.credit);
+                    setWalletBalance(Number(data.credit));
                 } else {
                     console.error('Invalid wallet payload:', data);
                 }

@@ -17,6 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     else if (url.includes('/save-channels')) action = 'save-channels';
     else if (url.includes('/check-code')) action = 'check-code';
     else if (url.includes('/clear-license-data')) action = 'clear-license-data';
+    else if (url.includes('/fish-tts')) action = 'fish-tts';
 
     if (!action) {
         const parts = url.split('?')[0].split('/').filter(Boolean);
@@ -35,6 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             case 'save-channels': return handleSaveChannels(req, res);
             case 'check-code': return handleCheckCode(req, res);
             case 'clear-license-data': return handleClearLicenseData(req, res);
+            case 'fish-tts': return handleFishTTS(req, res);
             default: return res.status(404).json({ error: 'Unknown action: ' + action });
         }
     } catch (e: any) {
@@ -157,6 +159,39 @@ async function handleClearLicenseData(req: VercelRequest, res: VercelResponse) {
     await kv.del(`br:sync:channels:${license}`);
 
     return res.status(200).json({ success: true });
+}
+
+async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
+    const { text, reference_id, model = 's1', format = 'mp3' } = req.body;
+    if (!text) return res.status(400).json({ error: 'Missing text' });
+
+    try {
+        const response = await fetch('https://api.fish.audio/v1/tts', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer b3a18f1fd0724399b73f1861d31bef03',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text,
+                reference_id,
+                format,
+                model
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            return res.status(response.status).json({ error: errorData.message || 'Fish Audio API Error' });
+        }
+
+        const audioBuffer = await response.arrayBuffer();
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        return res.status(200).send(Buffer.from(audioBuffer));
+    } catch (e: any) {
+        return res.status(500).json({ error: e.message });
+    }
 }
 
 async function getEdgeTTS(text: string, voice: string, rate: number): Promise<Buffer> {

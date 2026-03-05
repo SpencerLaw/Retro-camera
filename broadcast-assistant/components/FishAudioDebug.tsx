@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Play, Loader2, Volume2, Save, Info, Music } from 'lucide-react';
+import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle } from 'lucide-react';
 
 interface FishAudioDebugProps {
     onClose: () => void;
@@ -16,16 +16,17 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
     const [text, setText] = useState('这是 Fish Audio 的智能播报测试，听起来怎么样？');
     const [refId, setRefId] = useState(PRESET_VOICES[0].id);
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const handlePlay = async () => {
         if (!text.trim() || !refId.trim()) return;
         setIsLoading(true);
+        setErrorMsg(null);
         try {
-            const response = await fetch('https://api.fish.audio/v1/tts', {
+            const response = await fetch('/api/broadcast/fish-tts', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer b3a18f1fd0724399b73f1861d31bef03',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -36,7 +37,10 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                 })
             });
 
-            if (!response.ok) throw new Error('TTS Request Failed');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP Error ${response.status}`);
+            }
 
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
@@ -45,9 +49,9 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                 audioRef.current.src = url;
                 audioRef.current.play();
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Fish Audio TTS Error:', error);
-            alert('播放失败，请检查控制台或 API Key');
+            setErrorMsg(error.message || '未知错误');
         } finally {
             setIsLoading(false);
         }
@@ -100,8 +104,8 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                                     key={voice.id}
                                     onClick={() => setRefId(voice.id)}
                                     className={`px-4 py-2 rounded-xl text-xs font-black transition-all border ${refId === voice.id
-                                            ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
-                                            : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
+                                        ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
+                                        : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
                                         }`}
                                 >
                                     {voice.name}
@@ -119,6 +123,17 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                         />
                     </div>
 
+                    {errorMsg && (
+                        <div className={`p-4 rounded-2xl border flex items-start gap-3 animate-in slide-in-from-top-2 duration-300 ${theme === 'dark' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 border-red-100 text-red-600'
+                            }`}>
+                            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                            <div className="space-y-1">
+                                <p className="text-[11px] font-black uppercase tracking-widest">播放失败</p>
+                                <p className="text-[11px] font-medium leading-relaxed">{errorMsg}</p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className={`p-4 rounded-2xl border flex items-start gap-3 ${theme === 'dark' ? 'bg-indigo-500/5 border-indigo-500/20 text-indigo-300' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
                         }`}>
                         <Info size={16} className="shrink-0 mt-0.5" />
@@ -134,8 +149,8 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                         onClick={handlePlay}
                         disabled={isLoading || !text.trim()}
                         className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
-                                ? 'bg-slate-500 opacity-50 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-indigo-500/25 hover:scale-[1.02] active:scale-95'
+                            ? 'bg-slate-500 opacity-50 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-indigo-500/25 hover:scale-[1.02] active:scale-95'
                             }`}
                     >
                         {isLoading ? (

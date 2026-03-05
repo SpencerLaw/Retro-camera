@@ -512,306 +512,309 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     };
 
     return (
-        <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20 origin-top scale-95 md:scale-100 transition-transform">
-            {/* Channel Management Section */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between px-2">
-                    <h3 className="text-sm font-black uppercase tracking-[0.2em] opacity-30">{t('broadcast.sender.manageClasses')}</h3>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={clearCloudRooms}
-                            className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition active:scale-90"
-                            title={t('broadcast.sender.clearAllRooms')}
-                        >
-                            <AlertTriangle size={18} />
-                        </button>
-                        <button
-                            onClick={addChannel}
-                            className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition active:scale-90"
-                        >
-                            <Plus size={20} />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="flex flex-col gap-3 py-2 px-1">
-                    {channels.map((channel) => (
-                        <button
-                            key={channel.id}
-                            onClick={() => setActiveChannelId(channel.id)}
-                            className={`w-full px-6 py-4 rounded-3xl border transition duration-300 flex items-center justify-between gap-3 relative group ${activeChannelId === channel.id
-                                ? 'bg-gradient-to-r from-pink-500/90 to-rose-500/90 backdrop-blur-md border-pink-500/30 text-white shadow-lg shadow-pink-500/20'
-                                : 'bg-white/50 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-400 hover:bg-white/80 dark:hover:bg-white/10'
-                                }`}
-                        >
-                            <div className="text-left flex-1 min-w-0">
-                                <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeChannelId === channel.id ? 'opacity-80 text-white' : 'opacity-40'}`}>{t('broadcast.sender.room')} {channel.code}</p>
-                                <p className="text-sm font-bold truncate max-w-[120px]">{channel.name}</p>
-                            </div>
-                            <div className={`flex items-center gap-1 ${activeChannelId === channel.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-opacity'}`}>
-                                <div
-                                    onClick={(e) => startEditing(channel, e)}
-                                    className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
-                                >
-                                    <Edit2 size={14} />
-                                </div>
-                                {channels.length > 1 && (
-                                    <div
-                                        onClick={(e) => deleteChannel(channel.id, e)}
-                                        className={`p-1.5 rounded-lg transition-colors ${activeChannelId === channel.id ? 'hover:bg-white/20 text-white' : 'hover:bg-red-500/20 text-red-500/60 hover:text-red-500'}`}
-                                    >
-                                        <Trash2 size={14} />
-                                    </div>
-                                )}
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Active Channel Details / Editor / Empty State */}
-            {channels.length === 0 ? (
-                <GlassCard className="p-12 space-y-6 text-center shadow-2xl overflow-hidden relative group border-2 border-dashed border-slate-200 dark:border-white/10">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] dark:opacity-[0.05] pointer-events-none">
-                        <Radio size={240} />
-                    </div>
-                    <div className="relative z-10 space-y-4">
-                        <h2 className="text-2xl font-black text-slate-700 dark:text-slate-200">欢迎使用广播助手</h2>
-                        <p className="text-sm font-semibold text-slate-500 max-w-sm mx-auto leading-relaxed">
-                            目前您还没有任何广播频道。请先创建一个频道（虚拟房间），以便学生们通过 6 位房间码加入接收广播。
-                        </p>
-                        <button
-                            onClick={addChannel}
-                            className="mt-4 px-8 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all inline-flex items-center gap-2"
-                        >
-                            <Plus size={16} />
-                            {t('broadcast.sender.addClass')}
-                        </button>
-                    </div>
-                </GlassCard>
-            ) : editingChannel ? (
-                <GlassCard className="p-6 space-y-5 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
-                    <div className="flex flex-col gap-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.className')}</label>
-                            <input
-                                type="text"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                                className={`w-full p-4 rounded-2xl border bg-slate-50 border-slate-100 focus:bg-white focus:border-blue-400 outline-none font-bold transition-all`}
-                                placeholder={t('broadcast.sender.unknownClass')}
-                            />
+        <>
+            <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20 origin-top scale-95 md:scale-100 transition-transform">
+                {/* Channel Management Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between px-2">
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] opacity-30">{t('broadcast.sender.manageClasses')}</h3>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={clearCloudRooms}
+                                className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition active:scale-90"
+                                title={t('broadcast.sender.clearAllRooms')}
+                            >
+                                <AlertTriangle size={18} />
+                            </button>
+                            <button
+                                onClick={addChannel}
+                                className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition active:scale-90"
+                            >
+                                <Plus size={20} />
+                            </button>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.roomCode')}</label>
-                            <div className="flex gap-2">
+                    </div>
+
+                    <div className="flex flex-col gap-3 py-2 px-1">
+                        {channels.map((channel) => (
+                            <button
+                                key={channel.id}
+                                onClick={() => setActiveChannelId(channel.id)}
+                                className={`w-full px-6 py-4 rounded-3xl border transition duration-300 flex items-center justify-between gap-3 relative group ${activeChannelId === channel.id
+                                    ? 'bg-gradient-to-r from-pink-500/90 to-rose-500/90 backdrop-blur-md border-pink-500/30 text-white shadow-lg shadow-pink-500/20'
+                                    : 'bg-white/50 dark:bg-white/5 border-black/5 dark:border-white/5 text-gray-400 hover:bg-white/80 dark:hover:bg-white/10'
+                                    }`}
+                            >
+                                <div className="text-left flex-1 min-w-0">
+                                    <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeChannelId === channel.id ? 'opacity-80 text-white' : 'opacity-40'}`}>{t('broadcast.sender.room')} {channel.code}</p>
+                                    <p className="text-sm font-bold truncate max-w-[120px]">{channel.name}</p>
+                                </div>
+                                <div className={`flex items-center gap-1 ${activeChannelId === channel.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-opacity'}`}>
+                                    <div
+                                        onClick={(e) => startEditing(channel, e)}
+                                        className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+                                    >
+                                        <Edit2 size={14} />
+                                    </div>
+                                    {channels.length > 1 && (
+                                        <div
+                                            onClick={(e) => deleteChannel(channel.id, e)}
+                                            className={`p-1.5 rounded-lg transition-colors ${activeChannelId === channel.id ? 'hover:bg-white/20 text-white' : 'hover:bg-red-500/20 text-red-500/60 hover:text-red-500'}`}
+                                        >
+                                            <Trash2 size={14} />
+                                        </div>
+                                    )}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Active Channel Details / Editor / Empty State */}
+                {channels.length === 0 ? (
+                    <GlassCard className="p-12 space-y-6 text-center shadow-2xl overflow-hidden relative group border-2 border-dashed border-slate-200 dark:border-white/10">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] dark:opacity-[0.05] pointer-events-none">
+                            <Radio size={240} />
+                        </div>
+                        <div className="relative z-10 space-y-4">
+                            <h2 className="text-2xl font-black text-slate-700 dark:text-slate-200">欢迎使用广播助手</h2>
+                            <p className="text-sm font-semibold text-slate-500 max-w-sm mx-auto leading-relaxed">
+                                目前您还没有任何广播频道。请先创建一个频道（虚拟房间），以便学生们通过 6 位房间码加入接收广播。
+                            </p>
+                            <button
+                                onClick={addChannel}
+                                className="mt-4 px-8 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all inline-flex items-center gap-2"
+                            >
+                                <Plus size={16} />
+                                {t('broadcast.sender.addClass')}
+                            </button>
+                        </div>
+                    </GlassCard>
+                ) : editingChannel ? (
+                    <GlassCard className="p-6 space-y-5 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
+                        <div className="flex flex-col gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.className')}</label>
                                 <input
                                     type="text"
-                                    value={editCode}
-                                    onChange={(e) => setEditCode(e.target.value.toUpperCase())}
-                                    className={`flex-1 p-4 rounded-2xl border bg-slate-50 border-slate-100 focus:bg-white focus:border-blue-400 outline-none font-mono font-black transition-all`}
-                                    maxLength={8}
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    className={`w-full p-4 rounded-2xl border bg-slate-50 border-slate-100 focus:bg-white focus:border-blue-400 outline-none font-bold transition-all`}
+                                    placeholder={t('broadcast.sender.unknownClass')}
                                 />
-                                <button
-                                    onClick={generateRandomChannel}
-                                    className="p-4 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors shrink-0"
-                                >
-                                    <RefreshCw size={18} />
-                                </button>
                             </div>
-                        </div>
-                    </div>
-                    <div className="flex gap-4">
-                        <button
-                            onClick={() => setEditingChannel(null)}
-                            className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 transition-colors"
-                        >
-                            {t('broadcast.sender.cancel')}
-                        </button>
-                        <button
-                            onClick={saveEdit}
-                            className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all"
-                        >
-                            {t('broadcast.sender.save')}
-                        </button>
-                    </div>
-                </GlassCard>
-            ) : (
-                <GlassCard className="p-10 space-y-8 shadow-2xl overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity -rotate-12 translate-x-4 -translate-y-4">
-                        <Radio size={120} />
-                    </div>
-
-                    <div className="space-y-4">
-                        <label className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] opacity-40 ml-2">
-                            <Plus size={12} /> {t('broadcast.sender.messageContent')}
-                        </label>
-                        <div className="relative rounded-[2.5rem] p-8 transition-all border-2 bg-slate-50 border-slate-100 focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-2xl">
-                            <textarea
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                                className="w-full bg-transparent font-bold outline-none resize-none min-h-[320px] text-3xl leading-relaxed text-slate-800 placeholder:text-slate-300"
-                                placeholder={t('broadcast.sender.inputPlaceholder')}
-                            />
-                            <div className="absolute bottom-6 right-8 opacity-10 pointer-events-none group-focus-within:opacity-20 transition-opacity">
-                                <History size={64} />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ─── 核心控制区 ─── */}
-                    <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-                        {/* 左侧：播放次数与模式 (一体化高斯模糊容器) */}
-                        <div className="flex-1 flex items-center bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/10 p-1.5 shadow-sm">
-                            {/* 次数调节器 */}
-                            <div className={`flex items-center gap-1 bg-white/80 dark:bg-zinc-900/50 rounded-xl p-1 transition-all ${isLooping ? 'opacity-40 grayscale pointer-events-none' : 'shadow-sm'}`}>
-                                <button
-                                    onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
-                                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-500"
-                                >
-                                    <ChevronDown size={18} />
-                                </button>
-                                <div className="min-w-[40px] flex flex-col items-center">
-                                    <span className="text-lg font-black text-blue-600 tabular-nums">
-                                        {isLooping ? '∞' : repeatCount}
-                                    </span>
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter -mt-1 opacity-60">
-                                        {t('broadcast.sender.repeatCount')}
-                                    </span>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.roomCode')}</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={editCode}
+                                        onChange={(e) => setEditCode(e.target.value.toUpperCase())}
+                                        className={`flex-1 p-4 rounded-2xl border bg-slate-50 border-slate-100 focus:bg-white focus:border-blue-400 outline-none font-mono font-black transition-all`}
+                                        maxLength={8}
+                                    />
+                                    <button
+                                        onClick={generateRandomChannel}
+                                        className="p-4 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors shrink-0"
+                                    >
+                                        <RefreshCw size={18} />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
-                                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-500"
-                                >
-                                    <ChevronUp size={18} />
-                                </button>
                             </div>
-
-                            {/* 分隔线 */}
-                            <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-3 opacity-50" />
-
-                            {/* 模式切换 (无限循环图标) */}
+                        </div>
+                        <div className="flex gap-4">
                             <button
-                                onClick={() => setIsLooping(!isLooping)}
-                                className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl transition-all duration-300 ${isLooping
-                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
-                                    : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                                onClick={() => setEditingChannel(null)}
+                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 transition-colors"
                             >
-                                <Repeat
-                                    size={18}
-                                    className={isLooping ? 'animate-spin' : ''}
-                                    style={isLooping ? { animationDuration: '3s' } : {}}
+                                {t('broadcast.sender.cancel')}
+                            </button>
+                            <button
+                                onClick={saveEdit}
+                                className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all"
+                            >
+                                {t('broadcast.sender.save')}
+                            </button>
+                        </div>
+                    </GlassCard>
+                ) : (
+                    <GlassCard className="p-10 space-y-8 shadow-2xl overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity -rotate-12 translate-x-4 -translate-y-4">
+                            <Radio size={120} />
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] opacity-40 ml-2">
+                                <Plus size={12} /> {t('broadcast.sender.messageContent')}
+                            </label>
+                            <div className="relative rounded-[2.5rem] p-8 transition-all border-2 bg-slate-50 border-slate-100 focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-2xl">
+                                <textarea
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    className="w-full bg-transparent font-bold outline-none resize-none min-h-[320px] text-3xl leading-relaxed text-slate-800 placeholder:text-slate-300"
+                                    placeholder={t('broadcast.sender.inputPlaceholder')}
                                 />
-                                <span className={`text-xs font-black uppercase tracking-widest ${isLooping ? 'opacity-100' : 'opacity-60'}`}>
-                                    {isLooping ? t('broadcast.sender.looping') : t('broadcast.sender.once')}
-                                </span>
-                            </button>
+                                <div className="absolute bottom-6 right-8 opacity-10 pointer-events-none group-focus-within:opacity-20 transition-opacity">
+                                    <History size={64} />
+                                </div>
+                            </div>
                         </div>
 
-                        {/* 右侧：紧急开关 + 发送按钮 */}
-                        <div className="flex gap-3 items-stretch">
-                            {/* 紧急开关按钮 */}
-                            <button
-                                onClick={() => setIsEmergency(!isEmergency)}
-                                className={`relative group px-5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-500 border-2 ${isEmergency
-                                    ? 'bg-red-500 border-red-400 text-white shadow-xl shadow-red-500/25 scale-105 z-10'
-                                    : 'bg-white/50 dark:bg-white/5 border-slate-100 dark:border-white/10 text-slate-400 hover:border-red-200 dark:hover:border-red-900/30'}`}
-                            >
-                                <AlertTriangle size={18} className={isEmergency ? 'animate-bounce' : 'group-hover:text-red-400'} />
-                                <span className="text-[9px] font-black uppercase tracking-tighter opacity-80">
-                                    {t('broadcast.sender.emergency')}
-                                </span>
-                                {isEmergency && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />}
-                            </button>
-
-                            {/* 发起播报大按钮 */}
-                            <button
-                                onClick={handleSend}
-                                disabled={status.type === 'loading'}
-                                className="min-w-[140px] sm:min-w-[180px] rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 overflow-hidden group"
-                            >
-                                {status.type === 'loading' ? (
-                                    <Loader2 className="animate-spin" size={20} />
-                                ) : (
-                                    <>
-                                        <div className="relative">
-                                            <Send size={18} className="group-hover:translate-x-12 group-hover:-translate-y-12 transition-all duration-500 ease-in-out" />
-                                            <Send size={18} className="absolute inset-0 -translate-x-12 translate-y-12 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-500 ease-in-out opacity-0 group-hover:opacity-100" />
-                                        </div>
-                                        <span>{t('broadcast.sender.initBroadcast')}</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </GlassCard>
-            )}
-
-            {/* History Section */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between px-2">
-                    <h3 className="text-sm font-black uppercase tracking-[0.2em] opacity-30">{t('broadcast.sender.history')}</h3>
-                    <button
-                        onClick={clearHistory}
-                        className="text-[10px] font-black text-red-500/40 hover:text-red-500 transition-colors uppercase tracking-widest"
-                    >
-                        {t('broadcast.sender.clearHistory')}
-                    </button>
-                </div>
-                <div className="space-y-3">
-                    {(() => {
-                        const filteredHistory = history.filter(msg => msg.channelName === activeChannel?.name);
-                        if (filteredHistory.length === 0) {
-                            return (
-                                <div className="py-20 flex flex-col items-center justify-center text-slate-300 space-y-4">
-                                    <History size={48} className="opacity-20" />
-                                    <p className="text-xs font-black uppercase tracking-[0.3em] opacity-50">{t('broadcast.sender.noHistory')}</p>
-                                </div>
-                            );
-                        }
-                        return filteredHistory.map((msg) => (
-                            <button
-                                key={msg.id}
-                                onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName)}
-                                className={`w-full group p-6 rounded-[2rem] border transition-all hover:scale-[1.01] text-left flex items-start gap-4 ${msg.isEmergency
-                                    ? 'bg-red-50/50 border-red-100 hover:border-red-200'
-                                    : 'bg-white/50 border-slate-100 hover:border-blue-200 hover:bg-white'}`}
-                            >
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${msg.isEmergency ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-slate-100 text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-colors'}`}>
-                                    {msg.isEmergency ? <AlertTriangle size={20} /> : <History size={20} />}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-30">{msg.timestamp} · {msg.channelName}</p>
-                                        {msg.repeatCount && msg.repeatCount !== 1 && (
-                                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
-                                                {msg.repeatCount === -1 ? '∞' : `x${msg.repeatCount}`}
-                                            </span>
-                                        )}
+                        {/* ─── 核心控制区 ─── */}
+                        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+                            {/* 左侧：播放次数与模式 (一体化高斯模糊容器) */}
+                            <div className="flex-1 flex items-center bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/10 p-1.5 shadow-sm">
+                                {/* 次数调节器 */}
+                                <div className={`flex items-center gap-1 bg-white/80 dark:bg-zinc-900/50 rounded-xl p-1 transition-all ${isLooping ? 'opacity-40 grayscale pointer-events-none' : 'shadow-sm'}`}>
+                                    <button
+                                        onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
+                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-500"
+                                    >
+                                        <ChevronDown size={18} />
+                                    </button>
+                                    <div className="min-w-[40px] flex flex-col items-center">
+                                        <span className="text-lg font-black text-blue-600 tabular-nums">
+                                            {isLooping ? '∞' : repeatCount}
+                                        </span>
+                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter -mt-1 opacity-60">
+                                            {t('broadcast.sender.repeatCount')}
+                                        </span>
                                     </div>
-                                    <p className={`text-base font-bold line-clamp-2 leading-relaxed ${msg.isEmergency ? 'text-red-600' : 'text-slate-700'}`}>
-                                        {msg.text}
-                                    </p>
+                                    <button
+                                        onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
+                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-500"
+                                    >
+                                        <ChevronUp size={18} />
+                                    </button>
                                 </div>
-                                <div className="self-center p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <ChevronRight className="text-slate-300" size={20} />
-                                </div>
-                            </button>
-                        ));
-                    })()}
+
+                                {/* 分隔线 */}
+                                <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-3 opacity-50" />
+
+                                {/* 模式切换 (无限循环图标) */}
+                                <button
+                                    onClick={() => setIsLooping(!isLooping)}
+                                    className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl transition-all duration-300 ${isLooping
+                                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                                        : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                                >
+                                    <Repeat
+                                        size={18}
+                                        className={isLooping ? 'animate-spin' : ''}
+                                        style={isLooping ? { animationDuration: '3s' } : {}}
+                                    />
+                                    <span className={`text-xs font-black uppercase tracking-widest ${isLooping ? 'opacity-100' : 'opacity-60'}`}>
+                                        {isLooping ? t('broadcast.sender.looping') : t('broadcast.sender.once')}
+                                    </span>
+                                </button>
+                            </div>
+
+                            {/* 右侧：紧急开关 + 发送按钮 */}
+                            <div className="flex gap-3 items-stretch">
+                                {/* 紧急开关按钮 */}
+                                <button
+                                    onClick={() => setIsEmergency(!isEmergency)}
+                                    className={`relative group px-5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-500 border-2 ${isEmergency
+                                        ? 'bg-red-500 border-red-400 text-white shadow-xl shadow-red-500/25 scale-105 z-10'
+                                        : 'bg-white/50 dark:bg-white/5 border-slate-100 dark:border-white/10 text-slate-400 hover:border-red-200 dark:hover:border-red-900/30'}`}
+                                >
+                                    <AlertTriangle size={18} className={isEmergency ? 'animate-bounce' : 'group-hover:text-red-400'} />
+                                    <span className="text-[9px] font-black uppercase tracking-tighter opacity-80">
+                                        {t('broadcast.sender.emergency')}
+                                    </span>
+                                    {isEmergency && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />}
+                                </button>
+
+                                {/* 发起播报大按钮 */}
+                                <button
+                                    onClick={handleSend}
+                                    disabled={status.type === 'loading'}
+                                    className="min-w-[140px] sm:min-w-[180px] rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 overflow-hidden group"
+                                >
+                                    {status.type === 'loading' ? (
+                                        <Loader2 className="animate-spin" size={20} />
+                                    ) : (
+                                        <>
+                                            <div className="relative">
+                                                <Send size={18} className="group-hover:translate-x-12 group-hover:-translate-y-12 transition-all duration-500 ease-in-out" />
+                                                <Send size={18} className="absolute inset-0 -translate-x-12 translate-y-12 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-500 ease-in-out opacity-0 group-hover:opacity-100" />
+                                            </div>
+                                            <span>{t('broadcast.sender.initBroadcast')}</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </GlassCard>
+                )}
+
+                {/* History Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between px-2">
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] opacity-30">{t('broadcast.sender.history')}</h3>
+                        <button
+                            onClick={clearHistory}
+                            className="text-[10px] font-black text-red-500/40 hover:text-red-500 transition-colors uppercase tracking-widest"
+                        >
+                            {t('broadcast.sender.clearHistory')}
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        {(() => {
+                            const filteredHistory = history.filter(msg => msg.channelName === activeChannel?.name);
+                            if (filteredHistory.length === 0) {
+                                return (
+                                    <div className="py-20 flex flex-col items-center justify-center text-slate-300 space-y-4">
+                                        <History size={48} className="opacity-20" />
+                                        <p className="text-xs font-black uppercase tracking-[0.3em] opacity-50">{t('broadcast.sender.noHistory')}</p>
+                                    </div>
+                                );
+                            }
+                            return filteredHistory.map((msg) => (
+                                <button
+                                    key={msg.id}
+                                    onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName)}
+                                    className={`w-full group p-6 rounded-[2rem] border transition-all hover:scale-[1.01] text-left flex items-start gap-4 ${msg.isEmergency
+                                        ? 'bg-red-50/50 border-red-100 hover:border-red-200'
+                                        : 'bg-white/50 border-slate-100 hover:border-blue-200 hover:bg-white'}`}
+                                >
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${msg.isEmergency ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-slate-100 text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-colors'}`}>
+                                        {msg.isEmergency ? <AlertTriangle size={20} /> : <History size={20} />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30">{msg.timestamp} · {msg.channelName}</p>
+                                            {msg.repeatCount && msg.repeatCount !== 1 && (
+                                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
+                                                    {msg.repeatCount === -1 ? '∞' : `x${msg.repeatCount}`}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className={`text-base font-bold line-clamp-2 leading-relaxed ${msg.isEmergency ? 'text-red-600' : 'text-slate-700'}`}>
+                                            {msg.text}
+                                        </p>
+                                    </div>
+                                    <div className="self-center p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <ChevronRight className="text-slate-300" size={20} />
+                                    </div>
+                                </button>
+                            ));
+                        })()}
+                    </div>
                 </div>
+
+                {/* Schedule Manager Section */}
+                {channels.length > 0 && (
+                    <ScheduleManager
+                        license={license}
+                        activeChannelCode={channelCode}
+                        isDark={isDark}
+                    />
+                )}
+
             </div>
 
-            {/* Schedule Manager Section */}
-            {channels.length > 0 && (
-                <ScheduleManager
-                    license={license}
-                    activeChannelCode={channelCode}
-                    isDark={isDark}
-                />
-            )}
-
-            {/* Status Toast */}
+            {/* Status Toast - Moved outside scaled container to fix fixed positioning */}
             {status.msg && (
                 <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-bottom-4">
                     <div className={`px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-xl border ${status.type === 'success' ? 'bg-emerald-500/90 border-emerald-400 text-white' :
@@ -826,7 +829,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 </div>
             )}
 
-            {/* Replay Quick-Editor Dialog */}
+            {/* Replay Quick-Editor Dialog - Moved outside scaled container to fix fixed positioning */}
             {showReplayDialog && replayData && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 transition-all">
                     <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-xl" onClick={() => setShowReplayDialog(false)} />
@@ -915,7 +918,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

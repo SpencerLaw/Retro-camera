@@ -269,135 +269,6 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
-          {/* Homework Crush - Cute Green */}
-          <a
-            href="/homework-crush/index.html"
-            className="group relative bg-gradient-to-br from-[#C8E6C9] via-[#A5D6A7] to-[#81C784] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(102,187,106,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(102,187,106,0.6)] hover:rotate-2 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Cute leaves decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🌱</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#81C784] to-[#A5D6A7] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(102,187,106,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#C8E6C9]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <BookOpen size={72} className="text-[#4CAF50] drop-shadow-lg" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#2E7D32] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.homeworkCrush.title')}</h2>
-              <p className="text-base text-[#388E3C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
-                {t('home.homeworkCrush.subtitle')}
-              </p>
-              <p className="text-sm text-[#1B5E20] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
-                {t('home.homeworkCrush.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#4CAF50] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(102,187,106,0.4)] border-[3px] border-[#A5D6A7] hover:bg-gradient-to-r hover:from-[#A5D6A7] hover:to-white">
-                  Enter → 📝
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Magic Roll Call - Cosmic Purple/Blue */}
-          <a
-            href="/magic-roll-call/index.html"
-            className="group relative bg-gradient-to-br from-[#1a0b2e] via-[#302b63] to-[#24243e] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(48,43,99,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(48,43,99,0.6)] hover:rotate-2 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Cute stars decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🔮</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#00f260] to-[#0575e6] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-[#302b63] rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(0,0,0,0.3)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#4a4380]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Wand2 size={72} className="text-[#00f260] drop-shadow-[0_0_15px_rgba(0,242,96,0.8)]" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#00f260] mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ textShadow: '0 0 10px rgba(0,242,96,0.5)' }}>{t('home.magicRollCall.title')}</h2>
-              <p className="text-base text-[#76e4ff] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
-                {t('home.magicRollCall.subtitle')}
-              </p>
-              <p className="text-sm text-[#bcaae3] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
-                {t('home.magicRollCall.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/20">
-                <div className="inline-block px-6 py-3 bg-[#302b63] text-[#00f260] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)] border-[3px] border-[#00f260] hover:bg-gradient-to-r hover:from-[#00f260] hover:to-[#0575e6] hover:text-white">
-                  Enter → ✨
-                </div>
-              </div>
-            </div>
-          </a>
-
-          {/* Kiddie Plan - Hand-drawn Style */}
-          <Link
-            to="/kiddie-plan"
-            className="group relative bg-gradient-to-br from-[#FFF9E1] via-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,217,90,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,217,90,0.6)] hover:rotate-2 block"
-            style={{
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {/* Cute heart decoration */}
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💝</div>
-
-            {/* Kawaii Glow Effect */}
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
-
-            {/* Icon */}
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,177,177,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFD95A]"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <BookOpen size={72} className="text-[#FFB1B1] drop-shadow-lg" />
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#4C3D3D] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.kiddiePlan.title')}</h2>
-              <p className="text-base text-[#4C3D3D] mb-4 font-semibold opacity-80">
-                {t('home.kiddiePlan.subtitle')}
-              </p>
-              <p className="text-sm text-[#4C3D3D] leading-relaxed font-medium opacity-70">
-                {t('home.kiddiePlan.description')}
-              </p>
-
-              {/* Decorative Border */}
-              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
-                <div className="inline-block px-6 py-3 bg-white text-[#FFB1B1] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(255,217,90,0.4)] border-[3px] border-[#FFD95A] hover:bg-gradient-to-r hover:from-[#FFD95A] hover:to-white">
-                  Enter → 📖
-                </div>
-              </div>
-            </div>
-          </Link>
-
           {/* Morning Energy Tree - Sky Blue/Green */}
           <a
             href="/morning-energy-tree/index.html"
@@ -406,13 +277,9 @@ export const HomePage: React.FC = () => {
               transformStyle: 'preserve-3d',
             }}
           >
-            {/* Cute sun decoration */}
             <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>☀️</div>
-
-            {/* Kawaii Glow Effect */}
             <div className="absolute -inset-3 bg-gradient-to-r from-[#4DD0E1] to-[#26C6DA] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
 
-            {/* Icon */}
             <div className="relative z-10 flex justify-center mb-6">
               <div
                 className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(38,198,218,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#E0F7FA]"
@@ -422,7 +289,6 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Content */}
             <div className="relative z-10 text-center">
               <h2 className="font-bold text-4xl text-[#0097A7] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.morningTree.title')}</h2>
               <p className="text-base text-[#00838F] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
@@ -431,8 +297,6 @@ export const HomePage: React.FC = () => {
               <p className="text-sm text-[#006064] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
                 {t('home.morningTree.description')}
               </p>
-
-              {/* Decorative Border */}
               <div className="mt-6 pt-6 border-t-[3px] border-white/70">
                 <div className="inline-block px-6 py-3 bg-white text-[#00BCD4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(77,208,225,0.4)] border-[3px] border-[#80DEEA] hover:bg-gradient-to-r hover:from-[#80DEEA] hover:to-white">
                   Enter → 🌳
@@ -469,10 +333,117 @@ export const HomePage: React.FC = () => {
               <p className="text-sm text-[#1976D2] leading-relaxed font-medium">
                 {t('home.broadcast.description')}
               </p>
-
               <div className="mt-6 pt-6 border-t-[3px] border-white/70">
                 <div className="inline-block px-6 py-3 bg-white text-[#FF69B4] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(255,182,193,0.4)] border-[3px] border-[#FFDEE9] hover:bg-gradient-to-r hover:from-[#FFDEE9] hover:to-white">
                   Enter → 📣
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Homework Crush - Cute Green */}
+          <a
+            href="/homework-crush/index.html"
+            className="group relative bg-gradient-to-br from-[#C8E6C9] via-[#A5D6A7] to-[#81C784] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(102,187,106,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(102,187,106,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🌱</div>
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#81C784] to-[#A5D6A7] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(102,187,106,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#C8E6C9]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <BookOpen size={72} className="text-[#4CAF50] drop-shadow-lg" />
+              </div>
+            </div>
+
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#2E7D32] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.homeworkCrush.title')}</h2>
+              <p className="text-base text-[#388E3C] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                {t('home.homeworkCrush.subtitle')}
+              </p>
+              <p className="text-sm text-[#1B5E20] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                {t('home.homeworkCrush.description')}
+              </p>
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#4CAF50] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(102,187,106,0.4)] border-[3px] border-[#A5D6A7] hover:bg-gradient-to-r hover:from-[#A5D6A7] hover:to-white">
+                  Enter → 📝
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Magic Roll Call - Cosmic Purple/Blue */}
+          <a
+            href="/magic-roll-call/index.html"
+            className="group relative bg-gradient-to-br from-[#1a0b2e] via-[#302b63] to-[#24243e] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(48,43,99,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(48,43,99,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🔮</div>
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#00f260] to-[#0575e6] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-[#302b63] rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(0,0,0,0.3)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#4a4380]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Wand2 size={72} className="text-[#00f260] drop-shadow-[0_0_15px_rgba(0,242,96,0.8)]" />
+              </div>
+            </div>
+
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#00f260] mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ textShadow: '0 0 10px rgba(0,242,96,0.5)' }}>{t('home.magicRollCall.title')}</h2>
+              <p className="text-base text-[#76e4ff] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                {t('home.magicRollCall.subtitle')}
+              </p>
+              <p className="text-sm text-[#bcaae3] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                {t('home.magicRollCall.description')}
+              </p>
+              <div className="mt-6 pt-6 border-t-[3px] border-white/20">
+                <div className="inline-block px-6 py-3 bg-[#302b63] text-[#00f260] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)] border-[3px] border-[#00f260] hover:bg-gradient-to-r hover:from-[#00f260] hover:to-[#0575e6] hover:text-white">
+                  Enter → ✨
+                </div>
+              </div>
+            </div>
+          </a>
+
+          {/* Kiddie Plan - Hand-drawn Style */}
+          <Link
+            to="/kiddie-plan"
+            className="group relative bg-gradient-to-br from-[#FFF9E1] via-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,217,90,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,217,90,0.6)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>💝</div>
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,177,177,0.4)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#FFD95A]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <BookOpen size={72} className="text-[#FFB1B1] drop-shadow-lg" />
+              </div>
+            </div>
+
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#4C3D3D] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.kiddiePlan.title')}</h2>
+              <p className="text-base text-[#4C3D3D] mb-4 font-semibold opacity-80">
+                {t('home.kiddiePlan.subtitle')}
+              </p>
+              <p className="text-sm text-[#4C3D3D] leading-relaxed font-medium opacity-70">
+                {t('home.kiddiePlan.description')}
+              </p>
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#FFB1B1] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(255,217,90,0.4)] border-[3px] border-[#FFD95A] hover:bg-gradient-to-r hover:from-[#FFD95A] hover:to-white">
+                  Enter → 📖
                 </div>
               </div>
             </div>

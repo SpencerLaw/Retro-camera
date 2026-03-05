@@ -46,7 +46,7 @@ class TTSManager {
     public async speak(text: string, options: TTSOptions = {}): Promise<void> {
         this.stop(false); // Stop current but don't increment playback ID
         const playbackId = this.activePlaybackId;
-        
+
         return new Promise(async (resolve) => {
             const onEnd = () => {
                 if (options.onEnd) options.onEnd();
@@ -89,7 +89,7 @@ class TTSManager {
     private playUrl(url: string, options: TTSOptions, playbackId: number): Promise<void> {
         return new Promise((resolve) => {
             if (!this.audio) return resolve();
-            
+
             this.initAudioCtx();
             if (this.gainNode && options.volume) {
                 this.gainNode.gain.setTargetAtTime(options.volume, this.audioCtx!.currentTime, 0.1);
@@ -115,15 +115,25 @@ class TTSManager {
         return new Promise((resolve) => {
             if (!window.speechSynthesis) return resolve();
             window.speechSynthesis.cancel();
-            
+
             const ut = new SpeechSynthesisUtterance(text);
             ut.rate = options.rate || 1;
-            ut.onend = () => resolve();
-            ut.onerror = () => resolve();
-            
+
+            let timer: any = null;
+            const cleanup = () => {
+                if (timer) clearTimeout(timer);
+                resolve();
+            };
+
+            ut.onend = cleanup;
+            ut.onerror = cleanup;
+
             window.speechSynthesis.speak(ut);
-            // Safety timeout for native TTS which sometimes fails to trigger onend
-            setTimeout(resolve, 10000);
+
+            // 增加安全超时：基础 60s + 每个字符 200ms
+            // 确保长句子（如100字+）有充足时间读完（通常约 30-40s）
+            const timeout = Math.max(60000, 10000 + text.length * 200);
+            timer = setTimeout(cleanup, timeout);
         });
     }
 

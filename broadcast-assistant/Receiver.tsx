@@ -196,6 +196,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [activeSentenceIndex, setActiveSentenceIndex] = useState(-1);
     const [theme, setTheme] = useState<'light' | 'dark'>(isDark ? 'dark' : 'light');
     const [displayChannelName, setDisplayChannelName] = useState('');
+    const [msgQueue, setMsgQueue] = useState<Message[]>([]);
 
     const activeRef = useRef<HTMLDivElement>(null);
     const isPlayingRef = useRef(false);
@@ -282,6 +283,15 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         }
     }, []);
 
+    // Queue worker: process messages one by one
+    useEffect(() => {
+        if (msgQueue.length > 0 && !isPlayingRef.current && isListening) {
+            const nextMsg = msgQueue[0];
+            setMsgQueue(prev => prev.slice(1));
+            runPlayback(nextMsg);
+        }
+    }, [msgQueue, isListening, runPlayback, isPlaying]);
+
     useEffect(() => {
         if (!isJoined) return;
         const poll = async () => {
@@ -318,9 +328,12 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                             engine.current.lastId = msg.id;
                             if (msg.channelName) setDisplayChannelName(msg.channelName);
                             if (msg.text && msg.text.trim()) {
-                                setCurrentMsg(msg);
                                 if (engine.current.isListening) {
-                                    runPlayback(msg);
+                                    setMsgQueue(prev => {
+                                        // 紧急消息插队到最前面，普通消息排队
+                                        if (msg.isEmergency) return [msg, ...prev];
+                                        return [...prev, msg];
+                                    });
                                 }
                                 setReceivedHistory(prev => {
                                     const next = [...prev, msg].slice(-20);
@@ -342,7 +355,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         };
         poll();
         ttsManager.startSilentLoop();
-        return () => { engine.current.isJoined = false; ttsManager.cancelAll(); };
+        return () => { engine.current.isJoined = false; ttsManager.cancelAll(); setMsgQueue([]); };
     }, [isJoined, fullRoomId, runPlayback]);
 
     // Duplicate effect removed
@@ -423,6 +436,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 localStorage.setItem('br_receiver_roomId', roomId);
                                 engine.current.isJoined = true;
                                 setIsJoined(true);
+                                setMsgQueue([]);
                             }}
                             className={`w-full py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl ${roomId.length === 6
                                 ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-pink-500/25 hover:scale-[1.02] active:scale-95'
@@ -607,7 +621,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 [...receivedHistory].reverse().map(m => (
                                     <button
                                         key={m.id}
-                                        onClick={() => runPlayback(m)}
+                                        onClick={() => setMsgQueue(prev => [...prev, m])}
                                         className={`flex-none w-72 p-5 rounded-2xl text-left transition-all border group snap-start ${m.isEmergency
                                             ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
                                             : (theme === 'dark'

@@ -680,9 +680,9 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
 
                         {/* ─── 核心控制区 ─── */}
-                        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+                        <div className="flex flex-wrap gap-3 sm:gap-4 items-stretch">
                             {/* 左侧：播放次数与模式 (一体化高斯模糊容器) */}
-                            <div className="flex-1 flex items-center bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/10 p-1.5 shadow-sm">
+                            <div className="flex-1 flex items-center min-w-[260px] bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/10 p-1.5 shadow-sm">
                                 {/* 次数调节器 */}
                                 <div className={`flex items-center gap-1 bg-white/80 dark:bg-zinc-900/50 rounded-xl p-1 transition-all ${isLooping ? 'opacity-40 grayscale pointer-events-none' : 'shadow-sm'}`}>
                                     <button
@@ -728,7 +728,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             </div>
 
                             {/* 右侧：紧急开关 + 发送按钮 */}
-                            <div className="flex gap-3 items-stretch">
+                            <div className="flex flex-1 md:flex-none gap-2 sm:gap-3 items-stretch min-w-[240px]">
                                 {/* 紧急开关按钮 */}
                                 <button
                                     onClick={() => setIsEmergency(!isEmergency)}
@@ -747,7 +747,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 <button
                                     onClick={handleSend}
                                     disabled={status.type === 'loading'}
-                                    className="min-w-[140px] sm:min-w-[180px] rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 overflow-hidden group"
+                                    className="flex-1 sm:min-w-[160px] rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs sm:text-sm uppercase tracking-widest sm:tracking-[0.2em] shadow-2xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 sm:gap-3 overflow-hidden group shrink-0"
                                 >
                                     {status.type === 'loading' ? (
                                         <Loader2 className="animate-spin" size={20} />

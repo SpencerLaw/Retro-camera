@@ -235,19 +235,20 @@ canvas {
 
 .ring-bg {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.15);
-    stroke-width: 8;
+    stroke: rgba(255, 255, 255, 0.12);
+    stroke-width: 14;
 }
 
 .ring-bar {
     fill: none;
     stroke: #f39c12;
-    stroke-width: 9;
-    stroke-linecap: round;
-    stroke-dasharray: 408;
+    stroke-width: 14;
+    stroke-linecap: butt;
+    /* 16px block + 5px gap ≈ 19 segments around the ring */
+    stroke-dasharray: 16 5;
     stroke-dashoffset: 0;
-    transition: stroke-dashoffset 1s linear;
-    filter: drop-shadow(0 0 8px rgba(243, 156, 18, 0.85));
+    /* JS overrides dashoffset to hide segments as time counts down */
+    filter: drop-shadow(0 0 6px rgba(243, 156, 18, 0.9));
 }
 
 .ring-inner {

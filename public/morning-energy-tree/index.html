@@ -10,13 +10,6 @@
 
 <body>
 
-    <!-- Animated Clouds -->
-    <div class="cloud-layer">
-        <div class="cloud cloud-1"></div>
-        <div class="cloud cloud-2"></div>
-        <div class="cloud cloud-3"></div>
-    </div>
-
 
     <a href="/" class="back-home-btn" data-i18n-title="morningTree.backHome">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -63,6 +56,13 @@
                 <!-- Circular Ring Timer -->
                 <div class="timer-ring-wrap">
                     <svg viewBox="0 0 140 140" width="140" height="140">
+                        <defs>
+                            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop id="grad-stop1" offset="0%" stop-color="#2ecc71" />
+                                <stop id="grad-stop2" offset="50%" stop-color="#f1c40f" />
+                                <stop id="grad-stop3" offset="100%" stop-color="#f1c40f" />
+                            </linearGradient>
+                        </defs>
                         <circle class="ring-bg" cx="70" cy="70" r="65" />
                         <circle class="ring-bar" id="ring-bar" cx="70" cy="70" r="65" />
                     </svg>

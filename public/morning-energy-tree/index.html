@@ -38,7 +38,8 @@
         <div class="auth-card">
             <h1 data-i18n="morningTree.gatekeeperTitle">🔒 班级早读系统</h1>
             <p style="opacity: 0.8; margin-bottom: 20px;" data-i18n="morningTree.gatekeeperSub">请输入授权码以启动</p>
-            <input type="text" id="license-input" class="auth-input" data-i18n-placeholder="morningTree.licensePlaceholder" placeholder="ZD-xxxx-xxxx" autocomplete="off">
+            <input type="text" id="license-input" class="auth-input"
+                data-i18n-placeholder="morningTree.licensePlaceholder" placeholder="ZD-xxxx-xxxx" autocomplete="off">
             <button id="verify-btn" class="auth-btn" data-i18n="morningTree.verifyBtn">开启能量树</button>
             <p id="auth-error" style="color: #ff6b6b; margin-top: 10px; display: none;">无效的授权码 (需以 ZD 开头)</p>
         </div>
@@ -62,8 +63,8 @@
                 <!-- Circular Ring Timer -->
                 <div class="timer-ring-wrap">
                     <svg viewBox="0 0 140 140" width="140" height="140">
-                        <circle class="ring-bg" cx="70" cy="70" r="65"/>
-                        <circle class="ring-bar" id="ring-bar" cx="70" cy="70" r="65"/>
+                        <circle class="ring-bg" cx="70" cy="70" r="65" />
+                        <circle class="ring-bar" id="ring-bar" cx="70" cy="70" r="65" />
                     </svg>
                     <div class="ring-inner">
                         <span id="countdown-time">--:--</span>
@@ -96,26 +97,27 @@
 
                 <!-- Sensitivity 3-level -->
                 <div class="sens-group">
-                    <div class="sens-label">灵敏度</div>
+                    <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
                     <div class="sens-btns">
                         <button class="sens-btn" data-sens="30">低</button>
                         <button class="sens-btn active" data-sens="50">中</button>
                         <button class="sens-btn" data-sens="75">高</button>
                     </div>
+                    <!-- Tooltip Content -->
+                    <div id="help-tooltip" class="help-tooltip hidden">
+                        <strong>📏 校准建议：</strong>
+                        <ul>
+                            <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</li>
+                            <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</li>
+                            <li><strong>低</strong> = 灵敏度低，需较大声音才触发；<strong>高</strong> = 灵敏度高，小声也能读。</li>
+                        </ul>
+                        <p class="tap-close">点击此处关闭</p>
+                    </div>
                 </div>
 
-                    <!-- hidden tooltip still used by script -->
-                    <div id="help-tooltip" class="help-tooltip hidden">
-                        <strong data-i18n="morningTree.helpAdviceTitle">📏 校准建议：</strong>
-                        <ul>
-                            <li><strong data-i18n="morningTree.helpAdviceMute">静音测试</strong><span data-i18n="morningTree.helpAdviceMuteDesc">：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</span></li>
-                            <li><strong data-i18n="morningTree.helpAdviceRead">朗读测试</strong><span data-i18n="morningTree.helpAdviceReadDesc">：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</span></li>
-                        </ul>
-                        <p class="tap-close" data-i18n="morningTree.tapToClose">点击此处关闭</p>
-                    </div>
-
                 <!-- Reset Button -->
-                <button id="reset-btn" class="icon-btn" data-i18n-title="morningTree.resetBtnTitle" style="font-size: 1.2rem;">
+                <button id="reset-btn" class="icon-btn" data-i18n-title="morningTree.resetBtnTitle"
+                    style="font-size: 1.2rem;">
                     🔄
                 </button>
             </div>

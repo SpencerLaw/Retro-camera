@@ -277,29 +277,42 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         const fishVoiceId = isFishVoice ? msg.voice?.split(':')[1] : null;
 
                         if (isFishVoice && fishVoiceId) {
-                            // 使用 Fish Audio 代理接口进行播放
-                            const ttsResp = await fetch('/api/broadcast/fish-tts', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    text: sentences[i],
-                                    reference_id: fishVoiceId,
-                                    format: 'mp3',
-                                    model: 's1'
-                                })
-                            });
-
-                            if (ttsResp.ok) {
-                                const blob = await ttsResp.blob();
-                                const url = URL.createObjectURL(blob);
-                                const audio = new Audio(url);
-                                await new Promise((resolve, reject) => {
-                                    audio.onended = resolve;
-                                    audio.onerror = reject;
-                                    audio.play().catch(reject);
+                            let fishSuccess = false;
+                            try {
+                                // 使用 Fish Audio 代理接口进行播放
+                                const ttsResp = await fetch('/api/broadcast/fish-tts', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        text: sentences[i],
+                                        reference_id: fishVoiceId,
+                                        format: 'mp3',
+                                        model: 's1'
+                                    })
                                 });
-                            } else {
-                                throw new Error('Fish Audio Proxy Failed');
+
+                                if (ttsResp.ok) {
+                                    const blob = await ttsResp.blob();
+                                    const url = URL.createObjectURL(blob);
+                                    const audio = new Audio(url);
+                                    await new Promise((resolve, reject) => {
+                                        audio.onended = resolve;
+                                        audio.onerror = reject;
+                                        audio.play().catch(reject);
+                                    });
+                                    fishSuccess = true;
+                                }
+                            } catch (e) {
+                                console.error('Fish Audio Playback failed, falling back to Edge TTS:', e);
+                            }
+
+                            if (!fishSuccess) {
+                                // Fallback to default Edge TTS
+                                await ttsManager.speak(sentences[i], {
+                                    voice: 'zh-CN-XiaoxiaoNeural',
+                                    engine: 'edge',
+                                    volume: 1
+                                });
                             }
                         } else {
                             // 默认使用 Edge TTS

@@ -54,6 +54,8 @@ const customDuration = $('custom-duration');
 // Help Tooltip Toggle
 const helpTrigger = $('help-trigger');
 const helpTooltip = $('help-tooltip');
+const dbStatus = $('db-status');
+const ringBar = $('ring-bar');
 
 if (helpTrigger) {
     helpTrigger.onclick = (e) => {
@@ -151,6 +153,18 @@ function updateTimerDisplay() {
     const mins = Math.floor(STATE.remainingTime / 60);
     const secs = STATE.remainingTime % 60;
     countdownTime.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+    // Update ring progress
+    if (ringBar) {
+        const totalSec = STATE.sessionDuration * 60;
+        const CIRCUMFERENCE = 408; // 2*PI*65 ≈ 408
+        const progress = totalSec > 0 ? STATE.remainingTime / totalSec : 1;
+        ringBar.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+        // Color: green when plenty of time, amber when < 25%, red when < 10%
+        if (progress < 0.1) ringBar.style.stroke = '#e74c3c';
+        else if (progress < 0.25) ringBar.style.stroke = '#f39c12';
+        else ringBar.style.stroke = '#f1c40f';
+    }
 }
 
 /* --- 3. Audio Logic --- */
@@ -253,12 +267,19 @@ function updateState() {
     if (STATE.currentDB > 85) {
         dbValue.style.color = '#ff6b6b';
         dbDisplay.style.borderColor = 'rgba(255, 107, 107, 0.8)';
+        if (dbStatus) { dbStatus.textContent = '📢 太吵了'; dbStatus.style.color = '#ff6b6b'; }
     } else if (STATE.currentDB > 70) {
         dbValue.style.color = '#4caf50';
         dbDisplay.style.borderColor = 'rgba(76, 175, 80, 0.8)';
+        if (dbStatus) { dbStatus.textContent = '📚 朗读中'; dbStatus.style.color = '#4caf50'; }
+    } else if (STATE.currentDB > 50) {
+        dbValue.style.color = '#fff';
+        dbDisplay.style.borderColor = 'rgba(255,255,255,0.4)';
+        if (dbStatus) { dbStatus.textContent = '🔇 很安静'; dbStatus.style.color = 'rgba(255,255,255,0.7)'; }
     } else {
         dbValue.style.color = '#fff';
-        dbDisplay.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+        dbDisplay.style.borderColor = 'rgba(255,255,255,0.4)';
+        if (dbStatus) { dbStatus.textContent = '等待中'; dbStatus.style.color = 'rgba(255,255,255,0.5)'; }
     }
 
     const READING_THRESHOLD = 70;
@@ -641,5 +662,16 @@ initLocalization().then(() => {
     initGatekeeper();
 });
 micBtn.onclick = toggleMic;
-if ($('reset-btn')) $('reset-btn').onclick = resetGame; // FIX: Use shared reset function
+if ($('reset-btn')) $('reset-btn').onclick = resetGame;
+
+// 3-level sensitivity buttons
+document.querySelectorAll('.sens-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.sens-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        STATE.sensitivity = parseInt(btn.dataset.sens);
+    };
+});
+
+// Fallback: keep slider support if it exists
 if ($('sensitivity-slider')) $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };

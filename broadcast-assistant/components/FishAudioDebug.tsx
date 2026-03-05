@@ -72,9 +72,13 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
         setIsCheckingWallet(true);
         try {
             const resp = await fetch('/api/broadcast/fish-wallet');
-            const data = await resp.json();
-            if (data.credit !== undefined) {
-                setWalletBalance(data.credit);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.credit !== undefined) {
+                    setWalletBalance(data.credit);
+                } else {
+                    console.error('Invalid wallet payload:', data);
+                }
             }
         } catch (e) {
             console.error('Failed to fetch wallet balance:', e);
@@ -82,6 +86,10 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
             setIsCheckingWallet(false);
         }
     };
+
+    useEffect(() => {
+        fetchWalletBalance();
+    }, []);
 
     return (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
@@ -118,17 +126,19 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                                 <span className="text-[10px] font-bold opacity-30">Credits</span>
                             </div>
                         </div>
-                        <button
-                            onClick={fetchWalletBalance}
-                            disabled={isCheckingWallet}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${theme === 'dark'
+                        <div className="flex flex-col gap-1 items-end">
+                            <button
+                                onClick={fetchWalletBalance}
+                                disabled={isCheckingWallet}
+                                className={`flex items-center gap-2 p-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${theme === 'dark'
                                     ? 'bg-white/5 hover:bg-white/10 text-white/60'
                                     : 'bg-white border border-slate-100 hover:bg-slate-50 text-indigo-600 shadow-sm'
-                                }`}
-                        >
-                            <RefreshCw size={12} className={isCheckingWallet ? 'animate-spin' : ''} />
-                            {isCheckingWallet ? '查询中...' : '点击查询余额'}
-                        </button>
+                                    }`}
+                                title="刷新余额"
+                            >
+                                <RefreshCw size={14} className={isCheckingWallet ? 'animate-spin' : ''} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Text Area */}
@@ -161,8 +171,8 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                                         key={voice.id}
                                         onClick={() => setRefId(voice.id)}
                                         className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${refId === voice.id
-                                                ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
-                                                : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
+                                            ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
+                                            : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
                                             }`}
                                     >
                                         {voice.name}
@@ -199,8 +209,8 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                             onClick={handlePlay}
                             disabled={isLoading || !text.trim() || !refId.trim()}
                             className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
-                                    ? 'bg-slate-500 opacity-50 cursor-not-allowed'
-                                    : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                                ? 'bg-slate-500 opacity-50 cursor-not-allowed'
+                                : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
                                 }`}
                         >
                             {isLoading ? (

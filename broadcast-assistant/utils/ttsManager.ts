@@ -1,4 +1,4 @@
-export type TTSEngine = 'native' | 'edge';
+export type TTSEngine = 'native' | 'edge' | 'fish';
 
 export interface TTSOptions {
     engine?: TTSEngine;
@@ -67,6 +67,24 @@ class TTSManager {
                     }
                     resolve();
                 }
+            } else if (options.engine === 'fish') {
+                try {
+                    const blob = await this.fetchFish(text, options);
+                    if (blob && this.activePlaybackId === playbackId) {
+                        const url = URL.createObjectURL(blob);
+                        await this.playUrl(url, options, playbackId);
+                        if (options.onEnd) options.onEnd();
+                        resolve();
+                    } else {
+                        resolve();
+                    }
+                } catch (e) {
+                    if (this.activePlaybackId === playbackId) {
+                        await this.speakNative(text, options);
+                        if (options.onEnd) options.onEnd();
+                    }
+                    resolve();
+                }
             } else {
                 await this.speakNative(text, options);
                 if (options.onEnd) options.onEnd();
@@ -83,6 +101,23 @@ class TTSManager {
         });
         if (resp.ok) return await resp.blob();
         throw new Error('TTS Fetch Failed');
+    }
+
+    private async fetchFish(text: string, options: TTSOptions): Promise<Blob | null> {
+        // Voice is expected to be "fish:VoiceID" or just "VoiceID" here
+        const voiceId = options.voice?.startsWith('fish:') ? options.voice.split(':')[1] : options.voice;
+        const resp = await fetch('/api/broadcast/fish-tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text,
+                reference_id: voiceId,
+                format: 'mp3',
+                model: 's1'
+            })
+        });
+        if (resp.ok) return await resp.blob();
+        throw new Error('Fish TTS Fetch Failed');
     }
 
     private playUrl(url: string, options: TTSOptions, playbackId: number): Promise<void> {

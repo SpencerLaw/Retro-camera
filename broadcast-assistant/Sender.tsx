@@ -710,19 +710,18 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 {/* 分隔线 */}
                                 <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-3 opacity-50" />
 
-                                {/* 模式切换 (无限循环图标) */}
                                 <button
                                     onClick={() => setIsLooping(!isLooping)}
-                                    className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl transition-all duration-300 ${isLooping
+                                    className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl transition-all duration-300 px-2 ${isLooping
                                         ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
                                         : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'}`}
                                 >
                                     <Repeat
                                         size={18}
-                                        className={isLooping ? 'animate-spin' : ''}
+                                        className={`shrink-0 ${isLooping ? 'animate-spin' : ''}`}
                                         style={isLooping ? { animationDuration: '3s' } : {}}
                                     />
-                                    <span className={`text-xs font-black uppercase tracking-widest ${isLooping ? 'opacity-100' : 'opacity-60'}`}>
+                                    <span className={`text-xs font-black uppercase tracking-widest whitespace-nowrap ${isLooping ? 'opacity-100' : 'opacity-60'}`}>
                                         {isLooping ? t('broadcast.sender.looping') : t('broadcast.sender.once')}
                                     </span>
                                 </button>
@@ -733,12 +732,12 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 {/* 紧急开关按钮 */}
                                 <button
                                     onClick={() => setIsEmergency(!isEmergency)}
-                                    className={`relative group px-5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-500 border-2 ${isEmergency
+                                    className={`relative group px-3 sm:px-5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-500 border-2 shrink-0 ${isEmergency
                                         ? 'bg-red-500 border-red-400 text-white shadow-xl shadow-red-500/25 scale-105 z-10'
                                         : 'bg-white/50 dark:bg-white/5 border-slate-100 dark:border-white/10 text-slate-400 hover:border-red-200 dark:hover:border-red-900/30'}`}
                                 >
                                     <AlertTriangle size={18} className={isEmergency ? 'animate-bounce' : 'group-hover:text-red-400'} />
-                                    <span className="text-[9px] font-black uppercase tracking-tighter opacity-80">
+                                    <span className="text-[9px] font-black uppercase tracking-tighter opacity-80 whitespace-nowrap">
                                         {t('broadcast.sender.emergency')}
                                     </span>
                                     {isEmergency && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />}

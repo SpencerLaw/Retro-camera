@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle } from 'lucide-react';
+import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 interface FishAudioDebugProps {
     onClose: () => void;
@@ -9,13 +9,14 @@ interface FishAudioDebugProps {
 const PRESET_VOICES = [
     { name: '小晓 (默认)', id: '8ef4a238714b45718ce04243307c57a7' },
     { name: '元气男声', id: '802e3bc2b27e49c2995d23ef70e6ac89' },
-    { name: '甜美女生', id: '7061ca86548d447f9f060123565f17d3' },
+    { name: '甜美女生', id: '36f45610e6e741639f7833075678440c' }, // Updated ID
 ];
 
 const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
     const [text, setText] = useState('这是 Fish Audio 的智能播报测试，听起来怎么样？');
     const [refId, setRefId] = useState(PRESET_VOICES[0].id);
     const [isLoading, setIsLoading] = useState(false);
+    const [showId, setShowId] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -113,14 +114,22 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                             ))}
                         </div>
 
-                        <input
-                            type="text"
-                            value={refId}
-                            onChange={(e) => setRefId(e.target.value)}
-                            className={`w-full p-4 rounded-2xl border outline-none font-mono text-xs transition-all ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
-                                }`}
-                            placeholder="手动输入音色 ID..."
-                        />
+                        <div className="relative">
+                            <input
+                                type={showId ? "text" : "password"}
+                                value={refId}
+                                onChange={(e) => setRefId(e.target.value)}
+                                className={`w-full p-4 rounded-2xl border outline-none font-mono text-xs transition-all pr-12 ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
+                                    }`}
+                                placeholder="手动输入音色 ID..."
+                            />
+                            <button
+                                onClick={() => setShowId(!showId)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 hover:opacity-100 transition-opacity"
+                            >
+                                {showId ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                     </div>
 
                     {errorMsg && (

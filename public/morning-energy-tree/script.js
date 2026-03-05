@@ -157,9 +157,9 @@ function updateTimerDisplay() {
     if (ringBar) {
         const totalSec = STATE.sessionDuration * 60;
         const CIRCUMFERENCE = 408;
-        // elapsed 0→1 as time passes; dashoffset 408→0 = blocks fill up
+        // elapsed 0→1 as time passes; inline style overrides CSS
         const elapsed = totalSec > 0 ? 1 - (STATE.remainingTime / totalSec) : 0;
-        ringBar.setAttribute('stroke-dashoffset', CIRCUMFERENCE * (1 - elapsed));
+        ringBar.style.strokeDashoffset = CIRCUMFERENCE * (1 - elapsed);
     }
 }
 

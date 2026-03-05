@@ -218,13 +218,17 @@ canvas {
 
 /* ── Circular Ring Timer ── */
 .timer-ring-wrap {
-    margin-top: 10px;
-    position: relative;
-    width: 140px;
-    height: 140px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100px);
+    width: 160px;
+    height: 160px;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 100;
+    pointer-events: none;
 }
 
 .timer-ring-wrap svg {
@@ -244,10 +248,9 @@ canvas {
     stroke: #f39c12;
     stroke-width: 14;
     stroke-linecap: butt;
-    /* 16px block + 5px gap ≈ 19 segments around the ring */
+    /* 16px block + 5px gap ≈ 19 segments around 408px circumference */
     stroke-dasharray: 16 5;
-    stroke-dashoffset: 0;
-    /* JS overrides dashoffset to hide segments as time counts down */
+    /* Initial state = EMPTY. JS updates inline style each second */
     filter: drop-shadow(0 0 6px rgba(243, 156, 18, 0.9));
 }
 

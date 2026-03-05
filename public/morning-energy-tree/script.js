@@ -156,10 +156,13 @@ function updateTimerDisplay() {
 
     if (ringBar) {
         const totalSec = STATE.sessionDuration * 60;
-        const CIRCUMFERENCE = 408;
-        // elapsed 0→1 as time passes; inline style overrides CSS
-        const elapsed = totalSec > 0 ? 1 - (STATE.remainingTime / totalSec) : 0;
-        ringBar.style.strokeDashoffset = CIRCUMFERENCE * (1 - elapsed);
+        // elapsed 0→1 as time passes; with pathLength="100", 100 is full
+        const elapsed = totalSec > 0 ? (1 - (STATE.remainingTime / totalSec)) : 0;
+        const fillAmount = elapsed * 100;
+
+        // Use dasharray to fill (Segment 1 = solid color, Segment 2 = gap)
+        // With pathLength=100, this creates the fill effect under the mask
+        ringBar.style.strokeDasharray = `${fillAmount} 100`;
     }
 }
 

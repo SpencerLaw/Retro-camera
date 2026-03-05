@@ -8,6 +8,12 @@
     --text-color: #fff;
     --primary-btn: #f1c40f;
     --danger: #e74c3c;
+
+    /* Responsive Sizing Tokens */
+    --db-size: clamp(140px, 20vh, 220px);
+    --ring-size: clamp(140px, 20vh, 220px);
+    --side-gap: clamp(15px, 2vw, 30px);
+    --top-gap: 20px;
 }
 
 body {
@@ -51,11 +57,11 @@ body {
 
 .db-display {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: var(--top-gap);
+    right: var(--side-gap);
     z-index: 10000;
-    width: 180px;
-    height: 180px;
+    width: var(--db-size);
+    height: var(--db-size);
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.55), rgba(20, 20, 40, 0.50));
     backdrop-filter: blur(18px);
     border: 3px solid rgba(255, 255, 255, 0.35);
@@ -91,7 +97,7 @@ body {
 }
 
 #db-value {
-    font-size: 4.2rem;
+    font-size: clamp(2.5rem, 8vh, 4.5rem);
     font-weight: 900;
     line-height: 1;
     font-family: 'Courier New', monospace;
@@ -216,42 +222,47 @@ canvas {
     padding: 20px;
 }
 
-/* ── Circular Ring Timer ── */
+/* ── Circular Ring Timer (Responsive & Segmented) ── */
 .timer-ring-wrap {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -100px);
-    width: 160px;
-    height: 160px;
+    /* Position exactly below the dB display */
+    top: calc(var(--top-gap) + var(--db-size) + 15px);
+    right: var(--side-gap);
+    width: var(--ring-size);
+    height: var(--ring-size);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 9999;
     pointer-events: none;
+    overflow: visible;
 }
 
 .timer-ring-wrap svg {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
     transform: rotate(-90deg);
+    overflow: visible;
 }
 
 .ring-bg {
     fill: none;
     stroke: rgba(255, 255, 255, 0.12);
-    stroke-width: 14;
+    stroke-width: 10%;
+    /* Responsive stroke width */
 }
 
 .ring-bar {
     fill: none;
     stroke: #f39c12;
-    stroke-width: 14;
+    stroke-width: 10%;
     stroke-linecap: butt;
-    /* 16px block + 5px gap ≈ 19 segments around 408px circumference */
-    stroke-dasharray: 16 5;
-    /* Initial state = EMPTY. JS updates inline style each second */
+    /* Flat edges for blocks */
+    /* JS updates stroke-dasharray based on pathLength="100" */
     filter: drop-shadow(0 0 6px rgba(243, 156, 18, 0.9));
+    transition: stroke-dasharray 0.3s ease-out;
 }
 
 .ring-inner {
@@ -261,7 +272,7 @@ canvas {
 }
 
 #countdown-time {
-    font-size: 2rem;
+    font-size: clamp(1.2rem, 4vh, 2.5rem);
     font-weight: 900;
     font-family: 'Courier New', monospace;
     color: #f39c12;

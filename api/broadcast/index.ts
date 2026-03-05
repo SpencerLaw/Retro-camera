@@ -172,33 +172,51 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
     const { text, reference_id, model = 's1', format = 'mp3' } = req.body;
     if (!text) return res.status(400).json({ error: 'Missing text' });
 
-    try {
-        const response = await fetch('https://api.fish.audio/v1/tts', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer b3a18f1fd0724399b73f1861d31bef03',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                text,
-                reference_id,
-                format,
-                model
-            })
-        });
+    const FISH_KEYS = [
+        'b3a18f1fd0724399b73f1861d31bef03', // Primary
+        '975c5540684a4712bae3c6e4d91f22ac'  // Backup
+    ];
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            return res.status(response.status).json({ error: errorData.message || 'Fish Audio API Error' });
+    let lastError = null;
+
+    for (const key of FISH_KEYS) {
+        try {
+            const response = await fetch('https://api.fish.audio/v1/tts', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${key}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text,
+                    reference_id,
+                    format,
+                    model
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                // If it's a credit issue (402) or unauthorized (401), try next key
+                if (response.status === 402 || response.status === 401) {
+                    console.warn(`Fish Audio Key ${key.substring(0, 5)}... failed with ${response.status}. Trying next...`);
+                    lastError = errorData.message || `HTTP ${response.status}`;
+                    continue;
+                }
+                return res.status(response.status).json({ error: errorData.message || 'Fish Audio API Error' });
+            }
+
+            const audioBuffer = await response.arrayBuffer();
+            res.setHeader('Content-Type', 'audio/mpeg');
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            return res.status(200).send(Buffer.from(audioBuffer));
+        } catch (e: any) {
+            lastError = e.message;
+            continue;
         }
-
-        const audioBuffer = await response.arrayBuffer();
-        res.setHeader('Content-Type', 'audio/mpeg');
-        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        return res.status(200).send(Buffer.from(audioBuffer));
-    } catch (e: any) {
-        return res.status(500).json({ error: e.message });
     }
+
+    return res.status(500).json({ error: `All Fish Audio keys failed. Last error: ${lastError}` });
 }
 
 async function handleFetchFishModels(req: VercelRequest, res: VercelResponse) {
@@ -210,40 +228,68 @@ async function handleFetchFishModels(req: VercelRequest, res: VercelResponse) {
     url.searchParams.append('page_number', String(page_number));
     url.searchParams.append('sort_by', 'score');
 
-    try {
-        const response = await fetch(url.toString(), {
-            headers: {
-                'Authorization': 'Bearer b3a18f1fd0724399b73f1861d31bef03',
+    const FISH_KEYS = [
+        'b3a18f1fd0724399b73f1861d31bef03',
+        '975c5540684a4712bae3c6e4d91f22ac'
+    ];
+
+    for (const key of FISH_KEYS) {
+        try {
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'Authorization': `Bearer ${key}`,
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                return res.status(200).json(data);
             }
-        });
-
-        if (!response.ok) {
-            return res.status(response.status).json({ error: 'Failed to fetch models' });
+        } catch (e) {
+            console.error('Failed to fetch models for key', key.substring(0, 5));
         }
-
-        const data = await response.json();
-        return res.status(200).json(data);
-    } catch (e: any) {
-        return res.status(500).json({ error: e.message });
     }
+
+    return res.status(500).json({ error: 'Failed to fetch models from all Fish Audio keys' });
 }
 
 async function handleFishWallet(req: VercelRequest, res: VercelResponse) {
-    try {
-        const response = await fetch('https://api.fish.audio/wallet/self/api-credit', {
-            headers: {
-                'Authorization': `Bearer ${FISH_AUDIO_KEY}`,
+    const FISH_KEYS = [
+        'b3a18f1fd0724399b73f1861d31bef03',
+        '975c5540684a4712bae3c6e4d91f22ac'
+    ];
+
+    let totalCredit = 0;
+    let hasSuccess = false;
+
+    // Summating balance or just trying to find one valid? 
+    // Usually user wants to know if there's *any* money left. 
+    // Let's just return the first one with money, or sum them if possible.
+    // The fish API returns individual credit. Let's just try to find the first one that works
+    // and maybe show a combined view for the debug tool.
+
+    for (const key of FISH_KEYS) {
+        try {
+            const response = await fetch('https://api.fish.audio/wallet/self/api-credit', {
+                headers: {
+                    'Authorization': `Bearer ${key}`,
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                totalCredit += (Number(data.credit) || 0);
+                hasSuccess = true;
             }
-        });
-
-        if (!response.ok) {
-            return res.status(response.status).json({ error: 'Failed to fetch wallet' });
+        } catch (e) {
+            console.error(`Failed to fetch wallet for key ${key.substring(0, 5)}...`, e);
         }
+    }
 
-        const data = await response.json();
-        return res.status(200).json(data);
-    } catch (e: any) {
-        return res.status(500).json({ error: e.message });
+    if (hasSuccess) {
+        return res.status(200).json({ credit: totalCredit });
+    } else {
+        return res.status(500).json({ error: 'Failed to fetch wallet balance from all keys' });
     }
 }
 

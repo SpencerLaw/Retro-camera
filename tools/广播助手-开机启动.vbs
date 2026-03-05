@@ -59,18 +59,23 @@ startupFolder = objShell.SpecialFolders("Startup")
 thisScript    = WScript.ScriptFullName
 destPath      = startupFolder & "\" & objFSO.GetFileName(thisScript)
 
+' Use English to avoid encoding issues with WScript
+Dim STR_ERR_TITLE, STR_ERR_CONTENT, STR_SUCC_TITLE, STR_SUCC_CONTENT
+STR_ERR_TITLE   = "Broadcast Assistant - Startup Setup Failed"
+STR_ERR_CONTENT = "Cannot write to Startup folder." & vbCrLf & _
+                 "Error: " & Err.Description & vbCrLf & vbCrLf & _
+                 "Please try: Right-click this script -> Run as Administrator"
+STR_SUCC_TITLE   = "Broadcast Assistant - Setup Success"
+STR_SUCC_CONTENT = "Successfully added to startup!" & vbCrLf & _
+                  "The receiver will open automatically on next boot."
+
 If Not objFSO.FileExists(destPath) Then
     On Error Resume Next
     objFSO.CopyFile thisScript, destPath
     If Err.Number <> 0 Then
-        MsgBox "无法写入开机启动文件夹：" & vbCrLf & _
-               Err.Description & vbCrLf & vbCrLf & _
-               "请尝试：右键本脚本 -> 以管理员身份运行", _
-               vbExclamation, "广播助手 - 开机启动设置失败"
+        MsgBox STR_ERR_CONTENT, vbExclamation, STR_ERR_TITLE
     Else
-        MsgBox "已成功加入开机启动！" & vbCrLf & _
-               "下次开机将自动打开广播接收页面。", _
-               vbInformation, "广播助手 - 设置成功"
+        MsgBox STR_SUCC_CONTENT, vbInformation, STR_SUCC_TITLE
     End If
     On Error GoTo 0
 End If

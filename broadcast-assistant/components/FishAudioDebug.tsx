@@ -14,6 +14,7 @@ interface VoiceModel {
 }
 
 const RECOMMENDED_VOICES = [
+    { name: '默认音色 (免费 EdgeTTS)', id: '' },
     { name: '嘉岚3.0 (高保真女声)', id: 'fbe02f8306fc4d3d915e9871722a39d5' },
     { name: '王琨 (专业广播)', id: '4f201abba2574feeae11e5ebf737859e' },
     { name: '女大学生 (自然亲切)', id: '5c353fdb312f4888836a9a5680099ef0' },
@@ -31,21 +32,22 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const handlePlay = async () => {
-        if (!text.trim() || !refId.trim()) return;
+        if (!text.trim()) return;
         setIsLoading(true);
         setErrorMsg(null);
         try {
-            const response = await fetch('/api/broadcast/fish-tts', {
+            // 如果 reference_id 为空，调用 Edge TTS 测试接口
+            const endpointUrl = refId.trim() === '' ? '/api/broadcast/tts' : '/api/broadcast/fish-tts';
+            const bodyPayload = refId.trim() === ''
+                ? { text: text.trim(), voice: 'zh-CN-XiaoxiaoNeural', rate: 1 }
+                : { text: text.trim(), reference_id: refId.trim(), format: 'mp3', model: 's1' };
+
+            const response = await fetch(endpointUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    text: text.trim(),
-                    reference_id: refId.trim(),
-                    format: 'mp3',
-                    model: 's1'
-                })
+                body: JSON.stringify(bodyPayload)
             });
 
             if (!response.ok) {

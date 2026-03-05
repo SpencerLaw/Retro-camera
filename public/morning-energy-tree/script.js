@@ -156,30 +156,9 @@ function updateTimerDisplay() {
 
     if (ringBar) {
         const totalSec = STATE.sessionDuration * 60;
-        const CIRCUMFERENCE = 408; // 2*PI*65 ≈ 408
+        const CIRCUMFERENCE = 408;
         const progress = totalSec > 0 ? STATE.remainingTime / totalSec : 1;
         ringBar.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
-
-        // Update gradient stops based on time remaining
-        const s1 = document.getElementById('grad-stop1');
-        const s2 = document.getElementById('grad-stop2');
-        const s3 = document.getElementById('grad-stop3');
-        if (s1 && s2 && s3) {
-            let c1, c2, c3, txtColor;
-            if (progress < 0.1) {
-                c1 = '#e74c3c'; c2 = '#c0392b'; c3 = '#c0392b'; txtColor = '#e74c3c';
-            } else if (progress < 0.25) {
-                c1 = '#f39c12'; c2 = '#e74c3c'; c3 = '#e74c3c'; txtColor = '#f39c12';
-            } else if (progress < 0.5) {
-                c1 = '#f1c40f'; c2 = '#f39c12'; c3 = '#e67e22'; txtColor = '#f1c40f';
-            } else {
-                c1 = '#2ecc71'; c2 = '#f1c40f'; c3 = '#f1c40f'; txtColor = '#f1c40f';
-            }
-            s1.setAttribute('stop-color', c1);
-            s2.setAttribute('stop-color', c2);
-            s3.setAttribute('stop-color', c3);
-            countdownTime.style.color = txtColor;
-        }
     }
 }
 

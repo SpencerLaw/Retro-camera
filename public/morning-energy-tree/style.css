@@ -241,13 +241,13 @@ canvas {
 
 .ring-bar {
     fill: none;
-    stroke: url(#timerGradient);
+    stroke: #f39c12;
     stroke-width: 9;
     stroke-linecap: round;
     stroke-dasharray: 408;
     stroke-dashoffset: 0;
     transition: stroke-dashoffset 1s linear;
-    filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.8));
+    filter: drop-shadow(0 0 8px rgba(243, 156, 18, 0.85));
 }
 
 .ring-inner {
@@ -260,8 +260,8 @@ canvas {
     font-size: 2rem;
     font-weight: 900;
     font-family: 'Courier New', monospace;
-    color: #f1c40f;
-    text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
+    color: #f39c12;
+    text-shadow: 0 0 10px rgba(243, 156, 18, 0.7);
     line-height: 1;
     display: block;
 }

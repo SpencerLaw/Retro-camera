@@ -3,6 +3,7 @@ import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle, Eye, EyeOff,
 
 interface FishAudioDebugProps {
     onClose: () => void;
+    onSelectVoice: (voiceId: string) => void;
     theme: 'light' | 'dark';
 }
 
@@ -16,12 +17,10 @@ const RECOMMENDED_VOICES = [
     { name: '嘉岚3.0 (高保真女声)', id: 'fbe02f8306fc4d3d915e9871722a39d5' },
     { name: '王琨 (专业广播)', id: '4f201abba2574feeae11e5ebf737859e' },
     { name: '女大学生 (自然亲切)', id: '5c353fdb312f4888836a9a5680099ef0' },
-    { name: '郑翔洲 (商务男声)', id: 'ca8fb681ce2040958c15ede5eef86177' },
-    { name: '仿真人男声 (活力广告)', id: '21082ac382d945e29aea354e90380f11' },
 ];
 
-const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
-    const [text, setText] = useState('这是 Fish Audio 的智能播报测试，听起来怎么样？');
+const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice, theme }) => {
+    const [text, setText] = useState('我当然知道那不是我的月亮，但有一刻，月亮的确照在了我身上。可生活不是电影，我也缺少点运气。我悄然触摸你，却未曾料想，你像蒲公英散开了，到处啊，都是你的模样。');
     const [refId, setRefId] = useState(RECOMMENDED_VOICES[0].id);
     const [isLoading, setIsLoading] = useState(false);
     const [showId, setShowId] = useState(false);
@@ -88,16 +87,7 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
         }
     };
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (searchQuery.trim()) {
-                searchVoices(searchQuery);
-            } else {
-                setSearchResults([]);
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+    // Removed search effect as per requirement
 
     return (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
@@ -159,8 +149,8 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                                         key={voice.id}
                                         onClick={() => setRefId(voice.id)}
                                         className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${refId === voice.id
-                                                ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
-                                                : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
+                                            ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
+                                            : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
                                             }`}
                                     >
                                         {voice.name}
@@ -169,49 +159,7 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                             </div>
                         </div>
 
-                        {/* Search Library */}
-                        <div className="space-y-2 pt-2">
-                            <div className="flex items-center gap-1.5 opacity-40 px-1">
-                                <Search size={10} />
-                                <span className="text-[9px] font-black uppercase tracking-widest">在线库搜索 (中文)</span>
-                            </div>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className={`w-full p-3 rounded-xl border outline-none text-xs transition-all ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
-                                        }`}
-                                    placeholder="输入关键词搜索音色..."
-                                />
-                                {isSearching && <Loader2 size={14} className="animate-spin absolute right-3 top-3 opacity-30" />}
-                            </div>
-
-                            {searchResults.length > 0 && (
-                                <div className={`mt-2 max-h-[160px] overflow-y-auto rounded-xl border p-1 grid grid-cols-1 gap-1 ${theme === 'dark' ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-100'
-                                    }`}>
-                                    {searchResults.map(model => (
-                                        <button
-                                            key={model._id}
-                                            onClick={() => setRefId(model._id)}
-                                            className={`p-2 rounded-lg text-left transition-all ${refId === model._id
-                                                    ? 'bg-indigo-500 text-white shadow-md'
-                                                    : (theme === 'dark' ? 'hover:bg-white/5 text-white/60' : 'hover:bg-white text-slate-600')
-                                                }`}
-                                        >
-                                            <div className="font-bold text-[11px] truncate">{model.title}</div>
-                                            <div className="flex gap-1 mt-0.5 overflow-hidden">
-                                                {model.tags.slice(0, 3).map(tag => (
-                                                    <span key={tag} className={`text-[8px] px-1 rounded uppercase font-black opacity-40 ${refId === model._id ? 'bg-white/20' : 'bg-black/10 dark:bg-white/10'}`}>
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        {/* Search Library Removed */}
 
                         {/* Input Display (Visible ID if enabled) */}
                         <div className="relative pt-2">
@@ -251,21 +199,31 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
 
                 {/* Footer */}
                 <div className="p-6 border-t border-white/5 bg-black/5 shrink-0">
-                    <button
-                        onClick={handlePlay}
-                        disabled={isLoading || !text.trim() || !refId.trim()}
-                        className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handlePlay}
+                            disabled={isLoading || !text.trim() || !refId.trim()}
+                            className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
                                 ? 'bg-slate-500 opacity-50 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-indigo-500/25 hover:scale-[1.02] active:scale-95'
-                            }`}
-                    >
-                        {isLoading ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                            <Play size={18} fill="currentColor" />
-                        )}
-                        开始转换语音
-                    </button>
+                                : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                                }`}
+                        >
+                            {isLoading ? (
+                                <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                                <Play size={18} fill="currentColor" />
+                            )}
+                            测试试听
+                        </button>
+
+                        <button
+                            onClick={() => onSelectVoice(refId)}
+                            className="flex-[1.5] py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-indigo-500/25 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <Save size={18} />
+                            使用该音色！
+                        </button>
+                    </div>
                 </div>
 
                 <audio ref={audioRef} className="hidden" />

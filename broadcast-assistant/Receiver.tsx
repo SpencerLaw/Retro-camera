@@ -273,11 +273,42 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
 
                     try {
                         const startTime = Date.now();
-                        await ttsManager.speak(sentences[i], {
-                            voice: msg.voice || 'zh-CN-XiaoxiaoNeural',
-                            engine: 'edge',
-                            volume: 1
-                        });
+                        const isFishVoice = msg.voice?.startsWith('fish:');
+                        const fishVoiceId = isFishVoice ? msg.voice?.split(':')[1] : null;
+
+                        if (isFishVoice && fishVoiceId) {
+                            // 使用 Fish Audio 代理接口进行播放
+                            const ttsResp = await fetch('/api/broadcast/fish-tts', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    text: sentences[i],
+                                    reference_id: fishVoiceId,
+                                    format: 'mp3',
+                                    model: 's1'
+                                })
+                            });
+
+                            if (ttsResp.ok) {
+                                const blob = await ttsResp.blob();
+                                const url = URL.createObjectURL(blob);
+                                const audio = new Audio(url);
+                                await new Promise((resolve, reject) => {
+                                    audio.onended = resolve;
+                                    audio.onerror = reject;
+                                    audio.play().catch(reject);
+                                });
+                            } else {
+                                throw new Error('Fish Audio Proxy Failed');
+                            }
+                        } else {
+                            // 默认使用 Edge TTS
+                            await ttsManager.speak(sentences[i], {
+                                voice: msg.voice || 'zh-CN-XiaoxiaoNeural',
+                                engine: 'edge',
+                                volume: 1
+                            });
+                        }
 
                         // 额外防御：如果 speak 瞬间就被 resolve 了（通常是由于浏览器 autoplay 拦截），
                         // 我们需要手动补足一个视觉展示时间，否则循环瞬间结束，消息会闪现消失。

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X, Bug } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import ScheduleManager from './ScheduleManager';
 import GlassCard from './components/GlassCard';
 import { DialogType } from './components/CustomDialog';
+import FishAudioDebug from './components/FishAudioDebug';
 
 interface Message {
     id: string;
@@ -75,6 +76,11 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         isEmergency: boolean;
         channelName?: string;
     } | null>(null);
+
+    const [showFishAudioDebug, setShowFishAudioDebug] = useState(false);
+    const [fishAudioVoice, setFishAudioVoice] = useState(() => {
+        return localStorage.getItem(`br_fish_voice_${license}`) || '';
+    });
 
     const hasSyncedFromCloud = useRef(false);
 
@@ -359,7 +365,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     isEmergency,
                     channelName: activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
-                    voice: ''
+                    voice: fishAudioVoice ? `fish:${fishAudioVoice}` : ''
                 }),
                 signal: controller.signal
             });
@@ -372,7 +378,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     id: data.messageId,
                     text: inputText.trim(),
                     isEmergency,
-                    voice: '',
+                    voice: fishAudioVoice ? `fish:${fishAudioVoice}` : '',
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                     timestamp: new Date().toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' }),
                     channelName: activeChannel.name
@@ -424,7 +430,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     isEmergency: replayData.isEmergency,
                     channelName: replayData.channelName || activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: replayData.repeatCount,
-                    voice: ''
+                    voice: replayData.voice || (fishAudioVoice ? `fish:${fishAudioVoice}` : '')
                 }),
                 signal: controller.signal
             });
@@ -436,7 +442,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     id: data.messageId,
                     text: replayData.text.trim(),
                     isEmergency: replayData.isEmergency,
-                    voice: '',
+                    voice: replayData.voice || (fishAudioVoice ? `fish:${fishAudioVoice}` : ''),
                     repeatCount: replayData.repeatCount,
                     timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
                     channelName: replayData.channelName || activeChannel.name
@@ -511,8 +517,23 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
     };
 
+    const handleSelectFishVoice = (voiceId: string) => {
+        setFishAudioVoice(voiceId);
+        localStorage.setItem(`br_fish_voice_${license}`, voiceId);
+        setStatus({ type: 'success', msg: '音色设置成功！下次播报将生效' });
+        setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
+        setShowFishAudioDebug(false);
+    };
+
     return (
         <>
+            {showFishAudioDebug && (
+                <FishAudioDebug
+                    onClose={() => setShowFishAudioDebug(false)}
+                    onSelectVoice={handleSelectFishVoice}
+                    theme={isDark ? 'dark' : 'light'}
+                />
+            )}
             <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20 origin-top scale-95 md:scale-100 transition-transform">
                 {/* Channel Management Section */}
                 <div className="space-y-4">
@@ -778,6 +799,19 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                         ? 'bg-red-50/50 border-red-100 hover:border-red-200'
                                         : 'bg-white/50 border-slate-100 hover:border-blue-200 hover:bg-white'}`}
                                 >
+                                    <button
+                                        onClick={() => setShowFishAudioDebug(true)}
+                                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white/40' : 'bg-white/60 border-white shadow-sm hover:bg-white text-slate-400'}`}
+                                        title="Fish Audio 调试"
+                                    >
+                                        <Bug size={18} />
+                                    </button>
+                                    <button
+                                        onClick={onExitToSelection}
+                                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' : 'bg-white/60 border-white text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500'}`}
+                                    >
+                                        <X size={16} />
+                                    </button>
                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${msg.isEmergency ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-slate-100 text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-colors'}`}>
                                         {msg.isEmergency ? <AlertTriangle size={20} /> : <History size={20} />}
                                     </div>

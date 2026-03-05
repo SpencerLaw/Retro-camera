@@ -271,7 +271,7 @@ export const HomePage: React.FC = () => {
 
           {/* Morning Energy Tree - Sky Blue/Green */}
           <a
-            href="/morning-energy-tree/index.html"
+            href="/tree"
             className="group relative bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(77,208,225,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(77,208,225,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
@@ -343,7 +343,7 @@ export const HomePage: React.FC = () => {
 
           {/* Homework Crush - Cute Green */}
           <a
-            href="/homework-crush/index.html"
+            href="/homework"
             className="group relative bg-gradient-to-br from-[#C8E6C9] via-[#A5D6A7] to-[#81C784] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(102,187,106,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(102,187,106,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
@@ -379,7 +379,7 @@ export const HomePage: React.FC = () => {
 
           {/* Magic Roll Call - Cosmic Purple/Blue */}
           <a
-            href="/magic-roll-call/index.html"
+            href="/roll-call"
             className="group relative bg-gradient-to-br from-[#1a0b2e] via-[#302b63] to-[#24243e] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(48,43,99,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(48,43,99,0.6)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',

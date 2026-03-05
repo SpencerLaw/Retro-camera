@@ -11,9 +11,20 @@
       "destination": "/api/:path*"
     },
     {
+      "source": "/tree",
+      "destination": "/morning-energy-tree/index.html"
+    },
+    {
+      "source": "/roll-call",
+      "destination": "/magic-roll-call/index.html"
+    },
+    {
+      "source": "/homework",
+      "destination": "/homework-crush/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
 }
-

@@ -47,6 +47,10 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
     const [verifying, setVerifying] = useState(false);
     const [error, setError] = useState('');
     const [showFishDebug, setShowFishDebug] = useState(false);
+    const [fishAudioVoice, setFishAudioVoice] = useState(() => {
+        const license = getBCLicense();
+        return localStorage.getItem(`br_fish_voice_${license || 'DEMO-ONLY'}`) || '';
+    });
 
     // Custom Dialog State
     const [dialog, setDialog] = useState<{
@@ -102,6 +106,13 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                 closeDialog();
             }
         );
+    };
+
+    const handleSelectFishVoice = (voiceId: string) => {
+        setFishAudioVoice(voiceId);
+        const license = getBCLicense();
+        localStorage.setItem(`br_fish_voice_${license || 'DEMO-ONLY'}`, voiceId);
+        setShowFishDebug(false);
     };
 
     const handleTeacherMode = async () => {
@@ -308,6 +319,8 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                             isDark={theme === 'dark'}
                             onExitToSelection={() => setMode('selection')}
                             onOpenDialog={openDialog}
+                            fishAudioVoice={fishAudioVoice}
+                            onSelectFishVoice={setFishAudioVoice}
                         />
                     )}
                     {mode === 'receiver' && (
@@ -333,12 +346,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
             {showFishDebug && (
                 <FishAudioDebug
                     onClose={() => setShowFishDebug(false)}
-                    onSelectVoice={(voiceId) => {
-                        // In global selection mode, we can still set the voice for the current record
-                        // but usually it's better to do it inside Sender.
-                        // For now just close and maybe show a toast.
-                        setShowFishDebug(false);
-                    }}
+                    onSelectVoice={handleSelectFishVoice}
                     theme={theme}
                 />
             )}

@@ -28,9 +28,11 @@ interface SenderProps {
     isDark: boolean;
     onExitToSelection?: () => void;
     onOpenDialog?: (title: string, message: string, type: DialogType, onConfirm: () => void) => void;
+    fishAudioVoice?: string;
+    onSelectFishVoice?: (voiceId: string) => void;
 }
 
-const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onOpenDialog }) => {
+const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onOpenDialog, fishAudioVoice, onSelectFishVoice }) => {
     const t = useTranslations();
     const licensePrefix = getLicensePrefix(license);
 
@@ -78,9 +80,6 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     } | null>(null);
 
     const [showFishAudioDebug, setShowFishAudioDebug] = useState(false);
-    const [fishAudioVoice, setFishAudioVoice] = useState(() => {
-        return localStorage.getItem(`br_fish_voice_${license}`) || '';
-    });
 
     const hasSyncedFromCloud = useRef(false);
 
@@ -518,8 +517,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     };
 
     const handleSelectFishVoice = (voiceId: string) => {
-        setFishAudioVoice(voiceId);
-        localStorage.setItem(`br_fish_voice_${license}`, voiceId);
+        onSelectFishVoice?.(voiceId);
         setStatus({ type: 'success', msg: '音色设置成功！下次播报将生效' });
         setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
         setShowFishAudioDebug(false);

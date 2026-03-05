@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle, Eye, EyeOff, Search, Sparkles } from 'lucide-react';
+import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle, Eye, EyeOff, Search, Sparkles, RefreshCw } from 'lucide-react';
 
 interface FishAudioDebugProps {
     onClose: () => void;
@@ -23,9 +23,9 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
     const [text, setText] = useState('我当然知道那不是我的月亮，但有一刻，月亮的确照在了我身上。可生活不是电影，我也缺少点运气。我悄然触摸你，却未曾料想，你像蒲公英散开了，到处啊，都是你的模样。');
     const [refId, setRefId] = useState(RECOMMENDED_VOICES[0].id);
     const [isLoading, setIsLoading] = useState(false);
-    const [showId, setShowId] = useState(false);
+    const [walletBalance, setWalletBalance] = useState<number | null>(null);
+    const [isCheckingWallet, setIsCheckingWallet] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<VoiceModel[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -68,30 +68,24 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
         }
     };
 
-    const searchVoices = async (query: string) => {
-        if (!query.trim() && !searchResults.length) {
-            // Optional: Initial fetch for popular voices
-        }
-        setIsSearching(true);
+    const fetchWalletBalance = async () => {
+        setIsCheckingWallet(true);
         try {
-            const url = `/api/broadcast/fetch-fish-models?tags=chinese&query=${encodeURIComponent(query)}`;
-            const response = await fetch(url);
-            if (response.ok) {
-                const data = await response.json();
-                setSearchResults(data.items || []);
+            const resp = await fetch('/api/broadcast/fish-wallet');
+            const data = await resp.json();
+            if (data.credit !== undefined) {
+                setWalletBalance(data.credit);
             }
-        } catch (error) {
-            console.error('Search Voices Error:', error);
+        } catch (e) {
+            console.error('Failed to fetch wallet balance:', e);
         } finally {
-            setIsSearching(false);
+            setIsCheckingWallet(false);
         }
     };
 
-    // Removed search effect as per requirement
-
     return (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className={`relative w-full max-w-lg overflow-hidden rounded-[2rem] border shadow-2xl transition-all h-[90vh] flex flex-col ${theme === 'dark' ? 'bg-[#1a1a24] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
+            <div className={`relative w-full max-w-lg overflow-hidden rounded-[2rem] border shadow-2xl transition-all max-h-[90vh] flex flex-col ${theme === 'dark' ? 'bg-[#1a1a24] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
                 }`}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
@@ -113,6 +107,30 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+                    {/* Wallet Balance Display at Top */}
+                    <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${theme === 'dark' ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-40">账户剩余额度</span>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black tracking-tight text-indigo-500">
+                                    {walletBalance !== null ? walletBalance.toFixed(2) : '--'}
+                                </span>
+                                <span className="text-[10px] font-bold opacity-30">Credits</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={fetchWalletBalance}
+                            disabled={isCheckingWallet}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${theme === 'dark'
+                                    ? 'bg-white/5 hover:bg-white/10 text-white/60'
+                                    : 'bg-white border border-slate-100 hover:bg-slate-50 text-indigo-600 shadow-sm'
+                                }`}
+                        >
+                            <RefreshCw size={12} className={isCheckingWallet ? 'animate-spin' : ''} />
+                            {isCheckingWallet ? '查询中...' : '点击查询余额'}
+                        </button>
+                    </div>
+
                     {/* Text Area */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest opacity-30 px-1">播报文本</label>
@@ -128,13 +146,7 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                     {/* Reference ID & Library */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between px-1">
-                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">音色选择 (Reference ID)</label>
-                            <button
-                                onClick={() => setShowId(!showId)}
-                                className="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-400 transition-colors"
-                            >
-                                {showId ? '隐藏 ID' : '显示 ID'}
-                            </button>
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">音色选择</label>
                         </div>
 
                         {/* Presets (Recommended) */}
@@ -149,30 +161,13 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                                         key={voice.id}
                                         onClick={() => setRefId(voice.id)}
                                         className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${refId === voice.id
-                                            ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
-                                            : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
+                                                ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
+                                                : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
                                             }`}
                                     >
                                         {voice.name}
                                     </button>
                                 ))}
-                            </div>
-                        </div>
-
-                        {/* Search Library Removed */}
-
-                        {/* Input Display (Visible ID if enabled) */}
-                        <div className="relative pt-2">
-                            <input
-                                type={showId ? "text" : "password"}
-                                value={refId}
-                                readOnly
-                                className={`w-full p-4 rounded-2xl border outline-none font-mono text-[10px] transition-all opacity-60 ${theme === 'dark' ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-100'
-                                    }`}
-                                placeholder="选择上面的音色或搜索..."
-                            />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
-                                {showId ? <EyeOff size={14} className="opacity-30" /> : <Eye size={14} className="opacity-30" />}
                             </div>
                         </div>
                     </div>
@@ -192,7 +187,7 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                         }`}>
                         <Info size={16} className="shrink-0 mt-0.5" />
                         <p className="text-[10px] font-medium leading-relaxed">
-                            提示：已为您推荐高质量中文音色。您也可以通过搜索发现更多有趣的音色。
+                            提示：已为您推荐高质量中文音色。您可以查询余额以确保播报正常运行。
                         </p>
                     </div>
                 </div>
@@ -204,8 +199,8 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                             onClick={handlePlay}
                             disabled={isLoading || !text.trim() || !refId.trim()}
                             className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
-                                ? 'bg-slate-500 opacity-50 cursor-not-allowed'
-                                : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                                    ? 'bg-slate-500 opacity-50 cursor-not-allowed'
+                                    : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
                                 }`}
                         >
                             {isLoading ? (
@@ -232,9 +227,10 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                 __html: `
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.3); }
-            `}} />
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.2); border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128, 128, 128, 0.3); }
+                `
+            }} />
         </div>
     );
 };

@@ -3,6 +3,9 @@ import { kv } from '@vercel/kv';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 
+// Assuming FISH_AUDIO_KEY is an environment variable or a constant
+const FISH_AUDIO_KEY = process.env.FISH_AUDIO_KEY || 'b3a18f1fd0724399b73f1861d31bef03'; // Fallback to the key used in handleFishTTS if not set
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     const url = req.url || '';
     let action = '';
@@ -19,6 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     else if (url.includes('/clear-license-data')) action = 'clear-license-data';
     else if (url.includes('/fish-tts')) action = 'fish-tts';
     else if (url.includes('/fetch-fish-models')) action = 'fetch-fish-models';
+    else if (url.includes('/fish-wallet')) action = 'fish-wallet';
 
     if (!action) {
         const parts = url.split('?')[0].split('/').filter(Boolean);
@@ -39,6 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             case 'clear-license-data': return handleClearLicenseData(req, res);
             case 'fish-tts': return handleFishTTS(req, res);
             case 'fetch-fish-models': return handleFetchFishModels(req, res);
+            case 'fish-wallet': return handleFishWallet(req, res);
             default: return res.status(404).json({ error: 'Unknown action: ' + action });
         }
     } catch (e: any) {
@@ -214,6 +219,25 @@ async function handleFetchFishModels(req: VercelRequest, res: VercelResponse) {
 
         if (!response.ok) {
             return res.status(response.status).json({ error: 'Failed to fetch models' });
+        }
+
+        const data = await response.json();
+        return res.status(200).json(data);
+    } catch (e: any) {
+        return res.status(500).json({ error: e.message });
+    }
+}
+
+async function handleFishWallet(req: VercelRequest, res: VercelResponse) {
+    try {
+        const response = await fetch('https://api.fish.audio/wallet/self/api-credit', {
+            headers: {
+                'Authorization': `Bearer ${FISH_AUDIO_KEY}`,
+            }
+        });
+
+        if (!response.ok) {
+            return res.status(response.status).json({ error: 'Failed to fetch wallet' });
         }
 
         const data = await response.json();

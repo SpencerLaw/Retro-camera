@@ -18,6 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     else if (url.includes('/check-code')) action = 'check-code';
     else if (url.includes('/clear-license-data')) action = 'clear-license-data';
     else if (url.includes('/fish-tts')) action = 'fish-tts';
+    else if (url.includes('/fetch-fish-models')) action = 'fetch-fish-models';
 
     if (!action) {
         const parts = url.split('?')[0].split('/').filter(Boolean);
@@ -37,6 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             case 'check-code': return handleCheckCode(req, res);
             case 'clear-license-data': return handleClearLicenseData(req, res);
             case 'fish-tts': return handleFishTTS(req, res);
+            case 'fetch-fish-models': return handleFetchFishModels(req, res);
             default: return res.status(404).json({ error: 'Unknown action: ' + action });
         }
     } catch (e: any) {
@@ -189,6 +191,33 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
         res.setHeader('Content-Type', 'audio/mpeg');
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         return res.status(200).send(Buffer.from(audioBuffer));
+    } catch (e: any) {
+        return res.status(500).json({ error: e.message });
+    }
+}
+
+async function handleFetchFishModels(req: VercelRequest, res: VercelResponse) {
+    const { tags, query, page_size = 20, page_number = 1 } = req.query;
+    const url = new URL('https://api.fish.audio/model');
+    if (tags) url.searchParams.append('tags', tags as string);
+    if (query) url.searchParams.append('query', query as string);
+    url.searchParams.append('page_size', String(page_size));
+    url.searchParams.append('page_number', String(page_number));
+    url.searchParams.append('sort_by', 'score');
+
+    try {
+        const response = await fetch(url.toString(), {
+            headers: {
+                'Authorization': 'Bearer b3a18f1fd0724399b73f1861d31bef03',
+            }
+        });
+
+        if (!response.ok) {
+            return res.status(response.status).json({ error: 'Failed to fetch models' });
+        }
+
+        const data = await response.json();
+        return res.status(200).json(data);
     } catch (e: any) {
         return res.status(500).json({ error: e.message });
     }

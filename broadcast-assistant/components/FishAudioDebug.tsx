@@ -1,23 +1,34 @@
-import React, { useState, useRef } from 'react';
-import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle, Eye, EyeOff, Search, Sparkles } from 'lucide-react';
 
 interface FishAudioDebugProps {
     onClose: () => void;
     theme: 'light' | 'dark';
 }
 
-const PRESET_VOICES = [
-    { name: '小晓 (默认)', id: '8ef4a238714b45718ce04243307c57a7' },
-    { name: '元气男声', id: '802e3bc2b27e49c2995d23ef70e6ac89' },
-    { name: '甜美女生', id: '36f45610e6e741639f7833075678440c' }, // Updated ID
+interface VoiceModel {
+    _id: string;
+    title: string;
+    tags: string[];
+}
+
+const RECOMMENDED_VOICES = [
+    { name: '嘉岚3.0 (高保真女声)', id: 'fbe02f8306fc4d3d915e9871722a39d5' },
+    { name: '王琨 (专业广播)', id: '4f201abba2574feeae11e5ebf737859e' },
+    { name: '女大学生 (自然亲切)', id: '5c353fdb312f4888836a9a5680099ef0' },
+    { name: '郑翔洲 (商务男声)', id: 'ca8fb681ce2040958c15ede5eef86177' },
+    { name: '仿真人男声 (活力广告)', id: '21082ac382d945e29aea354e90380f11' },
 ];
 
 const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
     const [text, setText] = useState('这是 Fish Audio 的智能播报测试，听起来怎么样？');
-    const [refId, setRefId] = useState(PRESET_VOICES[0].id);
+    const [refId, setRefId] = useState(RECOMMENDED_VOICES[0].id);
     const [isLoading, setIsLoading] = useState(false);
     const [showId, setShowId] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<VoiceModel[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const handlePlay = async () => {
@@ -58,12 +69,42 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
         }
     };
 
+    const searchVoices = async (query: string) => {
+        if (!query.trim() && !searchResults.length) {
+            // Optional: Initial fetch for popular voices
+        }
+        setIsSearching(true);
+        try {
+            const url = `/api/broadcast/fetch-fish-models?tags=chinese&query=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                setSearchResults(data.items || []);
+            }
+        } catch (error) {
+            console.error('Search Voices Error:', error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchQuery.trim()) {
+                searchVoices(searchQuery);
+            } else {
+                setSearchResults([]);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     return (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className={`relative w-full max-w-lg overflow-hidden rounded-[2rem] border shadow-2xl transition-all ${theme === 'dark' ? 'bg-[#1a1a24] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
+            <div className={`relative w-full max-w-lg overflow-hidden rounded-[2rem] border shadow-2xl transition-all h-[90vh] flex flex-col ${theme === 'dark' ? 'bg-[#1a1a24] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
                 }`}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-white/5">
+                <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
                             <Music size={20} />
@@ -81,54 +122,110 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                     </button>
                 </div>
 
-                <div className="p-8 space-y-6">
+                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                     {/* Text Area */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest opacity-30 px-1">播报文本</label>
                         <textarea
                             value={text}
                             onChange={(e) => setText(e.target.value)}
-                            className={`w-full min-h-[120px] p-4 rounded-2xl border outline-none font-bold transition-all resize-none ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
+                            className={`w-full min-h-[100px] p-4 rounded-2xl border outline-none font-bold transition-all resize-none text-sm ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
                                 }`}
                             placeholder="输入要转语音的文字..."
                         />
                     </div>
 
-                    {/* Reference ID */}
+                    {/* Reference ID & Library */}
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest opacity-30 px-1">音色选择 (Reference ID)</label>
-
-                        {/* Presets */}
-                        <div className="flex flex-wrap gap-2">
-                            {PRESET_VOICES.map(voice => (
-                                <button
-                                    key={voice.id}
-                                    onClick={() => setRefId(voice.id)}
-                                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all border ${refId === voice.id
-                                        ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
-                                        : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
-                                        }`}
-                                >
-                                    {voice.name}
-                                </button>
-                            ))}
+                        <div className="flex items-center justify-between px-1">
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">音色选择 (Reference ID)</label>
+                            <button
+                                onClick={() => setShowId(!showId)}
+                                className="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-400 transition-colors"
+                            >
+                                {showId ? '隐藏 ID' : '显示 ID'}
+                            </button>
                         </div>
 
-                        <div className="relative">
+                        {/* Presets (Recommended) */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-1.5 opacity-40 px-1">
+                                <Sparkles size={10} />
+                                <span className="text-[9px] font-black uppercase tracking-widest">推荐中文音色</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {RECOMMENDED_VOICES.map(voice => (
+                                    <button
+                                        key={voice.id}
+                                        onClick={() => setRefId(voice.id)}
+                                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${refId === voice.id
+                                                ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
+                                                : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
+                                            }`}
+                                    >
+                                        {voice.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Search Library */}
+                        <div className="space-y-2 pt-2">
+                            <div className="flex items-center gap-1.5 opacity-40 px-1">
+                                <Search size={10} />
+                                <span className="text-[9px] font-black uppercase tracking-widest">在线库搜索 (中文)</span>
+                            </div>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className={`w-full p-3 rounded-xl border outline-none text-xs transition-all ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
+                                        }`}
+                                    placeholder="输入关键词搜索音色..."
+                                />
+                                {isSearching && <Loader2 size={14} className="animate-spin absolute right-3 top-3 opacity-30" />}
+                            </div>
+
+                            {searchResults.length > 0 && (
+                                <div className={`mt-2 max-h-[160px] overflow-y-auto rounded-xl border p-1 grid grid-cols-1 gap-1 ${theme === 'dark' ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-100'
+                                    }`}>
+                                    {searchResults.map(model => (
+                                        <button
+                                            key={model._id}
+                                            onClick={() => setRefId(model._id)}
+                                            className={`p-2 rounded-lg text-left transition-all ${refId === model._id
+                                                    ? 'bg-indigo-500 text-white shadow-md'
+                                                    : (theme === 'dark' ? 'hover:bg-white/5 text-white/60' : 'hover:bg-white text-slate-600')
+                                                }`}
+                                        >
+                                            <div className="font-bold text-[11px] truncate">{model.title}</div>
+                                            <div className="flex gap-1 mt-0.5 overflow-hidden">
+                                                {model.tags.slice(0, 3).map(tag => (
+                                                    <span key={tag} className={`text-[8px] px-1 rounded uppercase font-black opacity-40 ${refId === model._id ? 'bg-white/20' : 'bg-black/10 dark:bg-white/10'}`}>
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Input Display (Visible ID if enabled) */}
+                        <div className="relative pt-2">
                             <input
                                 type={showId ? "text" : "password"}
                                 value={refId}
-                                onChange={(e) => setRefId(e.target.value)}
-                                className={`w-full p-4 rounded-2xl border outline-none font-mono text-xs transition-all pr-12 ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
+                                readOnly
+                                className={`w-full p-4 rounded-2xl border outline-none font-mono text-[10px] transition-all opacity-60 ${theme === 'dark' ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-100'
                                     }`}
-                                placeholder="手动输入音色 ID..."
+                                placeholder="选择上面的音色或搜索..."
                             />
-                            <button
-                                onClick={() => setShowId(!showId)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 hover:opacity-100 transition-opacity"
-                            >
-                                {showId ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </button>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+                                {showId ? <EyeOff size={14} className="opacity-30" /> : <Eye size={14} className="opacity-30" />}
+                            </div>
                         </div>
                     </div>
 
@@ -146,20 +243,20 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
                     <div className={`p-4 rounded-2xl border flex items-start gap-3 ${theme === 'dark' ? 'bg-indigo-500/5 border-indigo-500/20 text-indigo-300' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
                         }`}>
                         <Info size={16} className="shrink-0 mt-0.5" />
-                        <p className="text-[11px] font-medium leading-relaxed">
-                            调试说明：此工具直接调用 Fish Audio 云端 API。首次加载可能稍慢。API 使用独立计费，请节约使用。
+                        <p className="text-[10px] font-medium leading-relaxed">
+                            提示：已为您推荐高质量中文音色。您也可以通过搜索发现更多有趣的音色。
                         </p>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-white/5 bg-black/5">
+                <div className="p-6 border-t border-white/5 bg-black/5 shrink-0">
                     <button
                         onClick={handlePlay}
-                        disabled={isLoading || !text.trim()}
+                        disabled={isLoading || !text.trim() || !refId.trim()}
                         className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
-                            ? 'bg-slate-500 opacity-50 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-indigo-500/25 hover:scale-[1.02] active:scale-95'
+                                ? 'bg-slate-500 opacity-50 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-indigo-500/25 hover:scale-[1.02] active:scale-95'
                             }`}
                     >
                         {isLoading ? (
@@ -173,6 +270,13 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, theme }) => {
 
                 <audio ref={audioRef} className="hidden" />
             </div>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.3); }
+            `}} />
         </div>
     );
 };

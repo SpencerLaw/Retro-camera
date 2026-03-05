@@ -39,91 +39,87 @@
     </div>
 
     <!-- 2. Main Application -->
-    <!-- Atmosphere Overlay for Fog/Bokeh -->
-    <div class="atmosphere-overlay" id="atmosphere-overlay"></div>
+    <div id="app-container" class="hidden">
+        <!-- Visualization Canvas -->
+        <canvas id="tree-canvas"></canvas>
 
-    <!-- Visualization Canvas -->
-    <canvas id="tree-canvas"></canvas>
+        <!-- UI Overlay -->
+        <div class="ui-layer">
 
-    <!-- UI Overlay -->
-    <div class="ui-layer">
-
-        <!-- Top: Energy Bar -->
-        <div class="top-bar">
-            <div class="energy-label" data-i18n="morningTree.energyLabel">
-                <span class="leaf-icon">🍃</span> 早读能量值
-            </div>
-            <div class="energy-container">
-                <div id="energy-fill"></div>
-            </div>
-
-            <!-- Circular Ring Timer (Segmented Energy Blocks) -->
-            <div class="timer-ring-wrap">
-                <svg viewBox="0 0 160 160" width="160" height="160" overflow="visible">
-                    <defs>
-                        <!-- The mask defines the segments (20 blocks) -->
-                        <mask id="timer-mask">
-                            <circle cx="80" cy="80" r="70" fill="none" stroke="white" stroke-width="14"
-                                stroke-dasharray="0.1 4.9" stroke-linecap="round" pathLength="100" />
-                        </mask>
-                    </defs>
-                    <!-- Background: the empty slots -->
-                    <circle class="ring-bg" cx="80" cy="80" r="70" />
-                    <!-- Foreground: the actual energy blocks filling up -->
-                    <circle class="ring-bar" id="ring-bar" cx="80" cy="80" r="70" pathLength="100"
-                        mask="url(#timer-mask)" stroke-linecap="round" />
-                </svg>
-                <div class="ring-inner">
-                    <span id="countdown-time">--:--</span>
-                    <div class="timer-label" data-i18n="morningTree.remainingTime">剩余时间</div>
+            <!-- Top: Energy Bar -->
+            <div class="top-bar">
+                <div class="energy-label" data-i18n="morningTree.energyLabel">🍃 早读能量值</div>
+                <div class="energy-container">
+                    <div id="energy-fill"></div>
                 </div>
+
+                <!-- Circular Ring Timer (Segmented Energy Blocks) -->
+                <div class="timer-ring-wrap">
+                    <svg viewBox="0 0 160 160" width="160" height="160" overflow="visible">
+                        <defs>
+                            <!-- The mask defines the segments (20 blocks) -->
+                            <mask id="timer-mask">
+                                <circle cx="80" cy="80" r="70" fill="none" stroke="white" stroke-width="14"
+                                    stroke-dasharray="0.1 4.9" stroke-linecap="round" pathLength="100" />
+                            </mask>
+                        </defs>
+                        <!-- Background: the empty slots -->
+                        <circle class="ring-bg" cx="80" cy="80" r="70" />
+                        <!-- Foreground: the actual energy blocks filling up -->
+                        <circle class="ring-bar" id="ring-bar" cx="80" cy="80" r="70" pathLength="100"
+                            mask="url(#timer-mask)" stroke-linecap="round" />
+                    </svg>
+                    <div class="ring-inner">
+                        <span id="countdown-time">--:--</span>
+                        <div class="timer-label" data-i18n="morningTree.remainingTime">剩余时间</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toast / Notifications Center -->
+            <div id="toast-container"></div>
+
+            <!-- Bottom: Controls -->
+            <div class="bottom-controls">
+                <!-- Mic Toggle -->
+                <button id="mic-toggle-btn" class="icon-btn" data-i18n-title="morningTree.micToggleTitle">
+                    🎤
+                </button>
+
+                <!-- Timer Settings -->
+                <div class="control-group">
+                    <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
+                    <select id="duration-select" class="duration-select">
+                        <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                        <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                        <option value="custom" data-i18n="morningTree.customOption">自定义</option>
+                    </select>
+                    <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
+                        data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
+                </div>
+
+                <!-- Sensitivity 3-level -->
+                <div class="sens-group">
+                    <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
+                    <div class="sens-btns">
+                        <button class="sens-btn" data-sens="30">低</button>
+                        <button class="sens-btn active" data-sens="50">中</button>
+                        <button class="sens-btn" data-sens="75">高</button>
+                    </div>
+                    <!-- Tooltip Content -->
+                    <div id="help-tooltip" class="help-tooltip hidden">
+                        <strong>📏 校准建议：</strong>
+                        <ul>
+                            <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</li>
+                            <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</li>
+                            <li><strong>低</strong> = 灵敏度低，需较大声音才触发；<strong>高</strong> = 灵敏度高，小声也能读。</li>
+                        </ul>
+                        <p class="tap-close">点击此处关闭</p>
+                    </div>
+                </div>
+
             </div>
         </div>
-
-        <!-- Toast / Notifications Center -->
-        <div id="toast-container"></div>
-
-        <!-- Bottom: Controls -->
-        <div class="bottom-controls">
-            <!-- Mic Toggle -->
-            <button id="mic-toggle-btn" class="icon-btn" data-i18n-title="morningTree.micToggleTitle">
-                🎤
-            </button>
-
-            <!-- Timer Settings -->
-            <div class="control-group">
-                <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
-                <select id="duration-select" class="duration-select">
-                    <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
-                    <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
-                    <option value="custom" data-i18n="morningTree.customOption">自定义</option>
-                </select>
-                <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
-                    data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
-            </div>
-
-            <!-- Sensitivity 3-level -->
-            <div class="sens-group">
-                <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
-                <div class="sens-btns">
-                    <button class="sens-btn" data-sens="30">低</button>
-                    <button class="sens-btn active" data-sens="50">中</button>
-                    <button class="sens-btn" data-sens="75">高</button>
-                </div>
-                <!-- Tooltip Content -->
-                <div id="help-tooltip" class="help-tooltip hidden">
-                    <strong>📏 校准建议：</strong>
-                    <ul>
-                        <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</li>
-                        <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</li>
-                        <li><strong>低</strong> = 灵敏度低，需较大声音才触发；<strong>高</strong> = 灵敏度高，小声也能读。</li>
-                    </ul>
-                    <p class="tap-close">点击此处关闭</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
     </div>
 
     <script src="script.js"></script>

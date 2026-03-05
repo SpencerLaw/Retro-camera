@@ -343,30 +343,33 @@ class Cloud {
         this.x = Math.random() * canvas.width;
     }
     reset() {
-        this.x = -250 - Math.random() * 200;
-        this.y = Math.random() * (canvas.height / 3.5);
-        this.speed = Math.random() * 0.2 + 0.15;
-        this.size = Math.random() * 0.5 + 0.5;
-        this.opacity = Math.random() * 0.15 + 0.1;
+        this.x = -200 - Math.random() * 200;
+        this.y = Math.random() * (canvas.height / 3);
+        this.speed = Math.random() * 0.3 + 0.1;
+        this.size = Math.random() * 0.6 + 0.6;
+        this.puffs = [];
+        const count = Math.floor(Math.random() * 3) + 3;
+        for (let i = 0; i < count; i++) {
+            this.puffs.push({
+                x: (Math.random() - 0.5) * 60,
+                y: (Math.random() - 0.5) * 30,
+                r: 30 + Math.random() * 20
+            });
+        }
     }
     update() {
         this.x += this.speed;
-        this.y += Math.sin(Date.now() / 3000) * 0.05; // Subtle bobbing
-        if (this.x > canvas.width + 250) this.reset();
+        if (this.x > canvas.width + 100) this.reset();
     }
     draw() {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.scale(this.size, this.size);
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-
-        // Stylized "Modern Vector" Cloud Shape
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.beginPath();
-        ctx.moveTo(0, 40);
-        ctx.bezierCurveTo(-50, 40, -50, 0, 0, 0);
-        ctx.bezierCurveTo(20, -30, 80, -30, 100, 0);
-        ctx.bezierCurveTo(160, 0, 160, 40, 100, 40);
-        ctx.closePath();
+        this.puffs.forEach(puff => {
+            ctx.arc(puff.x, puff.y, puff.r, 0, Math.PI * 2);
+        });
         ctx.fill();
         ctx.restore();
     }
@@ -416,46 +419,14 @@ class Sparkle {
         return this.life > 0;
     }
     draw() {
-        ctx.save();
         ctx.globalAlpha = this.life;
         ctx.fillStyle = '#fff';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#fff';
         ctx.beginPath();
         ctx.arc(this.x, this.y, Math.random() * 3, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
+        ctx.globalAlpha = 1;
     }
 }
-
-class Bokeh {
-    constructor() {
-        this.reset();
-        this.y = Math.random() * canvas.height;
-    }
-    reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height + 50;
-        this.size = Math.random() * 80 + 20;
-        this.speed = Math.random() * 0.5 + 0.2;
-        this.opacity = Math.random() * 0.1 + 0.05;
-    }
-    update() {
-        this.y -= this.speed;
-        if (this.y < -100) this.reset();
-    }
-    draw() {
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-        ctx.filter = 'blur(15px)';
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-    }
-}
-
-const bokehs = [];
 
 
 function initCanvas() {
@@ -468,9 +439,8 @@ function resizeCanvas() {
 }
 
 function initEnvironment() {
-    for (let i = 0; i < 6; i++) clouds.push(new Cloud());
+    for (let i = 0; i < 5; i++) clouds.push(new Cloud());
     for (let i = 0; i < 3; i++) birds.push(new Bird());
-    for (let i = 0; i < 15; i++) bokehs.push(new Bokeh());
 }
 
 // Enhanced Recursive Tree
@@ -498,43 +468,26 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     ctx.quadraticCurveTo(0, -len / 2, 0, -len);
     ctx.stroke();
 
-    // 🌳 LUSH FOLIAGE (CLUMPS) & ENERGY LEAVES 🌳
-    if (depth >= 4 || (len < 12 && depth > 2)) {
-        if (STATE.energy > 10) {
-            const baseSize = (STATE.energy / 100) * 12 + 4;
-            const windMotion = Math.sin(Date.now() / 1500 + depth) * 2;
-            const size = baseSize + windMotion;
+    // 🌳 LUSH FOLIAGE (CLUMPS) 🌳
+    if (depth >= 4 || (len < 10 && depth > 2)) {
+        if (STATE.energy > 15) {
+            const baseSize = (STATE.energy / 100) * 12 + 3;
+            // FIX: Slower wind animation (Date.now() / 1000 instead of / 500)
+            const size = baseSize + Math.sin(Date.now() / 1000 + depth) * 1.5;
 
             const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
             const color = colorSet[colorIndex];
 
-            // Foliage Clump
             ctx.beginPath();
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = 'rgba(0,0,0,0.1)';
             ctx.fillStyle = color;
             ctx.arc(0, -len, size, 0, Math.PI * 2);
             ctx.fill();
-            ctx.shadowBlur = 0;
 
-            // Highlight
             ctx.beginPath();
-            ctx.fillStyle = 'rgba(255,255,255,0.2)';
-            ctx.arc(-size * 0.3, -len - size * 0.3, size * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.arc(-size * 0.3, -len - size * 0.3, size * 0.5, 0, Math.PI * 2);
             ctx.fill();
-
-            // ✨ ENERGY LEAVES (Pulsing Glow points at tips)
-            if (depth >= 7 || len < 10) {
-                const pulse = Math.abs(Math.sin(Date.now() / 1000 + depth * 0.5));
-                ctx.beginPath();
-                ctx.fillStyle = '#b9fbc0';
-                ctx.shadowBlur = 10 * pulse;
-                ctx.shadowColor = '#b9fbc0';
-                ctx.arc(0, -len, 2 * pulse + 1, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            }
         }
     }
 
@@ -607,11 +560,6 @@ function loop() {
     ctx.fill();
     ctx.restore();
 
-    bokehs.forEach(bk => {
-        bk.update();
-        bk.draw();
-    });
-
     clouds.forEach(cloud => {
         cloud.update();
         cloud.draw();
@@ -625,7 +573,7 @@ function loop() {
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
     ctx.quadraticCurveTo(canvas.width / 2, canvas.height - 80, canvas.width, canvas.height);
-    ctx.fillStyle = '#4caf50';
+    ctx.fillStyle = '#66bb6a';
     ctx.fill();
 
     const treeSize = 80 + (STATE.energy * 1.6);
@@ -636,13 +584,13 @@ function loop() {
         ctx.beginPath();
         const startX = canvas.width / 2;
         const startY = canvas.height - 30;
-        ctx.fillStyle = '#5d4037';
-        ctx.ellipse(startX, startY, 12, 7, 0.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#795548';
+        ctx.ellipse(startX, startY, 10, 6, 0.2, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.quadraticCurveTo(startX - 5, startY - 15, startX - 15, startY - 20);
-        ctx.strokeStyle = '#4caf50';
+        ctx.strokeStyle = '#66bb6a';
         ctx.lineWidth = 3;
         ctx.stroke();
     }

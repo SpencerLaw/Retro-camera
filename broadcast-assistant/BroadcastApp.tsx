@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Send, Tv, Key, CheckCircle2, AlertCircle,
-    Loader2, LogOut, Sun, Moon, LayoutGrid, Radio
+    Loader2, LogOut, Sun, Moon, LayoutGrid, Radio, Bug
 } from 'lucide-react';
 import Sender from './Sender';
 import Receiver from './Receiver';
+import FishAudioDebug from './components/FishAudioDebug';
 import { isBCVerified, verifyLicense, clearBCLicense, getBCLicense } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import CustomDialog, { DialogType } from './components/CustomDialog';
@@ -45,6 +46,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
     const [licenseInput, setLicenseInput] = useState('');
     const [verifying, setVerifying] = useState(false);
     const [error, setError] = useState('');
+    const [showFishDebug, setShowFishDebug] = useState(false);
 
     // Custom Dialog State
     const [dialog, setDialog] = useState<{
@@ -234,6 +236,13 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                         >
                             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
+                        <button
+                            onClick={() => setShowFishDebug(true)}
+                            className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-indigo-500/10 text-indigo-500 transition active:scale-95"
+                            title="Fish Audio TTS 调试"
+                        >
+                            <Bug size={20} />
+                        </button>
                         {isBCVerified() && (
                             <button
                                 onClick={handleLogout}
@@ -320,6 +329,13 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                 onCancel={closeDialog}
                 isDark={theme === 'dark'}
             />
+
+            {showFishDebug && (
+                <FishAudioDebug
+                    onClose={() => setShowFishDebug(false)}
+                    theme={theme}
+                />
+            )}
         </div>
     );
 };

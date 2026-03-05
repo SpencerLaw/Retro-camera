@@ -182,10 +182,18 @@ interface ReceiverProps {
 const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => {
     const t = useTranslations();
     const [isJoined, setIsJoined] = useState(() => {
+        // Check URL ?room= param first, then fall back to localStorage
+        const urlRoom = new URLSearchParams(window.location.search).get('room') || '';
+        if (urlRoom.length === 6 && /^\d{6}$/.test(urlRoom)) {
+            localStorage.setItem('br_receiver_roomId', urlRoom);
+            return true;
+        }
         const saved = localStorage.getItem('br_receiver_roomId');
         return !!saved && saved.length >= 6;
     });
     const [roomId, setRoomId] = useState(() => {
+        const urlRoom = new URLSearchParams(window.location.search).get('room') || '';
+        if (urlRoom.length === 6 && /^\d{6}$/.test(urlRoom)) return urlRoom;
         return localStorage.getItem('br_receiver_roomId') || '';
     });
     const [currentMsg, setCurrentMsg] = useState<Message | null>(null);

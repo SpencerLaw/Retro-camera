@@ -9,7 +9,7 @@
 ' ============================================
 
 Dim BASE_URL
-BASE_URL = "https://lovedare.baby/tree"
+BASE_URL = "https://lovedare.baby/morning-energy-tree/index.html"
 
 ' --- Find Browser ---
 Dim objFSO, objShell

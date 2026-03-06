@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 // @ts-ignore
-import enTranslations from '../locales/en.json';
+import enTranslations from '../public/locales/en.json';
 // @ts-ignore
-import zhCNTranslations from '../locales/zh-CN.json';
+import zhCNTranslations from '../public/locales/zh-CN.json';
 // @ts-ignore
-import zhTWTranslations from '../locales/zh-TW.json';
+import zhTWTranslations from '../public/locales/zh-TW.json';
 // @ts-ignore
-import jaTranslations from '../locales/ja.json';
+import jaTranslations from '../public/locales/ja.json';
 
 const translations: Record<GlobalLanguage, any> = {
   'en': enTranslations,

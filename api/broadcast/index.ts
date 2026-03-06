@@ -169,8 +169,24 @@ async function handleClearLicenseData(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
-    const { text, reference_id, model = 's1', format = 'mp3' } = req.body;
+    const { text, reference_id, model = 's1', format = 'mp3', license } = req.body;
     if (!text) return res.status(400).json({ error: 'Missing text' });
+
+    // Quota Enforcement
+    if (license && license.toUpperCase().startsWith('GB')) {
+        const quotaKey = `br:quota:fish:${license.toUpperCase()}`;
+        const usage = await kv.get<number>(quotaKey) || 0;
+
+        if (usage >= 20) {
+            return res.status(403).json({
+                error: '鱼声配额已用完，请找管理员！',
+                quotaExceeded: true
+            });
+        }
+        // We increment only after a successful check, before the actual call
+        await kv.incr(quotaKey);
+        await kv.expire(quotaKey, 86400 * 30); // 30 day TTL for usage record
+    }
 
     const FISH_KEYS = [
         'b3a18f1fd0724399b73f1861d31bef03', // Primary

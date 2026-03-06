@@ -5,6 +5,7 @@ export interface TTSOptions {
     voice?: string;
     rate?: number;
     volume?: number;
+    license?: string;
     onStart?: () => void;
     onEnd?: () => void;
 }
@@ -113,7 +114,8 @@ class TTSManager {
                 text,
                 reference_id: voiceId,
                 format: 'mp3',
-                model: 's1'
+                model: 's1',
+                license: options.license
             })
         });
         if (resp.ok) return await resp.blob();

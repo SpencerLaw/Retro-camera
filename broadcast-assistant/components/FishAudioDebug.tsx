@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Play, Loader2, Volume2, Save, Info, Music, AlertCircle, Eye, EyeOff, Search, Sparkles, RefreshCw } from 'lucide-react';
+import { getBCLicense } from '../utils/licenseManager';
 
 interface FishAudioDebugProps {
     onClose: () => void;
@@ -40,7 +41,13 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
             const endpointUrl = refId.trim() === '' ? '/api/broadcast/tts' : '/api/broadcast/fish-tts';
             const bodyPayload = refId.trim() === ''
                 ? { text: text.trim(), voice: 'zh-CN-XiaoxiaoNeural', rate: 1 }
-                : { text: text.trim(), reference_id: refId.trim(), format: 'mp3', model: 's1' };
+                : {
+                    text: text.trim(),
+                    reference_id: refId.trim(),
+                    format: 'mp3',
+                    model: 's1',
+                    license: getBCLicense()
+                };
 
             const response = await fetch(endpointUrl, {
                 method: 'POST',
@@ -52,7 +59,8 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP Error ${response.status}`);
+                const msg = errorData.error || errorData.message || `HTTP Error ${response.status}`;
+                throw new Error(msg);
             }
 
             const blob = await response.blob();

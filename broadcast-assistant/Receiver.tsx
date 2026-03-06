@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Volume2, VolumeX, AlertCircle, Tv, Signal, X, History, Clock, Radio, Zap, Moon, Sun, Maximize, Minimize, ChevronUp, ChevronDown } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
+import { getBCLicense } from './utils/licenseManager';
 import { ttsManager } from './utils/ttsManager';
 import CustomDialog, { DialogType } from './components/CustomDialog';
 import GlassCard from './components/GlassCard';
@@ -281,7 +282,8 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 await ttsManager.speak(sentences[i], {
                                     voice: fishVoiceId,
                                     engine: 'fish',
-                                    volume: 1
+                                    volume: 1,
+                                    license: getBCLicense() || undefined
                                 });
                             } catch (e) {
                                 console.error('Fish Audio Playback failed, falling back to Edge TTS:', e);

@@ -122,13 +122,16 @@ async function handleFetch(req: VercelRequest, res: VercelResponse) {
     const code = (req.query.code as string)?.toUpperCase();
     if (!code) return res.status(400).json({ error: 'Missing code' });
 
-    // 检查房间是否处于活跃状态 (教师端 activate 才会创建此标记，cleanup 会清除)
-    const isActive = await kv.get(`br:room_active:${code}`);
+    // 优化：使用 mget 一次性获取两个 Key，减少 50% 的 Command 消耗 (Vercel KV 按指令数计费)
+    const [isActive, message] = await kv.mget([
+        `br:room_active:${code}`,
+        `br:v2:room:${code}`
+    ]);
+
     if (!isActive) {
         return res.status(200).json({ message: null, notFound: true });
     }
 
-    const message = await kv.get(`br:v2:room:${code}`);
     return res.status(200).json({ message: message || null });
 }
 

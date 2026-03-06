@@ -403,7 +403,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     }
                 }
             } catch (e) { }
-            if (engine.current.isJoined) setTimeout(poll, 2000);
+            if (engine.current.isJoined) setTimeout(poll, 5000); // 增加到 5 秒一次，大幅节省 KV Command 额度
         };
         poll();
         ttsManager.startSilentLoop();

@@ -7,7 +7,8 @@ Set objShell = CreateObject("WScript.Shell")
 
 Dim startupFolder, targetFile
 startupFolder = objShell.SpecialFolders("Startup")
-targetFile    = startupFolder & "\广播助手-开机启动.vbs"
+' "广播助手-开机启动.vbs" in Unicode codes
+targetFile    = startupFolder & "\" & ChrW(&H5E7F) & ChrW(&H64AD) & ChrW(&H52A9) & ChrW(&H624B) & "-开机启动.vbs"
 
 ' English messaging to avoid encoding errors
 Dim STR_TITLE, STR_SUCC, STR_NOTFOUND

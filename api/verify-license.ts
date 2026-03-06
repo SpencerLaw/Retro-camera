@@ -73,17 +73,30 @@ function extractDateFromCode(code: string): Date | null {
   try {
     let cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
 
-    // 支持多种前缀 (ZY 或 DM 或 ZD 或 GB) -> 2位前缀
-    if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD') || cleanCode.startsWith('GB') || cleanCode.startsWith('XM')) {
-      cleanCode = cleanCode.substring(2);
-    } else if (cleanCode.startsWith('XXDK')) {
+    // 移除前缀
+    if (cleanCode.startsWith('XXDK')) {
       cleanCode = cleanCode.substring(4);
+    } else if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD') || cleanCode.startsWith('GB') || cleanCode.startsWith('XM')) {
+      cleanCode = cleanCode.substring(2);
     }
 
-    const dateStr = cleanCode.substring(0, 8);
-    const year = parseInt(dateStr.substring(0, 4));
-    const month = parseInt(dateStr.substring(4, 6)) - 1;
-    const day = parseInt(dateStr.substring(6, 8));
+    // 自动识别 YYYYMMDD 或 YYMMDD
+    let year: number, month: number, day: number;
+
+    // 如果前 4 位看起来像 20xx
+    if (cleanCode.startsWith('20') && cleanCode.length >= 8) {
+      year = parseInt(cleanCode.substring(0, 4));
+      month = parseInt(cleanCode.substring(4, 6)) - 1;
+      day = parseInt(cleanCode.substring(6, 8));
+    } else if (cleanCode.length >= 6) {
+      // 旧版 YYMMDD
+      year = 2000 + parseInt(cleanCode.substring(0, 2));
+      month = parseInt(cleanCode.substring(2, 4)) - 1;
+      day = parseInt(cleanCode.substring(4, 6));
+    } else {
+      return null;
+    }
+
     const date = new Date(year, month, day);
     return isNaN(date.getTime()) ? null : date;
   } catch (error) {

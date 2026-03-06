@@ -349,11 +349,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         const poll = async () => {
             if (!engine.current.isJoined) return;
 
-            // 极限优化：如果用户切换了标签页或者最小化了窗口，停止请求，节省 KV Command
-            if (document.visibilityState !== 'visible') {
-                setTimeout(poll, 5000);
-                return;
-            }
+            // 智能降频优化 (方案 B)：
+            // 1. 如果窗口可见，5秒查一次。
+            // 2. 如果窗口最小化/后台运行，20秒查一次，既能保证听到广播又能极大省钱。
+            const pollInterval = document.visibilityState === 'visible' ? 5000 : 20000;
 
             try {
                 const r = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);
@@ -410,7 +409,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     }
                 }
             } catch (e) { }
-            if (engine.current.isJoined) setTimeout(poll, 5000); // 增加到 5 秒一次，大幅节省 KV Command 额度
+            if (engine.current.isJoined) setTimeout(poll, pollInterval);
         };
         poll();
         ttsManager.startSilentLoop();

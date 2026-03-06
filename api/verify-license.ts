@@ -341,29 +341,83 @@ export default async function handler(
         return res.status(401).json({ success: false, message: '密码错误' });
       }
 
-      const keys = await kv.keys('license:*');
-      if (keys.length === 0) return res.status(200).json({ success: true, data: [] });
+      const [keys, attemptKeys] = await Promise.all([
+        kv.keys('license:*'),
+        kv.keys('attempt:*')
+      ]);
 
-      const values = await Promise.all(keys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key)));
+      if (keys.length === 0 && attemptKeys.length === 0) return res.status(200).json({ success: true, data: [] });
 
+      // === 自动同步：如果 Vercel 环境里已经删掉了，这里也自动删除数据库中的记录 ===
+      const activeKeys: string[] = [];
+      const deletedCount: string[] = [];
+
+      for (const key of keys) {
+        const code = key.replace('license:', '');
+        if (isCodeInWhitelist(code)) {
+          activeKeys.push(key);
+        } else {
+          // 不在白名单了，执行物理删除
+          console.log(`[Auto-Sync] License ${code} is no longer in whitelist. Deleting from KV.`);
+          await kv.del(key);
+          deletedCount.push(code);
+        }
+      }
+
+      const [values, attemptValues] = await Promise.all([
+        Promise.all(activeKeys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key))),
+        Promise.all(attemptKeys.map(key => kv.get<any>(key)))
+      ]);
+
+      // 处理正常激活的列表
       const list = values
         .map((v, index) => {
           if (!v) return null;
-          const code = keys[index].replace('license:', '');
+          const code = activeKeys[index].replace('license:', '');
           const meta = decompressMetadata(v, code);
 
-          // 注入状态字段：检查是否在白名单中
           return {
             ...meta,
-            status: isCodeInWhitelist(code) ? 'active' : 'revoked'
+            status: 'active' // 既然没被删，肯定是在白名单里的
           };
         })
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .sort((a, b) => new Date(b.lastUsedTime).getTime() - new Date(a.lastUsedTime).getTime());
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
+      // 处理未授权尝试的列表
+      const attemptItems = attemptValues
+        .map((v, index) => {
+          if (!v) return null;
+          const code = attemptKeys[index].replace('attempt:', '');
+
+          // 如果该代码已经在正常列表中（后来被授权了），则跳过尝试记录
+          if (list.some(l => l.code === code)) return null;
+
+          return {
+            code: code,
+            totalDevices: v.count || 1,
+            maxDevices: getEffectiveMaxDevices(code),
+            generatedDate: extractDateFromCode(code)?.toISOString() || new Date().toISOString(),
+            expiryDate: new Date().toISOString(),
+            lastUsedTime: v.lastAttempt || v.firstAttempt || new Date().toISOString(),
+            status: 'unauthorized', // 特殊状态
+            devices: [{
+              deviceId: v.deviceId || 'unknown',
+              firstSeen: v.firstAttempt || new Date().toISOString(),
+              lastSeen: v.lastAttempt || new Date().toISOString(),
+              ua: v.ua || 'unknown'
+            }]
+          };
+        })
+        .filter(item => item !== null);
+
+      const combined = [...list, ...attemptItems].sort((a, b) =>
+        new Date(b.lastUsedTime).getTime() - new Date(a.lastUsedTime).getTime()
+      );
 
       return res.status(200).json({
         success: true,
-        data: list
+        data: combined,
+        syncInfo: deletedCount.length > 0 ? `已从数据库同步删除 ${deletedCount.length} 条失效记录` : null
       });
     }
 
@@ -375,11 +429,41 @@ export default async function handler(
     const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
 
     // 1. 基础检查
+    const generatedDate = extractDateFromCode(cleanCode);
+    const now = Date.now();
+    const nowISO = new Date(now).toISOString();
+
     if (!isCodeInWhitelist(cleanCode)) {
+      // 记录未授权尝试 (只要格式对就记录，防止主列表被垃圾数据填充)
+      if (generatedDate) {
+        const attemptKey = `attempt:${cleanCode}`;
+        try {
+          const existing = await kv.get(attemptKey) as any;
+          if (existing) {
+            await kv.set(attemptKey, {
+              ...existing,
+              lastAttempt: nowISO,
+              ua: rawDeviceInfo || getDeviceType(ua),
+              count: (existing.count || 1) + 1
+            });
+          } else {
+            await kv.set(attemptKey, {
+              code: cleanCode,
+              firstAttempt: nowISO,
+              lastAttempt: nowISO,
+              ua: rawDeviceInfo || getDeviceType(ua),
+              deviceId: deviceId,
+              count: 1
+            });
+          }
+          console.log(`[License] Recorded unauthorized attempt for ${cleanCode}`);
+        } catch (e) {
+          console.error('[License] Failed to record attempt:', e);
+        }
+      }
       return res.status(401).json({ success: false, message: '授权码不存在或已被禁用，请联系管理员购买' });
     }
 
-    const generatedDate = extractDateFromCode(cleanCode);
     if (!generatedDate) return res.status(401).json({ success: false, message: '授权码格式异常' });
 
     const expiryDate = new Date(generatedDate);
@@ -401,9 +485,6 @@ export default async function handler(
       finalData = await kv.get<CompressedMetadata | LicenseMetadata>(backupKey);
       if (finalData) console.log(`[License] Found legacy data with original key: ${backupKey}`);
     }
-
-    const now = Date.now();
-    const nowISO = new Date(now).toISOString();
 
     console.log(`[License] Logged in: ${cleanCode} action: verify`);
 

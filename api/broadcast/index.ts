@@ -153,7 +153,7 @@ async function handleSend(req: VercelRequest, res: VercelResponse) {
 
 async function handleActivate(req: VercelRequest, res: VercelResponse) {
     const { code } = req.body;
-    await kv.set(`br:room_active:${code.toUpperCase()}`, true, { ex: 86400 * 7 });
+    await kv.set(`br:room_active:${code.toUpperCase()}`, true, { ex: 86400 }); // 从 7 天减为 1 天，过期自动清理，节省 KV 指令
     return res.status(200).json({ success: true });
 }
 

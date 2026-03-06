@@ -348,6 +348,13 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         if (!isJoined) return;
         const poll = async () => {
             if (!engine.current.isJoined) return;
+
+            // 极限优化：如果用户切换了标签页或者最小化了窗口，停止请求，节省 KV Command
+            if (document.visibilityState !== 'visible') {
+                setTimeout(poll, 5000);
+                return;
+            }
+
             try {
                 const r = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);
 

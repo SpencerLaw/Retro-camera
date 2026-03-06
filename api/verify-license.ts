@@ -16,7 +16,7 @@ interface DeviceInfo {
   ua: string;
 }
 
-interface LicenseMetadata {
+export interface LicenseMetadata {
   code: string;
   totalDevices: number;
   maxDevices: number;
@@ -32,6 +32,8 @@ interface LicenseMetadata {
   hiddenPresets?: string[]; // 星梦奇缘：隐藏的任务预设
   hiddenRewardPresets?: string[]; // 星梦奇缘：隐藏的奖励预设
   redemptionLogs?: any[]; // 星梦奇缘：奖励核销日志
+  brChannels?: any[];   // 班级广播：频道同步列表
+  fishUsage?: number;   // 班级广播：鱼声 TTS 使用次数
 }
 
 // 压缩版数据结构 (用于 Redis 存储)
@@ -42,7 +44,7 @@ interface CompressedDevice {
   u: string; // ua
 }
 
-interface CompressedMetadata {
+export interface CompressedMetadata {
   m: number; // maxDevices
   f: number; // firstActivatedAt (timestamp)
   l: number; // lastUsedTime (timestamp)
@@ -54,6 +56,8 @@ interface CompressedMetadata {
   hp?: string[]; // hiddenPresets (隐藏任务预设)
   hrp?: string[]; // hiddenRewardPresets (隐藏奖励预设)
   rl?: any[]; // redemptionLogs (奖励日志)
+  brc?: any[]; // brChannels (广播频道)
+  fu?: number; // fishUsage (鱼声数)
 }
 
 // === 辅助工具 ===
@@ -126,7 +130,7 @@ function isCodeInWhitelist(code: string): boolean {
 
 // === 压缩与解压逻辑 ===
 
-function compressMetadata(full: LicenseMetadata): CompressedMetadata {
+export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
   return {
     m: full.maxDevices,
     f: new Date(full.firstActivatedAt || full.generatedDate).getTime(),
@@ -143,11 +147,13 @@ function compressMetadata(full: LicenseMetadata): CompressedMetadata {
     cat: full.categories,
     hp: full.hiddenPresets,
     hrp: full.hiddenRewardPresets,
-    rl: full.redemptionLogs
+    rl: full.redemptionLogs,
+    brc: full.brChannels,
+    fu: full.fishUsage
   };
 }
 
-function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, code: string): LicenseMetadata {
+export function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, code: string): LicenseMetadata {
   // 兼容性检查：如果已经是完整版（旧数据），直接返回
   if ('devices' in compressed) {
     return compressed as LicenseMetadata;
@@ -194,7 +200,9 @@ function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, co
     categories: (c as any).categories || c.cat, // 兼容旧版全称和新版压缩
     hiddenPresets: (c as any).hiddenPresets || c.hp,
     hiddenRewardPresets: (c as any).hiddenRewardPresets || c.hrp,
-    redemptionLogs: (c as any).redemptionLogs || c.rl
+    redemptionLogs: (c as any).redemptionLogs || c.rl,
+    brChannels: (c as any).brChannels || c.brc,
+    fishUsage: (c as any).fishUsage || c.fu || 0
   };
 }
 
@@ -334,6 +342,34 @@ export default async function handler(
       });
     }
 
+    // === 数据库大核爆：清理所有非 license: 开头的脏数据 ===
+    if (action === 'nuclear_cleanup') {
+      if (!adminKey || adminKey.trim() !== 'spencer') {
+        return res.status(401).json({ success: false, message: '密码错误' });
+      }
+
+      console.log('[Nuclear Cleanup] Starting deep garbage collection...');
+
+      // 1. 获取所有 keys
+      const allKeys = await kv.keys('*');
+      const keysToDelete = allKeys.filter(key => !key.startsWith('license:'));
+
+      if (keysToDelete.length === 0) {
+        return res.status(200).json({ success: true, message: '数据库已经很干净了，没有发现非 license: 开头的记录' });
+      }
+
+      // 2. 批量删除
+      console.log(`[Nuclear Cleanup] Found ${keysToDelete.length} dirty keys. Deleting...`);
+      await Promise.all(keysToDelete.map(key => kv.del(key)));
+
+      return res.status(200).json({
+        success: true,
+        message: `大核爆清理成功！共强制删除 ${keysToDelete.length} 条非规范记录`,
+        deletedList: keysToDelete
+      });
+    }
+
+
     // === 管理员列表 ===
     if (action === 'list_all') {
       if (!adminKey || adminKey.trim() !== 'spencer') {
@@ -343,7 +379,7 @@ export default async function handler(
 
       const [keys, attemptKeys] = await Promise.all([
         kv.keys('license:*'),
-        kv.keys('attempt:*')
+        kv.keys('license:attempt:*')
       ]);
 
       if (keys.length === 0 && attemptKeys.length === 0) return res.status(200).json({ success: true, data: [] });
@@ -353,6 +389,9 @@ export default async function handler(
       const deletedCount: string[] = [];
 
       for (const key of keys) {
+        // 跳过尝试记录主键
+        if (key.startsWith('license:attempt:')) continue;
+
         const code = key.replace('license:', '');
         if (isCodeInWhitelist(code)) {
           activeKeys.push(key);
@@ -387,7 +426,7 @@ export default async function handler(
       const attemptItems = attemptValues
         .map((v, index) => {
           if (!v) return null;
-          const code = attemptKeys[index].replace('attempt:', '');
+          const code = attemptKeys[index].replace('license:attempt:', '');
 
           // 如果该代码已经在正常列表中（后来被授权了），则跳过尝试记录
           if (list.some(l => l.code === code)) return null;
@@ -430,27 +469,27 @@ export default async function handler(
 
     // 1. 基础检查
     const generatedDate = extractDateFromCode(cleanCode);
-    const now = Date.now();
-    const nowISO = new Date(now).toISOString();
+    const dateNow = Date.now();
+    const dateNowISO = new Date(dateNow).toISOString();
 
     if (!isCodeInWhitelist(cleanCode)) {
       // 记录未授权尝试 (只要格式对就记录，防止主列表被垃圾数据填充)
       if (generatedDate) {
-        const attemptKey = `attempt:${cleanCode}`;
+        const attemptKey = `license:attempt:${cleanCode}`;
         try {
           const existing = await kv.get(attemptKey) as any;
           if (existing) {
             await kv.set(attemptKey, {
               ...existing,
-              lastAttempt: nowISO,
+              lastAttempt: dateNowISO,
               ua: rawDeviceInfo || getDeviceType(ua),
               count: (existing.count || 1) + 1
             });
           } else {
             await kv.set(attemptKey, {
               code: cleanCode,
-              firstAttempt: nowISO,
-              lastAttempt: nowISO,
+              firstAttempt: dateNowISO,
+              lastAttempt: dateNowISO,
               ua: rawDeviceInfo || getDeviceType(ua),
               deviceId: deviceId,
               count: 1
@@ -499,12 +538,12 @@ export default async function handler(
         maxDevices: getEffectiveMaxDevices(cleanCode),
         generatedDate: generatedDate.toISOString(),
         expiryDate: expiryDate.toISOString(),
-        firstActivatedAt: nowISO,
-        lastUsedTime: nowISO,
+        firstActivatedAt: dateNowISO,
+        lastUsedTime: dateNowISO,
         devices: [{
           deviceId,
-          firstSeen: nowISO,
-          lastSeen: nowISO,
+          firstSeen: dateNowISO,
+          lastSeen: dateNowISO,
           ua: rawDeviceInfo || getDeviceType(ua)
         }]
       };
@@ -517,13 +556,13 @@ export default async function handler(
       if (deviceIndex > -1) {
         // 更新现有设备
         console.log(`[License] Update Device: ${cleanCode} Device: ${deviceId}`);
-        metadata.devices[deviceIndex].lastSeen = nowISO;
+        metadata.devices[deviceIndex].lastSeen = dateNowISO;
 
         // 更新 UserAgent，以防用户更新了浏览器
         metadata.devices[deviceIndex].ua = rawDeviceInfo || getDeviceType(ua);
 
         // 确保 License 的最后使用时间也更新
-        metadata.lastUsedTime = nowISO;
+        metadata.lastUsedTime = dateNowISO;
       } else {
         // 添加新设备
         console.log(`[License] New Device: ${cleanCode} Device: ${deviceId}`);
@@ -539,12 +578,12 @@ export default async function handler(
 
         metadata.devices.push({
           deviceId,
-          firstSeen: nowISO,
-          lastSeen: nowISO,
+          firstSeen: dateNowISO,
+          lastSeen: dateNowISO,
           ua: rawDeviceInfo || getDeviceType(ua)
         });
         metadata.totalDevices = metadata.devices.length;
-        metadata.lastUsedTime = nowISO;
+        metadata.lastUsedTime = dateNowISO;
       }
     }
 

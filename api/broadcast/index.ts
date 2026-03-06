@@ -6,6 +6,63 @@ import crypto from 'crypto';
 // Assuming FISH_AUDIO_KEY is an environment variable or a constant
 const FISH_AUDIO_KEY = process.env.FISH_AUDIO_KEY || 'b3a18f1fd0724399b73f1861d31bef03'; // Fallback to the key used in handleFishTTS if not set
 
+// === 授权码辅助逻辑 (同步自 verify-license) ===
+
+function getEffectiveMaxDevices(code: string): number {
+    const cleanCode = code.toUpperCase();
+    if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM') || cleanCode.startsWith('GB')) return 999999;
+    return 5;
+}
+
+function extractDateFromCode(code: string): Date | null {
+    try {
+        let cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
+        if (cleanCode.startsWith('XXDK')) cleanCode = cleanCode.substring(4);
+        else if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD') || cleanCode.startsWith('GB') || cleanCode.startsWith('XM')) cleanCode = cleanCode.substring(2);
+        let year: number, month: number, day: number;
+        if (cleanCode.startsWith('20') && cleanCode.length >= 8) {
+            year = parseInt(cleanCode.substring(0, 4));
+            month = parseInt(cleanCode.substring(4, 6)) - 1;
+            day = parseInt(cleanCode.substring(6, 8));
+        } else if (cleanCode.length >= 6) {
+            year = 2000 + parseInt(cleanCode.substring(0, 2));
+            month = parseInt(cleanCode.substring(2, 4)) - 1;
+            day = parseInt(cleanCode.substring(4, 6));
+        } else return null;
+        const date = new Date(year, month, day);
+        return isNaN(date.getTime()) ? null : date;
+    } catch (e) { return null; }
+}
+
+function decompressMetadata(c: any, code: string): any {
+    if (!c || 'devices' in c) return c;
+    const genDate = extractDateFromCode(code) || new Date();
+    const expDate = new Date(genDate); expDate.setFullYear(expDate.getFullYear() + 1);
+    return {
+        code,
+        totalDevices: c.d.length,
+        maxDevices: getEffectiveMaxDevices(code),
+        generatedDate: genDate.toISOString(),
+        expiryDate: expDate.toISOString(),
+        firstActivatedAt: new Date(c.f).toISOString(),
+        lastUsedTime: c.l ? new Date(c.l).toISOString() : new Date().toISOString(),
+        devices: c.d.map((dev: any) => ({ deviceId: dev.i, firstSeen: new Date(dev.f).toISOString(), lastSeen: new Date(dev.l).toISOString(), ua: dev.u })),
+        brChannels: c.brc || [],
+        fishUsage: c.fu || 0
+    };
+}
+
+function compressMetadata(full: any): any {
+    return {
+        m: full.maxDevices,
+        f: new Date(full.firstActivatedAt || full.generatedDate).getTime(),
+        l: new Date(full.lastUsedTime).getTime(),
+        d: full.devices.map((dev: any) => ({ i: dev.deviceId, f: new Date(dev.firstSeen).getTime(), l: new Date(dev.lastSeen).getTime(), u: dev.ua })),
+        brc: full.brChannels,
+        fu: full.fishUsage
+    };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     const url = req.url || '';
     let action = '';
@@ -126,16 +183,30 @@ async function handleCleanup(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleGetChannels(req: VercelRequest, res: VercelResponse) {
-    const license = req.query.license as string;
+    const license = (req.query.license as string)?.toUpperCase();
     if (!license) return res.status(400).json({ error: 'Missing license' });
-    const channels = await kv.get(`br:sync:channels:${license}`);
-    return res.status(200).json({ channels: channels || [] });
+
+    // 从主授权记录读取频道建议
+    const data = await kv.get(`license:${license}`);
+    if (!data) return res.status(200).json({ channels: [] });
+
+    const meta = decompressMetadata(data, license);
+    return res.status(200).json({ channels: meta.brChannels || [] });
 }
 
 async function handleSaveChannels(req: VercelRequest, res: VercelResponse) {
     const { license, channels } = req.body;
     if (!license) return res.status(400).json({ error: 'Missing license' });
-    await kv.set(`br:sync:channels:${license}`, channels, { ex: 86400 * 30 }); // 30 days
+    const cleanLicense = license.toUpperCase();
+
+    // 合并存储到主记录
+    const data = await kv.get(`license:${cleanLicense}`);
+    if (!data) return res.status(404).json({ error: 'License not found' });
+
+    const meta = decompressMetadata(data, cleanLicense);
+    meta.brChannels = channels;
+    await kv.set(`license:${cleanLicense}`, compressMetadata(meta));
+
     return res.status(200).json({ success: true });
 }
 
@@ -149,21 +220,25 @@ async function handleCheckCode(req: VercelRequest, res: VercelResponse) {
 async function handleClearLicenseData(req: VercelRequest, res: VercelResponse) {
     const { license } = req.body;
     if (!license) return res.status(400).json({ error: 'Missing license' });
+    const cleanLicense = license.toUpperCase();
 
-    // 1. Get current channels to know which rooms to clean up
-    const channels = await kv.get(`br:sync:channels:${license}`) as any[];
-    if (channels && Array.isArray(channels)) {
-        const keysToDelete = channels.flatMap(c => [
-            `br:room_active:${c.code.toUpperCase()}`,
-            `br:v2:room:${c.code.toUpperCase()}`
-        ]);
-        if (keysToDelete.length > 0) {
-            await Promise.all(keysToDelete.map(k => kv.del(k)));
+    // 1. Get current metadata to know which rooms to clean up
+    const data = await kv.get(`license:${cleanLicense}`);
+    if (data) {
+        const meta = decompressMetadata(data, cleanLicense);
+        if (meta.brChannels && Array.isArray(meta.brChannels)) {
+            const keysToDelete = meta.brChannels.flatMap((c: any) => [
+                `br:room_active:${c.code.toUpperCase()}`,
+                `br:v2:room:${c.code.toUpperCase()}`
+            ]);
+            if (keysToDelete.length > 0) {
+                await Promise.all(keysToDelete.map(k => kv.del(k)));
+            }
         }
+        // 清空频道列表
+        meta.brChannels = [];
+        await kv.set(`license:${cleanLicense}`, compressMetadata(meta));
     }
-
-    // 2. Delete the sync list itself
-    await kv.del(`br:sync:channels:${license}`);
 
     return res.status(200).json({ success: true });
 }
@@ -173,19 +248,24 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
     if (!text) return res.status(400).json({ error: 'Missing text' });
 
     // Quota Enforcement
-    if (license && license.toUpperCase().startsWith('GB')) {
-        const quotaKey = `br:quota:fish:${license.toUpperCase()}`;
-        const usage = await kv.get<number>(quotaKey) || 0;
+    let currentMeta: any = null;
+    if (license) {
+        const cleanLicense = license.toUpperCase();
+        if (cleanLicense.startsWith('GB')) {
+            const data = await kv.get(`license:${cleanLicense}`);
+            if (data) {
+                currentMeta = decompressMetadata(data, cleanLicense);
+                const usage = currentMeta.fishUsage || 0;
 
-        if (usage >= 20) {
-            return res.status(403).json({
-                error: '鱼声配额已用完，请找管理员！',
-                quotaExceeded: true
-            });
+                if (usage >= 20) {
+                    return res.status(403).json({
+                        error: '鱼声配额已用完，请找管理员！',
+                        quotaExceeded: true
+                    });
+                }
+                // 后续如果成功则在下面更新
+            }
         }
-        // We increment only after a successful check, before the actual call
-        await kv.incr(quotaKey);
-        await kv.expire(quotaKey, 86400 * 30); // 30 day TTL for usage record
     }
 
     const FISH_KEYS = [
@@ -223,6 +303,13 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
             }
 
             const audioBuffer = await response.arrayBuffer();
+
+            // 成功后更新配额记录到 License 主键
+            if (currentMeta) {
+                currentMeta.fishUsage = (currentMeta.fishUsage || 0) + 1;
+                await kv.set(`license:${license.toUpperCase()}`, compressMetadata(currentMeta));
+            }
+
             res.setHeader('Content-Type', 'audio/mpeg');
             res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
             return res.status(200).send(Buffer.from(audioBuffer));

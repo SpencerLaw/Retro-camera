@@ -468,7 +468,10 @@
           <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
           <button onclick="generateCodes('xm')" class="btn-primary" style="background: #E0C3FC; color: #6A5D7B;">生成星梦码
             (XXDK)</button>
-          <button onclick="cleanupBlobs()" class="btn-primary" style="background: var(--success);">🧹 清理过期头像</button>
+          <button onclick="cleanupBlobs()" id="cleanupBtn" class="btn-primary"
+            style="background: var(--warning); margin-top: 10px; width: 100%;">🧹 清除冗余头像文件</button>
+          <button onclick="nuclearCleanup()" id="nuclearBtn" class="btn-primary"
+            style="background: var(--danger); margin-top: 10px; width: 100%;">☢️ 强力清洗数据库 (仅保留授权码)</button>
         </div>
 
         <div class="gen-list" id="genList"></div>
@@ -593,6 +596,33 @@
     }
 
     // === 辅助：解析 User Agent ===
+    async function nuclearCleanup() {
+      if (!confirm('☢️ 警告：此操作将永久删除数据库中所有非 "license:" 开头的记录！\n这包括旧版的房间活跃状态、临时广播消息、同步频道列表等。\n\n所有核心授权数据已合并到 license: 主键中，不会受影响。确定继续吗？')) return;
+
+      const btn = document.getElementById('nuclearBtn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '☢️ 正在深度清洗中...';
+
+      try {
+        const res = await fetch(API_URL + '?action=nuclear_cleanup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminKey: SECRET_KEY })
+        });
+        const json = await res.json();
+        alert(json.message);
+        if (json.success) {
+          login(); // 重新加载列表，虽然列表其实只显示 license: 相关的，但可以刷新状态
+        }
+      } catch (e) {
+        alert('清洗失败: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
     function parseUA(ua) {
       if (!ua) return '未知设备';
       if (ua.includes('iPhone')) return 'iPhone (iOS)';

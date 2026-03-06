@@ -358,6 +358,62 @@
       justify-content: flex-end;
       gap: 10px;
     }
+
+    /* Category Grouping */
+    .category-group {
+      margin-bottom: 2px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .category-header {
+      padding: 12px 20px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .category-header:hover {
+      background: var(--bg);
+    }
+
+    .category-tag {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      margin-right: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-count {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-left: auto;
+    }
+
+    .category-content {
+      display: none;
+      background: var(--surface);
+    }
+
+    .category-group.expanded .category-content {
+      display: block;
+    }
+
+    .category-group.expanded .toggle-arrow {
+      transform: rotate(90deg);
+    }
+
+    .toggle-arrow {
+      font-size: 10px;
+      margin-right: 10px;
+      color: var(--text-light);
+      transition: transform 0.2s;
+    }
   </style>
 </head>
 
@@ -445,6 +501,27 @@
     const SECRET_KEY = 'spencer';
     let currentData = [];
     let generatedCodes = [];
+    let expandedCategories = new Set();
+    let expandedItems = new Set();
+
+    const CATEGORIES = {
+      'ZD': { name: '早读能量树', color: '#eab308' },
+      'GB': { name: '班级广播器', color: '#ec4899' },
+      'ZY': { name: '作业消消乐', color: '#10b981' },
+      'DM': { name: '炫酷点名器', color: '#8b5cf6' },
+      'XXDK': { name: '星梦奇旅', color: '#E0C3FC', textColor: '#6A5D7B' },
+      'XM': { name: '星梦奇旅', color: '#E0C3FC', textColor: '#6A5D7B' },
+      'DEFAULT': { name: '分贝仪/通用', color: '#6366f1' }
+    };
+
+    function getCategoryInfo(code) {
+      if (!code) return CATEGORIES.DEFAULT;
+      for (const prefix in CATEGORIES) {
+        if (prefix === 'DEFAULT') continue;
+        if (code.startsWith(prefix)) return CATEGORIES[prefix];
+      }
+      return CATEGORIES.DEFAULT;
+    }
 
     // === 初始化：自动登录 ===
     window.addEventListener('load', () => {
@@ -552,108 +629,135 @@
         return;
       }
 
-      container.innerHTML = currentData.map((item, index) => {
-        // 检查是否失效
-        const isRevoked = item.status === 'revoked';
+      // 1. 按分类分组
+      const groups = {};
+      currentData.forEach(item => {
+        const cat = getCategoryInfo(item.code);
+        if (!groups[cat.name]) groups[cat.name] = { info: cat, items: [] };
+        groups[cat.name].items.push(item);
+      });
 
-        // 计算状态颜色
-        const usage = item.totalDevices;
-        const isUnlimited = item.code.startsWith('XXDK') || item.code.startsWith('XM') || item.code.startsWith('GB') || item.maxDevices >= 9999;
-        const max = isUnlimited ? '∞' : (item.maxDevices || 5);
-        let badgeClass = 'status-good';
-        let statusText = '正常';
+      // 2. 渲染分组
+      container.innerHTML = Object.values(groups).map((group, gIndex) => {
+        const cat = group.info;
+        const isCatExpanded = expandedCategories.has(cat.name);
+        
+        const itemsHtml = group.items.map((item, iIndex) => {
+          const globalIdx = `${gIndex}-${iIndex}`;
+          const isItemExpanded = expandedItems.has(item.code);
+          const isRevoked = item.status === 'revoked';
+          const usage = item.totalDevices;
+          const isUnlimited = item.code.startsWith('XXDK') || item.code.startsWith('XM') || item.code.startsWith('GB') || item.maxDevices >= 9999;
+          const max = isUnlimited ? '∞' : (item.maxDevices || 5);
+          
+          let badgeClass = 'status-good';
+          let statusText = '正常';
 
-        if (isRevoked) {
-          badgeClass = 'status-full'; // 用红色表示失效
-          statusText = '🚫 已删除';
-        } else if (!isUnlimited && usage >= max) {
-          badgeClass = 'status-full';
-          statusText = '已满';
-        } else if (!isUnlimited && usage > max * 0.8) {
-          badgeClass = 'status-warn';
-          statusText = '即将满';
-        }
+          if (isRevoked) {
+            badgeClass = 'status-full';
+            statusText = '🚫 已删除';
+          } else if (!isUnlimited && usage >= max) {
+            badgeClass = 'status-full';
+            statusText = '已满';
+          } else if (!isUnlimited && usage > max * 0.8) {
+            badgeClass = 'status-warn';
+            statusText = '即将满';
+          }
 
-        // 构建设备详情行 (略微调整样式)
-        const deviceRows = item.devices.map((dev, i) => {
-          const deviceName = parseUA(dev.ua);
-          const fullUA = dev.ua.replace(/"/g, '&quot;');
+          const deviceRows = item.devices.map((dev, i) => {
+            const deviceName = parseUA(dev.ua);
+            const fullUA = dev.ua.replace(/"/g, '&quot;');
+            return `
+              <tr>
+                <td>${i + 1}</td>
+                <td>
+                  <div style="font-weight:500; font-size:12px;">${deviceName}</div>
+                  <div style="font-size:10px; color:#94a3b8; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${fullUA}">${dev.ua}</div>
+                </td>
+                <td>
+                  <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
+                  <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
+                </td>
+                <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
+                <td>${new Date(dev.lastSeen).toLocaleString()}</td>
+              </tr>`;
+          }).join('');
 
           return `
-        <tr>
-          <td>${i + 1}</td>
-          <td>
-            <div style="font-weight:500; font-size:12px;">${deviceName}</div>
-            <div style="font-size:10px; color:#94a3b8; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${fullUA}">${dev.ua}</div>
-          </td>
-          <td>
-            <div style="font-family:monospace; font-size:11px;">${dev.deviceId ? dev.deviceId.substring(0, 12) + '...' : 'N/A'}</div>
-            <div style="font-size:10px; color:#64748b; cursor:pointer;" onclick="copy('${dev.deviceId}')" title="点击复制完整ID">📄 复制ID</div>
-          </td>
-          <td>${new Date(dev.firstSeen).toLocaleDateString()}</td>
-          <td>${new Date(dev.lastSeen).toLocaleString()}</td>
-        </tr>
-      `}).join('');
+            <div class="monitor-item ${isItemExpanded ? 'expanded' : ''}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
+              <div class="item-summary" onclick="toggleItem('${item.code}', event)">
+                <div class="toggle-btn">▶</div>
+                <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
+                  ${item.code}
+                </div>
+                <div>
+                  <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-light);">
+                  ${timeAgo(new Date(item.lastUsedTime))}
+                </div>
+              </div>
+              <div class="item-details" style="${isItemExpanded ? 'display:block;' : ''}">
+                <div class="details-grid">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                    <div style="font-size:12px; color:var(--text-light);">
+                      <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
+                      <span style="margin-left:15px;">首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
+                    </div>
+                    <button onclick="deleteLicense('${item.code}')" class="btn-primary" style="background: var(--danger); padding: 5px 10px; font-size: 11px;">🗑️ 删除所有数据</button>
+                  </div>
+                  <table class="device-table">
+                    <thead>
+                      <tr>
+                        <th width="30">#</th>
+                        <th>设备信息</th>
+                        <th>Device ID</th>
+                        <th>首次绑定</th>
+                        <th>最后在线</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${deviceRows}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
 
         return `
-        <div class="monitor-item" id="item-${index}" style="${isRevoked ? 'opacity: 0.6; background: #f9f9f9;' : ''}">
-          <div class="item-summary" onclick="toggleItem(${index})">
-            <div class="toggle-btn">▶</div>
-            <div class="code-display" style="${isRevoked ? 'text-decoration: line-through; color: #999;' : ''}">
-              ${item.code}
+          <div class="category-group ${isCatExpanded ? 'expanded' : ''}">
+            <div class="category-header" onclick="toggleCategory('${cat.name}')">
+              <span class="toggle-arrow">▶</span>
+              <span class="category-tag" style="background: ${cat.color}; color: ${cat.textColor || 'white'};">
+                ${cat.name}
+              </span>
+              <span class="category-count">共 ${group.items.length} 个授权码</span>
             </div>
-            <div>
-              <span class="status-badge ${badgeClass}">${usage} / ${max} ${statusText}</span>
+            <div class="category-content">
+              ${itemsHtml}
             </div>
-            <div style="font-size: 11px; color: var(--text-light);">
-              ${timeAgo(new Date(item.lastUsedTime))}
-            </div>
-          </div>
-          
-          <div class="item-details">
-            <div class="details-grid">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
-                <div style="font-size:12px; color:var(--text-light);">
-                  <span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span>
-                  <span style="margin-left:15px;">首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>
-                </div>
-                <button onclick="deleteLicense('${item.code}')" class="btn-primary" style="background: var(--danger); padding: 5px 10px; font-size: 11px;">🗑️ 删除所有数据</button>
-              </div>
-              
-              <table class="device-table">
-                <thead>
-                  <tr>
-                    <th width="30">#</th>
-                    <th>设备信息</th>
-                    <th>Device ID</th>
-                    <th>首次绑定</th>
-                    <th>最后在线</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${deviceRows}
-                </tbody>
-              </table>
-              
-            </div>
-          </div>
-        </div>
-      `;
+          </div>`;
       }).join('');
     }
 
-    function toggleItem(index) {
-      const el = document.getElementById(`item-${index}`);
-      const isExpanded = el.classList.contains('expanded');
-
-      // 关闭所有其他的 (可选，如果想保持手风琴效果)
-      // document.querySelectorAll('.monitor-item').forEach(e => e.classList.remove('expanded'));
-
-      if (!isExpanded) {
-        el.classList.add('expanded');
+    function toggleCategory(catName) {
+      if (expandedCategories.has(catName)) {
+        expandedCategories.delete(catName);
       } else {
-        el.classList.remove('expanded');
+        expandedCategories.add(catName);
       }
+      renderMonitorList();
+    }
+
+    function toggleItem(code, event) {
+      if (event) event.stopPropagation();
+      if (expandedItems.has(code)) {
+        expandedItems.delete(code);
+      } else {
+        expandedItems.add(code);
+      }
+      renderMonitorList();
     }
 
     // === 生成器功能 ===

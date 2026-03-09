@@ -84,18 +84,22 @@ function verifyLicense() {
     const input = $('license-input').value.trim().toUpperCase();
     const errorMsg = $('auth-error');
 
-    if (input.startsWith(LICENSE_PREFIX) && input.length >= 5) {
-        localStorage.setItem(AUTH_KEY, input);
-        showApp();
-    } else {
+    // 🚨 前端预检
+    if (!input.startsWith(LICENSE_PREFIX) || input.length < 6) {
         errorMsg.style.display = 'block';
-        errorMsg.textContent = t('morningTree.authError') || '无效的授权码：必须以 "ZD" 开头';
+        errorMsg.textContent = "❌ 授权码无效：授权码必须以 'ZD' 开头且长度不少于 6 位";
         gatekeeper.querySelector('.auth-card').animate([
             { transform: 'translateX(0)' },
             { transform: 'translateX(-10px)' },
             { transform: 'translateX(10px)' },
             { transform: 'translateX(0)' }
         ], { duration: 300 });
+        return;
+    }
+
+    if (input.startsWith(LICENSE_PREFIX) && input.length >= 5) {
+        localStorage.setItem(AUTH_KEY, input);
+        showApp();
     }
 }
 

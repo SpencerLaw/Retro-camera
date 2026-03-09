@@ -369,6 +369,23 @@ export default async function handler(
       });
     }
 
+    // === 彻底清除所有尝试记录 ===
+    if (action === 'purge_attempts') {
+      if (!adminKey || adminKey.trim() !== 'spencer') {
+        return res.status(401).json({ success: false, message: '密码错误' });
+      }
+
+      const keys = await kv.keys('license:attempt:*');
+      if (keys.length > 0) {
+        await Promise.all(keys.map(k => kv.del(k)));
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `已清除 ${keys.length} 条未授权尝试记录`
+      });
+    }
+
 
     // === 管理员列表 ===
     if (action === 'list_all') {
@@ -473,33 +490,6 @@ export default async function handler(
     const dateNowISO = new Date(dateNow).toISOString();
 
     if (!isCodeInWhitelist(cleanCode)) {
-      // 记录未授权尝试 (只要格式对就记录，防止主列表被垃圾数据填充)
-      if (generatedDate) {
-        const attemptKey = `license:attempt:${cleanCode}`;
-        try {
-          const existing = await kv.get(attemptKey) as any;
-          if (existing) {
-            await kv.set(attemptKey, {
-              ...existing,
-              lastAttempt: dateNowISO,
-              ua: rawDeviceInfo || getDeviceType(ua),
-              count: (existing.count || 1) + 1
-            });
-          } else {
-            await kv.set(attemptKey, {
-              code: cleanCode,
-              firstAttempt: dateNowISO,
-              lastAttempt: dateNowISO,
-              ua: rawDeviceInfo || getDeviceType(ua),
-              deviceId: deviceId,
-              count: 1
-            });
-          }
-          console.log(`[License] Recorded unauthorized attempt for ${cleanCode}`);
-        } catch (e) {
-          console.error('[License] Failed to record attempt:', e);
-        }
-      }
       return res.status(401).json({ success: false, message: '授权码不存在或已被禁用，请联系管理员购买' });
     }
 

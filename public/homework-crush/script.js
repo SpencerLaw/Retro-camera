@@ -294,7 +294,14 @@
             hideGate();
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('verify-btn').onclick = function() {
-                var code = document.getElementById('license-input').value.trim();
+                var code = document.getElementById('license-input').value.trim().toUpperCase();
+                
+                // 🚨 前端预检
+                if (!code.startsWith('ZY') || code.length < 6) {
+                    alert("❌ 授权码无效\n作业消消乐授权码必须以 'ZY' 开头");
+                    return;
+                }
+
                 fetch('/api/verify-license', { 
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'},

@@ -256,7 +256,16 @@ function bindAllEvents() {
     if (verifyBtn) {
         verifyBtn.onclick = async () => {
             const input = get('license-input');
-            const code = input ? input.value.trim() : "";
+            const code = input ? input.value.trim().toUpperCase() : "";
+            
+            // 🚨 前端预检：拒绝明显无效的输入
+            const validPrefixes = ['DM', 'ZY', 'ZD', 'GB', 'XM', 'XXDK'];
+            const hasValidPrefix = validPrefixes.some(p => code.startsWith(p));
+            if (!hasValidPrefix || code.length < 6) {
+                alert("❌ 授权码格式错误\n请输入以 DM/ZY/ZD/GB/XM 开头的正确授权码");
+                return;
+            }
+
             if (!code) { alert(t('authError')); return; }
 
             let deviceId = localStorage.getItem('magic_rc_device_id');

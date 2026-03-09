@@ -26,6 +26,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [timeStr, setTimeStr] = useState('');
   const [sensitivity, setSensitivity] = useState(50);
   const [showHelp, setShowHelp] = useState(false);
+  const [showThresholdHelp, setShowThresholdHelp] = useState(false);
   const sensitivityRef = useRef(50);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -462,11 +463,38 @@ const DoraemonMonitorApp: React.FC = () => {
             />
           </div>
 
-          <div className="controls-box">
+          <div className="controls-box" style={{ position: 'relative' }}>
             <div className="slider-header">
-              <span>{t('doraemon.threshold')}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>{t('doraemon.threshold')}</span>
+                <button
+                  onClick={() => setShowThresholdHelp(!showThresholdHelp)}
+                  className="help-icon-btn"
+                  title={t('doraemon.helpTitle')}
+                >
+                  <HelpCircle size={16} />
+                </button>
+              </div>
               <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{limit} dB</span>
             </div>
+
+            {showThresholdHelp && (
+              <div className="help-tooltip">
+                <div className="help-header">
+                  <span>{t('doraemon.thresholdHelpTitle')}</span>
+                  <button onClick={() => setShowThresholdHelp(false)} className="close-help-btn">
+                    <X size={14} />
+                  </button>
+                </div>
+                <div className="help-content">
+                  <p><strong>{t('doraemon.threshold')}</strong>{t('doraemon.thresholdHelpDesc')}</p>
+                </div>
+                <div className="help-footer" onClick={() => setShowThresholdHelp(false)}>
+                  {t('doraemon.tapToClose')}
+                </div>
+              </div>
+            )}
+
             <input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" />
           </div>
         </div>

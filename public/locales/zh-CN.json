@@ -107,6 +107,8 @@
     "helpAdviceMuteDesc": "：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。",
     "helpAdviceRead": "朗读测试",
     "helpAdviceReadDesc": "：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。",
+    "thresholdHelpTitle": "📏 阈值设置建议：",
+    "thresholdHelpDesc": "：通常建议设为 60-65dB。如果教室背景噪音较大，可调至 70dB；如果需要绝对安静，可调至 55dB。",
     "tapToClose": "点击此处关闭",
     "authFailed": "授权失败: ",
     "authExpired": "⚠️ 授权失效",

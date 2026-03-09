@@ -18,7 +18,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [maxDb, setMaxDb] = useState(0);
   const [quietTime, setQuietTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
-  const [state, setState] = useState<'calm' | 'warning' | 'alarm'>('calm');
+  const [state, setState] = useState<'happy' | 'calm' | 'annoyed' | 'alarm'>('happy');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -204,23 +204,50 @@ const DoraemonMonitorApp: React.FC = () => {
   useEffect(() => {
     if (!isStarted) return;
     const now = Date.now();
+    const delta = currentDb - limit;
+
+    // 1. Calculate Visual State based on Threshold Delta
+    let visualState: 'happy' | 'calm' | 'annoyed' | 'alarm' = 'happy';
+    if (delta >= 6) {
+      visualState = 'alarm';
+    } else if (delta >= 3) {
+      visualState = 'annoyed';
+    } else if (delta >= 0) {
+      visualState = 'calm';
+    } else {
+      visualState = 'happy';
+    }
+
+    // 2. Handle Alarm Trigger Logic (Sustained noise > limit)
     if (currentDb > limit) {
       recoverStartRef.current = 0;
       if (thresholdStartRef.current === 0) thresholdStartRef.current = now;
+
+      // Force Alarm state if noise sustained over 2 seconds
       if (now - thresholdStartRef.current > 2000) {
+        visualState = 'alarm';
         if (state !== 'alarm') {
-          setState('alarm');
           setWarnCount(prev => prev + 1);
           setQuietTime(0);
         }
       }
-      else if (now - thresholdStartRef.current > 800 && state === 'calm') setState('warning');
     } else {
+      // Recovery Logic
       thresholdStartRef.current = 0;
-      if (state === 'alarm') { if (recoverStartRef.current === 0) recoverStartRef.current = now; if (now - recoverStartRef.current > 3000) setState('calm'); }
-      else if (state !== 'calm') setState('calm');
+      if (state === 'alarm') {
+        if (recoverStartRef.current === 0) recoverStartRef.current = now;
+        if (now - recoverStartRef.current > 3000) {
+          // Stay in visualState derived above (usually 'happy' if below limit)
+        } else {
+          visualState = 'alarm'; // Keep alarm visual during recovery period
+        }
+      }
     }
-  }, [currentDb, limit, isStarted]);
+
+    if (state !== visualState) {
+      setState(visualState);
+    }
+  }, [currentDb, limit, isStarted, state]);
 
   useEffect(() => {
     if (state === 'alarm') {
@@ -350,15 +377,62 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const DoraemonSVG = () => (
     <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%' }}>
-      <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" /><circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+      {/* 头部蓝底 */}
+      <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" />
+      {/* 脸部白底 */}
+      <circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+
+      {/* 眼神设计 */}
       {state === 'alarm' ? (
-        <g stroke="#333" strokeWidth="5"><line x1="70" y1="60" x2="90" y2="80" /><line x1="90" y1="60" x2="70" y2="80" /><line x1="110" y1="60" x2="130" y2="80" /><line x1="130" y1="60" x2="110" y2="80" /></g>
+        <g stroke="#333" strokeWidth="5">
+          <line x1="70" y1="60" x2="90" y2="80" /><line x1="90" y1="60" x2="70" y2="80" />
+          <line x1="110" y1="60" x2="130" y2="80" /><line x1="130" y1="60" x2="110" y2="80" />
+        </g>
+      ) : state === 'happy' ? (
+        <g stroke="#333" strokeWidth="3" fill="none">
+          <path d="M 65 75 Q 82 55 99 75" />
+          <path d="M 101 75 Q 118 55 135 75" />
+        </g>
+      ) : state === 'annoyed' ? (
+        <g>
+          {/* Eyebrows */}
+          <line x1="65" y1="52" x2="95" y2="65" stroke="#333" strokeWidth="3" />
+          <line x1="105" y1="65" x2="135" y2="52" stroke="#333" strokeWidth="3" />
+          {/* Eyes */}
+          <ellipse cx="82" cy="74" rx="14" ry="18" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+          <ellipse cx="118" cy="74" rx="14" ry="18" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+          <circle cx="88" cy="74" r="4" fill="#000" />
+          <circle cx="112" cy="74" r="4" fill="#000" />
+        </g>
       ) : (
-        <g><circle cx={state === 'warning' ? 82 : 88} cy="70" r={state === 'warning' ? 3 : 4} fill="#000" /><circle cx={state === 'warning' ? 118 : 112} cy="70" r={state === 'warning' ? 3 : 4} fill="#000" /></g>
+        /* CALM - Normal state */
+        <g>
+          <ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+          <ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+          <circle cx="88" cy="70" r="4" fill="#000" />
+          <circle cx="112" cy="70" r="4" fill="#000" />
+        </g>
       )}
-      <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" /><line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2" />
-      {state === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2" /> : <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" />}
-      <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2" /><circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2" />
+
+      {/* 鼻子 */}
+      <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" />
+      {/* 鼻唇中线 */}
+      <line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2" />
+
+      {/* 嘴巴设计 */}
+      {state === 'alarm' ? (
+        <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2" />
+      ) : state === 'happy' ? (
+        <path d="M 55 135 Q 100 200 145 135" stroke="#D9002E" strokeWidth="4" fill="none" />
+      ) : state === 'annoyed' ? (
+        <path d="M 70 160 Q 100 145 130 160" stroke="#333" strokeWidth="2" fill="none" />
+      ) : (
+        <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" />
+      )}
+
+      {/* 项圈与铃铛 */}
+      <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2" />
+      <circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2" />
     </svg>
   );
 

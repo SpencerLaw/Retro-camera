@@ -3413,6 +3413,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Floating Action Button for Scan (Double Visibility) */}
+            <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                drag
+                dragConstraints={{ left: -100, right: 0, top: -500, bottom: 0 }}
+                className="fixed bottom-24 right-6 z-40"
+            >
+                <button
+                    onClick={() => setIsScanning(true)}
+                    className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full shadow-2xl flex items-center justify-center text-white border-4 border-white active:scale-90 transition-all"
+                >
+                    <Scan size={32} />
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border-2 border-white shadow-sm">NEW</span>
+                </button>
+            </motion.div>
         </div>
     );
 };

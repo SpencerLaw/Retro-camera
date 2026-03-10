@@ -1337,17 +1337,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         });
     };
 
-    if (loading) return (
-        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4" >
-            <motion.div
-                animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-16 h-16 bg-[var(--color-blue-fun)] rounded-3xl"
-            ></motion.div>
-            <p className="text-xl text-[#5D4037] opacity-60 font-bold">载入中...</p>
-        </div >
-    );
-
     const selectedChildIdLocal = selectedChildId; // placeholder to satisfy ref logic if needed
 
     // Dynamic Theme System
@@ -1467,6 +1456,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             setIsSaving(false);
         }
     };
+
+    if (loading) return (
+        <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4" >
+            <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-16 h-16 bg-[var(--color-blue-fun)] rounded-3xl"
+            ></motion.div>
+            <p className="text-xl text-[#5D4037] opacity-60 font-bold">载入中...</p>
+        </div >
+    );
 
     return (
         <div

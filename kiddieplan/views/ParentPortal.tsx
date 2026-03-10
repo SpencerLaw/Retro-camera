@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2, ArrowRight, Flame, Menu, ShieldCheck } from 'lucide-react';
-import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog, RedemptionLog } from '../types';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { LogOut, Plus, Trash2, Calendar, Gift, Settings, Clock, ArrowLeft, Trophy, AlertCircle, Save, Sparkles, LayoutGrid, Edit2, Star, ListTodo, Home, Timer, UserPlus, Check, CalendarCheck, BarChart3, RotateCcw, Zap, Target, RefreshCw, CheckCircle2, ArrowRight, Flame, Menu, ShieldCheck, Camera, Scan, X } from 'lucide-react';
+import { Child, Task, Reward, TaskCategory, Category, CategoryTemplate, FocusLog, RedemptionLog, ScannedTask } from '../types';
 import { TASK_TEMPLATES, DEFAULT_REWARDS, DEFAULT_CATEGORIES, REWARD_CATEGORIES } from '../constants/templates';
+import { performOCR } from '../services/ocrService';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ParentPortalProps {
@@ -139,6 +140,14 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
     const [parentToast, setParentToast] = useState<{ show: boolean; count: number }>({ show: false, count: 0 });
     const prevPendingCount = useRef(0);
+
+    // OCR & Scanning State
+    const [isScanning, setIsScanning] = useState(false);
+    const [isProcessingOCR, setIsProcessingOCR] = useState(false);
+    const [scannedResults, setScannedResults] = useState<ScannedTask[]>([]);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
     useEffect(() => {
         const selectedChild = children.find(c => c.id === selectedChildId);
@@ -1352,6 +1361,113 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         ? CHILD_THEMES[children.findIndex(c => c.id === selectedChild.id) % CHILD_THEMES.length]
         : CHILD_THEMES[0];
 
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' } 
+            });
+            setCameraStream(stream);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (err) {
+            alert('无法启动摄像头，请确保已授权访问');
+            setIsScanning(false);
+        }
+    };
+
+    const stopCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            setCameraStream(null);
+        }
+    };
+
+    useEffect(() => {
+        if (isScanning) {
+            startCamera();
+        } else {
+            stopCamera();
+        }
+    }, [isScanning]);
+
+    const handleCapture = async () => {
+        if (!videoRef.current || !canvasRef.current) return;
+
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+        setIsProcessingOCR(true);
+        try {
+            const results = await performOCR(imageData);
+            setScannedResults(results);
+        } catch (err) {
+            alert('识别失败，请重试');
+        } finally {
+            setIsProcessingOCR(false);
+        }
+    };
+
+    const handleConfirmScannedTasks = async () => {
+        if (scannedResults.length === 0 || !selectedChildId) return;
+
+        const today = new Date().toISOString().split('T')[0];
+        const newTasks: Task[] = scannedResults.map(res => ({
+            id: `t_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+            title: res.title,
+            timeSlot: res.time,
+            points: res.points,
+            completed: false,
+            isRequired: true,
+            date: today,
+            category: selectedCategory || 'all'
+        }));
+
+        const updatedTasks = [...currentTasks, ...newTasks];
+        setCurrentTasks(updatedTasks);
+        
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/kiddieplan/manage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'publish_tasks',
+                    token,
+                    data: { childId: selectedChildId, tasks: updatedTasks, date: today }
+                })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setScannedResults([]);
+                setIsScanning(false);
+                stopCamera();
+                
+                setDialogConfig({
+                    isOpen: true,
+                    title: '✨ 识别并发布成功！',
+                    placeholder: '',
+                    message: `已成功从作业中提取并发布 ${newTasks.length} 个任务。`,
+                    onConfirm: () => setDialogConfig(prev => ({ ...prev, isOpen: false })),
+                    hideInput: true
+                });
+            } else {
+                alert('发布失败: ' + result.message);
+            }
+        } catch (err) {
+            alert('发布失败，请检查网络');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div
             className={`flex flex-col h-full w-full overflow-hidden font-sans relative transition-colors duration-1000 bg-gradient-to-br ${currentTheme.bg}`}
@@ -1762,7 +1878,17 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </motion.button>
                                     <h2 className="text-2xl font-black text-[#5D4037]">今日任务清单</h2>
                                 </div>
-                                {/* Removed global add button as per user request */}
+                                <div className="flex items-center gap-2">
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setIsScanning(true)}
+                                        className="h-10 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl flex items-center gap-2 shadow-md hover:shadow-lg transition-all font-bold text-sm"
+                                    >
+                                        <Scan size={18} />
+                                        <span>拍照识别</span>
+                                    </motion.button>
+                                </div>
                             </div>
 
                             {/* Templates */}
@@ -3090,6 +3216,168 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             </div>
                         </motion.div>
                     </div>
+                )}
+            </AnimatePresence>
+
+            {/* Scanning Modal */}
+            <AnimatePresence>
+                {isScanning && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center font-candy overflow-hidden"
+                    >
+                        {/* Status Bar Decor */}
+                        <div className="absolute top-0 w-full h-12 bg-black/20 z-10"></div>
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => {
+                                stopCamera();
+                                setIsScanning(false);
+                                setScannedResults([]);
+                            }}
+                            className="absolute top-12 right-6 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 hover:bg-white/20 transition-all"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        {/* Title & Hint */}
+                        <div className="absolute top-24 text-center z-10 w-full px-10">
+                            <h3 className="text-white text-xl font-black drop-shadow-md">作业拍照识别</h3>
+                            <p className="text-white/60 text-xs font-bold mt-2">请对准作业内容，清晰拍摄</p>
+                        </div>
+
+                        {/* Camera Preview Area */}
+                        <div className="relative w-full flex-1 flex items-center justify-center">
+                            <div className="relative w-[85%] max-w-[400px] aspect-[3/4] rounded-[40px] overflow-hidden border-2 border-white/30 bg-gray-900 shadow-2xl">
+                                <video
+                                    ref={videoRef}
+                                    autoPlay
+                                    playsInline
+                                    className="w-full h-full object-cover"
+                                />
+                                
+                                {/* Scanning Effect */}
+                                {isProcessingOCR && (
+                                    <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-scan-line"></div>
+                                        <div className="absolute inset-0 bg-blue-500/5 animate-pulse"></div>
+                                    </div>
+                                )}
+
+                                {/* Capture Indicator */}
+                                {!isProcessingOCR && (
+                                    <div className="absolute inset-0 border-2 border-dashed border-white/20 rounded-[38px] m-6"></div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Results Overlay */}
+                        <AnimatePresence>
+                            {scannedResults.length > 0 && !isProcessingOCR && (
+                                <motion.div
+                                    initial={{ y: '100%' }}
+                                    animate={{ y: 0 }}
+                                    exit={{ y: '100%' }}
+                                    className="absolute bottom-0 w-full bg-white rounded-t-[40px] p-8 pb-12 z-30 max-h-[80%] overflow-y-auto no-scrollbar shadow-[0_-20px_50px_rgba(0,0,0,0.2)]"
+                                >
+                                    <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6"></div>
+                                    
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h4 className="text-xl font-black text-[#5D4037]">识别到 {scannedResults.length} 个任务</h4>
+                                        <button 
+                                            onClick={() => setScannedResults([])}
+                                            className="text-gray-400 hover:text-red-500 transition-colors"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-4 mb-8">
+                                        {scannedResults.map((result, idx) => (
+                                            <div key={idx} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center group hover:bg-blue-50 transition-colors">
+                                                <div className="flex-1">
+                                                    <input 
+                                                        type="text" 
+                                                        value={result.title}
+                                                        onChange={(e) => {
+                                                            const newResults = [...scannedResults];
+                                                            newResults[idx].title = e.target.value;
+                                                            setScannedResults(newResults);
+                                                        }}
+                                                        className="bg-transparent font-bold text-[#5D4037] border-none focus:ring-0 p-0 w-full"
+                                                    />
+                                                    <div className="flex gap-4 mt-1">
+                                                        <span className="text-[10px] font-black text-blue-500 bg-blue-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                            <Clock size={10} /> {result.time}
+                                                        </span>
+                                                        <span className="text-[10px] font-black text-emerald-500 bg-emerald-100 px-2 py-0.5 rounded-md">
+                                                            +{result.points} 🍭
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    onClick={() => {
+                                                        const newResults = scannedResults.filter((_, i) => i !== idx);
+                                                        setScannedResults(newResults);
+                                                    }}
+                                                    className="p-2 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => setScannedResults([])}
+                                            className="flex-1 py-4 rounded-2xl bg-gray-100 text-gray-500 font-black text-lg shadow-sm hover:bg-gray-200 transition-all"
+                                        >
+                                            重新拍摄
+                                        </button>
+                                        <button
+                                            onClick={handleConfirmScannedTasks}
+                                            className="flex-[2] py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black text-lg shadow-lg hover:shadow-blue-200 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Plus size={20} />
+                                            一键导入并发布
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Capture Button */}
+                        {!isProcessingOCR && scannedResults.length === 0 && (
+                            <div className="absolute bottom-12 w-full flex items-center justify-center z-20">
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={handleCapture}
+                                    className="w-20 h-20 bg-white rounded-full flex items-center justify-center border-8 border-white/20 shadow-2xl"
+                                >
+                                    <div className="w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                                        <Camera size={28} strokeWidth={3} />
+                                    </div>
+                                </motion.button>
+                            </div>
+                        )}
+
+                        {/* Processing Status */}
+                        {isProcessingOCR && (
+                            <div className="absolute bottom-12 w-full flex flex-col items-center gap-4 z-20">
+                                <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl flex items-center gap-3 border border-white/10">
+                                    <RefreshCw className="text-blue-400 animate-spin" size={20} />
+                                    <span className="text-white font-bold">正在离线解析作业内容...</span>
+                                </div>
+                            </div>
+                        )}
+
+                        <canvas ref={canvasRef} className="hidden" />
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>

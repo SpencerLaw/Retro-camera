@@ -86,3 +86,9 @@ export interface RedemptionLog {
   redeemedAt: string; // ISO String
   status: 'pending' | 'approved' | 'rejected';
 }
+
+export interface ScannedTask {
+  title: string;
+  points: number;
+  time: string;
+}

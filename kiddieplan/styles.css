@@ -104,6 +104,28 @@ body {
     animation: floating-animation 4s ease-in-out infinite;
 }
 
+/* Scanning Animation for OCR */
+@keyframes scan-line-movement {
+    0% {
+        top: 0%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+.animate-scan-line {
+    animation: scan-line-movement 3s linear infinite;
+}
+
 /* Colors Utilities Map - 温馨家居风 */
 .bg-warm-peach,
 .bg-pastel-pink {

@@ -1783,6 +1783,22 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                 </div>
 
+                                {/* Quick Action: Scan Homework */}
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => setIsScanning(true)}
+                                    className="w-full py-4 bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600 text-white rounded-[32px] flex items-center justify-center gap-3 shadow-lg shadow-blue-200/50 font-black text-lg border border-white/20"
+                                >
+                                    <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                                        <Scan size={24} strokeWidth={3} />
+                                    </div>
+                                    <span>作业拍照识别</span>
+                                    <div className="ml-auto mr-4 opacity-50">
+                                        <ArrowRight size={20} />
+                                    </div>
+                                </motion.button>
+
                                 {/* Action Grid (Redesigned: 2x2 Grid, Clean & Symmetric) */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <motion.button

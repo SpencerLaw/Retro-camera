@@ -11,24 +11,34 @@ export interface ScannedTask {
  * @param imageSource Base64 string or Blob/File
  */
 export const performOCR = async (imageSource: string | File): Promise<ScannedTask[]> => {
-  const worker = await createWorker('chi_sim+eng');
+  const worker = await createWorker('chi_sim+eng', 1, {
+    logger: m => console.log(m),
+  });
   
   try {
+    // Set parameters for better list recognition
+    // PSM 6: Assume a single uniform block of text.
+    await worker.setParameters({
+      tessedit_pageseg_mode: '6' as any,
+    });
+
     const { data: { text } } = await worker.recognize(imageSource);
     
     // Parse the text into tasks
-    // We look for lines that look like tasks
-    // For now, let's just split by newlines and filter out empty or too-short lines
-    const lines = text.split('\n')
+    // Better splitting: handle multiple delimiters common in OCR
+    const lines = text.split(/[\n\r]+/)
       .map(line => line.trim())
-      .filter(line => line.length > 2 && !isNoise(line));
+      .filter(line => line.length >= 2 && !isNoise(line));
     
     // Convert lines to ScannedTask objects with default values
-    const tasks: ScannedTask[] = lines.map(line => ({
-      title: cleanTitle(line),
-      points: 20, // Default points
-      time: '19:00', // Default time
-    }));
+    const tasks: ScannedTask[] = lines.map(line => {
+        const cleaned = cleanTitle(line);
+        return {
+            title: cleaned,
+            points: estimatePoints(cleaned),
+            time: '19:00',
+        };
+    }).filter(t => t.title.length >= 2);
 
     return tasks;
   } catch (error) {
@@ -38,6 +48,16 @@ export const performOCR = async (imageSource: string | File): Promise<ScannedTas
     await worker.terminate();
   }
 };
+
+/**
+ * Heuristic to estimate points based on keywords
+ */
+const estimatePoints = (text: string): number => {
+    if (text.includes('听写') || text.includes('背诵')) return 30;
+    if (text.includes('阅读') || text.includes('打卡')) return 15;
+    return 20;
+};
+
 
 /**
  * Filter out lines that are likely OCR noise (too short, symbols only, etc.)

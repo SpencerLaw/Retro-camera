@@ -148,6 +148,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
     useEffect(() => {
         const selectedChild = children.find(c => c.id === selectedChildId);
@@ -1385,20 +1386,51 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
         const video = videoRef.current;
         const canvas = canvasRef.current;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
+        
+        // Use a persistent internal canvas for preprocessing to keep it clean
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
+        // 1. Capture the raw frame at video resolution
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL('image/jpeg', 0.8);
-
+        
+        // 2. Immediately stop camera to freeze feed and save power
+        const rawData = canvas.toDataURL('image/jpeg', 0.9);
+        setCapturedImage(rawData);
+        stopCamera();
         setIsProcessingOCR(true);
+
         try {
-            const results = await performOCR(imageData);
+            // 3. Image Preprocessing for Better OCR
+            // Increase contrast and grayscale to help Tesseract
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                // Grayscale using Luminance (ITU-R Recommendation BT.709)
+                const avg = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+                
+                // Increase Contrast (Thresholding)
+                // If it's darker than 128, make it black, else white
+                const threshold = 140; 
+                const val = avg < threshold ? 0 : 255;
+                
+                data[i] = val;     // R
+                data[i + 1] = val; // G
+                data[i + 2] = val; // B
+            }
+            ctx.putImageData(imageData, 0, 0);
+            
+            // 4. Perform OCR on the processed image
+            const processedData = canvas.toDataURL('image/jpeg', 0.8);
+            const results = await performOCR(processedData);
             setScannedResults(results);
         } catch (err) {
-            alert('识别失败，请重试');
+            alert('识别失败，请检查光线并重试');
+            setCapturedImage(null);
+            setIsScanning(false);
         } finally {
             setIsProcessingOCR(false);
         }
@@ -1437,6 +1469,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             if (result.success) {
                 setScannedResults([]);
                 setIsScanning(false);
+                setCapturedImage(null);
                 stopCamera();
                 
                 setDialogConfig({
@@ -1456,6 +1489,13 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             setIsSaving(false);
         }
     };
+
+    const handleReshoot = () => {
+        setScannedResults([]);
+        setCapturedImage(null);
+        startCamera();
+    };
+
 
     if (loading) return (
         <div className="flex-1 flex flex-col items-center justify-center font-candy space-y-4" >
@@ -3255,6 +3295,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 stopCamera();
                                 setIsScanning(false);
                                 setScannedResults([]);
+                                setCapturedImage(null);
                             }}
                             className="absolute top-12 right-6 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 hover:bg-white/20 transition-all"
                         >
@@ -3270,12 +3311,16 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                         {/* Camera Preview Area */}
                         <div className="relative w-full flex-1 flex items-center justify-center">
                             <div className="relative w-[85%] max-w-[400px] aspect-[3/4] rounded-[40px] overflow-hidden border-2 border-white/30 bg-gray-900 shadow-2xl">
-                                <video
-                                    ref={videoRef}
-                                    autoPlay
-                                    playsInline
-                                    className="w-full h-full object-cover"
-                                />
+                                {capturedImage ? (
+                                    <img src={capturedImage} className="w-full h-full object-cover" alt="Captured" />
+                                ) : (
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        playsInline
+                                        className="w-full h-full object-cover"
+                                    />
+                                )}
                                 
                                 {/* Scanning Effect */}
                                 {isProcessingOCR && (
@@ -3351,7 +3396,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                                     <div className="flex gap-4">
                                         <button
-                                            onClick={() => setScannedResults([])}
+                                            onClick={handleReshoot}
                                             className="flex-1 py-4 rounded-2xl bg-gray-100 text-gray-500 font-black text-lg shadow-sm hover:bg-gray-200 transition-all"
                                         >
                                             重新拍摄

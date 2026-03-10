@@ -1590,28 +1590,45 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             )}
                         </AnimatePresence>
 
-                        {/* Right: Time & Compact Buttons */}
-                        <div className="flex items-center gap-3">
-                            {isScrolled && (
-                                <motion.button
-                                    initial={{ opacity: 0, scale: 0.5 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    onClick={() => {
-                                        setIsScrolled(false);
-                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                    }}
-                                    className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
-                                >
-                                    <Menu size={20} />
-                                </motion.button>
-                            )}
-                            <div className="flex flex-col items-end mr-0.5">
-                                <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[1]}
-                                </span>
-                                <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
-                                    {formatBeijingTime(currentTime).split(' ')[0]}
-                                </span>
+                        {/* Right: Scan, Time & Compact Buttons */}
+                        <div className="flex items-center gap-2">
+                            {/* Universal Scan Button */}
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsScanning(true);
+                                }}
+                                className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg hover:shadow-blue-200 transition-all"
+                                title="拍照识别作业"
+                            >
+                                <Scan size={20} />
+                            </motion.button>
+
+                            <div className="flex items-center gap-3 ml-2">
+                                {isScrolled && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsScrolled(false);
+                                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
+                                    >
+                                        <Menu size={20} />
+                                    </motion.button>
+                                )}
+                                <div className="flex flex-col items-end mr-0.5">
+                                    <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
+                                        {formatBeijingTime(currentTime).split(' ')[1]}
+                                    </span>
+                                    <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
+                                        {formatBeijingTime(currentTime).split(' ')[0]}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </header>

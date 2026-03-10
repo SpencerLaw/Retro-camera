@@ -1590,45 +1590,29 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             )}
                         </AnimatePresence>
 
-                        {/* Right: Scan, Time & Compact Buttons */}
-                        <div className="flex items-center gap-2">
-                            {/* Universal Scan Button */}
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsScanning(true);
-                                }}
-                                className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg hover:shadow-blue-200 transition-all"
-                                title="拍照识别作业"
-                            >
-                                <Scan size={20} />
-                            </motion.button>
-
-                            <div className="flex items-center gap-3 ml-2">
-                                {isScrolled && (
-                                    <motion.button
-                                        initial={{ opacity: 0, scale: 0.5 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setIsScrolled(false);
-                                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                                        }}
-                                        className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
-                                    >
-                                        <Menu size={20} />
-                                    </motion.button>
-                                )}
-                                <div className="flex flex-col items-end mr-0.5">
-                                    <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
-                                        {formatBeijingTime(currentTime).split(' ')[1]}
-                                    </span>
-                                    <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
-                                        {formatBeijingTime(currentTime).split(' ')[0]}
-                                    </span>
-                                </div>
+                        {/* Right: Time & Compact Buttons */}
+                        <div className="flex items-center gap-3">
+                            {isScrolled && (
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsScrolled(false);
+                                        mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-gray-500 hover:bg-white/60 transition-colors"
+                                >
+                                    <Menu size={20} />
+                                </motion.button>
+                            )}
+                            <div className="flex flex-col items-end mr-0.5">
+                                <span className="font-black text-gray-400 font-mono tracking-tighter leading-none" style={{ fontSize: '10.6px' }}>
+                                    {formatBeijingTime(currentTime).split(' ')[1]}
+                                </span>
+                                <span className="font-bold text-gray-300 leading-none mt-0.5" style={{ fontSize: '7.4px' }}>
+                                    {formatBeijingTime(currentTime).split(' ')[0]}
+                                </span>
                             </div>
                         </div>
                     </header>
@@ -1800,21 +1784,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     </div>
                                 </div>
 
-                                {/* Quick Action: Scan Homework */}
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={() => setIsScanning(true)}
-                                    className="w-full py-4 bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600 text-white rounded-[32px] flex items-center justify-center gap-3 shadow-lg shadow-blue-200/50 font-black text-lg border border-white/20"
-                                >
-                                    <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                                        <Scan size={24} strokeWidth={3} />
-                                    </div>
-                                    <span>作业拍照识别</span>
-                                    <div className="ml-auto mr-4 opacity-50">
-                                        <ArrowRight size={20} />
-                                    </div>
-                                </motion.button>
 
                                 {/* Action Grid (Redesigned: 2x2 Grid, Clean & Symmetric) */}
                                 <div className="grid grid-cols-2 gap-4">
@@ -1834,10 +1803,23 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileHover={{ y: -5, rotate: 1 }}
                                         whileTap={{ scale: 0.95 }}
+                                        onClick={() => setIsScanning(true)}
+                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
+                                    >
+                                        <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3">
+                                            <Scan size={32} strokeWidth={3} />
+                                        </div>
+                                        <span className="font-black text-[#5D4037] text-lg">作业识别</span>
+                                        <span className="text-xs text-gray-400 font-bold">快速拍照导入</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, rotate: 1 }}
+                                        whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('rewards')}
                                         className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy relative"
                                     >
-                                        <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg -rotate-3 relative">
+                                        <div className="w-16 h-16 bg-[var(--color-red-warning)] rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 relative">
                                             <Gift size={32} strokeWidth={3} />
                                             {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
                                                 <motion.div
@@ -1856,28 +1838,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     <motion.button
                                         whileHover={{ y: -5, rotate: -1 }}
                                         whileTap={{ scale: 0.95 }}
-                                        onClick={() => setActiveTab('redemption')}
-                                        className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy relative"
-                                    >
-                                        <div className="w-16 h-16 bg-pink-400 rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 relative">
-                                            <Trophy size={32} strokeWidth={3} />
-                                            {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
-                                                <motion.div
-                                                    initial={{ scale: 0 }}
-                                                    animate={{ scale: 1 }}
-                                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white shadow-sm ring-2 ring-red-100 animate-pulse"
-                                                >
-                                                    {redemptionLogs.filter(l => l.status === 'pending').length}
-                                                </motion.div>
-                                            )}
-                                        </div>
-                                        <span className="font-black text-[#5D4037] text-lg">核销记录</span>
-                                        <span className="text-xs text-gray-400 font-bold">糖果账单历史</span>
-                                    </motion.button>
-
-                                    <motion.button
-                                        whileHover={{ y: -5, rotate: 1 }}
-                                        whileTap={{ scale: 0.95 }}
                                         onClick={() => setActiveTab('stats')}
                                         className="bg-white/80 backdrop-blur-lg p-6 rounded-[32px] flex flex-col items-center gap-4 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy"
                                     >
@@ -1886,6 +1846,31 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                         </div>
                                         <span className="font-black text-[#5D4037] text-lg">统计分析</span>
                                         <span className="text-xs text-gray-400 font-bold">成长数据报表</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        whileHover={{ y: -5, scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setActiveTab('redemption')}
+                                        className="col-span-2 bg-white/80 backdrop-blur-lg p-4 rounded-[28px] flex items-center justify-center gap-6 shadow-sm border border-white/10 hover:border-white/40 transition-all font-candy relative overflow-hidden"
+                                    >
+                                        <div className="w-12 h-12 bg-pink-400 rounded-xl flex items-center justify-center text-white shadow-md rotate-3 shrink-0">
+                                            <Trophy size={24} strokeWidth={3} />
+                                        </div>
+                                        <div className="flex flex-col items-start">
+                                            <span className="font-black text-[#5D4037] text-base">核销记录</span>
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">糖果账单历史</span>
+                                        </div>
+                                        {redemptionLogs.filter(l => l.status === 'pending').length > 0 && (
+                                            <motion.div
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black border-2 border-white shadow-sm ml-auto mr-2"
+                                            >
+                                                {redemptionLogs.filter(l => l.status === 'pending').length} 个待审批
+                                            </motion.div>
+                                        )}
+                                        <ArrowRight size={16} className="text-gray-300 ml-auto mr-2" />
                                     </motion.button>
                                 </div>
                             </div>
@@ -3413,23 +3398,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            {/* Floating Action Button for Scan (Double Visibility) */}
-            <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                drag
-                dragConstraints={{ left: -100, right: 0, top: -500, bottom: 0 }}
-                className="fixed bottom-24 right-6 z-40"
-            >
-                <button
-                    onClick={() => setIsScanning(true)}
-                    className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full shadow-2xl flex items-center justify-center text-white border-4 border-white active:scale-90 transition-all"
-                >
-                    <Scan size={32} />
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border-2 border-white shadow-sm">NEW</span>
-                </button>
-            </motion.div>
         </div>
     );
 };

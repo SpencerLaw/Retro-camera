@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import crypto from 'crypto';
 
 // Assuming FISH_AUDIO_KEY is an environment variable or a constant
-const FISH_AUDIO_KEY = process.env.FISH_AUDIO_KEY || 'b3a18f1fd0724399b73f1861d31bef03'; // Fallback to the key used in handleFishTTS if not set
+const FISH_AUDIO_KEY = process.env.FISH_AUDIO_KEY;
 
 // === 授权码辅助逻辑 (同步自 verify-license) ===
 

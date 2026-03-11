@@ -112,73 +112,14 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         localStorage.setItem('br_active_channel_id', activeChannelId);
     }, [activeChannelId]);
 
-    // Initial & Polling cloud sync: Load channels for this license from cloud
     useEffect(() => {
-        if (!license) {
-            setIsLoadingCloud(false);
-            return;
-        }
+        setIsLoadingCloud(false);
+    }, []);
 
-        setIsLoadingCloud(true);
-        const controller = new AbortController();
-
-        const syncFromCloud = async (isPoll = false) => {
-            try {
-                const resp = await fetch(`/api/broadcast/get-channels?license=${license}`, {
-                    signal: controller.signal,
-                    cache: 'no-store'
-                });
-                const data = await resp.json();
-                if (data.channels && Array.isArray(data.channels)) {
-                    // Only update if cloud has content AND (it's initial load OR cloud significantly differs)
-                    // This prevents overwriting unsaved local changes during a poll
-                    const cloudLen = data.channels.length;
-                    if (cloudLen > 0) {
-                        hasSyncedFromCloud.current = true;
-                        setChannels(data.channels);
-                        if (activeChannelId === 'default' || !data.channels.find((c: any) => c.id === activeChannelId)) {
-                            setActiveChannelId(data.channels[0].id);
-                        }
-                    }
-                }
-            } catch (err: any) {
-                if (err.name !== 'AbortError') console.error('Cloud sync failed:', err);
-            } finally {
-                if (!isPoll) setIsLoadingCloud(false);
-            }
-        };
-
-        syncFromCloud(false);
-
-        // Set up polling every 20 seconds to keep multi-browser sessions in sync
-        const pollInterval = setInterval(() => syncFromCloud(true), 20000);
-
-        return () => {
-            controller.abort();
-            clearInterval(pollInterval);
-        };
-    }, [license]);
-
-    // Save to cloud whenever channels change
+    // Save to local whenever channels change
     useEffect(() => {
         localStorage.setItem('br_channels', JSON.stringify(channels));
-
-        // Don't save if we are still initial loading from cloud or if the change itself came from cloud
-        if (isLoadingCloud) return;
-
-        if (hasSyncedFromCloud.current) {
-            hasSyncedFromCloud.current = false;
-            return; // Skip one save cycle to avoid circular sync
-        }
-
-        if (license) {
-            fetch('/api/broadcast/save-channels', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ license, channels })
-            }).catch(e => console.error('Cloud save failed:', e));
-        }
-    }, [channels, license, isLoadingCloud]);
+    }, [channels]);
 
     // Auto-activate room on server
     useEffect(() => {
@@ -475,39 +416,6 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         );
     };
 
-    const clearCloudRooms = async () => {
-        openDialog(
-            t('broadcast.sender.manageClasses'),
-            '确定要清空云端数据库中所有关联的房间吗？此操作不可撤销。(注：该操作是安全的，仅会清理当前设备生成的这些房间数据，不会影响其他用户的房间。)',
-            'warning',
-            async () => {
-                setStatus({ type: 'loading', msg: t('broadcast.sender.clearing') });
-                try {
-                    const resp = await fetch('/api/broadcast/clear-license-data', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ license })
-                    });
-                    const data = await resp.json();
-                    if (data.success) {
-                        setChannels([]);
-                        setActiveChannelId('');
-                        localStorage.removeItem('br_channels');
-                        setStatus({ type: 'success', msg: t('broadcast.sender.clearSuccess') });
-                        setTimeout(() => {
-                            setStatus({ type: null, msg: '' });
-                            onExitToSelection?.();
-                        }, 1500);
-                    } else {
-                        throw new Error(data.error);
-                    }
-                } catch (err) {
-                    setStatus({ type: 'error', msg: t('broadcast.sender.clearFailed') });
-                    setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
-                }
-            }
-        );
-    };
 
     const copyRoomId = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -538,13 +446,6 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     <div className="flex items-center justify-between px-2">
                         <h3 className="text-sm font-black uppercase tracking-[0.2em] opacity-30">{t('broadcast.sender.manageClasses')}</h3>
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={clearCloudRooms}
-                                className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition active:scale-90"
-                                title={t('broadcast.sender.clearAllRooms')}
-                            >
-                                <AlertTriangle size={18} />
-                            </button>
                             <button
                                 onClick={addChannel}
                                 className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition active:scale-90"

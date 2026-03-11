@@ -25,10 +25,6 @@ export interface LicenseMetadata {
   firstActivatedAt?: string;
   lastUsedTime: string;
   devices: DeviceInfo[];
-  rooms?: string[]; // 房间广播激活列表
-  brChannels?: any[];   // 班级广播：频道同步列表
-  brMessages?: Record<string, any>; // 房间消息内容 (roomId -> Message)
-  fishUsage?: number;   // 班级广播：鱼声 TTS 使用次数
 }
 
 // 压缩版数据结构 (用于 Redis 存储)
@@ -44,10 +40,6 @@ export interface CompressedMetadata {
   f: number; // firstActivatedAt (timestamp)
   l: number; // lastUsedTime (timestamp)
   d: CompressedDevice[]; // devices
-  r?: string[]; // active rooms
-  brc?: any[]; // channels
-  brm?: Record<string, any>; // messages
-  fu?: number; // fish usage
 }
 
 // === 辅助工具 ===
@@ -133,11 +125,7 @@ export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
       f: new Date(dev.firstSeen).getTime(),
       l: new Date(dev.lastSeen).getTime(),
       u: dev.ua
-    })),
-    r: full.rooms || [],
-    brc: full.brChannels || [],
-    brm: full.brMessages || {},
-    fu: full.fishUsage || 0
+    }))
   };
 }
 
@@ -181,11 +169,7 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
       firstSeen: new Date(dev.f).toISOString(),
       lastSeen: new Date(dev.l).toISOString(),
       ua: dev.u
-    })),
-    rooms: c.r || [],
-    brChannels: (c as any).brChannels || c.brc || [],
-    brMessages: (c as any).brMessages || c.brm || {},
-    fishUsage: (c as any).fishUsage || c.fu || 0
+    }))
   };
 }
 
@@ -279,10 +263,7 @@ export default async function handler(
           if (!license) return;
           const cleanCode = keys[idx].replace('license:', '');
           const metadata = decompressMetadata(license, cleanCode);
-          if (metadata.rooms) {
-            // (Note: broadcast messages are now in metadata and won't be deleted)
-            console.log(`[Cleanup] An active license has rooms.`);
-          }
+          // (Note: broadcast references removed from metadata)
         });
       }
 

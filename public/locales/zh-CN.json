@@ -101,6 +101,8 @@
     "maxDb": "🔊 最高分贝",
     "threshold": "分贝阈值",
     "sensitivity": "麦克风灵敏度",
+    "mute": "静音模式",
+    "unmute": "恢复音量",
     "helpTitle": "点击查看校准建议",
     "helpAdviceTitle": "📏 校准建议：",
     "helpAdviceMute": "静音测试",

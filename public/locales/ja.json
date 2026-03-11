@@ -96,6 +96,8 @@
     "maxDb": "🔊 最大デシベル",
     "threshold": "デシベル閾値",
     "sensitivity": "マイク感度",
+    "mute": "静音モード",
+    "unmute": "音量オン",
     "helpTitle": "クリックして校正アドバイスを確認",
     "helpAdviceTitle": "📏 校正アドバイス：",
     "helpAdviceMute": "静音テスト",

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize, RotateCcw, HelpCircle, X } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize, RotateCcw, HelpCircle, X, Volume2, VolumeX } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
@@ -27,6 +27,12 @@ const DoraemonMonitorApp: React.FC = () => {
   const [sensitivity, setSensitivity] = useState(50);
   const [showHelp, setShowHelp] = useState(false);
   const [showThresholdHelp, setShowThresholdHelp] = useState(false);
+  const [isMuted, setIsMuted] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('doraemon_muted') === 'true';
+    }
+    return false;
+  });
   const sensitivityRef = useRef(50);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -152,37 +158,18 @@ const DoraemonMonitorApp: React.FC = () => {
     } finally { setIsLoading(false); }
   };
 
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      const next = !prev;
+      localStorage.setItem('doraemon_muted', String(next));
+      return next;
+    });
+  };
   const playAlarmSound = () => {
     if (!audioContextRef.current) return;
     try {
-      const ctx = audioContextRef.current;
-      if (ctx.state === 'suspended') ctx.resume();
-
-      const t = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      // More serious beep-style alarm
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(440, t); // A4, a more authoritative tone
-      osc.frequency.exponentialRampToValueAtTime(554.37, t + 0.1); // C#5
-      osc.frequency.setValueAtTime(440, t + 0.2);
-      osc.frequency.exponentialRampToValueAtTime(554.37, t + 0.3);
-      osc.frequency.setValueAtTime(440, t + 0.4);
-
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.2, t + 0.05);
-      gain.gain.linearRampToValueAtTime(0.2, t + 0.35);
-      gain.gain.linearRampToValueAtTime(0, t + 0.4);
-
-      osc.start(t);
-      osc.stop(t + 0.4);
-
       // Speech Synthesis Integration
-      if (window.speechSynthesis) {
+      if (window.speechSynthesis && !isMuted) {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
         msg.lang = 'zh-CN';
@@ -195,6 +182,34 @@ const DoraemonMonitorApp: React.FC = () => {
       if (navigator.vibrate) {
         navigator.vibrate([200, 100, 200]);
       }
+
+      if (isMuted) return;
+
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const tTime = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      // More serious beep-style alarm
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, tTime); // A4, a more authoritative tone
+      osc.frequency.exponentialRampToValueAtTime(554.37, tTime + 0.1); // C#5
+      osc.frequency.setValueAtTime(440, tTime + 0.2);
+      osc.frequency.exponentialRampToValueAtTime(554.37, tTime + 0.3);
+      osc.frequency.setValueAtTime(440, tTime + 0.4);
+
+      gain.gain.setValueAtTime(0, tTime);
+      gain.gain.linearRampToValueAtTime(0.2, tTime + 0.05);
+      gain.gain.linearRampToValueAtTime(0.2, tTime + 0.35);
+      gain.gain.linearRampToValueAtTime(0, tTime + 0.4);
+
+      osc.start(tTime);
+      osc.stop(tTime + 0.4);
 
     } catch (e) {
       console.error("Audio play failed", e);
@@ -376,6 +391,13 @@ const DoraemonMonitorApp: React.FC = () => {
           <div style={{ fontSize: '1.26rem', fontWeight: 'bold', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
         </div>
         <div style={{ display: 'flex', gap: '20px' }}>
+          <button
+            onClick={toggleMute}
+            className={`icon-btn ${isMuted ? 'text-red-500' : ''}`}
+            title={isMuted ? t('doraemon.unmute') : t('doraemon.mute')}
+          >
+            {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
+          </button>
           <button onClick={toggleFullscreen} className="icon-btn"><Maximize size={32} /></button>
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
         </div>

@@ -101,6 +101,8 @@
     "maxDb": "🔊 最高分貝",
     "threshold": "分貝閾值",
     "sensitivity": "麥克風靈敏度",
+    "mute": "靜音模式",
+    "unmute": "恢復音量",
     "helpTitle": "點擊查看校準建議",
     "helpAdviceTitle": "📏 校準建議：",
     "helpAdviceMute": "靜音測試",

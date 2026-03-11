@@ -101,6 +101,8 @@
     "maxDb": "🔊 Max dB",
     "threshold": "dB Threshold",
     "sensitivity": "Microphone Sensitivity",
+    "mute": "Muted",
+    "unmute": "Unmuted",
     "helpTitle": "Click for calibration advice",
     "helpAdviceTitle": "📏 Calibration Advice:",
     "helpAdviceMute": "Mute Test",

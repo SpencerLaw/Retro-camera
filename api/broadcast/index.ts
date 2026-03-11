@@ -49,7 +49,9 @@ function decompressMetadata(c: any, code: string): any {
         lastUsedTime: c.l ? new Date(c.l).toISOString() : new Date().toISOString(),
         devices: c.d.map((dev: any) => ({ deviceId: dev.i, firstSeen: new Date(dev.f).toISOString(), lastSeen: new Date(dev.l).toISOString(), ua: dev.u })),
         brChannels: c.brc || [],
-        fishUsage: c.fu || 0
+        fishUsage: c.fu || 0,
+        rooms: c.r || [],
+        brMessages: c.brm || {}
     };
 }
 
@@ -58,9 +60,11 @@ function compressMetadata(full: any): any {
         m: full.maxDevices,
         f: new Date(full.firstActivatedAt || full.generatedDate).getTime(),
         l: new Date(full.lastUsedTime).getTime(),
-        d: full.devices.map((dev: any) => ({ i: dev.deviceId, f: new Date(dev.firstSeen).getTime(), l: new Date(dev.lastSeen).getTime(), u: dev.ua })),
-        brc: full.brChannels,
-        fu: full.fishUsage
+        d: (full.devices || []).map((dev: any) => ({ i: dev.deviceId, f: new Date(dev.firstSeen).getTime(), l: new Date(dev.lastSeen).getTime(), u: dev.ua })),
+        brc: full.brChannels || [],
+        fu: full.fishUsage || 0,
+        r: full.rooms || [],
+        brm: full.brMessages || {}
     };
 }
 

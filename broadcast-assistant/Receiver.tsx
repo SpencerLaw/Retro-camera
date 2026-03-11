@@ -645,6 +645,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                             </h2>
                         </div>
                     </div>
+                </div>
                 )}
             </main>
 

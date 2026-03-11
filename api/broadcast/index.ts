@@ -226,7 +226,7 @@ async function handleClearLicenseData(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
-    const { text, reference_id, model = 's1', format = 'mp3', license } = req.body;
+    const { text, reference_id, model, format = 'mp3', latency = 'balanced', license } = req.body;
     if (!text) return res.status(400).json({ error: 'Missing text' });
 
     // Quota Enforcement
@@ -252,6 +252,10 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
 
     for (const key of FISH_KEYS) {
         try {
+            // Fish Audio V3 API typically uses /v1/tts and supports model names like "v3-turbo", "s1", etc.
+            // If model is not provided, we can either default to "v1" or "v3-turbo"
+            const requestModel = model || 'v3-turbo'; 
+            
             const response = await fetch('https://api.fish.audio/v1/tts', {
                 method: 'POST',
                 headers: {
@@ -262,7 +266,8 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
                     text,
                     reference_id,
                     format,
-                    model
+                    model: requestModel,
+                    latency
                 })
             });
 

@@ -48,7 +48,6 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
                     text: text.trim(),
                     reference_id: refId.trim(),
                     format: 'mp3',
-                    model: 's1',
                     license: getBCLicense()
                 };
 

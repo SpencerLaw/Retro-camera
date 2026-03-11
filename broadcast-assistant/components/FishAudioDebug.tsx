@@ -16,7 +16,6 @@ interface VoiceModel {
 
 const RECOMMENDED_VOICES = [
     { name: '默认音色 (免费 EdgeTTS)', id: '' },
-    { name: '嘉岚3.0 (高保真女声)', id: 'fbe02f8306fc4d3d915e9871722a39d5' },
     { name: '王琨 (专业广播)', id: '4f201abba2574feeae11e5ebf737859e' },
     { name: '女大学生 (自然亲切)', id: '5c353fdb312f4888836a9a5680099ef0' },
 ];

@@ -729,7 +729,7 @@
           const isRevoked = item.status === 'revoked';
           const isUnauthorized = item.status === 'unauthorized';
           const usage = item.totalDevices;
-          const isUnlimited = item.code.startsWith('XXDK') || item.code.startsWith('XM') || item.code.startsWith('GB') || item.maxDevices >= 9999;
+          const isUnlimited = item.code.startsWith('XXDK') || item.code.startsWith('XM') || item.maxDevices >= 9999;
           const max = isUnlimited ? '∞' : (item.maxDevices || 5);
 
           let badgeClass = 'status-good';

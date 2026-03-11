@@ -196,7 +196,8 @@ export default async function handler(
   res: VercelResponse
 ) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS'); 6
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -459,7 +460,7 @@ export default async function handler(
 
         const initialCount = metadata.devices.length;
         // 移除所有 UA 包含 "Web Broadcast Assistant" 或 "Web Assistant" 的设备
-        metadata.devices = metadata.devices.filter(d => 
+        metadata.devices = metadata.devices.filter(d =>
           !d.ua.includes('Web Broadcast Assistant') && !d.ua.includes('Web Assistant')
         );
 
@@ -545,6 +546,7 @@ export default async function handler(
           ua: rawDeviceInfo || getDeviceType(ua)
         }]
       };
+    } else {
       // 解压旧数据
       metadata = decompressMetadata(finalData, cleanCode);
       const deviceIndex = metadata.devices.findIndex(d => d.deviceId === deviceId);

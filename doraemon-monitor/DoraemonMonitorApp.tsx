@@ -162,6 +162,9 @@ const DoraemonMonitorApp: React.FC = () => {
     setIsMuted(prev => {
       const next = !prev;
       localStorage.setItem('doraemon_muted', String(next));
+      if (next && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
       return next;
     });
   };
@@ -181,7 +184,7 @@ const DoraemonMonitorApp: React.FC = () => {
       }
 
       // Haptic Feedback
-      if (navigator.vibrate) {
+      if (navigator.vibrate && !isMuted) {
         navigator.vibrate([200, 100, 200]);
       }
 
@@ -240,7 +243,7 @@ const DoraemonMonitorApp: React.FC = () => {
   }, [currentDb, limit, isStarted]);
 
   useEffect(() => {
-    if (state === 'alarm') {
+    if (state === 'alarm' && !isMuted) {
       // Play immediately
       playAlarmSound();
       // Start loop
@@ -252,7 +255,7 @@ const DoraemonMonitorApp: React.FC = () => {
         clearInterval(alarmIntervalRef.current);
         alarmIntervalRef.current = null;
       }
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (isMuted && window.speechSynthesis) window.speechSynthesis.cancel();
     }
     return () => {
       if (alarmIntervalRef.current) {
@@ -260,7 +263,7 @@ const DoraemonMonitorApp: React.FC = () => {
         alarmIntervalRef.current = null;
       }
     };
-  }, [state, playAlarmSound]);
+  }, [state, playAlarmSound, isMuted]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;

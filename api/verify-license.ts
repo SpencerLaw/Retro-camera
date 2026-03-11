@@ -203,7 +203,8 @@ export default async function handler(
   if (req.method !== 'POST') return res.status(405).json({ success: false, message: '方法不允许' });
 
   try {
-    const { action, adminKey, licenseCode, deviceId, deviceInfo: rawDeviceInfo, skipRegistration } = req.body;
+    const action = req.body.action || req.query.action;
+    const { adminKey, licenseCode, deviceId, deviceInfo: rawDeviceInfo, skipRegistration } = req.body;
     const ua = req.headers['user-agent'] || 'unknown';
 
     // === 管理员查询 ===
@@ -481,8 +482,9 @@ export default async function handler(
 
     // === 验证流程 ===
 
+    // 验证授权码流程
     if (!licenseCode || !deviceId) {
-      return res.status(400).json({ success: false, message: '缺少必要参数' });
+      return res.status(400).json({ success: false, message: '缺少必要参数 (licenseCode/deviceId)' });
     }
 
     const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();

@@ -607,10 +607,10 @@
       btn.textContent = '☢️ 正在深度清洗中...';
 
       try {
-        const res = await fetch(API_URL + '?action=nuclear_cleanup', {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ adminKey: SECRET_KEY })
+          body: JSON.stringify({ action: 'nuclear_cleanup', adminKey: SECRET_KEY })
         });
         const json = await res.json();
         alert(json.message);

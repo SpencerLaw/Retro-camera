@@ -468,6 +468,8 @@
           <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
           <button onclick="generateCodes('xm')" class="btn-primary" style="background: #E0C3FC; color: #6A5D7B;">生成星梦码
             (XXDK)</button>
+          <button onclick="purgeWebAssistant()" id="purgeWebBtn" class="btn-primary"
+            style="background: #ec4899; margin-top: 10px; width: 100%;">清除所有 Web Broadcast Assistant 设备记录</button>
           <button onclick="purgeAttempts()" id="purgeBtn" class="btn-primary"
             style="background: #ef4444; margin-top: 10px; width: 100%;">🗑️ 清空所有未授权尝试记录</button>
           <button onclick="cleanupBlobs()" id="cleanupBtn" class="btn-primary"
@@ -619,6 +621,30 @@
         }
       } catch (e) {
         alert('清洗失败: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    async function purgeWebAssistant() {
+      if (!confirm('确定要清除所有授权码中的 "Web Broadcast Assistant" 设备记录吗？\n这可以解决设备列表里出现大量重复网页端的问题。')) return;
+      const btn = document.getElementById('purgeWebBtn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⌛ 正在清理设备内记录...';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'purge_web_assistant', adminKey: SECRET_KEY })
+        });
+        const json = await res.json();
+        alert(json.message);
+        login();
+      } catch (e) {
+        alert('清理失败: ' + e.message);
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;

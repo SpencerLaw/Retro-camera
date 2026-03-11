@@ -196,7 +196,7 @@ export default async function handler(
   res: VercelResponse
 ) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS'); 6
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -312,17 +312,17 @@ export default async function handler(
       }
 
       console.log('[Nuclear Cleanup] Starting deep garbage collection...');
-  
+
       const allKeys = await kv.keys('*');
       const keysToDelete = allKeys.filter(key => !key.startsWith('license:'));
-  
+
       if (keysToDelete.length === 0) {
         return res.status(200).json({ success: true, message: '数据库已经很干净了' });
       }
-  
+
       console.log(`[Nuclear Cleanup] Deleting ${keysToDelete.length} keys...`);
       await Promise.all(keysToDelete.map(key => kv.del(key)));
-  
+
       return res.status(200).json({
         success: true,
         message: `大核爆清理完成：共强制删除 ${keysToDelete.length} 条非规范记录 (包括所有旧版 br:* 数据)`,
@@ -456,13 +456,13 @@ export default async function handler(
 
         const cleanCode = key.replace('license:', '');
         const metadata = decompressMetadata(rawData, cleanCode);
-        
+
         const initialCount = metadata.devices.length;
-        // 移除所有 UA 为 "Web Broadcast Assistant" 或 "Web Assistant" 的设备
+        // 移除所有 UA 包含 "Web Broadcast Assistant" 或 "Web Assistant" 的设备
         metadata.devices = metadata.devices.filter(d => 
-          d.ua !== 'Web Broadcast Assistant' && d.ua !== 'Web Assistant'
+          !d.ua.includes('Web Broadcast Assistant') && !d.ua.includes('Web Assistant')
         );
-        
+
         if (metadata.devices.length !== initialCount) {
           const purgedCount = initialCount - metadata.devices.length;
           totalPurged += purgedCount;

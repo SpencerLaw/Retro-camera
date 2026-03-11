@@ -311,7 +311,8 @@ export default async function handler(
       const keysToDelete = allKeys.filter(key => 
         !key.startsWith('license:') || 
         key.startsWith('license:usage:') || 
-        key.startsWith('license:attempt:')
+        key.startsWith('license:attempt:') ||
+        key === 'br:rooms'
       );
 
       if (keysToDelete.length === 0) {

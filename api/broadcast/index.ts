@@ -127,17 +127,35 @@ async function handleTTS(req: VercelRequest, res: VercelResponse) {
     return res.status(200).send(audioBuffer);
 }
 
+async function findLicenseByRoom(roomCode: string): Promise<{ license: string, metadata: any } | null> {
+    const keys = await kv.keys('license:*');
+    if (keys.length === 0) return null;
+    
+    // Fetch all metadata in batches to find the owner
+    const values = await kv.mget<any[]>(...keys);
+    for (let i = 0; i < keys.length; i++) {
+        const raw = values[i];
+        if (!raw) continue;
+        const code = keys[i].split(':')[1];
+        const meta = decompressMetadata(raw, code);
+        if (meta.a === roomCode) {
+            return { license: code, metadata: meta };
+        }
+    }
+    return null;
+}
+
 async function handleFetch(req: VercelRequest, res: VercelResponse) {
     const code = (req.query.code as string)?.toUpperCase();
     if (!code) return res.status(400).json({ error: 'Missing code' });
 
-    // 1. Check if room is active via Hash index
-    const ownerLicense = await kv.hget<string>(`br:rooms`, code);
-    if (!ownerLicense) {
+    // 1. Find owner via scan/mget
+    const match = await findLicenseByRoom(code);
+    if (!match) {
         return res.status(200).json({ message: null, notFound: true });
     }
 
-    // 2. Get the current transient message
+    // 2. Get the current transient message (still ephemeral)
     const message = await kv.get(`br:msg:${code}`);
     return res.status(200).json({ message });
 }
@@ -164,9 +182,6 @@ async function handleSend(req: VercelRequest, res: VercelResponse) {
     // Save transient message
     await kv.set(`br:msg:${uppercaseCode}`, messageData, { ex: 3600 }); // 1h TTL for messages
     
-    // Ensure room index exists (don't set TTL here as Hash keys don't support field-level TTL)
-    await kv.hset(`br:rooms`, { [uppercaseCode]: cleanLicense });
-
     return res.status(200).json({ success: true, messageId });
 }
 
@@ -178,8 +193,11 @@ async function handleActivate(req: VercelRequest, res: VercelResponse) {
     const uppercaseCode = code.toUpperCase();
     const redisKey = `license:${cleanLicense}`;
 
-    // 1. Update Index (Hash)
-    await kv.hset(`br:rooms`, { [uppercaseCode]: cleanLicense });
+    // 1. Collision Prevention (串台保护)
+    const existing = await findLicenseByRoom(uppercaseCode);
+    if (existing && existing.license !== cleanLicense) {
+        return res.status(409).json({ error: '该房间号已被其他授权码占用，请尝试其他号码' });
+    }
 
     // 2. Sync to License Metadata
     const rawData = await kv.get(redisKey);
@@ -197,10 +215,8 @@ async function handleDeactivate(req: VercelRequest, res: VercelResponse) {
     const { code, license } = req.body;
     const uppercaseCode = code?.toUpperCase();
     if (uppercaseCode) {
-        await Promise.all([
-            kv.hdel(`br:rooms`, uppercaseCode),
-            kv.del(`br:msg:${uppercaseCode}`)
-        ]);
+        // Only transient message is a separate key now
+        await kv.del(`br:msg:${uppercaseCode}`);
         
         // Also clear from license metadata
         if (license) {
@@ -223,10 +239,8 @@ async function handleCleanup(req: VercelRequest, res: VercelResponse) {
     const { codes, license } = req.body;
     if (Array.isArray(codes) && codes.length > 0) {
         const uppercaseCodes = codes.map(c => c.toUpperCase());
-        await Promise.all(uppercaseCodes.flatMap(c => [
-            kv.hdel(`br:rooms`, c),
-            kv.del(`br:msg:${c}`)
-        ]));
+        // Clean up transient messages
+        await Promise.all(uppercaseCodes.map(c => kv.del(`br:msg:${c}`)));
 
         if (license) {
             const cleanLicense = license.toUpperCase();
@@ -257,8 +271,8 @@ async function handleSaveChannels(req: VercelRequest, res: VercelResponse) {
 async function handleCheckCode(req: VercelRequest, res: VercelResponse) {
     const code = (req.query.code as string)?.toUpperCase();
     if (!code) return res.status(400).json({ error: 'Missing code' });
-    const owner = await kv.hget(`br:rooms`, code);
-    return res.status(200).json({ inUse: !!owner });
+    const match = await findLicenseByRoom(code);
+    return res.status(200).json({ inUse: !!match });
 }
 
 async function handleClearLicenseData(req: VercelRequest, res: VercelResponse) {

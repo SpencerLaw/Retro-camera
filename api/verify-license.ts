@@ -203,7 +203,7 @@ export default async function handler(
   if (req.method !== 'POST') return res.status(405).json({ success: false, message: '方法不允许' });
 
   try {
-    const { licenseCode, deviceId, deviceInfo: rawDeviceInfo, action, adminKey } = req.body;
+    const { action, adminKey, licenseCode, deviceId, deviceInfo: rawDeviceInfo, skipRegistration } = req.body;
     const ua = req.headers['user-agent'] || 'unknown';
 
     // === 管理员查询 ===
@@ -437,6 +437,7 @@ export default async function handler(
     }
 
     // === 验证流程 ===
+
     if (!licenseCode || !deviceId) {
       return res.status(400).json({ success: false, message: '缺少必要参数' });
     }
@@ -480,6 +481,9 @@ export default async function handler(
 
     if (!finalData) {
       // 首次激活
+      if (skipRegistration) {
+        return res.status(404).json({ success: false, message: '该授权码尚未激活，请先由教师端激活' });
+      }
       console.log(`[License] New Activation: ${cleanCode} Device: ${deviceId}`);
       metadata = {
         code: cleanCode,
@@ -496,10 +500,8 @@ export default async function handler(
           ua: rawDeviceInfo || getDeviceType(ua)
         }]
       };
-    } else {
       // 解压旧数据
-      metadata = decompressMetadata(rawData, cleanCode);
-
+      metadata = decompressMetadata(finalData, cleanCode);
       const deviceIndex = metadata.devices.findIndex(d => d.deviceId === deviceId);
 
       if (deviceIndex > -1) {
@@ -514,6 +516,19 @@ export default async function handler(
         metadata.lastUsedTime = dateNowISO;
       } else {
         // 添加新设备
+        if (skipRegistration) {
+          // 只读验证，不添加设备，直接返回成功以允许进入（前提是 License 存在且未过期）
+          const token = Buffer.from(`${cleanCode}:${deviceId}:${expiryDate.getTime()}`).toString('base64');
+          return res.status(200).json({
+            success: true,
+            message: '授权验证成功 (只读)',
+            data: {
+              expiryDate: metadata.expiryDate,
+              totalDevices: metadata.totalDevices,
+              token: token
+            }
+          });
+        }
         console.log(`[License] New Device: ${cleanCode} Device: ${deviceId}`);
 
         // 检查限制

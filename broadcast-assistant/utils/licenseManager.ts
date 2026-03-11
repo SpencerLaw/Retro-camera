@@ -90,7 +90,7 @@ export const getLicensePrefix = (license: string): string => {
     return '';
 };
 
-export const verifyLicense = async (code: string): Promise<{ success: boolean; message?: string }> => {
+export const verifyLicense = async (code: string, skipRegistration: boolean = false): Promise<{ success: boolean; message?: string }> => {
     const cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
 
     // Only allow GB prefix for Broadcast Assistant
@@ -105,7 +105,8 @@ export const verifyLicense = async (code: string): Promise<{ success: boolean; m
             body: JSON.stringify({
                 licenseCode: cleanCode,
                 deviceId: getBCDeviceId(),
-                deviceInfo: getBCDeviceInfo()
+                deviceInfo: getBCDeviceInfo(),
+                skipRegistration: skipRegistration
             }),
         });
         const data = await response.json();

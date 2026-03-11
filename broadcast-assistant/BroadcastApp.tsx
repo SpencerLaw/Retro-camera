@@ -121,7 +121,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
             const currentLicense = getBCLicense();
             if (currentLicense) {
                 setVerifying(true);
-                const result = await verifyLicense(currentLicense);
+                const result = await verifyLicense(currentLicense, false);
                 setVerifying(false);
 
                 if (result.success) {

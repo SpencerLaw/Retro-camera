@@ -38,26 +38,32 @@ function extractDateFromCode(code: string): Date | null {
 function decompressMetadata(c: any, code: string): any {
     if (!c) return null;
     
-    let meta: any;
+    // Check if it's already full metadata (legacy)
     if ('devices' in c) {
-        meta = c;
-    } else {
-        const genDate = extractDateFromCode(code) || new Date();
-        const expDate = new Date(genDate); expDate.setFullYear(expDate.getFullYear() + 1);
-        meta = {
-            code,
-            totalDevices: c.d.length,
-            maxDevices: getEffectiveMaxDevices(code),
-            generatedDate: genDate.toISOString(),
-            expiryDate: expDate.toISOString(),
-            firstActivatedAt: new Date(c.f).toISOString(),
-            lastUsedTime: c.l ? new Date(c.l).toISOString() : new Date().toISOString(),
-            devices: c.d.map((dev: any) => ({ deviceId: dev.i, firstSeen: new Date(dev.f).toISOString(), lastSeen: new Date(dev.l).toISOString(), ua: dev.u }))
-        };
+        return c;
     }
-    
-    if (!meta.devices) meta.devices = [];
-    return meta;
+
+    const genDate = extractDateFromCode(code) || new Date();
+    const expDate = new Date(genDate); expDate.setFullYear(expDate.getFullYear() + 1);
+
+    return {
+        code,
+        totalDevices: (c.d || []).length,
+        maxDevices: c.m || getEffectiveMaxDevices(code),
+        generatedDate: genDate.toISOString(),
+        expiryDate: expDate.toISOString(),
+        firstActivatedAt: new Date(c.f || Date.now()).toISOString(),
+        lastUsedTime: new Date(c.l || Date.now()).toISOString(),
+        devices: (c.d || []).map((dev: any) => ({ 
+            deviceId: dev.i, 
+            firstSeen: new Date(dev.f).toISOString(), 
+            lastSeen: new Date(dev.l).toISOString(), 
+            ua: dev.u 
+        })),
+        brc: c.brc,
+        fu: c.fu,
+        a: c.a
+    };
 }
 
 function compressMetadata(full: any): any {

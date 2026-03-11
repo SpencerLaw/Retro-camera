@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize, Minimize, RotateCcw, HelpCircle, X, Volume2, VolumeX } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
@@ -165,17 +165,19 @@ const DoraemonMonitorApp: React.FC = () => {
       return next;
     });
   };
-  const playAlarmSound = () => {
+  const playAlarmSound = useCallback(() => {
     if (!audioContextRef.current) return;
     try {
       // Speech Synthesis Integration
-      if (window.speechSynthesis && !isMuted) {
+      if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
-        msg.lang = 'zh-CN';
-        msg.rate = 0.9;   // Slower for seriousness
-        msg.pitch = 0.8;  // Deeper voice
-        window.speechSynthesis.speak(msg);
+        if (!isMuted) {
+          const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
+          msg.lang = 'zh-CN';
+          msg.rate = 0.9;   // Slower for seriousness
+          msg.pitch = 0.8;  // Deeper voice
+          window.speechSynthesis.speak(msg);
+        }
       }
 
       // Haptic Feedback
@@ -188,7 +190,7 @@ const DoraemonMonitorApp: React.FC = () => {
       const ctx = audioContextRef.current;
       if (ctx.state === 'suspended') ctx.resume();
 
-      const tTime = ctx.currentTime;
+      const currentTime = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
@@ -197,24 +199,24 @@ const DoraemonMonitorApp: React.FC = () => {
 
       // More serious beep-style alarm
       osc.type = 'square';
-      osc.frequency.setValueAtTime(440, tTime); // A4, a more authoritative tone
-      osc.frequency.exponentialRampToValueAtTime(554.37, tTime + 0.1); // C#5
-      osc.frequency.setValueAtTime(440, tTime + 0.2);
-      osc.frequency.exponentialRampToValueAtTime(554.37, tTime + 0.3);
-      osc.frequency.setValueAtTime(440, tTime + 0.4);
+      osc.frequency.setValueAtTime(440, currentTime); // A4, a more authoritative tone
+      osc.frequency.exponentialRampToValueAtTime(554.37, currentTime + 0.1); // C#5
+      osc.frequency.setValueAtTime(440, currentTime + 0.2);
+      osc.frequency.exponentialRampToValueAtTime(554.37, currentTime + 0.3);
+      osc.frequency.setValueAtTime(440, currentTime + 0.4);
 
-      gain.gain.setValueAtTime(0, tTime);
-      gain.gain.linearRampToValueAtTime(0.2, tTime + 0.05);
-      gain.gain.linearRampToValueAtTime(0.2, tTime + 0.35);
-      gain.gain.linearRampToValueAtTime(0, tTime + 0.4);
+      gain.gain.setValueAtTime(0, currentTime);
+      gain.gain.linearRampToValueAtTime(0.2, currentTime + 0.05);
+      gain.gain.linearRampToValueAtTime(0.2, currentTime + 0.35);
+      gain.gain.linearRampToValueAtTime(0, currentTime + 0.4);
 
-      osc.start(tTime);
-      osc.stop(tTime + 0.4);
+      osc.start(currentTime);
+      osc.stop(currentTime + 0.4);
 
     } catch (e) {
       console.error("Audio play failed", e);
     }
-  };
+  }, [isMuted, t]);
 
   useEffect(() => {
     if (!isStarted) return;
@@ -258,7 +260,7 @@ const DoraemonMonitorApp: React.FC = () => {
         alarmIntervalRef.current = null;
       }
     };
-  }, [state]);
+  }, [state, playAlarmSound]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -393,7 +395,8 @@ const DoraemonMonitorApp: React.FC = () => {
         <div style={{ display: 'flex', gap: '20px' }}>
           <button
             onClick={toggleMute}
-            className={`icon-btn ${isMuted ? 'text-red-500' : ''}`}
+            className="icon-btn"
+            style={{ color: isMuted ? '#ff416c' : 'inherit' }}
             title={isMuted ? t('doraemon.unmute') : t('doraemon.mute')}
           >
             {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}

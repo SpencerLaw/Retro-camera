@@ -518,7 +518,12 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const emergency = !!currentMsg?.isEmergency;
 
     return (
-        <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-all duration-1000 ${emergency ? 'bg-red-950 text-white' : (theme === 'dark' ? 'bg-[#0a0a0f] text-white' : 'bg-slate-100 text-slate-900')}`}>
+        <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-all duration-1000 ${
+            emergency 
+                ? 'bg-red-950 text-white' 
+                : (theme === 'dark' 
+                    ? 'bg-gradient-to-br from-[#0a0a0f] via-pink-950/10 to-[#050508] text-white' 
+                    : 'bg-gradient-to-br from-slate-50 via-pink-50/30 to-rose-50/20 text-slate-900')}`}>
 
             {/* ── Atmospheric BG ─────────────────────────────────────────── */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -535,7 +540,8 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     </>
                 ) : (
                     <>
-                        <div className="absolute -top-60 left-0 w-full h-[500px] bg-gradient-to-b from-pink-100/60 to-transparent" />
+                        <div className="absolute -top-60 left-0 w-full h-[800px] bg-gradient-to-b from-pink-100/40 via-rose-50/20 to-transparent" />
+                        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-200/20 blur-[140px] animate-pulse" />
                     </>
                 )}
                 {isPlaying && (

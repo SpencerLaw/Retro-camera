@@ -25,6 +25,9 @@ export interface LicenseMetadata {
   firstActivatedAt?: string;
   lastUsedTime: string;
   devices: DeviceInfo[];
+  brc?: any[]; // broadcast channels
+  fu?: number; // fish usage
+  a?: string;  // active room
 }
 
 // 压缩版数据结构 (用于 Redis 存储)
@@ -40,6 +43,9 @@ export interface CompressedMetadata {
   f: number; // firstActivatedAt (timestamp)
   l: number; // lastUsedTime (timestamp)
   d: CompressedDevice[]; // devices
+  brc?: any[]; // broadcast channels (legacy/sync)
+  fu?: number; // fish usage
+  a?: string;  // active room
 }
 
 // === 辅助工具 ===
@@ -125,7 +131,10 @@ export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
       f: new Date(dev.firstSeen).getTime(),
       l: new Date(dev.lastSeen).getTime(),
       u: dev.ua
-    }))
+    })),
+    brc: full.brc,
+    fu: full.fu,
+    a: full.a
   };
 }
 
@@ -169,7 +178,10 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
       firstSeen: new Date(dev.f).toISOString(),
       lastSeen: new Date(dev.l).toISOString(),
       ua: dev.u
-    }))
+    })),
+    brc: c.brc,
+    fu: c.fu,
+    a: c.a
   };
 }
 
@@ -296,7 +308,11 @@ export default async function handler(
       console.log('[Nuclear Cleanup] Starting deep garbage collection...');
 
       const allKeys = await kv.keys('*');
-      const keysToDelete = allKeys.filter(key => !key.startsWith('license:'));
+      const keysToDelete = allKeys.filter(key => 
+        !key.startsWith('license:') || 
+        key.startsWith('license:usage:') || 
+        key.startsWith('license:attempt:')
+      );
 
       if (keysToDelete.length === 0) {
         return res.status(200).json({ success: true, message: '数据库已经很干净了' });

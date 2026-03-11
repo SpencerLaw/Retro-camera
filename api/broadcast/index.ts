@@ -65,7 +65,10 @@ function compressMetadata(full: any): any {
         m: full.maxDevices,
         f: new Date(full.firstActivatedAt || full.generatedDate).getTime(),
         l: new Date(full.lastUsedTime).getTime(),
-        d: (full.devices || []).map((dev: any) => ({ i: dev.deviceId, f: new Date(dev.firstSeen).getTime(), l: new Date(dev.lastSeen).getTime(), u: dev.ua }))
+        d: (full.devices || []).map((dev: any) => ({ i: dev.deviceId, f: new Date(dev.firstSeen).getTime(), l: new Date(dev.lastSeen).getTime(), u: dev.ua })),
+        brc: full.brc,
+        fu: full.fu,
+        a: full.a
     };
 }
 
@@ -128,8 +131,8 @@ async function handleFetch(req: VercelRequest, res: VercelResponse) {
     const code = (req.query.code as string)?.toUpperCase();
     if (!code) return res.status(400).json({ error: 'Missing code' });
 
-    // 1. Check if room is active
-    const ownerLicense = await kv.get<string>(`br:active:${code}`);
+    // 1. Check if room is active via Hash index
+    const ownerLicense = await kv.hget<string>(`br:rooms`, code);
     if (!ownerLicense) {
         return res.status(200).json({ message: null, notFound: true });
     }
@@ -158,47 +161,85 @@ async function handleSend(req: VercelRequest, res: VercelResponse) {
         license: cleanLicense
     };
 
-    // Save transient message and keep room active
-    await Promise.all([
-        kv.set(`br:msg:${uppercaseCode}`, messageData, { ex: 3600 }), // 1h TTL for messages
-        kv.set(`br:active:${uppercaseCode}`, cleanLicense, { ex: 14400 }) // 4h TTL for room activity
-    ]);
+    // Save transient message
+    await kv.set(`br:msg:${uppercaseCode}`, messageData, { ex: 3600 }); // 1h TTL for messages
+    
+    // Ensure room index exists (don't set TTL here as Hash keys don't support field-level TTL)
+    await kv.hset(`br:rooms`, { [uppercaseCode]: cleanLicense });
 
     return res.status(200).json({ success: true, messageId });
 }
 
 async function handleActivate(req: VercelRequest, res: VercelResponse) {
-    const { code, license } = req.body;
+    const { code, license, brc } = req.body;
     if (!license) return res.status(400).json({ error: 'Missing license context' });
     
     const cleanLicense = license.toUpperCase();
     const uppercaseCode = code.toUpperCase();
+    const redisKey = `license:${cleanLicense}`;
 
-    // Just mark room as active with TTL
-    await kv.set(`br:active:${uppercaseCode}`, cleanLicense, { ex: 14400 });
+    // 1. Update Index (Hash)
+    await kv.hset(`br:rooms`, { [uppercaseCode]: cleanLicense });
+
+    // 2. Sync to License Metadata
+    const rawData = await kv.get(redisKey);
+    if (rawData) {
+        const metadata = decompressMetadata(rawData, cleanLicense);
+        metadata.a = uppercaseCode; // Active room
+        if (brc) metadata.brc = brc; // Update channels if provided
+        await kv.set(redisKey, compressMetadata(metadata));
+    }
 
     return res.status(200).json({ success: true });
 }
 
 async function handleDeactivate(req: VercelRequest, res: VercelResponse) {
-    const { code } = req.body;
+    const { code, license } = req.body;
     const uppercaseCode = code?.toUpperCase();
     if (uppercaseCode) {
         await Promise.all([
-            kv.del(`br:active:${uppercaseCode}`),
+            kv.hdel(`br:rooms`, uppercaseCode),
             kv.del(`br:msg:${uppercaseCode}`)
         ]);
+        
+        // Also clear from license metadata
+        if (license) {
+            const cleanLicense = license.toUpperCase();
+            const redisKey = `license:${cleanLicense}`;
+            const rawData = await kv.get(redisKey);
+            if (rawData) {
+                const metadata = decompressMetadata(rawData, cleanLicense);
+                if (metadata.a === uppercaseCode) {
+                    delete metadata.a;
+                    await kv.set(redisKey, compressMetadata(metadata));
+                }
+            }
+        }
     }
     return res.status(200).json({ success: true });
 }
 
 async function handleCleanup(req: VercelRequest, res: VercelResponse) {
-    const { codes } = req.body;
+    const { codes, license } = req.body;
     if (Array.isArray(codes) && codes.length > 0) {
-        await Promise.all(codes.flatMap(c => [
-            kv.del(`br:active:${c.toUpperCase()}`),
-            kv.del(`br:msg:${c.toUpperCase()}`)
+        const uppercaseCodes = codes.map(c => c.toUpperCase());
+        await Promise.all(uppercaseCodes.flatMap(c => [
+            kv.hdel(`br:rooms`, c),
+            kv.del(`br:msg:${c}`)
         ]));
+
+        if (license) {
+            const cleanLicense = license.toUpperCase();
+            const redisKey = `license:${cleanLicense}`;
+            const rawData = await kv.get(redisKey);
+            if (rawData) {
+                const metadata = decompressMetadata(rawData, cleanLicense);
+                if (metadata.a && uppercaseCodes.includes(metadata.a)) {
+                    delete metadata.a;
+                    await kv.set(redisKey, compressMetadata(metadata));
+                }
+            }
+        }
     }
     return res.status(200).json({ success: true });
 }
@@ -216,7 +257,7 @@ async function handleSaveChannels(req: VercelRequest, res: VercelResponse) {
 async function handleCheckCode(req: VercelRequest, res: VercelResponse) {
     const code = (req.query.code as string)?.toUpperCase();
     if (!code) return res.status(400).json({ error: 'Missing code' });
-    const owner = await kv.get(`br:active:${code}`);
+    const owner = await kv.hget(`br:rooms`, code);
     return res.status(200).json({ inUse: !!owner });
 }
 
@@ -230,15 +271,21 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
     if (!text) return res.status(400).json({ error: 'Missing text' });
 
     // Quota Enforcement
+    let metadata: any = null;
+    let redisKey: string = '';
     if (license) {
         const cleanLicense = license.toUpperCase();
+        redisKey = `license:${cleanLicense}`;
         if (cleanLicense.startsWith('GB')) {
-            const usage = await kv.get<number>(`license:usage:fish:${cleanLicense}`) || 0;
-            if (usage >= 20) {
-                return res.status(403).json({
-                    error: '鱼声配额已用完，请找管理员！',
-                    quotaExceeded: true
-                });
+            const rawData = await kv.get(redisKey);
+            if (rawData) {
+                metadata = decompressMetadata(rawData, cleanLicense);
+                if ((metadata.fu || 0) >= 20) {
+                    return res.status(403).json({
+                        error: '鱼声配额已用完，请找管理员！',
+                        quotaExceeded: true
+                    });
+                }
             }
         }
     }
@@ -285,8 +332,9 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
             const audioBuffer = await response.arrayBuffer();
 
             // 成功后更新配额记录
-            if (license && license.toUpperCase().startsWith('GB')) {
-                await kv.incr(`license:usage:fish:${license.toUpperCase()}`);
+            if (metadata && redisKey) {
+                metadata.fu = (metadata.fu || 0) + 1;
+                await kv.set(redisKey, compressMetadata(metadata));
             }
 
             res.setHeader('Content-Type', 'audio/mpeg');

@@ -521,12 +521,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-all duration-1000 ${
             emergency 
                 ? 'bg-red-950 text-white' 
-                : (theme === 'dark' 
-                    ? 'bg-gradient-to-br from-[#0a0a0f] via-pink-950/10 to-[#050508] text-white' 
-                    : 'bg-gradient-to-br from-slate-50 via-pink-50/30 to-rose-50/20 text-slate-900')}`}>
+                : (theme === 'dark' ? 'bg-[#0a0a0f] text-white' : 'bg-slate-50 text-slate-900')}`}>
 
             {/* ── Atmospheric BG ─────────────────────────────────────────── */}
-            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden text-white/10 dark:text-white/5">
                 {emergency ? (
                     <>
                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-900/80 via-red-950 to-black" />
@@ -535,13 +533,14 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     </>
                 ) : theme === 'dark' ? (
                     <>
-                        <div className="absolute -top-60 -left-40 w-[700px] h-[700px] rounded-full bg-pink-900/20 blur-[160px] animate-pulse" />
-                        <div className="absolute -bottom-60 -right-40 w-[700px] h-[700px] rounded-full bg-rose-900/20 blur-[160px] animate-pulse" />
+                        <div className="absolute -top-60 -left-60 w-[800px] h-[800px] rounded-full bg-pink-600/[0.07] blur-[160px] animate-pulse" />
+                        <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-rose-600/[0.05] blur-[140px] animate-pulse" />
+                        <div className="absolute -bottom-40 left-[10%] w-[500px] h-[500px] rounded-full bg-pink-500/[0.03] blur-[120px]" />
                     </>
                 ) : (
                     <>
-                        <div className="absolute -top-60 left-0 w-full h-[800px] bg-gradient-to-b from-pink-100/40 via-rose-50/20 to-transparent" />
-                        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-200/20 blur-[140px] animate-pulse" />
+                        <div className="absolute -top-60 left-0 w-full h-[500px] bg-gradient-to-b from-pink-100/40 via-transparent to-transparent" />
+                        <div className="absolute top-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-100/30 blur-[120px] animate-pulse" />
                     </>
                 )}
                 {isPlaying && (

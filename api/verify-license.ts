@@ -436,6 +436,49 @@ export default async function handler(
       });
     }
 
+    // === 管理员：清理 Web Assistant 脏数据 ===
+    if (action === 'purge_web_assistant') {
+      if (!adminKey || adminKey.trim() !== 'spencer') {
+        return res.status(401).json({ success: false, message: '密码错误' });
+      }
+
+      console.log('[Purge] Starting Web Assistant device purge...');
+      const keys = await kv.keys('license:*');
+      let totalPurged = 0;
+
+      for (const key of keys) {
+        // 跳过尝试记录主键
+        if (key.startsWith('license:attempt:')) continue;
+
+        const rawData = await kv.get<CompressedMetadata | LicenseMetadata>(key);
+        if (!rawData) continue;
+
+        const cleanCode = key.replace('license:', '');
+        const metadata = decompressMetadata(rawData, cleanCode);
+        
+        const initialCount = metadata.devices.length;
+        // 移除所有 UA 为 "Web Broadcast Assistant" 或 "Web Assistant" 的设备
+        metadata.devices = metadata.devices.filter(d => 
+          d.ua !== 'Web Broadcast Assistant' && d.ua !== 'Web Assistant'
+        );
+        
+        if (metadata.devices.length !== initialCount) {
+          const purgedCount = initialCount - metadata.devices.length;
+          totalPurged += purgedCount;
+          metadata.totalDevices = metadata.devices.length;
+          // 重新压缩并保存
+          const compressed = compressMetadata(metadata);
+          await kv.set(key, compressed);
+          console.log(`[Purge] Purged ${purgedCount} devices from ${cleanCode}`);
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `清理完成，共移除 ${totalPurged} 个 Web Assistant 设备记录`
+      });
+    }
+
     // === 验证流程 ===
 
     if (!licenseCode || !deviceId) {

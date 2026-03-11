@@ -36,23 +36,36 @@ function extractDateFromCode(code: string): Date | null {
 }
 
 function decompressMetadata(c: any, code: string): any {
-    if (!c || 'devices' in c) return c;
-    const genDate = extractDateFromCode(code) || new Date();
-    const expDate = new Date(genDate); expDate.setFullYear(expDate.getFullYear() + 1);
-    return {
-        code,
-        totalDevices: c.d.length,
-        maxDevices: getEffectiveMaxDevices(code),
-        generatedDate: genDate.toISOString(),
-        expiryDate: expDate.toISOString(),
-        firstActivatedAt: new Date(c.f).toISOString(),
-        lastUsedTime: c.l ? new Date(c.l).toISOString() : new Date().toISOString(),
-        devices: c.d.map((dev: any) => ({ deviceId: dev.i, firstSeen: new Date(dev.f).toISOString(), lastSeen: new Date(dev.l).toISOString(), ua: dev.u })),
-        brChannels: c.brc || [],
-        fishUsage: c.fu || 0,
-        rooms: c.r || [],
-        brMessages: c.brm || {}
-    };
+    if (!c) return null;
+    
+    let meta: any;
+    if ('devices' in c) {
+        meta = c;
+    } else {
+        const genDate = extractDateFromCode(code) || new Date();
+        const expDate = new Date(genDate); expDate.setFullYear(expDate.getFullYear() + 1);
+        meta = {
+            code,
+            totalDevices: c.d.length,
+            maxDevices: getEffectiveMaxDevices(code),
+            generatedDate: genDate.toISOString(),
+            expiryDate: expDate.toISOString(),
+            firstActivatedAt: new Date(c.f).toISOString(),
+            lastUsedTime: c.l ? new Date(c.l).toISOString() : new Date().toISOString(),
+            devices: c.d.map((dev: any) => ({ deviceId: dev.i, firstSeen: new Date(dev.f).toISOString(), lastSeen: new Date(dev.l).toISOString(), ua: dev.u })),
+            brChannels: c.brc || [],
+            fishUsage: c.fu || 0,
+            rooms: c.r || [],
+            brMessages: c.brm || {}
+        };
+    }
+    
+    // 强制补全关键字段，防止旧数据缺少字段导致前端或后续逻辑崩溃
+    if (!meta.rooms) meta.rooms = [];
+    if (!meta.brMessages) meta.brMessages = {};
+    if (!meta.brChannels) meta.brChannels = [];
+    
+    return meta;
 }
 
 function compressMetadata(full: any): any {

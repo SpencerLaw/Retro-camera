@@ -23,7 +23,10 @@ const RECOMMENDED_VOICES = [
 
 const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice, theme }) => {
     const [text, setText] = useState('我当然知道那不是我的月亮，但有一刻，月亮的确照在了我身上。可生活不是电影，我也缺少点运气。我悄然触摸你，却未曾料想，你像蒲公英散开了，到处啊，都是你的模样。');
-    const [refId, setRefId] = useState(RECOMMENDED_VOICES[0].id);
+    const [refId, setRefId] = useState(() => {
+        const license = getBCLicense();
+        return localStorage.getItem(`br_fish_voice_${license || 'DEMO-ONLY'}`) || RECOMMENDED_VOICES[0].id;
+    });
     const [isLoading, setIsLoading] = useState(false);
     const [walletBalance, setWalletBalance] = useState<number | null>(null);
     const [isCheckingWallet, setIsCheckingWallet] = useState(false);

@@ -134,10 +134,10 @@ export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
       l: new Date(dev.lastSeen).getTime(),
       u: dev.ua
     })),
-    r: full.rooms,
-    brc: full.brChannels,
-    brm: full.brMessages,
-    fu: full.fishUsage
+    r: full.rooms || [],
+    brc: full.brChannels || [],
+    brm: full.brMessages || {},
+    fu: full.fishUsage || 0
   };
 }
 
@@ -182,9 +182,9 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
       lastSeen: new Date(dev.l).toISOString(),
       ua: dev.u
     })),
-    rooms: c.r,
-    brChannels: (c as any).brChannels || c.brc,
-    brMessages: (c as any).brMessages || c.brm,
+    rooms: c.r || [],
+    brChannels: (c as any).brChannels || c.brc || [],
+    brMessages: (c as any).brMessages || c.brm || {},
     fishUsage: (c as any).fishUsage || c.fu || 0
   };
 }

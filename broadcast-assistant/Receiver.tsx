@@ -552,6 +552,9 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                             <span className={`ml-2 ${theme === 'dark' || emergency ? 'text-pink-400' : 'text-pink-500'}`}>
                                 {channelName || '等待识别频道名...'}
                             </span>
+                            <span className={`ml-3 text-xs opacity-40 font-mono`}>
+                                <ClockDisplay />
+                            </span>
                         </p>
                         <div className={`flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase ${theme === 'dark' || emergency ? 'text-white/20' : 'text-slate-400'}`}>
                             <div className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-blue-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
@@ -634,18 +637,12 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         <IdleVisualizer isEmergency={false} />
                         <div className="text-center space-y-4">
                             <div className="space-y-1">
-                                <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-pink-500/60 animate-pulse mb-8`}>
-                                    正在扫描信号...
-                                </p>
-                                <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                                    信号捕获中...
-                                </h2>
-                            </div>
-                            <div className={`flex items-center gap-3 justify-center text-[10px] font-mono font-bold tracking-widest ${theme === 'dark' ? 'text-white/15' : 'text-slate-400'}`}>
-                                <ClockDisplay />
-                                <span className="opacity-30">·</span>
-                                频道 {fullRoomId}
-                            </div>
+                            <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-pink-500/60 animate-pulse mb-8`}>
+                                正在扫描信号...
+                            </p>
+                            <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                                信号捕获中...
+                            </h2>
                         </div>
                     </div>
                 )}

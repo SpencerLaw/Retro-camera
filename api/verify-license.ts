@@ -25,14 +25,9 @@ export interface LicenseMetadata {
   firstActivatedAt?: string;
   lastUsedTime: string;
   devices: DeviceInfo[];
-  rooms?: string[]; // 房间广播记录
-  children?: any[]; // 星梦奇缘：孩子列表
-  progress?: any;   // 星梦奇缘：每日打卡进度
-  categories?: any[]; // 星梦奇缘：自定义分类
-  hiddenPresets?: string[]; // 星梦奇缘：隐藏的任务预设
-  hiddenRewardPresets?: string[]; // 星梦奇缘：隐藏的奖励预设
-  redemptionLogs?: any[]; // 星梦奇缘：奖励核销日志
+  rooms?: string[]; // 房间广播激活列表
   brChannels?: any[];   // 班级广播：频道同步列表
+  brMessages?: Record<string, any>; // 房间消息内容 (roomId -> Message)
   fishUsage?: number;   // 班级广播：鱼声 TTS 使用次数
 }
 
@@ -49,15 +44,10 @@ export interface CompressedMetadata {
   f: number; // firstActivatedAt (timestamp)
   l: number; // lastUsedTime (timestamp)
   d: CompressedDevice[]; // devices
-  r?: string[]; // rooms (房间码列表)
-  c?: any[]; // children (孩子列表)
-  p?: any;   // progress (打卡进度)
-  cat?: any[]; // categories (分类)
-  hp?: string[]; // hiddenPresets (隐藏任务预设)
-  hrp?: string[]; // hiddenRewardPresets (隐藏奖励预设)
-  rl?: any[]; // redemptionLogs (奖励日志)
-  brc?: any[]; // brChannels (广播频道)
-  fu?: number; // fishUsage (鱼声数)
+  r?: string[]; // active rooms
+  brc?: any[]; // channels
+  brm?: Record<string, any>; // messages
+  fu?: number; // fish usage
 }
 
 // === 辅助工具 ===
@@ -111,8 +101,11 @@ function extractDateFromCode(code: string): Date | null {
 // 获取设备限制数
 function getEffectiveMaxDevices(code: string): number {
   const cleanCode = code.toUpperCase();
-  if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM') || cleanCode.startsWith('GB')) {
-    return 999999; // 星梦奇旅和广播不限制
+  if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM')) {
+    return 999999; // 星梦奇旅不限制
+  }
+  if (cleanCode.startsWith('GB')) {
+    return 5; // 班级广播限制 5 个设备
   }
   return 5; // 其他默认 5
 }
@@ -142,13 +135,8 @@ export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
       u: dev.ua
     })),
     r: full.rooms,
-    c: full.children,
-    p: full.progress,
-    cat: full.categories,
-    hp: full.hiddenPresets,
-    hrp: full.hiddenRewardPresets,
-    rl: full.redemptionLogs,
     brc: full.brChannels,
+    brm: full.brMessages,
     fu: full.fishUsage
   };
 }
@@ -195,13 +183,8 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
       ua: dev.u
     })),
     rooms: c.r,
-    children: c.c,
-    progress: c.p,
-    categories: (c as any).categories || c.cat, // 兼容旧版全称和新版压缩
-    hiddenPresets: (c as any).hiddenPresets || c.hp,
-    hiddenRewardPresets: (c as any).hiddenRewardPresets || c.hrp,
-    redemptionLogs: (c as any).redemptionLogs || c.rl,
     brChannels: (c as any).brChannels || c.brc,
+    brMessages: (c as any).brMessages || c.brm,
     fishUsage: (c as any).fishUsage || c.fu || 0
   };
 }
@@ -255,26 +238,7 @@ export default async function handler(
       const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
       const redisKey = `license:${cleanCode}`;
 
-      // 1. 尝试获取数据以清理关联的 Blob 头像
-      try {
-        const data = await kv.get<any>(redisKey);
-        // 如果是压缩数据，尝试解压（虽然 blob 清理不一定依赖 full metadata，但需要 children 列表）
-        const metadata = data ? decompressMetadata(data, cleanCode) : null;
-
-        if (metadata && metadata.children && Array.isArray(metadata.children)) {
-          const avatarUrls = metadata.children
-            .map((c: any) => c.avatar)
-            .filter((url: string) => url && url.includes('public.blob.vercel-storage.com'));
-
-          if (avatarUrls.length > 0) {
-            console.log(`[Admin Delete] Cleaning up ${avatarUrls.length} avatars for ${cleanCode}`);
-            await del(avatarUrls);
-          }
-        }
-      } catch (blobErr) {
-        console.error('[Admin Delete] Avatar cleanup failed:', blobErr);
-        // 继续删除 KV 记录，不要因为 Blob 失败中断
-      }
+      // 1. (Legacy avatar cleanup for KiddiePlan removed as children data is no longer stored here)
 
       await kv.del(redisKey);
 
@@ -313,10 +277,9 @@ export default async function handler(
           if (!license) return;
           const cleanCode = keys[idx].replace('license:', '');
           const metadata = decompressMetadata(license, cleanCode);
-          if (metadata.children && Array.isArray(metadata.children)) {
-            metadata.children.forEach((c: any) => {
-              if (c.avatar) usedAvatars.add(c.avatar);
-            });
+          if (metadata.rooms) {
+            // (Note: broadcast messages are now in metadata and won't be deleted)
+            console.log(`[Cleanup] An active license has rooms.`);
           }
         });
       }
@@ -342,29 +305,26 @@ export default async function handler(
       });
     }
 
-    // === 数据库大核爆：清理所有非 license: 开头的脏数据 ===
     if (action === 'nuclear_cleanup') {
       if (!adminKey || adminKey.trim() !== 'spencer') {
         return res.status(401).json({ success: false, message: '密码错误' });
       }
 
       console.log('[Nuclear Cleanup] Starting deep garbage collection...');
-
-      // 1. 获取所有 keys
+  
       const allKeys = await kv.keys('*');
       const keysToDelete = allKeys.filter(key => !key.startsWith('license:'));
-
+  
       if (keysToDelete.length === 0) {
-        return res.status(200).json({ success: true, message: '数据库已经很干净了，没有发现非 license: 开头的记录' });
+        return res.status(200).json({ success: true, message: '数据库已经很干净了' });
       }
-
-      // 2. 批量删除
-      console.log(`[Nuclear Cleanup] Found ${keysToDelete.length} dirty keys. Deleting...`);
+  
+      console.log(`[Nuclear Cleanup] Deleting ${keysToDelete.length} keys...`);
       await Promise.all(keysToDelete.map(key => kv.del(key)));
-
+  
       return res.status(200).json({
         success: true,
-        message: `大核爆清理成功！共强制删除 ${keysToDelete.length} 条非规范记录`,
+        message: `大核爆清理完成：共强制删除 ${keysToDelete.length} 条非规范记录 (包括所有旧版 br:* 数据)`,
         deletedList: keysToDelete
       });
     }
@@ -431,7 +391,6 @@ export default async function handler(
           if (!v) return null;
           const code = activeKeys[index].replace('license:', '');
           const meta = decompressMetadata(v, code);
-
           return {
             ...meta,
             status: 'active' // 既然没被删，肯定是在白名单里的

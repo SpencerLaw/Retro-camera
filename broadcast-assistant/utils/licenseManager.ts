@@ -3,6 +3,49 @@
  */
 const BC_LICENSE_KEY = 'bc_license_code';
 const BC_VERIFIED_KEY = 'bc_verified';
+const BC_DEVICE_ID_KEY = 'bc_device_id';
+
+// 生成或获取持久化的设备唯一ID
+export const getBCDeviceId = (): string => {
+    try {
+        let deviceId = localStorage.getItem(BC_DEVICE_ID_KEY);
+        if (!deviceId) {
+            // 生成随机ID + 时间戳
+            const randomPart = Math.random().toString(36).substring(2, 11);
+            const timestamp = Date.now().toString(36);
+            deviceId = `bc-${randomPart}-${timestamp}`;
+            localStorage.setItem(BC_DEVICE_ID_KEY, deviceId);
+        }
+        return deviceId;
+    } catch (e) {
+        // 容错：如果无法使用 localStorage（如无痕模式），返回临时ID
+        return `bc-temp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    }
+};
+
+// 获取设备描述信息（OS - Browser）
+export const getBCDeviceInfo = (): string => {
+    try {
+        const ua = navigator.userAgent;
+        let os = 'Unknown OS';
+        if (/Windows/i.test(ua)) os = 'Windows';
+        else if (/Mac/i.test(ua)) os = 'Mac';
+        else if (/iPhone/i.test(ua)) os = 'iPhone';
+        else if (/iPad/i.test(ua)) os = 'iPad';
+        else if (/Android/i.test(ua)) os = 'Android';
+        else if (/Linux/i.test(ua)) os = 'Linux';
+
+        let browser = 'Unknown Browser';
+        if (/Edg/i.test(ua)) browser = 'Edge';
+        else if (/Chrome/i.test(ua)) browser = 'Chrome';
+        else if (/Firefox/i.test(ua)) browser = 'Firefox';
+        else if (/Safari/i.test(ua)) browser = 'Safari';
+
+        return `${os} - ${browser}`;
+    } catch (e) {
+        return 'Web Assistant';
+    }
+};
 
 export const saveBCLicense = (code: string) => {
     localStorage.setItem(BC_LICENSE_KEY, code.toUpperCase().replace(/\s/g, ''));
@@ -61,8 +104,8 @@ export const verifyLicense = async (code: string): Promise<{ success: boolean; m
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 licenseCode: cleanCode,
-                deviceId: `bc-${Math.random().toString(36).substr(2, 9)}`,
-                deviceInfo: 'Web Broadcast Assistant'
+                deviceId: getBCDeviceId(),
+                deviceInfo: getBCDeviceInfo()
             }),
         });
         const data = await response.json();

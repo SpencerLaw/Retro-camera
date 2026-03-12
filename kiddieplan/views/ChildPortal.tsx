@@ -952,12 +952,13 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                     <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
                                 </motion.button>
                                 <motion.button
+                                    whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={onLogout}
-                                    className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center text-gray-400 shadow-sm border border-white/20 hover:text-red-400 transition-colors"
+                                    className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-red-400 shadow-sm border border-white/20 hover:bg-white/30 transition-colors"
                                     title="退出"
                                 >
-                                    <LogOut size={14} />
+                                    <LogOut size={20} />
                                 </motion.button>
                             </div>
                         </div>

@@ -250,19 +250,21 @@
       "looping": "循环模式",
       "initBroadcast": "发起播报",
       "emergency": "紧急播报",
-      "history": "播报历史",
-      "clearHistory": "清空历史",
-      "noHistory": "暂无播报记录",
-      "cancel": "取消",
-      "save": "保存",
-      "inputPlaceholder": "今天要播报什么内容？",
+      "history": {
+        "clear": "清空记录"
+      },
       "unknownChannelName": "等待频道识别"
     },
     "receiver": {
       "joinChannel": "进入通道",
+      "joinTitle": "进入接收端",
       "joinDesc": "请输入老师给的通信号码",
+      "enterSixDigit": "请输入由老师提供的 6 位房间号码",
+      "joinButton": "立即进入",
       "channelPlaceholder": "例如: 160234",
       "initializeLive": "进入通信",
+      "monitoring": "监测中",
+      "historyTitle": "最近播报",
       "missingChannel": "请输入通道号",
       "invalidRoom": "无效的房间号",
       "online": "在线",

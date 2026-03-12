@@ -103,138 +103,115 @@ const FishAudioDebug: React.FC<FishAudioDebugProps> = ({ onClose, onSelectVoice,
     }, []);
 
     return (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className={`relative w-full max-w-lg overflow-hidden rounded-[2rem] border shadow-2xl transition-all max-h-[90vh] flex flex-col ${theme === 'dark' ? 'bg-[#1a1a24] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[12px] animate-in fade-in duration-500">
+            <div className={`relative w-full max-w-lg overflow-hidden rounded-[3rem] border shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] transition-all max-h-[90vh] flex flex-col backdrop-blur-[32px] ${theme === 'dark' ? 'bg-slate-900/80 border-white/10 text-white' : 'bg-white/80 border-white/30 text-slate-900'
                 }`}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                            <Music size={20} />
+                <div className="flex items-center justify-between p-8 border-b border-black/[0.03] dark:border-white/[0.03] shrink-0">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+                            <Music size={24} />
                         </div>
                         <div>
-                            <h3 className="font-black text-lg">Fish Audio 调试</h3>
-                            <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">TTS Debug Tool</p>
+                            <h3 className="font-black text-xl tracking-tight">Fish Audio 调试</h3>
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-40 mt-0.5">TTS Debug Tool</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className={`p-2 rounded-xl transition-colors ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-slate-100'}`}
-                    >
-                        <X size={20} />
+                    <button onClick={onClose} className={`p-3 rounded-2xl transition-all active:scale-90 ${theme === 'dark' ? 'hover:bg-white/5 text-white/40' : 'hover:bg-slate-100 text-slate-400'}`}>
+                        <X size={24} />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
-                    {/* Wallet Balance Display at Top */}
-                    <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${theme === 'dark' ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest opacity-40">账户剩余额度</span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black tracking-tight text-indigo-500">
+                <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                    {/* Wallet Balance Display */}
+                    <div className={`p-6 rounded-[2rem] border flex items-center justify-between gap-6 ${theme === 'dark' ? 'bg-black/40 border-white/10' : 'bg-slate-50/50 border-slate-100'}`}>
+                        <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">账户剩余额度</span>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-3xl font-black tracking-tight text-indigo-500 tabular-nums">
                                     {walletBalance !== null ? walletBalance.toFixed(2) : '--'}
                                 </span>
-                                <span className="text-[10px] font-bold opacity-30">Credits</span>
+                                <span className="text-[10px] font-black opacity-30 uppercase tracking-widest">Credits</span>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-1 items-end">
-                            <button
-                                onClick={fetchWalletBalance}
-                                disabled={isCheckingWallet}
-                                className={`flex items-center gap-2 p-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${theme === 'dark'
-                                    ? 'bg-white/5 hover:bg-white/10 text-white/60'
-                                    : 'bg-white border border-slate-100 hover:bg-slate-50 text-indigo-600 shadow-sm'
-                                    }`}
-                                title="刷新余额"
-                            >
-                                <RefreshCw size={14} className={isCheckingWallet ? 'animate-spin' : ''} />
-                            </button>
-                        </div>
+                        <button
+                            onClick={fetchWalletBalance}
+                            disabled={isCheckingWallet}
+                            className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-sm ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-white/40' : 'bg-white border border-slate-100 hover:bg-white text-indigo-600'
+                                }`}
+                        >
+                            <RefreshCw size={18} className={isCheckingWallet ? 'animate-spin' : ''} />
+                        </button>
                     </div>
 
                     {/* Text Area */}
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest opacity-30 px-1">播报文本</label>
-                        <textarea
-                            value={text}
-                            onChange={(e) => setText(e.target.value)}
-                            className={`w-full min-h-[100px] p-4 rounded-2xl border outline-none font-bold transition-all resize-none text-sm ${theme === 'dark' ? 'bg-black/20 border-white/5 focus:border-indigo-500/50' : 'bg-slate-50 border-slate-100 focus:bg-white focus:border-indigo-400'
-                                }`}
-                            placeholder="输入要转语音的文字..."
-                        />
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-[0.25em] opacity-30 px-2">播报文本</label>
+                        <div className={`relative rounded-[2.5rem] p-8 border transition-all ${theme === 'dark' ? 'bg-black/30 border-white/5 focus-within:border-indigo-500/50' : 'bg-white/60 border-slate-100 shadow-inner'}`}>
+                            <textarea
+                                value={text}
+                                onChange={(e) => setText(e.target.value)}
+                                className="w-full min-h-[120px] bg-transparent outline-none font-bold resize-none text-base leading-relaxed placeholder:text-slate-300"
+                                placeholder="输入要转语音的文字..."
+                            />
+                        </div>
                     </div>
 
-                    {/* Reference ID & Library */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between px-1">
-                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30">音色选择</label>
-                        </div>
-
-                        {/* Presets (Recommended) */}
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-1.5 opacity-40 px-1">
-                                <Sparkles size={10} />
-                                <span className="text-[9px] font-black uppercase tracking-widest">推荐中文音色</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {RECOMMENDED_VOICES.map(voice => (
-                                    <button
-                                        key={voice.id}
-                                        onClick={() => setRefId(voice.id)}
-                                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${refId === voice.id
-                                            ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20'
-                                            : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50')
-                                            }`}
-                                    >
-                                        {voice.name}
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Voice Selection */}
+                    <div className="space-y-6">
+                        <label className="text-[10px] font-black uppercase tracking-[0.25em] opacity-30 px-2">音色选择</label>
+                        <div className="flex flex-wrap gap-3">
+                            {RECOMMENDED_VOICES.map(voice => (
+                                <button
+                                    key={voice.id}
+                                    onClick={() => setRefId(voice.id)}
+                                    className={`px-5 py-3 rounded-2xl text-xs font-black tracking-wide transition-all border ${refId === voice.id
+                                        ? 'bg-indigo-500 border-indigo-400 text-white shadow-xl shadow-indigo-500/30 -translate-y-0.5'
+                                        : (theme === 'dark' ? 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10' : 'bg-white/60 border-slate-100 text-slate-500 hover:bg-white hover:shadow-md')
+                                        }`}
+                                >
+                                    {voice.name}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
                     {errorMsg && (
-                        <div className={`p-4 rounded-2xl border flex items-start gap-3 animate-in slide-in-from-top-2 duration-300 ${theme === 'dark' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 border-red-100 text-red-600'
-                            }`}>
-                            <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                            <div className="space-y-1">
-                                <p className="text-[11px] font-black uppercase tracking-widest">播放失败</p>
-                                <p className="text-[11px] font-medium leading-relaxed">{errorMsg}</p>
+                        <div className={`p-6 rounded-[2rem] border flex items-start gap-4 animate-in slide-in-from-top-4 duration-500 ${theme === 'dark' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
+                            <AlertCircle size={20} className="shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-[11px] font-black uppercase tracking-[0.2em] mb-1">播放失败</p>
+                                <p className="text-xs font-semibold leading-relaxed">{errorMsg}</p>
                             </div>
                         </div>
                     )}
 
-                    <div className={`p-4 rounded-2xl border flex items-start gap-3 ${theme === 'dark' ? 'bg-indigo-500/5 border-indigo-500/20 text-indigo-300' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
-                        }`}>
-                        <Info size={16} className="shrink-0 mt-0.5" />
-                        <p className="text-[10px] font-medium leading-relaxed">
+                    <div className={`p-6 rounded-[2rem] border flex items-start gap-4 ${theme === 'dark' ? 'bg-indigo-500/5 border-indigo-500/20 text-indigo-300' : 'bg-indigo-50/50 border-indigo-100 text-indigo-600'}`}>
+                        <Info size={20} className="shrink-0 mt-0.5" />
+                        <p className="text-xs font-semibold leading-relaxed opacity-80">
                             提示：已为您推荐高质量中文音色。您可以查询余额以确保播报正常运行。
                         </p>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-white/5 bg-black/5 shrink-0">
-                    <div className="flex gap-3">
+                <div className="p-8 border-t border-black/[0.03] dark:border-white/[0.03] bg-black/[0.02] shrink-0">
+                    <div className="flex gap-4">
                         <button
                             onClick={handlePlay}
                             disabled={isLoading || !text.trim() || !refId.trim()}
-                            className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
-                                ? 'bg-slate-500 opacity-50 cursor-not-allowed'
-                                : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                            className={`flex-1 py-5 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-[10px] transition-all flex items-center justify-center gap-3 shadow-xl ${isLoading
+                                ? 'bg-slate-500/20 text-slate-400'
+                                : 'bg-white/80 dark:bg-white/10 text-indigo-600 dark:text-indigo-400 hover:bg-white dark:hover:bg-white/20 active:scale-95'
                                 }`}
                         >
-                            {isLoading ? (
-                                <Loader2 size={18} className="animate-spin" />
-                            ) : (
-                                <Play size={18} fill="currentColor" />
-                            )}
+                            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Play size={18} fill="currentColor" />}
                             测试试听
                         </button>
 
                         <button
                             onClick={() => onSelectVoice(refId)}
-                            className="flex-[1.5] py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-indigo-500/25 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                            className="flex-[1.5] py-5 rounded-[1.5rem] bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-black uppercase tracking-[0.25em] text-[10px] shadow-[0_20px_40px_-10px_rgba(79,70,229,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(79,70,229,0.5)] hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
                             <Save size={18} />
                             使用该音色！

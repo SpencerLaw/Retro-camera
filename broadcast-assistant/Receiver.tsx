@@ -183,7 +183,6 @@ interface ReceiverProps {
 const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => {
     const t = useTranslations();
     const [isJoined, setIsJoined] = useState(() => {
-        // Check URL ?room= param first, then fall back to localStorage
         const urlRoom = new URLSearchParams(window.location.search).get('room') || '';
         if (urlRoom.length === 6 && /^\d{6}$/.test(urlRoom)) {
             localStorage.setItem('br_receiver_roomId', urlRoom);
@@ -207,8 +206,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [displayChannelName, setDisplayChannelName] = useState('');
     const [msgQueue, setMsgQueue] = useState<Message[]>([]);
     const [needsActivation, setNeedsActivation] = useState(false);
+    const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
     const activeRef = useRef<HTMLDivElement>(null);
+    const audioRef = useRef<HTMLAudioElement>(null);
     const isPlayingRef = useRef(false);
     const engine = useRef({
         lastId: '',
@@ -217,6 +218,14 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     });
 
     const fullRoomId = roomId.padStart(6, '0');
+
+    // Update clock every minute
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setLocalTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        }, 10000);
+        return () => clearInterval(timer);
+    }, []);
 
     const toggleTheme = useCallback(() => {
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
@@ -287,7 +296,6 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 });
                             } catch (e) {
                                 console.error('Fish Audio Playback failed, falling back to Edge TTS:', e);
-                                // Fallback to default Edge TTS
                                 await ttsManager.speak(sentences[i], {
                                     voice: 'zh-CN-XiaoxiaoNeural',
                                     engine: 'edge',
@@ -295,7 +303,6 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 });
                             }
                         } else {
-                            // 默认使用 Edge TTS
                             await ttsManager.speak(sentences[i], {
                                 voice: msg.voice || 'zh-CN-XiaoxiaoNeural',
                                 engine: 'edge',
@@ -303,8 +310,6 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                             });
                         }
 
-                        // 额外防御：如果 speak 瞬间就被 resolve 了（通常是由于浏览器 autoplay 拦截），
-                        // 我们需要手动补足一个视觉展示时间，否则循环瞬间结束，消息会闪现消失。
                         const duration = Date.now() - startTime;
                         if (duration < 500) {
                             const showDelay = Math.max(2500, sentences[i].length * 200);
@@ -325,8 +330,6 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             setIsPlaying(false);
             setActiveSentenceIndex(-1);
 
-            // 读完了，如果需要恢复雷达显示，必须清空 currentMsg
-            // 加一点小延迟，让用户在这个句子上停留一会儿再刷掉
             setTimeout(() => {
                 if (!isPlayingRef.current) {
                     setCurrentMsg(null);
@@ -346,30 +349,28 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
 
     useEffect(() => {
         if (!isJoined) return;
+        let failCount = 0;
         const poll = async () => {
             if (!engine.current.isJoined) return;
 
-            // 智能降频优化 (方案 B)：
-            // 1. 如果窗口可见，5秒查一次。
-            // 2. 如果窗口最小化/后台运行，20秒查一次，既能保证听到广播又能极大省钱。
             const pollInterval = document.visibilityState === 'visible' ? 5000 : 20000;
 
             try {
                 const r = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);
 
-                // 检测房间是否已被教师端删除
                 if (r.status === 404) {
-                    engine.current.isJoined = false;
-                    ttsManager.cancelAll();
-                    localStorage.removeItem('br_receiver_roomId');
-                    setIsJoined(false);
-                    return;
-                }
-
-                if (r.ok) {
+                    failCount++;
+                    if (failCount >= 3) {
+                        engine.current.isJoined = false;
+                        ttsManager.cancelAll();
+                        localStorage.removeItem('br_receiver_roomId');
+                        setIsJoined(false);
+                        return;
+                    }
+                } else if (r.ok) {
+                    failCount = 0;
                     const data = await r.json();
 
-                    // 服务端返回 roomDeleted / notFound 标志
                     if (data.roomDeleted || data.notFound) {
                         engine.current.isJoined = false;
                         ttsManager.cancelAll();
@@ -379,16 +380,13 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     }
 
                     const msg = data.message as Message;
-
                     if (msg) {
-                        // 有效消息：判断是不是新消息
                         if (msg.id !== engine.current.lastId) {
                             engine.current.lastId = msg.id;
                             if (msg.channelName) setDisplayChannelName(msg.channelName);
                             if (msg.text && msg.text.trim()) {
                                 if (engine.current.isListening) {
                                     setMsgQueue(prev => {
-                                        // 紧急消息插队到最前面，普通消息排队
                                         if (msg.isEmergency) return [msg, ...prev];
                                         return [...prev, msg];
                                     });
@@ -400,21 +398,20 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 });
                             }
                         }
-                    } else {
-                        // 如果后端返回 message 为 null (即 KV 被清除或过期)
-                        // 且当前没有任何播报在进行中，那么我们回到安全的 idle 状态
-                        if (!isPlayingRef.current) {
-                            setCurrentMsg(null);
-                        }
+                    } else if (!isPlayingRef.current) {
+                        setCurrentMsg(null);
                     }
+                } else {
+                    failCount = 0;
                 }
-            } catch (e) { }
+            } catch (e) {
+                failCount = 0;
+            }
             if (engine.current.isJoined) setTimeout(poll, pollInterval);
         };
         poll();
         ttsManager.startSilentLoop();
 
-        // Initial check for activation
         if (typeof navigator !== 'undefined' && (navigator as any).userActivation && !(navigator as any).userActivation.hasBeenActive) {
             setNeedsActivation(true);
         }
@@ -422,75 +419,89 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         return () => { engine.current.isJoined = false; ttsManager.cancelAll(); setMsgQueue([]); };
     }, [isJoined, fullRoomId, runPlayback]);
 
-    // Duplicate effect removed
-
-    const greeting = useMemo(() => {
-        const h = new Date().getHours();
-        if (h < 6) return '凌晨好';
-        if (h < 12) return '上午好';
-        if (h < 14) return '中午好';
-        if (h < 18) return '下午好';
-        return '晚上好';
-    }, []);
-
-    // The most recently known channel name comes from displayChannelName state
     const channelName = displayChannelName || receivedHistory[receivedHistory.length - 1]?.channelName || '';
+    const emergency = !!currentMsg?.isEmergency;
 
-    // ── Join Screen ──────────────────────────────────────────────────────────
-    if (!isJoined) {
-        return (
-            <div className={`fixed inset-0 flex items-center justify-center p-6 transition-colors duration-1000 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-slate-100'}`}>
-                {/* 退出按钮 */}
-                {onExit && (
-                    <button
-                        onClick={onExit}
-                        className={`absolute top-8 left-8 z-50 w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm border ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white/80 border-slate-200 text-slate-500 hover:text-slate-800'}`}
-                    >
-                        <X size={20} />
-                    </button>
-                )}
+    return (
+        <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-1000 ${emergency ? 'bg-rose-950 text-white' : (theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-950')
+            }`}>
+            {/* ─── Premium Animated Backdrop ─── */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                <div className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] blur-[160px] rounded-full animate-pulse ${emergency ? 'bg-rose-500/20' : 'bg-indigo-500/10'}`} />
+                <div className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] blur-[160px] rounded-full animate-pulse transition-colors duration-[7s] ${emergency ? 'bg-rose-600/15' : 'bg-purple-500/10'}`} />
+                <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full animate-pulse duration-[5s]" />
+            </div>
 
-                {/* bg blobs */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-pink-600/10 blur-[160px] rounded-full animate-pulse" />
-                    <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-rose-600/10 blur-[160px] rounded-full animate-pulse" />
-                </div>
-
-                <div className={`relative z-10 w-full max-w-md p-10 rounded-[3rem] border backdrop-blur-2xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] ${theme === 'dark' ? 'bg-white/[0.04] border-white/10' : 'bg-white/70 border-white'}`}>
-                    {/* Icon */}
-                    <div className="flex justify-center mb-10">
-                        <div className="relative">
-                            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-[0_12px_40px_rgba(236,72,153,0.4)] rotate-6">
-                                <Tv size={44} />
+            {/* ─── Floating Glass Header ─── */}
+            {isJoined && (
+                <div className="fixed top-10 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50">
+                    <GlassCard className="px-8 py-5 flex items-center justify-between border-white/[0.08] dark:border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)]">
+                        <div className="flex items-center gap-5">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${isJoined ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-200/50 dark:bg-white/5 text-slate-400'}`}>
+                                {isPlaying ? <Radio className="animate-pulse" size={24} /> : <Tv size={24} />}
                             </div>
-                            <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/40">
-                                <Radio size={14} className="text-white animate-pulse" />
+                            <div className="min-w-0">
+                                <h2 className="text-lg font-black tracking-tight truncate leading-none mb-1.5">{channelName || t('broadcast.receiver.monitoring')}</h2>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30">Room · {fullRoomId}</span>
+                                    <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/10" />
+                                    <div className="flex items-center gap-1.5 text-indigo-500/60 dark:text-indigo-400/60">
+                                        <Clock size={10} strokeWidth={3} />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] tabular-nums">{localTime}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <h1 className={`text-4xl font-extrabold text-center mb-3 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                        加入接收端
-                    </h1>
-                    <p className={`text-center mb-10 text-sm font-medium ${theme === 'dark' ? 'text-white/30' : 'text-slate-500'}`}>
-                        输入 6 位房间号码开始接收广播
-                    </p>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={toggleTheme}
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10' : 'hover:bg-slate-50'}`}
+                            >
+                                {theme === 'dark' ? <Sun size={18} className="text-amber-400/60" /> : <Moon size={18} className="text-slate-400" />}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const val = !isListening;
+                                    setIsListening(val);
+                                    engine.current.isListening = val;
+                                }}
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${isListening ? 'text-emerald-500' : 'text-rose-500 opacity-40'}`}
+                            >
+                                {isListening ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                            </button>
+                        </div>
+                    </GlassCard>
+                </div>
+            )}
 
-                    <div className="space-y-6">
-                        <div className="relative">
+            <main className="relative flex-1 w-full max-w-4xl flex flex-col items-center justify-center z-10 min-h-0">
+                {!isJoined ? (
+                    <div className="w-full max-w-md space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                        <div className="text-center space-y-4">
+                            <div className="flex justify-center mb-8">
+                                <div className="w-20 h-20 rounded-[2.5rem] bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-600 flex items-center justify-center text-white shadow-2xl shadow-indigo-500/30 rotate-3">
+                                    <Tv size={40} />
+                                </div>
+                            </div>
+                            <h1 className="text-5xl font-black tracking-tighter text-slate-800 dark:text-white italic uppercase">{t('broadcast.receiver.joinTitle')}</h1>
+                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 opacity-60 px-4">{t('broadcast.receiver.enterSixDigit')}</p>
+                        </div>
+
+                        <div className="relative group">
                             <input
                                 type="text"
                                 maxLength={6}
                                 value={roomId}
                                 onChange={(e) => setRoomId(e.target.value.replace(/\D/g, ''))}
-                                placeholder="000000"
-                                className={`w-full h-24 text-center text-6xl font-black rounded-3xl border-2 transition-all outline-none ${theme === 'dark'
-                                    ? 'bg-black/20 border-white/5 text-white focus:border-pink-500/50'
-                                    : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-pink-400 focus:bg-white'
+                                placeholder="000 000"
+                                className={`w-full h-28 text-center text-6xl font-black rounded-[2.5rem] border-2 transition-all outline-none tracking-tighter sm:tracking-normal ${theme === 'dark'
+                                    ? 'bg-black/20 border-white/5 text-white focus:border-indigo-500/50'
+                                    : 'bg-white/50 border-slate-100 text-slate-900 focus:border-indigo-400/50 focus:bg-white shadow-inner'
                                     }`}
                             />
-                            <div className="absolute -right-3 -top-3 w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-lg animate-bounce">
-                                <Zap size={16} />
+                            <div className="absolute -top-3 -right-3 w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-xl shadow-amber-500/20 animate-bounce">
+                                <Zap size={20} fill="currentColor" />
                             </div>
                         </div>
 
@@ -502,245 +513,171 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 setIsJoined(true);
                                 setMsgQueue([]);
                             }}
-                            className={`w-full py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl ${roomId.length === 6
-                                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-pink-500/25 hover:scale-[1.02] active:scale-95'
-                                : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-50'
+                            className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] transition-all duration-500 shadow-2xl ${roomId.length === 6
+                                ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 text-white shadow-indigo-600/25 hover:shadow-indigo-600/40 hover:-translate-y-1 active:scale-95 active:translate-y-0'
+                                : 'bg-slate-200/50 dark:bg-white/5 text-slate-400 dark:text-white/20 cursor-not-allowed'
                                 }`}
                         >
-                            初始化信号接收
+                            {t('broadcast.receiver.joinButton')}
                         </button>
                     </div>
-                </div>
-            </div>
-        );
-    }
-
-    const emergency = !!currentMsg?.isEmergency;
-
-    return (
-        <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden transition-all duration-1000 ${
-            emergency 
-                ? 'bg-red-950 text-white' 
-                : (theme === 'dark' ? 'bg-[#0a0a0f] text-white' : 'bg-slate-50 text-slate-900')}`}>
-
-            {/* ── Atmospheric BG ─────────────────────────────────────────── */}
-            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden text-white/10 dark:text-white/5">
-                {emergency ? (
-                    <>
-                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-900/80 via-red-950 to-black" />
-                        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-red-500/20 blur-[120px] animate-pulse" />
-                        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-red-600/15 blur-[120px] animate-pulse" />
-                    </>
-                ) : theme === 'dark' ? (
-                    <>
-                        <div className="absolute -top-60 -left-60 w-[800px] h-[800px] rounded-full bg-pink-600/[0.07] blur-[160px] animate-pulse" />
-                        <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-rose-600/[0.05] blur-[140px] animate-pulse" />
-                        <div className="absolute -bottom-40 left-[10%] w-[500px] h-[500px] rounded-full bg-pink-500/[0.03] blur-[120px]" />
-                    </>
                 ) : (
-                    <>
-                        <div className="absolute -top-60 left-0 w-full h-[500px] bg-gradient-to-b from-pink-100/40 via-transparent to-transparent" />
-                        <div className="absolute top-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-100/30 blur-[120px] animate-pulse" />
-                    </>
-                )}
-                {isPlaying && (
-                    <div className={`absolute inset-0 ${emergency ? 'bg-red-500/5' : 'bg-pink-500/3'} animate-pulse`} />
-                )}
-            </div>
-
-            {/* ── Header ─────────────────────────────────────────────────── */}
-            <header className="relative z-50 flex items-center justify-between px-6 py-4">
-                <div className="flex items-center gap-4">
-                    <div className="flex flex-col -space-y-1">
-                        <p className={`text-base font-black tracking-tight ${theme === 'dark' || emergency ? 'text-white' : 'text-slate-800'}`}>
-                            {greeting}！
-                            <span className={`ml-2 ${theme === 'dark' || emergency ? 'text-pink-400' : 'text-pink-500'}`}>
-                                {channelName || '等待识别频道名...'}
-                            </span>
-                            <span className={`ml-3 text-xs opacity-40 font-mono`}>
-                                <ClockDisplay />
-                            </span>
-                        </p>
-                        <div className={`flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase ${theme === 'dark' || emergency ? 'text-white/20' : 'text-slate-400'}`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-blue-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
-                            ROOM · {fullRoomId}
-                        </div>
-                    </div>
-
-                    <div className="h-8 w-px bg-current opacity-10 mx-2" />
-
-                    <button
-                        onClick={() => {
-                            const val = !isListening;
-                            setIsListening(val);
-                            engine.current.isListening = val;
-                        }}
-                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-2xl ${isListening ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30' : (theme === 'dark' || emergency ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/60 border-white text-slate-400 shadow-sm')}`}
-                    >
-                        {isListening ? <Volume2 size={18} /> : <VolumeX size={18} />}
-                    </button>
-                </div>
-
-                <div className="flex gap-2">
-                    <button
-                        onClick={toggleTheme}
-                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${theme === 'dark' || emergency ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/60 border-white shadow-sm hover:bg-white'}`}
-                    >
-                        {theme === 'dark' ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-slate-500" />}
-                    </button>
-                    <button
-                        onClick={() => { engine.current.isJoined = false; setIsJoined(false); ttsManager.cancelAll(); }}
-                        className={`w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95 backdrop-blur-2xl ${theme === 'dark' || emergency ? 'bg-white/5 border-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' : 'bg-white/60 border-white text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500'}`}
-                    >
-                        <X size={16} />
-                    </button>
-                </div>
-            </header>
-
-            {/* ── Main Content ────────────────────────────────────────────── */}
-            <main className="relative flex-1 flex flex-col items-center justify-center min-h-0 overflow-hidden z-10">
-                {currentMsg && currentMsg.text.trim() ? (
-                    /* ── Playback view: teleprompter style centered highlight ── */
-                    <div className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col pt-[30vh] pb-[40vh]" style={{ scrollBehavior: 'smooth' }}>
-                        <div className="max-w-4xl mx-auto w-full flex-none flex flex-col px-8 space-y-2">
-                            {/* 班级频道标签 */}
-                            {channelName && (
-                                <div className="flex justify-center mb-8">
-                                    <div className={`flex items-center gap-2 px-5 py-2 rounded-full border text-sm font-black ${emergency
-                                        ? 'bg-red-500/10 border-red-500/20 text-red-300'
-                                        : (theme === 'dark' ? 'bg-pink-500/10 border-pink-500/20 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-600')
-                                        }`}>
-                                        <Radio size={12} className="animate-pulse" />
-                                        <span>{channelName}</span>
+                    <div className="w-full flex flex-col items-center justify-center gap-16 py-20">
+                        {currentMsg && currentMsg.text.trim() ? (
+                            <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col pt-[30vh] pb-[40vh] scroll-smooth">
+                                <div className="max-w-4xl mx-auto w-full flex-none flex flex-col px-10 space-y-4">
+                                    {isPlaying && (
+                                        <div className="flex justify-center mb-12">
+                                            <ActiveVisualizer isEmergency={emergency} />
+                                        </div>
+                                    )}
+                                    {splitSentences(currentMsg.text).map((s, i) => (
+                                        <SentenceItem
+                                            key={`${currentMsg.id}-${i}`}
+                                            sentence={s}
+                                            isActive={i === activeSentenceIndex}
+                                            isPast={activeSentenceIndex !== -1 && i < activeSentenceIndex}
+                                            isEmergency={emergency}
+                                            textLength={currentMsg.text.length}
+                                            activeSentenceRef={activeRef}
+                                            theme={theme}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center gap-12 animate-in zoom-in-95 duration-1000">
+                                <div className="relative group">
+                                    <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/5 blur-[100px] rounded-full scale-150 animate-pulse" />
+                                    <IdleVisualizer isEmergency={false} />
+                                    <div className="absolute bottom-[-80px] left-1/2 -translate-x-1/2 w-full text-center space-y-4">
+                                        <p className="text-[11px] font-black uppercase tracking-[0.5em] text-indigo-500 animate-pulse">{t('broadcast.receiver.monitoring')}</p>
+                                        <div className="flex items-center justify-center gap-3">
+                                            <span className="text-[9px] font-black px-4 py-1.5 bg-slate-200/50 dark:bg-white/5 rounded-full text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">Freq 44.1kHz</span>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        </div>
                                     </div>
                                 </div>
-                            )}
-                            {/* 音频可视化 */}
-                            {isPlaying && (
-                                <div className="flex justify-center mb-8">
-                                    <ActiveVisualizer isEmergency={emergency} />
-                                </div>
-                            )}
-                            {/* 句子列表：当前句居中高亮 */}
-                            {splitSentences(currentMsg.text).map((s, i) => (
-                                <SentenceItem
-                                    key={`${currentMsg.id}-${i}`}
-                                    sentence={s}
-                                    isActive={i === activeSentenceIndex}
-                                    isPast={activeSentenceIndex !== -1 && i < activeSentenceIndex}
-                                    isEmergency={emergency}
-                                    textLength={currentMsg.text.length}
-                                    activeSentenceRef={activeRef}
-                                    theme={theme}
-                                />
-                            ))}
-                        </div>
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    /* ── Idle view: radar ── */
-                    <div className="flex flex-col items-center justify-center gap-12 px-8">
-                        <IdleVisualizer isEmergency={false} />
-                        <div className="text-center space-y-4">
-                            <div className="space-y-1">
-                            <p className={`text-[10px] font-black uppercase tracking-[0.5em] text-pink-500/60 animate-pulse mb-8`}>
-                                正在扫描信号...
-                            </p>
-                            <h2 className={`text-4xl md:text-5xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                                信号捕获中...
-                            </h2>
-                        </div>
-                    </div>
-                </div>
                 )}
             </main>
 
-            {/* ── History Footer：只在 idle 状态显示 ───────────────────────── */}
-            {!isPlaying && !currentMsg && (
-                <footer className={`absolute bottom-0 left-0 right-0 z-50 border-t transition-all duration-500 ${showHistory ? 'translate-y-0' : 'translate-y-[calc(100%-44px)]'} ${theme === 'dark' || emergency ? 'border-white/5 bg-black/60 backdrop-blur-3xl' : 'border-black/5 bg-white/70 backdrop-blur-3xl'}`}>
+            {/* ─── Premium Glass Footer ─── */}
+            {isJoined && !isPlaying && !currentMsg && (
+                <div className="fixed bottom-12 left-1/2 -translate-x-1/2 w-full max-w-sm px-8 z-50">
                     <button
                         onClick={() => setShowHistory(!showHistory)}
-                        className={`absolute -top-6 left-1/2 -translate-x-1/2 h-12 px-8 rounded-t-[2rem] flex items-center gap-3 text-sm font-black uppercase tracking-widest transition border border-b-0 ${theme === 'dark' || emergency ? 'bg-black/60 backdrop-blur-3xl border-white/10 text-white/50 hover:text-white' : 'bg-white/70 backdrop-blur-3xl border-black/5 text-slate-500 hover:text-slate-800'}`}
+                        className={`w-full group px-8 py-5 rounded-[2rem] backdrop-blur-[24px] border transition-all duration-500 flex items-center justify-between shadow-[0_20px_50px_-15px_rgba(0,0,0,0.2)] ${theme === 'dark' ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/70 border-white hover:bg-white shadow-xl'
+                            }`}
                     >
-                        <History size={14} />
-                        <span>播报记录</span>
-                        {showHistory ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 dark:bg-white/5 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                                <History size={20} />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">{t('broadcast.receiver.historyTitle')}</span>
+                        </div>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black shadow-inner ${theme === 'dark' ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-900'}`}>{receivedHistory.length}</div>
                     </button>
+                </div>
+            )}
 
-                    <div className="max-w-screen-xl mx-auto p-5">
-                        <div className="flex items-center justify-between mb-4 px-1">
-                            <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${theme === 'dark' || emergency ? 'text-white/20' : 'text-slate-400'}`}>
-                                最近 {receivedHistory.length} 条广播
-                            </span>
-                            <button
-                                onClick={() => { setReceivedHistory([]); localStorage.removeItem('br_receiver_history'); }}
-                                className="text-[10px] font-black text-red-500/30 hover:text-red-500 transition px-3 py-1.5 rounded-xl border border-red-500/10 hover:border-red-500/30 hover:bg-red-500/5"
-                            >
-                                清空记录
+            {/* ─── History Drawer ─── */}
+            {showHistory && (
+                <div className="fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={() => setShowHistory(false)} />
+                    <div className={`relative w-full max-w-2xl max-h-[70vh] rounded-t-[3rem] border-t border-x p-10 flex flex-col gap-8 shadow-[0_-40px_100px_-20px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-700 ${theme === 'dark' ? 'bg-slate-900/90 border-white/10' : 'bg-white/90 border-white'
+                        }`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                                    <History size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-xl tracking-tight">{t('broadcast.receiver.historyTitle')}</h3>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mt-0.5">{receivedHistory.length} BROADCASTS RECORDED</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowHistory(false)} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10' : 'hover:bg-slate-100'}`}>
+                                <X size={24} className="opacity-40" />
                             </button>
                         </div>
 
-                        <div className="flex flex-row gap-4 overflow-x-auto pb-1 snap-x scrollbar-hide min-h-[100px] items-center">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
                             {receivedHistory.length === 0 ? (
-                                <div className={`w-full text-center py-10 text-xs font-black uppercase tracking-[0.4em] ${theme === 'dark' || emergency ? 'text-white/10' : 'text-slate-300'}`}>
-                                    暂无广播记录
+                                <div className="h-64 flex flex-col items-center justify-center text-center space-y-4 opacity-20">
+                                    <History size={48} strokeWidth={1} />
+                                    <p className="text-xs font-black uppercase tracking-[0.3em]">No records found</p>
                                 </div>
                             ) : (
-                                [...receivedHistory].reverse().map(m => (
-                                    <button
-                                        key={m.id}
-                                        onClick={() => setMsgQueue(prev => [...prev, m])}
-                                        className={`flex-none w-72 p-5 rounded-2xl text-left transition-all border group snap-start ${m.isEmergency
-                                            ? 'bg-red-500/10 border-red-500/15 hover:bg-red-500/20 hover:border-red-500/40'
-                                            : (theme === 'dark'
-                                                ? 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07] hover:border-violet-500/25'
-                                                : 'bg-white/60 border-white hover:bg-white hover:border-violet-300 shadow-sm')
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest font-mono ${theme === 'dark' || emergency ? 'text-white/25' : 'text-slate-400'}`}>
-                                                {(() => {
-                                                    const ts = parseInt(m.timestamp);
-                                                    return isNaN(ts) ? m.timestamp : new Date(ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-                                                })()}
-                                            </span>
-                                            <div className="flex items-center gap-1.5">
-                                                {m.isEmergency && <Zap size={10} className="text-red-400 fill-red-400" />}
-                                                <div className={`w-1.5 h-1.5 rounded-full group-hover:scale-125 transition-transform ${m.isEmergency ? 'bg-red-400' : 'bg-pink-400'}`} />
+                                [...receivedHistory].reverse().map((m, idx) => (
+                                    <div key={m.id} className={`p-6 rounded-3xl border transition-all ${m.isEmergency ? 'bg-rose-500/5 border-rose-500/20' : (theme === 'dark' ? 'bg-white/[0.03] border-white/5' : 'bg-slate-50 border-slate-100')}`}>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[10px] font-black opacity-30 tabular-nums">
+                                                    {(() => {
+                                                        const ts = parseInt(m.timestamp);
+                                                        return isNaN(ts) ? m.timestamp : new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                                    })()}
+                                                </span>
+                                                {m.isEmergency && <span className="text-[9px] font-black px-2 py-0.5 bg-rose-500 text-white rounded-full">EMERGENCY</span>}
                                             </div>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${m.isEmergency ? 'bg-rose-500' : 'bg-indigo-500'}`} />
                                         </div>
-                                        <p className={`text-sm font-semibold line-clamp-2 leading-relaxed transition-colors ${m.isEmergency ? 'text-red-300' : (theme === 'dark' ? 'text-white/60 group-hover:text-pink-300' : 'text-slate-600 group-hover:text-pink-600')}`}>
-                                            {m.text}
-                                        </p>
-                                    </button>
+                                        <p className="text-base font-bold leading-relaxed">{m.text}</p>
+                                    </div>
                                 ))
                             )}
                         </div>
+
+                        <button
+                            onClick={() => {
+                                setReceivedHistory([]);
+                                localStorage.removeItem('br_receiver_history');
+                            }}
+                            className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-rose-500 hover:border-rose-500/30 transition-all active:scale-[0.98]"
+                        >
+                            {t('broadcast.history.clear')}
+                        </button>
                     </div>
-                </footer>
+                </div>
             )}
-            {/* ── Activation Overlay ────────────────────────────────────── */}
+            {/* ─── Activation Overlay ─── */}
             {needsActivation && (
-                <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-500">
-                    <div className="max-w-xs w-full text-center space-y-8 p-10">
-                        <div className="relative mx-auto w-24 h-24 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-500 animate-pulse">
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/60 backdrop-blur-2xl animate-in fade-in duration-500">
+                    <div className="max-w-xs w-full text-center space-y-10 p-10">
+                        <div className="relative mx-auto w-28 h-28 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 shadow-[0_0_100px_rgba(99,102,241,0.2)]">
                             <Volume2 size={48} />
-                            <div className="absolute inset-0 rounded-full border-2 border-pink-500/50 animate-ping" />
+                            <div className="absolute inset-0 rounded-full border-2 border-indigo-500 animate-ping opacity-20" />
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-2xl font-black text-white">激活语音播报</h3>
-                            <p className="text-sm text-white/50 leading-relaxed font-medium">
-                                由于浏览器安全策略限制，需要您点击下方按钮以建立音频连接。
+                        <div className="space-y-3">
+                            <h3 className="text-3xl font-black text-white tracking-tight">激活播报系统</h3>
+                            <p className="text-xs text-white/40 leading-relaxed font-bold uppercase tracking-wider">
+                                点击下方按钮以建立音频连接
                             </p>
                         </div>
                         <button
                             onClick={handleActivate}
-                            className="w-full py-5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black uppercase tracking-widest text-xs shadow-2xl shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all"
+                            className="w-full py-5 rounded-2xl bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 text-white font-black uppercase tracking-[0.3em] text-[10px] shadow-2xl shadow-indigo-500/40 hover:-translate-y-1 active:scale-95 transition-all"
                         >
-                            点击激活
+                            点击开始
                         </button>
                     </div>
                 </div>
             )}
+
+            <audio ref={audioRef} className="hidden" />
+
+            {/* Custom Styles */}
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.2); border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128, 128, 128, 0.3); }
+                `
+            }} />
         </div>
     );
 };

@@ -1632,6 +1632,19 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         {/* Right: Time & Compact Buttons */}
                         <div className="flex items-center gap-3">
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onLogout();
+                                }}
+                                className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-red-500 hover:bg-red-50 transition-colors border border-white/50"
+                                title="返回选择页面"
+                            >
+                                <LogOut size={20} />
+                            </motion.button>
+
                             {isScrolled && (
                                 <motion.button
                                     initial={{ opacity: 0, scale: 0.5 }}

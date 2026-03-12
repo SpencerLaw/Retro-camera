@@ -211,7 +211,7 @@ export default async function handler(
                 });
             }
 
-            // 同时累加到具体任务的 accumulatedTime 字段上，方便展示
+            // 同时累加到具体任务的 accumulatedTime 字段上，方便统计分析展示
             if (daily.tasks) {
                 const taskIdx = daily.tasks.findIndex((t: any) => t.id === log.taskId);
                 if (taskIdx > -1) {
@@ -233,18 +233,8 @@ export default async function handler(
             if (childIdx > -1) {
                 license.children[childIdx].isFocusing = isFocusing;
                 license.children[childIdx].currentTaskName = isFocusing ? taskTitle : null;
-                license.children[childIdx].lastFocusDuration = isFocusing ? duration : 0;
-
-                // 冗余更新具体任务的累计时间，确保即时准确
-                if (taskId && accumulatedTime !== undefined) {
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    if (license.progress?.[todayStr]?.[childId]?.tasks) {
-                        const taskIdx = license.progress[todayStr][childId].tasks.findIndex((t: any) => t.id === taskId);
-                        if (taskIdx > -1) {
-                            license.progress[todayStr][childId].tasks[taskIdx].accumulatedTime = accumulatedTime;
-                        }
-                    }
-                }
+                // 不再实时记录最后时长和累计时间到主对象，减少同步开销和前端显示干扰
+                license.children[childIdx].lastFocusDuration = 0; 
 
                 // 记录专注开始时间，用于判断是否过期
                 if (isFocusing) {

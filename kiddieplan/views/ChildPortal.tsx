@@ -173,9 +173,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                         data: {
                             isFocusing: true,
                             taskTitle: task.title,
-                            duration: timerSecondsRef.current,
-                            taskId: activeTaskId,
-                            accumulatedTime: (task.accumulatedTime || 0) + timerSecondsRef.current
+                            taskId: activeTaskId
                         }
                     })
                 });
@@ -661,10 +659,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                     <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
-                                                    {/* 显示条件：正在专注 OR 累计时间 > 0 */}
-                                                    {(isCurrentFocus || (task.accumulatedTime || 0) > 0) && (
+                                                    {/* 不再在清单中实时显示累计时间，改为仅在统计分析中可见 */}
+                                                    {isCurrentFocus && (
                                                         <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1 transition-all duration-300">
-                                                            <Timer size={10} className={isCurrentFocus ? "animate-spin-slow" : ""} /> {formatTime((task.accumulatedTime || 0) + (isCurrentFocus ? timerSeconds : 0))}
+                                                            <Timer size={10} className="animate-spin-slow" /> {formatTime(timerSeconds)}
                                                         </span>
                                                     )}
                                                 </div>

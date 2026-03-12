@@ -2090,11 +2090,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                                         <div className="text-xs text-gray-400 font-bold flex flex-wrap gap-2">
                                                             <span className="text-[var(--color-blue-fun)] bg-blue-50 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                             <span className="text-emerald-400">+{task.points} 🍭</span>
-                                                            {task.accumulatedTime && task.accumulatedTime > 0 && (
-                                                                <span className="text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                                                    <Timer size={10} /> {formatTime(task.accumulatedTime)}
-                                                                </span>
-                                                            )}
+                                                            {/* 不再在清单中实时显示时间，仅在统计中可见 */}
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-1">

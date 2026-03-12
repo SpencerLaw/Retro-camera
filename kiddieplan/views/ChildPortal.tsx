@@ -58,6 +58,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
     // Timer state
     const [isTimerRunning, setIsTimerRunning] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
     const [timerSeconds, setTimerSeconds] = useState(0);
     const timerSecondsRef = useRef(0); // Use ref to avoid sync pulse dependency loop
     const [startTime, setStartTime] = useState<string | null>(null);
@@ -377,6 +378,8 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
 
     const toggleTimer = async (task: Task) => {
         if (isTimerRunning) {
+            if (isSyncing) return; // Prevent double-clicks
+            setIsSyncing(true);
             // STOP TIMER: Record log
             if (activeTaskId !== task.id) {
                 setDialogConfig({
@@ -441,6 +444,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
             setActiveTaskId(null);
             setTimerSeconds(0);
             setStartTime(null);
+            setIsSyncing(false);
         } else {
             // START TIMER
             const now = new Date();

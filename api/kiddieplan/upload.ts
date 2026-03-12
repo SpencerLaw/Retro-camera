@@ -13,7 +13,17 @@ export default async function handler(
     }
 
     try {
-        const { filename, contentType } = request.query as { filename: string; contentType: string };
+        const { filename, contentType, token } = request.query as { filename: string; contentType: string; token: string };
+
+        if (!token) return response.status(401).json({ success: false, message: '未授权' });
+
+        // Simple check to ensure token is valid format
+        try {
+            const decodedToken = Buffer.from(token, 'base64').toString();
+            if (!decodedToken.includes(':')) throw new Error();
+        } catch (e) {
+            return response.status(401).json({ success: false, message: '无效授权' });
+        }
         const blob = await put(filename || 'avatar.webp', request, {
             contentType: contentType || 'image/webp',
             access: 'public',

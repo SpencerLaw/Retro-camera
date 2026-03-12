@@ -62,8 +62,8 @@ export default async function handler(
 
         // 2. 孩子端验证 (4位房间码) - 遍历所有授权码查找
         if (action === 'child_auth') {
-            if (cleanCode.length !== 4) {
-                return response.status(400).json({ success: false, message: '请输入4位房间码' });
+            if (cleanCode.length !== 6) {
+                return response.status(400).json({ success: false, message: '请输入6位房间密钥' });
             }
 
             // 遍历所有授权码，查找匹配房间码的孩子

@@ -318,14 +318,14 @@ const KiddiePlanApp: React.FC = () => {
               transition={{ duration: 0.4 }}
             >
               <input
-                type={portal === 'parent' ? 'text' : 'tel'}
+                type="text"
                 value={authCode}
                 onChange={(e) => {
                   setAuthCode(e.target.value.toUpperCase());
                   setError(null);
                 }}
-                placeholder={portal === 'parent' ? '请输入授权码' : '请输入4位号码'}
-                maxLength={portal === 'parent' ? 30 : 4}
+                placeholder={portal === 'parent' ? '请输入授权码' : '请输入6位房间密钥'}
+                maxLength={portal === 'parent' ? 30 : 6}
                 className="w-full bg-[#FFF9F0] rounded-[25px] px-6 py-5 text-center text-2xl font-black text-[#5D4037] tracking-wider outline-none border-4 border-transparent focus:border-[var(--color-blue-fun)] focus:bg-white transition-all shadow-inner placeholder:text-[#5D4037]/20"
                 autoFocus
                 spellCheck={false}

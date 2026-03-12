@@ -135,9 +135,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [isIdle, setIsIdle] = useState(false);
     const lastActivityRef = useRef(Date.now());
 
-    // Live Focus Timer State for Parent View
-    const [liveFocusDuration, setLiveFocusDuration] = useState(0);
-
     const [parentToast, setParentToast] = useState<{ show: boolean; count: number }>({ show: false, count: 0 });
     const prevPendingCount = useRef(0);
 
@@ -150,25 +147,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-    useEffect(() => {
-        const selectedChild = children.find(c => c.id === selectedChildId);
-        if (selectedChild?.isFocusing) {
-            setLiveFocusDuration(prev => {
-                const backendVal = selectedChild.lastFocusDuration || 0;
-                if (prev === 0 || Math.abs(prev - backendVal) > 30) {
-                    return backendVal;
-                }
-                return prev;
-            });
-
-            const interval = setInterval(() => {
-                setLiveFocusDuration(prev => prev + 1);
-            }, 1000);
-            return () => clearInterval(interval);
-        } else {
-            setLiveFocusDuration(0);
-        }
-    }, [children, selectedChildId]);
 
     // Background Polling for Updates (Redemption, Sync)
     useEffect(() => {
@@ -1210,7 +1188,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
         setUploadingAvatar(true);
         try {
             const webpBlob = await processImage(file);
-            const res = await fetch(`/api/kiddieplan/upload?filename=avatar_${Date.now()}.webp`, {
+            const res = await fetch(`/api/kiddieplan/upload?filename=avatar_${Date.now()}.webp&token=${encodeURIComponent(token)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'image/webp' },
                 body: webpBlob
@@ -1241,7 +1219,8 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
             showAvatarUpload: true,
             onConfirm: async (name) => {
                 if (!name) return;
-                const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+                // [Security Fix] Use a 6-digit roomCode to reduce collision probability.
+                const roomCode = Math.floor(100000 + Math.random() * 900000).toString();
                 try {
                     const finalAvatar = avatarRef.current || newAvatar;
                     const res = await fetch('/api/kiddieplan/manage', {
@@ -1771,7 +1750,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                             <div className="px-2 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-widest leading-none">
                                                 房间号
                                             </div>
-                                            <span className="text-sm font-black font-mono tracking-tighter">{selectedChild.roomCode}</span>
+                                            <span className="text-sm font-black font-mono tracking-tighter">{(selectedChild.roomCode || '').toString().padStart(6, '0')}</span>
                                         </div>
 
                                         <div className="relative z-10 mt-auto">

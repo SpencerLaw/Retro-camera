@@ -191,6 +191,13 @@ export default async function handler(
             if (existingIdx > -1) {
                 // Merge into existing entry
                 const existing = daily.focusLogs[existingIdx];
+
+                // [Deduplication] If the incoming log has EXACT SAME start/end as the latest merge/record, ignore it.
+                // This happens if a client retries or hits the stop button twice before state updates.
+                if (existing.startTime === log.startTime && existing.endTime === log.endTime) {
+                    return response.status(200).json({ success: true, message: '专注日志已存在，跳过冗余更新' });
+                }
+
                 const existingStart = existing.startTime ? new Date(existing.startTime).getTime() : Infinity;
                 const newStart = log.startTime ? new Date(log.startTime).getTime() : Infinity;
                 const existingEnd = existing.endTime ? new Date(existing.endTime).getTime() : 0;

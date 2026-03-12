@@ -171,6 +171,7 @@
       "silentAirwaves": "現在、電波は静止しています。",
       "active": "オンライン",
       "history": "履歴",
+      "inputPlaceholder": "放送する内容を入力してください...",
       "clearHistory": "履歴を消去"
     },
     "receiver": {

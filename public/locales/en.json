@@ -237,6 +237,7 @@
       "copySuccess": "Room ID Copied",
       "room": "ROOM",
       "queueHeader": "Upcoming Tasks Queue",
+      "inputPlaceholder": "Enter what you want to broadcast...",
       "history": "History",
       "clearHistory": "Clear History"
     },

@@ -176,6 +176,7 @@
       "roomCode": "房間碼",
       "manageClasses": "班級管理",
       "active": "在線",
+      "inputPlaceholder": "請輸入您要播報的內容...",
       "history": "歷史記錄",
       "clearHistory": "清空記錄"
     },

@@ -72,15 +72,15 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-10">
             {/* Dark scrim – always dark so white card always pops against any bg */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-[12px]"
                 onClick={onCancel}
             />
 
             {/* Card */}
-            <div className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_32px_80px_-8px_rgba(0,0,0,0.35)] border border-black/[0.06] overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+            <div className="relative w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-[32px] rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-white/30 dark:border-white/10 overflow-hidden animate-in zoom-in-95 fade-in duration-300">
 
                 {/* Colour-coded top strip */}
-                <div className={`h-1 w-full bg-gradient-to-r ${accentBar}`} />
+                <div className={`h-1.5 w-full bg-gradient-to-r ${accentBar} opacity-80`} />
 
                 <div className="p-8 space-y-6">
                     {/* Header */}

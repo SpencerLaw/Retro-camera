@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Trash2, Clock, CheckCircle2, Check, AlertTriangle, ToggleLeft, ToggleRight, ListTodo, FileText, Upload, Plus, X } from 'lucide-react';
+import { Calendar, Trash2, Clock, CheckCircle2, Check, AlertTriangle, ToggleLeft, ToggleRight, ListTodo, FileText, Upload, Plus, X, Loader2 } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import * as mammoth from 'mammoth';
 import CustomDialog, { DialogType } from './components/CustomDialog';
@@ -341,42 +341,42 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
     };
 
     return (
-        <GlassCard className="p-8 mt-8 border-2 border-indigo-500/20 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <GlassCard className="p-10 mt-12 border border-white/40 dark:border-white/10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-bottom-6 duration-700">
             {/* Header Area */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 px-2 border-b border-black/5 dark:border-white/5 pb-6">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
-                        <Calendar size={24} className="sm:w-7 sm:h-7" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 mb-10 px-2 border-b border-black/[0.03] dark:border-white/[0.03] pb-8">
+                <div className="flex items-center gap-5">
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-xl shadow-indigo-500/20 shrink-0">
+                        <Calendar size={32} />
                     </div>
                     <div className="min-w-0">
-                        <h3 className="text-lg sm:text-xl font-black tracking-tight truncate">{t('broadcast.sender.scheduler') || '定时播报计划'}</h3>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-500 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                {tasks.length} {t('broadcast.sender.rules') || 'TASKS'}
+                        <h3 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white truncate">{t('broadcast.sender.scheduler')}</h3>
+                        <div className="flex flex-wrap items-center gap-3 mt-1.5">
+                            <span className="text-[10px] font-black uppercase tracking-[0.25em] bg-indigo-500/10 text-indigo-500 px-3 py-1 rounded-full whitespace-nowrap">
+                                {tasks.length} {t('broadcast.sender.rules')}
                             </span>
-                            <span className="hidden sm:block w-1 h-1 rounded-full bg-gray-300"></span>
-                            <span className="text-[10px] font-black uppercase tracking-widest opacity-30 italic truncate">v2.1</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-white/10" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 italic">V2.5 PRO</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button
                         onClick={handleToggleAuto}
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 rounded-2xl font-bold text-xs sm:text-sm transition shadow-sm border ${isAutoEnabled
-                            ? 'bg-green-500 text-white border-green-400 shadow-green-500/20'
-                            : 'bg-white dark:bg-white/5 text-gray-400 border-black/5 hover:border-black/10'}`}
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-4 rounded-3xl font-black text-xs uppercase tracking-[0.2em] transition-all duration-500 border shadow-sm ${isAutoEnabled
+                            ? 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20 active:scale-95'
+                            : 'bg-white/40 dark:bg-white/5 text-slate-400 border-white/20 hover:border-blue-400/30'}`}
                     >
-                        {isAutoEnabled ? <ToggleRight size={20} className="sm:w-6 sm:h-6" /> : <ToggleLeft size={20} className="sm:w-6 sm:h-6" />}
+                        {isAutoEnabled ? <ToggleRight size={22} className="text-white" /> : <ToggleLeft size={22} className="opacity-40" />}
                         <span className="whitespace-nowrap">{isAutoEnabled ? t('broadcast.sender.running') : t('broadcast.sender.paused')}</span>
                     </button>
                     {tasks.length > 0 && (
                         <button
                             onClick={handleClearAll}
-                            className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition border border-transparent hover:border-red-500/20 shrink-0"
+                            className="w-14 h-14 flex items-center justify-center text-rose-500 bg-rose-500/5 hover:bg-rose-500/10 rounded-[1.25rem] transition-all duration-300 border border-transparent hover:border-rose-500/20 shrink-0"
                             title={t('broadcast.sender.clearAll')}
                         >
-                            <Trash2 size={20} />
+                            <Trash2 size={24} />
                         </button>
                     )}
                 </div>
@@ -384,31 +384,31 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
 
             {/* Actions / Import Section */}
             {!showImport && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
                     <button
                         onClick={() => setShowImport(true)}
-                        className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition text-indigo-500 overflow-hidden text-left sm:text-center"
+                        className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-8 sm:p-12 rounded-[2.5rem] border border-dashed border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/50 transition-all duration-500 text-indigo-500 overflow-hidden text-left sm:text-center"
                     >
-                        <Upload size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
-                        <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">{t('broadcast.sender.importExcelTitle')}</span>
-                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden sm:block">
-                            <FileText size={40} />
+                        <Upload size={32} className="mr-5 sm:mr-0 sm:mb-4 group-hover:scale-110 transition-transform duration-700 shrink-0" />
+                        <span className="font-black uppercase tracking-[0.25em] text-[11px]">{t('broadcast.sender.importExcelTitle')}</span>
+                        <div className="absolute -top-4 -right-4 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-700 rotate-12">
+                            <FileText size={80} />
                         </div>
                     </button>
 
-                    <label className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition text-emerald-600 dark:text-emerald-400 cursor-pointer overflow-hidden text-left sm:text-center">
+                    <label className="group relative flex flex-row sm:flex-col items-center sm:justify-center p-8 sm:p-12 rounded-[2.5rem] border border-dashed border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all duration-500 text-emerald-600 dark:text-emerald-400 cursor-pointer overflow-hidden text-left sm:text-center">
                         {isParsingDocx ? (
-                            <div className="flex items-center mr-4 sm:mr-0">
-                                <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin sm:mb-3"></span>
+                            <div className="flex items-center mr-5 sm:mr-0 sm:mb-4">
+                                <Loader2 size={32} className="animate-spin" />
                             </div>
                         ) : (
-                            <FileText size={28} className="mr-4 sm:mr-0 sm:mb-3 group-hover:scale-110 transition-transform shrink-0" />
+                            <FileText size={32} className="mr-5 sm:mr-0 sm:mb-4 group-hover:scale-110 transition-transform duration-700 shrink-0" />
                         )}
-                        <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs">
+                        <span className="font-black uppercase tracking-[0.25em] text-[11px]">
                             {isParsingDocx ? t('broadcast.sender.parsing') : t('broadcast.sender.importWordTitle')}
                         </span>
-                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden sm:block">
-                            <Upload size={40} />
+                        <div className="absolute -top-4 -right-4 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-700 -rotate-12">
+                            <Upload size={80} />
                         </div>
                         <input
                             type="file"
@@ -543,42 +543,43 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ license, activeChanne
                         <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent"></div>
                     </div>
 
-                    <div className="space-y-3 max-h-[500px] overflow-y-auto px-1 custom-scrollbar">
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto px-1 custom-scrollbar scroll-smooth">
                         {tasks.map((task) => (
                             <div
                                 key={task.id}
-                                className={`group p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition flex flex-row items-center gap-3 sm:gap-4 ${task.isPlayed
-                                    ? 'bg-gray-50/50 dark:bg-white/[0.02] border-transparent opacity-50 grayscale'
-                                    : 'bg-white dark:bg-white/5 border-black/5 dark:border-white/10 hover:border-indigo-500/40 hover:shadow-md'
+                                className={`group p-6 rounded-[2rem] border transition-all duration-500 flex flex-row items-center gap-5 ${task.isPlayed
+                                    ? 'bg-slate-50/50 dark:bg-white/[0.02] border-transparent opacity-40 grayscale-sm'
+                                    : 'bg-white/40 dark:bg-white/[0.03] border-white/40 dark:border-white/10 hover:border-indigo-500/40 hover:bg-white/60 dark:hover:bg-white/10 hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.05)]'
                                     }`}
                             >
-                                <div className="flex-none flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gray-50 dark:bg-black/20 text-indigo-500 font-mono shadow-inner shrink-0">
+                                <div className={`flex-none flex flex-col items-center justify-center w-16 h-16 rounded-2xl font-mono transition-colors duration-500 shrink-0 ${task.isPlayed ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-100/80 dark:bg-black/20 text-indigo-500 shadow-inner'}`}>
                                     {task.isPlayed ? (
-                                        <CheckCircle2 size={20} className="text-green-500 sm:w-6 sm:h-6" />
+                                        <CheckCircle2 size={28} />
                                     ) : (
                                         <>
-                                            <span className="text-[8px] sm:text-[9px] uppercase font-black opacity-40 leading-none mb-1">{task.date.slice(-5)}</span>
-                                            <span className="text-xs sm:text-sm font-black tracking-tighter leading-none">{task.time}</span>
+                                            <span className="text-[10px] uppercase font-black opacity-40 leading-none mb-1.5">{task.date.slice(-5)}</span>
+                                            <span className="text-base font-black tracking-tight leading-none">{task.time}</span>
                                         </>
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className={`text-xs sm:text-sm font-bold truncate ${task.isPlayed ? 'text-gray-400 line-through' : 'text-gray-800 dark:text-gray-200'}`}>
+                                    <p className={`text-base font-bold truncate leading-relaxed transition-all ${task.isPlayed ? 'text-slate-400 line-through opacity-70' : 'text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
                                         {task.content}
                                     </p>
-                                    <div className="flex items-center gap-2 mt-0.5 sm:mt-1">
-                                        <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${task.isPlayed ? 'text-green-500' : 'text-indigo-500 opacity-60'}`}>
-                                            {task.isPlayed ? 'PLAYED' : 'PENDING'}
+                                    <div className="flex items-center gap-3 mt-1.5">
+                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 ${task.isPlayed ? 'text-emerald-500' : 'text-indigo-500/60'}`}>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${task.isPlayed ? 'bg-emerald-500' : 'bg-indigo-500 animate-pulse'}`} />
+                                            {task.isPlayed ? 'COMPLETED' : 'SCHEDULED'}
                                         </span>
-                                        <span className="text-[8px] sm:text-[10px] opacity-20 font-black">/</span>
-                                        <span className="text-[8px] sm:text-[10px] font-mono opacity-40 font-bold uppercase truncate max-w-[80px]">Room {task.channelCode}</span>
+                                        <div className="w-1 h-1 rounded-full bg-slate-200 dark:bg-white/10" />
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 font-mono truncate max-w-[120px]">Room · {task.channelCode}</span>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => handleDelete(task.id)}
-                                    className="p-2 sm:p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition sm:opacity-0 group-hover:opacity-100 shrink-0"
+                                    className="w-12 h-12 flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all duration-300 sm:opacity-0 group-hover:opacity-100 shrink-0"
                                 >
-                                    <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+                                    <Trash2 size={20} />
                                 </button>
                             </div>
                         ))}

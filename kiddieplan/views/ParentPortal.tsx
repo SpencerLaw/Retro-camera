@@ -1589,10 +1589,10 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                     e.stopPropagation();
                                     onLogout();
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md rounded-2xl text-red-500 font-black shadow-sm border border-white/50 hover:bg-red-50 transition-all"
+                                className="w-10 h-10 flex items-center justify-center bg-white/60 backdrop-blur-md rounded-2xl text-red-500 font-black shadow-sm border border-white/50 hover:bg-red-50 transition-all"
+                                title="返回"
                             >
-                                <ArrowLeft size={18} strokeWidth={3} />
-                                <span className="text-sm">返回</span>
+                                <ArrowLeft size={20} strokeWidth={3} />
                             </motion.button>
                             <div className="flex flex-col cursor-pointer" onClick={(e) => {
                                 e.stopPropagation();

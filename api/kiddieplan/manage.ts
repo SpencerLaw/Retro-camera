@@ -207,8 +207,19 @@ export default async function handler(
             if (!license.progress[date]) license.progress[date] = {};
             if (!license.progress[date][childId]) license.progress[date][childId] = { tasks: [], checkins: [] };
 
-            // 更新该孩子在该日期的任务库，保留已有的打卡记录
-            license.progress[date][childId].tasks = tasks;
+            // 更新该孩子在该日期的任务库，保留已有的打卡记录和累计时间
+            const existingTasks = license.progress[date][childId].tasks || [];
+            license.progress[date][childId].tasks = tasks.map((newTask: any) => {
+                const existing = existingTasks.find((et: any) => et.id === newTask.id || (et.title === newTask.title && et.timeSlot === newTask.timeSlot));
+                if (existing) {
+                    return {
+                        ...newTask,
+                        accumulatedTime: existing.accumulatedTime || 0,
+                        completed: existing.completed || false
+                    };
+                }
+                return newTask;
+            });
 
             await kv.set(licenseKey, license);
             return response.status(200).json({ success: true, message: '任务发布成功' });

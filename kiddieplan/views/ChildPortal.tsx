@@ -659,10 +659,10 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
                                                     <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
-                                                    {/* 不再在清单中实时显示累计时间，改为仅在统计分析中可见 */}
-                                                    {isCurrentFocus && (
+                                                    {/* 恢复在清单中显示累计时间，实现“叠加”感 */}
+                                                    {(isCurrentFocus || (task.accumulatedTime || 0) > 0) && (
                                                         <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1 transition-all duration-300">
-                                                            <Timer size={10} className="animate-spin-slow" /> {formatTime(timerSeconds)}
+                                                            <Timer size={10} className={isCurrentFocus ? "animate-spin-slow" : ""} /> {formatTime((task.accumulatedTime || 0) + (isCurrentFocus ? timerSeconds : 0))}
                                                         </span>
                                                     )}
                                                 </div>

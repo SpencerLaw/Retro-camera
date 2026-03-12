@@ -363,7 +363,6 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     if (failCount >= 3) {
                         engine.current.isJoined = false;
                         ttsManager.cancelAll();
-                        localStorage.removeItem('br_receiver_roomId');
                         setIsJoined(false);
                         return;
                     }
@@ -374,7 +373,6 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     if (data.roomDeleted || data.notFound) {
                         engine.current.isJoined = false;
                         ttsManager.cancelAll();
-                        localStorage.removeItem('br_receiver_roomId');
                         setIsJoined(false);
                         return;
                     }

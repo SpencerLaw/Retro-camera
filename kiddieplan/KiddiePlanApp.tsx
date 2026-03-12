@@ -13,7 +13,25 @@ const KiddiePlanApp: React.FC = () => {
     // Check if we have an active session to restore
     const savedToken = localStorage.getItem('kp_token');
     const savedRole = localStorage.getItem('kp_role') as UserRole;
-    return (savedToken && savedRole) ? savedRole : 'selection';
+    const savedParentAuthTime = localStorage.getItem('kp_parent_auth_time');
+
+    if (savedToken && savedRole) {
+      // For parent role, check 15-day expiration even on startup
+      if (savedRole === 'parent' && savedParentAuthTime) {
+        const now = Date.now();
+        const fifteenDaysInMs = 15 * 24 * 60 * 60 * 1000;
+        if (now - parseInt(savedParentAuthTime) >= fifteenDaysInMs) {
+          // Parent session stale
+          localStorage.removeItem('kp_token');
+          localStorage.removeItem('kp_role');
+          localStorage.removeItem('kp_parent_token');
+          localStorage.removeItem('kp_parent_auth_time');
+          return 'selection';
+        }
+      }
+      return savedRole;
+    }
+    return 'selection';
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);

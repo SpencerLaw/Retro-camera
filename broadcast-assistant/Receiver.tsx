@@ -432,8 +432,8 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
 
             {/* ─── Floating Glass Header ─── */}
             {isJoined && (
-                <div className="fixed top-10 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50">
-                    <GlassCard className="px-8 py-5 flex items-center justify-between border-white/[0.08] dark:border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)]">
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50">
+                    <GlassCard className="px-8 py-4 flex items-center justify-between border-white/[0.08] dark:border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)]">
                         <div className="flex items-center gap-5">
                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${isJoined ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-200/50 dark:bg-white/5 text-slate-400'}`}>
                                 {isPlaying ? <Radio className="animate-pulse" size={24} /> : <Tv size={24} />}
@@ -544,14 +544,13 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center gap-12 animate-in zoom-in-95 duration-1000">
+                            <div className="flex flex-col items-center justify-center gap-12 animate-in zoom-in-95 duration-1000 mt-24">
                                 <div className="relative group">
                                     <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/5 blur-[100px] rounded-full scale-150 animate-pulse" />
                                     <IdleVisualizer isEmergency={false} />
                                     <div className="absolute bottom-[-80px] left-1/2 -translate-x-1/2 w-full text-center space-y-4">
                                         <p className="text-[11px] font-black uppercase tracking-[0.5em] text-indigo-500 animate-pulse">{t('broadcast.receiver.monitoring')}</p>
                                         <div className="flex items-center justify-center gap-3">
-                                            <span className="text-[9px] font-black px-4 py-1.5 bg-slate-200/50 dark:bg-white/5 rounded-full text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">Freq 44.1kHz</span>
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         </div>
                                     </div>
@@ -636,7 +635,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                             }}
                             className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-rose-500 hover:border-rose-500/30 transition-all active:scale-[0.98]"
                         >
-                            {t('broadcast.history.clear')}
+                            {t('broadcast.sender.clearHistory') || '清空记录'}
                         </button>
                     </div>
                 </div>

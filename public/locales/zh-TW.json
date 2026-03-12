@@ -175,7 +175,9 @@
       "clearHistoryConfirm": "確定要清空本地播報記錄嗎？",
       "roomCode": "房間碼",
       "manageClasses": "班級管理",
-      "active": "在線"
+      "active": "在線",
+      "history": "歷史記錄",
+      "clearHistory": "清空記錄"
     },
     "receiver": {
       "joinChannel": "進入通道",

@@ -250,9 +250,8 @@
       "looping": "循环模式",
       "initBroadcast": "发起播报",
       "emergency": "紧急播报",
-      "history": {
-        "clear": "清空记录"
-      },
+      "history": "历史记录",
+      "clearHistory": "清空记录",
       "unknownChannelName": "等待频道识别"
     },
     "receiver": {

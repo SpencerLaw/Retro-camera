@@ -169,7 +169,9 @@
       "wipeLogs": "ログを消去",
       "clearHistoryConfirm": "ローカルの放送履歴をすべて消去しますか？",
       "silentAirwaves": "現在、電波は静止しています。",
-      "active": "オンライン"
+      "active": "オンライン",
+      "history": "履歴",
+      "clearHistory": "履歴を消去"
     },
     "receiver": {
       "joinChannel": "チャンネルに入る",

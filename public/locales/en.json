@@ -236,7 +236,9 @@
       "pastePlaceholder": "Paste table content here...",
       "copySuccess": "Room ID Copied",
       "room": "ROOM",
-      "queueHeader": "Upcoming Tasks Queue"
+      "queueHeader": "Upcoming Tasks Queue",
+      "history": "History",
+      "clearHistory": "Clear History"
     },
     "receiver": {
       "joinChannel": "Join Channel",

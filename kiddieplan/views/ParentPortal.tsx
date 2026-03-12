@@ -1599,7 +1599,7 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                                 mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                                 if (isScrolled) setIsScrolled(false);
                             }}>
-                                <h1 className={`text-[18px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                <h1 className="text-[18px] font-black tracking-tight leading-none flex items-center gap-2 text-rose-500" style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif', textShadow: '0 2px 4px rgba(244, 114, 182, 0.1)' }}>
                                     星梦奇旅
                                 </h1>
                                 <AnimatePresence>

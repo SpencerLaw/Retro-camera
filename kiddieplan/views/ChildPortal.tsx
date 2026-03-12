@@ -46,6 +46,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
     const [redemptionLogs, setRedemptionLogs] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<AppTab>('home');
     const [loading, setLoading] = useState(true);
+    const [focusLogs, setFocusLogs] = useState<any[]>([]);
     const [childProfile, setChildProfile] = useState<{ name: string; avatar: string }>({ name: '宝贝', avatar: '' });
     const [plannerTab, setPlannerTab] = useState(0);
     const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
@@ -354,6 +355,7 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                 if (result.data.profile) setChildProfile(result.data.profile);
                 if (result.data.rewards) setRewards(result.data.rewards);
                 if (result.data.redemptionLogs) setRedemptionLogs(result.data.redemptionLogs);
+                if (result.data.focusLogs) setFocusLogs(result.data.focusLogs);
 
                 // RESTORE FOCUS STATE: Ensure timer resumes after refresh
                 // Only overwrite if timer is NOT already running locally to prevent poll-resetting
@@ -656,15 +658,38 @@ const ChildPortal: React.FC<ChildPortalProps> = ({ token, onLogout }) => {
                                             </div>
                                             <div>
                                                 <h3 className={`font-black text-lg ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'} `}>{task.title}</h3>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
-                                                    <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
-                                                    {/* 仅在孩子正在专注时显示实时计时，清单平时保持清洁 */}
-                                                    {isCurrentFocus && (
-                                                        <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1 transition-all duration-300">
-                                                            <Timer size={10} className="animate-spin-slow" /> {formatTime((task.accumulatedTime || 0) + timerSeconds)}
-                                                        </span>
-                                                    )}
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold bg-blue-100 text-blue-500 px-2 py-0.5 rounded-md">{task.timeSlot}</span>
+                                                        <span className="text-[10px] font-black text-orange-400">+{task.points} 🍭</span>
+                                                        {isCurrentFocus && (
+                                                            <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1 transition-all duration-300">
+                                                                <Timer size={10} className="animate-spin-slow" /> {formatTime((task.accumulatedTime || 0) + timerSeconds)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {/* 显示今日历史时间记录，让孩子“心里有数” */}
+                                                    {(() => {
+                                                        const logs = focusLogs.filter(l => l.taskId === task.id || (l.taskTitle === task.title && !l.taskId));
+                                                        if (logs.length > 0) {
+                                                            const startTimes = logs.map(l => new Date(l.startTime).getTime()).filter(t => !isNaN(t));
+                                                            const endTimes = logs.map(l => l.endTime ? new Date(l.endTime).getTime() : Date.now()).filter(t => !isNaN(t));
+                                                            if (startTimes.length === 0) return null;
+                                                            
+                                                            const firstStart = new Date(Math.min(...startTimes));
+                                                            const lastEnd = new Date(Math.max(...endTimes));
+                                                            const formatHHmm = (d: Date) => `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                                                            
+                                                            return (
+                                                                <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400">
+                                                                    <Clock size={8} />
+                                                                    <span>{formatHHmm(firstStart)} - {isCurrentFocus ? '专注中' : formatHHmm(lastEnd)}</span>
+                                                                    <span className="opacity-50">({formatTime(task.accumulatedTime || 0)})</span>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
                                                 </div>
                                             </div>
                                         </div>

@@ -1581,27 +1581,41 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
                             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                         }}
                     >
-                        <div className="flex flex-col cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                            if (isScrolled) setIsScrolled(false);
-                        }}>
-                            <h1 className={`text-[18px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
-                                星梦奇旅
-                            </h1>
-                            <AnimatePresence>
-                                {!isScrolled && (
-                                    <motion.span
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
-                                        style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
-                                    >
-                                        家长端
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
+                        <div className="flex items-center gap-4">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onLogout();
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md rounded-2xl text-red-500 font-black shadow-sm border border-white/50 hover:bg-red-50 transition-all"
+                            >
+                                <ArrowLeft size={18} strokeWidth={3} />
+                                <span className="text-sm">返回</span>
+                            </motion.button>
+                            <div className="flex flex-col cursor-pointer" onClick={(e) => {
+                                e.stopPropagation();
+                                mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                                if (isScrolled) setIsScrolled(false);
+                            }}>
+                                <h1 className={`text-[18px] font-black tracking-tight leading-none flex items-center gap-2 ${currentTheme.text}`} style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}>
+                                    星梦奇旅
+                                </h1>
+                                <AnimatePresence>
+                                    {!isScrolled && (
+                                        <motion.span
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="text-[10px] font-bold text-gray-400 mt-0.5 leading-none"
+                                            style={{ fontFamily: '"ZCOOL KuaiLe", sans-serif' }}
+                                        >
+                                            家长端
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
 
                         {/* Center: Mini Profile when Scrolled */}
@@ -1632,19 +1646,6 @@ const ParentPortal: React.FC<ParentPortalProps> = ({ token, onLogout }) => {
 
                         {/* Right: Time & Compact Buttons */}
                         <div className="flex items-center gap-3">
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onLogout();
-                                }}
-                                className="p-2 bg-white/40 backdrop-blur-md rounded-xl text-red-500 hover:bg-red-50 transition-colors border border-white/50"
-                                title="返回选择页面"
-                            >
-                                <LogOut size={20} />
-                            </motion.button>
-
                             {isScrolled && (
                                 <motion.button
                                     initial={{ opacity: 0, scale: 0.5 }}

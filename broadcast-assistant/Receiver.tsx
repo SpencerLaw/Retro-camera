@@ -421,7 +421,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const emergency = !!currentMsg?.isEmergency;
 
     return (
-        <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-1000 ${emergency ? 'bg-rose-950 text-white' : (theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-950')
+        <div className={`fixed inset-0 w-full h-[100dvh] z-[100] flex flex-col items-center justify-center p-6 overflow-hidden transition-all duration-1000 ${emergency ? 'bg-rose-950 text-white' : (theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-950')
             }`}>
             {/* ─── Premium Animated Backdrop ─── */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">

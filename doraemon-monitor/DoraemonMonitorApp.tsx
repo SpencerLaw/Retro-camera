@@ -6,7 +6,7 @@ import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from
 import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
 
-type MonitorState = 'calm' | 'warning' | 'alarm';
+type MonitorState = 'calm' | 'alarm';
 type MicTestStage = 'idle' | 'quiet' | 'active' | 'done';
 type MicTestHealth = 'good' | 'flat' | 'noisy' | 'weak';
 
@@ -77,12 +77,11 @@ const DoraemonMonitorApp: React.FC = () => {
   const streamRef = useRef<MediaStream | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const analyzeAudioRef = useRef<() => void>(() => {});
-  const thresholdStartRef = useRef(0);
-  const recoverStartRef = useRef(0);
   const alarmIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const alarmIgnoreUntilRef = useRef(0);
   const lastAlarmPlayedAtRef = useRef(0);
   const noiseFloorRef = useRef(40);
+  const environmentDbRef = useRef(40);
   const recentDbRef = useRef<number[]>([]);
   const micTestStartRef = useRef(0);
   const quietTestSamplesRef = useRef<number[]>([]);
@@ -153,10 +152,9 @@ const DoraemonMonitorApp: React.FC = () => {
       audioContextRef.current.close().catch(() => undefined);
       audioContextRef.current = null;
     }
-    thresholdStartRef.current = 0;
-    recoverStartRef.current = 0;
     alarmIgnoreUntilRef.current = 0;
     lastAlarmPlayedAtRef.current = 0;
+    environmentDbRef.current = 40;
   }, []);
 
   const finishMicTest = useCallback(() => {
@@ -241,15 +239,18 @@ const DoraemonMonitorApp: React.FC = () => {
 
       const rms = Math.sqrt(sum / data.length);
       const baseDb = clamp(rms > 0 ? (Math.log10(rms) * 20 + 100) : 35, 35, 120);
+      const isIgnoringOwnAlarm = Date.now() < alarmIgnoreUntilRef.current;
 
       if (!Number.isFinite(noiseFloorRef.current) || noiseFloorRef.current <= 0) {
         noiseFloorRef.current = baseDb;
       }
 
-      const floorGap = baseDb - noiseFloorRef.current;
-      const floorFollowRate = floorGap < 0 ? 0.08 : floorGap < 2 ? 0.03 : floorGap < 6 ? 0.01 : 0.003;
-      noiseFloorRef.current += (baseDb - noiseFloorRef.current) * floorFollowRate;
-      noiseFloorRef.current = clamp(noiseFloorRef.current, 30, 80);
+      if (!isIgnoringOwnAlarm) {
+        const floorGap = baseDb - noiseFloorRef.current;
+        const floorFollowRate = floorGap < 0 ? 0.08 : floorGap < 2 ? 0.03 : floorGap < 6 ? 0.01 : 0.003;
+        noiseFloorRef.current += (baseDb - noiseFloorRef.current) * floorFollowRate;
+        noiseFloorRef.current = clamp(noiseFloorRef.current, 30, 80);
+      }
 
       const sensitivityScale = 1 + ((sensitivityRef.current - 50) / 50) * 0.65;
       const adjustedDb = clamp(
@@ -257,8 +258,13 @@ const DoraemonMonitorApp: React.FC = () => {
         35,
         120
       );
+      const effectiveDb = isIgnoringOwnAlarm ? environmentDbRef.current : adjustedDb;
 
-      recentDbRef.current.push(adjustedDb);
+      if (!isIgnoringOwnAlarm) {
+        environmentDbRef.current = adjustedDb;
+      }
+
+      recentDbRef.current.push(effectiveDb);
       if (recentDbRef.current.length > 40) {
         recentDbRef.current.shift();
       }
@@ -266,19 +272,16 @@ const DoraemonMonitorApp: React.FC = () => {
       const minRecent = Math.min(...recentDbRef.current);
       const maxRecent = Math.max(...recentDbRef.current);
       const recentRange = maxRecent - minRecent;
-      const liveActivity = clamp(adjustedDb - noiseFloorRef.current, 0, 60);
+      const liveActivity = clamp(effectiveDb - noiseFloorRef.current, 0, 60);
 
       setAmbientDb(noiseFloorRef.current);
       setActivityDb(liveActivity);
       setSignalRange(recentRange);
-      setCurrentDb(prev => {
-        const next = prev + (adjustedDb - prev) * 0.35;
-        setMaxDb(m => Math.max(m, next));
-        return next;
-      });
+      setCurrentDb(effectiveDb);
+      setMaxDb(m => Math.max(m, effectiveDb));
 
       if (document.hidden) {
-        document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(adjustedDb).toString());
+        document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(effectiveDb).toString());
       } else {
         document.title = t('doraemon.appTitle');
       }
@@ -289,9 +292,9 @@ const DoraemonMonitorApp: React.FC = () => {
         const nextStage: MicTestStage = elapsed < 4000 ? 'quiet' : elapsed < 8000 ? 'active' : 'done';
 
         if (nextStage === 'quiet') {
-          quietTestSamplesRef.current.push(adjustedDb);
+          quietTestSamplesRef.current.push(effectiveDb);
         } else if (nextStage === 'active') {
-          activeTestSamplesRef.current.push(adjustedDb);
+          activeTestSamplesRef.current.push(effectiveDb);
           if (stage !== 'active') {
             setMicTestStage('active');
           }
@@ -353,6 +356,7 @@ const DoraemonMonitorApp: React.FC = () => {
     setMicTestResult(null);
     recentDbRef.current = [];
     noiseFloorRef.current = 40;
+    environmentDbRef.current = 40;
 
     try {
       const supported = navigator.mediaDevices.getSupportedConstraints?.() || {};
@@ -471,27 +475,8 @@ const DoraemonMonitorApp: React.FC = () => {
   useEffect(() => {
     if (!isStarted) return;
 
-    const now = Date.now();
-    const isIgnoringOwnAlarm = now < alarmIgnoreUntilRef.current;
-    const triggerDb = limit + 1.2;
-    const releaseDb = Math.max(35, limit - 4);
-    const dynamicTrigger = Math.max(3.5, 7 - sensitivity * 0.05);
-    const dynamicRelease = Math.max(1.5, dynamicTrigger - 2.2);
-    const shouldWarn = currentDb >= limit - 2 || activityDb >= dynamicTrigger - 1;
-    const shouldAlarm = currentDb >= triggerDb || (currentDb >= limit - 3 && activityDb >= dynamicTrigger);
-    const canRecover = currentDb <= releaseDb && activityDb <= dynamicRelease;
-
-    if (shouldAlarm && !isIgnoringOwnAlarm) {
-      recoverStartRef.current = 0;
-      if (thresholdStartRef.current === 0) {
-        thresholdStartRef.current = now;
-      }
-
-      const alarmElapsed = now - thresholdStartRef.current;
-      if (alarmElapsed > 700 && state === 'calm') {
-        setState('warning');
-      }
-      if (alarmElapsed > 1700 && state !== 'alarm') {
+    if (currentDb >= limit) {
+      if (state !== 'alarm') {
         setState('alarm');
         setWarnCount(prev => prev + 1);
         setQuietTime(0);
@@ -499,52 +484,29 @@ const DoraemonMonitorApp: React.FC = () => {
       return;
     }
 
-    thresholdStartRef.current = 0;
-
-    if (state === 'alarm') {
-      if (isIgnoringOwnAlarm) {
-        recoverStartRef.current = 0;
-        return;
-      }
-      if (canRecover) {
-        if (recoverStartRef.current === 0) {
-          recoverStartRef.current = now;
-        }
-        if (now - recoverStartRef.current > 1600) {
-          setState('calm');
-        }
-      } else {
-        recoverStartRef.current = 0;
-      }
-      return;
-    }
-
-    recoverStartRef.current = 0;
-    if (shouldWarn) {
-      setState('warning');
-    } else if (state !== 'calm') {
+    if (state !== 'calm') {
       setState('calm');
     }
-  }, [activityDb, currentDb, isStarted, limit, sensitivity, state]);
+  }, [currentDb, isStarted, limit, state]);
 
   useEffect(() => {
     if (state === 'alarm' && !isMuted) {
-      const playLoop = (withSpeech: boolean) => {
+      const playLoop = () => {
         const now = Date.now();
-        playAlarmSound(withSpeech);
+        playAlarmSound(true);
         lastAlarmPlayedAtRef.current = now;
-        alarmIgnoreUntilRef.current = now + (withSpeech ? 2200 : 1600);
+        alarmIgnoreUntilRef.current = now + 900;
       };
 
-      if (Date.now() - lastAlarmPlayedAtRef.current > 3800) {
-        playLoop(true);
+      if (Date.now() - lastAlarmPlayedAtRef.current > 1200) {
+        playLoop();
       }
 
       if (!alarmIntervalRef.current) {
         alarmIntervalRef.current = setInterval(() => {
-          if (Date.now() - lastAlarmPlayedAtRef.current < 3800) return;
-          playLoop(false);
-        }, 4200);
+          if (Date.now() - lastAlarmPlayedAtRef.current < 1200) return;
+          playLoop();
+        }, 1500);
       }
     } else {
       if (alarmIntervalRef.current) {
@@ -766,7 +728,7 @@ const DoraemonMonitorApp: React.FC = () => {
       {state === 'alarm' ? (
         <g stroke="#333" strokeWidth="5"><line x1="70" y1="60" x2="90" y2="80" /><line x1="90" y1="60" x2="70" y2="80" /><line x1="110" y1="60" x2="130" y2="80" /><line x1="130" y1="60" x2="110" y2="80" /></g>
       ) : (
-        <g><circle cx={state === 'warning' ? 82 : 88} cy="70" r={state === 'warning' ? 3 : 4} fill="#000" /><circle cx={state === 'warning' ? 118 : 112} cy="70" r={state === 'warning' ? 3 : 4} fill="#000" /></g>
+        <g><circle cx="88" cy="70" r="4" fill="#000" /><circle cx="112" cy="70" r="4" fill="#000" /></g>
       )}
       <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" /><line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2" />
       {state === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2" /> : <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" />}

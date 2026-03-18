@@ -1381,13 +1381,9 @@
   flex-direction: column;
   gap: 14px;
   padding: 18px 20px 20px;
-  overflow-y: auto;
+  overflow: hidden;
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
 }
 
 .report-modal-week {
@@ -1532,6 +1528,8 @@
 }
 
 .report-day-chip {
+  appearance: none;
+  -webkit-appearance: none;
   border-radius: 16px;
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.04);
@@ -1540,6 +1538,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  cursor: pointer;
+  width: 100%;
+  color: inherit;
+  text-align: left;
 }
 
 .doraemon-app:not(.dark-mode) .report-day-chip {
@@ -1550,6 +1552,11 @@
 .report-day-chip.has-data {
   border-color: rgba(34, 197, 94, 0.28);
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(14, 165, 233, 0.14));
+}
+
+.report-day-chip.selected {
+  border-color: rgba(125, 211, 252, 0.38);
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.18), 0 14px 30px rgba(14, 165, 233, 0.12);
 }
 
 .report-day-chip span {
@@ -1570,7 +1577,12 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-right: 4px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.report-day-panel {
+  justify-content: flex-start;
 }
 
 .report-day-section {
@@ -1620,6 +1632,95 @@
 
 .doraemon-app:not(.dark-mode) .report-day-count.has-data {
   color: #15803d;
+}
+
+.report-session-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.report-session-card {
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doraemon-app:not(.dark-mode) .report-session-card {
+  background: rgba(148, 163, 184, 0.06);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+.report-session-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.report-session-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.report-session-metric {
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(148, 163, 184, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-session-metric span {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.report-session-metric strong {
+  font-size: 0.92rem;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.doraemon-app:not(.dark-mode) .report-session-metric span {
+  color: #64748b;
+}
+
+.report-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+.report-page-btn {
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  background: rgba(14, 165, 233, 0.12);
+  color: #8edcff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.report-page-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.report-page-status {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 700;
 }
 
 .report-table-scroll {
@@ -2129,6 +2230,10 @@
     grid-template-columns: 1fr;
   }
 
+  .report-session-grid {
+    grid-template-columns: 1fr;
+  }
+
   .mic-test-capture-status,
   .mic-test-result-actions {
     grid-template-columns: 1fr;
@@ -2155,7 +2260,8 @@
     height: min(80vh, 680px);
   }
 
-  .report-day-section {
+  .report-day-section,
+  .report-session-card {
     padding: 12px;
   }
 }

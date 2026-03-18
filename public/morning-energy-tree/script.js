@@ -462,135 +462,135 @@ function pointOnQuadratic(start, control, end, t) {
     };
 }
 
-function drawEnergyNode(x, y, radius, color, alpha = 0.35) {
+function easeInOutSine(t) {
+    return -(Math.cos(Math.PI * t) - 1) / 2;
+}
+
+function tangentOnQuadratic(start, control, end, t) {
+    return {
+        x: (2 * (1 - t) * (control.x - start.x)) + (2 * t * (end.x - control.x)),
+        y: (2 * (1 - t) * (control.y - start.y)) + (2 * t * (end.y - control.y))
+    };
+}
+
+function drawEnergyAura(x, y, radius, color, alpha = 0.2) {
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 2.4);
-    glow.addColorStop(0, color);
-    glow.addColorStop(0.35, `rgba(255,255,255,${Math.min(0.95, alpha + 0.2)})`);
-    glow.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.globalAlpha = alpha;
+
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 2.6);
+    glow.addColorStop(0, 'rgba(255,255,255,0.95)');
+    glow.addColorStop(0.18, color);
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(x, y, radius * 2.4, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.globalAlpha = Math.min(0.95, alpha + 0.25);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.8;
-    ctx.setLineDash([4, 5]);
-    ctx.lineDashOffset = -(Date.now() / 45);
-    ctx.beginPath();
-    ctx.arc(x, y, radius * 1.25, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-    ctx.globalAlpha = 0.9;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(x, y, Math.max(1.6, radius * 0.3), 0, Math.PI * 2);
+    ctx.arc(x, y, radius * 2.6, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 }
 
-function drawQuadraticEnergyPath(start, control, end, glowColor, coreColor, width, alpha, dashed = true) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
+function drawParticleTrail(points, color, baseSize, alpha = 0.7) {
+    if (points.length < 2) return;
 
-    ctx.globalAlpha = alpha * 0.45;
-    ctx.strokeStyle = glowColor;
-    ctx.lineWidth = width * 2.4;
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.quadraticCurveTo(control.x, control.y, end.x, end.y);
-    ctx.stroke();
-
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = coreColor;
-    ctx.lineWidth = width;
-    if (dashed) {
-        ctx.setLineDash([14, 9]);
-        ctx.lineDashOffset = -(Date.now() / 55);
+    for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        const ratio = (i + 1) / points.length;
+        const size = Math.max(0.8, baseSize * (0.25 + ratio * 0.7));
+        ctx.globalAlpha = alpha * ratio * ratio;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+        ctx.fill();
     }
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.quadraticCurveTo(control.x, control.y, end.x, end.y);
-    ctx.stroke();
-    ctx.restore();
 }
 
 class SkyEnergy {
-    constructor(x, y, targetX, targetY, trunkBase, strength = 0.5) {
-        this.x = x;
-        this.y = y;
-        this.targetX = targetX;
-        this.targetY = targetY;
+    constructor(x, y, targetX, targetY, controlPoint, trunkBase, strength = 0.5) {
+        this.start = { x, y };
+        this.control = {
+            x: controlPoint.x + ((Math.random() - 0.5) * 80),
+            y: controlPoint.y + ((Math.random() - 0.5) * 40)
+        };
+        this.target = { x: targetX, y: targetY };
         this.trunkBase = trunkBase;
         this.strength = strength;
-        this.size = 2 + (Math.random() * 4 * strength);
+        this.size = 1.8 + (Math.random() * 3.4 * strength);
         this.life = 1;
         this.phase = Math.random() * Math.PI * 2;
         this.hue = ENERGY_TECH_COLORS[Math.floor(Math.random() * ENERGY_TECH_COLORS.length)];
-        this.vx = (Math.random() - 0.5) * 0.6;
-        this.vy = 0.2 + Math.random() * 0.4;
+        this.progress = 0;
+        this.speed = 0.0048 + (strength * 0.006);
         this.history = [];
+        this.x = x;
+        this.y = y;
     }
     update() {
-        const dx = this.targetX - this.x;
-        const dy = this.targetY - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const pull = 0.012 + (this.strength * 0.02);
+        this.phase += 0.08 + (this.strength * 0.03);
+        this.progress += this.speed;
 
-        this.phase += 0.15;
-        this.vx += (dx / dist) * pull;
-        this.vy += (dy / dist) * pull;
-        this.vx *= 0.985;
-        this.vy *= 0.987;
+        const eased = easeInOutSine(Math.min(1, this.progress));
+        const base = pointOnQuadratic(this.start, this.control, this.target, eased);
+        const tangent = tangentOnQuadratic(this.start, this.control, this.target, eased);
+        const tangentLength = Math.sqrt(tangent.x * tangent.x + tangent.y * tangent.y) || 1;
+        const normalX = -tangent.y / tangentLength;
+        const normalY = tangent.x / tangentLength;
+        const wobble = Math.sin(this.phase) * (18 + (this.strength * 12)) * (1 - (eased * 0.82));
 
-        this.x += this.vx + Math.sin(this.phase) * 0.35;
-        this.y += this.vy;
+        this.x = base.x + (normalX * wobble);
+        this.y = base.y + (normalY * wobble);
         this.history.push({ x: this.x, y: this.y });
-        if (this.history.length > 6) this.history.shift();
+        if (this.history.length > 10) this.history.shift();
 
-        if (dist < 24) {
+        const dx = this.target.x - this.x;
+        const dy = this.target.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 18 || this.progress >= 1) {
             sparkles.push(new Sparkle(this.x, this.y, '#c8fff7'));
             trunkTransfers.push(new TrunkTransfer(this.x, this.y, this.trunkBase.x, this.trunkBase.y, this.strength, this.hue));
             return false;
         }
 
-        this.life -= 0.003 + (this.strength * 0.001);
-        return this.life > 0 && this.y < canvas.height + 80;
+        this.life = Math.max(0.2, 1 - (eased * 0.35));
+        return this.y < canvas.height + 80;
     }
     draw() {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = Math.max(0.16, this.life * 0.75);
+        drawParticleTrail(this.history, this.hue, this.size, Math.max(0.18, this.life * 0.68));
 
-        if (this.history.length > 1) {
-            ctx.strokeStyle = this.hue;
-            ctx.lineWidth = this.size * 1.15;
-            ctx.beginPath();
-            ctx.moveTo(this.history[0].x, this.history[0].y);
-            for (let i = 1; i < this.history.length; i++) {
-                ctx.lineTo(this.history[i].x, this.history[i].y);
-            }
-            ctx.stroke();
-        }
-
-        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 4);
+        ctx.globalAlpha = Math.max(0.22, this.life * 0.78);
+        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 5.2);
         glow.addColorStop(0, this.hue);
         glow.addColorStop(0.45, 'rgba(255,255,255,0.85)');
         glow.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 5.2, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.globalAlpha = Math.min(1, this.life + 0.15);
         ctx.fillStyle = this.hue;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = Math.min(1, this.life + 0.1);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, Math.max(1.2, this.size * 0.42), 0, Math.PI * 2);
+        ctx.fill();
+
+        const orbitAngle = this.phase * 1.6;
+        ctx.globalAlpha = Math.max(0.12, this.life * 0.42);
+        ctx.fillStyle = '#dffcff';
+        ctx.beginPath();
+        ctx.arc(
+            this.x + Math.cos(orbitAngle) * this.size * 2.3,
+            this.y + Math.sin(orbitAngle) * this.size * 2.3,
+            Math.max(0.7, this.size * 0.24),
+            0,
+            Math.PI * 2
+        );
         ctx.fill();
         ctx.restore();
     }
@@ -605,11 +605,12 @@ class TrunkTransfer {
             y: startY + ((endY - startY) * 0.38)
         };
         this.t = 0;
-        this.speed = 0.03 + (strength * 0.045);
+        this.speed = 0.016 + (strength * 0.026);
         this.life = 1;
-        this.size = 2.4 + (strength * 3);
+        this.size = 2.2 + (strength * 2.8);
         this.color = color;
         this.strength = strength;
+        this.history = [];
     }
     update() {
         this.t += this.speed;
@@ -623,26 +624,35 @@ class TrunkTransfer {
         return true;
     }
     draw() {
-        const head = pointOnQuadratic(this.start, this.control, this.end, this.t);
-        const tail = pointOnQuadratic(this.start, this.control, this.end, Math.max(0, this.t - 0.14));
+        const eased = easeInOutSine(Math.min(1, this.t));
+        const head = pointOnQuadratic(this.start, this.control, this.end, eased);
+        this.history.push({ x: head.x, y: head.y });
+        if (this.history.length > 9) this.history.shift();
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = this.life;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.size;
-        ctx.beginPath();
-        ctx.moveTo(tail.x, tail.y);
-        ctx.lineTo(head.x, head.y);
-        ctx.stroke();
+        drawParticleTrail(this.history, this.color, this.size * 0.9, this.life * 0.76);
 
-        const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, this.size * 4);
+        ctx.globalAlpha = this.life;
+        const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, this.size * 4.6);
         glow.addColorStop(0, '#ffffff');
         glow.addColorStop(0.35, this.color);
         glow.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(head.x, head.y, this.size * 4, 0, Math.PI * 2);
+        ctx.arc(head.x, head.y, this.size * 4.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = Math.min(1, this.life + 0.12);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, this.size * 1.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, Math.max(1.1, this.size * 0.36), 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
@@ -658,10 +668,11 @@ class SoilTransfer {
             y: startY + 16 + Math.random() * 14
         };
         this.t = 0;
-        this.speed = 0.028 + (strength * 0.03);
+        this.speed = 0.018 + (strength * 0.024);
         this.life = 1;
-        this.size = 1.8 + (strength * 2.2);
+        this.size = 1.6 + (strength * 1.9);
         this.color = SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)] || color;
+        this.history = [];
     }
     update() {
         this.t += this.speed;
@@ -673,22 +684,29 @@ class SoilTransfer {
         return true;
     }
     draw() {
-        const head = pointOnQuadratic(this.start, this.control, this.end, this.t);
-        const tail = pointOnQuadratic(this.start, this.control, this.end, Math.max(0, this.t - 0.18));
+        const eased = easeInOutSine(Math.min(1, this.t));
+        const head = pointOnQuadratic(this.start, this.control, this.end, eased);
+        this.history.push({ x: head.x, y: head.y });
+        if (this.history.length > 8) this.history.shift();
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = this.life * 0.9;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.size;
-        ctx.beginPath();
-        ctx.moveTo(tail.x, tail.y);
-        ctx.lineTo(head.x, head.y);
-        ctx.stroke();
+        drawParticleTrail(this.history, this.color, this.size * 0.82, this.life * 0.64);
 
+        ctx.globalAlpha = this.life * 0.82;
+        const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, this.size * 3.8);
+        glow.addColorStop(0, '#ffffff');
+        glow.addColorStop(0.4, this.color);
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, this.size * 3.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = this.life * 0.9;
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.arc(head.x, head.y, this.size * 0.95, 0, Math.PI * 2);
+        ctx.arc(head.x, head.y, this.size, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
@@ -699,16 +717,19 @@ function spawnSkyEnergy(treeSize, anchors) {
     const activation = Math.max(0, (STATE.currentDB - 56) / 26);
     if (activation <= 0) return;
 
-    const spawnCount = Math.random() < (0.22 + activation * 0.45) ? 1 : 0;
-    if (!spawnCount) return;
+    const shouldSpawn = Math.random() < (0.24 + activation * 0.42);
+    if (!shouldSpawn) return;
 
-    const targetX = anchors.canopy.x + ((Math.random() - 0.5) * treeSize * 0.18);
-    const targetY = anchors.canopy.y + ((Math.random() - 0.5) * treeSize * 0.1);
-    const sourceBand = Math.max(90, canvas.width * 0.18);
-    const sourceX = canvas.width - 100 + ((Math.random() - 0.5) * sourceBand);
-    const sourceY = 90 + (Math.random() * 90);
+    const spawnCount = Math.random() < (0.22 + activation * 0.3) ? 2 : 1;
+    for (let i = 0; i < spawnCount; i++) {
+        const targetX = anchors.canopy.x + ((Math.random() - 0.5) * treeSize * 0.16);
+        const targetY = anchors.canopy.y + ((Math.random() - 0.5) * treeSize * 0.08);
+        const sourceBand = Math.max(90, canvas.width * 0.18);
+        const sourceX = canvas.width - 100 + ((Math.random() - 0.5) * sourceBand);
+        const sourceY = 90 + (Math.random() * 110);
 
-    energyParticles.push(new SkyEnergy(sourceX, sourceY, targetX, targetY, anchors.trunkBase, activation));
+        energyParticles.push(new SkyEnergy(sourceX, sourceY, targetX, targetY, anchors.beamControl, anchors.trunkBase, activation));
+    }
 }
 
 function drawEnergyFlow(treeSize) {
@@ -720,26 +741,11 @@ function drawEnergyFlow(treeSize) {
     }
 
     if (hasFlow) {
-        const canopyCore = 'rgba(125, 249, 255, 0.95)';
-        const canopyGlow = 'rgba(125, 249, 255, 0.22)';
-        const trunkCore = 'rgba(211, 255, 114, 0.92)';
-        const trunkGlow = 'rgba(211, 255, 114, 0.18)';
         const flowAlpha = Math.min(0.85, 0.18 + activation * 0.55);
-        const trunkControl = {
-            x: anchors.trunkBase.x,
-            y: anchors.canopy.y + ((anchors.trunkBase.y - anchors.canopy.y) * 0.42)
-        };
-
-        drawQuadraticEnergyPath(anchors.source, anchors.beamControl, anchors.canopy, canopyGlow, canopyCore, 3 + (activation * 4), flowAlpha, true);
-        drawQuadraticEnergyPath(anchors.canopy, trunkControl, anchors.trunkBase, trunkGlow, trunkCore, 2.6 + (activation * 3.2), Math.max(0.28, flowAlpha * 0.92), true);
-        drawQuadraticEnergyPath(anchors.trunkBase, {
-            x: anchors.trunkBase.x - 28,
-            y: anchors.trunkBase.y + 18
-        }, anchors.soilLeft, 'rgba(89, 240, 255, 0.16)', 'rgba(89, 240, 255, 0.86)', 2 + (activation * 2.2), Math.max(0.24, flowAlpha * 0.78), true);
-        drawQuadraticEnergyPath(anchors.trunkBase, {
-            x: anchors.trunkBase.x + 28,
-            y: anchors.trunkBase.y + 18
-        }, anchors.soilRight, 'rgba(216, 255, 102, 0.16)', 'rgba(216, 255, 102, 0.84)', 2 + (activation * 2.2), Math.max(0.24, flowAlpha * 0.78), true);
+        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, 14 + (activation * 14), '#8cf7d9', 0.12 + flowAlpha * 0.2);
+        drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, 13 + (activation * 16), '#d8ff66', 0.1 + flowAlpha * 0.2);
+        drawEnergyAura(anchors.soilLeft.x, anchors.soilLeft.y, 8 + (activation * 6), '#59f0ff', 0.08 + flowAlpha * 0.12);
+        drawEnergyAura(anchors.soilRight.x, anchors.soilRight.y, 8 + (activation * 6), '#d8ff66', 0.08 + flowAlpha * 0.12);
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -753,11 +759,6 @@ function drawEnergyFlow(treeSize) {
         ctx.ellipse(anchors.trunkBase.x, anchors.trunkBase.y + 10, 130, 34, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
-
-        drawEnergyNode(anchors.canopy.x, anchors.canopy.y, 8 + (activation * 5), '#8cf7d9', 0.28 + activation * 0.25);
-        drawEnergyNode(anchors.trunkBase.x, anchors.trunkBase.y, 9 + (activation * 6), '#d8ff66', 0.26 + activation * 0.24);
-        drawEnergyNode(anchors.soilLeft.x, anchors.soilLeft.y, 4 + (activation * 2), '#59f0ff', 0.18 + activation * 0.16);
-        drawEnergyNode(anchors.soilRight.x, anchors.soilRight.y, 4 + (activation * 2), '#d8ff66', 0.18 + activation * 0.16);
     }
 
     for (let i = energyParticles.length - 1; i >= 0; i--) {

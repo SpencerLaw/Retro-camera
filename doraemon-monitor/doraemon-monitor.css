@@ -136,7 +136,7 @@
 }
 
 .vertical-meter-container {
-  height: clamp(240px, 31vh, 350px);
+  height: clamp(210px, 27vh, 300px);
   display: flex;
   gap: 12px;
 }
@@ -1241,7 +1241,7 @@
   }
 
   .vertical-meter-container {
-    height: 250px;
+    height: 218px;
   }
 
   .doraemon-wrapper {
@@ -1470,7 +1470,7 @@
   }
 
   .vertical-meter-container {
-    height: 280px;
+    height: 238px;
   }
 
   .db-reference-panel,
@@ -1513,7 +1513,7 @@
   }
 
   .vertical-meter-container {
-    height: 260px;
+    height: 226px;
   }
 
   .reference-stack,

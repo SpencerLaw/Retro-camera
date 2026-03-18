@@ -1079,10 +1079,9 @@ const DoraemonMonitorApp: React.FC = () => {
       { min: 20, max: 40, label: t('doraemon.levels.l20') },
       { min: 40, max: 60, label: t('doraemon.levels.l40') },
       { min: 60, max: 80, label: t('doraemon.levels.l60') },
-      { min: 80, max: 100, label: t('doraemon.levels.l80') },
-      { min: 100, max: 120, label: t('doraemon.levels.l100') },
+      { min: 80, max: 120, label: t('doraemon.levels.l80') },
     ];
-    const pointerPos = Math.min(100, Math.max(0, (currentDb / 120) * 100));
+    const pointerPos = Math.min(100, Math.max(0, currentDb));
 
     // 恢复内联颜色逻辑
     // const activeTextColor = isDarkMode ? '#fff' : '#0f172a';

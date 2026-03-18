@@ -142,6 +142,9 @@
     },
     "micTest": {
       "title": "Mic Test",
+      "openWindow": "Open Test",
+      "closeWindow": "Close Test",
+      "windowHint": "Popup diagnosis without taking over the main screen",
       "start": "Run Test",
       "reset": "Reset Test",
       "guide": "Capture a quiet sample first, then capture a noisy sample.",

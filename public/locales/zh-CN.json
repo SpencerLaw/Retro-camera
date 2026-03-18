@@ -142,6 +142,9 @@
     },
     "micTest": {
       "title": "分贝测试",
+      "openWindow": "打开测试",
+      "closeWindow": "关闭测试",
+      "windowHint": "弹窗诊断，不占用主页面空间",
       "start": "开始测试",
       "reset": "清空重测",
       "guide": "先记录安静环境，再记录吵闹环境",

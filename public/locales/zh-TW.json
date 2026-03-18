@@ -140,6 +140,9 @@
     },
     "micTest": {
       "title": "分貝測試",
+      "openWindow": "開啟測試",
+      "closeWindow": "關閉測試",
+      "windowHint": "彈窗診斷，不佔用主頁面空間",
       "start": "開始測試",
       "reset": "清空重測",
       "guide": "先記錄安靜環境，再記錄吵鬧環境",

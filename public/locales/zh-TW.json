@@ -316,7 +316,7 @@
       "low": "低值",
       "average": "均值",
       "curve": "早讀曲線",
-      "curveHint": "峰值 / 低值 / 時間分刻",
+      "curveHint": "峰值 / 低值 / 真實時刻",
       "empty": "當天還沒有早讀記錄",
       "sessionSuffix": "場",
       "prevSession": "上一場",

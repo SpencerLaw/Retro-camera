@@ -144,6 +144,12 @@ function formatClock(dateLike) {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 }
 
+function formatPreciseClock(dateLike) {
+    const date = new Date(dateLike);
+    if (Number.isNaN(date.getTime())) return '--:--:--';
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+}
+
 function formatDuration(seconds) {
     const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
     const secs = Math.max(0, seconds % 60).toString().padStart(2, '0');
@@ -192,81 +198,175 @@ function getCurveStats(report) {
     };
 }
 
-function formatElapsedLabel(durationSeconds, ratio) {
-    const elapsed = Math.round(durationSeconds * ratio);
-    return formatDuration(elapsed);
+function formatCurveTickLabel(report, ratio) {
+    const start = new Date(report.startedAt);
+    const fallbackDuration = Math.max(1, report.durationSeconds || 0) * 1000;
+    if (Number.isNaN(start.getTime())) {
+        return formatDuration(Math.round((report.durationSeconds || 0) * ratio));
+    }
+
+    const endCandidate = report.endedAt ? new Date(report.endedAt).getTime() : NaN;
+    const end = Number.isFinite(endCandidate) && endCandidate > start.getTime()
+        ? endCandidate
+        : start.getTime() + fallbackDuration;
+
+    const tickTime = start.getTime() + ((end - start.getTime()) * ratio);
+    return formatPreciseClock(tickTime);
+}
+
+function buildSmoothCurvePath(points) {
+    if (!points.length) return '';
+    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+        const p0 = i > 0 ? points[i - 1] : points[i];
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = i !== points.length - 2 ? points[i + 2] : p2;
+
+        const cp1x = p1.x + ((p2.x - p0.x) / 6);
+        const cp1y = p1.y + ((p2.y - p0.y) / 6);
+        const cp2x = p2.x - ((p3.x - p1.x) / 6);
+        const cp2y = p2.y - ((p3.y - p1.y) / 6);
+
+        path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+
+    return path;
+}
+
+function buildCurveBadge(point, label, tone, position, bounds) {
+    const badgeWidth = clamp((label.length * 7.4) + 20, 74, 138);
+    const badgeHeight = 24;
+    const isRightSide = point.x > bounds.midX;
+    const badgeX = clamp(
+        point.x + (isRightSide ? -badgeWidth - 12 : 12),
+        bounds.left,
+        bounds.right - badgeWidth
+    );
+    const badgeY = clamp(
+        point.y + (position === 'top' ? -badgeHeight - 14 : 14),
+        bounds.top,
+        bounds.bottom - badgeHeight
+    );
+    const connectorX = clamp(
+        point.x + (isRightSide ? -6 : 6),
+        bounds.left,
+        bounds.right
+    );
+    const connectorY = position === 'top' ? badgeY + badgeHeight : badgeY;
+
+    return `
+        <g>
+            <path d="M ${point.x} ${point.y} L ${connectorX} ${connectorY}" stroke="${tone}" stroke-opacity="0.58" stroke-width="1.4" />
+            <rect x="${badgeX}" y="${badgeY}" width="${badgeWidth}" height="${badgeHeight}" rx="12" fill="rgba(17, 28, 61, 0.84)" stroke="${tone}" stroke-opacity="0.36" />
+            <text x="${badgeX + (badgeWidth / 2)}" y="${badgeY + 16}" fill="${tone}" font-size="11" font-weight="800" text-anchor="middle">${label}</text>
+        </g>
+    `;
 }
 
 function buildCurveSVG(report) {
     const stats = getCurveStats(report);
-    const values = stats.values;
-    const width = 420;
-    const height = 180;
-    const paddingLeft = 38;
+    const sourceValues = stats.values.length === 1 ? [stats.values[0], stats.values[0]] : stats.values;
+    const values = sourceValues.map(value => Math.round(value));
+    const width = 680;
+    const height = 176;
+    const paddingLeft = 46;
     const paddingRight = 18;
-    const paddingTop = 16;
-    const paddingBottom = 34;
+    const paddingTop = 18;
+    const paddingBottom = 38;
     const graphWidth = width - paddingLeft - paddingRight;
     const graphHeight = height - paddingTop - paddingBottom;
+    const baselineY = height - paddingBottom;
     const peakLabel = t('morningTree.report.peak') || '峰值';
     const lowLabel = t('morningTree.report.low') || '低值';
     const gradientId = `report-curve-line-${Math.random().toString(36).slice(2, 8)}`;
     const areaId = `report-curve-area-${Math.random().toString(36).slice(2, 8)}`;
-    const paddedMax = Math.max(78, stats.peakValue + 4, Math.max(...values) + 3);
-    const paddedMin = Math.max(0, Math.min(34, stats.lowValue - 4, Math.min(...values) - 3));
-    const range = Math.max(14, paddedMax - paddedMin);
+    const glowId = `report-curve-glow-${Math.random().toString(36).slice(2, 8)}`;
+    const graphMin = Math.min(...values);
+    const graphMax = Math.max(...values);
+    const paddedMax = Math.max(78, stats.peakValue + 6, graphMax + 4);
+    const paddedMin = Math.max(0, Math.min(40, stats.lowValue - 6, graphMin - 4));
+    const range = Math.max(16, paddedMax - paddedMin);
     const step = values.length > 1 ? graphWidth / (values.length - 1) : 0;
 
     const points = values.map((value, index) => {
         const x = paddingLeft + (index * step);
-        const y = paddingTop + (graphHeight * (1 - ((value - paddedMin) / range)));
-        return { x, y };
+        const normalized = (value - paddedMin) / range;
+        const y = paddingTop + (graphHeight * (1 - normalized));
+        return { x, y, value };
     });
-    const linePoints = points.map(point => `${point.x},${point.y}`).join(' ');
-    const areaPoints = `${paddingLeft},${height - paddingBottom} ${linePoints} ${width - paddingRight},${height - paddingBottom}`;
-    const peakPoint = points[stats.peakIndex] || points[0];
-    const lowPoint = points[stats.lowIndex] || points[0];
 
-    const horizontalGrid = Array.from({ length: 4 }, (_, index) => {
-        const ratio = index / 3;
+    const linePath = buildSmoothCurvePath(points);
+    const areaPath = `${linePath} L ${points[points.length - 1].x} ${baselineY} L ${points[0].x} ${baselineY} Z`;
+    const peakPoint = points[Math.min(points.length - 1, Math.max(0, stats.peakIndex))] || points[0];
+    const lowPoint = points[Math.min(points.length - 1, Math.max(0, stats.lowIndex))] || points[0];
+    const chartBounds = {
+        left: paddingLeft + 4,
+        right: width - paddingRight - 4,
+        top: paddingTop + 2,
+        bottom: baselineY - 26,
+        midX: paddingLeft + (graphWidth / 2)
+    };
+
+    const horizontalGrid = Array.from({ length: 5 }, (_, index) => {
+        const ratio = index / 4;
         const y = paddingTop + (graphHeight * ratio);
         const labelValue = Math.round(paddedMax - (range * ratio));
         return `
-            <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
-            <text x="${paddingLeft - 8}" y="${y + 4}" fill="rgba(255,255,255,0.5)" font-size="10" text-anchor="end">${labelValue}</text>
+            <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+            <text x="${paddingLeft - 10}" y="${y + 4}" fill="rgba(255,255,255,0.46)" font-size="11" text-anchor="end">${labelValue}</text>
         `;
     }).join('');
 
-    const timeGrid = [0, 0.25, 0.5, 0.75, 1].map(ratio => {
+    const tickRatios = [0, 0.25, 0.5, 0.75, 1];
+    const timeGrid = tickRatios.map((ratio, index) => {
         const x = paddingLeft + (graphWidth * ratio);
+        const anchor = index === 0 ? 'start' : index === tickRatios.length - 1 ? 'end' : 'middle';
+        const offset = index === 0 ? 0 : index === tickRatios.length - 1 ? 0 : 0;
         return `
-            <line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="rgba(255,255,255,0.06)" stroke-width="1" />
-            <text x="${x}" y="${height - 10}" fill="rgba(255,255,255,0.62)" font-size="10" text-anchor="middle">${formatElapsedLabel(report.durationSeconds, ratio)}</text>
+            <line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${baselineY}" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="3 7" />
+            <text x="${x + offset}" y="${height - 10}" fill="rgba(255,255,255,0.6)" font-size="10.5" text-anchor="${anchor}">${formatCurveTickLabel(report, ratio)}</text>
         `;
     }).join('');
+
+    const peakBadge = buildCurveBadge(peakPoint, `${peakLabel} ${stats.peakValue} dB`, '#ff9bd6', 'top', chartBounds);
+    const lowBadge = buildCurveBadge(lowPoint, `${lowLabel} ${stats.lowValue} dB`, '#8cf7d9', 'bottom', chartBounds);
 
     return `
         <svg class="report-curve-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
             <defs>
                 <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#86f7ff" />
-                    <stop offset="55%" stop-color="#80ffd5" />
-                    <stop offset="100%" stop-color="#d0ff71" />
+                    <stop offset="0%" stop-color="#8bf7ff" />
+                    <stop offset="50%" stop-color="#75ffd5" />
+                    <stop offset="100%" stop-color="#d9ff71" />
                 </linearGradient>
                 <linearGradient id="${areaId}" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#7df9ff" stop-opacity="0.4" />
-                    <stop offset="100%" stop-color="#7df9ff" stop-opacity="0.03" />
+                    <stop offset="0%" stop-color="#7df9ff" stop-opacity="0.34" />
+                    <stop offset="65%" stop-color="#7df9ff" stop-opacity="0.1" />
+                    <stop offset="100%" stop-color="#7df9ff" stop-opacity="0.02" />
                 </linearGradient>
+                <filter id="${glowId}" x="-20%" y="-20%" width="140%" height="160%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
             </defs>
-            <rect x="${paddingLeft}" y="${paddingTop}" width="${graphWidth}" height="${graphHeight}" rx="18" fill="rgba(255,255,255,0.02)" />
+            <rect x="${paddingLeft}" y="${paddingTop}" width="${graphWidth}" height="${graphHeight}" rx="18" fill="rgba(255,255,255,0.025)" />
             ${horizontalGrid}
             ${timeGrid}
-            <polyline fill="url(#${areaId})" stroke="none" points="${areaPoints}"></polyline>
-            <polyline fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" points="${linePoints}"></polyline>
-            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="5.5" fill="#ff8fd0" stroke="#ffffff" stroke-width="2" />
-            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="5.5" fill="#8cf7d9" stroke="#ffffff" stroke-width="2" />
-            <text x="${peakPoint.x}" y="${peakPoint.y - 12}" fill="#ff9fda" font-size="11" font-weight="700" text-anchor="middle">${peakLabel} ${stats.peakValue} dB</text>
-            <text x="${lowPoint.x}" y="${lowPoint.y + 20}" fill="#8cf7d9" font-size="11" font-weight="700" text-anchor="middle">${lowLabel} ${stats.lowValue} dB</text>
+            <path d="${areaPath}" fill="url(#${areaId})" stroke="none"></path>
+            <path d="${linePath}" fill="none" stroke="rgba(125,249,255,0.18)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" filter="url(#${glowId})"></path>
+            <path d="${linePath}" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="6.5" fill="#ff9bd6" stroke="#ffffff" stroke-width="2.4" />
+            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="6.5" fill="#8cf7d9" stroke="#ffffff" stroke-width="2.4" />
+            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="11" fill="none" stroke="rgba(255, 155, 214, 0.24)" stroke-width="2" />
+            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="11" fill="none" stroke="rgba(140, 247, 217, 0.24)" stroke-width="2" />
+            ${peakBadge}
+            ${lowBadge}
         </svg>
     `;
 }
@@ -429,7 +529,7 @@ function renderReportFocus(selectedDay) {
         <article class="report-focus-card">
             <div class="report-focus-top">
                 <div class="report-session-copy">
-                    <strong>${formatClock(selectedReport.startedAt)} - ${formatClock(selectedReport.endedAt)}</strong>
+                    <strong>${formatPreciseClock(selectedReport.startedAt)} - ${formatPreciseClock(selectedReport.endedAt)}</strong>
                     <span>${formatShortDate(selectedReport.startedAt)}</span>
                 </div>
                 <span class="report-duration-pill">${formatDuration(selectedReport.durationSeconds)}</span>
@@ -438,7 +538,7 @@ function renderReportFocus(selectedDay) {
             <div class="report-curve-panel">
                 <div class="report-curve-head">
                     <span class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</span>
-                    <span class="report-curve-hint">${t('morningTree.report.curveHint') || '峰值 / 低值 / 时间分刻'}</span>
+                    <span class="report-curve-hint">${t('morningTree.report.curveHint') || '峰值 / 低值 / 真实时刻'}</span>
                 </div>
                 ${buildCurveSVG(selectedReport)}
             </div>

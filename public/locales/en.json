@@ -397,7 +397,7 @@
       "low": "Low",
       "average": "Average",
       "curve": "Reading curve",
-      "curveHint": "Peak / Low / Time marks",
+      "curveHint": "Peak / Low / Real time",
       "empty": "No reading record for this day yet",
       "sessionSuffix": " sessions",
       "prevSession": "Prev Session",

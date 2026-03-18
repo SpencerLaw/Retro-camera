@@ -414,7 +414,7 @@
       "low": "低值",
       "average": "均值",
       "curve": "早读曲线",
-      "curveHint": "峰值 / 低值 / 时间分刻",
+      "curveHint": "峰值 / 低值 / 真实时刻",
       "empty": "当天还没有早读记录",
       "sessionSuffix": "场",
       "prevSession": "上一场",

@@ -301,6 +301,22 @@
     "micToggleTitle": "開始/停止監聽",
     "timeEndToast": "⏰ 早讀時間結束！",
     "micError": "無法訪問麥克風，請檢查權限設置。",
-    "superModeToast": "🎉 能量樹顯靈了！全班棒棒噠！ 🎉"
+    "superModeToast": "🎉 能量樹顯靈了！全班棒棒噠！ 🎉",
+    "report": {
+      "trigger": "一週報告",
+      "title": "本週早讀報告",
+      "sub": "僅保存在本機，按週一到週五查看",
+      "duration": "早讀時長",
+      "curve": "早讀曲線",
+      "empty": "當天還沒有早讀記錄",
+      "sessionSuffix": "場",
+      "days": {
+        "mon": "週一",
+        "tue": "週二",
+        "wed": "週三",
+        "thu": "週四",
+        "fri": "週五"
+      }
+    }
   }
 }

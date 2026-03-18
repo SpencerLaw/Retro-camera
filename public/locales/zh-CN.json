@@ -399,6 +399,22 @@
     "micToggleTitle": "开始/停止监听",
     "timeEndToast": "⏰ 早读时间结束！",
     "micError": "无法访问麦克风，请检查权限设置。",
-    "superModeToast": "🎉 能量树显灵了！全班棒棒哒！ 🎉"
+    "superModeToast": "🎉 能量树显灵了！全班棒棒哒！ 🎉",
+    "report": {
+      "trigger": "一周报告",
+      "title": "本周早读报告",
+      "sub": "仅保存在本机，按周一到周五查看",
+      "duration": "早读时长",
+      "curve": "早读曲线",
+      "empty": "当天还没有早读记录",
+      "sessionSuffix": "场",
+      "days": {
+        "mon": "周一",
+        "tue": "周二",
+        "wed": "周三",
+        "thu": "周四",
+        "fri": "周五"
+      }
+    }
   }
 }

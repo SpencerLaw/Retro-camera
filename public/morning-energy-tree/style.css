@@ -238,6 +238,266 @@ canvas {
     overflow: visible;
 }
 
+.report-trigger-btn {
+    position: fixed;
+    top: calc(var(--top-gap) + var(--db-size) + var(--ring-size) + 56px);
+    right: var(--side-gap);
+    width: var(--ring-size);
+    min-height: 48px;
+    border: 1.5px solid rgba(255, 255, 255, 0.32);
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.68), rgba(35, 58, 103, 0.62));
+    backdrop-filter: blur(14px);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.report-trigger-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, rgba(26, 39, 58, 0.84), rgba(45, 74, 126, 0.78));
+}
+
+.report-trigger-btn:active {
+    transform: scale(0.98);
+}
+
+.report-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 11000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.report-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.report-backdrop {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(4, 10, 24, 0.42);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+}
+
+.report-dialog {
+    position: relative;
+    width: min(960px, calc(100vw - 40px));
+    max-height: min(80vh, 760px);
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgba(17, 28, 61, 0.96), rgba(13, 22, 47, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.report-header-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.report-header-copy strong {
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.report-header-copy span {
+    font-size: 0.82rem;
+    opacity: 0.78;
+}
+
+.report-close-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+
+.report-body {
+    padding: 18px 22px 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+
+.report-week-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.report-day-chip-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.report-day-chip {
+    border-radius: 16px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.report-day-chip.active {
+    background: linear-gradient(135deg, rgba(50, 171, 199, 0.24), rgba(123, 197, 72, 0.18));
+    border-color: rgba(140, 255, 221, 0.28);
+}
+
+.report-day-chip span {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.report-day-chip strong {
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.report-day-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.report-day-section {
+    border-radius: 22px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.report-day-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.report-day-title strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.report-day-title span,
+.report-day-title em {
+    font-size: 0.8rem;
+    opacity: 0.74;
+    font-style: normal;
+}
+
+.report-session-card {
+    border-radius: 18px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.report-session-card+.report-session-card {
+    margin-top: 10px;
+}
+
+.report-session-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.report-session-meta strong {
+    display: block;
+    font-size: 0.96rem;
+    font-weight: 800;
+}
+
+.report-session-meta span {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    opacity: 0.76;
+}
+
+.report-duration-pill {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(130, 247, 255, 0.14);
+    color: #b6fbff;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.report-curve-panel {
+    border-radius: 16px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.report-curve-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    opacity: 0.82;
+    margin-bottom: 8px;
+}
+
+.report-curve-svg {
+    display: block;
+    width: 100%;
+    height: 76px;
+}
+
+.report-empty {
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
 .timer-ring-wrap svg {
     position: absolute;
     inset: 0;
@@ -582,6 +842,26 @@ button.icon-btn.active {
 
 /* Mobile Responsive */
 @media (max-width: 600px) {
+    .report-trigger-btn {
+        top: calc(var(--top-gap) + var(--db-size) + var(--ring-size) + 46px);
+    }
+
+    .report-dialog {
+        width: calc(100vw - 16px);
+        max-height: 84vh;
+    }
+
+    .report-day-chip-row {
+        grid-template-columns: 1fr;
+    }
+
+    .report-session-meta,
+    .report-day-title,
+    .report-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .bottom-controls {
         width: 100%;
         justify-content: space-between;

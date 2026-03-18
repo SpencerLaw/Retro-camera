@@ -11,6 +11,15 @@
 /* --- Constants & State --- */
 const AUTH_KEY = 'morning_tree_auth';
 const LICENSE_PREFIX = 'ZD';
+const REPORT_STORAGE_KEY = 'morning_tree_weekly_reports_v1';
+const MAX_STORED_REPORTS = 100;
+const REPORT_WEEKDAYS = [
+    { key: 'mon', offset: 0 },
+    { key: 'tue', offset: 1 },
+    { key: 'wed', offset: 2 },
+    { key: 'thu', offset: 3 },
+    { key: 'fri', offset: 4 }
+];
 
 const STATE = {
     isListening: false,
@@ -30,7 +39,11 @@ const STATE = {
 
     // Localization context
     language: localStorage.getItem('global-language') || 'en',
-    translations: null
+    translations: null,
+
+    // Weekly report tracking
+    sessionStartedAt: null,
+    curveBuffer: []
 };
 
 // Aesthetic Config
@@ -53,6 +66,13 @@ const dbDisplay = document.querySelector('.db-display');
 const countdownTime = $('countdown-time');
 const durationSelect = $('duration-select');
 const customDuration = $('custom-duration');
+const reportTriggerBtn = $('report-trigger-btn');
+const reportModal = $('report-modal');
+const reportBackdrop = $('report-backdrop');
+const reportCloseBtn = $('report-close-btn');
+const reportWeekLabel = $('report-week-label');
+const reportDayChipRow = $('report-day-chip-row');
+const reportDayList = $('report-day-list');
 
 // Help Tooltip Toggle
 const helpTrigger = $('help-trigger');
@@ -67,6 +87,254 @@ if (helpTrigger) {
     };
     helpTooltip.onclick = () => helpTooltip.classList.add('hidden');
     document.addEventListener('click', () => helpTooltip.classList.add('hidden'));
+}
+
+function loadStoredReports() {
+    try {
+        const raw = localStorage.getItem(REPORT_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter(item =>
+            item &&
+            typeof item.id === 'string' &&
+            typeof item.startedAt === 'string' &&
+            typeof item.endedAt === 'string' &&
+            typeof item.durationSeconds === 'number' &&
+            Array.isArray(item.curve)
+        );
+    } catch (error) {
+        console.error('Failed to load morning tree reports:', error);
+        return [];
+    }
+}
+
+function persistReports(reports) {
+    localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(reports.slice(0, MAX_STORED_REPORTS)));
+}
+
+function toDateKey(dateLike) {
+    const date = new Date(dateLike);
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function getCurrentWeekMonday(baseDate = new Date()) {
+    const monday = new Date(baseDate);
+    monday.setHours(0, 0, 0, 0);
+    const day = monday.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    monday.setDate(monday.getDate() + diffToMonday);
+    return monday;
+}
+
+function formatShortDate(dateLike) {
+    const date = new Date(dateLike);
+    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+}
+
+function formatClock(dateLike) {
+    const date = new Date(dateLike);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+}
+
+function formatDuration(seconds) {
+    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const secs = Math.max(0, seconds % 60).toString().padStart(2, '0');
+    return `${mins}:${secs}`;
+}
+
+function compressCurve(points, maxPoints = 24) {
+    if (!points.length) return [];
+    if (points.length <= maxPoints) return points.map(point => Math.round(point));
+
+    const chunkSize = Math.ceil(points.length / maxPoints);
+    const compressed = [];
+
+    for (let i = 0; i < points.length; i += chunkSize) {
+        const chunk = points.slice(i, i + chunkSize);
+        const average = chunk.reduce((sum, value) => sum + value, 0) / chunk.length;
+        compressed.push(Math.round(average));
+    }
+
+    return compressed;
+}
+
+function buildCurveSVG(points) {
+    const values = points.length ? points : [40, 42, 41];
+    const width = 260;
+    const height = 78;
+    const paddingX = 10;
+    const paddingY = 10;
+    const gradientId = `report-curve-line-${Math.random().toString(36).slice(2, 8)}`;
+    const areaId = `report-curve-area-${Math.random().toString(36).slice(2, 8)}`;
+    const maxValue = Math.max(...values, 75);
+    const minValue = Math.min(...values, 35);
+    const range = Math.max(1, maxValue - minValue);
+    const step = values.length > 1 ? (width - paddingX * 2) / (values.length - 1) : 0;
+
+    const linePoints = values.map((value, index) => {
+        const x = paddingX + (index * step);
+        const y = paddingY + ((height - paddingY * 2) * (1 - ((value - minValue) / range)));
+        return `${x},${y}`;
+    }).join(' ');
+
+    const areaPoints = `0,${height} ${linePoints} ${width},${height}`;
+
+    return `
+        <svg class="report-curve-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+                <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#82f7ff" />
+                    <stop offset="100%" stop-color="#9cff6f" />
+                </linearGradient>
+                <linearGradient id="${areaId}" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#82f7ff" stop-opacity="0.42" />
+                    <stop offset="100%" stop-color="#82f7ff" stop-opacity="0.02" />
+                </linearGradient>
+            </defs>
+            <polyline fill="url(#${areaId})" stroke="none" points="${areaPoints}"></polyline>
+            <polyline fill="none" stroke="url(#${gradientId})" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="${linePoints}"></polyline>
+        </svg>
+    `;
+}
+
+function startReportSession() {
+    STATE.sessionStartedAt = new Date().toISOString();
+    STATE.curveBuffer = [Math.round(STATE.currentDB || 40)];
+}
+
+function captureReportPoint() {
+    if (!STATE.isListening || !STATE.sessionStartedAt) return;
+    STATE.curveBuffer.push(Math.round(STATE.currentDB || 40));
+}
+
+function finalizeReportSession() {
+    if (!STATE.sessionStartedAt) return;
+
+    const startedAt = STATE.sessionStartedAt;
+    const endedAt = new Date().toISOString();
+    const durationSeconds = Math.max(1, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000));
+    const curve = compressCurve(STATE.curveBuffer, 24);
+
+    STATE.sessionStartedAt = null;
+    STATE.curveBuffer = [];
+
+    if (durationSeconds < 5) return;
+
+    const nextRecord = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        startedAt,
+        endedAt,
+        durationSeconds,
+        curve
+    };
+
+    const nextReports = [
+        nextRecord,
+        ...loadStoredReports()
+    ]
+        .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+        .slice(0, MAX_STORED_REPORTS);
+
+    persistReports(nextReports);
+    renderWeeklyReport();
+}
+
+function renderWeeklyReport() {
+    if (!reportWeekLabel || !reportDayChipRow || !reportDayList) return;
+
+    const monday = getCurrentWeekMonday();
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+    friday.setHours(23, 59, 59, 999);
+
+    const reports = loadStoredReports().filter(report => {
+        const startedAt = new Date(report.startedAt).getTime();
+        return startedAt >= monday.getTime() && startedAt <= friday.getTime();
+    });
+
+    reportWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(friday)}`;
+
+    reportDayChipRow.innerHTML = REPORT_WEEKDAYS.map(({ key, offset }) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + offset);
+        const dayKey = toDateKey(date);
+        const count = reports.filter(report => toDateKey(report.startedAt) === dayKey).length;
+        return `
+            <div class="report-day-chip ${count ? 'active' : ''}">
+                <span>${t(`morningTree.report.days.${key}`) || key}</span>
+                <strong>${count}</strong>
+            </div>
+        `;
+    }).join('');
+
+    reportDayList.innerHTML = REPORT_WEEKDAYS.map(({ key, offset }) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + offset);
+        const dayKey = toDateKey(date);
+        const dayReports = reports
+            .filter(report => toDateKey(report.startedAt) === dayKey)
+            .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+
+        const sessionsMarkup = dayReports.length
+            ? dayReports.map(report => `
+                <div class="report-session-card">
+                    <div class="report-session-meta">
+                        <div>
+                            <strong>${formatClock(report.startedAt)} - ${formatClock(report.endedAt)}</strong>
+                            <span>${t('morningTree.report.duration') || '早读时长'} ${formatDuration(report.durationSeconds)}</span>
+                        </div>
+                        <span class="report-duration-pill">${formatDuration(report.durationSeconds)}</span>
+                    </div>
+                    <div class="report-curve-panel">
+                        <div class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</div>
+                        ${buildCurveSVG(report.curve)}
+                    </div>
+                </div>
+            `).join('')
+            : `<div class="report-empty">${t('morningTree.report.empty') || '当天还没有早读记录'}</div>`;
+
+        return `
+            <section class="report-day-section">
+                <div class="report-day-title">
+                    <div>
+                        <strong>${t(`morningTree.report.days.${key}`) || key}</strong>
+                        <span>${formatShortDate(date)}</span>
+                    </div>
+                    <em>${dayReports.length}${t('morningTree.report.sessionSuffix') || '场'}</em>
+                </div>
+                ${sessionsMarkup}
+            </section>
+        `;
+    }).join('');
+}
+
+function openReportModal() {
+    renderWeeklyReport();
+    reportModal.classList.add('open');
+    reportModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeReportModal() {
+    reportModal.classList.remove('open');
+    reportModal.setAttribute('aria-hidden', 'true');
+}
+
+function initReportUI() {
+    if (!reportTriggerBtn || !reportModal) return;
+
+    reportTriggerBtn.onclick = openReportModal;
+    reportBackdrop.onclick = closeReportModal;
+    reportCloseBtn.onclick = closeReportModal;
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeReportModal();
+    });
+
+    renderWeeklyReport();
 }
 
 
@@ -146,6 +414,7 @@ function startTimer() {
     if (STATE.timerInterval) return;
     STATE.timerInterval = setInterval(() => {
         if (STATE.remainingTime > 0) {
+            captureReportPoint();
             STATE.remainingTime--;
             updateTimerDisplay();
             if (STATE.remainingTime === 0) {
@@ -174,7 +443,7 @@ function updateTimerDisplay() {
 }
 
 /* --- 3. Audio Logic --- */
-let audioCtx, analyser, dataArray, source;
+let audioCtx, analyser, dataArray, source, audioStream;
 
 async function toggleMic() {
     if (STATE.isListening) {
@@ -195,6 +464,7 @@ async function startMic() {
             audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
         });
 
+        audioStream = stream;
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 512;
@@ -210,6 +480,7 @@ async function startMic() {
 
         if (audioCtx.state === 'suspended') await audioCtx.resume();
 
+        startReportSession();
         startTimer();
         loop();
     } catch (err) {
@@ -220,6 +491,18 @@ async function startMic() {
 
 function stopMic() {
     if (source) source.disconnect();
+    source = null;
+    if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop());
+        audioStream = null;
+    }
+    if (audioCtx) {
+        audioCtx.close().catch(() => undefined);
+        audioCtx = null;
+    }
+    analyser = null;
+    dataArray = null;
+    finalizeReportSession();
     STATE.isListening = false;
     micBtn.textContent = '🎤';
     micBtn.classList.remove('active');
@@ -232,6 +515,8 @@ function stopMic() {
 }
 
 function resetGame() {
+    STATE.sessionStartedAt = null;
+    STATE.curveBuffer = [];
     STATE.energy = 0;
     STATE.isSuperMode = false;
     STATE.remainingTime = STATE.sessionDuration * 60;
@@ -1025,9 +1310,14 @@ function translateUI() {
 // Init
 initLocalization().then(() => {
     initGatekeeper();
+    initReportUI();
 });
 micBtn.onclick = toggleMic;
 if ($('reset-btn')) $('reset-btn').onclick = resetGame;
+
+window.addEventListener('pagehide', () => {
+    if (STATE.isListening) stopMic();
+});
 
 // 3-level sensitivity buttons
 document.querySelectorAll('.sens-btn').forEach(btn => {

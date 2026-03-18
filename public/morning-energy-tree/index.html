@@ -74,6 +74,9 @@
                         <div class="timer-label" data-i18n="morningTree.remainingTime">剩余时间</div>
                     </div>
                 </div>
+                <button id="report-trigger-btn" class="report-trigger-btn" data-i18n="morningTree.report.trigger">
+                    一周报告
+                </button>
             </div>
 
             <!-- Toast / Notifications Center -->
@@ -118,6 +121,24 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <div id="report-modal" class="report-modal" aria-hidden="true">
+            <button id="report-backdrop" class="report-backdrop" aria-label="Close report"></button>
+            <div class="report-dialog">
+                <div class="report-header">
+                    <div class="report-header-copy">
+                        <strong data-i18n="morningTree.report.title">本周早读报告</strong>
+                        <span data-i18n="morningTree.report.sub">仅保存在本机，按周一到周五查看</span>
+                    </div>
+                    <button id="report-close-btn" class="report-close-btn" type="button" aria-label="Close report">✕</button>
+                </div>
+                <div class="report-body">
+                    <div id="report-week-label" class="report-week-label"></div>
+                    <div id="report-day-chip-row" class="report-day-chip-row"></div>
+                    <div id="report-day-list" class="report-day-list"></div>
+                </div>
             </div>
         </div>
     </div>

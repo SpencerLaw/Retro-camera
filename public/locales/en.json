@@ -382,6 +382,22 @@
     "micToggleTitle": "Start/Stop Listening",
     "timeEndToast": "⏰ Reading session ended!",
     "micError": "Cannot access microphone, please check permissions.",
-    "superModeToast": "🎉 The Energy Tree is glowing! Great job, class! 🎉"
+    "superModeToast": "🎉 The Energy Tree is glowing! Great job, class! 🎉",
+    "report": {
+      "trigger": "Weekly Report",
+      "title": "This Week's Reading Report",
+      "sub": "Saved on this device only, grouped from Monday to Friday",
+      "duration": "Reading duration",
+      "curve": "Reading curve",
+      "empty": "No reading record for this day yet",
+      "sessionSuffix": " sessions",
+      "days": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri"
+      }
+    }
   }
 }

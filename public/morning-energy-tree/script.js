@@ -435,6 +435,14 @@ function renderReportFocus(selectedDay) {
                 <span class="report-duration-pill">${formatDuration(selectedReport.durationSeconds)}</span>
             </div>
 
+            <div class="report-curve-panel">
+                <div class="report-curve-head">
+                    <span class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</span>
+                    <span class="report-curve-hint">${t('morningTree.report.curveHint') || '峰值 / 低值 / 时间分刻'}</span>
+                </div>
+                ${buildCurveSVG(selectedReport)}
+            </div>
+
             <div class="report-metric-grid">
                 <div class="report-metric-card">
                     <span>${t('morningTree.report.duration') || '早读时长'}</span>
@@ -452,14 +460,6 @@ function renderReportFocus(selectedDay) {
                     <span>${t('morningTree.report.average') || '均值'}</span>
                     <strong>${stats.averageValue} dB</strong>
                 </div>
-            </div>
-
-            <div class="report-curve-panel">
-                <div class="report-curve-head">
-                    <span class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</span>
-                    <span class="report-curve-hint">${t('morningTree.report.curveHint') || '峰值 / 低值 / 时间分刻'}</span>
-                </div>
-                ${buildCurveSVG(selectedReport)}
             </div>
         </article>
     `;
@@ -961,9 +961,12 @@ function tangentOnQuadratic(start, control, end, t) {
 }
 
 function drawEnergyAura(x, y, radius, color, alpha = 0.2) {
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(radius) || radius <= 0) return;
+
+    const safeAlpha = Number.isFinite(alpha) ? Math.max(0, alpha) : 0.2;
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    ctx.globalAlpha = alpha;
+    ctx.globalAlpha = safeAlpha;
 
     const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 2.6);
     glow.addColorStop(0, 'rgba(255,255,255,0.95)');
@@ -1147,7 +1150,8 @@ class TrunkTransfer {
 
 class SoilTransfer {
     constructor(startX, startY, direction, strength, color) {
-        const spread = 68 + (Math.random() * 54) + (strength * 22);
+        const safeStrength = Number.isFinite(strength) ? strength : 0;
+        const spread = 68 + (Math.random() * 54) + (safeStrength * 22);
         this.start = { x: startX, y: startY };
         this.end = { x: startX + (direction * spread), y: startY + 24 + Math.random() * 18 };
         this.control = {
@@ -1155,9 +1159,10 @@ class SoilTransfer {
             y: startY + 16 + Math.random() * 14
         };
         this.t = 0;
-        this.speed = 0.018 + (strength * 0.024);
+        this.speed = 0.018 + (safeStrength * 0.024);
         this.life = 1;
-        this.size = 1.6 + (strength * 1.9);
+        this.size = 1.6 + (safeStrength * 1.9);
+        this.strength = safeStrength;
         this.color = SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)] || color;
         this.history = [];
     }
@@ -1234,6 +1239,9 @@ function resetMeadowPlants() {
 }
 
 function feedMeadowGrowth(sourceX, strength, color) {
+    if (!Number.isFinite(sourceX) || !meadowPlants.length) return;
+
+    const safeStrength = Number.isFinite(strength) ? strength : 0;
     const nearby = meadowPlants
         .map(plant => ({ plant, dist: Math.abs(plant.x - sourceX) }))
         .sort((a, b) => a.dist - b.dist)
@@ -1241,8 +1249,10 @@ function feedMeadowGrowth(sourceX, strength, color) {
 
     nearby.forEach(({ plant, dist }) => {
         const distanceFactor = Math.max(0.22, 1 - (dist / 140));
-        plant.growth = Math.min(1, plant.growth + distanceFactor * (0.05 + strength * 0.09));
-        plant.pulse = Math.min(1, plant.pulse + 0.35 + strength * 0.28);
+        const currentGrowth = Number.isFinite(plant.growth) ? plant.growth : 0;
+        const currentPulse = Number.isFinite(plant.pulse) ? plant.pulse : 0;
+        plant.growth = Math.min(1, currentGrowth + distanceFactor * (0.05 + safeStrength * 0.09));
+        plant.pulse = Math.min(1, currentPulse + 0.35 + safeStrength * 0.28);
         plant.energyColor = color || plant.energyColor;
     });
 }
@@ -1326,8 +1336,12 @@ function drawMeadowPlants() {
     const time = Date.now() / 950;
 
     meadowPlants.forEach((plant, index) => {
-        plant.growth = Math.min(1, plant.growth + passiveGrowth);
-        plant.pulse = Math.max(0, plant.pulse - 0.016);
+        const baseGrowth = Number.isFinite(plant.growth) ? plant.growth : 0;
+        const basePulse = Number.isFinite(plant.pulse) ? plant.pulse : 0;
+        if (!Number.isFinite(plant.x) || !Number.isFinite(plant.baseY) || !Number.isFinite(plant.swayPhase)) return;
+
+        plant.growth = Math.min(1, Math.max(0, baseGrowth + passiveGrowth));
+        plant.pulse = Math.min(1, Math.max(0, basePulse - 0.016));
 
         if (plant.growth < 0.03) return;
 

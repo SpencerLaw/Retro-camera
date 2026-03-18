@@ -1603,14 +1603,15 @@
 
 .report-focus-shell {
   border-radius: 20px;
-  padding: 14px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   min-height: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-shell {
@@ -1623,7 +1624,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .report-day-header strong {
@@ -1657,8 +1658,8 @@
 
 .report-nav-row {
   display: grid;
-  grid-template-columns: 120px 1fr 120px;
-  gap: 10px;
+  grid-template-columns: 108px 1fr 108px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -1667,7 +1668,7 @@
   background: rgba(14, 165, 233, 0.12);
   color: #8edcff;
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
@@ -1693,12 +1694,12 @@
 
 .report-focus-card {
   border-radius: 18px;
-  padding: 14px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-card {
@@ -1720,17 +1721,17 @@
 
 .report-focus-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .report-session-metric {
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 9px 10px;
   background: rgba(148, 163, 184, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .report-session-metric span {
@@ -1739,7 +1740,7 @@
 }
 
 .report-session-metric strong {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   line-height: 1.25;
   color: var(--text-primary);
 }
@@ -1750,12 +1751,22 @@
 
 .report-settings-band {
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(34, 197, 94, 0.14));
   border: 1px solid rgba(125, 211, 252, 0.14);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.82);
+}
+
+@media (max-width: 980px) {
+  .report-viewer-layout {
+    grid-template-columns: 168px minmax(0, 1fr);
+  }
+
+  .report-focus-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .doraemon-app:not(.dark-mode) .report-settings-band {
@@ -2085,10 +2096,13 @@
     padding: 12px;
   }
 
-  .report-nav-row,
-  .report-focus-grid {
-    grid-template-columns: 1fr;
-  }
+  .report-nav-row {
+      grid-template-columns: 104px 1fr 104px;
+    }
+
+    .report-focus-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 
   .stat-box {
     min-height: 78px;
@@ -2316,11 +2330,14 @@
     padding: 12px;
   }
 
-  .report-nav-row,
-  .report-focus-grid {
-    grid-template-columns: 1fr;
+  .report-nav-row {
+      grid-template-columns: 100px 1fr 100px;
+    }
+
+    .report-focus-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
-}
 
 /* ===== 报警模式保持不变 ===== */
 

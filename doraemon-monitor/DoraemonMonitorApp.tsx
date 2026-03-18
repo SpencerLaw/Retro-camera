@@ -1132,7 +1132,7 @@ const DoraemonMonitorApp: React.FC = () => {
           </button>
         </div>
 
-        <div className="floating-modal-body report-modal-body">
+        <div className="report-modal-body">
             <div className="report-modal-week">
               {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
             </div>

@@ -1517,18 +1517,25 @@
   color: #4ade80;
 }
 
-.report-day-chip-row {
+.report-viewer-layout {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.report-day-sidebar {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-bottom: 8px;
 }
 
 .report-day-chip {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 16px;
-  padding: 11px 12px;
+  min-height: 72px;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -1541,6 +1548,7 @@
   text-align: left;
   position: relative;
   z-index: 1;
+  touch-action: manipulation;
 }
 
 .doraemon-app:not(.dark-mode) .report-day-chip {
@@ -1558,6 +1566,12 @@
   box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.18), 0 14px 30px rgba(14, 165, 233, 0.12);
 }
 
+.report-day-chip-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .report-day-chip span {
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.76);
@@ -1565,6 +1579,15 @@
 
 .doraemon-app:not(.dark-mode) .report-day-chip span {
   color: #475569;
+}
+
+.report-day-chip-copy small {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.doraemon-app:not(.dark-mode) .report-day-chip-copy small {
+  color: #64748b;
 }
 
 .report-day-chip strong {
@@ -1580,6 +1603,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-shell {
@@ -1640,6 +1664,7 @@
   font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .report-nav-btn:disabled {
@@ -1679,6 +1704,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.report-time-cell strong {
+  font-size: 1.05rem;
+  line-height: 1.25;
 }
 
 .report-focus-grid {
@@ -2000,8 +2030,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .report-day-chip-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .report-viewer-layout {
+    grid-template-columns: 168px minmax(0, 1fr);
   }
 
   .diagnostic-grid,
@@ -2035,8 +2065,7 @@
     width: 100%;
   }
 
-  .report-summary-grid,
-  .report-day-chip-row {
+  .report-summary-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2232,8 +2261,7 @@
   .mic-test-launcher-meta,
   .mic-test-grid,
   .mic-test-result-grid,
-  .report-summary-grid,
-  .report-day-chip-row {
+  .report-summary-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2264,6 +2292,15 @@
   .report-sheet-panel {
     width: calc(100vw - 12px);
     height: min(80vh, 680px);
+  }
+
+  .report-viewer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .report-day-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .report-focus-shell,

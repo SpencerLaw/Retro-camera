@@ -1323,6 +1323,7 @@
   position: relative;
   z-index: 1;
   width: min(880px, calc(100vw - 40px));
+  height: min(80vh, 760px);
   max-height: min(80vh, 760px);
   border-radius: 28px;
   background: rgba(18, 28, 63, 0.96);
@@ -1383,6 +1384,7 @@
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;

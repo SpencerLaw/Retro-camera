@@ -154,6 +154,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const workerRef = useRef<Worker | null>(null);
   const analyzeAudioRef = useRef<() => void>(() => {});
   const alarmIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const alarmPendingSinceRef = useRef<number | null>(null);
   const alarmIgnoreUntilRef = useRef(0);
   const lastAlarmPlayedAtRef = useRef(0);
   const noiseFloorRef = useRef(40);
@@ -372,6 +373,7 @@ const DoraemonMonitorApp: React.FC = () => {
       recommendedLimit,
       health
     });
+    micTestStageRef.current = 'done';
     setMicTestStage('done');
   }, []);
 
@@ -380,6 +382,7 @@ const DoraemonMonitorApp: React.FC = () => {
     quietTestSamplesRef.current = [];
     activeTestSamplesRef.current = [];
     micTestWindowRef.current = [];
+    micTestStageRef.current = 'quiet';
     setMicTestResult(null);
     setQuietSnapshotAvg(null);
     setActiveSnapshotAvg(null);
@@ -393,6 +396,7 @@ const DoraemonMonitorApp: React.FC = () => {
     quietTestSamplesRef.current = snapshot;
     activeTestSamplesRef.current = [];
     micTestWindowRef.current = [];
+    micTestStageRef.current = 'active';
     setMicTestResult(null);
     setQuietSnapshotAvg(average(snapshot));
     setActiveSnapshotAvg(null);
@@ -690,7 +694,16 @@ const DoraemonMonitorApp: React.FC = () => {
     if (!isStarted) return;
 
     if (currentDb >= limit) {
-      if (state !== 'alarm') {
+      if (state === 'alarm') {
+        return;
+      }
+
+      if (alarmPendingSinceRef.current === null) {
+        alarmPendingSinceRef.current = Date.now();
+        return;
+      }
+
+      if (Date.now() - alarmPendingSinceRef.current >= 2000) {
         setState('alarm');
         setWarnCount(prev => {
           const next = prev + 1;
@@ -699,14 +712,22 @@ const DoraemonMonitorApp: React.FC = () => {
         });
         setQuietTime(0);
         quietTimeRef.current = 0;
+        alarmPendingSinceRef.current = null;
       }
       return;
     }
 
+    alarmPendingSinceRef.current = null;
     if (state !== 'calm') {
       setState('calm');
     }
   }, [currentDb, isStarted, limit, state]);
+
+  useEffect(() => {
+    if (!isStarted) {
+      alarmPendingSinceRef.current = null;
+    }
+  }, [isStarted]);
 
   useEffect(() => {
     if (state === 'alarm' && !isMuted && !isOverlayOpen) {
@@ -869,6 +890,28 @@ const DoraemonMonitorApp: React.FC = () => {
     : isMicTestOnQuietStep
       ? t('doraemon.micTest.stageQuietDesc')
       : t('doraemon.micTest.stageActiveDesc');
+  const closeMicTest = useCallback(() => {
+    setIsMicTestOpen(false);
+  }, []);
+  const closeReport = useCallback(() => {
+    setIsReportOpen(false);
+  }, []);
+  const openMicTest = useCallback(() => {
+    setIsReportOpen(false);
+    setShowHelp(false);
+    setShowThresholdHelp(false);
+    startMicTest();
+    setIsMicTestOpen(true);
+  }, [startMicTest]);
+  const openReport = useCallback(() => {
+    setIsMicTestOpen(false);
+    setShowHelp(false);
+    setShowThresholdHelp(false);
+    setIsReportOpen(true);
+  }, []);
+  const stopModalPropagation = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
 
   const MicTestContent = () => (
     <div className="diagnostic-box mic-test-window">
@@ -902,6 +945,7 @@ const DoraemonMonitorApp: React.FC = () => {
         {!micTestResult && (
           <button
             className="mic-test-main-action"
+            type="button"
             onClick={isMicTestOnQuietStep ? captureQuietMicTest : captureActiveMicTest}
             disabled={!isStarted || (!isMicTestOnQuietStep && quietSnapshotAvg === null)}
           >
@@ -961,10 +1005,10 @@ const DoraemonMonitorApp: React.FC = () => {
             <div>{t('doraemon.micTest.recommendedThreshold').replace('{value}', String(micTestResult.recommendedLimit))}</div>
           </div>
           <div className="mic-test-result-actions">
-            <button className="diagnostic-apply-btn" onClick={applyMicTestRecommendation}>
+            <button className="diagnostic-apply-btn" type="button" onClick={applyMicTestRecommendation}>
               {t('doraemon.micTest.apply')}
             </button>
-            <button className="diagnostic-step-btn secondary" onClick={startMicTest}>
+            <button className="diagnostic-step-btn secondary" type="button" onClick={startMicTest}>
               {t('doraemon.micTest.reset')}
             </button>
           </div>
@@ -985,27 +1029,30 @@ const DoraemonMonitorApp: React.FC = () => {
       </div>
       <button
         className="mic-test-launcher-btn"
-        onClick={() => {
-          setIsReportOpen(false);
-          setShowHelp(false);
-          setShowThresholdHelp(false);
-          startMicTest();
-          setIsMicTestOpen(true);
-        }}
+        type="button"
+        onClick={openMicTest}
       >
         {t('doraemon.micTest.openWindow')}
       </button>
     </div>
   );
 
-  const MicTestModal = () => (
-    <div className={`floating-modal-layer ${isMicTestOpen ? 'open' : ''}`} aria-hidden={!isMicTestOpen}>
-      <button
-        className="floating-modal-backdrop"
-        onClick={() => setIsMicTestOpen(false)}
-        aria-label={t('doraemon.micTest.closeWindow')}
-      />
-      <div className="floating-modal-shell">
+  const MicTestModal = () => {
+    if (!isMicTestOpen) return null;
+
+    return (
+      <div className="floating-modal-layer open">
+        <button
+          type="button"
+          className="floating-modal-backdrop"
+          onClick={closeMicTest}
+          aria-label={t('doraemon.micTest.closeWindow')}
+        />
+        <div
+          className="floating-modal-shell"
+          onClick={stopModalPropagation}
+          onMouseDown={stopModalPropagation}
+        >
         <div className="floating-modal-header">
           <div>
             <strong>{t('doraemon.micTest.title')}</strong>
@@ -1013,7 +1060,16 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
           <button
             className="floating-close-btn"
-            onClick={() => setIsMicTestOpen(false)}
+            type="button"
+            onMouseDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              closeMicTest();
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              closeMicTest();
+            }}
             title={t('doraemon.micTest.closeWindow')}
           >
             <X size={16} />
@@ -1023,17 +1079,26 @@ const DoraemonMonitorApp: React.FC = () => {
           <MicTestContent />
         </div>
       </div>
-    </div>
-  );
+      </div>
+    );
+  };
 
-  const ReportDrawer = () => (
-    <div className={`report-modal-layer ${isReportOpen ? 'open' : ''}`}>
-      <button
-        className="floating-modal-backdrop"
-        onClick={() => setIsReportOpen(false)}
-        aria-hidden={!isReportOpen}
-      />
-      <div className="report-modal-shell">
+  const ReportDrawer = () => {
+    if (!isReportOpen) return null;
+
+    return (
+      <div className="report-modal-layer open">
+        <button
+          type="button"
+          className="floating-modal-backdrop report-modal-backdrop"
+          onClick={closeReport}
+          aria-label={t('doraemon.report.hide')}
+        />
+        <div
+          className="report-modal-shell"
+          onClick={stopModalPropagation}
+          onMouseDown={stopModalPropagation}
+        >
         <div className="floating-modal-header report-modal-header">
           <div className="report-drawer-heading">
             <div className="report-drawer-icon">
@@ -1046,7 +1111,16 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
           <button
             className="floating-close-btn"
-            onClick={() => setIsReportOpen(false)}
+            type="button"
+            onMouseDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              closeReport();
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              closeReport();
+            }}
             title={t('doraemon.report.hide')}
           >
             <X size={16} />
@@ -1147,8 +1221,9 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+      </div>
+    );
+  };
 
   const NoiseLevelReference = () => {
     const levels = [
@@ -1267,12 +1342,8 @@ const DoraemonMonitorApp: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: '20px' }}>
           <button
-            onClick={() => {
-              setIsMicTestOpen(false);
-              setShowHelp(false);
-              setShowThresholdHelp(false);
-              setIsReportOpen(true);
-            }}
+            type="button"
+            onClick={openReport}
             className="report-header-btn"
             title={t('doraemon.report.show')}
           >

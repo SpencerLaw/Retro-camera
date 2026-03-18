@@ -259,6 +259,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: clamp(8px, 1.5vh, 16px);
   z-index: 10;
   flex: 1;
   min-width: min(280px, 30vw);
@@ -272,19 +273,18 @@
   filter: drop-shadow(0 10px 25px rgba(0, 150, 225, 0.25));
   transition: transform 0.1s ease-out;
   transform-origin: center center;
-  margin-bottom: 1.4vh;
+  margin-bottom: 0;
 }
 
 .db-display {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  margin-top: 1.2vh;
-  margin-bottom: 1.2vh;
+  margin: 0;
 }
 
 .db-number {
-  font-size: clamp(4.4rem, 8.8vh, 8.2rem);
+  font-size: clamp(4.85rem, 9.7vh, 9rem);
   font-weight: 900;
   line-height: 1;
   color: var(--text-primary);
@@ -292,7 +292,7 @@
 }
 
 .db-unit {
-  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-size: clamp(1.65rem, 3.3vw, 2.75rem);
   font-weight: 700;
   color: var(--accent-blue);
   margin-left: 8px;
@@ -300,13 +300,13 @@
 
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
-  width: 100%;
-  height: clamp(96px, 16vh, 180px);
+  width: min(100%, 720px);
+  height: clamp(92px, 14vh, 156px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2.5%;
-  margin-top: auto;
+  margin-top: clamp(2px, 0.6vh, 8px);
   pointer-events: none;
 }
 
@@ -499,6 +499,9 @@
   inset: 0;
   z-index: 120;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .floating-modal-layer.open {
@@ -518,16 +521,15 @@
 
 .floating-modal-layer.open .floating-modal-backdrop {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .floating-modal-shell {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  left: 50%;
-  top: 50%;
   width: min(760px, calc(100vw - 32px));
   max-height: min(82vh, 760px);
-  transform: translate(-50%, -46%) scale(0.96);
+  transform: translateY(8px) scale(0.96);
   border-radius: 28px;
   background: rgba(18, 28, 63, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -535,12 +537,14 @@
   opacity: 0;
   overflow: hidden;
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
   transition: transform 0.28s ease, opacity 0.24s ease;
 }
 
 .floating-modal-layer.open .floating-modal-shell {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translateY(0) scale(1);
 }
 
 .doraemon-app:not(.dark-mode) .floating-modal-shell {
@@ -587,12 +591,19 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
 }
 
 .floating-modal-body {
   padding: 18px 20px 20px;
   overflow-y: auto;
   max-height: calc(min(82vh, 760px) - 72px);
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .mic-test-window {
@@ -1278,20 +1289,26 @@
   inset: 0;
   z-index: 125;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .report-modal-layer.open {
   pointer-events: auto;
 }
 
+.report-modal-layer.open .report-modal-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .report-modal-shell {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  left: 50%;
-  top: 50%;
   width: min(880px, calc(100vw - 40px));
   max-height: min(78vh, 760px);
-  transform: translate(-50%, -46%) scale(0.96);
+  transform: translateY(8px) scale(0.96);
   border-radius: 28px;
   background: rgba(18, 28, 63, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1299,12 +1316,14 @@
   opacity: 0;
   overflow: hidden;
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
   transition: transform 0.28s ease, opacity 0.24s ease;
 }
 
 .report-modal-layer.open .report-modal-shell {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translateY(0) scale(1);
 }
 
 .doraemon-app:not(.dark-mode) .report-modal-shell {
@@ -1317,7 +1336,15 @@
 }
 
 .report-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   max-height: calc(min(78vh, 760px) - 78px);
+  overflow-y: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .report-modal-week {
@@ -1497,12 +1524,9 @@
 }
 
 .report-day-list {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto;
   padding-right: 4px;
 }
 

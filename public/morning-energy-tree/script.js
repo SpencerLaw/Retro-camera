@@ -54,6 +54,12 @@ const GOLDEN_COLORS = ['#ffd700', '#ffecb3', '#fff9c4', '#fff59d'];
 const ENERGY_SKY_COLORS = ['#fff176', '#ffe082', '#fff59d', '#ffecb3'];
 const ENERGY_TECH_COLORS = ['#7df9ff', '#8cf7d9', '#d2ff72', '#f7ff9c'];
 const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
+const FX_LIMITS = {
+    sparkles: 64,
+    energyParticles: 16,
+    trunkTransfers: 12,
+    soilTransfers: 14
+};
 
 /* --- DOM Elements --- */
 const $ = (id) => document.getElementById(id);
@@ -270,15 +276,22 @@ function buildCurveSVG(report) {
     const stats = getCurveStats(report);
     const sourceValues = stats.values.length === 1 ? [stats.values[0], stats.values[0]] : stats.values;
     const values = sourceValues.map(value => Math.round(value));
-    const width = 680;
-    const height = 176;
-    const paddingLeft = 46;
-    const paddingRight = 18;
-    const paddingTop = 18;
-    const paddingBottom = 38;
-    const graphWidth = width - paddingLeft - paddingRight;
-    const graphHeight = height - paddingTop - paddingBottom;
-    const baselineY = height - paddingBottom;
+    const width = 720;
+    const height = 210;
+    const paddingLeft = 54;
+    const paddingRight = 34;
+    const paddingTop = 24;
+    const paddingBottom = 46;
+    const plotInsetX = 14;
+    const plotInsetTop = 10;
+    const plotInsetBottom = 12;
+    const plotLeft = paddingLeft + plotInsetX;
+    const plotRight = width - paddingRight - plotInsetX;
+    const plotTop = paddingTop + plotInsetTop;
+    const plotBottom = height - paddingBottom - plotInsetBottom;
+    const graphWidth = plotRight - plotLeft;
+    const graphHeight = plotBottom - plotTop;
+    const baselineY = plotBottom;
     const peakLabel = t('morningTree.report.peak') || '峰值';
     const lowLabel = t('morningTree.report.low') || '低值';
     const gradientId = `report-curve-line-${Math.random().toString(36).slice(2, 8)}`;
@@ -292,9 +305,9 @@ function buildCurveSVG(report) {
     const step = values.length > 1 ? graphWidth / (values.length - 1) : 0;
 
     const points = values.map((value, index) => {
-        const x = paddingLeft + (index * step);
+        const x = plotLeft + (index * step);
         const normalized = (value - paddedMin) / range;
-        const y = paddingTop + (graphHeight * (1 - normalized));
+        const y = plotTop + (graphHeight * (1 - normalized));
         return { x, y, value };
     });
 
@@ -303,31 +316,30 @@ function buildCurveSVG(report) {
     const peakPoint = points[Math.min(points.length - 1, Math.max(0, stats.peakIndex))] || points[0];
     const lowPoint = points[Math.min(points.length - 1, Math.max(0, stats.lowIndex))] || points[0];
     const chartBounds = {
-        left: paddingLeft + 4,
-        right: width - paddingRight - 4,
-        top: paddingTop + 2,
-        bottom: baselineY - 26,
-        midX: paddingLeft + (graphWidth / 2)
+        left: plotLeft + 6,
+        right: plotRight - 6,
+        top: plotTop + 2,
+        bottom: baselineY - 28,
+        midX: plotLeft + (graphWidth / 2)
     };
 
     const horizontalGrid = Array.from({ length: 5 }, (_, index) => {
         const ratio = index / 4;
-        const y = paddingTop + (graphHeight * ratio);
+        const y = plotTop + (graphHeight * ratio);
         const labelValue = Math.round(paddedMax - (range * ratio));
         return `
-            <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
-            <text x="${paddingLeft - 10}" y="${y + 4}" fill="rgba(255,255,255,0.46)" font-size="11" text-anchor="end">${labelValue}</text>
+            <line x1="${plotLeft}" y1="${y}" x2="${plotRight}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+            <text x="${plotLeft - 12}" y="${y + 4}" fill="rgba(255,255,255,0.46)" font-size="11" text-anchor="end">${labelValue}</text>
         `;
     }).join('');
 
-    const tickRatios = [0, 0.25, 0.5, 0.75, 1];
+    const tickRatios = [0, 0.33, 0.66, 1];
     const timeGrid = tickRatios.map((ratio, index) => {
-        const x = paddingLeft + (graphWidth * ratio);
+        const x = plotLeft + (graphWidth * ratio);
         const anchor = index === 0 ? 'start' : index === tickRatios.length - 1 ? 'end' : 'middle';
-        const offset = index === 0 ? 0 : index === tickRatios.length - 1 ? 0 : 0;
         return `
-            <line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${baselineY}" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="3 7" />
-            <text x="${x + offset}" y="${height - 10}" fill="rgba(255,255,255,0.6)" font-size="10.5" text-anchor="${anchor}">${formatCurveTickLabel(report, ratio)}</text>
+            <line x1="${x}" y1="${plotTop}" x2="${x}" y2="${baselineY}" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="3 7" />
+            <text x="${x}" y="${height - 10}" fill="rgba(255,255,255,0.6)" font-size="10.5" text-anchor="${anchor}">${formatCurveTickLabel(report, ratio)}</text>
         `;
     }).join('');
 
@@ -335,7 +347,7 @@ function buildCurveSVG(report) {
     const lowBadge = buildCurveBadge(lowPoint, `${lowLabel} ${stats.lowValue} dB`, '#8cf7d9', 'bottom', chartBounds);
 
     return `
-        <svg class="report-curve-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+        <svg class="report-curve-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
             <defs>
                 <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stop-color="#8bf7ff" />
@@ -355,7 +367,7 @@ function buildCurveSVG(report) {
                     </feMerge>
                 </filter>
             </defs>
-            <rect x="${paddingLeft}" y="${paddingTop}" width="${graphWidth}" height="${graphHeight}" rx="18" fill="rgba(255,255,255,0.025)" />
+            <rect x="${plotLeft}" y="${plotTop}" width="${graphWidth}" height="${graphHeight}" rx="18" fill="rgba(255,255,255,0.025)" />
             ${horizontalGrid}
             ${timeGrid}
             <path d="${areaPath}" fill="url(#${areaId})" stroke="none"></path>
@@ -937,6 +949,37 @@ const trunkTransfers = [];
 const soilTransfers = [];
 const meadowPlants = [];
 
+function pushLimitedEffect(queue, item, maxSize) {
+    if (!item) return;
+    if (queue.length >= maxSize) {
+        queue.splice(0, queue.length - maxSize + 1);
+    }
+    queue.push(item);
+}
+
+function spawnSparkle(x, y, color = '#fff') {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    pushLimitedEffect(sparkles, new Sparkle(x, y, color), FX_LIMITS.sparkles);
+}
+
+function getFxLoad() {
+    return energyParticles.length + trunkTransfers.length + soilTransfers.length + (sparkles.length * 0.3);
+}
+
+function getRenderMode(treeSize = 0) {
+    const fxLoad = getFxLoad();
+    const energyPressure = Math.max(0, STATE.energy - 68) * 0.32;
+    const treePressure = Math.max(0, treeSize - 176) / 11;
+    const totalPressure = fxLoad + energyPressure + treePressure;
+
+    return {
+        fxLoad,
+        totalPressure,
+        lowPower: totalPressure > 42,
+        ultraLowPower: totalPressure > 56
+    };
+}
+
 class Cloud {
     constructor() {
         this.reset();
@@ -1081,8 +1124,10 @@ function drawEnergyAura(x, y, radius, color, alpha = 0.2) {
 
 function drawParticleTrail(points, color, baseSize, alpha = 0.7) {
     if (points.length < 2) return;
+    const renderMode = getRenderMode();
+    const step = renderMode.lowPower ? 2 : 1;
 
-    for (let i = 0; i < points.length; i++) {
+    for (let i = 0; i < points.length; i += step) {
         const point = points[i];
         const ratio = (i + 1) / points.length;
         const size = Math.max(0.8, baseSize * (0.25 + ratio * 0.7));
@@ -1129,14 +1174,18 @@ class SkyEnergy {
         this.x = base.x + (normalX * wobble);
         this.y = base.y + (normalY * wobble);
         this.history.push({ x: this.x, y: this.y });
-        if (this.history.length > 10) this.history.shift();
+        if (this.history.length > 8) this.history.shift();
 
         const dx = this.target.x - this.x;
         const dy = this.target.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 18 || this.progress >= 1) {
-            sparkles.push(new Sparkle(this.x, this.y, '#c8fff7'));
-            trunkTransfers.push(new TrunkTransfer(this.x, this.y, this.trunkBase.x, this.trunkBase.y, this.strength, this.hue));
+            spawnSparkle(this.x, this.y, '#c8fff7');
+            pushLimitedEffect(
+                trunkTransfers,
+                new TrunkTransfer(this.x, this.y, this.trunkBase.x, this.trunkBase.y, this.strength, this.hue),
+                FX_LIMITS.trunkTransfers
+            );
             return false;
         }
 
@@ -1205,9 +1254,18 @@ class TrunkTransfer {
     update() {
         this.t += this.speed;
         if (this.t >= 1) {
-            sparkles.push(new Sparkle(this.end.x, this.end.y, '#d8ff66'));
-            soilTransfers.push(new SoilTransfer(this.end.x, this.end.y, -1, this.strength, this.color));
-            soilTransfers.push(new SoilTransfer(this.end.x, this.end.y, 1, this.strength, this.color));
+            spawnSparkle(this.end.x, this.end.y, '#d8ff66');
+            const remainingSlots = FX_LIMITS.soilTransfers - soilTransfers.length;
+            if (remainingSlots >= 2) {
+                pushLimitedEffect(soilTransfers, new SoilTransfer(this.end.x, this.end.y, -1, this.strength, this.color), FX_LIMITS.soilTransfers);
+                pushLimitedEffect(soilTransfers, new SoilTransfer(this.end.x, this.end.y, 1, this.strength, this.color), FX_LIMITS.soilTransfers);
+            } else if (remainingSlots === 1) {
+                pushLimitedEffect(
+                    soilTransfers,
+                    new SoilTransfer(this.end.x, this.end.y, Math.random() < 0.5 ? -1 : 1, this.strength, this.color),
+                    FX_LIMITS.soilTransfers
+                );
+            }
             return false;
         }
         this.life = Math.max(0.25, 1 - (this.t * 0.45));
@@ -1217,7 +1275,7 @@ class TrunkTransfer {
         const eased = easeInOutSine(Math.min(1, this.t));
         const head = pointOnQuadratic(this.start, this.control, this.end, eased);
         this.history.push({ x: head.x, y: head.y });
-        if (this.history.length > 9) this.history.shift();
+        if (this.history.length > 7) this.history.shift();
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1269,7 +1327,7 @@ class SoilTransfer {
     update() {
         this.t += this.speed;
         if (this.t >= 1) {
-            sparkles.push(new Sparkle(this.end.x, this.end.y, this.color));
+            spawnSparkle(this.end.x, this.end.y, this.color);
             feedMeadowGrowth(this.end.x, this.strength, this.color);
             return false;
         }
@@ -1280,7 +1338,7 @@ class SoilTransfer {
         const eased = easeInOutSine(Math.min(1, this.t));
         const head = pointOnQuadratic(this.start, this.control, this.end, eased);
         this.history.push({ x: head.x, y: head.y });
-        if (this.history.length > 8) this.history.shift();
+        if (this.history.length > 6) this.history.shift();
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1309,22 +1367,26 @@ function initMeadowPlants() {
     meadowPlants.length = 0;
     const centerX = canvas.width / 2;
     const baseY = canvas.height - 12;
+    const petalPalette = ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71', '#9ff4ff', '#ffc5df'];
 
     [-1, 1].forEach(side => {
-        for (let i = 0; i < 6; i++) {
-            const offset = 88 + (i * 28) + Math.random() * 18;
+        for (let i = 0; i < 11; i++) {
+            const lane = i % 2;
+            const offset = 72 + (i * 22) + Math.random() * 16;
+            const flowerBias = i < 4 ? 0.72 : 0.54;
             meadowPlants.push({
                 side,
-                kind: Math.random() < 0.38 ? 'flower' : 'grass',
+                kind: Math.random() < flowerBias ? 'flower' : 'grass',
                 x: centerX + (side * offset),
-                baseY: baseY + Math.random() * 6,
-                growth: Math.random() * 0.04,
-                stemHeight: 18 + Math.random() * 26,
-                bloomSize: 7 + Math.random() * 5,
+                baseY: baseY + lane * 4 + Math.random() * 7,
+                growth: Math.random() * 0.05,
+                stemHeight: 16 + Math.random() * 30,
+                bloomSize: 6 + Math.random() * 6,
+                bloomCount: 1 + (Math.random() < 0.58 ? 1 : 0) + (Math.random() < 0.2 ? 1 : 0),
                 swayPhase: Math.random() * Math.PI * 2,
                 pulse: 0,
                 energyColor: SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)],
-                petalColor: ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71'][Math.floor(Math.random() * 4)]
+                petalColor: petalPalette[Math.floor(Math.random() * petalPalette.length)]
             });
         }
     });
@@ -1342,18 +1404,29 @@ function feedMeadowGrowth(sourceX, strength, color) {
     if (!Number.isFinite(sourceX) || !meadowPlants.length) return;
 
     const safeStrength = Number.isFinite(strength) ? strength : 0;
+    const petalPalette = ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71', '#9ff4ff', '#ffc5df'];
     const nearby = meadowPlants
         .map(plant => ({ plant, dist: Math.abs(plant.x - sourceX) }))
         .sort((a, b) => a.dist - b.dist)
-        .slice(0, 4);
+        .slice(0, 7);
 
     nearby.forEach(({ plant, dist }) => {
         const distanceFactor = Math.max(0.22, 1 - (dist / 140));
         const currentGrowth = Number.isFinite(plant.growth) ? plant.growth : 0;
         const currentPulse = Number.isFinite(plant.pulse) ? plant.pulse : 0;
-        plant.growth = Math.min(1, currentGrowth + distanceFactor * (0.05 + safeStrength * 0.09));
-        plant.pulse = Math.min(1, currentPulse + 0.35 + safeStrength * 0.28);
+        plant.growth = Math.min(1, currentGrowth + distanceFactor * (0.08 + safeStrength * 0.12));
+        plant.pulse = Math.min(1, currentPulse + 0.45 + safeStrength * 0.34);
         plant.energyColor = color || plant.energyColor;
+
+        if (plant.kind === 'grass' && safeStrength > 0.22 && currentGrowth > 0.2 && dist < 180) {
+            const bloomChance = 0.14 + safeStrength * 0.14;
+            if (Math.random() < bloomChance) {
+                plant.kind = 'flower';
+                plant.bloomSize = 6 + Math.random() * 6;
+                plant.bloomCount = 1 + (Math.random() < 0.64 ? 1 : 0) + (Math.random() < 0.28 ? 1 : 0);
+                plant.petalColor = petalPalette[Math.floor(Math.random() * petalPalette.length)];
+            }
+        }
     });
 }
 
@@ -1374,7 +1447,27 @@ function drawGrassBlade(plant, sway, heightScale) {
     ctx.stroke();
 }
 
-function drawFlowerPlant(plant, sway) {
+function drawFlowerCluster(x, y, blossomSize, petalColor) {
+    ctx.save();
+    ctx.translate(x, y);
+    for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI * 2 * i) / 6;
+        ctx.save();
+        ctx.rotate(angle);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.ellipse(0, -blossomSize * 0.72, blossomSize * 0.52, blossomSize * 0.92, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+    ctx.fillStyle = '#fff5b7';
+    ctx.beginPath();
+    ctx.arc(0, 0, blossomSize * 0.55, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawFlowerPlant(plant, sway, lowPowerMode = false) {
     const growth = plant.growth;
     const stemHeight = plant.stemHeight * growth;
     if (stemHeight <= 1) return;
@@ -1412,28 +1505,24 @@ function drawFlowerPlant(plant, sway) {
     const blossomSize = plant.bloomSize * growth;
     drawEnergyAura(bloomX, bloomY, 5 + plant.pulse * 7, plant.energyColor, 0.05 + plant.pulse * 0.08);
 
-    ctx.save();
-    ctx.translate(bloomX, bloomY);
-    for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI * 2 * i) / 6;
-        ctx.save();
-        ctx.rotate(angle);
-        ctx.fillStyle = plant.petalColor;
-        ctx.beginPath();
-        ctx.ellipse(0, -blossomSize * 0.72, blossomSize * 0.52, blossomSize * 0.92, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+    drawFlowerCluster(bloomX, bloomY, blossomSize, plant.petalColor);
+
+    const bloomCount = lowPowerMode ? 1 : Math.max(1, plant.bloomCount || 1);
+    for (let i = 1; i < bloomCount; i++) {
+        const direction = i % 2 === 0 ? 1 : -1;
+        const offsetX = direction * (6 + i * 4 + plant.pulse * 2);
+        const offsetY = 4 + i * 3;
+        const miniSize = blossomSize * (0.5 - i * 0.07 + plant.pulse * 0.04);
+        if (miniSize <= 1.6) continue;
+
+        drawFlowerCluster(bloomX + offsetX, bloomY + offsetY, miniSize, plant.petalColor);
     }
-    ctx.fillStyle = '#fff5b7';
-    ctx.beginPath();
-    ctx.arc(0, 0, blossomSize * 0.55, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
 }
 
 function drawMeadowPlants() {
-    const passiveGrowth = Math.max(0, (STATE.currentDB - 58) / 15000);
+    const passiveGrowth = Math.max(0, (STATE.currentDB - 56) / 12000);
     const time = Date.now() / 950;
+    const lowPowerMode = getRenderMode(80 + (STATE.energy * 1.6)).lowPower;
 
     meadowPlants.forEach((plant, index) => {
         const baseGrowth = Number.isFinite(plant.growth) ? plant.growth : 0;
@@ -1445,17 +1534,26 @@ function drawMeadowPlants() {
 
         if (plant.growth < 0.03) return;
 
-        const sway = Math.sin(time + plant.swayPhase + index * 0.18) * (3 + plant.growth * 4);
-        drawEnergyAura(plant.x, plant.baseY - 4, 5 + plant.pulse * 7, plant.energyColor, 0.04 + plant.pulse * 0.06);
+        const sway = Math.sin(time + plant.swayPhase + index * 0.18) * (lowPowerMode ? 2.4 : 3 + plant.growth * 4);
+        drawEnergyAura(
+            plant.x,
+            plant.baseY - 4,
+            (lowPowerMode ? 3.6 : 5) + plant.pulse * (lowPowerMode ? 4.2 : 7),
+            plant.energyColor,
+            (lowPowerMode ? 0.025 : 0.04) + plant.pulse * (lowPowerMode ? 0.03 : 0.06)
+        );
 
         ctx.save();
         ctx.lineCap = 'round';
         if (plant.kind === 'flower') {
-            drawFlowerPlant(plant, sway);
+            drawFlowerPlant(plant, sway, lowPowerMode);
         } else {
             drawGrassBlade(plant, sway, 1);
             drawGrassBlade(plant, sway * 0.72 - 6, 0.82);
             drawGrassBlade(plant, sway * 0.65 + 5, 0.74);
+            if (!lowPowerMode && (plant.growth > 0.42 || plant.pulse > 0.24)) {
+                drawGrassBlade(plant, sway * 0.38 + 8, 0.62);
+            }
         }
         ctx.restore();
     });
@@ -1465,11 +1563,15 @@ function spawnSkyEnergy(treeSize, anchors) {
     if (!STATE.isListening) return;
     const activation = Math.max(0, (STATE.currentDB - 56) / 26);
     if (activation <= 0) return;
+    if (energyParticles.length >= FX_LIMITS.energyParticles) return;
 
-    const shouldSpawn = Math.random() < (0.24 + activation * 0.42);
+    const backlogRatio = energyParticles.length / FX_LIMITS.energyParticles;
+    const shouldSpawn = Math.random() < ((0.2 + activation * 0.32) * (1 - backlogRatio * 0.65));
     if (!shouldSpawn) return;
 
-    const spawnCount = Math.random() < (0.22 + activation * 0.3) ? 2 : 1;
+    const availableSlots = Math.max(0, FX_LIMITS.energyParticles - energyParticles.length);
+    if (!availableSlots) return;
+    const spawnCount = Math.min(availableSlots, Math.random() < (0.18 + activation * 0.22) ? 2 : 1);
     for (let i = 0; i < spawnCount; i++) {
         const targetX = anchors.canopy.x + ((Math.random() - 0.5) * treeSize * 0.16);
         const targetY = anchors.canopy.y + ((Math.random() - 0.5) * treeSize * 0.08);
@@ -1477,37 +1579,48 @@ function spawnSkyEnergy(treeSize, anchors) {
         const sourceX = canvas.width - 100 + ((Math.random() - 0.5) * sourceBand);
         const sourceY = 90 + (Math.random() * 110);
 
-        energyParticles.push(new SkyEnergy(sourceX, sourceY, targetX, targetY, anchors.beamControl, anchors.trunkBase, activation));
+        pushLimitedEffect(
+            energyParticles,
+            new SkyEnergy(sourceX, sourceY, targetX, targetY, anchors.beamControl, anchors.trunkBase, activation),
+            FX_LIMITS.energyParticles
+        );
     }
 }
 
 function drawEnergyFlow(treeSize) {
     const activation = Math.max(0, (STATE.currentDB - 56) / 26);
     const anchors = getEnergyAnchors(treeSize);
+    const renderMode = getRenderMode(treeSize);
     const hasFlow = activation > 0.04 || energyParticles.length || trunkTransfers.length || soilTransfers.length;
-    if (activation > 0.05) {
+    if (activation > 0.05 && (!renderMode.ultraLowPower || Math.random() < 0.72)) {
         spawnSkyEnergy(treeSize, anchors);
     }
 
     if (hasFlow) {
         const flowAlpha = Math.min(0.85, 0.18 + activation * 0.55);
-        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, 14 + (activation * 14), '#8cf7d9', 0.12 + flowAlpha * 0.2);
-        drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, 13 + (activation * 16), '#d8ff66', 0.1 + flowAlpha * 0.2);
-        drawEnergyAura(anchors.soilLeft.x, anchors.soilLeft.y, 8 + (activation * 6), '#59f0ff', 0.08 + flowAlpha * 0.12);
-        drawEnergyAura(anchors.soilRight.x, anchors.soilRight.y, 8 + (activation * 6), '#d8ff66', 0.08 + flowAlpha * 0.12);
+        const auraScale = renderMode.ultraLowPower ? 0.58 : renderMode.lowPower ? 0.76 : 1;
+        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, (14 + (activation * 14)) * auraScale, '#8cf7d9', (0.12 + flowAlpha * 0.2) * auraScale);
+        drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, (13 + (activation * 16)) * auraScale, '#d8ff66', (0.1 + flowAlpha * 0.2) * auraScale);
 
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = Math.max(0.16, flowAlpha * 0.34);
-        const soilGlow = ctx.createRadialGradient(anchors.trunkBase.x, anchors.trunkBase.y + 10, 0, anchors.trunkBase.x, anchors.trunkBase.y + 10, 130);
-        soilGlow.addColorStop(0, 'rgba(216, 255, 102, 0.55)');
-        soilGlow.addColorStop(0.4, 'rgba(89, 240, 255, 0.18)');
-        soilGlow.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = soilGlow;
-        ctx.beginPath();
-        ctx.ellipse(anchors.trunkBase.x, anchors.trunkBase.y + 10, 130, 34, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        if (!renderMode.ultraLowPower) {
+            drawEnergyAura(anchors.soilLeft.x, anchors.soilLeft.y, (8 + (activation * 6)) * auraScale, '#59f0ff', (0.08 + flowAlpha * 0.12) * auraScale);
+            drawEnergyAura(anchors.soilRight.x, anchors.soilRight.y, (8 + (activation * 6)) * auraScale, '#d8ff66', (0.08 + flowAlpha * 0.12) * auraScale);
+        }
+
+        if (!renderMode.lowPower) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen';
+            ctx.globalAlpha = Math.max(0.16, flowAlpha * 0.34);
+            const soilGlow = ctx.createRadialGradient(anchors.trunkBase.x, anchors.trunkBase.y + 10, 0, anchors.trunkBase.x, anchors.trunkBase.y + 10, 130);
+            soilGlow.addColorStop(0, 'rgba(216, 255, 102, 0.55)');
+            soilGlow.addColorStop(0.4, 'rgba(89, 240, 255, 0.18)');
+            soilGlow.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = soilGlow;
+            ctx.beginPath();
+            ctx.ellipse(anchors.trunkBase.x, anchors.trunkBase.y + 10, 130, 34, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
     }
 
     for (let i = energyParticles.length - 1; i >= 0; i--) {
@@ -1559,7 +1672,7 @@ function initEnvironment() {
 }
 
 // Enhanced Recursive Tree
-function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
+function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, renderMode = { lowPower: false, ultraLowPower: false }) {
     ctx.beginPath();
     ctx.save();
 
@@ -1587,8 +1700,8 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     if (depth >= 4 || (len < 10 && depth > 2)) {
         if (STATE.energy > 15) {
             const baseSize = (STATE.energy / 100) * 12 + 3;
-            // FIX: Slower wind animation (Date.now() / 1000 instead of / 500)
-            const size = baseSize + Math.sin(Date.now() / 1000 + depth) * 1.5;
+            const leafPulse = renderMode.lowPower ? 1 : 1.5;
+            const size = baseSize + Math.sin(Date.now() / 1000 + depth) * leafPulse;
 
             const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
@@ -1599,14 +1712,17 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
             ctx.arc(0, -len, size, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.beginPath();
-            ctx.fillStyle = 'rgba(255,255,255,0.15)';
-            ctx.arc(-size * 0.3, -len - size * 0.3, size * 0.5, 0, Math.PI * 2);
-            ctx.fill();
+            if (!renderMode.lowPower) {
+                ctx.beginPath();
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.arc(-size * 0.3, -len - size * 0.3, size * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 
-    if (len < 10) {
+    const minBranchLen = renderMode.ultraLowPower ? 16 : renderMode.lowPower ? 13 : 10;
+    if (len < minBranchLen) {
         ctx.restore();
         return;
     }
@@ -1628,15 +1744,17 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth) {
     const branchCount = 2;
     for (let i = 0; i < branchCount; i++) {
         const dir = i === 0 ? -1 : 1;
-        const offset = (Math.random() - 0.5) * 5;
+        const branchSeed = ((depth + 1) * 1.37) + (i * 2.11) + (len * 0.031) + (angle * 0.017);
+        const offset = Math.sin(branchSeed * 3.17) * (renderMode.lowPower ? 2.3 : 4.1);
         const branchAngle = (spread * dir) + wind + offset;
-        const lengthFactor = 0.72 + (Math.random() * 0.05);
+        const lengthSpread = renderMode.ultraLowPower ? 0.018 : 0.03;
+        const lengthFactor = 0.71 + (((Math.sin(branchSeed * 5.41) + 1) / 2) * lengthSpread);
 
-        drawEnhancedTree(0, 0, len * lengthFactor, branchAngle, branchWidth * 0.7, depth + 1);
+        drawEnhancedTree(0, 0, len * lengthFactor, branchAngle, branchWidth * 0.7, depth + 1, renderMode);
     }
 
-    if (depth < 3 && STATE.energy > 60 && Math.random() < 0.3) {
-        drawEnhancedTree(0, 0, len * 0.6, wind, branchWidth * 0.6, depth + 1);
+    if (!renderMode.lowPower && depth < 3 && STATE.energy > 60 && Math.random() < 0.16) {
+        drawEnhancedTree(0, 0, len * 0.6, wind, branchWidth * 0.6, depth + 1, renderMode);
     }
 
     ctx.restore();
@@ -1686,6 +1804,7 @@ function loop() {
     });
 
     const treeSize = 80 + (STATE.energy * 1.6);
+    const renderMode = getRenderMode(treeSize);
 
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
@@ -1694,7 +1813,7 @@ function loop() {
     ctx.fill();
 
     if (treeSize > 60) {
-        drawEnhancedTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 9, 0);
+        drawEnhancedTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 9, 0, renderMode);
     } else {
         ctx.beginPath();
         const startX = canvas.width / 2;
@@ -1713,8 +1832,9 @@ function loop() {
     drawEnergyFlow(treeSize);
     drawMeadowPlants();
 
-    if (STATE.isSuperMode && Math.random() < 0.2) {
-        sparkles.push(new Sparkle(Math.random() * canvas.width, Math.random() * canvas.height));
+    const superSparkleChance = renderMode.ultraLowPower ? 0.05 : renderMode.lowPower ? 0.1 : 0.16;
+    if (STATE.isSuperMode && Math.random() < superSparkleChance) {
+        spawnSparkle(Math.random() * canvas.width, Math.random() * canvas.height);
     }
 
     for (let i = sparkles.length - 1; i >= 0; i--) {

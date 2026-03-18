@@ -586,6 +586,86 @@ const DoraemonMonitorApp: React.FC = () => {
       ].join(' · ')
     : '';
 
+  const MicTestPanel = () => (
+    <div className="controls-box diagnostic-box">
+      <div className="slider-header">
+        <span>{t('doraemon.micTest.title')}</span>
+        <button
+          className="diagnostic-action-btn"
+          onClick={startMicTest}
+          disabled={micTestStage === 'quiet' || micTestStage === 'active'}
+        >
+          {micTestStage === 'quiet' || micTestStage === 'active'
+            ? t('doraemon.micTest.testing')
+            : micTestResult
+              ? t('doraemon.micTest.rerun')
+              : t('doraemon.micTest.start')}
+        </button>
+      </div>
+
+      <div className="diagnostic-grid">
+        <div className="diagnostic-chip">
+          <span>{t('doraemon.micTest.ambient')}</span>
+          <strong>{Math.round(ambientDb)} dB</strong>
+        </div>
+        <div className="diagnostic-chip">
+          <span>{t('doraemon.micTest.activity')}</span>
+          <strong>{activityDb.toFixed(1)} dB</strong>
+        </div>
+        <div className="diagnostic-chip">
+          <span>{t('doraemon.micTest.range')}</span>
+          <strong>{signalRange.toFixed(1)} dB</strong>
+        </div>
+      </div>
+
+      {captureModeText && <div className="capture-mode-note">{captureModeText}</div>}
+
+      {(micTestStage === 'quiet' || micTestStage === 'active') && (
+        <div className="mic-test-runner">
+          <strong>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuiet') : t('doraemon.micTest.stageActive')}</strong>
+          <p>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuietDesc') : t('doraemon.micTest.stageActiveDesc')}</p>
+          <div className="mic-test-countdown">{micTestCountdown}s</div>
+        </div>
+      )}
+
+      {micTestResult && (
+        <div className={`mic-test-result ${micTestResult.health}`}>
+          <div className="mic-test-result-title">
+            {t(`doraemon.micTest.health.${micTestResult.health}`)}
+          </div>
+          <div className="mic-test-result-desc">
+            {t(`doraemon.micTest.healthDesc.${micTestResult.health}`)}
+          </div>
+          <div className="mic-test-result-grid">
+            <div>
+              <span>{t('doraemon.micTest.quietAvg')}</span>
+              <strong>{micTestResult.quietAvg.toFixed(1)} dB</strong>
+            </div>
+            <div>
+              <span>{t('doraemon.micTest.activeAvg')}</span>
+              <strong>{micTestResult.activeAvg.toFixed(1)} dB</strong>
+            </div>
+            <div>
+              <span>{t('doraemon.micTest.dynamicRange')}</span>
+              <strong>{micTestResult.dynamicRange.toFixed(1)} dB</strong>
+            </div>
+            <div>
+              <span>{t('doraemon.micTest.overallRange')}</span>
+              <strong>{micTestResult.overallMin.toFixed(1)}-{micTestResult.overallMax.toFixed(1)}</strong>
+            </div>
+          </div>
+          <div className="mic-test-recommend">
+            <div>{t('doraemon.micTest.recommendedSensitivity').replace('{value}', String(micTestResult.recommendedSensitivity))}</div>
+            <div>{t('doraemon.micTest.recommendedThreshold').replace('{value}', String(micTestResult.recommendedLimit))}</div>
+          </div>
+          <button className="diagnostic-apply-btn" onClick={applyMicTestRecommendation}>
+            {t('doraemon.micTest.apply')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   const NoiseLevelReference = () => {
     const levels = [
       { min: 0, max: 20, label: t('doraemon.levels.l0') },
@@ -605,35 +685,38 @@ const DoraemonMonitorApp: React.FC = () => {
     const textColor = isDarkMode ? '#94a3b8' : '#475569';
 
     return (
-      <div className="db-reference-panel">
-        <div className="reference-title">{t('doraemon.dbReference')}</div>
-        <div className="vertical-meter-container">
-          <div style={{ position: 'relative', width: '12px' }}>
-            <div className="meter-bar-bg">
-              <div className="meter-gradient-fill"></div>
-            </div>
-            <div
-              className="current-level-pointer"
-              style={{
-                bottom: `${pointerPos}%`
-              }}
-            >
-              <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid #0096E1` }} />
-            </div>
-          </div>
-          <div className="level-nodes">
-            {levels.reverse().map((l, i) => (
-              <div key={i} style={{
-                color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor,
-                opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5,
-                fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
-                fontSize: '0.9rem'
-              }}>
-                {l.label}
+      <div className="reference-stack">
+        <div className="db-reference-panel">
+          <div className="reference-title">{t('doraemon.dbReference')}</div>
+          <div className="vertical-meter-container">
+            <div style={{ position: 'relative', width: '12px' }}>
+              <div className="meter-bar-bg">
+                <div className="meter-gradient-fill"></div>
               </div>
-            ))}
+              <div
+                className="current-level-pointer"
+                style={{
+                  bottom: `${pointerPos}%`
+                }}
+              >
+                <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid #0096E1` }} />
+              </div>
+            </div>
+            <div className="level-nodes">
+              {levels.reverse().map((l, i) => (
+                <div key={i} style={{
+                  color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor,
+                  opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5,
+                  fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
+                  fontSize: '0.9rem'
+                }}>
+                  {l.label}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+        <MicTestPanel />
       </div>
     );
   };
@@ -750,84 +833,6 @@ const DoraemonMonitorApp: React.FC = () => {
               <span className="stat-label">{t('doraemon.maxDb')}</span>
               <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
             </div>
-          </div>
-
-          <div className="controls-box diagnostic-box">
-            <div className="slider-header">
-              <span>{t('doraemon.micTest.title')}</span>
-              <button
-                className="diagnostic-action-btn"
-                onClick={startMicTest}
-                disabled={micTestStage === 'quiet' || micTestStage === 'active'}
-              >
-                {micTestStage === 'quiet' || micTestStage === 'active'
-                  ? t('doraemon.micTest.testing')
-                  : micTestResult
-                    ? t('doraemon.micTest.rerun')
-                    : t('doraemon.micTest.start')}
-              </button>
-            </div>
-
-            <div className="diagnostic-grid">
-              <div className="diagnostic-chip">
-                <span>{t('doraemon.micTest.ambient')}</span>
-                <strong>{Math.round(ambientDb)} dB</strong>
-              </div>
-              <div className="diagnostic-chip">
-                <span>{t('doraemon.micTest.activity')}</span>
-                <strong>{activityDb.toFixed(1)} dB</strong>
-              </div>
-              <div className="diagnostic-chip">
-                <span>{t('doraemon.micTest.range')}</span>
-                <strong>{signalRange.toFixed(1)} dB</strong>
-              </div>
-            </div>
-
-            {captureModeText && <div className="capture-mode-note">{captureModeText}</div>}
-
-            {(micTestStage === 'quiet' || micTestStage === 'active') && (
-              <div className="mic-test-runner">
-                <strong>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuiet') : t('doraemon.micTest.stageActive')}</strong>
-                <p>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuietDesc') : t('doraemon.micTest.stageActiveDesc')}</p>
-                <div className="mic-test-countdown">{micTestCountdown}s</div>
-              </div>
-            )}
-
-            {micTestResult && (
-              <div className={`mic-test-result ${micTestResult.health}`}>
-                <div className="mic-test-result-title">
-                  {t(`doraemon.micTest.health.${micTestResult.health}`)}
-                </div>
-                <div className="mic-test-result-desc">
-                  {t(`doraemon.micTest.healthDesc.${micTestResult.health}`)}
-                </div>
-                <div className="mic-test-result-grid">
-                  <div>
-                    <span>{t('doraemon.micTest.quietAvg')}</span>
-                    <strong>{micTestResult.quietAvg.toFixed(1)} dB</strong>
-                  </div>
-                  <div>
-                    <span>{t('doraemon.micTest.activeAvg')}</span>
-                    <strong>{micTestResult.activeAvg.toFixed(1)} dB</strong>
-                  </div>
-                  <div>
-                    <span>{t('doraemon.micTest.dynamicRange')}</span>
-                    <strong>{micTestResult.dynamicRange.toFixed(1)} dB</strong>
-                  </div>
-                  <div>
-                    <span>{t('doraemon.micTest.overallRange')}</span>
-                    <strong>{micTestResult.overallMin.toFixed(1)}-{micTestResult.overallMax.toFixed(1)}</strong>
-                  </div>
-                </div>
-                <div className="mic-test-recommend">
-                  <div>{t('doraemon.micTest.recommendedSensitivity').replace('{value}', String(micTestResult.recommendedSensitivity))}</div>
-                  <div>{t('doraemon.micTest.recommendedThreshold').replace('{value}', String(micTestResult.recommendedLimit))}</div>
-                </div>
-                <button className="diagnostic-apply-btn" onClick={applyMicTestRecommendation}>
-                  {t('doraemon.micTest.apply')}
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="controls-box" style={{ position: 'relative' }}>

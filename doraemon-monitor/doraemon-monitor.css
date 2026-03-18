@@ -101,22 +101,28 @@
   width: 100%;
 }
 
-/* ===== 分贝参考面板 ===== */
-.db-reference-panel {
+.reference-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   width: 260px;
-  /* 默认宽度略微减小 */
   min-width: 220px;
   max-width: 280px;
+  flex-shrink: 0;
+  align-self: center;
+  z-index: 10;
+}
+
+/* ===== 分贝参考面板 ===== */
+.db-reference-panel {
+  width: 100%;
   background: var(--card-bg);
   border: 2px solid var(--card-border);
   border-radius: 24px;
   padding: 20px;
-  flex-shrink: 0;
-  z-index: 10;
   height: auto;
   max-height: 100%;
   overflow-y: auto;
-  align-self: center;
   transition: all 0.3s ease;
 }
 
@@ -398,6 +404,10 @@
   padding: 16px 20px;
 }
 
+.reference-stack .controls-box {
+  width: 100%;
+}
+
 .diagnostic-box {
   display: flex;
   flex-direction: column;
@@ -444,6 +454,10 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+}
+
+.reference-stack .diagnostic-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .diagnostic-chip {
@@ -538,6 +552,10 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.reference-stack .mic-test-result-grid {
+  grid-template-columns: 1fr;
 }
 
 .mic-test-result-grid div {
@@ -742,10 +760,14 @@
     padding: 10px;
   }
 
-  .db-reference-panel,
+  .reference-stack,
   .right-panel {
     width: 220px;
     min-width: 200px;
+  }
+
+  .db-reference-panel,
+  .right-panel {
     padding: 15px;
   }
 
@@ -784,6 +806,11 @@
   /* 隐藏左侧参考面板以节省空间，或者移动到底部 */
   .db-reference-panel {
     display: none;
+  }
+
+  .reference-stack {
+    width: 90%;
+    max-width: 400px;
   }
 
   .center-display {
@@ -846,6 +873,10 @@
   .right-panel {
     width: 100%;
     gap: 10px;
+  }
+
+  .reference-stack {
+    width: 100%;
   }
 
   .stat-box {
@@ -921,12 +952,16 @@
     height: 260px;
   }
 
-  .db-reference-panel,
+  .reference-stack,
   .right-panel {
     width: 220px;
     min-width: 200px;
-    padding: 12px;
     gap: 10px;
+  }
+
+  .db-reference-panel,
+  .right-panel {
+    padding: 12px;
   }
 
   .stat-box {

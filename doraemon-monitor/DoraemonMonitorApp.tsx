@@ -60,7 +60,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const [showThresholdHelp, setShowThresholdHelp] = useState(false);
   const [captureSettings, setCaptureSettings] = useState<CaptureSettings | null>(null);
   const [micTestStage, setMicTestStage] = useState<MicTestStage>('idle');
-  const [micTestCountdown, setMicTestCountdown] = useState(0);
   const [micTestResult, setMicTestResult] = useState<MicTestResult | null>(null);
   const [isMuted, setIsMuted] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -83,7 +82,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const noiseFloorRef = useRef(40);
   const environmentDbRef = useRef(40);
   const recentDbRef = useRef<number[]>([]);
-  const micTestStartRef = useRef(0);
+  const micTestWindowRef = useRef<number[]>([]);
   const quietTestSamplesRef = useRef<number[]>([]);
   const activeTestSamplesRef = useRef<number[]>([]);
 
@@ -200,18 +199,35 @@ const DoraemonMonitorApp: React.FC = () => {
       health
     });
     setMicTestStage('done');
-    setMicTestCountdown(0);
   }, []);
 
   const startMicTest = useCallback(() => {
     if (!isStarted) return;
     quietTestSamplesRef.current = [];
     activeTestSamplesRef.current = [];
-    micTestStartRef.current = Date.now();
+    micTestWindowRef.current = [];
     setMicTestResult(null);
     setMicTestStage('quiet');
-    setMicTestCountdown(8);
   }, [isStarted]);
+
+  const captureMicTestStage = useCallback(() => {
+    if (!isStarted) return;
+
+    const snapshot = micTestWindowRef.current.length ? [...micTestWindowRef.current] : [currentDb];
+
+    if (micTestStageRef.current === 'quiet') {
+      quietTestSamplesRef.current = snapshot;
+      activeTestSamplesRef.current = [];
+      micTestWindowRef.current = [];
+      setMicTestStage('active');
+      return;
+    }
+
+    if (micTestStageRef.current === 'active') {
+      activeTestSamplesRef.current = snapshot;
+      finishMicTest();
+    }
+  }, [currentDb, finishMicTest, isStarted]);
 
   const applyMicTestRecommendation = useCallback(() => {
     if (!micTestResult) return;
@@ -288,22 +304,10 @@ const DoraemonMonitorApp: React.FC = () => {
 
       const stage = micTestStageRef.current;
       if (stage === 'quiet' || stage === 'active') {
-        const elapsed = Date.now() - micTestStartRef.current;
-        const nextStage: MicTestStage = elapsed < 4000 ? 'quiet' : elapsed < 8000 ? 'active' : 'done';
-
-        if (nextStage === 'quiet') {
-          quietTestSamplesRef.current.push(effectiveDb);
-        } else if (nextStage === 'active') {
-          activeTestSamplesRef.current.push(effectiveDb);
-          if (stage !== 'active') {
-            setMicTestStage('active');
-          }
-        } else {
-          finishMicTest();
-          return;
+        micTestWindowRef.current.push(effectiveDb);
+        if (micTestWindowRef.current.length > 15) {
+          micTestWindowRef.current.shift();
         }
-
-        setMicTestCountdown(Math.max(0, Math.ceil((8000 - elapsed) / 1000)));
       }
     };
   }, [finishMicTest, t]);
@@ -352,11 +356,11 @@ const DoraemonMonitorApp: React.FC = () => {
     setActivityDb(0);
     setSignalRange(0);
     setMicTestStage('idle');
-    setMicTestCountdown(0);
     setMicTestResult(null);
     recentDbRef.current = [];
     noiseFloorRef.current = 40;
     environmentDbRef.current = 40;
+    micTestWindowRef.current = [];
 
     try {
       const supported = navigator.mediaDevices.getSupportedConstraints?.() || {};
@@ -553,20 +557,24 @@ const DoraemonMonitorApp: React.FC = () => {
       ].join(' · ')
     : '';
 
+  const micTestActionLabel = micTestStage === 'quiet'
+    ? t('doraemon.micTest.captureQuiet')
+    : micTestStage === 'active'
+      ? t('doraemon.micTest.captureActive')
+      : micTestResult
+        ? t('doraemon.micTest.rerun')
+        : t('doraemon.micTest.start');
+
   const MicTestPanel = () => (
     <div className="controls-box diagnostic-box">
       <div className="slider-header">
         <span>{t('doraemon.micTest.title')}</span>
         <button
           className="diagnostic-action-btn"
-          onClick={startMicTest}
-          disabled={micTestStage === 'quiet' || micTestStage === 'active'}
+          onClick={micTestStage === 'quiet' || micTestStage === 'active' ? captureMicTestStage : startMicTest}
+          disabled={!isStarted}
         >
-          {micTestStage === 'quiet' || micTestStage === 'active'
-            ? t('doraemon.micTest.testing')
-            : micTestResult
-              ? t('doraemon.micTest.rerun')
-              : t('doraemon.micTest.start')}
+          {micTestActionLabel}
         </button>
       </div>
 
@@ -591,7 +599,6 @@ const DoraemonMonitorApp: React.FC = () => {
         <div className="mic-test-runner">
           <strong>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuiet') : t('doraemon.micTest.stageActive')}</strong>
           <p>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuietDesc') : t('doraemon.micTest.stageActiveDesc')}</p>
-          <div className="mic-test-countdown">{micTestCountdown}s</div>
         </div>
       )}
 

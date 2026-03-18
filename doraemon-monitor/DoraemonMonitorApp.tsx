@@ -171,9 +171,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const totalTimeRef = useRef(0);
   const sessionReportsRef = useRef<SessionReport[]>(loadStoredReports());
   const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
-  const reportScrollRef = useRef<HTMLDivElement | null>(null);
-  const reportTouchStartYRef = useRef<number | null>(null);
-  const reportTouchStartTopRef = useRef(0);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -850,7 +847,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const weeklyPeak = weeklyRecords.length
     ? Math.max(...weeklyRecords.map(report => report.peakDb))
     : 0;
-  const weeklyQuietTotal = weeklyRecords.reduce((sum, report) => sum + report.quietSeconds, 0);
 
   const reportDayGroups = REPORT_WEEKDAYS.map(({ key, offset }) => {
     const date = new Date(weekStart);
@@ -919,31 +915,6 @@ const DoraemonMonitorApp: React.FC = () => {
     event.preventDefault();
     event.stopPropagation();
     openMicTest();
-  };
-  const handleReportWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    const scrollNode = reportScrollRef.current;
-    if (!scrollNode) return;
-    scrollNode.scrollTop += event.deltaY;
-    event.preventDefault();
-    event.stopPropagation();
-  };
-  const handleReportTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
-    const scrollNode = reportScrollRef.current;
-    if (!scrollNode || event.touches.length !== 1) return;
-    reportTouchStartYRef.current = event.touches[0].clientY;
-    reportTouchStartTopRef.current = scrollNode.scrollTop;
-  };
-  const handleReportTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
-    const scrollNode = reportScrollRef.current;
-    const startY = reportTouchStartYRef.current;
-    if (!scrollNode || startY === null || event.touches.length !== 1) return;
-    const deltaY = startY - event.touches[0].clientY;
-    scrollNode.scrollTop = reportTouchStartTopRef.current + deltaY;
-    event.preventDefault();
-    event.stopPropagation();
-  };
-  const handleReportTouchEnd = () => {
-    reportTouchStartYRef.current = null;
   };
 
   const MicTestContent = () => (
@@ -1162,14 +1133,6 @@ const DoraemonMonitorApp: React.FC = () => {
         </div>
 
         <div className="floating-modal-body report-modal-body">
-          <div
-            ref={reportScrollRef}
-            className="report-modal-scroll"
-            onWheel={handleReportWheel}
-            onTouchStart={handleReportTouchStart}
-            onTouchMove={handleReportTouchMove}
-            onTouchEnd={handleReportTouchEnd}
-          >
             <div className="report-modal-week">
               {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
             </div>
@@ -1182,10 +1145,6 @@ const DoraemonMonitorApp: React.FC = () => {
               <div className="report-summary-card peak">
                 <span>{t('doraemon.report.summaryPeak')}</span>
                 <strong>{weeklyRecords.length ? `${Math.round(weeklyPeak)} dB` : '--'}</strong>
-              </div>
-              <div className="report-summary-card quiet">
-                <span>{t('doraemon.report.summaryQuiet')}</span>
-                <strong>{formatTime(weeklyQuietTotal)}</strong>
               </div>
             </div>
 
@@ -1261,7 +1220,6 @@ const DoraemonMonitorApp: React.FC = () => {
                 </section>
               ))}
             </div>
-          </div>
         </div>
       </div>
       </div>

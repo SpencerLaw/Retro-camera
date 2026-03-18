@@ -143,8 +143,12 @@
     "micTest": {
       "title": "Mic Test",
       "start": "Run Test",
+      "reset": "Reset Test",
+      "guide": "Capture a quiet sample first, then capture a noisy sample.",
       "captureQuiet": "Capture Quiet",
       "captureActive": "Capture Noise",
+      "pending": "Not captured",
+      "captured": "Captured: {value} dB",
       "testing": "Testing",
       "rerun": "Run Again",
       "apply": "Apply Suggestion",

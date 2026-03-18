@@ -141,8 +141,12 @@
     "micTest": {
       "title": "分貝測試",
       "start": "開始測試",
+      "reset": "清空重測",
+      "guide": "先記錄安靜環境，再記錄吵鬧環境",
       "captureQuiet": "記錄安靜環境",
       "captureActive": "記錄吵鬧環境",
+      "pending": "未記錄",
+      "captured": "已記錄：{value} dB",
       "testing": "測試中",
       "rerun": "重新測試",
       "apply": "套用建議",

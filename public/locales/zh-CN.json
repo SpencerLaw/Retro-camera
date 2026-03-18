@@ -143,8 +143,12 @@
     "micTest": {
       "title": "分贝测试",
       "start": "开始测试",
+      "reset": "清空重测",
+      "guide": "先记录安静环境，再记录吵闹环境",
       "captureQuiet": "记录安静环境",
       "captureActive": "记录吵闹环境",
+      "pending": "未记录",
+      "captured": "已记录：{value} dB",
       "testing": "测试中",
       "rerun": "重新测试",
       "apply": "应用建议",

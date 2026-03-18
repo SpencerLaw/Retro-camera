@@ -136,8 +136,12 @@
     "micTest": {
       "title": "マイクテスト",
       "start": "テスト開始",
+      "reset": "リセット",
+      "guide": "静かな状態を先に記録し、その後で騒がしい状態を記録してください。",
       "captureQuiet": "静かな状態を記録",
       "captureActive": "騒がしい状態を記録",
+      "pending": "未記録",
+      "captured": "記録済み: {value} dB",
       "testing": "テスト中",
       "rerun": "再テスト",
       "apply": "提案を適用",

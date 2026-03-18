@@ -61,6 +61,8 @@ const DoraemonMonitorApp: React.FC = () => {
   const [captureSettings, setCaptureSettings] = useState<CaptureSettings | null>(null);
   const [micTestStage, setMicTestStage] = useState<MicTestStage>('idle');
   const [micTestResult, setMicTestResult] = useState<MicTestResult | null>(null);
+  const [quietSnapshotAvg, setQuietSnapshotAvg] = useState<number | null>(null);
+  const [activeSnapshotAvg, setActiveSnapshotAvg] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('doraemon_muted') === 'true';
@@ -207,26 +209,31 @@ const DoraemonMonitorApp: React.FC = () => {
     activeTestSamplesRef.current = [];
     micTestWindowRef.current = [];
     setMicTestResult(null);
+    setQuietSnapshotAvg(null);
+    setActiveSnapshotAvg(null);
     setMicTestStage('quiet');
   }, [isStarted]);
 
-  const captureMicTestStage = useCallback(() => {
+  const captureQuietMicTest = useCallback(() => {
     if (!isStarted) return;
 
     const snapshot = micTestWindowRef.current.length ? [...micTestWindowRef.current] : [currentDb];
+    quietTestSamplesRef.current = snapshot;
+    activeTestSamplesRef.current = [];
+    micTestWindowRef.current = [];
+    setMicTestResult(null);
+    setQuietSnapshotAvg(average(snapshot));
+    setActiveSnapshotAvg(null);
+    setMicTestStage('active');
+  }, [currentDb, isStarted]);
 
-    if (micTestStageRef.current === 'quiet') {
-      quietTestSamplesRef.current = snapshot;
-      activeTestSamplesRef.current = [];
-      micTestWindowRef.current = [];
-      setMicTestStage('active');
-      return;
-    }
+  const captureActiveMicTest = useCallback(() => {
+    if (!isStarted || quietTestSamplesRef.current.length === 0) return;
 
-    if (micTestStageRef.current === 'active') {
-      activeTestSamplesRef.current = snapshot;
-      finishMicTest();
-    }
+    const snapshot = micTestWindowRef.current.length ? [...micTestWindowRef.current] : [currentDb];
+    activeTestSamplesRef.current = snapshot;
+    setActiveSnapshotAvg(average(snapshot));
+    finishMicTest();
   }, [currentDb, finishMicTest, isStarted]);
 
   const applyMicTestRecommendation = useCallback(() => {
@@ -357,6 +364,8 @@ const DoraemonMonitorApp: React.FC = () => {
     setSignalRange(0);
     setMicTestStage('idle');
     setMicTestResult(null);
+    setQuietSnapshotAvg(null);
+    setActiveSnapshotAvg(null);
     recentDbRef.current = [];
     noiseFloorRef.current = 40;
     environmentDbRef.current = 40;
@@ -556,14 +565,16 @@ const DoraemonMonitorApp: React.FC = () => {
         `${t('doraemon.micTest.autoGain')}:${captureSettings.autoGainControl === true ? t('doraemon.micTest.on') : captureSettings.autoGainControl === false ? t('doraemon.micTest.off') : t('doraemon.micTest.unknown')}`
       ].join(' · ')
     : '';
-
-  const micTestActionLabel = micTestStage === 'quiet'
-    ? t('doraemon.micTest.captureQuiet')
-    : micTestStage === 'active'
-      ? t('doraemon.micTest.captureActive')
-      : micTestResult
-        ? t('doraemon.micTest.rerun')
-        : t('doraemon.micTest.start');
+  const hasMicTestProgress = quietSnapshotAvg !== null || activeSnapshotAvg !== null || micTestResult !== null || micTestStage !== 'idle';
+  const micTestGuideText = micTestStage === 'active'
+    ? t('doraemon.micTest.stageActiveDesc')
+    : t('doraemon.micTest.stageQuietDesc');
+  const quietCapturedText = quietSnapshotAvg === null
+    ? t('doraemon.micTest.pending')
+    : t('doraemon.micTest.captured').replace('{value}', quietSnapshotAvg.toFixed(1));
+  const activeCapturedText = activeSnapshotAvg === null
+    ? t('doraemon.micTest.pending')
+    : t('doraemon.micTest.captured').replace('{value}', activeSnapshotAvg.toFixed(1));
 
   const MicTestPanel = () => (
     <div className="controls-box diagnostic-box">
@@ -571,10 +582,10 @@ const DoraemonMonitorApp: React.FC = () => {
         <span>{t('doraemon.micTest.title')}</span>
         <button
           className="diagnostic-action-btn"
-          onClick={micTestStage === 'quiet' || micTestStage === 'active' ? captureMicTestStage : startMicTest}
+          onClick={startMicTest}
           disabled={!isStarted}
         >
-          {micTestActionLabel}
+          {hasMicTestProgress ? t('doraemon.micTest.reset') : t('doraemon.micTest.start')}
         </button>
       </div>
 
@@ -595,12 +606,46 @@ const DoraemonMonitorApp: React.FC = () => {
 
       {captureModeText && <div className="capture-mode-note">{captureModeText}</div>}
 
-      {(micTestStage === 'quiet' || micTestStage === 'active') && (
-        <div className="mic-test-runner">
-          <strong>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuiet') : t('doraemon.micTest.stageActive')}</strong>
-          <p>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuietDesc') : t('doraemon.micTest.stageActiveDesc')}</p>
+      <div className="mic-test-runner">
+        <strong>{t('doraemon.micTest.guide')}</strong>
+        <p>{micTestGuideText}</p>
+      </div>
+
+      <div className="mic-test-step-list">
+        <div className={`mic-test-step ${quietSnapshotAvg !== null ? 'captured' : micTestStage !== 'active' && micTestStage !== 'done' ? 'active' : ''}`}>
+          <div className="mic-test-step-copy">
+            <strong>{t('doraemon.micTest.stageQuiet')}</strong>
+            <p>{t('doraemon.micTest.stageQuietDesc')}</p>
+            <span className={`mic-test-step-badge ${quietSnapshotAvg !== null ? 'captured' : 'pending'}`}>
+              {quietCapturedText}
+            </span>
+          </div>
+          <button
+            className="diagnostic-step-btn"
+            onClick={captureQuietMicTest}
+            disabled={!isStarted}
+          >
+            {t('doraemon.micTest.captureQuiet')}
+          </button>
         </div>
-      )}
+
+        <div className={`mic-test-step ${activeSnapshotAvg !== null ? 'captured' : micTestStage === 'active' ? 'active' : ''}`}>
+          <div className="mic-test-step-copy">
+            <strong>{t('doraemon.micTest.stageActive')}</strong>
+            <p>{t('doraemon.micTest.stageActiveDesc')}</p>
+            <span className={`mic-test-step-badge ${activeSnapshotAvg !== null ? 'captured' : 'pending'}`}>
+              {activeCapturedText}
+            </span>
+          </div>
+          <button
+            className="diagnostic-step-btn"
+            onClick={captureActiveMicTest}
+            disabled={!isStarted || quietSnapshotAvg === null}
+          >
+            {t('doraemon.micTest.captureActive')}
+          </button>
+        </div>
+      </div>
 
       {micTestResult && (
         <div className={`mic-test-result ${micTestResult.health}`}>

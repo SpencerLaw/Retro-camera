@@ -105,9 +105,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 260px;
+  width: clamp(220px, 15vw, 260px);
   min-width: 220px;
-  max-width: 280px;
+  max-width: 260px;
   flex-shrink: 0;
   align-self: center;
   z-index: 10;
@@ -136,8 +136,7 @@
 }
 
 .vertical-meter-container {
-  height: 350px;
-  /* 默认高度减小 */
+  height: clamp(240px, 31vh, 350px);
   display: flex;
   gap: 12px;
 }
@@ -244,33 +243,30 @@
   justify-content: center;
   z-index: 10;
   flex: 1;
-  min-width: 280px;
-  /* 防止过度压缩 */
-  max-width: 600px;
+  min-width: 260px;
+  max-width: 560px;
   height: 100%;
 }
 
 .doraemon-wrapper {
-  width: min(300px, 25vw);
-  /* 响应式大小 */
-  height: min(300px, 25vw);
+  width: min(300px, 25vw, 30vh);
+  height: min(300px, 25vw, 30vh);
   filter: drop-shadow(0 10px 25px rgba(0, 150, 225, 0.25));
   transition: transform 0.1s ease-out;
   transform-origin: center center;
-  margin-bottom: 2vh;
+  margin-bottom: 1.4vh;
 }
 
 .db-display {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  margin-top: 2vh;
-  margin-bottom: 2vh;
+  margin-top: 1.2vh;
+  margin-bottom: 1.2vh;
 }
 
 .db-number {
-  font-size: clamp(4.4rem, 11vw, 8.8rem);
-  /* Increased by ~10% */
+  font-size: clamp(4.4rem, 8.8vh, 8.2rem);
   font-weight: 900;
   line-height: 1;
   color: var(--text-primary);
@@ -287,15 +283,12 @@
 /* ===== 声纹可视化 ===== */
 .visualizer-container {
   width: 100%;
-  height: 180px;
-  /* 增加高度以提升视觉冲击力 */
+  height: clamp(96px, 16vh, 180px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2.5%;
-  /* 减少padding以增加宽度15% */
   margin-top: auto;
-  /* 推到底部 */
   pointer-events: none;
 }
 
@@ -316,10 +309,9 @@
   gap: 12px;
   z-index: 10;
   flex-shrink: 0;
-  width: 260px;
-  /* 默认略微减小 */
+  width: clamp(220px, 15vw, 260px);
   min-width: 220px;
-  max-width: 280px;
+  max-width: 260px;
   align-self: center;
 }
 
@@ -331,7 +323,7 @@
   background: var(--card-bg);
   border: 2px solid var(--card-border);
   border-radius: 16px;
-  padding: 14px 20px;
+  padding: 12px 16px;
   width: 100%;
   transition: all 0.3s;
 }
@@ -401,7 +393,7 @@
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 16px;
-  padding: 16px 20px;
+  padding: 14px 16px;
 }
 
 .reference-stack .controls-box {
@@ -412,6 +404,68 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.mic-test-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mic-test-step {
+  border-radius: 16px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(148, 163, 184, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.mic-test-step.active {
+  border-color: rgba(14, 165, 233, 0.34);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(34, 197, 94, 0.1));
+}
+
+.mic-test-step.captured {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.mic-test-step-copy strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.mic-test-step-copy p {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.mic-test-step-badge {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.mic-test-step-badge.pending {
+  background: rgba(148, 163, 184, 0.14);
+  color: var(--text-secondary);
+}
+
+.mic-test-step-badge.captured {
+  background: rgba(34, 197, 94, 0.16);
+  color: #16a34a;
+}
+
+.dark-mode .mic-test-step-badge.captured {
+  color: #86efac;
 }
 
 .diagnostic-action-btn,
@@ -435,6 +489,31 @@
   opacity: 0.55;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.diagnostic-step-btn {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(0, 150, 225, 0.12);
+  color: #0f7dc2;
+  border: 1px solid rgba(0, 150, 225, 0.22);
+}
+
+.dark-mode .diagnostic-step-btn {
+  background: rgba(0, 150, 225, 0.18);
+  color: #8edcff;
+  border-color: rgba(142, 220, 255, 0.18);
+}
+
+.diagnostic-step-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .diagnostic-apply-btn {
@@ -461,7 +540,7 @@
 }
 
 .diagnostic-chip {
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 14px;
   background: rgba(148, 163, 184, 0.1);
   border: 1px solid rgba(148, 163, 184, 0.15);
@@ -488,7 +567,7 @@
 
 .mic-test-runner {
   border-radius: 16px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.14), rgba(34, 197, 94, 0.12));
   border: 1px solid rgba(14, 165, 233, 0.22);
 }
@@ -504,13 +583,6 @@
   font-size: 0.8rem;
   color: var(--text-secondary);
   line-height: 1.5;
-}
-
-.mic-test-countdown {
-  margin-top: 10px;
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--accent-blue);
 }
 
 .mic-test-result {
@@ -752,6 +824,65 @@
 
 
 /* ===== 响应式适配 ===== */
+
+@media (max-height: 920px) and (min-width: 1024px) {
+  .doraemon-header {
+    height: 56px;
+  }
+
+  .doraemon-main {
+    gap: 16px;
+    padding: 8px 16px 14px;
+  }
+
+  .reference-stack,
+  .right-panel {
+    width: 236px;
+    min-width: 212px;
+  }
+
+  .db-reference-panel,
+  .right-panel {
+    padding: 12px;
+  }
+
+  .reference-title {
+    margin-bottom: 10px;
+  }
+
+  .vertical-meter-container {
+    height: 250px;
+  }
+
+  .doraemon-wrapper {
+    width: min(240px, 19vw, 24vh);
+    height: min(240px, 19vw, 24vh);
+  }
+
+  .db-number {
+    font-size: clamp(4.8rem, 7.5vh, 6.8rem);
+  }
+
+  .db-unit {
+    font-size: clamp(1.6rem, 2.2vh, 2.2rem);
+  }
+
+  .visualizer-container {
+    height: 110px;
+  }
+
+  .stat-box {
+    padding: 10px 14px;
+  }
+
+  .stat-value {
+    font-size: 1.85rem;
+  }
+
+  .controls-box {
+    padding: 12px 14px;
+  }
+}
 
 /* 笔记本/中等屏幕 (小于 1280px) */
 @media (max-width: 1280px) {

@@ -1095,7 +1095,7 @@ const DoraemonMonitorApp: React.FC = () => {
       <div className="report-modal-layer open">
         <button
           type="button"
-          className="floating-modal-backdrop report-modal-backdrop"
+          className="report-modal-backdrop"
           onClick={closeReport}
           aria-label={t('doraemon.report.hide')}
         />
@@ -1104,35 +1104,35 @@ const DoraemonMonitorApp: React.FC = () => {
           onClick={stopModalPropagation}
           onMouseDown={stopModalPropagation}
         >
-        <div className="floating-modal-header report-modal-header">
-          <div className="report-drawer-heading">
-            <div className="report-drawer-icon">
-              <CalendarDays size={18} />
+          <div className="report-modal-header">
+            <div className="report-drawer-heading">
+              <div className="report-drawer-icon">
+                <CalendarDays size={18} />
+              </div>
+              <div>
+                <strong>{t('doraemon.report.title')}</strong>
+                <p>{t('doraemon.report.localOnly')}</p>
+              </div>
             </div>
-            <div>
-              <strong>{t('doraemon.report.title')}</strong>
-              <p>{t('doraemon.report.localOnly')}</p>
-            </div>
+            <button
+              className="report-modal-close"
+              type="button"
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                closeReport();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                closeReport();
+              }}
+              title={t('doraemon.report.hide')}
+            >
+              <X size={16} />
+            </button>
           </div>
-          <button
-            className="floating-close-btn"
-            type="button"
-            onMouseDown={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              closeReport();
-            }}
-            onClick={(event) => {
-              event.stopPropagation();
-              closeReport();
-            }}
-            title={t('doraemon.report.hide')}
-          >
-            <X size={16} />
-          </button>
-        </div>
 
-        <div className="report-modal-body">
+          <div className="report-modal-body">
             <div className="report-modal-week">
               {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
             </div>
@@ -1220,8 +1220,8 @@ const DoraemonMonitorApp: React.FC = () => {
                 </section>
               ))}
             </div>
+          </div>
         </div>
-      </div>
       </div>
     );
   };

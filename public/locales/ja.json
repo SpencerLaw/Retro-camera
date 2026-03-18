@@ -104,6 +104,8 @@
     "helpAdviceMuteDesc": "：静かな時は40-50が正常です。65dBを超える場合は感度を下げてください。",
     "helpAdviceRead": "音読テスト",
     "helpAdviceReadDesc": "：標準的な音量は70-75が理想的です。70dBに届かない場合は感度を上げてください。",
+    "thresholdHelpTitle": "📏 閾値設定の目安：",
+    "thresholdHelpDesc": "：通常は60-65dBが目安です。教室の空調音が強い場合は少し上げ、本当に静かにしたい時だけ55dB付近まで下げてください。",
     "tapToClose": "ここをタップして閉じる",
     "authFailed": "認証失敗: ",
     "authExpired": "⚠️ 認証期限切れ",
@@ -130,6 +132,44 @@
       "permissionDenied": "\n⛔ マイクを\"拒否\"しました。\n\n✅ 解決方法：\n1. ブラウザのアドレスバーの左側にある\"ロック\"または\"設定\"アイコンをクリックします。\n2. \"マイク\"を見つけて\"リセット\"または\"許可\"をクリックします。\n3. ページを更新するか、下のボタンをクリックして再試行します。",
       "noMicFound": "\n🔌 マイクデバイスが検出されませんでした。接続を確認してください。",
       "unknownError": "\n❓ "
+    },
+    "micTest": {
+      "title": "マイクテスト",
+      "start": "テスト開始",
+      "testing": "テスト中",
+      "rerun": "再テスト",
+      "apply": "提案を適用",
+      "ambient": "環境ノイズ",
+      "activity": "現在の変化量",
+      "range": "直近の変動幅",
+      "stageQuiet": "手順 1: 静かにする",
+      "stageQuietDesc": "最初の4秒は静かにして、教室と機器の基準ノイズを測定します。",
+      "stageActive": "手順 2: 拍手または発話",
+      "stageActiveDesc": "次の4秒は拍手・発話・机を軽く叩くなどして、マイクが本当に変化を拾えるか確認します。",
+      "quietAvg": "静音平均",
+      "activeAvg": "発声音平均",
+      "dynamicRange": "差分",
+      "overallRange": "全体範囲",
+      "recommendedSensitivity": "推奨感度: {value}",
+      "recommendedThreshold": "推奨閾値: {value} dB",
+      "echo": "エコー除去",
+      "noiseSuppression": "ノイズ抑制",
+      "autoGain": "自動ゲイン",
+      "on": "オン",
+      "off": "オフ",
+      "unknown": "不明",
+      "health": {
+        "good": "収音は正常",
+        "flat": "変化が小さすぎます",
+        "noisy": "環境ノイズが高いです",
+        "weak": "収音が弱いです"
+      },
+      "healthDesc": {
+        "good": "この端末は静かな状態と教室のざわつきを区別できています。",
+        "flat": "教室が騒がしくなっても数値がほとんど変わらず、一体型PC側で信号が平坦化されている可能性があります。",
+        "noisy": "基準ノイズが高いため、静かな時でも誤報が起きやすい状態です。",
+        "weak": "音は拾えていますが変動幅が小さいため、少し感度を上げて再確認してください。"
+      }
     }
   },
   "broadcast": {

@@ -139,6 +139,44 @@
       "permissionDenied": "\n⛔ 您刚才点击了\"禁止\"麦克风。\n\n✅ 解决方法：\n1. 点击浏览器地址栏左侧的\"锁\"或\"设置\"图标。\n2. 找到\"麦克风\"并点击\"重置\"或\"允许\"。\n3. 刷新页面或点击下方按钮重试。",
       "noMicFound": "\n🔌 未检测到麦克风设备，请检查连接。",
       "unknownError": "\n❓ "
+    },
+    "micTest": {
+      "title": "分贝测试",
+      "start": "开始测试",
+      "testing": "测试中",
+      "rerun": "重新测试",
+      "apply": "应用建议",
+      "ambient": "环境底噪",
+      "activity": "当前波动",
+      "range": "最近波动",
+      "stageQuiet": "第 1 步：保持安静",
+      "stageQuietDesc": "请先保持 4 秒安静，系统会记录一体机的环境底噪。",
+      "stageActive": "第 2 步：拍手或讲话",
+      "stageActiveDesc": "接下来 4 秒请拍手、说话或敲桌面，用来确认麦克风是否真的能收进波动。",
+      "quietAvg": "安静均值",
+      "activeAvg": "发声均值",
+      "dynamicRange": "动态差值",
+      "overallRange": "整体范围",
+      "recommendedSensitivity": "建议灵敏度：{value}",
+      "recommendedThreshold": "建议阈值：{value} dB",
+      "echo": "回声消除",
+      "noiseSuppression": "降噪",
+      "autoGain": "自动增益",
+      "on": "开",
+      "off": "关",
+      "unknown": "未知",
+      "health": {
+        "good": "收音正常",
+        "flat": "波动过小",
+        "noisy": "环境底噪偏高",
+        "weak": "收音偏弱"
+      },
+      "healthDesc": {
+        "good": "这台设备能分出安静和嘈杂，适合直接用于自习提醒。",
+        "flat": "环境再吵数值也不明显变化，通常是一体机麦克风被系统压平，建议先用推荐参数再复测。",
+        "noisy": "环境本底已经偏高，容易出现教室安静时也报警，建议降低灵敏度并提高阈值。",
+        "weak": "设备能收到声音，但波动幅度偏小，建议适度提高灵敏度后再观察。"
+      }
     }
   },
   "broadcast": {

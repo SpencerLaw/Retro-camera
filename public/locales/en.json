@@ -109,6 +109,8 @@
     "helpAdviceMuteDesc": ": 40-50 dB is normal; if over 65dB, lower sensitivity.",
     "helpAdviceRead": "Reading Test",
     "helpAdviceReadDesc": ": 70-75 dB is ideal; if hard to reach 70dB, raise sensitivity.",
+    "thresholdHelpTitle": "📏 Threshold Advice:",
+    "thresholdHelpDesc": ": 60-65 dB usually works well. Raise it when background HVAC noise is strong; lower it only if the classroom really needs near-silence.",
     "tapToClose": "Tap to close",
     "authFailed": "Auth Failed: ",
     "authExpired": "⚠️ Auth Expired",
@@ -137,6 +139,44 @@
       "permissionDenied": "\n⛔ You clicked \"Deny\" for microphone.\n\n✅ Solution:\n1. Click the \"lock\" or \"settings\" icon on the left side of the browser address bar.\n2. Find \"Microphone\" and click \"Reset\" or \"Allow\".\n3. Refresh the page or click the button below to retry.",
       "noMicFound": "\n🔌 No microphone device detected. Please check connection.",
       "unknownError": "\n❓ "
+    },
+    "micTest": {
+      "title": "Mic Test",
+      "start": "Run Test",
+      "testing": "Testing",
+      "rerun": "Run Again",
+      "apply": "Apply Suggestion",
+      "ambient": "Noise Floor",
+      "activity": "Live Delta",
+      "range": "Recent Range",
+      "stageQuiet": "Step 1: Stay quiet",
+      "stageQuietDesc": "Stay quiet for 4 seconds so the system can learn the room's baseline noise.",
+      "stageActive": "Step 2: Clap or speak",
+      "stageActiveDesc": "For the next 4 seconds, clap, speak, or tap the desk so we can verify that the microphone still reacts to real changes.",
+      "quietAvg": "Quiet Avg",
+      "activeAvg": "Active Avg",
+      "dynamicRange": "Dynamic Gap",
+      "overallRange": "Overall Range",
+      "recommendedSensitivity": "Suggested sensitivity: {value}",
+      "recommendedThreshold": "Suggested threshold: {value} dB",
+      "echo": "Echo cancel",
+      "noiseSuppression": "Noise suppression",
+      "autoGain": "Auto gain",
+      "on": "On",
+      "off": "Off",
+      "unknown": "Unknown",
+      "health": {
+        "good": "Mic looks healthy",
+        "flat": "Signal is too flat",
+        "noisy": "Background noise is high",
+        "weak": "Mic pickup is weak"
+      },
+      "healthDesc": {
+        "good": "This device can separate quiet time from student noise and should work for study hall monitoring.",
+        "flat": "The level barely changes even when the room gets noisy. This usually means the all-in-one PC is heavily flattening the mic signal.",
+        "noisy": "Baseline room noise is already high, so false alarms are more likely unless sensitivity is lowered or the threshold is raised.",
+        "weak": "The microphone reacts, but the dynamic range is small. Raising sensitivity slightly should help."
+      }
     }
   },
   "broadcast": {

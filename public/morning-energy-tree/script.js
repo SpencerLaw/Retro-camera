@@ -36,6 +36,7 @@ const STATE = {
 // Aesthetic Config
 const FOLIAGE_COLORS = ['#43a047', '#66bb6a', '#a5d6a7', '#81c784'];
 const GOLDEN_COLORS = ['#ffd700', '#ffecb3', '#fff9c4', '#fff59d'];
+const ENERGY_SKY_COLORS = ['#fff176', '#ffe082', '#fff59d', '#ffecb3'];
 
 /* --- DOM Elements --- */
 const $ = (id) => document.getElementById(id);
@@ -234,6 +235,7 @@ function resetGame() {
     STATE.remainingTime = STATE.sessionDuration * 60;
     updateTimerDisplay();
     sparkles.length = 0;
+    energyParticles.length = 0;
 }
 
 function calculateDB() {
@@ -340,6 +342,7 @@ function showToast(msg) {
 const clouds = [];
 const birds = [];
 const sparkles = [];
+const energyParticles = [];
 
 class Cloud {
     constructor() {
@@ -428,6 +431,110 @@ class Sparkle {
     }
 }
 
+class SkyEnergy {
+    constructor(x, y, targetX, targetY, strength = 0.5) {
+        this.x = x;
+        this.y = y;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.strength = strength;
+        this.size = 2 + (Math.random() * 4 * strength);
+        this.life = 1;
+        this.phase = Math.random() * Math.PI * 2;
+        this.hue = ENERGY_SKY_COLORS[Math.floor(Math.random() * ENERGY_SKY_COLORS.length)];
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = 0.2 + Math.random() * 0.4;
+    }
+    update() {
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const pull = 0.012 + (this.strength * 0.02);
+
+        this.phase += 0.15;
+        this.vx += (dx / dist) * pull;
+        this.vy += (dy / dist) * pull;
+        this.vx *= 0.985;
+        this.vy *= 0.987;
+
+        this.x += this.vx + Math.sin(this.phase) * 0.35;
+        this.y += this.vy;
+
+        if (dist < 18) {
+            sparkles.push(new Sparkle(this.x, this.y));
+            return false;
+        }
+
+        this.life -= 0.003 + (this.strength * 0.001);
+        return this.life > 0 && this.y < canvas.height + 80;
+    }
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.15, this.life);
+        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 4);
+        glow.addColorStop(0, this.hue);
+        glow.addColorStop(0.45, 'rgba(255,255,255,0.85)');
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = Math.min(1, this.life + 0.15);
+        ctx.fillStyle = this.hue;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+function spawnSkyEnergy(treeSize) {
+    if (!STATE.isListening) return;
+    const activation = Math.max(0, (STATE.currentDB - 56) / 26);
+    if (activation <= 0) return;
+
+    const spawnCount = Math.random() < (0.18 + activation * 0.4) ? 1 : 0;
+    if (!spawnCount) return;
+
+    const targetX = (canvas.width / 2) + ((Math.random() - 0.5) * treeSize * 0.35);
+    const targetY = canvas.height - 30 - (treeSize * 0.78) + ((Math.random() - 0.5) * treeSize * 0.15);
+    const sourceBand = Math.max(90, canvas.width * 0.18);
+    const sourceX = canvas.width - 100 + ((Math.random() - 0.5) * sourceBand);
+    const sourceY = 90 + (Math.random() * 90);
+
+    energyParticles.push(new SkyEnergy(sourceX, sourceY, targetX, targetY, activation));
+}
+
+function drawEnergyFlow(treeSize) {
+    const activation = Math.max(0, (STATE.currentDB - 56) / 26);
+    if (activation > 0.05) {
+        spawnSkyEnergy(treeSize);
+
+        ctx.save();
+        ctx.globalAlpha = Math.min(0.25, activation * 0.22);
+        const beam = ctx.createLinearGradient(canvas.width - 100, 100, canvas.width / 2, canvas.height - 40 - treeSize * 0.72);
+        beam.addColorStop(0, 'rgba(255, 245, 157, 0.55)');
+        beam.addColorStop(0.55, 'rgba(255, 255, 255, 0.12)');
+        beam.addColorStop(1, 'rgba(76, 175, 80, 0)');
+        ctx.strokeStyle = beam;
+        ctx.lineWidth = 10 + (activation * 8);
+        ctx.beginPath();
+        ctx.moveTo(canvas.width - 100, 100);
+        ctx.quadraticCurveTo(canvas.width * 0.72, canvas.height * 0.24, canvas.width / 2, canvas.height - 35 - treeSize * 0.72);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    for (let i = energyParticles.length - 1; i >= 0; i--) {
+        if (!energyParticles[i].update()) {
+            energyParticles.splice(i, 1);
+        } else {
+            energyParticles[i].draw();
+        }
+    }
+}
+
 
 function initCanvas() {
     window.addEventListener('resize', resizeCanvas);
@@ -439,6 +546,10 @@ function resizeCanvas() {
 }
 
 function initEnvironment() {
+    clouds.length = 0;
+    birds.length = 0;
+    sparkles.length = 0;
+    energyParticles.length = 0;
     for (let i = 0; i < 5; i++) clouds.push(new Cloud());
     for (let i = 0; i < 3; i++) birds.push(new Bird());
 }
@@ -570,13 +681,14 @@ function loop() {
         bird.draw();
     });
 
+    const treeSize = 80 + (STATE.energy * 1.6);
+    drawEnergyFlow(treeSize);
+
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
     ctx.quadraticCurveTo(canvas.width / 2, canvas.height - 80, canvas.width, canvas.height);
     ctx.fillStyle = '#66bb6a';
     ctx.fill();
-
-    const treeSize = 80 + (STATE.energy * 1.6);
 
     if (treeSize > 60) {
         drawEnhancedTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 9, 0);

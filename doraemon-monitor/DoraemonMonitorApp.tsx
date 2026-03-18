@@ -1,10 +1,38 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize, RotateCcw, HelpCircle, X, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
+
+type MonitorState = 'calm' | 'warning' | 'alarm';
+type MicTestStage = 'idle' | 'quiet' | 'active' | 'done';
+type MicTestHealth = 'good' | 'flat' | 'noisy' | 'weak';
+
+interface CaptureSettings {
+  echoCancellation: boolean | null;
+  noiseSuppression: boolean | null;
+  autoGainControl: boolean | null;
+}
+
+interface MicTestResult {
+  quietAvg: number;
+  activeAvg: number;
+  dynamicRange: number;
+  overallMin: number;
+  overallMax: number;
+  recommendedSensitivity: number;
+  recommendedLimit: number;
+  health: MicTestHealth;
+}
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const average = (values: number[]) => {
+  if (!values.length) return 0;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+};
 
 const DoraemonMonitorApp: React.FC = () => {
   const navigate = useNavigate();
@@ -13,12 +41,15 @@ const DoraemonMonitorApp: React.FC = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const [isStarted, setIsStarted] = useState(false);
   const [currentDb, setCurrentDb] = useState(40);
+  const [ambientDb, setAmbientDb] = useState(40);
+  const [activityDb, setActivityDb] = useState(0);
+  const [signalRange, setSignalRange] = useState(0);
   const [limit, setLimit] = useState(60);
   const [warnCount, setWarnCount] = useState(0);
   const [maxDb, setMaxDb] = useState(0);
   const [quietTime, setQuietTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
-  const [state, setState] = useState<'calm' | 'warning' | 'alarm'>('calm');
+  const [state, setState] = useState<MonitorState>('calm');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +58,10 @@ const DoraemonMonitorApp: React.FC = () => {
   const [sensitivity, setSensitivity] = useState(50);
   const [showHelp, setShowHelp] = useState(false);
   const [showThresholdHelp, setShowThresholdHelp] = useState(false);
+  const [captureSettings, setCaptureSettings] = useState<CaptureSettings | null>(null);
+  const [micTestStage, setMicTestStage] = useState<MicTestStage>('idle');
+  const [micTestCountdown, setMicTestCountdown] = useState(0);
+  const [micTestResult, setMicTestResult] = useState<MicTestResult | null>(null);
   const [isMuted, setIsMuted] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('doraemon_muted') === 'true';
@@ -34,16 +69,32 @@ const DoraemonMonitorApp: React.FC = () => {
     return false;
   });
   const sensitivityRef = useRef(50);
+  const micTestStageRef = useRef<MicTestStage>('idle');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const muteGainRef = useRef<GainNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const workerRef = useRef<Worker | null>(null);
+  const analyzeAudioRef = useRef<() => void>(() => {});
   const thresholdStartRef = useRef(0);
   const recoverStartRef = useRef(0);
   const alarmIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const alarmIgnoreUntilRef = useRef(0);
+  const lastAlarmPlayedAtRef = useRef(0);
+  const noiseFloorRef = useRef(40);
+  const recentDbRef = useRef<number[]>([]);
+  const micTestStartRef = useRef(0);
+  const quietTestSamplesRef = useRef<number[]>([]);
+  const activeTestSamplesRef = useRef<number[]>([]);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
   }, [sensitivity]);
+
+  useEffect(() => {
+    micTestStageRef.current = micTestStage;
+  }, [micTestStage]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -81,57 +132,254 @@ const DoraemonMonitorApp: React.FC = () => {
     } else setIsLicensed(false);
   }, []);
 
+  const stopAudioMonitoring = useCallback(() => {
+    workerRef.current?.postMessage('stop');
+    if (alarmIntervalRef.current) {
+      clearInterval(alarmIntervalRef.current);
+      alarmIntervalRef.current = null;
+    }
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    sourceRef.current?.disconnect();
+    sourceRef.current = null;
+    muteGainRef.current?.disconnect();
+    muteGainRef.current = null;
+    analyserRef.current?.disconnect();
+    analyserRef.current = null;
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => undefined);
+      audioContextRef.current = null;
+    }
+    thresholdStartRef.current = 0;
+    recoverStartRef.current = 0;
+    alarmIgnoreUntilRef.current = 0;
+    lastAlarmPlayedAtRef.current = 0;
+  }, []);
+
+  const finishMicTest = useCallback(() => {
+    const quietAvg = average(quietTestSamplesRef.current);
+    const activeAvg = average(activeTestSamplesRef.current);
+    const allSamples = [...quietTestSamplesRef.current, ...activeTestSamplesRef.current];
+    const overallMin = allSamples.length ? Math.min(...allSamples) : 0;
+    const overallMax = allSamples.length ? Math.max(...allSamples) : 0;
+    const dynamicRange = Math.max(0, activeAvg - quietAvg);
+
+    let health: MicTestHealth = 'good';
+    if (quietAvg >= 54) {
+      health = 'noisy';
+    } else if (dynamicRange < 3) {
+      health = 'flat';
+    } else if (dynamicRange < 6) {
+      health = 'weak';
+    }
+
+    let recommendedSensitivity = sensitivityRef.current;
+    if (health === 'noisy') {
+      recommendedSensitivity = clamp(Math.round(sensitivityRef.current - 6), 30, 70);
+    } else if (health === 'flat') {
+      recommendedSensitivity = clamp(Math.round(sensitivityRef.current + 8), 35, 75);
+    } else if (health === 'weak') {
+      recommendedSensitivity = clamp(Math.round(sensitivityRef.current + 4), 35, 72);
+    }
+
+    const recommendedLimit = clamp(
+      Math.round(quietAvg + Math.max(6, Math.min(10, dynamicRange * 0.9 || 6))),
+      50,
+      75
+    );
+
+    setMicTestResult({
+      quietAvg,
+      activeAvg,
+      dynamicRange,
+      overallMin,
+      overallMax,
+      recommendedSensitivity,
+      recommendedLimit,
+      health
+    });
+    setMicTestStage('done');
+    setMicTestCountdown(0);
+  }, []);
+
+  const startMicTest = useCallback(() => {
+    if (!isStarted) return;
+    quietTestSamplesRef.current = [];
+    activeTestSamplesRef.current = [];
+    micTestStartRef.current = Date.now();
+    setMicTestResult(null);
+    setMicTestStage('quiet');
+    setMicTestCountdown(8);
+  }, [isStarted]);
+
+  const applyMicTestRecommendation = useCallback(() => {
+    if (!micTestResult) return;
+    setSensitivity(micTestResult.recommendedSensitivity);
+    setLimit(micTestResult.recommendedLimit);
+  }, [micTestResult]);
+
+  useEffect(() => {
+    analyzeAudioRef.current = () => {
+      const analyser = analyserRef.current;
+      if (!analyser) return;
+
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => undefined);
+      }
+
+      const data = new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(data);
+
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) {
+        const x = (data[i] - 128) / 128;
+        sum += x * x;
+      }
+
+      const rms = Math.sqrt(sum / data.length);
+      const baseDb = clamp(rms > 0 ? (Math.log10(rms) * 20 + 100) : 35, 35, 120);
+
+      if (!Number.isFinite(noiseFloorRef.current) || noiseFloorRef.current <= 0) {
+        noiseFloorRef.current = baseDb;
+      }
+
+      const floorGap = baseDb - noiseFloorRef.current;
+      const floorFollowRate = floorGap < 0 ? 0.08 : floorGap < 2 ? 0.03 : floorGap < 6 ? 0.01 : 0.003;
+      noiseFloorRef.current += (baseDb - noiseFloorRef.current) * floorFollowRate;
+      noiseFloorRef.current = clamp(noiseFloorRef.current, 30, 80);
+
+      const sensitivityScale = 1 + ((sensitivityRef.current - 50) / 50) * 0.65;
+      const adjustedDb = clamp(
+        noiseFloorRef.current + (baseDb - noiseFloorRef.current) * sensitivityScale,
+        35,
+        120
+      );
+
+      recentDbRef.current.push(adjustedDb);
+      if (recentDbRef.current.length > 40) {
+        recentDbRef.current.shift();
+      }
+
+      const minRecent = Math.min(...recentDbRef.current);
+      const maxRecent = Math.max(...recentDbRef.current);
+      const recentRange = maxRecent - minRecent;
+      const liveActivity = clamp(adjustedDb - noiseFloorRef.current, 0, 60);
+
+      setAmbientDb(noiseFloorRef.current);
+      setActivityDb(liveActivity);
+      setSignalRange(recentRange);
+      setCurrentDb(prev => {
+        const next = prev + (adjustedDb - prev) * 0.35;
+        setMaxDb(m => Math.max(m, next));
+        return next;
+      });
+
+      if (document.hidden) {
+        document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(adjustedDb).toString());
+      } else {
+        document.title = t('doraemon.appTitle');
+      }
+
+      const stage = micTestStageRef.current;
+      if (stage === 'quiet' || stage === 'active') {
+        const elapsed = Date.now() - micTestStartRef.current;
+        const nextStage: MicTestStage = elapsed < 4000 ? 'quiet' : elapsed < 8000 ? 'active' : 'done';
+
+        if (nextStage === 'quiet') {
+          quietTestSamplesRef.current.push(adjustedDb);
+        } else if (nextStage === 'active') {
+          activeTestSamplesRef.current.push(adjustedDb);
+          if (stage !== 'active') {
+            setMicTestStage('active');
+          }
+        } else {
+          finishMicTest();
+          return;
+        }
+
+        setMicTestCountdown(Math.max(0, Math.ceil((8000 - elapsed) / 1000)));
+      }
+    };
+  }, [finishMicTest, t]);
+
   useEffect(() => {
     const workerBlob = new Blob([`
       let interval = null;
       self.onmessage = function(e) {
-        if (e.data === 'start') { if (interval) clearInterval(interval); interval = setInterval(() => self.postMessage('tick'), 100); }
-        else if (e.data === 'stop') { if (interval) clearInterval(interval); }
-      }
+        if (e.data === 'start') {
+          if (interval) clearInterval(interval);
+          interval = setInterval(() => self.postMessage('tick'), 100);
+        } else if (e.data === 'stop') {
+          if (interval) clearInterval(interval);
+          interval = null;
+        }
+      };
     `], { type: 'application/javascript' });
     workerRef.current = new Worker(URL.createObjectURL(workerBlob));
-    workerRef.current.onmessage = () => analyzeAudio();
-    return () => workerRef.current?.terminate();
+    workerRef.current.onmessage = () => analyzeAudioRef.current();
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
   }, []);
 
-  const analyzeAudio = () => {
-    if (!analyserRef.current) return;
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') audioContextRef.current.resume();
-    const data = new Uint8Array(analyserRef.current.fftSize);
-    analyserRef.current.getByteTimeDomainData(data);
-    let sum = 0;
-    for (let i = 0; i < data.length; i++) {
-      const x = (data[i] - 128) / 128; sum += x * x;
-    }
-    const rms = Math.sqrt(sum / data.length);
-    let rawDb = rms > 0 ? (Math.log10(rms) * 20 + 100) : 30;
-
-    // Apply sensitivity adjustment
-    const adj = (sensitivityRef.current - 50) * 0.5;
-    rawDb += adj;
-
-    rawDb = Math.max(35, Math.min(120, rawDb));
-    setCurrentDb(prev => {
-      const next = prev + (rawDb - prev) * 0.5;
-      setMaxDb(m => Math.max(m, next));
-      return next;
-    });
-    if (document.hidden) document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(rawDb).toString());
-    else document.title = t('doraemon.appTitle');
-  };
+  useEffect(() => () => stopAudioMonitoring(), [stopAudioMonitoring]);
 
   const initApp = async () => {
     setIsLoading(true);
+    setError('');
 
-    // 兼容旧浏览器/HTTP环境：mediaDevices 可能不存在
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setError(t('doraemon.errors.startFailed') + t('doraemon.errors.browserNotSupported'));
       setIsLoading(false);
       return;
     }
 
+    stopAudioMonitoring();
+    setState('calm');
+    setWarnCount(0);
+    setMaxDb(0);
+    setQuietTime(0);
+    setTotalTime(0);
+    setCurrentDb(40);
+    setAmbientDb(40);
+    setActivityDb(0);
+    setSignalRange(0);
+    setMicTestStage('idle');
+    setMicTestCountdown(0);
+    setMicTestResult(null);
+    recentDbRef.current = [];
+    noiseFloorRef.current = 40;
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const supported = navigator.mediaDevices.getSupportedConstraints?.() || {};
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: supported.echoCancellation ? true : undefined,
+          noiseSuppression: supported.noiseSuppression ? false : undefined,
+          autoGainControl: supported.autoGainControl ? false : undefined,
+          channelCount: supported.channelCount ? 1 : undefined
+        }
+      });
+
+      const track = stream.getAudioTracks()[0];
+      const settings = track?.getSettings?.() || {};
+      streamRef.current = stream;
+      setCaptureSettings({
+        echoCancellation: typeof settings.echoCancellation === 'boolean' ? settings.echoCancellation : null,
+        noiseSuppression: typeof settings.noiseSuppression === 'boolean' ? settings.noiseSuppression : null,
+        autoGainControl: typeof settings.autoGainControl === 'boolean' ? settings.autoGainControl : null
+      });
+
+      track.onended = () => {
+        stopAudioMonitoring();
+        setIsStarted(false);
+        setError(t('doraemon.errors.micDisconnected'));
+      };
+
       const AC = window.AudioContext || (window as any).webkitAudioContext;
       const context = new AC();
       audioContextRef.current = context;
@@ -139,9 +387,11 @@ const DoraemonMonitorApp: React.FC = () => {
       analyser.fftSize = 512;
       analyserRef.current = analyser;
       const source = context.createMediaStreamSource(stream);
+      sourceRef.current = source;
       source.connect(analyser);
       const muteGain = context.createGain();
       muteGain.gain.value = 0;
+      muteGainRef.current = muteGain;
       analyser.connect(muteGain);
       muteGain.connect(context.destination);
       setIsStarted(true);
@@ -155,7 +405,9 @@ const DoraemonMonitorApp: React.FC = () => {
       } else {
         setError(t('doraemon.errors.startFailed') + t('doraemon.errors.unknownError') + err.message);
       }
-    } finally { setIsLoading(false); }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleMute = () => {
@@ -168,30 +420,28 @@ const DoraemonMonitorApp: React.FC = () => {
       return next;
     });
   };
-  const playAlarmSound = useCallback(() => {
-    if (!audioContextRef.current) return;
+  const playAlarmSound = useCallback((withSpeech = true) => {
+    if (!audioContextRef.current || isMuted) return;
+
     try {
-      // Speech Synthesis Integration
-      if (window.speechSynthesis) {
+      if (withSpeech && window.speechSynthesis) {
         window.speechSynthesis.cancel();
-        if (!isMuted) {
-          const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
-          msg.lang = 'zh-CN';
-          msg.rate = 0.9;   // Slower for seriousness
-          msg.pitch = 0.8;  // Deeper voice
-          window.speechSynthesis.speak(msg);
-        }
+        const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
+        msg.lang = 'zh-CN';
+        msg.rate = 1;
+        msg.pitch = 0.85;
+        msg.volume = 0.85;
+        window.speechSynthesis.speak(msg);
       }
 
-      // Haptic Feedback
-      if (navigator.vibrate && !isMuted) {
-        navigator.vibrate([200, 100, 200]);
+      if (navigator.vibrate) {
+        navigator.vibrate([160, 80, 160]);
       }
-
-      if (isMuted) return;
 
       const ctx = audioContextRef.current;
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => undefined);
+      }
 
       const currentTime = ctx.currentTime;
       const osc = ctx.createOscillator();
@@ -200,62 +450,105 @@ const DoraemonMonitorApp: React.FC = () => {
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      // More serious beep-style alarm
       osc.type = 'square';
-      osc.frequency.setValueAtTime(440, currentTime); // A4, a more authoritative tone
-      osc.frequency.exponentialRampToValueAtTime(554.37, currentTime + 0.1); // C#5
-      osc.frequency.setValueAtTime(440, currentTime + 0.2);
-      osc.frequency.exponentialRampToValueAtTime(554.37, currentTime + 0.3);
-      osc.frequency.setValueAtTime(440, currentTime + 0.4);
+      osc.frequency.setValueAtTime(440, currentTime);
+      osc.frequency.exponentialRampToValueAtTime(523.25, currentTime + 0.08);
+      osc.frequency.setValueAtTime(440, currentTime + 0.16);
+      osc.frequency.exponentialRampToValueAtTime(523.25, currentTime + 0.24);
 
       gain.gain.setValueAtTime(0, currentTime);
-      gain.gain.linearRampToValueAtTime(0.2, currentTime + 0.05);
-      gain.gain.linearRampToValueAtTime(0.2, currentTime + 0.35);
-      gain.gain.linearRampToValueAtTime(0, currentTime + 0.4);
+      gain.gain.linearRampToValueAtTime(0.12, currentTime + 0.03);
+      gain.gain.linearRampToValueAtTime(0.12, currentTime + 0.22);
+      gain.gain.linearRampToValueAtTime(0, currentTime + 0.28);
 
       osc.start(currentTime);
-      osc.stop(currentTime + 0.4);
-
+      osc.stop(currentTime + 0.28);
     } catch (e) {
-      console.error("Audio play failed", e);
+      console.error('Audio play failed', e);
     }
   }, [isMuted, t]);
 
   useEffect(() => {
     if (!isStarted) return;
+
     const now = Date.now();
-    if (currentDb > limit) {
+    const triggerDb = limit + 1.2;
+    const releaseDb = Math.max(35, limit - 4);
+    const dynamicTrigger = Math.max(3.5, 7 - sensitivity * 0.05);
+    const dynamicRelease = Math.max(1.5, dynamicTrigger - 2.2);
+    const shouldWarn = currentDb >= limit - 2 || activityDb >= dynamicTrigger - 1;
+    const shouldAlarm = currentDb >= triggerDb || (currentDb >= limit - 3 && activityDb >= dynamicTrigger);
+    const canRecover = (currentDb <= releaseDb && activityDb <= dynamicRelease) || now < alarmIgnoreUntilRef.current;
+
+    if (shouldAlarm && now >= alarmIgnoreUntilRef.current) {
       recoverStartRef.current = 0;
-      if (thresholdStartRef.current === 0) thresholdStartRef.current = now;
-      if (now - thresholdStartRef.current > 2000) {
-        if (state !== 'alarm') {
-          setState('alarm');
-          setWarnCount(prev => prev + 1);
-          setQuietTime(0);
-        }
+      if (thresholdStartRef.current === 0) {
+        thresholdStartRef.current = now;
       }
-      else if (now - thresholdStartRef.current > 800 && state === 'calm') setState('warning');
-    } else {
-      thresholdStartRef.current = 0;
-      if (state === 'alarm') { if (recoverStartRef.current === 0) recoverStartRef.current = now; if (now - recoverStartRef.current > 3000) setState('calm'); }
-      else if (state !== 'calm') setState('calm');
+
+      const alarmElapsed = now - thresholdStartRef.current;
+      if (alarmElapsed > 700 && state === 'calm') {
+        setState('warning');
+      }
+      if (alarmElapsed > 1700 && state !== 'alarm') {
+        setState('alarm');
+        setWarnCount(prev => prev + 1);
+        setQuietTime(0);
+      }
+      return;
     }
-  }, [currentDb, limit, isStarted]);
+
+    thresholdStartRef.current = 0;
+
+    if (state === 'alarm') {
+      if (canRecover) {
+        if (recoverStartRef.current === 0) {
+          recoverStartRef.current = now;
+        }
+        if (now - recoverStartRef.current > 1600) {
+          setState('calm');
+        }
+      } else {
+        recoverStartRef.current = 0;
+      }
+      return;
+    }
+
+    recoverStartRef.current = 0;
+    if (shouldWarn) {
+      setState('warning');
+    } else if (state !== 'calm') {
+      setState('calm');
+    }
+  }, [activityDb, currentDb, isStarted, limit, sensitivity, state]);
 
   useEffect(() => {
     if (state === 'alarm' && !isMuted) {
-      // Play immediately
-      playAlarmSound();
-      // Start loop
+      const playLoop = (withSpeech: boolean) => {
+        const now = Date.now();
+        playAlarmSound(withSpeech);
+        lastAlarmPlayedAtRef.current = now;
+        alarmIgnoreUntilRef.current = now + (withSpeech ? 2200 : 1600);
+      };
+
+      if (Date.now() - lastAlarmPlayedAtRef.current > 3800) {
+        playLoop(true);
+      }
+
       if (!alarmIntervalRef.current) {
-        alarmIntervalRef.current = setInterval(playAlarmSound, 2500); // Repeat every 2.5s
+        alarmIntervalRef.current = setInterval(() => {
+          if (Date.now() - lastAlarmPlayedAtRef.current < 3800) return;
+          playLoop(false);
+        }, 4200);
       }
     } else {
       if (alarmIntervalRef.current) {
         clearInterval(alarmIntervalRef.current);
         alarmIntervalRef.current = null;
       }
-      if (isMuted && window.speechSynthesis) window.speechSynthesis.cancel();
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
     }
     return () => {
       if (alarmIntervalRef.current) {
@@ -272,8 +565,11 @@ const DoraemonMonitorApp: React.FC = () => {
   }, [isStarted, state]);
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => undefined);
+    } else {
+      document.exitFullscreen().catch(() => undefined);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -281,6 +577,14 @@ const DoraemonMonitorApp: React.FC = () => {
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
+
+  const captureModeText = captureSettings
+    ? [
+        `${t('doraemon.micTest.echo')}:${captureSettings.echoCancellation === true ? t('doraemon.micTest.on') : captureSettings.echoCancellation === false ? t('doraemon.micTest.off') : t('doraemon.micTest.unknown')}`,
+        `${t('doraemon.micTest.noiseSuppression')}:${captureSettings.noiseSuppression === true ? t('doraemon.micTest.on') : captureSettings.noiseSuppression === false ? t('doraemon.micTest.off') : t('doraemon.micTest.unknown')}`,
+        `${t('doraemon.micTest.autoGain')}:${captureSettings.autoGainControl === true ? t('doraemon.micTest.on') : captureSettings.autoGainControl === false ? t('doraemon.micTest.off') : t('doraemon.micTest.unknown')}`
+      ].join(' · ')
+    : '';
 
   const NoiseLevelReference = () => {
     const levels = [
@@ -446,6 +750,84 @@ const DoraemonMonitorApp: React.FC = () => {
               <span className="stat-label">{t('doraemon.maxDb')}</span>
               <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
             </div>
+          </div>
+
+          <div className="controls-box diagnostic-box">
+            <div className="slider-header">
+              <span>{t('doraemon.micTest.title')}</span>
+              <button
+                className="diagnostic-action-btn"
+                onClick={startMicTest}
+                disabled={micTestStage === 'quiet' || micTestStage === 'active'}
+              >
+                {micTestStage === 'quiet' || micTestStage === 'active'
+                  ? t('doraemon.micTest.testing')
+                  : micTestResult
+                    ? t('doraemon.micTest.rerun')
+                    : t('doraemon.micTest.start')}
+              </button>
+            </div>
+
+            <div className="diagnostic-grid">
+              <div className="diagnostic-chip">
+                <span>{t('doraemon.micTest.ambient')}</span>
+                <strong>{Math.round(ambientDb)} dB</strong>
+              </div>
+              <div className="diagnostic-chip">
+                <span>{t('doraemon.micTest.activity')}</span>
+                <strong>{activityDb.toFixed(1)} dB</strong>
+              </div>
+              <div className="diagnostic-chip">
+                <span>{t('doraemon.micTest.range')}</span>
+                <strong>{signalRange.toFixed(1)} dB</strong>
+              </div>
+            </div>
+
+            {captureModeText && <div className="capture-mode-note">{captureModeText}</div>}
+
+            {(micTestStage === 'quiet' || micTestStage === 'active') && (
+              <div className="mic-test-runner">
+                <strong>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuiet') : t('doraemon.micTest.stageActive')}</strong>
+                <p>{micTestStage === 'quiet' ? t('doraemon.micTest.stageQuietDesc') : t('doraemon.micTest.stageActiveDesc')}</p>
+                <div className="mic-test-countdown">{micTestCountdown}s</div>
+              </div>
+            )}
+
+            {micTestResult && (
+              <div className={`mic-test-result ${micTestResult.health}`}>
+                <div className="mic-test-result-title">
+                  {t(`doraemon.micTest.health.${micTestResult.health}`)}
+                </div>
+                <div className="mic-test-result-desc">
+                  {t(`doraemon.micTest.healthDesc.${micTestResult.health}`)}
+                </div>
+                <div className="mic-test-result-grid">
+                  <div>
+                    <span>{t('doraemon.micTest.quietAvg')}</span>
+                    <strong>{micTestResult.quietAvg.toFixed(1)} dB</strong>
+                  </div>
+                  <div>
+                    <span>{t('doraemon.micTest.activeAvg')}</span>
+                    <strong>{micTestResult.activeAvg.toFixed(1)} dB</strong>
+                  </div>
+                  <div>
+                    <span>{t('doraemon.micTest.dynamicRange')}</span>
+                    <strong>{micTestResult.dynamicRange.toFixed(1)} dB</strong>
+                  </div>
+                  <div>
+                    <span>{t('doraemon.micTest.overallRange')}</span>
+                    <strong>{micTestResult.overallMin.toFixed(1)}-{micTestResult.overallMax.toFixed(1)}</strong>
+                  </div>
+                </div>
+                <div className="mic-test-recommend">
+                  <div>{t('doraemon.micTest.recommendedSensitivity').replace('{value}', String(micTestResult.recommendedSensitivity))}</div>
+                  <div>{t('doraemon.micTest.recommendedThreshold').replace('{value}', String(micTestResult.recommendedLimit))}</div>
+                </div>
+                <button className="diagnostic-apply-btn" onClick={applyMicTestRecommendation}>
+                  {t('doraemon.micTest.apply')}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="controls-box" style={{ position: 'relative' }}>

@@ -37,6 +37,8 @@ const STATE = {
 const FOLIAGE_COLORS = ['#43a047', '#66bb6a', '#a5d6a7', '#81c784'];
 const GOLDEN_COLORS = ['#ffd700', '#ffecb3', '#fff9c4', '#fff59d'];
 const ENERGY_SKY_COLORS = ['#fff176', '#ffe082', '#fff59d', '#ffecb3'];
+const ENERGY_TECH_COLORS = ['#7df9ff', '#8cf7d9', '#d2ff72', '#f7ff9c'];
+const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
 
 /* --- DOM Elements --- */
 const $ = (id) => document.getElementById(id);
@@ -236,6 +238,8 @@ function resetGame() {
     updateTimerDisplay();
     sparkles.length = 0;
     energyParticles.length = 0;
+    trunkTransfers.length = 0;
+    soilTransfers.length = 0;
 }
 
 function calculateDB() {
@@ -343,6 +347,8 @@ const clouds = [];
 const birds = [];
 const sparkles = [];
 const energyParticles = [];
+const trunkTransfers = [];
+const soilTransfers = [];
 
 class Cloud {
     constructor() {
@@ -410,11 +416,13 @@ class Bird {
 }
 
 class Sparkle {
-    constructor(x, y) {
+    constructor(x, y, color = '#fff') {
         this.x = x;
         this.y = y;
         this.vy = -(Math.random() * 2 + 1);
         this.life = 1;
+        this.size = 1.5 + Math.random() * 2.5;
+        this.color = color;
     }
     update() {
         this.y += this.vy;
@@ -423,27 +431,110 @@ class Sparkle {
     }
     draw() {
         ctx.globalAlpha = this.life;
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, Math.random() * 3, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
     }
 }
 
+function getEnergyAnchors(treeSize) {
+    const trunkBaseY = canvas.height - 26;
+    const canopyY = canvas.height - 40 - (treeSize * 0.7);
+    const rootReach = 70 + (treeSize * 0.18);
+
+    return {
+        source: { x: canvas.width - 100, y: 100 },
+        beamControl: { x: canvas.width * 0.72, y: canvas.height * 0.2 },
+        canopy: { x: canvas.width / 2, y: canopyY },
+        trunkBase: { x: canvas.width / 2, y: trunkBaseY },
+        soilLeft: { x: (canvas.width / 2) - rootReach, y: trunkBaseY + 28 },
+        soilRight: { x: (canvas.width / 2) + rootReach, y: trunkBaseY + 28 }
+    };
+}
+
+function pointOnQuadratic(start, control, end, t) {
+    const inv = 1 - t;
+    return {
+        x: (inv * inv * start.x) + (2 * inv * t * control.x) + (t * t * end.x),
+        y: (inv * inv * start.y) + (2 * inv * t * control.y) + (t * t * end.y)
+    };
+}
+
+function drawEnergyNode(x, y, radius, color, alpha = 0.35) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 2.4);
+    glow.addColorStop(0, color);
+    glow.addColorStop(0.35, `rgba(255,255,255,${Math.min(0.95, alpha + 0.2)})`);
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 2.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = Math.min(0.95, alpha + 0.25);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([4, 5]);
+    ctx.lineDashOffset = -(Date.now() / 45);
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 1.25, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(1.6, radius * 0.3), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawQuadraticEnergyPath(start, control, end, glowColor, coreColor, width, alpha, dashed = true) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+
+    ctx.globalAlpha = alpha * 0.45;
+    ctx.strokeStyle = glowColor;
+    ctx.lineWidth = width * 2.4;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.quadraticCurveTo(control.x, control.y, end.x, end.y);
+    ctx.stroke();
+
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = coreColor;
+    ctx.lineWidth = width;
+    if (dashed) {
+        ctx.setLineDash([14, 9]);
+        ctx.lineDashOffset = -(Date.now() / 55);
+    }
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.quadraticCurveTo(control.x, control.y, end.x, end.y);
+    ctx.stroke();
+    ctx.restore();
+}
+
 class SkyEnergy {
-    constructor(x, y, targetX, targetY, strength = 0.5) {
+    constructor(x, y, targetX, targetY, trunkBase, strength = 0.5) {
         this.x = x;
         this.y = y;
         this.targetX = targetX;
         this.targetY = targetY;
+        this.trunkBase = trunkBase;
         this.strength = strength;
         this.size = 2 + (Math.random() * 4 * strength);
         this.life = 1;
         this.phase = Math.random() * Math.PI * 2;
-        this.hue = ENERGY_SKY_COLORS[Math.floor(Math.random() * ENERGY_SKY_COLORS.length)];
+        this.hue = ENERGY_TECH_COLORS[Math.floor(Math.random() * ENERGY_TECH_COLORS.length)];
         this.vx = (Math.random() - 0.5) * 0.6;
         this.vy = 0.2 + Math.random() * 0.4;
+        this.history = [];
     }
     update() {
         const dx = this.targetX - this.x;
@@ -459,9 +550,12 @@ class SkyEnergy {
 
         this.x += this.vx + Math.sin(this.phase) * 0.35;
         this.y += this.vy;
+        this.history.push({ x: this.x, y: this.y });
+        if (this.history.length > 6) this.history.shift();
 
-        if (dist < 18) {
-            sparkles.push(new Sparkle(this.x, this.y));
+        if (dist < 24) {
+            sparkles.push(new Sparkle(this.x, this.y, '#c8fff7'));
+            trunkTransfers.push(new TrunkTransfer(this.x, this.y, this.trunkBase.x, this.trunkBase.y, this.strength, this.hue));
             return false;
         }
 
@@ -470,7 +564,20 @@ class SkyEnergy {
     }
     draw() {
         ctx.save();
-        ctx.globalAlpha = Math.max(0.15, this.life);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = Math.max(0.16, this.life * 0.75);
+
+        if (this.history.length > 1) {
+            ctx.strokeStyle = this.hue;
+            ctx.lineWidth = this.size * 1.15;
+            ctx.beginPath();
+            ctx.moveTo(this.history[0].x, this.history[0].y);
+            for (let i = 1; i < this.history.length; i++) {
+                ctx.lineTo(this.history[i].x, this.history[i].y);
+            }
+            ctx.stroke();
+        }
+
         const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 4);
         glow.addColorStop(0, this.hue);
         glow.addColorStop(0.45, 'rgba(255,255,255,0.85)');
@@ -489,41 +596,168 @@ class SkyEnergy {
     }
 }
 
-function spawnSkyEnergy(treeSize) {
+class TrunkTransfer {
+    constructor(startX, startY, endX, endY, strength, color) {
+        this.start = { x: startX, y: startY };
+        this.end = { x: endX + ((Math.random() - 0.5) * 10), y: endY };
+        this.control = {
+            x: ((startX + endX) / 2) + ((Math.random() - 0.5) * 12),
+            y: startY + ((endY - startY) * 0.38)
+        };
+        this.t = 0;
+        this.speed = 0.03 + (strength * 0.045);
+        this.life = 1;
+        this.size = 2.4 + (strength * 3);
+        this.color = color;
+        this.strength = strength;
+    }
+    update() {
+        this.t += this.speed;
+        if (this.t >= 1) {
+            sparkles.push(new Sparkle(this.end.x, this.end.y, '#d8ff66'));
+            soilTransfers.push(new SoilTransfer(this.end.x, this.end.y, -1, this.strength, this.color));
+            soilTransfers.push(new SoilTransfer(this.end.x, this.end.y, 1, this.strength, this.color));
+            return false;
+        }
+        this.life = Math.max(0.25, 1 - (this.t * 0.45));
+        return true;
+    }
+    draw() {
+        const head = pointOnQuadratic(this.start, this.control, this.end, this.t);
+        const tail = pointOnQuadratic(this.start, this.control, this.end, Math.max(0, this.t - 0.14));
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = this.life;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.size;
+        ctx.beginPath();
+        ctx.moveTo(tail.x, tail.y);
+        ctx.lineTo(head.x, head.y);
+        ctx.stroke();
+
+        const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, this.size * 4);
+        glow.addColorStop(0, '#ffffff');
+        glow.addColorStop(0.35, this.color);
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, this.size * 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class SoilTransfer {
+    constructor(startX, startY, direction, strength, color) {
+        const spread = 68 + (Math.random() * 54) + (strength * 22);
+        this.start = { x: startX, y: startY };
+        this.end = { x: startX + (direction * spread), y: startY + 24 + Math.random() * 18 };
+        this.control = {
+            x: startX + (direction * (26 + Math.random() * 24)),
+            y: startY + 16 + Math.random() * 14
+        };
+        this.t = 0;
+        this.speed = 0.028 + (strength * 0.03);
+        this.life = 1;
+        this.size = 1.8 + (strength * 2.2);
+        this.color = SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)] || color;
+    }
+    update() {
+        this.t += this.speed;
+        if (this.t >= 1) {
+            sparkles.push(new Sparkle(this.end.x, this.end.y, this.color));
+            return false;
+        }
+        this.life = Math.max(0.2, 1 - (this.t * 0.55));
+        return true;
+    }
+    draw() {
+        const head = pointOnQuadratic(this.start, this.control, this.end, this.t);
+        const tail = pointOnQuadratic(this.start, this.control, this.end, Math.max(0, this.t - 0.18));
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = this.life * 0.9;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.size;
+        ctx.beginPath();
+        ctx.moveTo(tail.x, tail.y);
+        ctx.lineTo(head.x, head.y);
+        ctx.stroke();
+
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, this.size * 0.95, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+function spawnSkyEnergy(treeSize, anchors) {
     if (!STATE.isListening) return;
     const activation = Math.max(0, (STATE.currentDB - 56) / 26);
     if (activation <= 0) return;
 
-    const spawnCount = Math.random() < (0.18 + activation * 0.4) ? 1 : 0;
+    const spawnCount = Math.random() < (0.22 + activation * 0.45) ? 1 : 0;
     if (!spawnCount) return;
 
-    const targetX = (canvas.width / 2) + ((Math.random() - 0.5) * treeSize * 0.35);
-    const targetY = canvas.height - 30 - (treeSize * 0.78) + ((Math.random() - 0.5) * treeSize * 0.15);
+    const targetX = anchors.canopy.x + ((Math.random() - 0.5) * treeSize * 0.18);
+    const targetY = anchors.canopy.y + ((Math.random() - 0.5) * treeSize * 0.1);
     const sourceBand = Math.max(90, canvas.width * 0.18);
     const sourceX = canvas.width - 100 + ((Math.random() - 0.5) * sourceBand);
     const sourceY = 90 + (Math.random() * 90);
 
-    energyParticles.push(new SkyEnergy(sourceX, sourceY, targetX, targetY, activation));
+    energyParticles.push(new SkyEnergy(sourceX, sourceY, targetX, targetY, anchors.trunkBase, activation));
 }
 
 function drawEnergyFlow(treeSize) {
     const activation = Math.max(0, (STATE.currentDB - 56) / 26);
+    const anchors = getEnergyAnchors(treeSize);
+    const hasFlow = activation > 0.04 || energyParticles.length || trunkTransfers.length || soilTransfers.length;
     if (activation > 0.05) {
-        spawnSkyEnergy(treeSize);
+        spawnSkyEnergy(treeSize, anchors);
+    }
+
+    if (hasFlow) {
+        const canopyCore = 'rgba(125, 249, 255, 0.95)';
+        const canopyGlow = 'rgba(125, 249, 255, 0.22)';
+        const trunkCore = 'rgba(211, 255, 114, 0.92)';
+        const trunkGlow = 'rgba(211, 255, 114, 0.18)';
+        const flowAlpha = Math.min(0.85, 0.18 + activation * 0.55);
+        const trunkControl = {
+            x: anchors.trunkBase.x,
+            y: anchors.canopy.y + ((anchors.trunkBase.y - anchors.canopy.y) * 0.42)
+        };
+
+        drawQuadraticEnergyPath(anchors.source, anchors.beamControl, anchors.canopy, canopyGlow, canopyCore, 3 + (activation * 4), flowAlpha, true);
+        drawQuadraticEnergyPath(anchors.canopy, trunkControl, anchors.trunkBase, trunkGlow, trunkCore, 2.6 + (activation * 3.2), Math.max(0.28, flowAlpha * 0.92), true);
+        drawQuadraticEnergyPath(anchors.trunkBase, {
+            x: anchors.trunkBase.x - 28,
+            y: anchors.trunkBase.y + 18
+        }, anchors.soilLeft, 'rgba(89, 240, 255, 0.16)', 'rgba(89, 240, 255, 0.86)', 2 + (activation * 2.2), Math.max(0.24, flowAlpha * 0.78), true);
+        drawQuadraticEnergyPath(anchors.trunkBase, {
+            x: anchors.trunkBase.x + 28,
+            y: anchors.trunkBase.y + 18
+        }, anchors.soilRight, 'rgba(216, 255, 102, 0.16)', 'rgba(216, 255, 102, 0.84)', 2 + (activation * 2.2), Math.max(0.24, flowAlpha * 0.78), true);
 
         ctx.save();
-        ctx.globalAlpha = Math.min(0.25, activation * 0.22);
-        const beam = ctx.createLinearGradient(canvas.width - 100, 100, canvas.width / 2, canvas.height - 40 - treeSize * 0.72);
-        beam.addColorStop(0, 'rgba(255, 245, 157, 0.55)');
-        beam.addColorStop(0.55, 'rgba(255, 255, 255, 0.12)');
-        beam.addColorStop(1, 'rgba(76, 175, 80, 0)');
-        ctx.strokeStyle = beam;
-        ctx.lineWidth = 10 + (activation * 8);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = Math.max(0.16, flowAlpha * 0.34);
+        const soilGlow = ctx.createRadialGradient(anchors.trunkBase.x, anchors.trunkBase.y + 10, 0, anchors.trunkBase.x, anchors.trunkBase.y + 10, 130);
+        soilGlow.addColorStop(0, 'rgba(216, 255, 102, 0.55)');
+        soilGlow.addColorStop(0.4, 'rgba(89, 240, 255, 0.18)');
+        soilGlow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = soilGlow;
         ctx.beginPath();
-        ctx.moveTo(canvas.width - 100, 100);
-        ctx.quadraticCurveTo(canvas.width * 0.72, canvas.height * 0.24, canvas.width / 2, canvas.height - 35 - treeSize * 0.72);
-        ctx.stroke();
+        ctx.ellipse(anchors.trunkBase.x, anchors.trunkBase.y + 10, 130, 34, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
+
+        drawEnergyNode(anchors.canopy.x, anchors.canopy.y, 8 + (activation * 5), '#8cf7d9', 0.28 + activation * 0.25);
+        drawEnergyNode(anchors.trunkBase.x, anchors.trunkBase.y, 9 + (activation * 6), '#d8ff66', 0.26 + activation * 0.24);
+        drawEnergyNode(anchors.soilLeft.x, anchors.soilLeft.y, 4 + (activation * 2), '#59f0ff', 0.18 + activation * 0.16);
+        drawEnergyNode(anchors.soilRight.x, anchors.soilRight.y, 4 + (activation * 2), '#d8ff66', 0.18 + activation * 0.16);
     }
 
     for (let i = energyParticles.length - 1; i >= 0; i--) {
@@ -531,6 +765,22 @@ function drawEnergyFlow(treeSize) {
             energyParticles.splice(i, 1);
         } else {
             energyParticles[i].draw();
+        }
+    }
+
+    for (let i = trunkTransfers.length - 1; i >= 0; i--) {
+        if (!trunkTransfers[i].update()) {
+            trunkTransfers.splice(i, 1);
+        } else {
+            trunkTransfers[i].draw();
+        }
+    }
+
+    for (let i = soilTransfers.length - 1; i >= 0; i--) {
+        if (!soilTransfers[i].update()) {
+            soilTransfers.splice(i, 1);
+        } else {
+            soilTransfers[i].draw();
         }
     }
 }
@@ -550,6 +800,8 @@ function initEnvironment() {
     birds.length = 0;
     sparkles.length = 0;
     energyParticles.length = 0;
+    trunkTransfers.length = 0;
+    soilTransfers.length = 0;
     for (let i = 0; i < 5; i++) clouds.push(new Cloud());
     for (let i = 0; i < 3; i++) birds.push(new Bird());
 }
@@ -682,7 +934,6 @@ function loop() {
     });
 
     const treeSize = 80 + (STATE.energy * 1.6);
-    drawEnergyFlow(treeSize);
 
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
@@ -706,6 +957,8 @@ function loop() {
         ctx.lineWidth = 3;
         ctx.stroke();
     }
+
+    drawEnergyFlow(treeSize);
 
     if (STATE.isSuperMode && Math.random() < 0.2) {
         sparkles.push(new Sparkle(Math.random() * canvas.width, Math.random() * canvas.height));

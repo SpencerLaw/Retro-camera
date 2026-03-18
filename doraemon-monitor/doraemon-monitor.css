@@ -1380,7 +1380,9 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px 18px 18px;
-  overflow: visible;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .report-modal-week {
@@ -1522,19 +1524,23 @@
   grid-template-columns: 190px minmax(0, 1fr);
   gap: 14px;
   align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .report-day-sidebar {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
   gap: 10px;
+  min-height: 0;
 }
 
 .report-day-chip {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 16px;
-  min-height: 72px;
+  min-height: 0;
+  height: 100%;
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1604,6 +1610,7 @@
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  height: 100%;
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-shell {
@@ -2301,6 +2308,7 @@
   .report-day-sidebar {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
   }
 
   .report-focus-shell,

@@ -189,6 +189,7 @@
     },
     "report": {
       "title": "Weekly Class Report",
+      "trigger": "Weekly Report",
       "subtitle": "Monday to Friday · Pull up from the bottom",
       "show": "Open report",
       "hide": "Hide report",

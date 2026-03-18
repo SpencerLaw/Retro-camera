@@ -142,6 +142,8 @@ const DoraemonMonitorApp: React.FC = () => {
     }
     return false;
   });
+  const isOverlayOpen = isMicTestOpen || isReportOpen;
+  const visualState: MonitorState = isOverlayOpen ? 'calm' : state;
   const sensitivityRef = useRef(50);
   const micTestStageRef = useRef<MicTestStage>('idle');
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -707,7 +709,7 @@ const DoraemonMonitorApp: React.FC = () => {
   }, [currentDb, isStarted, limit, state]);
 
   useEffect(() => {
-    if (state === 'alarm' && !isMuted) {
+    if (state === 'alarm' && !isMuted && !isOverlayOpen) {
       const playLoop = () => {
         const now = Date.now();
         playAlarmSound(true);
@@ -740,7 +742,7 @@ const DoraemonMonitorApp: React.FC = () => {
         alarmIntervalRef.current = null;
       }
     };
-  }, [state, playAlarmSound, isMuted]);
+  }, [state, playAlarmSound, isMuted, isOverlayOpen]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -850,27 +852,31 @@ const DoraemonMonitorApp: React.FC = () => {
       ].join(' · ')
     : '';
   const hasMicTestProgress = quietSnapshotAvg !== null || activeSnapshotAvg !== null || micTestResult !== null || micTestStage !== 'idle';
-  const micTestGuideText = micTestStage === 'active'
-    ? t('doraemon.micTest.stageActiveDesc')
-    : t('doraemon.micTest.stageQuietDesc');
   const quietCapturedText = quietSnapshotAvg === null
     ? t('doraemon.micTest.pending')
     : t('doraemon.micTest.captured').replace('{value}', quietSnapshotAvg.toFixed(1));
   const activeCapturedText = activeSnapshotAvg === null
     ? t('doraemon.micTest.pending')
     : t('doraemon.micTest.captured').replace('{value}', activeSnapshotAvg.toFixed(1));
+  const isMicTestOnQuietStep = quietSnapshotAvg === null;
+  const currentMicTestTitle = micTestResult
+    ? t(`doraemon.micTest.health.${micTestResult.health}`)
+    : isMicTestOnQuietStep
+      ? t('doraemon.micTest.stageQuiet')
+      : t('doraemon.micTest.stageActive');
+  const currentMicTestDesc = micTestResult
+    ? t(`doraemon.micTest.healthDesc.${micTestResult.health}`)
+    : isMicTestOnQuietStep
+      ? t('doraemon.micTest.stageQuietDesc')
+      : t('doraemon.micTest.stageActiveDesc');
 
   const MicTestContent = () => (
     <div className="diagnostic-box mic-test-window">
       <div className="slider-header mic-test-window-topbar">
         <span>{t('doraemon.micTest.guide')}</span>
-        <button
-          className="diagnostic-action-btn"
-          onClick={startMicTest}
-          disabled={!isStarted}
-        >
-          {hasMicTestProgress ? t('doraemon.micTest.reset') : t('doraemon.micTest.start')}
-        </button>
+        <span className="mic-test-inline-hint">
+          {quietSnapshotAvg === null ? '01' : activeSnapshotAvg === null ? '02' : 'OK'}
+        </span>
       </div>
 
       <div className="diagnostic-grid mic-test-grid">
@@ -890,44 +896,37 @@ const DoraemonMonitorApp: React.FC = () => {
 
       {captureModeText && <div className="capture-mode-note">{captureModeText}</div>}
 
-      <div className="mic-test-runner">
-        <strong>{t('doraemon.micTest.guide')}</strong>
-        <p>{micTestGuideText}</p>
+      <div className={`mic-test-focus-card ${micTestResult ? micTestResult.health : isMicTestOnQuietStep ? 'quiet' : 'active'}`}>
+        <strong>{currentMicTestTitle}</strong>
+        <p>{currentMicTestDesc}</p>
+        {!micTestResult && (
+          <button
+            className="mic-test-main-action"
+            onClick={isMicTestOnQuietStep ? captureQuietMicTest : captureActiveMicTest}
+            disabled={!isStarted || (!isMicTestOnQuietStep && quietSnapshotAvg === null)}
+          >
+            {isMicTestOnQuietStep ? t('doraemon.micTest.captureQuiet') : t('doraemon.micTest.captureActive')}
+          </button>
+        )}
       </div>
 
-      <div className="mic-test-step-list">
-        <div className={`mic-test-step ${quietSnapshotAvg !== null ? 'captured' : micTestStage !== 'active' && micTestStage !== 'done' ? 'active' : ''}`}>
+      <div className="mic-test-capture-status">
+        <div className={`mic-test-step compact ${quietSnapshotAvg !== null ? 'captured' : 'active'}`}>
           <div className="mic-test-step-copy">
             <strong>{t('doraemon.micTest.stageQuiet')}</strong>
-            <p>{t('doraemon.micTest.stageQuietDesc')}</p>
             <span className={`mic-test-step-badge ${quietSnapshotAvg !== null ? 'captured' : 'pending'}`}>
               {quietCapturedText}
             </span>
           </div>
-          <button
-            className="diagnostic-step-btn"
-            onClick={captureQuietMicTest}
-            disabled={!isStarted}
-          >
-            {t('doraemon.micTest.captureQuiet')}
-          </button>
         </div>
 
-        <div className={`mic-test-step ${activeSnapshotAvg !== null ? 'captured' : micTestStage === 'active' ? 'active' : ''}`}>
+        <div className={`mic-test-step compact ${activeSnapshotAvg !== null ? 'captured' : micTestStage === 'active' ? 'active' : ''}`}>
           <div className="mic-test-step-copy">
             <strong>{t('doraemon.micTest.stageActive')}</strong>
-            <p>{t('doraemon.micTest.stageActiveDesc')}</p>
             <span className={`mic-test-step-badge ${activeSnapshotAvg !== null ? 'captured' : 'pending'}`}>
               {activeCapturedText}
             </span>
           </div>
-          <button
-            className="diagnostic-step-btn"
-            onClick={captureActiveMicTest}
-            disabled={!isStarted || quietSnapshotAvg === null}
-          >
-            {t('doraemon.micTest.captureActive')}
-          </button>
         </div>
       </div>
 
@@ -961,9 +960,14 @@ const DoraemonMonitorApp: React.FC = () => {
             <div>{t('doraemon.micTest.recommendedSensitivity').replace('{value}', String(micTestResult.recommendedSensitivity))}</div>
             <div>{t('doraemon.micTest.recommendedThreshold').replace('{value}', String(micTestResult.recommendedLimit))}</div>
           </div>
-          <button className="diagnostic-apply-btn" onClick={applyMicTestRecommendation}>
-            {t('doraemon.micTest.apply')}
-          </button>
+          <div className="mic-test-result-actions">
+            <button className="diagnostic-apply-btn" onClick={applyMicTestRecommendation}>
+              {t('doraemon.micTest.apply')}
+            </button>
+            <button className="diagnostic-step-btn secondary" onClick={startMicTest}>
+              {t('doraemon.micTest.reset')}
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -983,6 +987,9 @@ const DoraemonMonitorApp: React.FC = () => {
         className="mic-test-launcher-btn"
         onClick={() => {
           setIsReportOpen(false);
+          setShowHelp(false);
+          setShowThresholdHelp(false);
+          startMicTest();
           setIsMicTestOpen(true);
         }}
       >
@@ -1020,44 +1027,35 @@ const DoraemonMonitorApp: React.FC = () => {
   );
 
   const ReportDrawer = () => (
-    <div className={`report-sheet ${isReportOpen ? 'open' : ''}`}>
+    <div className={`report-modal-layer ${isReportOpen ? 'open' : ''}`}>
       <button
-        className="report-sheet-backdrop"
+        className="floating-modal-backdrop"
         onClick={() => setIsReportOpen(false)}
         aria-hidden={!isReportOpen}
       />
-      <div className="report-sheet-panel">
-        <button
-          className="report-sheet-handle"
-          onClick={() => setIsReportOpen(prev => {
-            const next = !prev;
-            if (next) setIsMicTestOpen(false);
-            return next;
-          })}
-          title={isReportOpen ? t('doraemon.report.hide') : t('doraemon.report.show')}
-        >
-          <span className="report-drawer-grip" />
-          <div className="report-drawer-toggle-copy">
-            <strong>{t('doraemon.report.title')}</strong>
-            <span>{t('doraemon.report.subtitle')}</span>
-          </div>
-          {isReportOpen ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-        </button>
-
-        <div className="report-sheet-body">
-          <div className="report-drawer-header">
-            <div className="report-drawer-heading">
-              <div className="report-drawer-icon">
-                <CalendarDays size={18} />
-              </div>
-              <div>
-                <strong>{t('doraemon.report.title')}</strong>
-                <p>{t('doraemon.report.localOnly')}</p>
-              </div>
+      <div className="report-modal-shell">
+        <div className="floating-modal-header report-modal-header">
+          <div className="report-drawer-heading">
+            <div className="report-drawer-icon">
+              <CalendarDays size={18} />
             </div>
-            <span className="report-drawer-week">
-              {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
-            </span>
+            <div>
+              <strong>{t('doraemon.report.title')}</strong>
+              <p>{t('doraemon.report.localOnly')}</p>
+            </div>
+          </div>
+          <button
+            className="floating-close-btn"
+            onClick={() => setIsReportOpen(false)}
+            title={t('doraemon.report.hide')}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="floating-modal-body report-modal-body">
+          <div className="report-modal-week">
+            {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
           </div>
 
           <div className="report-summary-grid">
@@ -1243,13 +1241,13 @@ const DoraemonMonitorApp: React.FC = () => {
   const DoraemonSVG = () => (
     <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%' }}>
       <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" /><circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
-      {state === 'alarm' ? (
+      {visualState === 'alarm' ? (
         <g stroke="#333" strokeWidth="5"><line x1="70" y1="60" x2="90" y2="80" /><line x1="90" y1="60" x2="70" y2="80" /><line x1="110" y1="60" x2="130" y2="80" /><line x1="130" y1="60" x2="110" y2="80" /></g>
       ) : (
         <g><circle cx="88" cy="70" r="4" fill="#000" /><circle cx="112" cy="70" r="4" fill="#000" /></g>
       )}
       <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" /><line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2" />
-      {state === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2" /> : <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" />}
+      {visualState === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2" /> : <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" />}
       <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2" /><circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2" />
     </svg>
   );
@@ -1260,14 +1258,26 @@ const DoraemonMonitorApp: React.FC = () => {
   if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>{t('doraemon.title')}</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>{t('doraemon.summoning')}</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>{t('doraemon.startMonitor')}</span><span className="btn-sub-text">{t('doraemon.startMonitorSub')}</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;
 
   return (
-    <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
-      {state === 'alarm' && <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>}
+    <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${visualState === 'alarm' ? 'alarm-mode' : ''}`}>
+      {visualState === 'alarm' && <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>}
       <header className="doraemon-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
           <div style={{ fontSize: '1.26rem', fontWeight: 'bold', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
         </div>
         <div style={{ display: 'flex', gap: '20px' }}>
+          <button
+            onClick={() => {
+              setIsMicTestOpen(false);
+              setShowHelp(false);
+              setShowThresholdHelp(false);
+              setIsReportOpen(true);
+            }}
+            className="report-header-btn"
+            title={t('doraemon.report.show')}
+          >
+            {t('doraemon.report.trigger')}
+          </button>
           <button
             onClick={toggleMute}
             className="icon-btn"

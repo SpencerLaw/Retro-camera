@@ -472,15 +472,16 @@ const DoraemonMonitorApp: React.FC = () => {
     if (!isStarted) return;
 
     const now = Date.now();
+    const isIgnoringOwnAlarm = now < alarmIgnoreUntilRef.current;
     const triggerDb = limit + 1.2;
     const releaseDb = Math.max(35, limit - 4);
     const dynamicTrigger = Math.max(3.5, 7 - sensitivity * 0.05);
     const dynamicRelease = Math.max(1.5, dynamicTrigger - 2.2);
     const shouldWarn = currentDb >= limit - 2 || activityDb >= dynamicTrigger - 1;
     const shouldAlarm = currentDb >= triggerDb || (currentDb >= limit - 3 && activityDb >= dynamicTrigger);
-    const canRecover = (currentDb <= releaseDb && activityDb <= dynamicRelease) || now < alarmIgnoreUntilRef.current;
+    const canRecover = currentDb <= releaseDb && activityDb <= dynamicRelease;
 
-    if (shouldAlarm && now >= alarmIgnoreUntilRef.current) {
+    if (shouldAlarm && !isIgnoringOwnAlarm) {
       recoverStartRef.current = 0;
       if (thresholdStartRef.current === 0) {
         thresholdStartRef.current = now;
@@ -501,6 +502,10 @@ const DoraemonMonitorApp: React.FC = () => {
     thresholdStartRef.current = 0;
 
     if (state === 'alarm') {
+      if (isIgnoringOwnAlarm) {
+        recoverStartRef.current = 0;
+        return;
+      }
       if (canRecover) {
         if (recoverStartRef.current === 0) {
           recoverStartRef.current = now;

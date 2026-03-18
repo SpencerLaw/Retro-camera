@@ -171,6 +171,9 @@ const DoraemonMonitorApp: React.FC = () => {
   const totalTimeRef = useRef(0);
   const sessionReportsRef = useRef<SessionReport[]>(loadStoredReports());
   const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
+  const reportScrollRef = useRef<HTMLDivElement | null>(null);
+  const reportTouchStartYRef = useRef<number | null>(null);
+  const reportTouchStartTopRef = useRef(0);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -912,6 +915,36 @@ const DoraemonMonitorApp: React.FC = () => {
   const stopModalPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
   };
+  const handleOpenMicTest = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openMicTest();
+  };
+  const handleReportWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const scrollNode = reportScrollRef.current;
+    if (!scrollNode) return;
+    scrollNode.scrollTop += event.deltaY;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const handleReportTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    const scrollNode = reportScrollRef.current;
+    if (!scrollNode || event.touches.length !== 1) return;
+    reportTouchStartYRef.current = event.touches[0].clientY;
+    reportTouchStartTopRef.current = scrollNode.scrollTop;
+  };
+  const handleReportTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    const scrollNode = reportScrollRef.current;
+    const startY = reportTouchStartYRef.current;
+    if (!scrollNode || startY === null || event.touches.length !== 1) return;
+    const deltaY = startY - event.touches[0].clientY;
+    scrollNode.scrollTop = reportTouchStartTopRef.current + deltaY;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const handleReportTouchEnd = () => {
+    reportTouchStartYRef.current = null;
+  };
 
   const MicTestContent = () => (
     <div className="diagnostic-box mic-test-window">
@@ -1030,7 +1063,8 @@ const DoraemonMonitorApp: React.FC = () => {
       <button
         className="mic-test-launcher-btn"
         type="button"
-        onClick={openMicTest}
+        onMouseDown={stopModalPropagation}
+        onClick={handleOpenMicTest}
       >
         {t('doraemon.micTest.openWindow')}
       </button>
@@ -1128,96 +1162,105 @@ const DoraemonMonitorApp: React.FC = () => {
         </div>
 
         <div className="floating-modal-body report-modal-body">
-          <div className="report-modal-week">
-            {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
-          </div>
+          <div
+            ref={reportScrollRef}
+            className="report-modal-scroll"
+            onWheel={handleReportWheel}
+            onTouchStart={handleReportTouchStart}
+            onTouchMove={handleReportTouchMove}
+            onTouchEnd={handleReportTouchEnd}
+          >
+            <div className="report-modal-week">
+              {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
+            </div>
 
-          <div className="report-summary-grid">
-            <div className="report-summary-card">
-              <span>{t('doraemon.report.summarySessions')}</span>
-              <strong>{weeklyRecords.length}</strong>
-            </div>
-            <div className="report-summary-card peak">
-              <span>{t('doraemon.report.summaryPeak')}</span>
-              <strong>{weeklyRecords.length ? `${Math.round(weeklyPeak)} dB` : '--'}</strong>
-            </div>
-            <div className="report-summary-card quiet">
-              <span>{t('doraemon.report.summaryQuiet')}</span>
-              <strong>{formatTime(weeklyQuietTotal)}</strong>
-            </div>
-          </div>
-
-          <div className="report-day-chip-row">
-            {reportDayGroups.map(group => (
-              <div key={group.key} className={`report-day-chip ${group.records.length ? 'has-data' : ''}`}>
-                <span>{group.label}</span>
-                <strong>{group.records.length}</strong>
+            <div className="report-summary-grid">
+              <div className="report-summary-card">
+                <span>{t('doraemon.report.summarySessions')}</span>
+                <strong>{weeklyRecords.length}</strong>
               </div>
-            ))}
-          </div>
+              <div className="report-summary-card peak">
+                <span>{t('doraemon.report.summaryPeak')}</span>
+                <strong>{weeklyRecords.length ? `${Math.round(weeklyPeak)} dB` : '--'}</strong>
+              </div>
+              <div className="report-summary-card quiet">
+                <span>{t('doraemon.report.summaryQuiet')}</span>
+                <strong>{formatTime(weeklyQuietTotal)}</strong>
+              </div>
+            </div>
 
-          <div className="report-day-list">
-            {reportDayGroups.map(group => (
-              <section key={group.key} className="report-day-section">
-                <div className="report-day-header">
-                  <div>
-                    <strong>{group.label}</strong>
-                    <span>{group.dateLabel}</span>
-                  </div>
-                  <span className={`report-day-count ${group.records.length ? 'has-data' : ''}`}>
-                    {t('doraemon.report.sessionCount').replace('{count}', String(group.records.length))}
-                  </span>
+            <div className="report-day-chip-row">
+              {reportDayGroups.map(group => (
+                <div key={group.key} className={`report-day-chip ${group.records.length ? 'has-data' : ''}`}>
+                  <span>{group.label}</span>
+                  <strong>{group.records.length}</strong>
                 </div>
+              ))}
+            </div>
 
-                {group.records.length > 0 ? (
-                  <div className="report-table-scroll">
-                    <table className="report-table">
-                      <thead>
-                        <tr>
-                          <th>{t('doraemon.report.columns.start')}</th>
-                          <th>{t('doraemon.report.columns.end')}</th>
-                          <th>{t('doraemon.report.columns.duration')}</th>
-                          <th>{t('doraemon.report.columns.quiet')}</th>
-                          <th>{t('doraemon.report.columns.peak')}</th>
-                          <th>{t('doraemon.report.columns.warnings')}</th>
-                          <th>{t('doraemon.report.columns.settings')}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {group.records.map(report => (
-                          <tr key={report.id}>
-                            <td>
-                              <div className="report-time-cell">
-                                <strong>{formatReportClock(report.startedAt)}</strong>
-                                {report.endedAt === null && (
-                                  <span className="report-live-badge">{t('doraemon.report.live')}</span>
-                                )}
-                              </div>
-                            </td>
-                            <td>{report.endedAt ? formatReportClock(report.endedAt) : t('doraemon.report.ongoing')}</td>
-                            <td>{formatTime(report.totalSeconds)}</td>
-                            <td>{formatTime(report.quietSeconds)}</td>
-                            <td>
-                              <span className="report-peak-pill">{Math.round(report.peakDb)} dB</span>
-                            </td>
-                            <td>{report.warnCount}</td>
-                            <td>
-                              <span className="report-setting-note">
-                                {t('doraemon.report.settings')
-                                  .replace('{limit}', String(report.threshold))
-                                  .replace('{sensitivity}', String(report.sensitivity))}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+            <div className="report-day-list">
+              {reportDayGroups.map(group => (
+                <section key={group.key} className="report-day-section">
+                  <div className="report-day-header">
+                    <div>
+                      <strong>{group.label}</strong>
+                      <span>{group.dateLabel}</span>
+                    </div>
+                    <span className={`report-day-count ${group.records.length ? 'has-data' : ''}`}>
+                      {t('doraemon.report.sessionCount').replace('{count}', String(group.records.length))}
+                    </span>
                   </div>
-                ) : (
-                  <div className="report-empty-state">{t('doraemon.report.empty')}</div>
-                )}
-              </section>
-            ))}
+
+                  {group.records.length > 0 ? (
+                    <div className="report-table-scroll">
+                      <table className="report-table">
+                        <thead>
+                          <tr>
+                            <th>{t('doraemon.report.columns.start')}</th>
+                            <th>{t('doraemon.report.columns.end')}</th>
+                            <th>{t('doraemon.report.columns.duration')}</th>
+                            <th>{t('doraemon.report.columns.quiet')}</th>
+                            <th>{t('doraemon.report.columns.peak')}</th>
+                            <th>{t('doraemon.report.columns.warnings')}</th>
+                            <th>{t('doraemon.report.columns.settings')}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {group.records.map(report => (
+                            <tr key={report.id}>
+                              <td>
+                                <div className="report-time-cell">
+                                  <strong>{formatReportClock(report.startedAt)}</strong>
+                                  {report.endedAt === null && (
+                                    <span className="report-live-badge">{t('doraemon.report.live')}</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td>{report.endedAt ? formatReportClock(report.endedAt) : t('doraemon.report.ongoing')}</td>
+                              <td>{formatTime(report.totalSeconds)}</td>
+                              <td>{formatTime(report.quietSeconds)}</td>
+                              <td>
+                                <span className="report-peak-pill">{Math.round(report.peakDb)} dB</span>
+                              </td>
+                              <td>{report.warnCount}</td>
+                              <td>
+                                <span className="report-setting-note">
+                                  {t('doraemon.report.settings')
+                                    .replace('{limit}', String(report.threshold))
+                                    .replace('{sensitivity}', String(report.sensitivity))}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="report-empty-state">{t('doraemon.report.empty')}</div>
+                  )}
+                </section>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -1274,7 +1317,6 @@ const DoraemonMonitorApp: React.FC = () => {
             </div>
           </div>
         </div>
-        <MicTestLauncher />
       </div>
     );
   };
@@ -1483,7 +1525,6 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
         </div>
       </main>
-      <MicTestModal />
       <ReportDrawer />
     </div>
   );

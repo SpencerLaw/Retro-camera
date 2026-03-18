@@ -183,6 +183,37 @@
         "noisy": "Baseline room noise is already high, so false alarms are more likely unless sensitivity is lowered or the threshold is raised.",
         "weak": "The microphone reacts, but the dynamic range is small. Raising sensitivity slightly should help."
       }
+    },
+    "report": {
+      "title": "Weekly Class Report",
+      "subtitle": "Monday to Friday · Pull up from the bottom",
+      "show": "Open report",
+      "hide": "Hide report",
+      "localOnly": "Saved on this computer only. Nothing is uploaded.",
+      "summarySessions": "Sessions",
+      "summaryPeak": "Peak This Week",
+      "summaryQuiet": "Quiet Total",
+      "sessionCount": "{count} sessions",
+      "live": "Live",
+      "ongoing": "Ongoing",
+      "empty": "No saved sessions for this day yet.",
+      "settings": "Limit {limit} dB / Sensitivity {sensitivity}%",
+      "days": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri"
+      },
+      "columns": {
+        "start": "Start",
+        "end": "End",
+        "duration": "Duration",
+        "quiet": "Quiet",
+        "peak": "Peak",
+        "warnings": "Alerts",
+        "settings": "Settings"
+      }
     }
   },
   "broadcast": {

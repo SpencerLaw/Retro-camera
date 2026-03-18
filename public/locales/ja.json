@@ -176,6 +176,37 @@
         "noisy": "基準ノイズが高いため、静かな時でも誤報が起きやすい状態です。",
         "weak": "音は拾えていますが変動幅が小さいため、少し感度を上げて再確認してください。"
       }
+    },
+    "report": {
+      "title": "今週の授業レポート",
+      "subtitle": "月曜から金曜まで・下から引き上げて表示",
+      "show": "レポートを開く",
+      "hide": "レポートを閉じる",
+      "localOnly": "この端末のローカル保存のみで、アップロードは行いません。",
+      "summarySessions": "記録数",
+      "summaryPeak": "今週の最大値",
+      "summaryQuiet": "静かな時間",
+      "sessionCount": "{count} 件",
+      "live": "進行中",
+      "ongoing": "進行中",
+      "empty": "この日の保存記録はまだありません。",
+      "settings": "閾値 {limit} dB / 感度 {sensitivity}%",
+      "days": {
+        "mon": "月",
+        "tue": "火",
+        "wed": "水",
+        "thu": "木",
+        "fri": "金"
+      },
+      "columns": {
+        "start": "開始",
+        "end": "終了",
+        "duration": "時間",
+        "quiet": "静音",
+        "peak": "最大",
+        "warnings": "警報",
+        "settings": "設定"
+      }
     }
   },
   "broadcast": {

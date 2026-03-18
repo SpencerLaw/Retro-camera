@@ -183,6 +183,37 @@
         "noisy": "环境本底已经偏高，容易出现教室安静时也报警，建议降低灵敏度并提高阈值。",
         "weak": "设备能收到声音，但波动幅度偏小，建议适度提高灵敏度后再观察。"
       }
+    },
+    "report": {
+      "title": "本周课堂报告",
+      "subtitle": "周一到周五 · 底部上拉查看",
+      "show": "展开报告",
+      "hide": "收起报告",
+      "localOnly": "仅保存在这台电脑本地，关闭后不会上传。",
+      "summarySessions": "记录场次",
+      "summaryPeak": "本周最高",
+      "summaryQuiet": "累计安静",
+      "sessionCount": "{count} 场",
+      "live": "进行中",
+      "ongoing": "进行中",
+      "empty": "当天还没有保存记录",
+      "settings": "阈值 {limit} dB / 灵敏度 {sensitivity}%",
+      "days": {
+        "mon": "周一",
+        "tue": "周二",
+        "wed": "周三",
+        "thu": "周四",
+        "fri": "周五"
+      },
+      "columns": {
+        "start": "开始",
+        "end": "结束",
+        "duration": "时长",
+        "quiet": "安静",
+        "peak": "最高",
+        "warnings": "警报",
+        "settings": "参数"
+      }
     }
   },
   "broadcast": {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX, ChevronUp, ChevronDown, CalendarDays } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
 import LicenseInput from './components/LicenseInput';
@@ -9,6 +9,7 @@ import './doraemon-monitor.css';
 type MonitorState = 'calm' | 'alarm';
 type MicTestStage = 'idle' | 'quiet' | 'active' | 'done';
 type MicTestHealth = 'good' | 'flat' | 'noisy' | 'weak';
+type ReportWeekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri';
 
 interface CaptureSettings {
   echoCancellation: boolean | null;
@@ -27,11 +28,80 @@ interface MicTestResult {
   health: MicTestHealth;
 }
 
+interface SessionReport {
+  id: string;
+  startedAt: string;
+  endedAt: string | null;
+  peakDb: number;
+  quietSeconds: number;
+  totalSeconds: number;
+  warnCount: number;
+  threshold: number;
+  sensitivity: number;
+}
+
+const REPORT_STORAGE_KEY = 'doraemon_session_reports_v1';
+const MAX_STORED_REPORTS = 180;
+const REPORT_WEEKDAYS: Array<{ key: ReportWeekday; offset: number }> = [
+  { key: 'mon', offset: 0 },
+  { key: 'tue', offset: 1 },
+  { key: 'wed', offset: 2 },
+  { key: 'thu', offset: 3 },
+  { key: 'fri', offset: 4 }
+];
+
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const average = (values: number[]) => {
   if (!values.length) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
+};
+
+const toDateKey = (dateLike: string | Date) => {
+  const date = typeof dateLike === 'string' ? new Date(dateLike) : new Date(dateLike);
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getCurrentWeekMonday = (baseDate = new Date()) => {
+  const monday = new Date(baseDate);
+  monday.setHours(0, 0, 0, 0);
+  const day = monday.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  monday.setDate(monday.getDate() + diffToMonday);
+  return monday;
+};
+
+const loadStoredReports = (): SessionReport[] => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const raw = localStorage.getItem(REPORT_STORAGE_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .filter((item): item is SessionReport => (
+        item &&
+        typeof item.id === 'string' &&
+        typeof item.startedAt === 'string' &&
+        (typeof item.endedAt === 'string' || item.endedAt === null) &&
+        typeof item.peakDb === 'number' &&
+        typeof item.quietSeconds === 'number' &&
+        typeof item.totalSeconds === 'number' &&
+        typeof item.warnCount === 'number' &&
+        typeof item.threshold === 'number' &&
+        typeof item.sensitivity === 'number'
+      ))
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      .slice(0, MAX_STORED_REPORTS);
+  } catch {
+    return [];
+  }
 };
 
 const DoraemonMonitorApp: React.FC = () => {
@@ -58,6 +128,8 @@ const DoraemonMonitorApp: React.FC = () => {
   const [sensitivity, setSensitivity] = useState(50);
   const [showHelp, setShowHelp] = useState(false);
   const [showThresholdHelp, setShowThresholdHelp] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [sessionReports, setSessionReports] = useState<SessionReport[]>(() => loadStoredReports());
   const [captureSettings, setCaptureSettings] = useState<CaptureSettings | null>(null);
   const [micTestStage, setMicTestStage] = useState<MicTestStage>('idle');
   const [micTestResult, setMicTestResult] = useState<MicTestResult | null>(null);
@@ -87,14 +159,50 @@ const DoraemonMonitorApp: React.FC = () => {
   const micTestWindowRef = useRef<number[]>([]);
   const quietTestSamplesRef = useRef<number[]>([]);
   const activeTestSamplesRef = useRef<number[]>([]);
+  const limitRef = useRef(60);
+  const currentDbRef = useRef(40);
+  const maxDbRef = useRef(0);
+  const warnCountRef = useRef(0);
+  const quietTimeRef = useRef(0);
+  const totalTimeRef = useRef(0);
+  const sessionReportsRef = useRef<SessionReport[]>(loadStoredReports());
+  const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
   }, [sensitivity]);
 
   useEffect(() => {
+    limitRef.current = limit;
+  }, [limit]);
+
+  useEffect(() => {
     micTestStageRef.current = micTestStage;
   }, [micTestStage]);
+
+  useEffect(() => {
+    currentDbRef.current = currentDb;
+  }, [currentDb]);
+
+  useEffect(() => {
+    maxDbRef.current = maxDb;
+  }, [maxDb]);
+
+  useEffect(() => {
+    warnCountRef.current = warnCount;
+  }, [warnCount]);
+
+  useEffect(() => {
+    quietTimeRef.current = quietTime;
+  }, [quietTime]);
+
+  useEffect(() => {
+    totalTimeRef.current = totalTime;
+  }, [totalTime]);
+
+  useEffect(() => {
+    sessionReportsRef.current = sessionReports;
+  }, [sessionReports]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -131,6 +239,54 @@ const DoraemonMonitorApp: React.FC = () => {
       });
     } else setIsLicensed(false);
   }, []);
+
+  const persistSessionReports = useCallback((nextReports: SessionReport[]) => {
+    sessionReportsRef.current = nextReports;
+    setSessionReports(nextReports);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(nextReports));
+    }
+  }, []);
+
+  const beginSessionTracking = useCallback(() => {
+    activeSessionRef.current = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      startedAt: new Date().toISOString()
+    };
+  }, []);
+
+  const finalizeCurrentSession = useCallback(() => {
+    const activeSession = activeSessionRef.current;
+    if (!activeSession) return;
+
+    const endedAt = new Date();
+    const inferredDuration = Math.max(
+      1,
+      Math.round((endedAt.getTime() - new Date(activeSession.startedAt).getTime()) / 1000)
+    );
+    const totalSeconds = Math.max(totalTimeRef.current, inferredDuration);
+    const nextRecord: SessionReport = {
+      id: activeSession.id,
+      startedAt: activeSession.startedAt,
+      endedAt: endedAt.toISOString(),
+      peakDb: Math.round(Math.max(maxDbRef.current, currentDbRef.current)),
+      quietSeconds: Math.max(0, quietTimeRef.current),
+      totalSeconds,
+      warnCount: Math.max(0, warnCountRef.current),
+      threshold: limitRef.current,
+      sensitivity: sensitivityRef.current
+    };
+
+    const nextReports = [
+      nextRecord,
+      ...sessionReportsRef.current.filter(report => report.id !== nextRecord.id)
+    ]
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      .slice(0, MAX_STORED_REPORTS);
+
+    persistSessionReports(nextReports);
+    activeSessionRef.current = null;
+  }, [persistSessionReports]);
 
   const stopAudioMonitoring = useCallback(() => {
     workerRef.current?.postMessage('stop');
@@ -300,8 +456,13 @@ const DoraemonMonitorApp: React.FC = () => {
       setAmbientDb(noiseFloorRef.current);
       setActivityDb(liveActivity);
       setSignalRange(recentRange);
+      currentDbRef.current = effectiveDb;
       setCurrentDb(effectiveDb);
-      setMaxDb(m => Math.max(m, effectiveDb));
+      setMaxDb(m => {
+        const next = Math.max(m, effectiveDb);
+        maxDbRef.current = next;
+        return next;
+      });
 
       if (document.hidden) {
         document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(effectiveDb).toString());
@@ -340,7 +501,19 @@ const DoraemonMonitorApp: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => () => stopAudioMonitoring(), [stopAudioMonitoring]);
+  useEffect(() => {
+    const handlePageHide = () => {
+      finalizeCurrentSession();
+      stopAudioMonitoring();
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+      finalizeCurrentSession();
+      stopAudioMonitoring();
+    };
+  }, [finalizeCurrentSession, stopAudioMonitoring]);
 
   const initApp = async () => {
     setIsLoading(true);
@@ -352,6 +525,7 @@ const DoraemonMonitorApp: React.FC = () => {
       return;
     }
 
+    finalizeCurrentSession();
     stopAudioMonitoring();
     setState('calm');
     setWarnCount(0);
@@ -370,6 +544,11 @@ const DoraemonMonitorApp: React.FC = () => {
     noiseFloorRef.current = 40;
     environmentDbRef.current = 40;
     micTestWindowRef.current = [];
+    currentDbRef.current = 40;
+    maxDbRef.current = 0;
+    warnCountRef.current = 0;
+    quietTimeRef.current = 0;
+    totalTimeRef.current = 0;
 
     try {
       const supported = navigator.mediaDevices.getSupportedConstraints?.() || {};
@@ -392,6 +571,7 @@ const DoraemonMonitorApp: React.FC = () => {
       });
 
       track.onended = () => {
+        finalizeCurrentSession();
         stopAudioMonitoring();
         setIsStarted(false);
         setError(t('doraemon.errors.micDisconnected'));
@@ -411,6 +591,7 @@ const DoraemonMonitorApp: React.FC = () => {
       muteGainRef.current = muteGain;
       analyser.connect(muteGain);
       muteGain.connect(context.destination);
+      beginSessionTracking();
       setIsStarted(true);
       workerRef.current?.postMessage('start');
     } catch (err: any) {
@@ -491,8 +672,13 @@ const DoraemonMonitorApp: React.FC = () => {
     if (currentDb >= limit) {
       if (state !== 'alarm') {
         setState('alarm');
-        setWarnCount(prev => prev + 1);
+        setWarnCount(prev => {
+          const next = prev + 1;
+          warnCountRef.current = next;
+          return next;
+        });
         setQuietTime(0);
+        quietTimeRef.current = 0;
       }
       return;
     }
@@ -540,7 +726,23 @@ const DoraemonMonitorApp: React.FC = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isStarted) interval = setInterval(() => { setTotalTime(prev => prev + 1); if (state !== 'alarm') setQuietTime(prev => prev + 1); }, 1000);
+    if (isStarted) {
+      interval = setInterval(() => {
+        setTotalTime(prev => {
+          const next = prev + 1;
+          totalTimeRef.current = next;
+          return next;
+        });
+
+        if (state !== 'alarm') {
+          setQuietTime(prev => {
+            const next = prev + 1;
+            quietTimeRef.current = next;
+            return next;
+          });
+        }
+      }, 1000);
+    }
     return () => { if (interval) clearInterval(interval); };
   }, [isStarted, state]);
 
@@ -557,6 +759,70 @@ const DoraemonMonitorApp: React.FC = () => {
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
+
+  const formatReportClock = (dateLike: string) => {
+    const date = new Date(dateLike);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  const formatReportDate = (date: Date) => {
+    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+  };
+
+  const liveSessionPreview: SessionReport | null = activeSessionRef.current
+    ? {
+        id: activeSessionRef.current.id,
+        startedAt: activeSessionRef.current.startedAt,
+        endedAt: null,
+        peakDb: Math.round(Math.max(maxDb, currentDb)),
+        quietSeconds: quietTime,
+        totalSeconds: totalTime,
+        warnCount,
+        threshold: limit,
+        sensitivity
+      }
+    : null;
+
+  const weekStart = getCurrentWeekMonday();
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 4);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const currentWeekRecords = sessionReports.filter(report => {
+    const startedAt = new Date(report.startedAt).getTime();
+    return startedAt >= weekStart.getTime() && startedAt <= weekEnd.getTime();
+  });
+
+  const liveInCurrentWeek = liveSessionPreview
+    && (() => {
+      const startedAt = new Date(liveSessionPreview.startedAt).getTime();
+      return startedAt >= weekStart.getTime() && startedAt <= weekEnd.getTime();
+    })();
+
+  const weeklyRecords = liveInCurrentWeek
+    ? [liveSessionPreview!, ...currentWeekRecords.filter(report => report.id !== liveSessionPreview!.id)]
+    : currentWeekRecords;
+
+  const weeklyPeak = weeklyRecords.length
+    ? Math.max(...weeklyRecords.map(report => report.peakDb))
+    : 0;
+  const weeklyQuietTotal = weeklyRecords.reduce((sum, report) => sum + report.quietSeconds, 0);
+
+  const reportDayGroups = REPORT_WEEKDAYS.map(({ key, offset }) => {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + offset);
+    const dayKey = toDateKey(date);
+    const records = weeklyRecords
+      .filter(report => toDateKey(report.startedAt) === dayKey)
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+
+    return {
+      key,
+      label: t(`doraemon.report.days.${key}`),
+      dateLabel: formatReportDate(date),
+      records
+    };
+  });
 
   const captureModeText = captureSettings
     ? [
@@ -682,6 +948,128 @@ const DoraemonMonitorApp: React.FC = () => {
           </button>
         </div>
       )}
+    </div>
+  );
+
+  const ReportDrawer = () => (
+    <div className={`report-drawer-shell ${isReportOpen ? 'open' : ''}`}>
+      <button
+        className="report-drawer-toggle"
+        onClick={() => setIsReportOpen(prev => !prev)}
+        title={isReportOpen ? t('doraemon.report.hide') : t('doraemon.report.show')}
+      >
+        <span className="report-drawer-grip" />
+        <div className="report-drawer-toggle-copy">
+          <strong>{t('doraemon.report.title')}</strong>
+          <span>{t('doraemon.report.subtitle')}</span>
+        </div>
+        {isReportOpen ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+      </button>
+
+      <div className="report-drawer-panel">
+        <div className="report-drawer-header">
+          <div className="report-drawer-heading">
+            <div className="report-drawer-icon">
+              <CalendarDays size={18} />
+            </div>
+            <div>
+              <strong>{t('doraemon.report.title')}</strong>
+              <p>{t('doraemon.report.localOnly')}</p>
+            </div>
+          </div>
+          <span className="report-drawer-week">
+            {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
+          </span>
+        </div>
+
+        <div className="report-summary-grid">
+          <div className="report-summary-card">
+            <span>{t('doraemon.report.summarySessions')}</span>
+            <strong>{weeklyRecords.length}</strong>
+          </div>
+          <div className="report-summary-card peak">
+            <span>{t('doraemon.report.summaryPeak')}</span>
+            <strong>{weeklyRecords.length ? `${Math.round(weeklyPeak)} dB` : '--'}</strong>
+          </div>
+          <div className="report-summary-card quiet">
+            <span>{t('doraemon.report.summaryQuiet')}</span>
+            <strong>{formatTime(weeklyQuietTotal)}</strong>
+          </div>
+        </div>
+
+        <div className="report-day-chip-row">
+          {reportDayGroups.map(group => (
+            <div key={group.key} className={`report-day-chip ${group.records.length ? 'has-data' : ''}`}>
+              <span>{group.label}</span>
+              <strong>{group.records.length}</strong>
+            </div>
+          ))}
+        </div>
+
+        <div className="report-day-list">
+          {reportDayGroups.map(group => (
+            <section key={group.key} className="report-day-section">
+              <div className="report-day-header">
+                <div>
+                  <strong>{group.label}</strong>
+                  <span>{group.dateLabel}</span>
+                </div>
+                <span className={`report-day-count ${group.records.length ? 'has-data' : ''}`}>
+                  {t('doraemon.report.sessionCount').replace('{count}', String(group.records.length))}
+                </span>
+              </div>
+
+              {group.records.length > 0 ? (
+                <div className="report-table-scroll">
+                  <table className="report-table">
+                    <thead>
+                      <tr>
+                        <th>{t('doraemon.report.columns.start')}</th>
+                        <th>{t('doraemon.report.columns.end')}</th>
+                        <th>{t('doraemon.report.columns.duration')}</th>
+                        <th>{t('doraemon.report.columns.quiet')}</th>
+                        <th>{t('doraemon.report.columns.peak')}</th>
+                        <th>{t('doraemon.report.columns.warnings')}</th>
+                        <th>{t('doraemon.report.columns.settings')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.records.map(report => (
+                        <tr key={report.id}>
+                          <td>
+                            <div className="report-time-cell">
+                              <strong>{formatReportClock(report.startedAt)}</strong>
+                              {report.endedAt === null && (
+                                <span className="report-live-badge">{t('doraemon.report.live')}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td>{report.endedAt ? formatReportClock(report.endedAt) : t('doraemon.report.ongoing')}</td>
+                          <td>{formatTime(report.totalSeconds)}</td>
+                          <td>{formatTime(report.quietSeconds)}</td>
+                          <td>
+                            <span className="report-peak-pill">{Math.round(report.peakDb)} dB</span>
+                          </td>
+                          <td>{report.warnCount}</td>
+                          <td>
+                            <span className="report-setting-note">
+                              {t('doraemon.report.settings')
+                                .replace('{limit}', String(report.threshold))
+                                .replace('{sensitivity}', String(report.sensitivity))}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="report-empty-state">{t('doraemon.report.empty')}</div>
+              )}
+            </section>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
@@ -841,7 +1229,10 @@ const DoraemonMonitorApp: React.FC = () => {
             </div>
             <button
               className="reset-icon-btn"
-              onClick={() => { setWarnCount(0); }}
+              onClick={() => {
+                warnCountRef.current = 0;
+                setWarnCount(0);
+              }}
               title={t('doraemon.resetCount')}
             >
               <RotateCcw size={20} />
@@ -933,6 +1324,7 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
         </div>
       </main>
+      <ReportDrawer />
     </div>
   );
 };

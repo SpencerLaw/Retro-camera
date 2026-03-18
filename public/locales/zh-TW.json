@@ -181,6 +181,37 @@
         "noisy": "環境本底已偏高，容易在安靜時也誤報，建議降低靈敏度並提高閾值。",
         "weak": "設備可以收到聲音，但波動幅度偏小，建議適度提高靈敏度後再觀察。"
       }
+    },
+    "report": {
+      "title": "本週課堂報告",
+      "subtitle": "週一到週五 · 從底部上拉查看",
+      "show": "展開報告",
+      "hide": "收起報告",
+      "localOnly": "僅保存在這台電腦本地，不會上傳。",
+      "summarySessions": "記錄場次",
+      "summaryPeak": "本週最高",
+      "summaryQuiet": "累計安靜",
+      "sessionCount": "{count} 場",
+      "live": "進行中",
+      "ongoing": "進行中",
+      "empty": "當天還沒有保存記錄",
+      "settings": "閾值 {limit} dB / 靈敏度 {sensitivity}%",
+      "days": {
+        "mon": "週一",
+        "tue": "週二",
+        "wed": "週三",
+        "thu": "週四",
+        "fri": "週五"
+      },
+      "columns": {
+        "start": "開始",
+        "end": "結束",
+        "duration": "時長",
+        "quiet": "安靜",
+        "peak": "最高",
+        "warnings": "警報",
+        "settings": "參數"
+      }
     }
   },
   "broadcast": {

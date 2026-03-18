@@ -43,7 +43,9 @@ const STATE = {
 
     // Weekly report tracking
     sessionStartedAt: null,
-    curveBuffer: []
+    curveBuffer: [],
+    reportActiveDay: null,
+    reportActiveSession: 0
 };
 
 // Aesthetic Config
@@ -71,6 +73,8 @@ const reportModal = $('report-modal');
 const reportBackdrop = $('report-backdrop');
 const reportCloseBtn = $('report-close-btn');
 const reportWeekLabel = $('report-week-label');
+const reportSummaryCount = $('report-summary-count');
+const reportSummaryPeak = $('report-summary-peak');
 const reportDayChipRow = $('report-day-chip-row');
 const reportDayList = $('report-day-list');
 
@@ -146,7 +150,11 @@ function formatDuration(seconds) {
     return `${mins}:${secs}`;
 }
 
-function compressCurve(points, maxPoints = 24) {
+function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+}
+
+function compressCurve(points, maxPoints = 40) {
     if (!points.length) return [];
     if (points.length <= maxPoints) return points.map(point => Math.round(point));
 
@@ -162,41 +170,103 @@ function compressCurve(points, maxPoints = 24) {
     return compressed;
 }
 
-function buildCurveSVG(points) {
-    const values = points.length ? points : [40, 42, 41];
-    const width = 260;
-    const height = 78;
-    const paddingX = 10;
-    const paddingY = 10;
+function getCurveStats(report) {
+    const values = Array.isArray(report.curve) && report.curve.length
+        ? report.curve.map(point => Math.round(point))
+        : [40, 42, 41];
+    const peakSource = typeof report.peakDb === 'number' ? report.peakDb : Math.max(...values);
+    const lowSource = typeof report.lowDb === 'number' ? report.lowDb : Math.min(...values);
+    const averageSource = typeof report.averageDb === 'number'
+        ? report.averageDb
+        : values.reduce((sum, value) => sum + value, 0) / values.length;
+    const peakCurveValue = Math.max(...values);
+    const lowCurveValue = Math.min(...values);
+
+    return {
+        values,
+        peakValue: Math.round(peakSource),
+        lowValue: Math.round(lowSource),
+        averageValue: Math.round(averageSource),
+        peakIndex: Math.max(0, values.indexOf(peakCurveValue)),
+        lowIndex: Math.max(0, values.indexOf(lowCurveValue))
+    };
+}
+
+function formatElapsedLabel(durationSeconds, ratio) {
+    const elapsed = Math.round(durationSeconds * ratio);
+    return formatDuration(elapsed);
+}
+
+function buildCurveSVG(report) {
+    const stats = getCurveStats(report);
+    const values = stats.values;
+    const width = 420;
+    const height = 180;
+    const paddingLeft = 38;
+    const paddingRight = 18;
+    const paddingTop = 16;
+    const paddingBottom = 34;
+    const graphWidth = width - paddingLeft - paddingRight;
+    const graphHeight = height - paddingTop - paddingBottom;
+    const peakLabel = t('morningTree.report.peak') || '峰值';
+    const lowLabel = t('morningTree.report.low') || '低值';
     const gradientId = `report-curve-line-${Math.random().toString(36).slice(2, 8)}`;
     const areaId = `report-curve-area-${Math.random().toString(36).slice(2, 8)}`;
-    const maxValue = Math.max(...values, 75);
-    const minValue = Math.min(...values, 35);
-    const range = Math.max(1, maxValue - minValue);
-    const step = values.length > 1 ? (width - paddingX * 2) / (values.length - 1) : 0;
+    const paddedMax = Math.max(78, stats.peakValue + 4, Math.max(...values) + 3);
+    const paddedMin = Math.max(0, Math.min(34, stats.lowValue - 4, Math.min(...values) - 3));
+    const range = Math.max(14, paddedMax - paddedMin);
+    const step = values.length > 1 ? graphWidth / (values.length - 1) : 0;
 
-    const linePoints = values.map((value, index) => {
-        const x = paddingX + (index * step);
-        const y = paddingY + ((height - paddingY * 2) * (1 - ((value - minValue) / range)));
-        return `${x},${y}`;
-    }).join(' ');
+    const points = values.map((value, index) => {
+        const x = paddingLeft + (index * step);
+        const y = paddingTop + (graphHeight * (1 - ((value - paddedMin) / range)));
+        return { x, y };
+    });
+    const linePoints = points.map(point => `${point.x},${point.y}`).join(' ');
+    const areaPoints = `${paddingLeft},${height - paddingBottom} ${linePoints} ${width - paddingRight},${height - paddingBottom}`;
+    const peakPoint = points[stats.peakIndex] || points[0];
+    const lowPoint = points[stats.lowIndex] || points[0];
 
-    const areaPoints = `0,${height} ${linePoints} ${width},${height}`;
+    const horizontalGrid = Array.from({ length: 4 }, (_, index) => {
+        const ratio = index / 3;
+        const y = paddingTop + (graphHeight * ratio);
+        const labelValue = Math.round(paddedMax - (range * ratio));
+        return `
+            <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+            <text x="${paddingLeft - 8}" y="${y + 4}" fill="rgba(255,255,255,0.5)" font-size="10" text-anchor="end">${labelValue}</text>
+        `;
+    }).join('');
+
+    const timeGrid = [0, 0.25, 0.5, 0.75, 1].map(ratio => {
+        const x = paddingLeft + (graphWidth * ratio);
+        return `
+            <line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="rgba(255,255,255,0.06)" stroke-width="1" />
+            <text x="${x}" y="${height - 10}" fill="rgba(255,255,255,0.62)" font-size="10" text-anchor="middle">${formatElapsedLabel(report.durationSeconds, ratio)}</text>
+        `;
+    }).join('');
 
     return `
         <svg class="report-curve-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
             <defs>
                 <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#82f7ff" />
-                    <stop offset="100%" stop-color="#9cff6f" />
+                    <stop offset="0%" stop-color="#86f7ff" />
+                    <stop offset="55%" stop-color="#80ffd5" />
+                    <stop offset="100%" stop-color="#d0ff71" />
                 </linearGradient>
                 <linearGradient id="${areaId}" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#82f7ff" stop-opacity="0.42" />
-                    <stop offset="100%" stop-color="#82f7ff" stop-opacity="0.02" />
+                    <stop offset="0%" stop-color="#7df9ff" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#7df9ff" stop-opacity="0.03" />
                 </linearGradient>
             </defs>
+            <rect x="${paddingLeft}" y="${paddingTop}" width="${graphWidth}" height="${graphHeight}" rx="18" fill="rgba(255,255,255,0.02)" />
+            ${horizontalGrid}
+            ${timeGrid}
             <polyline fill="url(#${areaId})" stroke="none" points="${areaPoints}"></polyline>
-            <polyline fill="none" stroke="url(#${gradientId})" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="${linePoints}"></polyline>
+            <polyline fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" points="${linePoints}"></polyline>
+            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="5.5" fill="#ff8fd0" stroke="#ffffff" stroke-width="2" />
+            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="5.5" fill="#8cf7d9" stroke="#ffffff" stroke-width="2" />
+            <text x="${peakPoint.x}" y="${peakPoint.y - 12}" fill="#ff9fda" font-size="11" font-weight="700" text-anchor="middle">${peakLabel} ${stats.peakValue} dB</text>
+            <text x="${lowPoint.x}" y="${lowPoint.y + 20}" fill="#8cf7d9" font-size="11" font-weight="700" text-anchor="middle">${lowLabel} ${stats.lowValue} dB</text>
         </svg>
     `;
 }
@@ -217,7 +287,13 @@ function finalizeReportSession() {
     const startedAt = STATE.sessionStartedAt;
     const endedAt = new Date().toISOString();
     const durationSeconds = Math.max(1, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000));
-    const curve = compressCurve(STATE.curveBuffer, 24);
+    const rawCurve = STATE.curveBuffer.length
+        ? STATE.curveBuffer.map(point => Math.round(point))
+        : [Math.round(STATE.currentDB || 40)];
+    const curve = compressCurve(rawCurve, 40);
+    const peakDb = Math.max(...rawCurve);
+    const lowDb = Math.min(...rawCurve);
+    const averageDb = Math.round(rawCurve.reduce((sum, value) => sum + value, 0) / rawCurve.length);
 
     STATE.sessionStartedAt = null;
     STATE.curveBuffer = [];
@@ -229,7 +305,10 @@ function finalizeReportSession() {
         startedAt,
         endedAt,
         durationSeconds,
-        curve
+        curve,
+        peakDb,
+        lowDb,
+        averageDb
     };
 
     const nextReports = [
@@ -241,6 +320,162 @@ function finalizeReportSession() {
 
     persistReports(nextReports);
     renderWeeklyReport();
+}
+
+function getWeeklyDayGroups(reports, monday) {
+    return REPORT_WEEKDAYS.map(({ key, offset }) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + offset);
+        const dayKey = toDateKey(date);
+        const records = reports
+            .filter(report => toDateKey(report.startedAt) === dayKey)
+            .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+
+        return {
+            key,
+            date,
+            dateLabel: formatShortDate(date),
+            label: t(`morningTree.report.days.${key}`) || key,
+            records
+        };
+    });
+}
+
+function pickDefaultReportDay(dayGroups) {
+    const today = REPORT_WEEKDAYS[new Date().getDay() === 0 ? 0 : Math.max(0, Math.min(4, new Date().getDay() - 1))]?.key || 'mon';
+    return dayGroups.find(group => group.key === today && group.records.length)?.key
+        || dayGroups.find(group => group.records.length)?.key
+        || 'mon';
+}
+
+function renderReportDaySidebar(dayGroups, selectedKey) {
+    if (!reportDayChipRow) return;
+
+    reportDayChipRow.innerHTML = dayGroups.map(group => `
+        <button
+            type="button"
+            class="report-day-chip ${group.records.length ? 'has-data' : ''} ${group.key === selectedKey ? 'selected' : ''}"
+            data-report-day="${group.key}"
+        >
+            <div class="report-day-chip-copy">
+                <span>${group.label}</span>
+                <small>${group.dateLabel}</small>
+            </div>
+            <strong>${group.records.length}</strong>
+        </button>
+    `).join('');
+
+    reportDayChipRow.querySelectorAll('[data-report-day]').forEach(button => {
+        button.onpointerdown = (event) => {
+            event.preventDefault();
+            const nextDay = button.getAttribute('data-report-day');
+            if (!nextDay) return;
+            STATE.reportActiveDay = nextDay;
+            STATE.reportActiveSession = 0;
+            renderWeeklyReport();
+        };
+    });
+}
+
+function renderReportFocus(selectedDay) {
+    if (!reportDayList) return;
+
+    const sessionCountLabel = `${selectedDay.records.length}${t('morningTree.report.sessionSuffix') || '场'}`;
+    const selectedIndex = clamp(STATE.reportActiveSession || 0, 0, Math.max(0, selectedDay.records.length - 1));
+    STATE.reportActiveSession = selectedIndex;
+    const selectedReport = selectedDay.records[selectedIndex] || null;
+
+    if (!selectedReport) {
+        reportDayList.innerHTML = `
+            <div class="report-day-header">
+                <div>
+                    <strong>${selectedDay.label}</strong>
+                    <span>${selectedDay.dateLabel}</span>
+                </div>
+                <span class="report-day-count">${sessionCountLabel}</span>
+            </div>
+            <div class="report-empty-state">${t('morningTree.report.empty') || '当天还没有早读记录'}</div>
+        `;
+        return;
+    }
+
+    const stats = getCurveStats(selectedReport);
+    const hasPrev = selectedIndex > 0;
+    const hasNext = selectedIndex < selectedDay.records.length - 1;
+
+    reportDayList.innerHTML = `
+        <div class="report-day-header">
+            <div>
+                <strong>${selectedDay.label}</strong>
+                <span>${selectedDay.dateLabel}</span>
+            </div>
+            <span class="report-day-count has-data">${sessionCountLabel}</span>
+        </div>
+
+        <div class="report-nav-row">
+            <button type="button" class="report-nav-btn" data-report-nav="-1" ${hasPrev ? '' : 'disabled'}>
+                ${t('morningTree.report.prevSession') || '上一场'}
+            </button>
+            <span class="report-nav-status">
+                ${(t('morningTree.report.sessionStatus') || '第 {current} / {total} 场')
+                    .replace('{current}', String(selectedIndex + 1))
+                    .replace('{total}', String(selectedDay.records.length))}
+            </span>
+            <button type="button" class="report-nav-btn" data-report-nav="1" ${hasNext ? '' : 'disabled'}>
+                ${t('morningTree.report.nextSession') || '下一场'}
+            </button>
+        </div>
+
+        <article class="report-focus-card">
+            <div class="report-focus-top">
+                <div class="report-session-copy">
+                    <strong>${formatClock(selectedReport.startedAt)} - ${formatClock(selectedReport.endedAt)}</strong>
+                    <span>${formatShortDate(selectedReport.startedAt)}</span>
+                </div>
+                <span class="report-duration-pill">${formatDuration(selectedReport.durationSeconds)}</span>
+            </div>
+
+            <div class="report-metric-grid">
+                <div class="report-metric-card">
+                    <span>${t('morningTree.report.duration') || '早读时长'}</span>
+                    <strong>${formatDuration(selectedReport.durationSeconds)}</strong>
+                </div>
+                <div class="report-metric-card peak">
+                    <span>${t('morningTree.report.peak') || '峰值'}</span>
+                    <strong>${stats.peakValue} dB</strong>
+                </div>
+                <div class="report-metric-card low">
+                    <span>${t('morningTree.report.low') || '低值'}</span>
+                    <strong>${stats.lowValue} dB</strong>
+                </div>
+                <div class="report-metric-card">
+                    <span>${t('morningTree.report.average') || '均值'}</span>
+                    <strong>${stats.averageValue} dB</strong>
+                </div>
+            </div>
+
+            <div class="report-curve-panel">
+                <div class="report-curve-head">
+                    <span class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</span>
+                    <span class="report-curve-hint">${t('morningTree.report.curveHint') || '峰值 / 低值 / 时间分刻'}</span>
+                </div>
+                ${buildCurveSVG(selectedReport)}
+            </div>
+        </article>
+    `;
+
+    reportDayList.querySelectorAll('[data-report-nav]').forEach(button => {
+        button.onpointerdown = (event) => {
+            event.preventDefault();
+            const direction = parseInt(button.getAttribute('data-report-nav'), 10) || 0;
+            STATE.reportActiveSession = clamp(
+                STATE.reportActiveSession + direction,
+                0,
+                Math.max(0, selectedDay.records.length - 1)
+            );
+            renderWeeklyReport();
+        };
+    });
 }
 
 function renderWeeklyReport() {
@@ -255,64 +490,28 @@ function renderWeeklyReport() {
         const startedAt = new Date(report.startedAt).getTime();
         return startedAt >= monday.getTime() && startedAt <= friday.getTime();
     });
+    const weeklyPeak = reports.length
+        ? Math.max(...reports.map(report => getCurveStats(report).peakValue))
+        : 0;
+    const dayGroups = getWeeklyDayGroups(reports, monday);
+    const defaultDay = pickDefaultReportDay(dayGroups);
+
+    if (!STATE.reportActiveDay || !dayGroups.some(group => group.key === STATE.reportActiveDay)) {
+        STATE.reportActiveDay = defaultDay;
+    }
 
     reportWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(friday)}`;
+    if (reportSummaryCount) reportSummaryCount.textContent = `${reports.length}`;
+    if (reportSummaryPeak) reportSummaryPeak.textContent = reports.length ? `${weeklyPeak} dB` : '--';
 
-    reportDayChipRow.innerHTML = REPORT_WEEKDAYS.map(({ key, offset }) => {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + offset);
-        const dayKey = toDateKey(date);
-        const count = reports.filter(report => toDateKey(report.startedAt) === dayKey).length;
-        return `
-            <div class="report-day-chip ${count ? 'active' : ''}">
-                <span>${t(`morningTree.report.days.${key}`) || key}</span>
-                <strong>${count}</strong>
-            </div>
-        `;
-    }).join('');
-
-    reportDayList.innerHTML = REPORT_WEEKDAYS.map(({ key, offset }) => {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + offset);
-        const dayKey = toDateKey(date);
-        const dayReports = reports
-            .filter(report => toDateKey(report.startedAt) === dayKey)
-            .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
-
-        const sessionsMarkup = dayReports.length
-            ? dayReports.map(report => `
-                <div class="report-session-card">
-                    <div class="report-session-meta">
-                        <div>
-                            <strong>${formatClock(report.startedAt)} - ${formatClock(report.endedAt)}</strong>
-                            <span>${t('morningTree.report.duration') || '早读时长'} ${formatDuration(report.durationSeconds)}</span>
-                        </div>
-                        <span class="report-duration-pill">${formatDuration(report.durationSeconds)}</span>
-                    </div>
-                    <div class="report-curve-panel">
-                        <div class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</div>
-                        ${buildCurveSVG(report.curve)}
-                    </div>
-                </div>
-            `).join('')
-            : `<div class="report-empty">${t('morningTree.report.empty') || '当天还没有早读记录'}</div>`;
-
-        return `
-            <section class="report-day-section">
-                <div class="report-day-title">
-                    <div>
-                        <strong>${t(`morningTree.report.days.${key}`) || key}</strong>
-                        <span>${formatShortDate(date)}</span>
-                    </div>
-                    <em>${dayReports.length}${t('morningTree.report.sessionSuffix') || '场'}</em>
-                </div>
-                ${sessionsMarkup}
-            </section>
-        `;
-    }).join('');
+    renderReportDaySidebar(dayGroups, STATE.reportActiveDay);
+    const selectedDay = dayGroups.find(group => group.key === STATE.reportActiveDay) || dayGroups[0];
+    renderReportFocus(selectedDay);
 }
 
 function openReportModal() {
+    STATE.reportActiveDay = null;
+    STATE.reportActiveSession = 0;
     renderWeeklyReport();
     reportModal.classList.add('open');
     reportModal.setAttribute('aria-hidden', 'false');
@@ -517,6 +716,7 @@ function stopMic() {
 function resetGame() {
     STATE.sessionStartedAt = null;
     STATE.curveBuffer = [];
+    STATE.reportActiveSession = 0;
     STATE.energy = 0;
     STATE.isSuperMode = false;
     STATE.remainingTime = STATE.sessionDuration * 60;
@@ -525,6 +725,7 @@ function resetGame() {
     energyParticles.length = 0;
     trunkTransfers.length = 0;
     soilTransfers.length = 0;
+    resetMeadowPlants();
 }
 
 function calculateDB() {
@@ -634,6 +835,7 @@ const sparkles = [];
 const energyParticles = [];
 const trunkTransfers = [];
 const soilTransfers = [];
+const meadowPlants = [];
 
 class Cloud {
     constructor() {
@@ -963,6 +1165,7 @@ class SoilTransfer {
         this.t += this.speed;
         if (this.t >= 1) {
             sparkles.push(new Sparkle(this.end.x, this.end.y, this.color));
+            feedMeadowGrowth(this.end.x, this.strength, this.color);
             return false;
         }
         this.life = Math.max(0.2, 1 - (this.t * 0.55));
@@ -995,6 +1198,153 @@ class SoilTransfer {
         ctx.fill();
         ctx.restore();
     }
+}
+
+function initMeadowPlants() {
+    meadowPlants.length = 0;
+    const centerX = canvas.width / 2;
+    const baseY = canvas.height - 12;
+
+    [-1, 1].forEach(side => {
+        for (let i = 0; i < 6; i++) {
+            const offset = 88 + (i * 28) + Math.random() * 18;
+            meadowPlants.push({
+                side,
+                kind: Math.random() < 0.38 ? 'flower' : 'grass',
+                x: centerX + (side * offset),
+                baseY: baseY + Math.random() * 6,
+                growth: Math.random() * 0.04,
+                stemHeight: 18 + Math.random() * 26,
+                bloomSize: 7 + Math.random() * 5,
+                swayPhase: Math.random() * Math.PI * 2,
+                pulse: 0,
+                energyColor: SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)],
+                petalColor: ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71'][Math.floor(Math.random() * 4)]
+            });
+        }
+    });
+}
+
+function resetMeadowPlants() {
+    meadowPlants.forEach(plant => {
+        plant.growth = Math.random() * 0.04;
+        plant.pulse = 0;
+        plant.energyColor = SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)];
+    });
+}
+
+function feedMeadowGrowth(sourceX, strength, color) {
+    const nearby = meadowPlants
+        .map(plant => ({ plant, dist: Math.abs(plant.x - sourceX) }))
+        .sort((a, b) => a.dist - b.dist)
+        .slice(0, 4);
+
+    nearby.forEach(({ plant, dist }) => {
+        const distanceFactor = Math.max(0.22, 1 - (dist / 140));
+        plant.growth = Math.min(1, plant.growth + distanceFactor * (0.05 + strength * 0.09));
+        plant.pulse = Math.min(1, plant.pulse + 0.35 + strength * 0.28);
+        plant.energyColor = color || plant.energyColor;
+    });
+}
+
+function drawGrassBlade(plant, sway, heightScale) {
+    const bladeHeight = plant.stemHeight * heightScale * plant.growth;
+    if (bladeHeight <= 1) return;
+
+    ctx.beginPath();
+    ctx.moveTo(plant.x, plant.baseY);
+    ctx.quadraticCurveTo(
+        plant.x + sway * 0.45,
+        plant.baseY - bladeHeight * 0.65,
+        plant.x + sway,
+        plant.baseY - bladeHeight
+    );
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = '#78d870';
+    ctx.stroke();
+}
+
+function drawFlowerPlant(plant, sway) {
+    const growth = plant.growth;
+    const stemHeight = plant.stemHeight * growth;
+    if (stemHeight <= 1) return;
+
+    const bloomX = plant.x + sway;
+    const bloomY = plant.baseY - stemHeight;
+
+    ctx.beginPath();
+    ctx.moveTo(plant.x, plant.baseY);
+    ctx.quadraticCurveTo(plant.x + sway * 0.35, plant.baseY - stemHeight * 0.55, bloomX, bloomY);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#5abf59';
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(plant.x, plant.baseY - stemHeight * 0.45);
+    ctx.rotate(-0.6);
+    ctx.fillStyle = 'rgba(135, 214, 117, 0.82)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 10 * growth, 4 * growth, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(plant.x, plant.baseY - stemHeight * 0.28);
+    ctx.rotate(0.65);
+    ctx.fillStyle = 'rgba(135, 214, 117, 0.72)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 9 * growth, 3.6 * growth, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    if (growth < 0.55) return;
+
+    const blossomSize = plant.bloomSize * growth;
+    drawEnergyAura(bloomX, bloomY, 5 + plant.pulse * 7, plant.energyColor, 0.05 + plant.pulse * 0.08);
+
+    ctx.save();
+    ctx.translate(bloomX, bloomY);
+    for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI * 2 * i) / 6;
+        ctx.save();
+        ctx.rotate(angle);
+        ctx.fillStyle = plant.petalColor;
+        ctx.beginPath();
+        ctx.ellipse(0, -blossomSize * 0.72, blossomSize * 0.52, blossomSize * 0.92, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+    ctx.fillStyle = '#fff5b7';
+    ctx.beginPath();
+    ctx.arc(0, 0, blossomSize * 0.55, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawMeadowPlants() {
+    const passiveGrowth = Math.max(0, (STATE.currentDB - 58) / 15000);
+    const time = Date.now() / 950;
+
+    meadowPlants.forEach((plant, index) => {
+        plant.growth = Math.min(1, plant.growth + passiveGrowth);
+        plant.pulse = Math.max(0, plant.pulse - 0.016);
+
+        if (plant.growth < 0.03) return;
+
+        const sway = Math.sin(time + plant.swayPhase + index * 0.18) * (3 + plant.growth * 4);
+        drawEnergyAura(plant.x, plant.baseY - 4, 5 + plant.pulse * 7, plant.energyColor, 0.04 + plant.pulse * 0.06);
+
+        ctx.save();
+        ctx.lineCap = 'round';
+        if (plant.kind === 'flower') {
+            drawFlowerPlant(plant, sway);
+        } else {
+            drawGrassBlade(plant, sway, 1);
+            drawGrassBlade(plant, sway * 0.72 - 6, 0.82);
+            drawGrassBlade(plant, sway * 0.65 + 5, 0.74);
+        }
+        ctx.restore();
+    });
 }
 
 function spawnSkyEnergy(treeSize, anchors) {
@@ -1079,6 +1429,7 @@ function initCanvas() {
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    if (meadowPlants.length) initMeadowPlants();
 }
 
 function initEnvironment() {
@@ -1088,6 +1439,7 @@ function initEnvironment() {
     energyParticles.length = 0;
     trunkTransfers.length = 0;
     soilTransfers.length = 0;
+    initMeadowPlants();
     for (let i = 0; i < 5; i++) clouds.push(new Cloud());
     for (let i = 0; i < 3; i++) birds.push(new Bird());
 }
@@ -1245,6 +1597,7 @@ function loop() {
     }
 
     drawEnergyFlow(treeSize);
+    drawMeadowPlants();
 
     if (STATE.isSuperMode && Math.random() < 0.2) {
         sparkles.push(new Sparkle(Math.random() * canvas.width, Math.random() * canvas.height));

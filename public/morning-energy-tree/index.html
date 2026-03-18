@@ -128,16 +128,31 @@
             <button id="report-backdrop" class="report-backdrop" aria-label="Close report"></button>
             <div class="report-dialog">
                 <div class="report-header">
-                    <div class="report-header-copy">
-                        <strong data-i18n="morningTree.report.title">本周早读报告</strong>
-                        <span data-i18n="morningTree.report.sub">仅保存在本机，按周一到周五查看</span>
+                    <div class="report-header-heading">
+                        <div class="report-header-icon">🌿</div>
+                        <div class="report-header-copy">
+                            <strong data-i18n="morningTree.report.title">本周早读报告</strong>
+                            <span data-i18n="morningTree.report.sub">仅保存在本机，按周一到周五查看</span>
+                        </div>
                     </div>
                     <button id="report-close-btn" class="report-close-btn" type="button" aria-label="Close report">✕</button>
                 </div>
                 <div class="report-body">
                     <div id="report-week-label" class="report-week-label"></div>
-                    <div id="report-day-chip-row" class="report-day-chip-row"></div>
-                    <div id="report-day-list" class="report-day-list"></div>
+                    <div class="report-summary-grid">
+                        <div class="report-summary-card">
+                            <span data-i18n="morningTree.report.summarySessions">记录场次</span>
+                            <strong id="report-summary-count">0</strong>
+                        </div>
+                        <div class="report-summary-card peak">
+                            <span data-i18n="morningTree.report.summaryPeak">本周峰值</span>
+                            <strong id="report-summary-peak">--</strong>
+                        </div>
+                    </div>
+                    <div class="report-viewer-layout">
+                        <div id="report-day-chip-row" class="report-day-sidebar"></div>
+                        <div id="report-day-list" class="report-focus-shell"></div>
+                    </div>
                 </div>
             </div>
         </div>

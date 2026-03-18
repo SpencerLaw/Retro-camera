@@ -297,7 +297,7 @@ canvas {
 .report-dialog {
     position: relative;
     width: min(960px, calc(100vw - 40px));
-    max-height: min(80vh, 760px);
+    max-height: min(82vh, 760px);
     border-radius: 28px;
     background: linear-gradient(180deg, rgba(17, 28, 61, 0.96), rgba(13, 22, 47, 0.96));
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -314,6 +314,24 @@ canvas {
     gap: 16px;
     padding: 18px 22px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.report-header-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.report-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    background: linear-gradient(135deg, rgba(125, 249, 255, 0.2), rgba(156, 255, 111, 0.18));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .report-header-copy {
@@ -345,13 +363,12 @@ canvas {
 
 .report-body {
     padding: 18px 22px 22px;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .report-week-label {
@@ -360,26 +377,86 @@ canvas {
     color: rgba(255, 255, 255, 0.75);
 }
 
-.report-day-chip-row {
+.report-summary-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.report-summary-card {
+    border-radius: 20px;
+    padding: 16px 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.report-summary-card span {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.report-summary-card strong {
+    font-size: 1.9rem;
+    line-height: 1;
+    font-weight: 900;
+    color: #f8fafc;
+}
+
+.report-summary-card.peak strong {
+    color: #ff80c8;
+}
+
+.report-viewer-layout {
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 14px;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.report-day-sidebar {
+    display: grid;
+    grid-template-rows: repeat(5, minmax(0, 1fr));
     gap: 10px;
+    min-height: 0;
 }
 
 .report-day-chip {
+    appearance: none;
+    -webkit-appearance: none;
     border-radius: 16px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    min-height: 0;
+    height: 100%;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-.report-day-chip.active {
+.report-day-chip.has-data {
     background: linear-gradient(135deg, rgba(50, 171, 199, 0.24), rgba(123, 197, 72, 0.18));
     border-color: rgba(140, 255, 221, 0.28);
+}
+
+.report-day-chip.selected {
+    border-color: rgba(125, 249, 255, 0.42);
+    box-shadow: 0 0 0 1px rgba(125, 249, 255, 0.18), 0 14px 30px rgba(41, 198, 255, 0.14);
+}
+
+.report-day-chip-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .report-day-chip span {
@@ -387,110 +464,200 @@ canvas {
     opacity: 0.8;
 }
 
+.report-day-chip-copy small {
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.58);
+}
+
 .report-day-chip strong {
     font-size: 1.1rem;
     font-weight: 900;
 }
 
-.report-day-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.report-day-section {
+.report-focus-shell {
     border-radius: 22px;
     padding: 16px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
 }
 
-.report-day-title {
+.report-day-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
 }
 
-.report-day-title strong {
+.report-day-header strong {
     display: block;
     font-size: 1rem;
     font-weight: 900;
 }
 
-.report-day-title span,
-.report-day-title em {
+.report-day-header span {
     font-size: 0.8rem;
     opacity: 0.74;
-    font-style: normal;
 }
 
-.report-session-card {
-    border-radius: 18px;
-    padding: 14px;
+.report-day-count {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.12);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.report-day-count.has-data {
+    background: rgba(156, 255, 111, 0.16);
+    color: #d6ff9b;
+}
+
+.report-nav-row {
+    display: grid;
+    grid-template-columns: 116px 1fr 116px;
+    gap: 10px;
+    align-items: center;
+}
+
+.report-nav-btn {
+    border: 1px solid rgba(125, 249, 255, 0.18);
+    background: rgba(50, 171, 199, 0.14);
+    color: #aafaff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.report-nav-btn:disabled {
+    opacity: 0.36;
+    cursor: not-allowed;
+}
+
+.report-nav-status {
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.74);
+}
+
+.report-focus-card {
+    border-radius: 20px;
+    padding: 16px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
-.report-session-card+.report-session-card {
-    margin-top: 10px;
-}
-
-.report-session-meta {
+.report-focus-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
 }
 
-.report-session-meta strong {
+.report-session-copy strong {
     display: block;
-    font-size: 0.96rem;
-    font-weight: 800;
+    font-size: 1rem;
+    font-weight: 900;
 }
 
-.report-session-meta span {
+.report-session-copy span {
     display: block;
     margin-top: 4px;
     font-size: 0.78rem;
-    opacity: 0.76;
+    color: rgba(255, 255, 255, 0.68);
 }
 
 .report-duration-pill {
     flex-shrink: 0;
     padding: 8px 12px;
     border-radius: 999px;
-    background: rgba(130, 247, 255, 0.14);
-    color: #b6fbff;
+    background: rgba(130, 247, 255, 0.16);
+    color: #d8ffff;
     font-size: 0.82rem;
     font-weight: 800;
 }
 
-.report-curve-panel {
+.report-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.report-metric-card {
     border-radius: 16px;
     padding: 12px;
-    background: rgba(0, 0, 0, 0.16);
+    background: rgba(148, 163, 184, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.report-metric-card span {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.report-metric-card strong {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.report-metric-card.peak strong {
+    color: #ff9bd6;
+}
+
+.report-metric-card.low strong {
+    color: #8cf7d9;
+}
+
+.report-curve-panel {
+    border-radius: 18px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.18);
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.report-curve-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
 .report-curve-label {
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 800;
     opacity: 0.82;
-    margin-bottom: 8px;
+}
+
+.report-curve-hint {
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.58);
 }
 
 .report-curve-svg {
     display: block;
     width: 100%;
-    height: 76px;
+    height: 180px;
 }
 
-.report-empty {
+.report-empty-state {
     border-radius: 16px;
-    padding: 16px;
+    padding: 18px;
     text-align: center;
     background: rgba(255, 255, 255, 0.04);
     color: rgba(255, 255, 255, 0.68);
@@ -851,13 +1018,32 @@ button.icon-btn.active {
         max-height: 84vh;
     }
 
-    .report-day-chip-row {
+    .report-summary-grid,
+    .report-viewer-layout,
+    .report-day-sidebar,
+    .report-nav-row,
+    .report-metric-grid {
         grid-template-columns: 1fr;
     }
 
-    .report-session-meta,
-    .report-day-title,
+    .report-day-sidebar {
+        grid-template-rows: none;
+    }
+
+    .report-focus-shell,
+    .report-focus-card {
+        padding: 12px;
+    }
+
+    .report-focus-top,
     .report-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .report-header-heading,
+    .report-curve-head {
+        width: 100%;
         flex-direction: column;
         align-items: flex-start;
     }

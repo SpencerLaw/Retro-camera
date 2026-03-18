@@ -42,7 +42,6 @@ interface SessionReport {
 
 const REPORT_STORAGE_KEY = 'doraemon_session_reports_v1';
 const MAX_STORED_REPORTS = 180;
-const REPORT_PAGE_SIZE = 3;
 const REPORT_WEEKDAYS: Array<{ key: ReportWeekday; offset: number }> = [
   { key: 'mon', offset: 0 },
   { key: 'tue', offset: 1 },
@@ -225,8 +224,7 @@ const DoraemonMonitorApp: React.FC = () => {
     const selectedDayCount = sessionReports.filter(
       report => getReportWeekdayKey(report.startedAt) === activeReportDay
     ).length;
-    const pageCount = Math.max(1, Math.ceil(selectedDayCount / REPORT_PAGE_SIZE));
-    setReportPage(prev => Math.min(prev, pageCount - 1));
+    setReportPage(prev => Math.min(prev, Math.max(0, selectedDayCount - 1)));
   }, [activeReportDay, sessionReports]);
 
   useEffect(() => {
@@ -886,11 +884,10 @@ const DoraemonMonitorApp: React.FC = () => {
   });
   const firstReportDayWithData = reportDayGroups.find(group => group.records.length > 0)?.key ?? 'mon';
   const selectedReportDay = reportDayGroups.find(group => group.key === activeReportDay) ?? reportDayGroups[0];
-  const totalReportPages = Math.max(1, Math.ceil(selectedReportDay.records.length / REPORT_PAGE_SIZE));
-  const pagedReportRecords = selectedReportDay.records.slice(
-    reportPage * REPORT_PAGE_SIZE,
-    (reportPage + 1) * REPORT_PAGE_SIZE
-  );
+  const selectedReportIndex = clamp(reportPage, 0, Math.max(0, selectedReportDay.records.length - 1));
+  const selectedReportRecord = selectedReportDay.records[selectedReportIndex] ?? null;
+  const hasPreviousReport = selectedReportIndex > 0;
+  const hasNextReport = selectedReportIndex < selectedReportDay.records.length - 1;
   const todayReportWeekday = getReportWeekdayKey(new Date());
   const defaultReportDay = reportDayGroups.find(group => group.key === todayReportWeekday && group.records.length > 0)?.key
     ?? todayReportWeekday
@@ -1199,84 +1196,84 @@ const DoraemonMonitorApp: React.FC = () => {
               ))}
             </div>
 
-            <div className="report-day-list report-day-panel">
-              <section className="report-day-section">
-                <div className="report-day-header">
-                  <div>
-                    <strong>{selectedReportDay.label}</strong>
-                    <span>{selectedReportDay.dateLabel}</span>
-                  </div>
-                  <span className={`report-day-count ${selectedReportDay.records.length ? 'has-data' : ''}`}>
-                    {t('doraemon.report.sessionCount').replace('{count}', String(selectedReportDay.records.length))}
-                  </span>
+            <section className="report-focus-shell">
+              <div className="report-day-header">
+                <div>
+                  <strong>{selectedReportDay.label}</strong>
+                  <span>{selectedReportDay.dateLabel}</span>
                 </div>
+                <span className={`report-day-count ${selectedReportDay.records.length ? 'has-data' : ''}`}>
+                  {t('doraemon.report.sessionCount').replace('{count}', String(selectedReportDay.records.length))}
+                </span>
+              </div>
 
-                {pagedReportRecords.length > 0 ? (
-                  <div className="report-session-list">
-                    {pagedReportRecords.map(report => (
-                      <article key={report.id} className="report-session-card">
-                        <div className="report-session-top">
-                          <div className="report-time-cell">
-                            <strong>{formatReportClock(report.startedAt)} - {report.endedAt ? formatReportClock(report.endedAt) : t('doraemon.report.ongoing')}</strong>
-                            {report.endedAt === null && (
-                              <span className="report-live-badge">{t('doraemon.report.live')}</span>
-                            )}
-                          </div>
-                          <span className="report-peak-pill">{Math.round(report.peakDb)} dB</span>
-                        </div>
-
-                        <div className="report-session-grid">
-                          <div className="report-session-metric">
-                            <span>{t('doraemon.report.columns.duration')}</span>
-                            <strong>{formatTime(report.totalSeconds)}</strong>
-                          </div>
-                          <div className="report-session-metric">
-                            <span>{t('doraemon.report.columns.quiet')}</span>
-                            <strong>{formatTime(report.quietSeconds)}</strong>
-                          </div>
-                          <div className="report-session-metric">
-                            <span>{t('doraemon.report.columns.warnings')}</span>
-                            <strong>{report.warnCount}</strong>
-                          </div>
-                          <div className="report-session-metric">
-                            <span>{t('doraemon.report.columns.settings')}</span>
-                            <strong>{`${report.threshold} dB / ${report.sensitivity}%`}</strong>
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="report-empty-state">{t('doraemon.report.empty')}</div>
-                )}
-
-                {selectedReportDay.records.length > REPORT_PAGE_SIZE && (
-                  <div className="report-pagination">
+              {selectedReportRecord ? (
+                <>
+                  <div className="report-nav-row">
                     <button
                       type="button"
-                      className="report-page-btn"
+                      className="report-nav-btn"
                       onClick={() => setReportPage(prev => Math.max(0, prev - 1))}
-                      disabled={reportPage === 0}
+                      disabled={!hasPreviousReport}
                     >
                       {t('doraemon.report.prevPage')}
                     </button>
-                    <span className="report-page-status">
+                    <span className="report-nav-status">
                       {t('doraemon.report.pageStatus')
-                        .replace('{current}', String(reportPage + 1))
-                        .replace('{total}', String(totalReportPages))}
+                        .replace('{current}', String(selectedReportIndex + 1))
+                        .replace('{total}', String(selectedReportDay.records.length))}
                     </span>
                     <button
                       type="button"
-                      className="report-page-btn"
-                      onClick={() => setReportPage(prev => Math.min(totalReportPages - 1, prev + 1))}
-                      disabled={reportPage >= totalReportPages - 1}
+                      className="report-nav-btn"
+                      onClick={() => setReportPage(prev => Math.min(selectedReportDay.records.length - 1, prev + 1))}
+                      disabled={!hasNextReport}
                     >
                       {t('doraemon.report.nextPage')}
                     </button>
                   </div>
-                )}
-              </section>
-            </div>
+
+                  <article className="report-focus-card">
+                    <div className="report-focus-top">
+                      <div className="report-time-cell">
+                        <strong>{formatReportClock(selectedReportRecord.startedAt)} - {selectedReportRecord.endedAt ? formatReportClock(selectedReportRecord.endedAt) : t('doraemon.report.ongoing')}</strong>
+                        {selectedReportRecord.endedAt === null && (
+                          <span className="report-live-badge">{t('doraemon.report.live')}</span>
+                        )}
+                      </div>
+                      <span className="report-peak-pill">{Math.round(selectedReportRecord.peakDb)} dB</span>
+                    </div>
+
+                    <div className="report-focus-grid">
+                      <div className="report-session-metric">
+                        <span>{t('doraemon.report.columns.duration')}</span>
+                        <strong>{formatTime(selectedReportRecord.totalSeconds)}</strong>
+                      </div>
+                      <div className="report-session-metric">
+                        <span>{t('doraemon.report.columns.quiet')}</span>
+                        <strong>{formatTime(selectedReportRecord.quietSeconds)}</strong>
+                      </div>
+                      <div className="report-session-metric">
+                        <span>{t('doraemon.report.columns.warnings')}</span>
+                        <strong>{selectedReportRecord.warnCount}</strong>
+                      </div>
+                      <div className="report-session-metric">
+                        <span>{t('doraemon.report.columns.settings')}</span>
+                        <strong>{`${selectedReportRecord.threshold} dB / ${selectedReportRecord.sensitivity}%`}</strong>
+                      </div>
+                    </div>
+
+                    <div className="report-settings-band">
+                      {t('doraemon.report.settings')
+                        .replace('{limit}', String(selectedReportRecord.threshold))
+                        .replace('{sensitivity}', String(selectedReportRecord.sensitivity))}
+                    </div>
+                  </article>
+                </>
+              ) : (
+                <div className="report-empty-state">{t('doraemon.report.empty')}</div>
+              )}
+            </section>
           </div>
         </div>
       </div>

@@ -1322,9 +1322,8 @@
 .report-modal-shell {
   position: relative;
   z-index: 1;
-  width: min(880px, calc(100vw - 40px));
-  height: min(80vh, 760px);
-  max-height: min(80vh, 760px);
+  width: min(860px, calc(100vw - 40px));
+  max-height: min(84vh, 700px);
   border-radius: 28px;
   background: rgba(18, 28, 63, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1379,15 +1378,13 @@
 .report-modal-body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px 20px 20px;
-  overflow: hidden;
-  flex: 1 1 auto;
-  min-height: 0;
+  gap: 12px;
+  padding: 16px 18px 18px;
+  overflow: visible;
 }
 
 .report-modal-week {
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   font-size: 0.82rem;
   font-weight: 800;
   color: var(--text-secondary);
@@ -1479,7 +1476,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .report-summary-card {
@@ -1524,14 +1521,14 @@
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .report-day-chip {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 16px;
-  padding: 10px 12px;
+  padding: 11px 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -1542,6 +1539,8 @@
   width: 100%;
   color: inherit;
   text-align: left;
+  position: relative;
+  z-index: 1;
 }
 
 .doraemon-app:not(.dark-mode) .report-day-chip {
@@ -1573,26 +1572,17 @@
   font-weight: 900;
 }
 
-.report-day-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.report-day-panel {
-  justify-content: flex-start;
-}
-
-.report-day-section {
+.report-focus-shell {
   border-radius: 20px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.doraemon-app:not(.dark-mode) .report-day-section {
+.doraemon-app:not(.dark-mode) .report-focus-shell {
   background: rgba(148, 163, 184, 0.06);
   border-color: rgba(148, 163, 184, 0.16);
 }
@@ -1634,13 +1624,42 @@
   color: #15803d;
 }
 
-.report-session-list {
+.report-nav-row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 120px 1fr 120px;
   gap: 10px;
+  align-items: center;
 }
 
-.report-session-card {
+.report-nav-btn {
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  background: rgba(14, 165, 233, 0.12);
+  color: #8edcff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.report-nav-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.report-nav-status {
+  min-width: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.doraemon-app:not(.dark-mode) .report-nav-status {
+  color: #475569;
+}
+
+.report-focus-card {
   border-radius: 18px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.04);
@@ -1650,19 +1669,19 @@
   gap: 12px;
 }
 
-.doraemon-app:not(.dark-mode) .report-session-card {
+.doraemon-app:not(.dark-mode) .report-focus-card {
   background: rgba(148, 163, 184, 0.06);
   border-color: rgba(148, 163, 184, 0.16);
 }
 
-.report-session-top {
+.report-focus-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.report-session-grid {
+.report-focus-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
@@ -1692,35 +1711,18 @@
   color: #64748b;
 }
 
-.report-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 2px;
-}
-
-.report-page-btn {
-  border: 1px solid rgba(125, 211, 252, 0.18);
-  background: rgba(14, 165, 233, 0.12);
-  color: #8edcff;
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.report-page-btn:disabled {
-  opacity: 0.38;
-  cursor: not-allowed;
-}
-
-.report-page-status {
+.report-settings-band {
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(34, 197, 94, 0.14));
+  border: 1px solid rgba(125, 211, 252, 0.14);
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.72);
   font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.doraemon-app:not(.dark-mode) .report-settings-band {
+  color: #334155;
 }
 
 .report-table-scroll {
@@ -2043,8 +2045,13 @@
     align-items: flex-start;
   }
 
-  .report-day-section {
+  .report-focus-shell {
     padding: 12px;
+  }
+
+  .report-nav-row,
+  .report-focus-grid {
+    grid-template-columns: 1fr;
   }
 
   .stat-box {
@@ -2251,7 +2258,6 @@
 
   .report-modal-shell {
     width: calc(100vw - 12px);
-    height: 82vh;
     max-height: 82vh;
   }
 
@@ -2260,9 +2266,14 @@
     height: min(80vh, 680px);
   }
 
-  .report-day-section,
-  .report-session-card {
+  .report-focus-shell,
+  .report-focus-card {
     padding: 12px;
+  }
+
+  .report-nav-row,
+  .report-focus-grid {
+    grid-template-columns: 1fr;
   }
 }
 

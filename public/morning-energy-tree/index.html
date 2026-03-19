@@ -57,7 +57,10 @@
                         <div class="task-strip-badge" data-i18n="morningTree.tasks.todayBadge">今日任务</div>
                         <div class="task-strip-switch">
                             <button id="task-strip-prev" class="task-strip-nav-btn" type="button" aria-label="Previous weekday">‹</button>
-                            <span id="task-strip-day" class="task-strip-day">周一</span>
+                            <div class="task-strip-switch-copy">
+                                <span id="task-strip-day" class="task-strip-day">周一</span>
+                                <span id="task-strip-datetime" class="task-strip-datetime">2026-03-19 14:26</span>
+                            </div>
                             <button id="task-strip-next" class="task-strip-nav-btn" type="button" aria-label="Next weekday">›</button>
                         </div>
                     </div>
@@ -108,13 +111,7 @@
 
             <!-- Bottom: Controls -->
             <div class="bottom-controls">
-                <!-- Mic Toggle -->
-                <button id="mic-toggle-btn" class="icon-btn" data-i18n-title="morningTree.micToggleTitle">
-                    🎤
-                </button>
-
-                <!-- Timer Settings -->
-                <div class="control-group">
+                <div class="control-group control-block">
                     <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
                     <select id="duration-select" class="duration-select">
                         <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
@@ -125,8 +122,7 @@
                         data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
                 </div>
 
-                <!-- Sensitivity 3-level -->
-                <div class="sens-group">
+                <div class="sens-group control-block">
                     <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
                     <div class="sens-btns">
                         <button class="sens-btn" data-sens="30">低</button>
@@ -144,6 +140,10 @@
                         <p class="tap-close">点击此处关闭</p>
                     </div>
                 </div>
+
+                <button id="mic-toggle-btn" class="start-reading-btn" data-i18n-title="morningTree.micToggleTitle" type="button">
+                    开始早读
+                </button>
 
             </div>
         </div>

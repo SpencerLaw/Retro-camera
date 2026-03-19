@@ -93,6 +93,7 @@ const taskStripNoteWrap = $('task-strip-note-wrap');
 const taskStripNoteTitle = $('task-strip-note-title');
 const taskStripNote = $('task-strip-note');
 const taskStripDay = $('task-strip-day');
+const taskStripDateTime = $('task-strip-datetime');
 const taskStripPrev = $('task-strip-prev');
 const taskStripNext = $('task-strip-next');
 const taskTriggerBtn = $('task-trigger-btn');
@@ -121,6 +122,7 @@ const dbStatus = $('db-status');
 const ringBar = $('ring-bar');
 let taskSaveFeedbackTimer = null;
 let taskStripResetTimer = null;
+let taskStripClockTimer = null;
 
 if (helpTrigger) {
     helpTrigger.onclick = (e) => {
@@ -293,6 +295,16 @@ function escapeHtml(value) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+function formatTaskStripDateTime(dateLike = new Date()) {
+    const date = new Date(dateLike);
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    const hours = `${date.getHours()}`.padStart(2, '0');
+    const minutes = `${date.getMinutes()}`.padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
 function compressCurve(points, maxPoints = 40) {
@@ -899,6 +911,7 @@ function updateTaskStrip() {
 
     taskStrip.classList.remove('hidden');
     if (taskStripDay) taskStripDay.textContent = dayLabel;
+    if (taskStripDateTime) taskStripDateTime.textContent = formatTaskStripDateTime(now);
 
     if (taskStripNoteWrap && taskStripNote && taskStripNoteTitle) {
         if (noteHeading || noteText) {
@@ -1193,6 +1206,13 @@ function initTaskUI() {
         taskStripNext.onclick = () => shiftTaskStripDay(1);
     }
 
+    if (taskStripClockTimer) {
+        clearInterval(taskStripClockTimer);
+    }
+    taskStripClockTimer = setInterval(() => {
+        updateTaskStrip();
+    }, 30000);
+
     updateTaskStrip();
 }
 
@@ -1336,7 +1356,7 @@ async function startMic() {
         dataArray = new Uint8Array(analyser.fftSize);
 
         STATE.isListening = true;
-        micBtn.textContent = '⏸';
+        micBtn.textContent = '暂停早读';
         micBtn.classList.add('active');
         dbDisplay.classList.add('active');
 
@@ -1366,7 +1386,7 @@ function stopMic() {
     dataArray = null;
     finalizeReportSession();
     STATE.isListening = false;
-    micBtn.textContent = '🎤';
+    micBtn.textContent = '开始早读';
     micBtn.classList.remove('active');
     dbDisplay.classList.remove('active');
     dbValue.textContent = '--';

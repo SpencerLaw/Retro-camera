@@ -55,10 +55,10 @@ const ENERGY_SKY_COLORS = ['#fff176', '#ffe082', '#fff59d', '#ffecb3'];
 const ENERGY_TECH_COLORS = ['#7df9ff', '#8cf7d9', '#d2ff72', '#f7ff9c'];
 const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
 const FX_LIMITS = {
-    sparkles: 64,
-    energyParticles: 16,
-    trunkTransfers: 12,
-    soilTransfers: 14
+    sparkles: 88,
+    energyParticles: 22,
+    trunkTransfers: 16,
+    soilTransfers: 18
 };
 
 /* --- DOM Elements --- */
@@ -959,7 +959,7 @@ function pushLimitedEffect(queue, item, maxSize) {
 
 function spawnSparkle(x, y, color = '#fff') {
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-    pushLimitedEffect(sparkles, new Sparkle(x, y, color), FX_LIMITS.sparkles);
+    pushLimitedEffect(sparkles, new Sparkle(x, y, color), getFxLimit('sparkles'));
 }
 
 function getFxLoad() {
@@ -968,16 +968,25 @@ function getFxLoad() {
 
 function getRenderMode(treeSize = 0) {
     const fxLoad = getFxLoad();
-    const energyPressure = Math.max(0, STATE.energy - 68) * 0.32;
-    const treePressure = Math.max(0, treeSize - 176) / 11;
+    const energyPressure = Math.max(0, STATE.energy - 72) * 0.24;
+    const treePressure = Math.max(0, treeSize - 188) / 13;
     const totalPressure = fxLoad + energyPressure + treePressure;
 
     return {
         fxLoad,
         totalPressure,
-        lowPower: totalPressure > 42,
-        ultraLowPower: totalPressure > 56
+        lowPower: totalPressure > 48,
+        ultraLowPower: totalPressure > 64
     };
+}
+
+function getFxLimit(type, treeSize = 0) {
+    const renderMode = getRenderMode(treeSize);
+    const baseLimit = FX_LIMITS[type];
+    if (!baseLimit) return 0;
+    if (renderMode.ultraLowPower) return Math.max(8, Math.round(baseLimit * 0.72));
+    if (renderMode.lowPower) return Math.max(10, Math.round(baseLimit * 0.9));
+    return baseLimit;
 }
 
 class Cloud {
@@ -1125,7 +1134,7 @@ function drawEnergyAura(x, y, radius, color, alpha = 0.2) {
 function drawParticleTrail(points, color, baseSize, alpha = 0.7) {
     if (points.length < 2) return;
     const renderMode = getRenderMode();
-    const step = renderMode.lowPower ? 2 : 1;
+    const step = renderMode.ultraLowPower ? 2 : 1;
 
     for (let i = 0; i < points.length; i += step) {
         const point = points[i];
@@ -1174,7 +1183,7 @@ class SkyEnergy {
         this.x = base.x + (normalX * wobble);
         this.y = base.y + (normalY * wobble);
         this.history.push({ x: this.x, y: this.y });
-        if (this.history.length > 8) this.history.shift();
+        if (this.history.length > 9) this.history.shift();
 
         const dx = this.target.x - this.x;
         const dy = this.target.y - this.y;
@@ -1184,7 +1193,7 @@ class SkyEnergy {
             pushLimitedEffect(
                 trunkTransfers,
                 new TrunkTransfer(this.x, this.y, this.trunkBase.x, this.trunkBase.y, this.strength, this.hue),
-                FX_LIMITS.trunkTransfers
+                getFxLimit('trunkTransfers')
             );
             return false;
         }
@@ -1255,15 +1264,16 @@ class TrunkTransfer {
         this.t += this.speed;
         if (this.t >= 1) {
             spawnSparkle(this.end.x, this.end.y, '#d8ff66');
-            const remainingSlots = FX_LIMITS.soilTransfers - soilTransfers.length;
+            const soilLimit = getFxLimit('soilTransfers');
+            const remainingSlots = soilLimit - soilTransfers.length;
             if (remainingSlots >= 2) {
-                pushLimitedEffect(soilTransfers, new SoilTransfer(this.end.x, this.end.y, -1, this.strength, this.color), FX_LIMITS.soilTransfers);
-                pushLimitedEffect(soilTransfers, new SoilTransfer(this.end.x, this.end.y, 1, this.strength, this.color), FX_LIMITS.soilTransfers);
+                pushLimitedEffect(soilTransfers, new SoilTransfer(this.end.x, this.end.y, -1, this.strength, this.color), soilLimit);
+                pushLimitedEffect(soilTransfers, new SoilTransfer(this.end.x, this.end.y, 1, this.strength, this.color), soilLimit);
             } else if (remainingSlots === 1) {
                 pushLimitedEffect(
                     soilTransfers,
                     new SoilTransfer(this.end.x, this.end.y, Math.random() < 0.5 ? -1 : 1, this.strength, this.color),
-                    FX_LIMITS.soilTransfers
+                    soilLimit
                 );
             }
             return false;
@@ -1275,7 +1285,7 @@ class TrunkTransfer {
         const eased = easeInOutSine(Math.min(1, this.t));
         const head = pointOnQuadratic(this.start, this.control, this.end, eased);
         this.history.push({ x: head.x, y: head.y });
-        if (this.history.length > 7) this.history.shift();
+        if (this.history.length > 8) this.history.shift();
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1338,7 +1348,7 @@ class SoilTransfer {
         const eased = easeInOutSine(Math.min(1, this.t));
         const head = pointOnQuadratic(this.start, this.control, this.end, eased);
         this.history.push({ x: head.x, y: head.y });
-        if (this.history.length > 6) this.history.shift();
+        if (this.history.length > 7) this.history.shift();
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1562,16 +1572,29 @@ function drawMeadowPlants() {
 function spawnSkyEnergy(treeSize, anchors) {
     if (!STATE.isListening) return;
     const activation = Math.max(0, (STATE.currentDB - 56) / 26);
+    const renderMode = getRenderMode(treeSize);
+    const particleLimit = getFxLimit('energyParticles', treeSize);
     if (activation <= 0) return;
-    if (energyParticles.length >= FX_LIMITS.energyParticles) return;
+    if (energyParticles.length >= particleLimit) return;
 
-    const backlogRatio = energyParticles.length / FX_LIMITS.energyParticles;
-    const shouldSpawn = Math.random() < ((0.2 + activation * 0.32) * (1 - backlogRatio * 0.65));
+    const backlogRatio = energyParticles.length / particleLimit;
+    const spawnFactor = renderMode.ultraLowPower ? 0.72 : renderMode.lowPower ? 0.94 : 1.2;
+    const shouldSpawn = Math.random() < Math.min(
+        0.92,
+        ((0.22 + activation * 0.34) * (1 - backlogRatio * 0.45)) * spawnFactor
+    );
     if (!shouldSpawn) return;
 
-    const availableSlots = Math.max(0, FX_LIMITS.energyParticles - energyParticles.length);
+    const availableSlots = Math.max(0, particleLimit - energyParticles.length);
     if (!availableSlots) return;
-    const spawnCount = Math.min(availableSlots, Math.random() < (0.18 + activation * 0.22) ? 2 : 1);
+    let spawnCount = 1;
+    if (!renderMode.ultraLowPower && Math.random() < (0.2 + activation * 0.24)) {
+        spawnCount += 1;
+    }
+    if (!renderMode.lowPower && activation > 0.48 && Math.random() < 0.26) {
+        spawnCount += 1;
+    }
+    spawnCount = Math.min(availableSlots, spawnCount);
     for (let i = 0; i < spawnCount; i++) {
         const targetX = anchors.canopy.x + ((Math.random() - 0.5) * treeSize * 0.16);
         const targetY = anchors.canopy.y + ((Math.random() - 0.5) * treeSize * 0.08);
@@ -1582,7 +1605,7 @@ function spawnSkyEnergy(treeSize, anchors) {
         pushLimitedEffect(
             energyParticles,
             new SkyEnergy(sourceX, sourceY, targetX, targetY, anchors.beamControl, anchors.trunkBase, activation),
-            FX_LIMITS.energyParticles
+            particleLimit
         );
     }
 }
@@ -1598,7 +1621,7 @@ function drawEnergyFlow(treeSize) {
 
     if (hasFlow) {
         const flowAlpha = Math.min(0.85, 0.18 + activation * 0.55);
-        const auraScale = renderMode.ultraLowPower ? 0.58 : renderMode.lowPower ? 0.76 : 1;
+        const auraScale = renderMode.ultraLowPower ? 0.64 : renderMode.lowPower ? 0.86 : 1.08;
         drawEnergyAura(anchors.canopy.x, anchors.canopy.y, (14 + (activation * 14)) * auraScale, '#8cf7d9', (0.12 + flowAlpha * 0.2) * auraScale);
         drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, (13 + (activation * 16)) * auraScale, '#d8ff66', (0.1 + flowAlpha * 0.2) * auraScale);
 
@@ -1610,7 +1633,7 @@ function drawEnergyFlow(treeSize) {
         if (!renderMode.lowPower) {
             ctx.save();
             ctx.globalCompositeOperation = 'screen';
-            ctx.globalAlpha = Math.max(0.16, flowAlpha * 0.34);
+            ctx.globalAlpha = Math.max(0.18, flowAlpha * 0.38);
             const soilGlow = ctx.createRadialGradient(anchors.trunkBase.x, anchors.trunkBase.y + 10, 0, anchors.trunkBase.x, anchors.trunkBase.y + 10, 130);
             soilGlow.addColorStop(0, 'rgba(216, 255, 102, 0.55)');
             soilGlow.addColorStop(0.4, 'rgba(89, 240, 255, 0.18)');
@@ -1832,7 +1855,7 @@ function loop() {
     drawEnergyFlow(treeSize);
     drawMeadowPlants();
 
-    const superSparkleChance = renderMode.ultraLowPower ? 0.05 : renderMode.lowPower ? 0.1 : 0.16;
+    const superSparkleChance = renderMode.ultraLowPower ? 0.06 : renderMode.lowPower ? 0.12 : 0.22;
     if (STATE.isSuperMode && Math.random() < superSparkleChance) {
         spawnSparkle(Math.random() * canvas.width, Math.random() * canvas.height);
     }

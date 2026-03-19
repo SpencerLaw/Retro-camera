@@ -410,6 +410,34 @@
         "thu": "Thu",
         "fri": "Fri"
       }
+    },
+    "tasks": {
+      "trigger": "Today's Tasks",
+      "title": "Weekly Morning Tasks",
+      "sub": "Saved only on this device and shown automatically on the matching day",
+      "todayBadge": "Today's Tasks",
+      "emptyToday": "No task scheduled for today",
+      "emptyHint": "Click Today's Tasks on the right to set Monday to Friday content",
+      "pendingTask": "Please enter a task",
+      "nextTask": "Next: {time} {content}",
+      "upcoming": "Starting soon",
+      "finished": "Today's tasks are complete",
+      "itemSuffix": " items",
+      "addSlot": "Add Task",
+      "save": "Save Locally",
+      "savedToast": "✅ Morning tasks saved on this device",
+      "scheduleTitle": "Morning Task Timeline",
+      "scheduleSub": "Teachers can maintain time-based tasks that appear automatically on the matching day",
+      "taskPlaceholder": "Example: Recite Ballad of Mulan part 4",
+      "inspirationTitle": "Daily Reflection / Motivational Text",
+      "inspirationSub": "Enter a headline and a short inspirational passage for students",
+      "noteTitlePlaceholder": "Example: Thinking creates questions; action creates answers",
+      "noteBodyPlaceholder": "Write today's reflection, reminder, or motivational passage here.",
+      "previewTitle": "Student View Preview",
+      "previewSub": "The current task will be shown automatically in the top strip on the matching day",
+      "noteHint": "Fill in the reflection title and text on the right",
+      "noteDefaultTitle": "Daily Reflection",
+      "noteDefaultBody": "You can place a motivational note, a daily reminder, or the goal of today's reading session here."
     }
   }
 }

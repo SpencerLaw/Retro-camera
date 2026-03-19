@@ -427,6 +427,34 @@
         "thu": "周四",
         "fri": "周五"
       }
+    },
+    "tasks": {
+      "trigger": "今日任务",
+      "title": "本周早读任务",
+      "sub": "仅保存在本机，到当天会自动显示",
+      "todayBadge": "今日任务",
+      "emptyToday": "今日暂无早读任务",
+      "emptyHint": "点击右侧今日任务，设置周一到周五内容",
+      "pendingTask": "请填写任务内容",
+      "nextTask": "下一项：{time} {content}",
+      "upcoming": "即将开始",
+      "finished": "今日任务已完成",
+      "itemSuffix": "项",
+      "addSlot": "新增任务",
+      "save": "保存到本机",
+      "savedToast": "✅ 早读任务已保存到本机",
+      "scheduleTitle": "早读任务时间轴",
+      "scheduleSub": "支持老师按时间段维护任务，自动在当天显示",
+      "taskPlaceholder": "例如：背诵《木兰诗》第4部分",
+      "inspirationTitle": "每日感悟 / 励志短文",
+      "inspirationSub": "可输入一句话标题和一段励志短文，面向学生展示",
+      "noteTitlePlaceholder": "例如：想，都是问题；做，才有答案",
+      "noteBodyPlaceholder": "在这里输入当天想展示给学生的短文、感悟或激励语。",
+      "previewTitle": "学生端显示预览",
+      "previewSub": "当天会在顶部细条中自动提示当前任务",
+      "noteHint": "右侧可填写每日感悟标题和短文内容",
+      "noteDefaultTitle": "每日感悟",
+      "noteDefaultBody": "可在这里输入一段励志短文、每日提醒，或当日早读目标。"
     }
   }
 }

@@ -323,6 +323,34 @@
         "thu": "木",
         "fri": "金"
       }
+    },
+    "tasks": {
+      "trigger": "今日の課題",
+      "title": "今週の朝読課題",
+      "sub": "この端末だけに保存され、該当する曜日に自動表示されます",
+      "todayBadge": "今日の課題",
+      "emptyToday": "今日の朝読課題はまだありません",
+      "emptyHint": "右側の今日の課題から月曜から金曜の内容を設定できます",
+      "pendingTask": "課題内容を入力してください",
+      "nextTask": "次：{time} {content}",
+      "upcoming": "まもなく開始",
+      "finished": "今日の課題は完了しました",
+      "itemSuffix": "件",
+      "addSlot": "課題を追加",
+      "save": "端末に保存",
+      "savedToast": "✅ 朝読課題をこの端末に保存しました",
+      "scheduleTitle": "朝読課題タイムライン",
+      "scheduleSub": "先生が時間帯ごとに課題を編集し、その曜日に自動表示されます",
+      "taskPlaceholder": "例：『木蘭詩』第4部分を暗唱",
+      "inspirationTitle": "今日のメッセージ / 励ましの文章",
+      "inspirationSub": "見出しと短い励まし文を入力して生徒に表示できます",
+      "noteTitlePlaceholder": "例：考えるだけでは問い、行動すれば答え",
+      "noteBodyPlaceholder": "今日生徒に見せたい短文、感想、励ましの言葉を入力してください。",
+      "previewTitle": "生徒側プレビュー",
+      "previewSub": "当日は上部の細いバーに現在の課題が自動表示されます",
+      "noteHint": "右側に見出しと本文を入力できます",
+      "noteDefaultTitle": "今日のメッセージ",
+      "noteDefaultBody": "ここに励ましの短文、毎日の注意、または今日の朝読目標を入力できます。"
     }
   }
 }

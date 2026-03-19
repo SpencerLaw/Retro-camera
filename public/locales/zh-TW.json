@@ -329,6 +329,34 @@
         "thu": "週四",
         "fri": "週五"
       }
+    },
+    "tasks": {
+      "trigger": "今日任務",
+      "title": "本週早讀任務",
+      "sub": "僅保存在本機，到當天會自動顯示",
+      "todayBadge": "今日任務",
+      "emptyToday": "今日暫無早讀任務",
+      "emptyHint": "點擊右側今日任務，設定週一到週五內容",
+      "pendingTask": "請填寫任務內容",
+      "nextTask": "下一項：{time} {content}",
+      "upcoming": "即將開始",
+      "finished": "今日任務已完成",
+      "itemSuffix": "項",
+      "addSlot": "新增任務",
+      "save": "保存到本機",
+      "savedToast": "✅ 早讀任務已保存到本機",
+      "scheduleTitle": "早讀任務時間軸",
+      "scheduleSub": "支援老師按時間段維護任務，會在當天自動顯示",
+      "taskPlaceholder": "例如：背誦《木蘭詩》第4部分",
+      "inspirationTitle": "每日感悟 / 勵志短文",
+      "inspirationSub": "可輸入一句標題和一段勵志短文，面向學生展示",
+      "noteTitlePlaceholder": "例如：想，都是問題；做，才有答案",
+      "noteBodyPlaceholder": "在這裡輸入當天想展示給學生的短文、感悟或激勵語。",
+      "previewTitle": "學生端顯示預覽",
+      "previewSub": "到當天會在頂部細條中自動提示目前任務",
+      "noteHint": "右側可填寫每日感悟標題和短文內容",
+      "noteDefaultTitle": "每日感悟",
+      "noteDefaultBody": "可在這裡輸入一段勵志短文、每日提醒，或當日早讀目標。"
     }
   }
 }

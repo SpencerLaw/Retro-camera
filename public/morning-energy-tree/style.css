@@ -238,9 +238,62 @@ canvas {
     overflow: visible;
 }
 
+.task-strip {
+    margin-top: 14px;
+    width: 100%;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.34), rgba(40, 65, 120, 0.28));
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+}
+
+.task-strip-badge {
+    flex-shrink: 0;
+    min-width: 78px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(123, 233, 170, 0.14);
+    color: #d5ffe8;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+
+.task-strip-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    text-align: left;
+}
+
+.task-strip-copy strong,
+.task-strip-copy span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.task-strip-copy strong {
+    font-size: 0.96rem;
+    font-weight: 900;
+}
+
+.task-strip-copy span {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.task-trigger-btn,
 .report-trigger-btn {
     position: fixed;
-    top: calc(var(--top-gap) + var(--db-size) + var(--ring-size) + 56px);
     right: var(--side-gap);
     width: var(--ring-size);
     min-height: 48px;
@@ -258,11 +311,26 @@ canvas {
     transition: transform 0.2s ease, background 0.2s ease;
 }
 
+.task-trigger-btn {
+    top: calc(var(--top-gap) + var(--db-size) + var(--ring-size) + 56px);
+    background: linear-gradient(135deg, rgba(18, 42, 62, 0.76), rgba(42, 110, 98, 0.68));
+}
+
+.report-trigger-btn {
+    top: calc(var(--top-gap) + var(--db-size) + var(--ring-size) + 116px);
+}
+
+.task-trigger-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, rgba(23, 62, 83, 0.9), rgba(58, 138, 118, 0.82));
+}
+
 .report-trigger-btn:hover {
     transform: translateY(-1px);
     background: linear-gradient(135deg, rgba(26, 39, 58, 0.84), rgba(45, 74, 126, 0.78));
 }
 
+.task-trigger-btn:active,
 .report-trigger-btn:active {
     transform: scale(0.98);
 }
@@ -369,6 +437,40 @@ canvas {
     overflow: hidden;
     flex: 1 1 auto;
     min-height: 0;
+}
+
+.task-body {
+    gap: 16px;
+}
+
+.task-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.task-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-toolbar-btn {
+    border: 1px solid rgba(125, 249, 255, 0.18);
+    background: rgba(52, 92, 129, 0.34);
+    color: #d9fbff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.task-toolbar-btn.primary {
+    background: linear-gradient(135deg, rgba(47, 179, 203, 0.78), rgba(80, 197, 107, 0.78));
+    color: #fff;
+    border-color: rgba(174, 255, 214, 0.24);
 }
 
 .report-week-label {
@@ -488,6 +590,14 @@ canvas {
     overflow: hidden;
 }
 
+.task-layout {
+    grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.task-focus-shell {
+    gap: 14px;
+}
+
 .report-day-header {
     display: flex;
     align-items: center;
@@ -561,6 +671,165 @@ canvas {
     flex-direction: column;
     gap: 14px;
     min-height: 0;
+}
+
+.task-focus-card {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.task-section-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+    gap: 14px;
+}
+
+.task-panel-card,
+.task-preview-card {
+    border-radius: 18px;
+    padding: 14px 16px;
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-panel-head,
+.task-preview-head,
+.task-note-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.task-panel-head strong,
+.task-preview-head strong {
+    display: block;
+    font-size: 0.96rem;
+    font-weight: 900;
+}
+
+.task-panel-head span,
+.task-preview-head span {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.task-slot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.task-slot-row {
+    display: grid;
+    grid-template-columns: 186px minmax(0, 1fr) 38px;
+    gap: 10px;
+    align-items: center;
+}
+
+.task-slot-times {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-slot-separator {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 800;
+}
+
+.task-input,
+.task-textarea {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(6, 12, 28, 0.28);
+    color: #fff;
+    padding: 12px 14px;
+    font-size: 0.88rem;
+    outline: none;
+    box-sizing: border-box;
+    color-scheme: dark;
+}
+
+.task-input::placeholder,
+.task-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.task-input.time {
+    padding: 11px 12px;
+    text-align: center;
+}
+
+.task-textarea {
+    min-height: 168px;
+    resize: vertical;
+    line-height: 1.65;
+}
+
+.task-remove-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.96rem;
+}
+
+.task-remove-btn:disabled {
+    opacity: 0.32;
+    cursor: not-allowed;
+}
+
+.task-preview-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 12px;
+}
+
+.task-preview-main,
+.task-preview-note {
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: rgba(9, 17, 38, 0.28);
+    min-height: 0;
+}
+
+.task-preview-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 78px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+    background: rgba(95, 241, 184, 0.16);
+    color: #d3ffec;
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.task-preview-main strong,
+.task-preview-note strong {
+    display: block;
+    font-size: 0.96rem;
+    font-weight: 900;
+    line-height: 1.45;
+}
+
+.task-preview-main p,
+.task-preview-note p {
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.72);
+    white-space: pre-wrap;
 }
 
 .report-focus-top {
@@ -668,8 +937,25 @@ canvas {
         grid-template-columns: 170px minmax(0, 1fr);
     }
 
+    .task-layout {
+        grid-template-columns: 160px minmax(0, 1fr);
+    }
+
     .report-metric-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .task-section-grid,
+    .task-preview-body {
+        grid-template-columns: 1fr;
+    }
+
+    .task-slot-row {
+        grid-template-columns: 1fr;
+    }
+
+    .task-slot-times {
+        justify-content: space-between;
     }
 
     .report-curve-svg {
@@ -1031,8 +1317,18 @@ button.icon-btn.active {
 
 /* Mobile Responsive */
 @media (max-width: 600px) {
-    .report-trigger-btn {
+    .task-strip {
+        width: calc(100vw - 24px);
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .task-trigger-btn {
         top: calc(var(--top-gap) + var(--db-size) + var(--ring-size) + 46px);
+    }
+
+    .report-trigger-btn {
+        top: calc(var(--top-gap) + var(--db-size) + var(--ring-size) + 102px);
     }
 
     .report-dialog {
@@ -1044,7 +1340,9 @@ button.icon-btn.active {
     .report-viewer-layout,
     .report-day-sidebar,
     .report-nav-row,
-    .report-metric-grid {
+    .report-metric-grid,
+    .task-section-grid,
+    .task-preview-body {
         grid-template-columns: 1fr;
     }
 
@@ -1055,6 +1353,20 @@ button.icon-btn.active {
     .report-focus-shell,
     .report-focus-card {
         padding: 12px;
+    }
+
+    .task-toolbar,
+    .task-toolbar-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .task-toolbar-actions {
+        width: 100%;
+    }
+
+    .task-slot-row {
+        grid-template-columns: 1fr;
     }
 
     .report-curve-svg {

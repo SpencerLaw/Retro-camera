@@ -12,7 +12,9 @@
 const AUTH_KEY = 'morning_tree_auth';
 const LICENSE_PREFIX = 'ZD';
 const REPORT_STORAGE_KEY = 'morning_tree_weekly_reports_v1';
+const TASK_STORAGE_KEY = 'morning_tree_weekly_tasks_v1';
 const MAX_STORED_REPORTS = 100;
+const MAX_TASK_SLOTS = 6;
 const REPORT_WEEKDAYS = [
     { key: 'mon', offset: 0 },
     { key: 'tue', offset: 1 },
@@ -45,7 +47,12 @@ const STATE = {
     sessionStartedAt: null,
     curveBuffer: [],
     reportActiveDay: null,
-    reportActiveSession: 0
+    reportActiveSession: 0,
+
+    // Weekly task board
+    taskActiveDay: null,
+    taskDrafts: null,
+    frameNow: 0
 };
 
 // Aesthetic Config
@@ -74,6 +81,18 @@ const dbDisplay = document.querySelector('.db-display');
 const countdownTime = $('countdown-time');
 const durationSelect = $('duration-select');
 const customDuration = $('custom-duration');
+const taskStrip = $('task-strip');
+const taskStripTitle = $('task-strip-title');
+const taskStripMeta = $('task-strip-meta');
+const taskTriggerBtn = $('task-trigger-btn');
+const taskModal = $('task-modal');
+const taskBackdrop = $('task-backdrop');
+const taskCloseBtn = $('task-close-btn');
+const taskWeekLabel = $('task-week-label');
+const taskDayChipRow = $('task-day-chip-row');
+const taskDayPanel = $('task-day-panel');
+const taskAddSlotBtn = $('task-add-slot-btn');
+const taskSaveBtn = $('task-save-btn');
 const reportTriggerBtn = $('report-trigger-btn');
 const reportModal = $('report-modal');
 const reportBackdrop = $('report-backdrop');
@@ -123,6 +142,72 @@ function persistReports(reports) {
     localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(reports.slice(0, MAX_STORED_REPORTS)));
 }
 
+function createDefaultTaskSlot(index = 0) {
+    const startHour = index === 0 ? '07' : '07';
+    const startMinute = index === 0 ? '30' : `${Math.min(59, 40 + ((index - 1) * 10))}`.padStart(2, '0');
+    const endMinute = `${Math.min(59, parseInt(startMinute, 10) + 9)}`.padStart(2, '0');
+    return {
+        start: `${startHour}:${startMinute}`,
+        end: `${startHour}:${endMinute}`,
+        content: ''
+    };
+}
+
+function createDefaultTaskDay() {
+    return {
+        tasks: [createDefaultTaskSlot(0), createDefaultTaskSlot(1)],
+        noteTitle: '',
+        noteBody: '',
+        updatedAt: null
+    };
+}
+
+function createDefaultWeeklyTasks() {
+    return REPORT_WEEKDAYS.reduce((acc, { key }) => {
+        acc[key] = createDefaultTaskDay();
+        return acc;
+    }, {});
+}
+
+function normalizeTaskSlot(slot, index = 0) {
+    return {
+        start: typeof slot?.start === 'string' ? slot.start : createDefaultTaskSlot(index).start,
+        end: typeof slot?.end === 'string' ? slot.end : createDefaultTaskSlot(index).end,
+        content: typeof slot?.content === 'string' ? slot.content : ''
+    };
+}
+
+function normalizeTaskDay(dayTask) {
+    const fallback = createDefaultTaskDay();
+    const rawSlots = Array.isArray(dayTask?.tasks) ? dayTask.tasks.slice(0, MAX_TASK_SLOTS) : fallback.tasks;
+    return {
+        tasks: rawSlots.length ? rawSlots.map((slot, index) => normalizeTaskSlot(slot, index)) : fallback.tasks,
+        noteTitle: typeof dayTask?.noteTitle === 'string' ? dayTask.noteTitle : '',
+        noteBody: typeof dayTask?.noteBody === 'string' ? dayTask.noteBody : '',
+        updatedAt: typeof dayTask?.updatedAt === 'string' ? dayTask.updatedAt : null
+    };
+}
+
+function loadStoredTasks() {
+    const defaults = createDefaultWeeklyTasks();
+    try {
+        const raw = localStorage.getItem(TASK_STORAGE_KEY);
+        if (!raw) return defaults;
+        const parsed = JSON.parse(raw);
+        return REPORT_WEEKDAYS.reduce((acc, { key }) => {
+            acc[key] = normalizeTaskDay(parsed?.[key]);
+            return acc;
+        }, {});
+    } catch (error) {
+        console.error('Failed to load morning tree tasks:', error);
+        return defaults;
+    }
+}
+
+function persistTasks(taskMap) {
+    localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(taskMap));
+}
+
 function toDateKey(dateLike) {
     const date = new Date(dateLike);
     const year = date.getFullYear();
@@ -160,6 +245,19 @@ function formatDuration(seconds) {
     const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
     const secs = Math.max(0, seconds % 60).toString().padStart(2, '0');
     return `${mins}:${secs}`;
+}
+
+function parseClockMinutes(value) {
+    if (typeof value !== 'string' || !value.includes(':')) return null;
+    const [hours, minutes] = value.split(':').map(part => parseInt(part, 10));
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+    return (hours * 60) + minutes;
+}
+
+function getCurrentWeekdayKey(baseDate = new Date()) {
+    const day = baseDate.getDay();
+    if (day === 0 || day === 6) return null;
+    return REPORT_WEEKDAYS[Math.max(0, Math.min(4, day - 1))]?.key || 'mon';
 }
 
 function clamp(value, min, max) {
@@ -622,6 +720,7 @@ function renderWeeklyReport() {
 }
 
 function openReportModal() {
+    if (taskModal?.classList.contains('open')) closeTaskModal();
     STATE.reportActiveDay = null;
     STATE.reportActiveSession = 0;
     renderWeeklyReport();
@@ -642,10 +741,318 @@ function initReportUI() {
     reportCloseBtn.onclick = closeReportModal;
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') closeReportModal();
+        if (event.key !== 'Escape') return;
+        if (taskModal?.classList.contains('open')) closeTaskModal();
+        if (reportModal?.classList.contains('open')) closeReportModal();
     });
 
     renderWeeklyReport();
+}
+
+function getTaskDayGroups(taskMap, monday = getCurrentWeekMonday()) {
+    return REPORT_WEEKDAYS.map(({ key, offset }) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + offset);
+        return {
+            key,
+            date,
+            dateLabel: formatShortDate(date),
+            label: t(`morningTree.report.days.${key}`) || key,
+            payload: normalizeTaskDay(taskMap?.[key])
+        };
+    });
+}
+
+function getMeaningfulTaskSlots(dayTask) {
+    return (dayTask?.tasks || []).filter(slot =>
+        (slot.content || '').trim() || (slot.start || '').trim() || (slot.end || '').trim()
+    );
+}
+
+function resolveCurrentTaskSlot(dayTask, now = new Date()) {
+    const slots = getMeaningfulTaskSlots(dayTask)
+        .map(slot => ({
+            ...slot,
+            startMinutes: parseClockMinutes(slot.start),
+            endMinutes: parseClockMinutes(slot.end)
+        }))
+        .filter(slot => Number.isFinite(slot.startMinutes) && Number.isFinite(slot.endMinutes))
+        .sort((a, b) => a.startMinutes - b.startMinutes);
+
+    if (!slots.length) return { phase: 'empty', current: null, next: null };
+
+    const nowMinutes = (now.getHours() * 60) + now.getMinutes();
+    const active = slots.find(slot => nowMinutes >= slot.startMinutes && nowMinutes <= slot.endMinutes);
+    if (active) {
+        const next = slots.find(slot => slot.startMinutes > active.endMinutes) || null;
+        return { phase: 'active', current: active, next };
+    }
+
+    const upcoming = slots.find(slot => slot.startMinutes > nowMinutes);
+    if (upcoming) {
+        return { phase: 'upcoming', current: upcoming, next: slots.find(slot => slot.startMinutes > upcoming.endMinutes) || null };
+    }
+
+    return { phase: 'finished', current: slots[slots.length - 1], next: null };
+}
+
+function updateTaskStrip() {
+    if (!taskStrip || !taskStripTitle || !taskStripMeta) return;
+
+    const weekdayKey = getCurrentWeekdayKey();
+    if (!weekdayKey) {
+        taskStrip.classList.add('hidden');
+        return;
+    }
+
+    const tasks = STATE.taskDrafts || loadStoredTasks();
+    const dayTask = normalizeTaskDay(tasks[weekdayKey]);
+    const resolution = resolveCurrentTaskSlot(dayTask);
+    const dayLabel = t(`morningTree.report.days.${weekdayKey}`) || weekdayKey;
+
+    taskStrip.classList.remove('hidden');
+
+    if (!resolution.current) {
+        taskStripTitle.textContent = t('morningTree.tasks.emptyToday') || '今日暂无早读任务';
+        taskStripMeta.textContent = (t('morningTree.tasks.emptyHint') || '点击右侧今日任务，设置周一到周五内容')
+            .replace('{day}', dayLabel);
+        return;
+    }
+
+    const currentText = `${resolution.current.start || '--:--'} - ${resolution.current.end || '--:--'}  ${resolution.current.content || (t('morningTree.tasks.pendingTask') || '请填写任务内容')}`;
+    taskStripTitle.textContent = currentText;
+
+    if (resolution.phase === 'active' && resolution.next) {
+        taskStripMeta.textContent = (t('morningTree.tasks.nextTask') || '下一项：{time} {content}')
+            .replace('{time}', `${resolution.next.start || '--:--'}-${resolution.next.end || '--:--'}`)
+            .replace('{content}', resolution.next.content || (t('morningTree.tasks.pendingTask') || '请填写任务内容'));
+    } else if (resolution.phase === 'upcoming') {
+        taskStripMeta.textContent = t('morningTree.tasks.upcoming') || '即将开始';
+    } else if (resolution.phase === 'finished') {
+        taskStripMeta.textContent = t('morningTree.tasks.finished') || '今日任务已完成';
+    } else {
+        taskStripMeta.textContent = `${dayLabel} · ${t('morningTree.tasks.todayBadge') || '今日任务'}`;
+    }
+}
+
+function renderTaskDaySidebar(dayGroups, selectedKey) {
+    if (!taskDayChipRow) return;
+
+    taskDayChipRow.innerHTML = dayGroups.map(group => {
+        const slotCount = getMeaningfulTaskSlots(group.payload).length;
+        return `
+            <button
+                type="button"
+                class="report-day-chip ${slotCount ? 'has-data' : ''} ${group.key === selectedKey ? 'selected' : ''}"
+                data-task-day="${group.key}"
+            >
+                <div class="report-day-chip-copy">
+                    <span>${group.label}</span>
+                    <small>${group.dateLabel}</small>
+                </div>
+                <strong>${slotCount}</strong>
+            </button>
+        `;
+    }).join('');
+
+    taskDayChipRow.querySelectorAll('[data-task-day]').forEach(button => {
+        button.onpointerdown = (event) => {
+            event.preventDefault();
+            const nextDay = button.getAttribute('data-task-day');
+            if (!nextDay) return;
+            STATE.taskActiveDay = nextDay;
+            renderTaskBoard();
+        };
+    });
+}
+
+function updateTaskDraftField(dayKey, field, value, slotIndex = null) {
+    if (!STATE.taskDrafts) STATE.taskDrafts = loadStoredTasks();
+    if (!STATE.taskDrafts[dayKey]) STATE.taskDrafts[dayKey] = createDefaultTaskDay();
+
+    if (slotIndex === null) {
+        STATE.taskDrafts[dayKey][field] = value;
+    } else {
+        const nextSlots = STATE.taskDrafts[dayKey].tasks || [];
+        if (!nextSlots[slotIndex]) nextSlots[slotIndex] = createDefaultTaskSlot(slotIndex);
+        nextSlots[slotIndex][field] = value;
+        STATE.taskDrafts[dayKey].tasks = nextSlots;
+    }
+    STATE.taskDrafts[dayKey].updatedAt = new Date().toISOString();
+    updateTaskStrip();
+}
+
+function saveTaskDrafts(showSavedToast = false) {
+    if (!STATE.taskDrafts) STATE.taskDrafts = loadStoredTasks();
+    persistTasks(STATE.taskDrafts);
+    updateTaskStrip();
+    if (taskModal?.classList.contains('open')) renderTaskBoard();
+    if (showSavedToast) {
+        showToast(t('morningTree.tasks.savedToast') || '✅ 今日任务已保存到本机');
+    }
+}
+
+function renderTaskBoard() {
+    if (!taskWeekLabel || !taskDayPanel) return;
+    if (!STATE.taskDrafts) STATE.taskDrafts = loadStoredTasks();
+
+    const monday = getCurrentWeekMonday();
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+
+    const dayGroups = getTaskDayGroups(STATE.taskDrafts, monday);
+    const weekdayKey = getCurrentWeekdayKey() || 'mon';
+    if (!STATE.taskActiveDay || !dayGroups.some(group => group.key === STATE.taskActiveDay)) {
+        STATE.taskActiveDay = weekdayKey;
+    }
+
+    taskWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(friday)}`;
+    renderTaskDaySidebar(dayGroups, STATE.taskActiveDay);
+
+    const selectedDay = dayGroups.find(group => group.key === STATE.taskActiveDay) || dayGroups[0];
+    const selectedTask = normalizeTaskDay(selectedDay.payload);
+    const slots = selectedTask.tasks.length ? selectedTask.tasks : [createDefaultTaskSlot(0)];
+    const slotCountLabel = `${getMeaningfulTaskSlots(selectedTask).length}${t('morningTree.tasks.itemSuffix') || '项'}`;
+    const preview = resolveCurrentTaskSlot(selectedTask, selectedDay.date);
+
+    taskDayPanel.innerHTML = `
+        <div class="report-day-header">
+            <div>
+                <strong>${selectedDay.label}</strong>
+                <span>${selectedDay.dateLabel}</span>
+            </div>
+            <span class="report-day-count ${getMeaningfulTaskSlots(selectedTask).length ? 'has-data' : ''}">${slotCountLabel}</span>
+        </div>
+
+        <article class="report-focus-card task-focus-card">
+            <div class="task-section-grid">
+                <section class="task-panel-card">
+                    <div class="task-panel-head">
+                        <div>
+                            <strong>${t('morningTree.tasks.scheduleTitle') || '早读任务时间轴'}</strong>
+                            <span>${t('morningTree.tasks.scheduleSub') || '支持老师按时间段维护任务，自动在当天显示'}</span>
+                        </div>
+                    </div>
+                    <div class="task-slot-list">
+                        ${slots.map((slot, index) => `
+                            <div class="task-slot-row">
+                                <div class="task-slot-times">
+                                    <input type="time" class="task-input time" data-task-field="start" data-task-day="${selectedDay.key}" data-task-slot="${index}" value="${slot.start || ''}">
+                                    <span class="task-slot-separator">-</span>
+                                    <input type="time" class="task-input time" data-task-field="end" data-task-day="${selectedDay.key}" data-task-slot="${index}" value="${slot.end || ''}">
+                                </div>
+                                <input type="text" class="task-input content" data-task-field="content" data-task-day="${selectedDay.key}" data-task-slot="${index}" value="${slot.content || ''}" placeholder="${t('morningTree.tasks.taskPlaceholder') || '例如：背诵《木兰诗》第 4 部分'}">
+                                <button type="button" class="task-remove-btn" data-task-remove="${index}" ${slots.length <= 1 ? 'disabled' : ''}>✕</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+
+                <section class="task-panel-card">
+                    <div class="task-panel-head">
+                        <div>
+                            <strong>${t('morningTree.tasks.inspirationTitle') || '每日感悟 / 励志短文'}</strong>
+                            <span>${t('morningTree.tasks.inspirationSub') || '可输入一句话标题和一段励志短文，面向学生展示'}</span>
+                        </div>
+                    </div>
+                    <div class="task-note-form">
+                        <input type="text" class="task-input" data-task-field="noteTitle" data-task-day="${selectedDay.key}" value="${selectedTask.noteTitle || ''}" placeholder="${t('morningTree.tasks.noteTitlePlaceholder') || '例如：想，都是问题；做，才有答案'}">
+                        <textarea class="task-textarea" data-task-field="noteBody" data-task-day="${selectedDay.key}" placeholder="${t('morningTree.tasks.noteBodyPlaceholder') || '在这里输入当天想展示给学生的短文、感悟或激励语。'}">${selectedTask.noteBody || ''}</textarea>
+                    </div>
+                </section>
+            </div>
+
+            <section class="task-preview-card">
+                <div class="task-preview-head">
+                    <div>
+                        <strong>${t('morningTree.tasks.previewTitle') || '学生端显示预览'}</strong>
+                        <span>${t('morningTree.tasks.previewSub') || '当天会在顶部细条中自动提示当前任务'}</span>
+                    </div>
+                </div>
+                <div class="task-preview-body">
+                    <div class="task-preview-main">
+                        <span class="task-preview-label">${t('morningTree.tasks.todayBadge') || '今日任务'}</span>
+                        <strong>${preview.current ? `${preview.current.start || '--:--'} - ${preview.current.end || '--:--'} ${preview.current.content || (t('morningTree.tasks.pendingTask') || '请填写任务内容')}` : (t('morningTree.tasks.emptyToday') || '今日暂无早读任务')}</strong>
+                        <p>${selectedTask.noteTitle || (t('morningTree.tasks.noteHint') || '右侧可填写每日感悟标题和短文内容')}</p>
+                    </div>
+                    <div class="task-preview-note">
+                        <strong>${selectedTask.noteTitle || (t('morningTree.tasks.noteDefaultTitle') || '每日感悟')}</strong>
+                        <p>${selectedTask.noteBody || (t('morningTree.tasks.noteDefaultBody') || '可在这里输入一段励志短文、每日提醒，或当日早读目标。')}</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+    `;
+
+    taskDayPanel.querySelectorAll('[data-task-field]').forEach(field => {
+        const eventName = field.type === 'time' ? 'change' : 'input';
+        field.addEventListener(eventName, (event) => {
+            const target = event.currentTarget;
+            const dayKey = target.getAttribute('data-task-day');
+            const taskField = target.getAttribute('data-task-field');
+            const slotIndexAttr = target.getAttribute('data-task-slot');
+            const slotIndex = slotIndexAttr === null ? null : parseInt(slotIndexAttr, 10);
+            if (!dayKey || !taskField) return;
+            updateTaskDraftField(dayKey, taskField, target.value, Number.isFinite(slotIndex) ? slotIndex : null);
+        });
+    });
+
+    taskDayPanel.querySelectorAll('[data-task-remove]').forEach(button => {
+        button.onpointerdown = (event) => {
+            event.preventDefault();
+            const index = parseInt(button.getAttribute('data-task-remove'), 10);
+            const activeDay = STATE.taskActiveDay;
+            if (!activeDay || !Number.isFinite(index) || !STATE.taskDrafts?.[activeDay]) return;
+            const nextSlots = [...STATE.taskDrafts[activeDay].tasks];
+            nextSlots.splice(index, 1);
+            STATE.taskDrafts[activeDay].tasks = nextSlots.length ? nextSlots : [createDefaultTaskSlot(0)];
+            STATE.taskDrafts[activeDay].updatedAt = new Date().toISOString();
+            renderTaskBoard();
+            updateTaskStrip();
+        };
+    });
+}
+
+function openTaskModal() {
+    if (reportModal?.classList.contains('open')) closeReportModal();
+    STATE.taskDrafts = loadStoredTasks();
+    STATE.taskActiveDay = getCurrentWeekdayKey() || 'mon';
+    renderTaskBoard();
+    taskModal.classList.add('open');
+    taskModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeTaskModal() {
+    saveTaskDrafts(false);
+    taskModal.classList.remove('open');
+    taskModal.setAttribute('aria-hidden', 'true');
+}
+
+function initTaskUI() {
+    if (!taskTriggerBtn || !taskModal) return;
+
+    taskTriggerBtn.onclick = openTaskModal;
+    taskBackdrop.onclick = closeTaskModal;
+    taskCloseBtn.onclick = closeTaskModal;
+
+    if (taskAddSlotBtn) {
+        taskAddSlotBtn.onclick = () => {
+            if (!STATE.taskDrafts) STATE.taskDrafts = loadStoredTasks();
+            const activeDay = STATE.taskActiveDay || getCurrentWeekdayKey() || 'mon';
+            const dayTask = normalizeTaskDay(STATE.taskDrafts[activeDay]);
+            if (dayTask.tasks.length >= MAX_TASK_SLOTS) return;
+            dayTask.tasks.push(createDefaultTaskSlot(dayTask.tasks.length));
+            dayTask.updatedAt = new Date().toISOString();
+            STATE.taskDrafts[activeDay] = dayTask;
+            renderTaskBoard();
+        };
+    }
+
+    if (taskSaveBtn) {
+        taskSaveBtn.onclick = () => saveTaskDrafts(true);
+    }
+
+    updateTaskStrip();
 }
 
 
@@ -694,6 +1101,7 @@ function showApp() {
         resizeCanvas();
         initTimer();
         initEnvironment();
+        updateTaskStrip();
     }, 500);
 }
 
@@ -751,6 +1159,8 @@ function updateTimerDisplay() {
         // With pathLength=100, this creates the fill effect under the mask
         ringBar.style.strokeDasharray = `${fillAmount} 100`;
     }
+
+    updateTaskStrip();
 }
 
 /* --- 3. Audio Logic --- */
@@ -1924,17 +2334,23 @@ function translateUI() {
         const translated = t(key);
         if (translated) el.title = translated;
     });
+
+    updateTaskStrip();
+    renderWeeklyReport();
+    if (taskModal?.classList.contains('open')) renderTaskBoard();
 }
 
 // Init
 initLocalization().then(() => {
     initGatekeeper();
+    initTaskUI();
     initReportUI();
 });
 micBtn.onclick = toggleMic;
 if ($('reset-btn')) $('reset-btn').onclick = resetGame;
 
 window.addEventListener('pagehide', () => {
+    saveTaskDrafts(false);
     if (STATE.isListening) stopMic();
 });
 

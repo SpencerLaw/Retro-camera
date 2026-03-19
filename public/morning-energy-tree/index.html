@@ -52,6 +52,13 @@
                 <div class="energy-container">
                     <div id="energy-fill"></div>
                 </div>
+                <div id="task-strip" class="task-strip hidden">
+                    <div class="task-strip-badge" data-i18n="morningTree.tasks.todayBadge">今日任务</div>
+                    <div class="task-strip-copy">
+                        <strong id="task-strip-title">今日暂无早读任务</strong>
+                        <span id="task-strip-meta">点击右侧今日任务设置周一到周五内容</span>
+                    </div>
+                </div>
 
                 <!-- Circular Ring Timer (Segmented Energy Blocks) -->
                 <div class="timer-ring-wrap">
@@ -74,6 +81,9 @@
                         <div class="timer-label" data-i18n="morningTree.remainingTime">剩余时间</div>
                     </div>
                 </div>
+                <button id="task-trigger-btn" class="task-trigger-btn" data-i18n="morningTree.tasks.trigger">
+                    今日任务
+                </button>
                 <button id="report-trigger-btn" class="report-trigger-btn" data-i18n="morningTree.report.trigger">
                     一周报告
                 </button>
@@ -152,6 +162,35 @@
                     <div class="report-viewer-layout">
                         <div id="report-day-chip-row" class="report-day-sidebar"></div>
                         <div id="report-day-list" class="report-focus-shell"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="task-modal" class="report-modal task-modal" aria-hidden="true">
+            <button id="task-backdrop" class="report-backdrop" aria-label="Close task editor"></button>
+            <div class="report-dialog task-dialog">
+                <div class="report-header">
+                    <div class="report-header-heading">
+                        <div class="report-header-icon">🗓️</div>
+                        <div class="report-header-copy">
+                            <strong data-i18n="morningTree.tasks.title">本周早读任务</strong>
+                            <span data-i18n="morningTree.tasks.sub">仅保存在本机，到当天会自动显示</span>
+                        </div>
+                    </div>
+                    <button id="task-close-btn" class="report-close-btn" type="button" aria-label="Close task editor">✕</button>
+                </div>
+                <div class="report-body task-body">
+                    <div class="task-toolbar">
+                        <div id="task-week-label" class="report-week-label"></div>
+                        <div class="task-toolbar-actions">
+                            <button id="task-add-slot-btn" class="task-toolbar-btn" type="button" data-i18n="morningTree.tasks.addSlot">新增任务</button>
+                            <button id="task-save-btn" class="task-toolbar-btn primary" type="button" data-i18n="morningTree.tasks.save">保存到本机</button>
+                        </div>
+                    </div>
+                    <div class="report-viewer-layout task-layout">
+                        <div id="task-day-chip-row" class="report-day-sidebar"></div>
+                        <div id="task-day-panel" class="report-focus-shell task-focus-shell"></div>
                     </div>
                 </div>
             </div>

@@ -413,6 +413,7 @@
       "peak": "峰值",
       "low": "低值",
       "average": "均值",
+      "manifested": "显灵成功",
       "curve": "早读曲线",
       "curveHint": "峰值 / 低值 / 真实时刻",
       "empty": "当天还没有早读记录",

@@ -315,6 +315,7 @@
       "peak": "峰值",
       "low": "低值",
       "average": "均值",
+      "manifested": "顯靈成功",
       "curve": "早讀曲線",
       "curveHint": "峰值 / 低值 / 真實時刻",
       "empty": "當天還沒有早讀記錄",

@@ -30,6 +30,8 @@ const STATE = {
     currentDB: 30,
     treeColor: '#4caf50',
     isSuperMode: false,
+    hasManifested: false,
+    superModeTimer: null,
 
     // Timer System
     sessionDuration: 30, // minutes
@@ -131,7 +133,10 @@ function loadStoredReports() {
             typeof item.endedAt === 'string' &&
             typeof item.durationSeconds === 'number' &&
             Array.isArray(item.curve)
-        );
+        ).map(item => ({
+            ...item,
+            manifested: Boolean(item.manifested)
+        }));
     } catch (error) {
         console.error('Failed to load morning tree reports:', error);
         return [];
@@ -375,18 +380,15 @@ function buildCurveSVG(report) {
     const sourceValues = stats.values.length === 1 ? [stats.values[0], stats.values[0]] : stats.values;
     const values = sourceValues.map(value => Math.round(value));
     const width = 720;
-    const height = 226;
-    const paddingLeft = 54;
-    const paddingRight = 34;
-    const paddingTop = 24;
-    const paddingBottom = 58;
-    const plotInsetX = 14;
-    const plotInsetTop = 12;
-    const plotInsetBottom = 16;
-    const plotLeft = paddingLeft + plotInsetX;
-    const plotRight = width - paddingRight - plotInsetX;
-    const plotTop = paddingTop + plotInsetTop;
-    const plotBottom = height - paddingBottom - plotInsetBottom;
+    const height = 242;
+    const paddingLeft = 78;
+    const paddingRight = 58;
+    const paddingTop = 34;
+    const paddingBottom = 74;
+    const plotLeft = paddingLeft;
+    const plotRight = width - paddingRight;
+    const plotTop = paddingTop;
+    const plotBottom = height - paddingBottom;
     const graphWidth = plotRight - plotLeft;
     const graphHeight = plotBottom - plotTop;
     const baselineY = plotBottom;
@@ -437,7 +439,7 @@ function buildCurveSVG(report) {
         const anchor = index === 0 ? 'start' : index === tickRatios.length - 1 ? 'end' : 'middle';
         return `
             <line x1="${x}" y1="${plotTop}" x2="${x}" y2="${baselineY}" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="3 7" />
-            <text x="${x}" y="${height - 10}" fill="rgba(255,255,255,0.6)" font-size="10.5" text-anchor="${anchor}">${formatCurveTickLabel(report, ratio)}</text>
+            <text x="${x}" y="${height - 18}" fill="rgba(255,255,255,0.6)" font-size="10.5" text-anchor="${anchor}">${formatCurveTickLabel(report, ratio)}</text>
         `;
     }).join('');
 
@@ -465,7 +467,7 @@ function buildCurveSVG(report) {
                     </feMerge>
                 </filter>
             </defs>
-            <rect x="${plotLeft}" y="${plotTop}" width="${graphWidth}" height="${graphHeight}" rx="18" fill="rgba(255,255,255,0.025)" />
+            <rect x="${plotLeft}" y="${plotTop}" width="${graphWidth}" height="${graphHeight}" rx="20" fill="rgba(255,255,255,0.03)" />
             ${horizontalGrid}
             ${timeGrid}
             <path d="${areaPath}" fill="url(#${areaId})" stroke="none"></path>
@@ -518,7 +520,8 @@ function finalizeReportSession() {
         curve,
         peakDb,
         lowDb,
-        averageDb
+        averageDb,
+        manifested: Boolean(STATE.hasManifested)
     };
 
     const nextReports = [
@@ -630,6 +633,7 @@ function renderReportFocus(selectedDay) {
                 ${(t('morningTree.report.sessionStatus') || '第 {current} / {total} 场')
                     .replace('{current}', String(selectedIndex + 1))
                     .replace('{total}', String(selectedDay.records.length))}
+                ${selectedReport.manifested ? '<span class="report-nav-tree" aria-hidden="true">🌳</span>' : ''}
             </span>
             <button type="button" class="report-nav-btn" data-report-nav="1" ${hasNext ? '' : 'disabled'}>
                 ${t('morningTree.report.nextSession') || '下一场'}
@@ -642,7 +646,10 @@ function renderReportFocus(selectedDay) {
                     <strong>${formatPreciseClock(selectedReport.startedAt)} - ${formatPreciseClock(selectedReport.endedAt)}</strong>
                     <span>${formatShortDate(selectedReport.startedAt)}</span>
                 </div>
-                <span class="report-duration-pill">${formatDuration(selectedReport.durationSeconds)}</span>
+                <div class="report-focus-pills">
+                    ${selectedReport.manifested ? `<span class="report-success-pill">🌳 ${t('morningTree.report.manifested') || '显灵成功'}</span>` : ''}
+                    <span class="report-duration-pill">${formatDuration(selectedReport.durationSeconds)}</span>
+                </div>
             </div>
 
             <div class="report-curve-panel">
@@ -650,7 +657,9 @@ function renderReportFocus(selectedDay) {
                     <span class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</span>
                     <span class="report-curve-hint">${t('morningTree.report.curveHint') || '峰值 / 低值 / 真实时刻'}</span>
                 </div>
-                ${buildCurveSVG(selectedReport)}
+                <div class="report-curve-frame">
+                    ${buildCurveSVG(selectedReport)}
+                </div>
             </div>
 
             <div class="report-metric-grid">
@@ -1241,6 +1250,12 @@ function resetGame() {
     STATE.reportActiveSession = 0;
     STATE.energy = 0;
     STATE.isSuperMode = false;
+    STATE.hasManifested = false;
+    STATE.treeColor = '#4caf50';
+    if (STATE.superModeTimer) {
+        clearTimeout(STATE.superModeTimer);
+        STATE.superModeTimer = null;
+    }
     STATE.remainingTime = STATE.sessionDuration * 60;
     updateTimerDisplay();
     sparkles.length = 0;
@@ -1299,6 +1314,12 @@ function updateState() {
         if (dbStatus) { dbStatus.textContent = '等待中'; dbStatus.style.color = 'rgba(255,255,255,0.5)'; }
     }
 
+    if (STATE.hasManifested) {
+        STATE.energy = 100;
+        energyFill.style.width = '100%';
+        return;
+    }
+
     const READING_THRESHOLD = 70;
     if (STATE.currentDB >= READING_THRESHOLD) {
         const volumeBonus = Math.min((STATE.currentDB - READING_THRESHOLD) / 20, 1);
@@ -1316,18 +1337,25 @@ function updateState() {
 
     energyFill.style.width = STATE.energy + '%';
 
-    if (STATE.energy >= 100 && !STATE.isSuperMode) triggerSuperMode();
+    if (STATE.energy >= 100 && !STATE.isSuperMode && !STATE.hasManifested) triggerSuperMode();
 }
 
 function triggerSuperMode() {
+    if (STATE.superModeTimer) {
+        clearTimeout(STATE.superModeTimer);
+        STATE.superModeTimer = null;
+    }
     STATE.isSuperMode = true;
+    STATE.hasManifested = true;
+    STATE.energy = 100;
     STATE.treeColor = '#ffd700';
     showToast(t('morningTree.superModeToast') || "🎉 能量树显灵了！全班棒棒哒！ 🎉");
 
-    setTimeout(() => {
+    STATE.superModeTimer = setTimeout(() => {
         STATE.isSuperMode = false;
-        STATE.energy = 80;
-        STATE.treeColor = '#4caf50';
+        STATE.energy = 100;
+        STATE.treeColor = '#ffd700';
+        STATE.superModeTimer = null;
     }, 5000);
 }
 
@@ -2145,7 +2173,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
             const leafPulse = renderMode.lowPower ? 1 : 1.5;
             const size = baseSize + Math.sin(frameTime + depth) * leafPulse;
 
-            const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
+            const colorSet = (STATE.isSuperMode || STATE.hasManifested) ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
             const color = colorSet[colorIndex];
 

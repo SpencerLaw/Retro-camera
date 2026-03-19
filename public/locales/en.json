@@ -396,6 +396,7 @@
       "peak": "Peak",
       "low": "Low",
       "average": "Average",
+      "manifested": "Manifested",
       "curve": "Reading curve",
       "curveHint": "Peak / Low / Real time",
       "empty": "No reading record for this day yet",

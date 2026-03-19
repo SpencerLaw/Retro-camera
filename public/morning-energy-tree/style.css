@@ -1453,6 +1453,10 @@ canvas {
 /* ── Bottom Controls (bottom-LEFT, touch-friendly) ── */
 .bottom-controls {
     box-sizing: border-box;
+    position: fixed;
+    left: 20px;
+    bottom: 24px;
+    z-index: 9998;
     pointer-events: auto;
     background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(14px);
@@ -1465,9 +1469,6 @@ canvas {
     align-items: stretch;
     justify-content: flex-start;
     gap: 14px;
-    align-self: flex-start;
-    margin-bottom: 24px;
-    margin-left: 20px;
     width: min(262px, calc(100vw - 40px));
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
 }
@@ -1715,8 +1716,9 @@ input[type="range"] {
     }
 
     .bottom-controls {
+        left: 12px;
+        bottom: 12px;
         width: min(246px, calc(100vw - 24px));
-        margin-left: 12px;
         padding: 14px 12px;
     }
 
@@ -1775,9 +1777,8 @@ input[type="range"] {
     }
 
     .bottom-controls {
-        width: 100%;
-        justify-content: space-between;
-        margin-bottom: 0;
+        width: min(246px, calc(100vw - 24px));
+        justify-content: flex-start;
     }
 
     .auth-card {

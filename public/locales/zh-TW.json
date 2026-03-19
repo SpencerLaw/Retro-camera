@@ -345,6 +345,7 @@
       "itemSuffix": "項",
       "addSlot": "新增任務",
       "save": "保存到本機",
+      "savedState": "已保存",
       "savedToast": "✅ 早讀任務已保存到本機",
       "scheduleTitle": "早讀任務時間軸",
       "scheduleSub": "支援老師按時間段維護任務，會在當天自動顯示",

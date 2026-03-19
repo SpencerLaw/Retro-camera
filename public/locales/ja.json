@@ -339,6 +339,7 @@
       "itemSuffix": "件",
       "addSlot": "課題を追加",
       "save": "端末に保存",
+      "savedState": "保存済み",
       "savedToast": "✅ 朝読課題をこの端末に保存しました",
       "scheduleTitle": "朝読課題タイムライン",
       "scheduleSub": "先生が時間帯ごとに課題を編集し、その曜日に自動表示されます",

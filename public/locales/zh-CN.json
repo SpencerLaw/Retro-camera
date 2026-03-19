@@ -443,6 +443,7 @@
       "itemSuffix": "项",
       "addSlot": "新增任务",
       "save": "保存到本机",
+      "savedState": "已保存",
       "savedToast": "✅ 早读任务已保存到本机",
       "scheduleTitle": "早读任务时间轴",
       "scheduleSub": "支持老师按时间段维护任务，自动在当天显示",

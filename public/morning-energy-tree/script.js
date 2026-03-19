@@ -86,6 +86,7 @@ const customDuration = $('custom-duration');
 const taskStrip = $('task-strip');
 const taskStripTitle = $('task-strip-title');
 const taskStripMeta = $('task-strip-meta');
+const taskStripNote = $('task-strip-note');
 const taskTriggerBtn = $('task-trigger-btn');
 const taskModal = $('task-modal');
 const taskBackdrop = $('task-backdrop');
@@ -110,6 +111,7 @@ const helpTrigger = $('help-trigger');
 const helpTooltip = $('help-tooltip');
 const dbStatus = $('db-status');
 const ringBar = $('ring-bar');
+let taskSaveFeedbackTimer = null;
 
 if (helpTrigger) {
     helpTrigger.onclick = (e) => {
@@ -160,7 +162,7 @@ function createDefaultTaskSlot(index = 0) {
 
 function createDefaultTaskDay() {
     return {
-        tasks: [createDefaultTaskSlot(0), createDefaultTaskSlot(1)],
+        tasks: [createDefaultTaskSlot(0)],
         noteTitle: '',
         noteBody: '',
         updatedAt: null
@@ -185,8 +187,14 @@ function normalizeTaskSlot(slot, index = 0) {
 function normalizeTaskDay(dayTask) {
     const fallback = createDefaultTaskDay();
     const rawSlots = Array.isArray(dayTask?.tasks) ? dayTask.tasks.slice(0, MAX_TASK_SLOTS) : fallback.tasks;
+    const normalizedSlots = rawSlots.length ? rawSlots.map((slot, index) => normalizeTaskSlot(slot, index)) : fallback.tasks;
+    while (normalizedSlots.length > 1) {
+        const lastSlot = normalizedSlots[normalizedSlots.length - 1];
+        if ((lastSlot.content || '').trim() || (lastSlot.start || '').trim() || (lastSlot.end || '').trim()) break;
+        normalizedSlots.pop();
+    }
     return {
-        tasks: rawSlots.length ? rawSlots.map((slot, index) => normalizeTaskSlot(slot, index)) : fallback.tasks,
+        tasks: normalizedSlots,
         noteTitle: typeof dayTask?.noteTitle === 'string' ? dayTask.noteTitle : '',
         noteBody: typeof dayTask?.noteBody === 'string' ? dayTask.noteBody : '',
         updatedAt: typeof dayTask?.updatedAt === 'string' ? dayTask.updatedAt : null
@@ -811,6 +819,7 @@ function updateTaskStrip() {
     const weekdayKey = getCurrentWeekdayKey();
     if (!weekdayKey) {
         taskStrip.classList.add('hidden');
+        if (taskStripNote) taskStripNote.classList.add('hidden');
         return;
     }
 
@@ -818,8 +827,21 @@ function updateTaskStrip() {
     const dayTask = normalizeTaskDay(tasks[weekdayKey]);
     const resolution = resolveCurrentTaskSlot(dayTask);
     const dayLabel = t(`morningTree.report.days.${weekdayKey}`) || weekdayKey;
+    const noteTitle = (dayTask.noteTitle || '').trim();
+    const noteBody = (dayTask.noteBody || '').trim();
+    const noteText = noteBody || noteTitle;
 
     taskStrip.classList.remove('hidden');
+
+    if (taskStripNote) {
+        if (noteText) {
+            taskStripNote.textContent = noteTitle && noteBody ? `${noteTitle} · ${noteBody}` : noteText;
+            taskStripNote.classList.remove('hidden');
+        } else {
+            taskStripNote.textContent = '';
+            taskStripNote.classList.add('hidden');
+        }
+    }
 
     if (!resolution.current) {
         taskStripTitle.textContent = t('morningTree.tasks.emptyToday') || '今日暂无早读任务';
@@ -891,13 +913,45 @@ function updateTaskDraftField(dayKey, field, value, slotIndex = null) {
     updateTaskStrip();
 }
 
+function syncVisibleTaskFieldsIntoDrafts() {
+    if (!taskModal?.classList.contains('open') || !taskDayPanel) return;
+
+    taskDayPanel.querySelectorAll('[data-task-field]').forEach(field => {
+        const dayKey = field.getAttribute('data-task-day');
+        const taskField = field.getAttribute('data-task-field');
+        const slotIndexAttr = field.getAttribute('data-task-slot');
+        const slotIndex = slotIndexAttr === null ? null : parseInt(slotIndexAttr, 10);
+        if (!dayKey || !taskField) return;
+        updateTaskDraftField(dayKey, taskField, field.value, Number.isFinite(slotIndex) ? slotIndex : null);
+    });
+}
+
+function flashTaskSaveButton() {
+    if (!taskSaveBtn) return;
+
+    if (taskSaveFeedbackTimer) {
+        clearTimeout(taskSaveFeedbackTimer);
+        taskSaveFeedbackTimer = null;
+    }
+
+    taskSaveBtn.classList.add('saved');
+    taskSaveBtn.textContent = t('morningTree.tasks.savedState') || '已保存';
+
+    taskSaveFeedbackTimer = setTimeout(() => {
+        taskSaveBtn.classList.remove('saved');
+        taskSaveBtn.textContent = t('morningTree.tasks.save') || '保存到本机';
+        taskSaveFeedbackTimer = null;
+    }, 1600);
+}
+
 function saveTaskDrafts(showSavedToast = false) {
     if (!STATE.taskDrafts) STATE.taskDrafts = loadStoredTasks();
+    syncVisibleTaskFieldsIntoDrafts();
     persistTasks(STATE.taskDrafts);
     updateTaskStrip();
     if (taskModal?.classList.contains('open')) renderTaskBoard();
     if (showSavedToast) {
-        showToast(t('morningTree.tasks.savedToast') || '✅ 今日任务已保存到本机');
+        flashTaskSaveButton();
     }
 }
 

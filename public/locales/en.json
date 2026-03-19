@@ -426,6 +426,7 @@
       "itemSuffix": " items",
       "addSlot": "Add Task",
       "save": "Save Locally",
+      "savedState": "Saved",
       "savedToast": "✅ Morning tasks saved on this device",
       "scheduleTitle": "Morning Task Timeline",
       "scheduleSub": "Teachers can maintain time-based tasks that appear automatically on the matching day",

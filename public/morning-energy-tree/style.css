@@ -239,6 +239,7 @@ canvas {
 }
 
 .task-strip {
+    box-sizing: border-box;
     position: fixed;
     top: 86px;
     left: 20px;
@@ -1451,6 +1452,7 @@ canvas {
 
 /* ── Bottom Controls (bottom-LEFT, touch-friendly) ── */
 .bottom-controls {
+    box-sizing: border-box;
     pointer-events: auto;
     background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(14px);

@@ -395,7 +395,7 @@ canvas {
 .task-strip-timeline::before {
     content: '';
     position: absolute;
-    left: 28px;
+    left: 32px;
     top: 10px;
     bottom: 12px;
     width: 2px;
@@ -1780,6 +1780,10 @@ input[type="range"] {
     .task-strip-timeline-item {
         grid-template-columns: 52px minmax(0, 1fr);
         column-gap: 16px;
+    }
+
+    .task-strip-timeline::before {
+        left: 30px;
     }
 
     .task-strip-timeline-marker {

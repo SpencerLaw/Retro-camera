@@ -52,30 +52,6 @@
                 <div class="energy-container">
                     <div id="energy-fill"></div>
                 </div>
-                <div id="task-strip" class="task-strip hidden">
-                    <div class="task-strip-head">
-                        <div class="task-strip-badge" data-i18n="morningTree.tasks.todayBadge">今日任务</div>
-                        <div class="task-strip-switch">
-                            <button id="task-strip-prev" class="task-strip-nav-btn" type="button" aria-label="Previous weekday">‹</button>
-                            <div class="task-strip-switch-copy">
-                                <span id="task-strip-day" class="task-strip-day">周一</span>
-                                <span id="task-strip-datetime" class="task-strip-datetime">2026-03-19 14:26</span>
-                            </div>
-                            <button id="task-strip-next" class="task-strip-nav-btn" type="button" aria-label="Next weekday">›</button>
-                        </div>
-                    </div>
-                    <div class="task-strip-copy">
-                        <div id="task-strip-empty" class="task-strip-empty hidden">
-                            <strong id="task-strip-title">今日暂无早读任务</strong>
-                            <span id="task-strip-meta">点击右侧今日任务设置周一到周五内容</span>
-                        </div>
-                        <div id="task-strip-timeline" class="task-strip-timeline hidden"></div>
-                        <div id="task-strip-note-wrap" class="task-strip-note-wrap hidden">
-                            <span id="task-strip-note-title" class="task-strip-note-title">每日感悟</span>
-                            <span id="task-strip-note" class="task-strip-note">每日感悟会显示在这里</span>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Circular Ring Timer (Segmented Energy Blocks) -->
                 <div class="timer-ring-wrap">
@@ -109,42 +85,68 @@
             <!-- Toast / Notifications Center -->
             <div id="toast-container"></div>
 
-            <!-- Bottom: Controls -->
-            <div class="bottom-controls">
-                <div class="control-group control-block">
-                    <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
-                    <select id="duration-select" class="duration-select">
-                        <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
-                        <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
-                        <option value="custom" data-i18n="morningTree.customOption">自定义</option>
-                    </select>
-                    <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
-                        data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
-                </div>
-
-                <div class="sens-group control-block">
-                    <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
-                    <div class="sens-btns">
-                        <button class="sens-btn" data-sens="30">低</button>
-                        <button class="sens-btn active" data-sens="50">中</button>
-                        <button class="sens-btn" data-sens="75">高</button>
+            <div class="left-side-stack">
+                <div id="task-strip" class="task-strip hidden">
+                    <div class="task-strip-head">
+                        <div class="task-strip-badge" data-i18n="morningTree.tasks.todayBadge">今日任务</div>
+                        <div class="task-strip-switch">
+                            <button id="task-strip-prev" class="task-strip-nav-btn" type="button" aria-label="Previous weekday">‹</button>
+                            <div class="task-strip-switch-copy">
+                                <span id="task-strip-day" class="task-strip-day">周一</span>
+                                <span id="task-strip-datetime" class="task-strip-datetime">2026-03-19 14:26</span>
+                            </div>
+                            <button id="task-strip-next" class="task-strip-nav-btn" type="button" aria-label="Next weekday">›</button>
+                        </div>
                     </div>
-                    <!-- Tooltip Content -->
-                    <div id="help-tooltip" class="help-tooltip hidden">
-                        <strong>📏 校准建议：</strong>
-                        <ul>
-                            <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</li>
-                            <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</li>
-                            <li><strong>低</strong> = 灵敏度低，需较大声音才触发；<strong>高</strong> = 灵敏度高，小声也能读。</li>
-                        </ul>
-                        <p class="tap-close">点击此处关闭</p>
+                    <div class="task-strip-copy">
+                        <div id="task-strip-empty" class="task-strip-empty hidden">
+                            <strong id="task-strip-title">今日暂无早读任务</strong>
+                            <span id="task-strip-meta">点击右侧今日任务设置周一到周五内容</span>
+                        </div>
+                        <div id="task-strip-timeline" class="task-strip-timeline hidden"></div>
+                        <div id="task-strip-note-wrap" class="task-strip-note-wrap hidden">
+                            <span id="task-strip-note-title" class="task-strip-note-title">每日感悟</span>
+                            <span id="task-strip-note" class="task-strip-note">每日感悟会显示在这里</span>
+                        </div>
                     </div>
                 </div>
 
-                <button id="mic-toggle-btn" class="start-reading-btn" data-i18n-title="morningTree.micToggleTitle" type="button">
-                    开始早读
-                </button>
+                <!-- Bottom: Controls -->
+                <div class="bottom-controls">
+                    <div class="control-group control-block">
+                        <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
+                        <select id="duration-select" class="duration-select">
+                            <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                            <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                            <option value="custom" data-i18n="morningTree.customOption">自定义</option>
+                        </select>
+                        <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
+                            data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
+                    </div>
 
+                    <div class="sens-group control-block">
+                        <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
+                        <div class="sens-btns">
+                            <button class="sens-btn" data-sens="30">低</button>
+                            <button class="sens-btn active" data-sens="50">中</button>
+                            <button class="sens-btn" data-sens="75">高</button>
+                        </div>
+                        <!-- Tooltip Content -->
+                        <div id="help-tooltip" class="help-tooltip hidden">
+                            <strong>📏 校准建议：</strong>
+                            <ul>
+                                <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</li>
+                                <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</li>
+                                <li><strong>低</strong> = 灵敏度低，需较大声音才触发；<strong>高</strong> = 灵敏度高，小声也能读。</li>
+                            </ul>
+                            <p class="tap-close">点击此处关闭</p>
+                        </div>
+                    </div>
+
+                    <button id="mic-toggle-btn" class="start-reading-btn" data-i18n-title="morningTree.micToggleTitle" type="button">
+                        开始早读
+                    </button>
+                </div>
             </div>
         </div>
 

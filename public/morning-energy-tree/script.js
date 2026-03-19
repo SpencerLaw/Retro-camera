@@ -277,14 +277,14 @@ function buildCurveSVG(report) {
     const sourceValues = stats.values.length === 1 ? [stats.values[0], stats.values[0]] : stats.values;
     const values = sourceValues.map(value => Math.round(value));
     const width = 720;
-    const height = 210;
+    const height = 226;
     const paddingLeft = 54;
     const paddingRight = 34;
     const paddingTop = 24;
-    const paddingBottom = 46;
+    const paddingBottom = 58;
     const plotInsetX = 14;
-    const plotInsetTop = 10;
-    const plotInsetBottom = 12;
+    const plotInsetTop = 12;
+    const plotInsetBottom = 16;
     const plotLeft = paddingLeft + plotInsetX;
     const plotRight = width - paddingRight - plotInsetX;
     const plotTop = paddingTop + plotInsetTop;
@@ -987,6 +987,14 @@ function getFxLimit(type, treeSize = 0) {
     if (renderMode.ultraLowPower) return Math.max(8, Math.round(baseLimit * 0.72));
     if (renderMode.lowPower) return Math.max(10, Math.round(baseLimit * 0.9));
     return baseLimit;
+}
+
+function shouldRenderCanopyCluster(depth, len, angle, renderMode) {
+    if (!renderMode.lowPower && STATE.energy < 82) return true;
+
+    const density = renderMode.ultraLowPower ? 0.48 : renderMode.lowPower ? 0.68 : 0.84;
+    const leafSeed = Math.abs(Math.sin((depth * 1.91) + (len * 0.083) + (angle * 0.047)));
+    return leafSeed <= density;
 }
 
 class Cloud {
@@ -1698,6 +1706,7 @@ function initEnvironment() {
 function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, renderMode = { lowPower: false, ultraLowPower: false }) {
     ctx.beginPath();
     ctx.save();
+    const frameTime = (STATE.frameNow || Date.now()) / 1000;
 
     ctx.lineCap = 'round';
     ctx.lineWidth = branchWidth;
@@ -1721,10 +1730,10 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
 
     // 🌳 LUSH FOLIAGE (CLUMPS) 🌳
     if (depth >= 4 || (len < 10 && depth > 2)) {
-        if (STATE.energy > 15) {
+        if (STATE.energy > 15 && shouldRenderCanopyCluster(depth, len, angle, renderMode)) {
             const baseSize = (STATE.energy / 100) * 12 + 3;
             const leafPulse = renderMode.lowPower ? 1 : 1.5;
-            const size = baseSize + Math.sin(Date.now() / 1000 + depth) * leafPulse;
+            const size = baseSize + Math.sin(frameTime + depth) * leafPulse;
 
             const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
@@ -1744,7 +1753,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
         }
     }
 
-    const minBranchLen = renderMode.ultraLowPower ? 16 : renderMode.lowPower ? 13 : 10;
+    const minBranchLen = renderMode.ultraLowPower ? 18 : renderMode.lowPower ? 15 : STATE.energy > 86 ? 11.5 : 10;
     if (len < minBranchLen) {
         ctx.restore();
         return;
@@ -1753,8 +1762,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
     // Branching with Wind
     let wind = 0;
     if (STATE.currentDB > 50) {
-        // FIX: Slower wind (Date.now() / 1000)
-        wind = Math.sin(Date.now() / 1000 + depth) * ((STATE.currentDB - 50) / 30) * (depth * 0.5);
+        wind = Math.sin(frameTime + depth) * ((STATE.currentDB - 50) / 30) * (depth * 0.5);
     }
 
     let volumeFactor = (STATE.currentDB - 30) / 70;
@@ -1776,7 +1784,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
         drawEnhancedTree(0, 0, len * lengthFactor, branchAngle, branchWidth * 0.7, depth + 1, renderMode);
     }
 
-    if (!renderMode.lowPower && depth < 3 && STATE.energy > 60 && Math.random() < 0.16) {
+    if (!renderMode.lowPower && depth < 3 && len > 42 && STATE.energy > 60 && Math.random() < 0.1) {
         drawEnhancedTree(0, 0, len * 0.6, wind, branchWidth * 0.6, depth + 1, renderMode);
     }
 
@@ -1785,6 +1793,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
 
 function loop() {
     updateState();
+    STATE.frameNow = Date.now();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 

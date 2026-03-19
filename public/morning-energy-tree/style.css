@@ -489,6 +489,36 @@ canvas {
     overscroll-behavior: contain;
 }
 
+.report-body,
+.task-day-panel {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 118, 188, 0.96) rgba(255, 255, 255, 0.12);
+}
+
+.report-body::-webkit-scrollbar,
+.task-day-panel::-webkit-scrollbar {
+    width: 12px;
+}
+
+.report-body::-webkit-scrollbar-track,
+.task-day-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+}
+
+.report-body::-webkit-scrollbar-thumb,
+.task-day-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 162, 216, 0.98) 0%, rgba(255, 96, 175, 0.98) 100%);
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.26);
+}
+
+.report-body::-webkit-scrollbar-thumb:hover,
+.task-day-panel::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 182, 225, 1) 0%, rgba(255, 82, 168, 1) 100%);
+}
+
 .task-body {
     gap: 16px;
 }

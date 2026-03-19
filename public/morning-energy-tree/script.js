@@ -87,6 +87,10 @@ const customDuration = $('custom-duration');
 const taskStrip = $('task-strip');
 const taskStripTitle = $('task-strip-title');
 const taskStripMeta = $('task-strip-meta');
+const taskStripEmpty = $('task-strip-empty');
+const taskStripTimeline = $('task-strip-timeline');
+const taskStripNoteWrap = $('task-strip-note-wrap');
+const taskStripNoteTitle = $('task-strip-note-title');
 const taskStripNote = $('task-strip-note');
 const taskStripDay = $('task-strip-day');
 const taskStripPrev = $('task-strip-prev');
@@ -280,6 +284,15 @@ function getCurrentWeekdayKey(baseDate = new Date()) {
 
 function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function compressCurve(points, maxPoints = 40) {
@@ -849,58 +862,99 @@ function shiftTaskStripDay(direction) {
 }
 
 function updateTaskStrip() {
-    if (!taskStrip || !taskStripTitle || !taskStripMeta) return;
+    if (!taskStrip || !taskStripTitle || !taskStripMeta || !taskStripTimeline) return;
 
     const weekdayKey = getCurrentWeekdayKey();
     const displayDayKey = STATE.taskStripPreviewDay || weekdayKey;
     if (!displayDayKey) {
         taskStrip.classList.add('hidden');
-        if (taskStripNote) taskStripNote.classList.add('hidden');
+        if (taskStripEmpty) taskStripEmpty.classList.add('hidden');
+        if (taskStripTimeline) taskStripTimeline.classList.add('hidden');
+        if (taskStripNoteWrap) taskStripNoteWrap.classList.add('hidden');
         return;
     }
 
     const tasks = STATE.taskDrafts || loadStoredTasks();
     const dayTask = normalizeTaskDay(tasks[displayDayKey]);
-    const resolution = resolveCurrentTaskSlot(dayTask);
+    const slots = getMeaningfulTaskSlots(dayTask)
+        .map(slot => ({
+            ...slot,
+            startMinutes: parseClockMinutes(slot.start),
+            endMinutes: parseClockMinutes(slot.end)
+        }))
+        .sort((a, b) => {
+            const left = Number.isFinite(a.startMinutes) ? a.startMinutes : Number.MAX_SAFE_INTEGER;
+            const right = Number.isFinite(b.startMinutes) ? b.startMinutes : Number.MAX_SAFE_INTEGER;
+            return left - right;
+        });
     const dayLabel = t(`morningTree.report.days.${displayDayKey}`) || displayDayKey;
     const noteTitle = (dayTask.noteTitle || '').trim();
     const noteBody = (dayTask.noteBody || '').trim();
-    const noteText = noteTitle && noteBody ? `${noteTitle}：${noteBody}` : (noteBody || noteTitle);
+    const noteHeading = noteTitle || (t('morningTree.tasks.noteDefaultTitle') || '每日感悟');
+    const noteText = noteBody || (noteTitle ? '' : (t('morningTree.tasks.noteDefaultBody') || '可在这里输入一段励志短文、每日提醒，或当日早读目标。'));
+    const currentWeekdayIndex = getWeekdayIndex(weekdayKey);
+    const displayWeekdayIndex = getWeekdayIndex(displayDayKey);
+    const now = new Date();
+    const nowMinutes = (now.getHours() * 60) + now.getMinutes();
 
     taskStrip.classList.remove('hidden');
     if (taskStripDay) taskStripDay.textContent = dayLabel;
 
-    if (taskStripNote) {
-        if (noteText) {
+    if (taskStripNoteWrap && taskStripNote && taskStripNoteTitle) {
+        if (noteHeading || noteText) {
+            taskStripNoteTitle.textContent = noteHeading;
             taskStripNote.textContent = noteText;
-            taskStripNote.classList.remove('hidden');
+            taskStripNoteWrap.classList.remove('hidden');
         } else {
             taskStripNote.textContent = '';
-            taskStripNote.classList.add('hidden');
+            taskStripNoteTitle.textContent = '';
+            taskStripNoteWrap.classList.add('hidden');
         }
     }
 
-    if (!resolution.current) {
-        taskStripTitle.textContent = noteTitle || (t('morningTree.tasks.emptyToday') || '今日暂无早读任务');
+    if (!slots.length) {
+        taskStripTimeline.innerHTML = '';
+        taskStripTimeline.classList.add('hidden');
+        if (taskStripEmpty) taskStripEmpty.classList.remove('hidden');
+        taskStripTitle.textContent = t('morningTree.tasks.emptyToday') || '今日暂无早读任务';
         taskStripMeta.textContent = (t('morningTree.tasks.emptyHint') || '点击右侧今日任务，设置周一到周五内容')
             .replace('{day}', dayLabel);
         return;
     }
 
-    const currentText = `${resolution.current.start || '--:--'} - ${resolution.current.end || '--:--'}  ${resolution.current.content || (t('morningTree.tasks.pendingTask') || '请填写任务内容')}`;
-    taskStripTitle.textContent = currentText;
+    if (taskStripEmpty) taskStripEmpty.classList.add('hidden');
+    taskStripTimeline.classList.remove('hidden');
 
-    if (resolution.phase === 'active' && resolution.next) {
-        taskStripMeta.textContent = (t('morningTree.tasks.nextTask') || '下一项：{time} {content}')
-            .replace('{time}', `${resolution.next.start || '--:--'}-${resolution.next.end || '--:--'}`)
-            .replace('{content}', resolution.next.content || (t('morningTree.tasks.pendingTask') || '请填写任务内容'));
-    } else if (resolution.phase === 'upcoming') {
-        taskStripMeta.textContent = t('morningTree.tasks.upcoming') || '即将开始';
-    } else if (resolution.phase === 'finished') {
-        taskStripMeta.textContent = t('morningTree.tasks.finished') || '今日任务已完成';
-    } else {
-        taskStripMeta.textContent = `${dayLabel} · ${t('morningTree.tasks.todayBadge') || '今日任务'}`;
-    }
+    taskStripTimeline.innerHTML = slots.map(slot => {
+        let state = 'pending';
+        let stateLabel = t('morningTree.tasks.upcoming') || '即将开始';
+
+        if (displayWeekdayIndex !== -1 && currentWeekdayIndex !== -1) {
+            if (displayWeekdayIndex < currentWeekdayIndex) {
+                state = 'done';
+                stateLabel = '已完成';
+            } else if (displayWeekdayIndex === currentWeekdayIndex) {
+                if (Number.isFinite(slot.endMinutes) && nowMinutes > slot.endMinutes) {
+                    state = 'done';
+                    stateLabel = '已完成';
+                } else if (Number.isFinite(slot.startMinutes) && Number.isFinite(slot.endMinutes) && nowMinutes >= slot.startMinutes && nowMinutes <= slot.endMinutes) {
+                    state = 'active';
+                    stateLabel = '进行中';
+                }
+            }
+        }
+
+        return `
+            <div class="task-strip-timeline-item is-${state}">
+                <span class="task-strip-timeline-marker">${state === 'done' ? '&#10003;' : ''}</span>
+                <div class="task-strip-timeline-content">
+                    <div class="task-strip-timeline-time">${escapeHtml(slot.start || '--:--')} - ${escapeHtml(slot.end || '--:--')}</div>
+                    <strong>${escapeHtml(slot.content || (t('morningTree.tasks.pendingTask') || '请填写任务内容'))}</strong>
+                    <span class="task-strip-timeline-state">${stateLabel}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function renderTaskDaySidebar(dayGroups, selectedKey) {

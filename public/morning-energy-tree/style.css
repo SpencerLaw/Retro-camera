@@ -244,12 +244,13 @@ canvas {
     left: 20px;
     z-index: 9998;
     margin-top: 0;
-    width: min(420px, calc(100vw - 40px));
-    min-height: 90px;
+    width: min(308px, calc(100vw - 40px));
+    min-height: 124px;
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 13px;
     border-radius: 20px;
     background: linear-gradient(135deg, rgba(17, 24, 39, 0.34), rgba(40, 65, 120, 0.28));
     border: 1px solid rgba(255, 255, 255, 0.22);
@@ -257,10 +258,17 @@ canvas {
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
 }
 
+.task-strip-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
 .task-strip-badge {
     flex-shrink: 0;
-    min-width: 78px;
-    padding: 8px 12px;
+    min-width: 90px;
+    padding: 8px 14px;
     border-radius: 999px;
     background: rgba(123, 233, 170, 0.14);
     color: #d5ffe8;
@@ -270,29 +278,55 @@ canvas {
     letter-spacing: 0.03em;
 }
 
+.task-strip-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-strip-nav-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.task-strip-day {
+    min-width: 52px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: rgba(230, 250, 255, 0.9);
+}
+
 .task-strip-copy {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
     min-width: 0;
     text-align: left;
 }
 
-.task-strip-copy strong,
-.task-strip-copy > span:not(.task-strip-note) {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
 .task-strip-copy strong {
-    font-size: 0.96rem;
+    font-size: 0.98rem;
     font-weight: 900;
+    line-height: 1.38;
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .task-strip-copy span {
     font-size: 0.78rem;
     color: rgba(255, 255, 255, 0.72);
+    line-height: 1.42;
 }
 
 .task-strip-note {
@@ -301,9 +335,8 @@ canvas {
     color: rgba(223, 255, 232, 0.88);
     white-space: normal;
     overflow: hidden;
-    text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
@@ -450,9 +483,10 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    overflow: hidden;
+    overflow-y: auto;
     flex: 1 1 auto;
     min-height: 0;
+    overscroll-behavior: contain;
 }
 
 .task-body {
@@ -538,7 +572,7 @@ canvas {
     display: grid;
     grid-template-columns: 190px minmax(0, 1fr);
     gap: 14px;
-    align-items: stretch;
+    align-items: start;
     flex: 1 1 auto;
     min-height: 0;
 }
@@ -609,12 +643,12 @@ canvas {
     flex-direction: column;
     gap: 12px;
     min-height: 0;
-    height: 100%;
-    overflow: hidden;
+    height: auto;
+    overflow: visible;
 }
 
 .task-layout {
-    grid-template-columns: 190px minmax(0, 1fr);
+    grid-template-columns: 170px minmax(0, 1fr);
 }
 
 .task-focus-shell {
@@ -713,8 +747,8 @@ canvas {
 
 .task-section-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
-    gap: 14px;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.92fr);
+    gap: 16px;
 }
 
 .task-panel-card,
@@ -759,12 +793,16 @@ canvas {
 
 .task-slot-row {
     display: grid;
-    grid-template-columns: 186px minmax(0, 1fr) 38px;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    grid-template-areas:
+        "times remove"
+        "content content";
     gap: 10px;
-    align-items: center;
+    align-items: start;
 }
 
 .task-slot-times {
+    grid-area: times;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -799,6 +837,13 @@ canvas {
     text-align: center;
 }
 
+.task-textarea-inline {
+    grid-area: content;
+    min-height: 92px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
 .task-textarea {
     min-height: 168px;
     resize: vertical;
@@ -806,6 +851,7 @@ canvas {
 }
 
 .task-remove-btn {
+    grid-area: remove;
     width: 38px;
     height: 38px;
     border-radius: 12px;
@@ -1450,10 +1496,10 @@ button.icon-btn.active {
     .task-strip {
         top: 78px;
         left: 12px;
-        width: calc(100vw - 24px);
+        width: min(288px, calc(100vw - 24px));
         padding: 10px 12px;
         gap: 10px;
-        min-height: 82px;
+        min-height: 118px;
     }
 
     .task-trigger-btn {

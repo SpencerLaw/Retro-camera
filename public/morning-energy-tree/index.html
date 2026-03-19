@@ -53,10 +53,18 @@
                     <div id="energy-fill"></div>
                 </div>
                 <div id="task-strip" class="task-strip hidden">
-                    <div class="task-strip-badge" data-i18n="morningTree.tasks.todayBadge">今日任务</div>
+                    <div class="task-strip-head">
+                        <div class="task-strip-badge" data-i18n="morningTree.tasks.todayBadge">今日任务</div>
+                        <div class="task-strip-switch">
+                            <button id="task-strip-prev" class="task-strip-nav-btn" type="button" aria-label="Previous weekday">‹</button>
+                            <span id="task-strip-day" class="task-strip-day">周一</span>
+                            <button id="task-strip-next" class="task-strip-nav-btn" type="button" aria-label="Next weekday">›</button>
+                        </div>
+                    </div>
                     <div class="task-strip-copy">
                         <strong id="task-strip-title">今日暂无早读任务</strong>
                         <span id="task-strip-meta">点击右侧今日任务设置周一到周五内容</span>
+                        <span id="task-strip-note" class="task-strip-note hidden">每日感悟会显示在这里</span>
                     </div>
                 </div>
 

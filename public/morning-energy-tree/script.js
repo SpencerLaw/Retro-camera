@@ -54,6 +54,7 @@ const STATE = {
     // Weekly task board
     taskActiveDay: null,
     taskDrafts: null,
+    taskStripPreviewDay: null,
     frameNow: 0
 };
 
@@ -87,6 +88,9 @@ const taskStrip = $('task-strip');
 const taskStripTitle = $('task-strip-title');
 const taskStripMeta = $('task-strip-meta');
 const taskStripNote = $('task-strip-note');
+const taskStripDay = $('task-strip-day');
+const taskStripPrev = $('task-strip-prev');
+const taskStripNext = $('task-strip-next');
 const taskTriggerBtn = $('task-trigger-btn');
 const taskModal = $('task-modal');
 const taskBackdrop = $('task-backdrop');
@@ -112,6 +116,7 @@ const helpTooltip = $('help-tooltip');
 const dbStatus = $('db-status');
 const ringBar = $('ring-bar');
 let taskSaveFeedbackTimer = null;
+let taskStripResetTimer = null;
 
 if (helpTrigger) {
     helpTrigger.onclick = (e) => {
@@ -813,29 +818,61 @@ function resolveCurrentTaskSlot(dayTask, now = new Date()) {
     return { phase: 'finished', current: slots[slots.length - 1], next: null };
 }
 
+function getWeekdayIndex(key) {
+    return REPORT_WEEKDAYS.findIndex(day => day.key === key);
+}
+
+function scheduleTaskStripReset() {
+    if (taskStripResetTimer) {
+        clearTimeout(taskStripResetTimer);
+        taskStripResetTimer = null;
+    }
+
+    if (!STATE.taskStripPreviewDay || !getCurrentWeekdayKey()) return;
+
+    taskStripResetTimer = setTimeout(() => {
+        STATE.taskStripPreviewDay = null;
+        taskStripResetTimer = null;
+        updateTaskStrip();
+    }, 3000);
+}
+
+function shiftTaskStripDay(direction) {
+    const currentKey = getCurrentWeekdayKey();
+    const keys = REPORT_WEEKDAYS.map(day => day.key);
+    const baseKey = STATE.taskStripPreviewDay || currentKey || 'mon';
+    const baseIndex = Math.max(0, getWeekdayIndex(baseKey));
+    const nextIndex = (baseIndex + direction + keys.length) % keys.length;
+    STATE.taskStripPreviewDay = keys[nextIndex];
+    updateTaskStrip();
+    scheduleTaskStripReset();
+}
+
 function updateTaskStrip() {
     if (!taskStrip || !taskStripTitle || !taskStripMeta) return;
 
     const weekdayKey = getCurrentWeekdayKey();
-    if (!weekdayKey) {
+    const displayDayKey = STATE.taskStripPreviewDay || weekdayKey;
+    if (!displayDayKey) {
         taskStrip.classList.add('hidden');
         if (taskStripNote) taskStripNote.classList.add('hidden');
         return;
     }
 
     const tasks = STATE.taskDrafts || loadStoredTasks();
-    const dayTask = normalizeTaskDay(tasks[weekdayKey]);
+    const dayTask = normalizeTaskDay(tasks[displayDayKey]);
     const resolution = resolveCurrentTaskSlot(dayTask);
-    const dayLabel = t(`morningTree.report.days.${weekdayKey}`) || weekdayKey;
+    const dayLabel = t(`morningTree.report.days.${displayDayKey}`) || displayDayKey;
     const noteTitle = (dayTask.noteTitle || '').trim();
     const noteBody = (dayTask.noteBody || '').trim();
-    const noteText = noteBody || noteTitle;
+    const noteText = noteTitle && noteBody ? `${noteTitle}：${noteBody}` : (noteBody || noteTitle);
 
     taskStrip.classList.remove('hidden');
+    if (taskStripDay) taskStripDay.textContent = dayLabel;
 
     if (taskStripNote) {
         if (noteText) {
-            taskStripNote.textContent = noteTitle && noteBody ? `${noteTitle} · ${noteBody}` : noteText;
+            taskStripNote.textContent = noteText;
             taskStripNote.classList.remove('hidden');
         } else {
             taskStripNote.textContent = '';
@@ -844,7 +881,7 @@ function updateTaskStrip() {
     }
 
     if (!resolution.current) {
-        taskStripTitle.textContent = t('morningTree.tasks.emptyToday') || '今日暂无早读任务';
+        taskStripTitle.textContent = noteTitle || (t('morningTree.tasks.emptyToday') || '今日暂无早读任务');
         taskStripMeta.textContent = (t('morningTree.tasks.emptyHint') || '点击右侧今日任务，设置周一到周五内容')
             .replace('{day}', dayLabel);
         return;
@@ -976,7 +1013,6 @@ function renderTaskBoard() {
     const selectedTask = normalizeTaskDay(selectedDay.payload);
     const slots = selectedTask.tasks.length ? selectedTask.tasks : [createDefaultTaskSlot(0)];
     const slotCountLabel = `${getMeaningfulTaskSlots(selectedTask).length}${t('morningTree.tasks.itemSuffix') || '项'}`;
-    const preview = resolveCurrentTaskSlot(selectedTask, selectedDay.date);
 
     taskDayPanel.innerHTML = `
         <div class="report-day-header">
@@ -1004,8 +1040,8 @@ function renderTaskBoard() {
                                     <span class="task-slot-separator">-</span>
                                     <input type="time" class="task-input time" data-task-field="end" data-task-day="${selectedDay.key}" data-task-slot="${index}" value="${slot.end || ''}">
                                 </div>
-                                <input type="text" class="task-input content" data-task-field="content" data-task-day="${selectedDay.key}" data-task-slot="${index}" value="${slot.content || ''}" placeholder="${t('morningTree.tasks.taskPlaceholder') || '例如：背诵《木兰诗》第 4 部分'}">
                                 <button type="button" class="task-remove-btn" data-task-remove="${index}" ${slots.length <= 1 ? 'disabled' : ''}>✕</button>
+                                <textarea class="task-textarea task-textarea-inline" data-task-field="content" data-task-day="${selectedDay.key}" data-task-slot="${index}" placeholder="${t('morningTree.tasks.taskPlaceholder') || '例如：背诵《木兰诗》第 4 部分'}">${slot.content || ''}</textarea>
                             </div>
                         `).join('')}
                     </div>
@@ -1024,26 +1060,6 @@ function renderTaskBoard() {
                     </div>
                 </section>
             </div>
-
-            <section class="task-preview-card">
-                <div class="task-preview-head">
-                    <div>
-                        <strong>${t('morningTree.tasks.previewTitle') || '学生端显示预览'}</strong>
-                        <span>${t('morningTree.tasks.previewSub') || '当天会在顶部细条中自动提示当前任务'}</span>
-                    </div>
-                </div>
-                <div class="task-preview-body">
-                    <div class="task-preview-main">
-                        <span class="task-preview-label">${t('morningTree.tasks.todayBadge') || '今日任务'}</span>
-                        <strong>${preview.current ? `${preview.current.start || '--:--'} - ${preview.current.end || '--:--'} ${preview.current.content || (t('morningTree.tasks.pendingTask') || '请填写任务内容')}` : (t('morningTree.tasks.emptyToday') || '今日暂无早读任务')}</strong>
-                        <p>${selectedTask.noteTitle || (t('morningTree.tasks.noteHint') || '右侧可填写每日感悟标题和短文内容')}</p>
-                    </div>
-                    <div class="task-preview-note">
-                        <strong>${selectedTask.noteTitle || (t('morningTree.tasks.noteDefaultTitle') || '每日感悟')}</strong>
-                        <p>${selectedTask.noteBody || (t('morningTree.tasks.noteDefaultBody') || '可在这里输入一段励志短文、每日提醒，或当日早读目标。')}</p>
-                    </div>
-                </div>
-            </section>
         </article>
     `;
 
@@ -1113,6 +1129,14 @@ function initTaskUI() {
 
     if (taskSaveBtn) {
         taskSaveBtn.onclick = () => saveTaskDrafts(true);
+    }
+
+    if (taskStripPrev) {
+        taskStripPrev.onclick = () => shiftTaskStripDay(-1);
+    }
+
+    if (taskStripNext) {
+        taskStripNext.onclick = () => shiftTaskStripDay(1);
     }
 
     updateTaskStrip();

@@ -1349,43 +1349,88 @@ const DoraemonMonitorApp: React.FC = () => {
   // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
     const BAR_COUNT = 80; // 减少数量以提高性能和适应性
-    const PARTICLE_COUNT = 18;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     const tick = Date.now();
     // 在白天模式下使用更深的颜色和更高的不透明度
     const opacity = isDarkMode ? 0.7 : 0.5;
     const mainColor = `hsl(${hue}, 95%, 50%)`; // 极高饱和度
     const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
-    const particleIntensity = clamp((currentDb - 36) / 42, 0, 1);
-    const activeParticleCount = Math.max(2, Math.round(4 + (particleIntensity * 14)));
-    const absorbCoreOpacity = 0.18 + (particleIntensity * 0.48);
-    const absorbCoreWidth = 28 + (particleIntensity * 22);
+
+    return (
+      <div className="visualizer-container">
+        {Array.from({ length: BAR_COUNT }).map((_, i) => {
+          const dist = Math.abs(i - BAR_COUNT / 2);
+          const norm = 1 - (dist / (BAR_COUNT / 2));
+          const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
+          const wave = Math.sin(i * 0.35 + tick / 150) * 0.15;
+
+          // 优化：边缘高度自然收尾 (Taper height at edges)
+          const taperedNorm = Math.pow(norm, 1.5);
+          const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
+
+          return (
+            <div key={i} className="wave-bar" style={{
+              height: `${Math.min(100, height)}%`, // 使用百分比高度
+              background: `linear-gradient(to top, transparent, ${mainColor})`,
+              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
+              boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
+            }} />
+          );
+        })}
+      </div>
+    );
+  };
+
+  const DbEnergyField = () => {
+    const PARTICLE_COUNT = 22;
+    const SHELL_W = 340;
+    const SHELL_H = 194;
+    const ringIntensity = clamp((currentDb - 38) / 40, 0, 1);
+    const dbHue = Math.max(0, 200 - (currentDb - 40) * 4);
+    const ringAccent = `hsla(${Math.max(178, dbHue - 12)}, 100%, 74%, 1)`;
+    const ringGlow = `hsla(${Math.max(186, dbHue - 6)}, 100%, 72%, 0.9)`;
+    const activeParticleCount = Math.max(4, Math.round(6 + (ringIntensity * 16)));
+    const ringStyle = {
+      ['--db-ring-size' as const]: `${118 + (ringIntensity * 30)}px`,
+      ['--db-ring-thickness' as const]: `${(3 + (ringIntensity * 1.5)).toFixed(2)}px`,
+      ['--db-ring-glow-opacity' as const]: `${(0.28 + (ringIntensity * 0.46)).toFixed(3)}`,
+      ['--db-ring-core-opacity' as const]: `${(0.16 + (ringIntensity * 0.28)).toFixed(3)}`,
+      ['--db-ring-scale' as const]: `${(0.98 + (ringIntensity * 0.06)).toFixed(3)}`,
+      ['--db-ring-spin-duration' as const]: `${(5.6 - (ringIntensity * 2.1)).toFixed(2)}s`,
+      ['--db-ring-glow-color' as const]: ringGlow,
+      ['--db-ring-accent-color' as const]: ringAccent
+    } as React.CSSProperties;
 
     const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
-      const lane = Math.floor(i / 2);
-      const isLeft = i % 2 === 0;
-      const startX = isLeft ? 6 + ((lane % 4) * 7) : 94 - ((lane % 4) * 7);
-      const startY = 10 + ((lane * 11 + i * 3) % 42);
-      const endX = 50 + (((lane % 5) - 2) * 6);
-      const endY = 42 + ((lane * 7 + i * 5) % 18);
+      const sourceAngle = (-Math.PI * 0.96) + ((i / PARTICLE_COUNT) * Math.PI * 1.92);
+      const sourceRadiusX = 132 + ((i % 4) * 8);
+      const sourceRadiusY = 76 + ((i % 5) * 6);
+      const ringCenterX = SHELL_W / 2;
+      const ringCenterY = SHELL_H / 2;
+      const targetRadius = 48 + (ringIntensity * 10) + ((i % 3) * 2.2);
+      const targetAngle = sourceAngle + ((i % 2 === 0 ? 1 : -1) * (0.3 + (ringIntensity * 0.16)));
+      const startX = clamp(ringCenterX + (Math.cos(sourceAngle) * sourceRadiusX), 16, SHELL_W - 16);
+      const startY = clamp(ringCenterY + (Math.sin(sourceAngle) * sourceRadiusY), 12, SHELL_H - 12);
+      const endX = clamp(ringCenterX + (Math.cos(targetAngle) * targetRadius), 84, SHELL_W - 84);
+      const endY = clamp(ringCenterY + (Math.sin(targetAngle) * targetRadius), 48, SHELL_H - 48);
       const visible = i < activeParticleCount;
-      const size = 7 + ((i % 3) * 2.4) + (particleIntensity * 4.6);
-      const duration = Math.max(1.65, 2.9 - (particleIntensity * 0.95) + ((i % 4) * 0.15));
+      const size = 4 + ((i % 3) * 1.4) + (ringIntensity * 2.4);
+      const duration = Math.max(1.15, 2.35 - (ringIntensity * 0.75) + ((i % 4) * 0.12));
       const particleOpacity = visible
-        ? clamp(0.26 + (particleIntensity * 0.58) - (lane * 0.018), 0.16, 0.92)
+        ? clamp(0.22 + (ringIntensity * 0.62) - (i * 0.014), 0.12, 0.88)
         : 0;
-      const particleColor = `hsla(${175 - (particleIntensity * 38) + ((i % 5) * 7)}, 100%, ${78 - ((i % 3) * 5)}%, 1)`;
+      const particleColor = `hsla(${188 - (ringIntensity * 18) + ((i % 4) * 5)}, 100%, ${81 - ((i % 3) * 5)}%, 1)`;
 
       return {
-        key: `particle-${i}`,
+        key: `db-particle-${i}`,
         style: {
-          left: `${startX}%`,
-          top: `${startY}%`,
-          ['--particle-dx' as const]: `${endX - startX}%`,
-          ['--particle-dy' as const]: `${endY - startY}%`,
+          left: `${endX}px`,
+          top: `${endY}px`,
+          ['--particle-origin-x' as const]: `${(startX - endX).toFixed(2)}px`,
+          ['--particle-origin-y' as const]: `${(startY - endY).toFixed(2)}px`,
           ['--particle-size' as const]: `${size}px`,
           ['--particle-duration' as const]: `${duration.toFixed(2)}s`,
-          ['--particle-delay' as const]: `${(-0.34 * i).toFixed(2)}s`,
+          ['--particle-delay' as const]: `${(-0.26 * i).toFixed(2)}s`,
           ['--particle-opacity' as const]: `${particleOpacity.toFixed(3)}`,
           ['--particle-color' as const]: particleColor,
           ['--particle-core' as const]: 'rgba(255,255,255,0.96)'
@@ -1394,53 +1439,23 @@ const DoraemonMonitorApp: React.FC = () => {
     });
 
     return (
-      <div className="visualizer-shell">
-        <div className="visualizer-particle-layer" aria-hidden="true">
+      <div className="db-display-shell">
+        <div className="db-energy-layer" aria-hidden="true" style={ringStyle}>
+          <span className="db-energy-ring-glow" />
+          <span className="db-energy-ring-track" />
+          <span className="db-energy-ring-scan" />
+          <span className="db-energy-ring-core" />
           {particles.map((particle) => (
             <span
               key={particle.key}
-              className="visualizer-particle"
+              className="db-energy-particle"
               style={particle.style}
             />
           ))}
         </div>
-        <div
-          className="visualizer-absorb-haze"
-          aria-hidden="true"
-          style={{
-            opacity: 0.14 + (particleIntensity * 0.24),
-            background: `radial-gradient(circle, ${glowColor} 0%, transparent 72%)`
-          }}
-        />
-        <div
-          className="visualizer-absorb-core"
-          aria-hidden="true"
-          style={{
-            opacity: absorbCoreOpacity,
-            width: `${absorbCoreWidth}%`,
-            boxShadow: `0 0 ${22 + (particleIntensity * 26)}px ${glowColor}`
-          }}
-        />
-        <div className="visualizer-container">
-          {Array.from({ length: BAR_COUNT }).map((_, i) => {
-            const dist = Math.abs(i - BAR_COUNT / 2);
-            const norm = 1 - (dist / (BAR_COUNT / 2));
-            const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
-            const wave = Math.sin(i * 0.35 + tick / 150) * 0.15;
-
-            // 优化：边缘高度自然收尾 (Taper height at edges)
-            const taperedNorm = Math.pow(norm, 1.5);
-            const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
-
-            return (
-              <div key={i} className="wave-bar" style={{
-                height: `${Math.min(100, height)}%`, // 使用百分比高度
-                background: `linear-gradient(to top, transparent, ${mainColor})`,
-                opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
-                boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
-              }} />
-            );
-          })}
+        <div className="db-display">
+          <span className="db-number">{Math.round(currentDb)}</span>
+          <span className="db-unit">dB</span>
         </div>
       </div>
     );
@@ -1494,13 +1509,13 @@ const DoraemonMonitorApp: React.FC = () => {
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
         </div>
       </header>
-      <main className="doraemon-main">
-        <NoiseLevelReference />
-        <div className="center-display">
-          <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 150})` }}><DoraemonSVG /></div>
-          <div className="db-display"><span className="db-number">{Math.round(currentDb)}</span><span className="db-unit">dB</span></div>
-          <Visualizer />
-        </div>
+        <main className="doraemon-main">
+          <NoiseLevelReference />
+          <div className="center-display">
+            <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 150})` }}><DoraemonSVG /></div>
+            <DbEnergyField />
+            <Visualizer />
+          </div>
         <div className="right-panel">
           <div className="stat-box">
             <div className="stat-content">

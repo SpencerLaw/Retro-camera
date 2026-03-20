@@ -1382,14 +1382,14 @@ const DoraemonMonitorApp: React.FC = () => {
   };
 
   const DbEnergyField = () => {
-    const PARTICLE_COUNT = 30;
+    const PARTICLE_COUNT = 34;
     const SHELL_W = 380;
     const SHELL_H = 220;
     const ringIntensity = clamp((currentDb - 38) / 40, 0, 1);
     const dbHue = Math.max(0, 200 - (currentDb - 40) * 4);
     const ringAccent = `hsla(${Math.max(176, dbHue - 14)}, 100%, 74%, 1)`;
     const ringGlow = `hsla(${Math.max(184, dbHue - 8)}, 100%, 76%, 0.92)`;
-    const activeParticleCount = Math.round(10 + (ringIntensity * 18));
+    const activeParticleCount = Math.round(16 + (ringIntensity * 16));
     const ringStyle = {
       ['--db-ring-size' as const]: `${122 + (ringIntensity * 34)}px`,
       ['--db-ring-secondary-size' as const]: `${146 + (ringIntensity * 40)}px`,
@@ -1408,19 +1408,20 @@ const DoraemonMonitorApp: React.FC = () => {
       const sourceRadiusY = 90 + ((i % 6) * 8);
       const ringCenterX = SHELL_W / 2;
       const ringCenterY = SHELL_H / 2;
-      const targetRadius = 18 + (ringIntensity * 16) + ((i % 4) * 3.4);
+      const targetRadius = 22 + (ringIntensity * 18) + ((i % 4) * 3.1);
       const targetAngle = sourceAngle + ((i % 2 === 0 ? 1 : -1) * (0.22 + (ringIntensity * 0.12)));
       const startX = clamp(ringCenterX + (Math.cos(sourceAngle) * sourceRadiusX), 6, SHELL_W - 6);
       const startY = clamp(ringCenterY + (Math.sin(sourceAngle) * sourceRadiusY), 8, SHELL_H - 8);
       const endX = clamp(ringCenterX + (Math.cos(targetAngle) * targetRadius), 120, SHELL_W - 120);
       const endY = clamp(ringCenterY + (Math.sin(targetAngle) * targetRadius * 0.78), 64, SHELL_H - 64);
       const visible = i < activeParticleCount;
-      const size = 4.8 + ((i % 3) * 1.5) + (ringIntensity * 2.6);
-      const duration = Math.max(1.8, 3.1 - (ringIntensity * 0.82) + ((i % 5) * 0.16));
+      const size = 4.4 + ((i % 3) * 1.2) + (ringIntensity * 2.2);
+      const duration = Math.max(2.2, 3.6 - (ringIntensity * 0.92) + ((i % 5) * 0.18));
       const particleOpacity = visible
-        ? clamp(0.3 + (ringIntensity * 0.52) - (i * 0.011), 0.18, 0.92)
+        ? clamp(0.46 + (ringIntensity * 0.42) - (i * 0.01), 0.22, 0.94)
         : 0;
-      const particleColor = `hsla(${184 - (ringIntensity * 16) + ((i % 4) * 6)}, 100%, ${84 - ((i % 3) * 5)}%, 1)`;
+      const particleColor = `hsla(${186 - (ringIntensity * 12) + ((i % 4) * 4)}, 100%, ${88 - ((i % 3) * 4)}%, 1)`;
+      const particleAngle = `${(Math.atan2(endY - startY, endX - startX) * 180 / Math.PI).toFixed(2)}deg`;
 
       return {
         key: `db-particle-${i}`,
@@ -1434,20 +1435,21 @@ const DoraemonMonitorApp: React.FC = () => {
           ['--particle-delay' as const]: `${(-0.34 * i).toFixed(2)}s`,
           ['--particle-opacity' as const]: `${particleOpacity.toFixed(3)}`,
           ['--particle-color' as const]: particleColor,
-          ['--particle-core' as const]: 'rgba(255,255,255,0.96)'
+          ['--particle-core' as const]: 'rgba(255,255,255,0.98)',
+          ['--particle-angle' as const]: particleAngle
         } as React.CSSProperties
       };
     });
 
-      return (
-        <div className="db-display-shell">
-          <div className="db-energy-layer" aria-hidden="true" style={ringStyle}>
-            <span className="db-energy-ring-glow" />
-            <span className="db-energy-ring-backdrop" />
-            <span className="db-energy-ring-secondary" />
-            <span className="db-energy-ring-track" />
-            <span className="db-energy-ring-scan" />
-            <span className="db-energy-ring-core" />
+    return (
+      <div className="db-display-shell">
+        <div className="db-energy-layer" aria-hidden="true" style={ringStyle}>
+          <span className="db-energy-ring-glow" />
+          <span className="db-energy-ring-backdrop" />
+          <span className="db-energy-ring-secondary" />
+          <span className="db-energy-ring-track" />
+          <span className="db-energy-ring-scan" />
+          <span className="db-energy-ring-core" />
           {particles.map((particle) => (
             <span
               key={particle.key}

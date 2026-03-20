@@ -339,32 +339,29 @@
 }
 
 .db-energy-ring-glow {
-  background: radial-gradient(circle, transparent 34%, rgba(190, 246, 255, 0.16) 46%, var(--db-ring-glow-color) 58%, rgba(255, 255, 255, 0.06) 67%, transparent 78%);
+  background: radial-gradient(circle, transparent 46%, rgba(206, 248, 255, 0.1) 57%, var(--db-ring-glow-color) 64%, rgba(255, 255, 255, 0.05) 68%, transparent 76%);
   opacity: var(--db-ring-glow-opacity);
-  filter: blur(20px);
+  filter: blur(18px);
 }
 
 .db-energy-ring-backdrop {
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(124, 231, 255, 0.08) 26%, rgba(24, 37, 86, 0.16) 46%, transparent 72%);
-  opacity: 0.82;
+  background: radial-gradient(circle, transparent 44%, rgba(129, 230, 255, 0.05) 58%, transparent 76%);
+  opacity: 0.34;
 }
 
 .db-energy-ring-secondary {
   width: var(--db-ring-secondary-size);
   height: var(--db-ring-secondary-size);
-  border: 1px solid rgba(173, 243, 255, 0.14);
+  border: 1px solid rgba(173, 243, 255, 0.12);
   box-shadow:
-    inset 0 0 24px rgba(99, 210, 255, 0.08),
-    0 0 26px rgba(72, 204, 255, 0.1);
-  opacity: calc(var(--db-ring-glow-opacity) * 0.8);
+    0 0 18px rgba(72, 204, 255, 0.08);
+  opacity: calc(var(--db-ring-glow-opacity) * 0.56);
 }
 
 .db-energy-ring-track {
-  border: 1px solid rgba(183, 241, 255, 0.28);
+  border: 1px solid rgba(183, 241, 255, 0.26);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    inset 0 0 20px rgba(120, 235, 255, 0.22),
-    0 0 22px rgba(72, 204, 255, 0.16);
+    0 0 18px rgba(72, 204, 255, 0.14);
 }
 
 .db-energy-ring-scan {
@@ -398,25 +395,33 @@
 .db-energy-ring-core {
   width: calc(var(--db-ring-size) * 0.34);
   height: calc(var(--db-ring-size) * 0.34);
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.76) 0%, rgba(181, 247, 255, 0.34) 28%, rgba(72, 204, 255, 0.16) 42%, transparent 72%);
-  filter: blur(10px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.42) 0%, rgba(181, 247, 255, 0.16) 26%, transparent 64%);
+  filter: blur(9px);
   opacity: var(--db-ring-core-opacity);
 }
 
 .db-energy-particle {
   position: absolute;
-  width: var(--particle-size);
+  width: calc(var(--particle-size) * 3.6);
   height: var(--particle-size);
   border-radius: 999px;
-  background: radial-gradient(circle, var(--particle-core) 0%, var(--particle-color) 32%, rgba(255, 255, 255, 0.16) 60%, transparent 78%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(220, 250, 255, 0.08) 24%,
+    var(--particle-color) 62%,
+    var(--particle-core) 100%
+  );
   box-shadow:
-    0 0 calc(var(--particle-size) * 2.8) var(--particle-color),
-    0 0 calc(var(--particle-size) * 4.6) rgba(255, 255, 255, 0.18);
+    0 0 calc(var(--particle-size) * 2.4) var(--particle-color),
+    0 0 calc(var(--particle-size) * 5.2) rgba(255, 255, 255, 0.22);
   opacity: 0;
-  transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) scale(0.32);
+  transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) rotate(var(--particle-angle)) scale(0.34);
+  transform-origin: center center;
   animation: db-energy-particle-flow var(--particle-duration) linear infinite;
   animation-delay: var(--particle-delay);
   will-change: transform, opacity;
+  mix-blend-mode: screen;
 }
 
 /* ===== 声纹可视化 ===== */
@@ -454,7 +459,7 @@
 @keyframes db-energy-particle-flow {
   0% {
     opacity: 0;
-    transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) scale(0.34);
+    transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) rotate(var(--particle-angle)) scale(0.36);
   }
 
   12% {
@@ -467,7 +472,7 @@
 
   100% {
     opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.06);
+    transform: translate3d(0, 0, 0) rotate(var(--particle-angle)) scale(0.05);
   }
 }
 

@@ -1382,44 +1382,45 @@ const DoraemonMonitorApp: React.FC = () => {
   };
 
   const DbEnergyField = () => {
-    const PARTICLE_COUNT = 22;
-    const SHELL_W = 340;
-    const SHELL_H = 194;
+    const PARTICLE_COUNT = 30;
+    const SHELL_W = 380;
+    const SHELL_H = 220;
     const ringIntensity = clamp((currentDb - 38) / 40, 0, 1);
     const dbHue = Math.max(0, 200 - (currentDb - 40) * 4);
-    const ringAccent = `hsla(${Math.max(178, dbHue - 12)}, 100%, 74%, 1)`;
-    const ringGlow = `hsla(${Math.max(186, dbHue - 6)}, 100%, 72%, 0.9)`;
-    const activeParticleCount = Math.max(4, Math.round(6 + (ringIntensity * 16)));
+    const ringAccent = `hsla(${Math.max(176, dbHue - 14)}, 100%, 74%, 1)`;
+    const ringGlow = `hsla(${Math.max(184, dbHue - 8)}, 100%, 76%, 0.92)`;
+    const activeParticleCount = Math.round(10 + (ringIntensity * 18));
     const ringStyle = {
-      ['--db-ring-size' as const]: `${118 + (ringIntensity * 30)}px`,
-      ['--db-ring-thickness' as const]: `${(3 + (ringIntensity * 1.5)).toFixed(2)}px`,
-      ['--db-ring-glow-opacity' as const]: `${(0.28 + (ringIntensity * 0.46)).toFixed(3)}`,
-      ['--db-ring-core-opacity' as const]: `${(0.16 + (ringIntensity * 0.28)).toFixed(3)}`,
+      ['--db-ring-size' as const]: `${122 + (ringIntensity * 34)}px`,
+      ['--db-ring-secondary-size' as const]: `${146 + (ringIntensity * 40)}px`,
+      ['--db-ring-thickness' as const]: `${(2.6 + (ringIntensity * 1.6)).toFixed(2)}px`,
+      ['--db-ring-glow-opacity' as const]: `${(0.24 + (ringIntensity * 0.48)).toFixed(3)}`,
+      ['--db-ring-core-opacity' as const]: `${(0.12 + (ringIntensity * 0.22)).toFixed(3)}`,
       ['--db-ring-scale' as const]: `${(0.98 + (ringIntensity * 0.06)).toFixed(3)}`,
-      ['--db-ring-spin-duration' as const]: `${(5.6 - (ringIntensity * 2.1)).toFixed(2)}s`,
+      ['--db-ring-spin-duration' as const]: `${(6.8 - (ringIntensity * 2.4)).toFixed(2)}s`,
       ['--db-ring-glow-color' as const]: ringGlow,
       ['--db-ring-accent-color' as const]: ringAccent
     } as React.CSSProperties;
 
     const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
-      const sourceAngle = (-Math.PI * 0.96) + ((i / PARTICLE_COUNT) * Math.PI * 1.92);
-      const sourceRadiusX = 132 + ((i % 4) * 8);
-      const sourceRadiusY = 76 + ((i % 5) * 6);
+      const sourceAngle = (-Math.PI * 0.98) + ((i / PARTICLE_COUNT) * Math.PI * 1.96);
+      const sourceRadiusX = 150 + ((i % 5) * 10);
+      const sourceRadiusY = 90 + ((i % 6) * 8);
       const ringCenterX = SHELL_W / 2;
       const ringCenterY = SHELL_H / 2;
-      const targetRadius = 48 + (ringIntensity * 10) + ((i % 3) * 2.2);
-      const targetAngle = sourceAngle + ((i % 2 === 0 ? 1 : -1) * (0.3 + (ringIntensity * 0.16)));
-      const startX = clamp(ringCenterX + (Math.cos(sourceAngle) * sourceRadiusX), 16, SHELL_W - 16);
-      const startY = clamp(ringCenterY + (Math.sin(sourceAngle) * sourceRadiusY), 12, SHELL_H - 12);
-      const endX = clamp(ringCenterX + (Math.cos(targetAngle) * targetRadius), 84, SHELL_W - 84);
-      const endY = clamp(ringCenterY + (Math.sin(targetAngle) * targetRadius), 48, SHELL_H - 48);
+      const targetRadius = 18 + (ringIntensity * 16) + ((i % 4) * 3.4);
+      const targetAngle = sourceAngle + ((i % 2 === 0 ? 1 : -1) * (0.22 + (ringIntensity * 0.12)));
+      const startX = clamp(ringCenterX + (Math.cos(sourceAngle) * sourceRadiusX), 6, SHELL_W - 6);
+      const startY = clamp(ringCenterY + (Math.sin(sourceAngle) * sourceRadiusY), 8, SHELL_H - 8);
+      const endX = clamp(ringCenterX + (Math.cos(targetAngle) * targetRadius), 120, SHELL_W - 120);
+      const endY = clamp(ringCenterY + (Math.sin(targetAngle) * targetRadius * 0.78), 64, SHELL_H - 64);
       const visible = i < activeParticleCount;
-      const size = 4 + ((i % 3) * 1.4) + (ringIntensity * 2.4);
-      const duration = Math.max(1.15, 2.35 - (ringIntensity * 0.75) + ((i % 4) * 0.12));
+      const size = 4.8 + ((i % 3) * 1.5) + (ringIntensity * 2.6);
+      const duration = Math.max(1.8, 3.1 - (ringIntensity * 0.82) + ((i % 5) * 0.16));
       const particleOpacity = visible
-        ? clamp(0.22 + (ringIntensity * 0.62) - (i * 0.014), 0.12, 0.88)
+        ? clamp(0.3 + (ringIntensity * 0.52) - (i * 0.011), 0.18, 0.92)
         : 0;
-      const particleColor = `hsla(${188 - (ringIntensity * 18) + ((i % 4) * 5)}, 100%, ${81 - ((i % 3) * 5)}%, 1)`;
+      const particleColor = `hsla(${184 - (ringIntensity * 16) + ((i % 4) * 6)}, 100%, ${84 - ((i % 3) * 5)}%, 1)`;
 
       return {
         key: `db-particle-${i}`,
@@ -1430,7 +1431,7 @@ const DoraemonMonitorApp: React.FC = () => {
           ['--particle-origin-y' as const]: `${(startY - endY).toFixed(2)}px`,
           ['--particle-size' as const]: `${size}px`,
           ['--particle-duration' as const]: `${duration.toFixed(2)}s`,
-          ['--particle-delay' as const]: `${(-0.26 * i).toFixed(2)}s`,
+          ['--particle-delay' as const]: `${(-0.34 * i).toFixed(2)}s`,
           ['--particle-opacity' as const]: `${particleOpacity.toFixed(3)}`,
           ['--particle-color' as const]: particleColor,
           ['--particle-core' as const]: 'rgba(255,255,255,0.96)'
@@ -1438,13 +1439,15 @@ const DoraemonMonitorApp: React.FC = () => {
       };
     });
 
-    return (
-      <div className="db-display-shell">
-        <div className="db-energy-layer" aria-hidden="true" style={ringStyle}>
-          <span className="db-energy-ring-glow" />
-          <span className="db-energy-ring-track" />
-          <span className="db-energy-ring-scan" />
-          <span className="db-energy-ring-core" />
+      return (
+        <div className="db-display-shell">
+          <div className="db-energy-layer" aria-hidden="true" style={ringStyle}>
+            <span className="db-energy-ring-glow" />
+            <span className="db-energy-ring-backdrop" />
+            <span className="db-energy-ring-secondary" />
+            <span className="db-energy-ring-track" />
+            <span className="db-energy-ring-scan" />
+            <span className="db-energy-ring-core" />
           {particles.map((particle) => (
             <span
               key={particle.key}

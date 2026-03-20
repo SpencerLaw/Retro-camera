@@ -302,8 +302,8 @@
 
 .db-display-shell {
   position: relative;
-  width: clamp(280px, 32vw, 360px);
-  height: clamp(164px, 20vh, 214px);
+  width: clamp(300px, 34vw, 392px);
+  height: clamp(178px, 22vh, 238px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -324,6 +324,8 @@
 }
 
 .db-energy-ring-glow,
+.db-energy-ring-backdrop,
+.db-energy-ring-secondary,
 .db-energy-ring-track,
 .db-energy-ring-scan,
 .db-energy-ring-core {
@@ -337,17 +339,32 @@
 }
 
 .db-energy-ring-glow {
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, var(--db-ring-glow-color) 26%, rgba(255, 255, 255, 0.05) 52%, transparent 72%);
+  background: radial-gradient(circle, transparent 34%, rgba(190, 246, 255, 0.16) 46%, var(--db-ring-glow-color) 58%, rgba(255, 255, 255, 0.06) 67%, transparent 78%);
   opacity: var(--db-ring-glow-opacity);
-  filter: blur(22px);
+  filter: blur(20px);
+}
+
+.db-energy-ring-backdrop {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(124, 231, 255, 0.08) 26%, rgba(24, 37, 86, 0.16) 46%, transparent 72%);
+  opacity: 0.82;
+}
+
+.db-energy-ring-secondary {
+  width: var(--db-ring-secondary-size);
+  height: var(--db-ring-secondary-size);
+  border: 1px solid rgba(173, 243, 255, 0.14);
+  box-shadow:
+    inset 0 0 24px rgba(99, 210, 255, 0.08),
+    0 0 26px rgba(72, 204, 255, 0.1);
+  opacity: calc(var(--db-ring-glow-opacity) * 0.8);
 }
 
 .db-energy-ring-track {
-  border: 1px solid rgba(183, 241, 255, 0.22);
+  border: 1px solid rgba(183, 241, 255, 0.28);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    inset 0 0 18px var(--db-ring-accent-color),
-    0 0 24px rgba(86, 210, 255, 0.14);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 0 20px rgba(120, 235, 255, 0.22),
+    0 0 22px rgba(72, 204, 255, 0.16);
 }
 
 .db-energy-ring-scan {
@@ -374,15 +391,15 @@
     #000 calc(100% - 1px),
     transparent 100%
   );
-  opacity: calc(var(--db-ring-glow-opacity) + 0.08);
+  opacity: calc(var(--db-ring-glow-opacity) + 0.14);
   animation: db-energy-ring-spin var(--db-ring-spin-duration) linear infinite;
 }
 
 .db-energy-ring-core {
   width: calc(var(--db-ring-size) * 0.34);
   height: calc(var(--db-ring-size) * 0.34);
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.62) 0%, rgba(164, 245, 255, 0.28) 36%, transparent 72%);
-  filter: blur(8px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.76) 0%, rgba(181, 247, 255, 0.34) 28%, rgba(72, 204, 255, 0.16) 42%, transparent 72%);
+  filter: blur(10px);
   opacity: var(--db-ring-core-opacity);
 }
 
@@ -391,10 +408,12 @@
   width: var(--particle-size);
   height: var(--particle-size);
   border-radius: 999px;
-  background: radial-gradient(circle, var(--particle-core) 0%, var(--particle-color) 36%, rgba(255, 255, 255, 0.14) 62%, transparent 78%);
-  box-shadow: 0 0 calc(var(--particle-size) * 2.8) var(--particle-color);
+  background: radial-gradient(circle, var(--particle-core) 0%, var(--particle-color) 32%, rgba(255, 255, 255, 0.16) 60%, transparent 78%);
+  box-shadow:
+    0 0 calc(var(--particle-size) * 2.8) var(--particle-color),
+    0 0 calc(var(--particle-size) * 4.6) rgba(255, 255, 255, 0.18);
   opacity: 0;
-  transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) scale(0.22);
+  transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) scale(0.32);
   animation: db-energy-particle-flow var(--particle-duration) linear infinite;
   animation-delay: var(--particle-delay);
   will-change: transform, opacity;
@@ -435,20 +454,20 @@
 @keyframes db-energy-particle-flow {
   0% {
     opacity: 0;
-    transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) scale(0.22);
+    transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) scale(0.34);
   }
 
-  14% {
+  12% {
     opacity: var(--particle-opacity);
   }
 
-  76% {
-    opacity: calc(var(--particle-opacity) * 0.72);
+  72% {
+    opacity: calc(var(--particle-opacity) * 0.76);
   }
 
   100% {
     opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.08);
+    transform: translate3d(0, 0, 0) scale(0.06);
   }
 }
 

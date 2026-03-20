@@ -1383,63 +1383,84 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const DbEnergyField = () => {
     const PARTICLE_COUNT = 34;
-    const SHELL_W = 380;
-    const SHELL_H = 220;
+    const SHELL_W = 440;
+    const SHELL_H = 260;
     const ringIntensity = clamp((currentDb - 38) / 40, 0, 1);
     const dbHue = Math.max(0, 200 - (currentDb - 40) * 4);
     const ringAccent = `hsla(${Math.max(176, dbHue - 14)}, 100%, 74%, 1)`;
     const ringGlow = `hsla(${Math.max(184, dbHue - 8)}, 100%, 76%, 0.92)`;
-    const activeParticleCount = Math.round(16 + (ringIntensity * 16));
+    const particleSeedsRef = useRef<Array<{
+      key: string;
+      endX: number;
+      endY: number;
+      originX: number;
+      originY: number;
+      size: number;
+      duration: number;
+      delay: number;
+      opacity: number;
+      color: string;
+      angle: string;
+    }> | null>(null);
     const ringStyle = {
-      ['--db-ring-size' as const]: `${122 + (ringIntensity * 34)}px`,
-      ['--db-ring-secondary-size' as const]: `${146 + (ringIntensity * 40)}px`,
-      ['--db-ring-thickness' as const]: `${(2.6 + (ringIntensity * 1.6)).toFixed(2)}px`,
-      ['--db-ring-glow-opacity' as const]: `${(0.24 + (ringIntensity * 0.48)).toFixed(3)}`,
-      ['--db-ring-core-opacity' as const]: `${(0.12 + (ringIntensity * 0.22)).toFixed(3)}`,
-      ['--db-ring-scale' as const]: `${(0.98 + (ringIntensity * 0.06)).toFixed(3)}`,
-      ['--db-ring-spin-duration' as const]: `${(6.8 - (ringIntensity * 2.4)).toFixed(2)}s`,
+      ['--db-ring-size' as const]: '136px',
+      ['--db-ring-secondary-size' as const]: '172px',
+      ['--db-ring-thickness' as const]: '2.2px',
+      ['--db-ring-glow-opacity' as const]: `${(0.26 + (ringIntensity * 0.22)).toFixed(3)}`,
+      ['--db-ring-core-opacity' as const]: `${(0.08 + (ringIntensity * 0.12)).toFixed(3)}`,
+      ['--db-ring-scale' as const]: '1',
+      ['--db-ring-spin-duration' as const]: '7.2s',
       ['--db-ring-glow-color' as const]: ringGlow,
-      ['--db-ring-accent-color' as const]: ringAccent
+      ['--db-ring-accent-color' as const]: ringAccent,
+      ['--db-particle-alpha' as const]: `${(0.86 + (ringIntensity * 0.14)).toFixed(3)}`
     } as React.CSSProperties;
 
-    const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
-      const sourceAngle = (-Math.PI * 0.98) + ((i / PARTICLE_COUNT) * Math.PI * 1.96);
-      const sourceRadiusX = 150 + ((i % 5) * 10);
-      const sourceRadiusY = 90 + ((i % 6) * 8);
+    if (!particleSeedsRef.current) {
       const ringCenterX = SHELL_W / 2;
       const ringCenterY = SHELL_H / 2;
-      const targetRadius = 22 + (ringIntensity * 18) + ((i % 4) * 3.1);
-      const targetAngle = sourceAngle + ((i % 2 === 0 ? 1 : -1) * (0.22 + (ringIntensity * 0.12)));
-      const startX = clamp(ringCenterX + (Math.cos(sourceAngle) * sourceRadiusX), 6, SHELL_W - 6);
-      const startY = clamp(ringCenterY + (Math.sin(sourceAngle) * sourceRadiusY), 8, SHELL_H - 8);
-      const endX = clamp(ringCenterX + (Math.cos(targetAngle) * targetRadius), 120, SHELL_W - 120);
-      const endY = clamp(ringCenterY + (Math.sin(targetAngle) * targetRadius * 0.78), 64, SHELL_H - 64);
-      const visible = i < activeParticleCount;
-      const size = 4.4 + ((i % 3) * 1.2) + (ringIntensity * 2.2);
-      const duration = Math.max(2.2, 3.6 - (ringIntensity * 0.92) + ((i % 5) * 0.18));
-      const particleOpacity = visible
-        ? clamp(0.46 + (ringIntensity * 0.42) - (i * 0.01), 0.22, 0.94)
-        : 0;
-      const particleColor = `hsla(${186 - (ringIntensity * 12) + ((i % 4) * 4)}, 100%, ${88 - ((i % 3) * 4)}%, 1)`;
-      const particleAngle = `${(Math.atan2(endY - startY, endX - startX) * 180 / Math.PI).toFixed(2)}deg`;
+      particleSeedsRef.current = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
+        const sourceAngle = (-Math.PI * 0.98) + ((i / PARTICLE_COUNT) * Math.PI * 1.96);
+        const sourceRadiusX = 186 + ((i % 5) * 14);
+        const sourceRadiusY = 112 + ((i % 6) * 10);
+        const targetRadius = 24 + ((i % 4) * 4.8);
+        const targetAngle = sourceAngle + ((i % 2 === 0 ? 1 : -1) * 0.18);
+        const startX = clamp(ringCenterX + (Math.cos(sourceAngle) * sourceRadiusX), 4, SHELL_W - 4);
+        const startY = clamp(ringCenterY + (Math.sin(sourceAngle) * sourceRadiusY), 6, SHELL_H - 6);
+        const endX = clamp(ringCenterX + (Math.cos(targetAngle) * targetRadius), 144, SHELL_W - 144);
+        const endY = clamp(ringCenterY + (Math.sin(targetAngle) * targetRadius * 0.78), 82, SHELL_H - 82);
+        const angle = `${(Math.atan2(endY - startY, endX - startX) * 180 / Math.PI).toFixed(2)}deg`;
+        return {
+          key: `db-particle-${i}`,
+          endX,
+          endY,
+          originX: startX - endX,
+          originY: startY - endY,
+          size: 4.1 + ((i % 3) * 1.15),
+          duration: 4.2 + ((i % 6) * 0.32),
+          delay: -0.42 * i,
+          opacity: clamp(0.34 + (((i + 2) % 5) * 0.08), 0.32, 0.74),
+          color: `hsla(${188 + ((i % 4) * 2)}, 100%, ${88 - ((i % 3) * 3)}%, 1)`,
+          angle
+        };
+      });
+    }
 
-      return {
-        key: `db-particle-${i}`,
-        style: {
-          left: `${endX}px`,
-          top: `${endY}px`,
-          ['--particle-origin-x' as const]: `${(startX - endX).toFixed(2)}px`,
-          ['--particle-origin-y' as const]: `${(startY - endY).toFixed(2)}px`,
-          ['--particle-size' as const]: `${size}px`,
-          ['--particle-duration' as const]: `${duration.toFixed(2)}s`,
-          ['--particle-delay' as const]: `${(-0.34 * i).toFixed(2)}s`,
-          ['--particle-opacity' as const]: `${particleOpacity.toFixed(3)}`,
-          ['--particle-color' as const]: particleColor,
-          ['--particle-core' as const]: 'rgba(255,255,255,0.98)',
-          ['--particle-angle' as const]: particleAngle
-        } as React.CSSProperties
-      };
-    });
+    const particles = particleSeedsRef.current.map((particle) => ({
+      key: particle.key,
+      style: {
+        left: `${particle.endX}px`,
+        top: `${particle.endY}px`,
+        ['--particle-origin-x' as const]: `${particle.originX.toFixed(2)}px`,
+        ['--particle-origin-y' as const]: `${particle.originY.toFixed(2)}px`,
+        ['--particle-size' as const]: `${particle.size.toFixed(2)}px`,
+        ['--particle-duration' as const]: `${particle.duration.toFixed(2)}s`,
+        ['--particle-delay' as const]: `${particle.delay.toFixed(2)}s`,
+        ['--particle-opacity' as const]: `${particle.opacity.toFixed(3)}`,
+        ['--particle-color' as const]: particle.color,
+        ['--particle-core' as const]: 'rgba(255,255,255,0.98)',
+        ['--particle-angle' as const]: particle.angle
+      } as React.CSSProperties
+    }));
 
     return (
       <div className="db-display-shell">

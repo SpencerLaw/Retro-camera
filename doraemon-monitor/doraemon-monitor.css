@@ -299,15 +299,67 @@
 }
 
 /* ===== 声纹可视化 ===== */
-.visualizer-container {
+.visualizer-shell {
   width: min(100%, 720px);
   height: clamp(92px, 14vh, 156px);
+  position: relative;
+  margin-top: clamp(2px, 0.6vh, 8px);
+  pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.visualizer-container {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2.5%;
-  margin-top: clamp(2px, 0.6vh, 8px);
-  pointer-events: none;
+  z-index: 2;
+}
+
+.visualizer-particle-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.visualizer-particle {
+  position: absolute;
+  width: var(--particle-size);
+  height: var(--particle-size);
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--particle-core) 0%, var(--particle-color) 36%, rgba(255, 255, 255, 0.12) 62%, transparent 78%);
+  box-shadow: 0 0 calc(var(--particle-size) * 2.4) var(--particle-color);
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(0.26);
+  animation: visualizer-particle-flow var(--particle-duration) linear infinite;
+  animation-delay: var(--particle-delay);
+  will-change: transform, opacity;
+}
+
+.visualizer-absorb-core {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  height: 22px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.88) 50%, transparent 100%);
+  z-index: 0;
+}
+
+.visualizer-absorb-haze {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  width: 42%;
+  height: 54px;
+  transform: translateX(-50%);
+  filter: blur(10px);
+  z-index: 0;
 }
 
 .wave-bar {
@@ -318,6 +370,26 @@
   min-height: 4px;
   border-radius: 4px;
   transition: height 0.08s ease-out;
+}
+
+@keyframes visualizer-particle-flow {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.26);
+  }
+
+  12% {
+    opacity: var(--particle-opacity);
+  }
+
+  72% {
+    opacity: calc(var(--particle-opacity) * 0.86);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--particle-dx), var(--particle-dy), 0) scale(0.12);
+  }
 }
 
 /* ===== 右侧面板 ===== */
@@ -1908,7 +1980,7 @@
     font-size: clamp(1.6rem, 2.2vh, 2.2rem);
   }
 
-  .visualizer-container {
+  .visualizer-shell {
     height: 110px;
   }
 
@@ -2162,7 +2234,7 @@
     font-size: 2rem;
   }
 
-  .visualizer-container {
+  .visualizer-shell {
     height: 96px;
     /* 增加20%: 80px -> 96px */
     margin-top: 15px;

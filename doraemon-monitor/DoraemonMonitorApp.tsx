@@ -1349,33 +1349,99 @@ const DoraemonMonitorApp: React.FC = () => {
   // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
     const BAR_COUNT = 80; // 减少数量以提高性能和适应性
+    const PARTICLE_COUNT = 18;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
+    const tick = Date.now();
     // 在白天模式下使用更深的颜色和更高的不透明度
     const opacity = isDarkMode ? 0.7 : 0.5;
     const mainColor = `hsl(${hue}, 95%, 50%)`; // 极高饱和度
     const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
+    const particleIntensity = clamp((currentDb - 36) / 42, 0, 1);
+    const activeParticleCount = Math.max(2, Math.round(4 + (particleIntensity * 14)));
+    const absorbCoreOpacity = 0.18 + (particleIntensity * 0.48);
+    const absorbCoreWidth = 28 + (particleIntensity * 22);
+
+    const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
+      const lane = Math.floor(i / 2);
+      const isLeft = i % 2 === 0;
+      const startX = isLeft ? 6 + ((lane % 4) * 7) : 94 - ((lane % 4) * 7);
+      const startY = 10 + ((lane * 11 + i * 3) % 42);
+      const endX = 50 + (((lane % 5) - 2) * 6);
+      const endY = 42 + ((lane * 7 + i * 5) % 18);
+      const visible = i < activeParticleCount;
+      const size = 7 + ((i % 3) * 2.4) + (particleIntensity * 4.6);
+      const duration = Math.max(1.65, 2.9 - (particleIntensity * 0.95) + ((i % 4) * 0.15));
+      const particleOpacity = visible
+        ? clamp(0.26 + (particleIntensity * 0.58) - (lane * 0.018), 0.16, 0.92)
+        : 0;
+      const particleColor = `hsla(${175 - (particleIntensity * 38) + ((i % 5) * 7)}, 100%, ${78 - ((i % 3) * 5)}%, 1)`;
+
+      return {
+        key: `particle-${i}`,
+        style: {
+          left: `${startX}%`,
+          top: `${startY}%`,
+          ['--particle-dx' as const]: `${endX - startX}%`,
+          ['--particle-dy' as const]: `${endY - startY}%`,
+          ['--particle-size' as const]: `${size}px`,
+          ['--particle-duration' as const]: `${duration.toFixed(2)}s`,
+          ['--particle-delay' as const]: `${(-0.34 * i).toFixed(2)}s`,
+          ['--particle-opacity' as const]: `${particleOpacity.toFixed(3)}`,
+          ['--particle-color' as const]: particleColor,
+          ['--particle-core' as const]: 'rgba(255,255,255,0.96)'
+        } as React.CSSProperties
+      };
+    });
 
     return (
-      <div className="visualizer-container">
-        {Array.from({ length: BAR_COUNT }).map((_, i) => {
-          const dist = Math.abs(i - BAR_COUNT / 2);
-          const norm = 1 - (dist / (BAR_COUNT / 2));
-          const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
-          const wave = Math.sin(i * 0.35 + Date.now() / 150) * 0.15;
+      <div className="visualizer-shell">
+        <div className="visualizer-particle-layer" aria-hidden="true">
+          {particles.map((particle) => (
+            <span
+              key={particle.key}
+              className="visualizer-particle"
+              style={particle.style}
+            />
+          ))}
+        </div>
+        <div
+          className="visualizer-absorb-haze"
+          aria-hidden="true"
+          style={{
+            opacity: 0.14 + (particleIntensity * 0.24),
+            background: `radial-gradient(circle, ${glowColor} 0%, transparent 72%)`
+          }}
+        />
+        <div
+          className="visualizer-absorb-core"
+          aria-hidden="true"
+          style={{
+            opacity: absorbCoreOpacity,
+            width: `${absorbCoreWidth}%`,
+            boxShadow: `0 0 ${22 + (particleIntensity * 26)}px ${glowColor}`
+          }}
+        />
+        <div className="visualizer-container">
+          {Array.from({ length: BAR_COUNT }).map((_, i) => {
+            const dist = Math.abs(i - BAR_COUNT / 2);
+            const norm = 1 - (dist / (BAR_COUNT / 2));
+            const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
+            const wave = Math.sin(i * 0.35 + tick / 150) * 0.15;
 
-          // 优化：边缘高度自然收尾 (Taper height at edges)
-          const taperedNorm = Math.pow(norm, 1.5);
-          const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
+            // 优化：边缘高度自然收尾 (Taper height at edges)
+            const taperedNorm = Math.pow(norm, 1.5);
+            const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
 
-          return (
-            <div key={i} className="wave-bar" style={{
-              height: `${Math.min(100, height)}%`, // 使用百分比高度
-              background: `linear-gradient(to top, transparent, ${mainColor})`,
-              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
-              boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
-            }} />
-          );
-        })}
+            return (
+              <div key={i} className="wave-bar" style={{
+                height: `${Math.min(100, height)}%`, // 使用百分比高度
+                background: `linear-gradient(to top, transparent, ${mainColor})`,
+                opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
+                boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
+              }} />
+            );
+          })}
+        </div>
       </div>
     );
   };

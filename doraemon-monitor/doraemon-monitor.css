@@ -281,8 +281,6 @@
   align-items: baseline;
   justify-content: center;
   margin: 0;
-  position: relative;
-  z-index: 2;
 }
 
 .db-number {
@@ -298,133 +296,6 @@
   font-weight: 700;
   color: var(--accent-blue);
   margin-left: 8px;
-}
-
-.db-display-shell {
-  position: relative;
-  width: clamp(320px, 36vw, 430px);
-  height: clamp(194px, 23vh, 262px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.db-energy-layer {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  overflow: visible;
-  z-index: 0;
-  transition: opacity 220ms ease;
-}
-
-.db-energy-ring-glow,
-.db-energy-ring-backdrop,
-.db-energy-ring-secondary,
-.db-energy-ring-track,
-.db-energy-ring-scan,
-.db-energy-ring-core {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: var(--db-ring-size);
-  height: var(--db-ring-size);
-  transform: translate(-50%, -50%) scale(var(--db-ring-scale));
-  border-radius: 50%;
-}
-
-.db-energy-ring-glow {
-  background: radial-gradient(circle, transparent 50%, rgba(206, 248, 255, 0.08) 60%, var(--db-ring-glow-color) 66%, rgba(255, 255, 255, 0.04) 70%, transparent 78%);
-  opacity: var(--db-ring-glow-opacity);
-  filter: blur(16px);
-}
-
-.db-energy-ring-backdrop {
-  background: radial-gradient(circle, transparent 54%, rgba(129, 230, 255, 0.03) 64%, transparent 78%);
-  opacity: 0.22;
-}
-
-.db-energy-ring-secondary {
-  width: var(--db-ring-secondary-size);
-  height: var(--db-ring-secondary-size);
-  border: 1px solid rgba(173, 243, 255, 0.08);
-  box-shadow:
-    0 0 14px rgba(72, 204, 255, 0.06);
-  opacity: calc(var(--db-ring-glow-opacity) * 0.42);
-}
-
-.db-energy-ring-track {
-  border: 1px solid rgba(183, 241, 255, 0.22);
-  box-shadow:
-    0 0 14px rgba(72, 204, 255, 0.12);
-}
-
-.db-energy-ring-scan {
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 42deg,
-    rgba(255, 255, 255, 0.92) 68deg,
-    var(--db-ring-glow-color) 94deg,
-    transparent 128deg,
-    transparent 360deg
-  );
-  -webkit-mask: radial-gradient(
-    farthest-side,
-    transparent calc(100% - var(--db-ring-thickness) - 4px),
-    #000 calc(100% - var(--db-ring-thickness)),
-    #000 calc(100% - 1px),
-    transparent 100%
-  );
-  mask: radial-gradient(
-    farthest-side,
-    transparent calc(100% - var(--db-ring-thickness) - 4px),
-    #000 calc(100% - var(--db-ring-thickness)),
-    #000 calc(100% - 1px),
-    transparent 100%
-  );
-  opacity: calc(var(--db-ring-glow-opacity) + 0.14);
-  animation: db-energy-ring-spin var(--db-ring-spin-duration) linear infinite;
-}
-
-.db-energy-ring-core {
-  width: calc(var(--db-ring-size) * 0.34);
-  height: calc(var(--db-ring-size) * 0.34);
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(181, 247, 255, 0.08) 24%, transparent 62%);
-  filter: blur(8px);
-  opacity: var(--db-ring-core-opacity);
-}
-
-.db-energy-particle {
-  position: absolute;
-  width: calc(var(--particle-size) * 7.2);
-  height: calc(var(--particle-size) * 1.08);
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(220, 250, 255, 0.04) 18%,
-    rgba(238, 253, 255, 0.18) 42%,
-    var(--particle-color) 72%,
-    var(--particle-core) 100%
-  );
-  box-shadow:
-    0 0 calc(var(--particle-size) * 2.8) rgba(255, 255, 255, 0.38),
-    0 0 calc(var(--particle-size) * 6.8) rgba(255, 255, 255, 0.18);
-  opacity: 0;
-  transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) rotate(var(--particle-angle)) scale(0.34);
-  transform-origin: center center;
-  animation: db-energy-particle-flow var(--particle-duration) linear infinite;
-  animation-delay: var(--particle-delay);
-  will-change: transform, opacity;
-  mix-blend-mode: screen;
-  filter: blur(0.2px);
 }
 
 /* ===== 声纹可视化 ===== */
@@ -447,36 +318,6 @@
   min-height: 4px;
   border-radius: 4px;
   transition: height 0.08s ease-out;
-}
-
-@keyframes db-energy-ring-spin {
-  from {
-    transform: translate(-50%, -50%) scale(var(--db-ring-scale)) rotate(0deg);
-  }
-
-  to {
-    transform: translate(-50%, -50%) scale(var(--db-ring-scale)) rotate(360deg);
-  }
-}
-
-@keyframes db-energy-particle-flow {
-  0% {
-    opacity: 0;
-    transform: translate3d(var(--particle-origin-x), var(--particle-origin-y), 0) rotate(var(--particle-angle)) scale(0.36);
-  }
-
-  12% {
-    opacity: calc(var(--particle-opacity) * var(--db-particle-alpha));
-  }
-
-  72% {
-    opacity: calc(var(--particle-opacity) * var(--db-particle-alpha) * 0.74);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) rotate(var(--particle-angle)) scale(0.05);
-  }
 }
 
 /* ===== 右侧面板 ===== */

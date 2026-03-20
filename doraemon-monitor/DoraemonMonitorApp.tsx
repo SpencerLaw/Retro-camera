@@ -1381,112 +1381,6 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   };
 
-  const DbEnergyField = () => {
-    const PARTICLE_COUNT = 34;
-    const SHELL_W = 440;
-    const SHELL_H = 260;
-    const ringIntensity = clamp((currentDb - 38) / 40, 0, 1);
-    const dbHue = Math.max(0, 200 - (currentDb - 40) * 4);
-    const ringAccent = `hsla(${Math.max(176, dbHue - 14)}, 100%, 74%, 1)`;
-    const ringGlow = `hsla(${Math.max(184, dbHue - 8)}, 100%, 76%, 0.92)`;
-    const particleSeedsRef = useRef<Array<{
-      key: string;
-      endX: number;
-      endY: number;
-      originX: number;
-      originY: number;
-      size: number;
-      duration: number;
-      delay: number;
-      opacity: number;
-      color: string;
-      angle: string;
-    }> | null>(null);
-    const ringStyle = {
-      ['--db-ring-size' as const]: '136px',
-      ['--db-ring-secondary-size' as const]: '172px',
-      ['--db-ring-thickness' as const]: '2.2px',
-      ['--db-ring-glow-opacity' as const]: `${(0.26 + (ringIntensity * 0.22)).toFixed(3)}`,
-      ['--db-ring-core-opacity' as const]: `${(0.08 + (ringIntensity * 0.12)).toFixed(3)}`,
-      ['--db-ring-scale' as const]: '1',
-      ['--db-ring-spin-duration' as const]: '7.2s',
-      ['--db-ring-glow-color' as const]: ringGlow,
-      ['--db-ring-accent-color' as const]: ringAccent,
-      ['--db-particle-alpha' as const]: `${(0.86 + (ringIntensity * 0.14)).toFixed(3)}`
-    } as React.CSSProperties;
-
-    if (!particleSeedsRef.current) {
-      const ringCenterX = SHELL_W / 2;
-      const ringCenterY = SHELL_H / 2;
-      particleSeedsRef.current = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
-        const sourceAngle = (-Math.PI * 0.98) + ((i / PARTICLE_COUNT) * Math.PI * 1.96);
-        const sourceRadiusX = 186 + ((i % 5) * 14);
-        const sourceRadiusY = 112 + ((i % 6) * 10);
-        const targetRadius = 24 + ((i % 4) * 4.8);
-        const targetAngle = sourceAngle + ((i % 2 === 0 ? 1 : -1) * 0.18);
-        const startX = clamp(ringCenterX + (Math.cos(sourceAngle) * sourceRadiusX), 4, SHELL_W - 4);
-        const startY = clamp(ringCenterY + (Math.sin(sourceAngle) * sourceRadiusY), 6, SHELL_H - 6);
-        const endX = clamp(ringCenterX + (Math.cos(targetAngle) * targetRadius), 144, SHELL_W - 144);
-        const endY = clamp(ringCenterY + (Math.sin(targetAngle) * targetRadius * 0.78), 82, SHELL_H - 82);
-        const angle = `${(Math.atan2(endY - startY, endX - startX) * 180 / Math.PI).toFixed(2)}deg`;
-        return {
-          key: `db-particle-${i}`,
-          endX,
-          endY,
-          originX: startX - endX,
-          originY: startY - endY,
-          size: 4.1 + ((i % 3) * 1.15),
-          duration: 4.2 + ((i % 6) * 0.32),
-          delay: -0.42 * i,
-          opacity: clamp(0.34 + (((i + 2) % 5) * 0.08), 0.32, 0.74),
-          color: `hsla(${188 + ((i % 4) * 2)}, 100%, ${88 - ((i % 3) * 3)}%, 1)`,
-          angle
-        };
-      });
-    }
-
-    const particles = particleSeedsRef.current.map((particle) => ({
-      key: particle.key,
-      style: {
-        left: `${particle.endX}px`,
-        top: `${particle.endY}px`,
-        ['--particle-origin-x' as const]: `${particle.originX.toFixed(2)}px`,
-        ['--particle-origin-y' as const]: `${particle.originY.toFixed(2)}px`,
-        ['--particle-size' as const]: `${particle.size.toFixed(2)}px`,
-        ['--particle-duration' as const]: `${particle.duration.toFixed(2)}s`,
-        ['--particle-delay' as const]: `${particle.delay.toFixed(2)}s`,
-        ['--particle-opacity' as const]: `${particle.opacity.toFixed(3)}`,
-        ['--particle-color' as const]: particle.color,
-        ['--particle-core' as const]: 'rgba(255,255,255,0.98)',
-        ['--particle-angle' as const]: particle.angle
-      } as React.CSSProperties
-    }));
-
-    return (
-      <div className="db-display-shell">
-        <div className="db-energy-layer" aria-hidden="true" style={ringStyle}>
-          <span className="db-energy-ring-glow" />
-          <span className="db-energy-ring-backdrop" />
-          <span className="db-energy-ring-secondary" />
-          <span className="db-energy-ring-track" />
-          <span className="db-energy-ring-scan" />
-          <span className="db-energy-ring-core" />
-          {particles.map((particle) => (
-            <span
-              key={particle.key}
-              className="db-energy-particle"
-              style={particle.style}
-            />
-          ))}
-        </div>
-        <div className="db-display">
-          <span className="db-number">{Math.round(currentDb)}</span>
-          <span className="db-unit">dB</span>
-        </div>
-      </div>
-    );
-  };
-
   const DoraemonSVG = () => (
     <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%' }}>
       <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" /><circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
@@ -1539,7 +1433,7 @@ const DoraemonMonitorApp: React.FC = () => {
           <NoiseLevelReference />
           <div className="center-display">
             <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 150})` }}><DoraemonSVG /></div>
-            <DbEnergyField />
+            <div className="db-display"><span className="db-number">{Math.round(currentDb)}</span><span className="db-unit">dB</span></div>
             <Visualizer />
           </div>
         <div className="right-panel">

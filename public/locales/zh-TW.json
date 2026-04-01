@@ -219,6 +219,31 @@
         "warnings": "警報",
         "settings": "參數"
       }
+    },
+    "warningResetPassword": {
+      "manageTitle": "重置保護密碼",
+      "manageDescEmpty": "替「清空警告次數」加上一道保護，避免學生趁老師不在時自行清空。",
+      "manageDescSet": "已開啟保護。之後清空警告次數前，需要先輸入你設定的密碼。",
+      "verifyTitle": "輸入密碼後清空",
+      "verifyDesc": "請輸入老師設定的密碼，驗證通過後才會清空警告次數。",
+      "helpTitle": "這個密碼有什麼作用？",
+      "helpDesc": "這個密碼只保護「清空警告次數」按鈕，用來避免學生誤按或偷清空，不會影響監測、閾值、靜音等其他功能。",
+      "inputLabel": "輸入密碼",
+      "confirmLabel": "再次輸入密碼",
+      "inputPlaceholder": "請輸入密碼",
+      "confirmPlaceholder": "請再次輸入密碼",
+      "cancel": "取消",
+      "save": "儲存密碼",
+      "update": "更新密碼",
+      "clear": "清除密碼",
+      "confirmReset": "驗證並清空",
+      "enabled": "已開啟密碼保護",
+      "disabled": "目前未開啟密碼保護",
+      "emptyError": "請輸入密碼",
+      "mismatchError": "兩次輸入的密碼不一致",
+      "verifyError": "密碼不正確",
+      "helpTrigger": "查看密碼說明",
+      "settingsTrigger": "設定清空密碼"
     }
   },
   "broadcast": {

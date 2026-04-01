@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX, ChevronUp, ChevronDown, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX, ChevronUp, ChevronDown, CalendarDays, Lock } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
+import {
+  clearWarningResetPasswordRecord,
+  loadWarningResetPasswordRecord,
+  normalizeWarningResetPassword,
+  saveWarningResetPasswordRecord,
+  shouldRequireWarningResetPassword,
+  verifyWarningResetPassword
+} from './utils/warningResetPassword.js';
 import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
 
@@ -10,6 +18,12 @@ type MonitorState = 'calm' | 'alarm';
 type MicTestStage = 'idle' | 'quiet' | 'active' | 'done';
 type MicTestHealth = 'good' | 'flat' | 'noisy' | 'weak';
 type ReportWeekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri';
+type WarningResetDialogMode = 'manage' | 'verify' | 'help';
+
+interface WarningResetPasswordRecord {
+  hash: string;
+  updatedAt: string;
+}
 
 interface CaptureSettings {
   echoCancellation: boolean | null;
@@ -154,7 +168,14 @@ const DoraemonMonitorApp: React.FC = () => {
     }
     return false;
   });
-  const isOverlayOpen = isMicTestOpen || isReportOpen;
+  const [warningResetPasswordRecord, setWarningResetPasswordRecord] = useState<WarningResetPasswordRecord | null>(() => loadWarningResetPasswordRecord());
+  const [isWarningResetDialogOpen, setIsWarningResetDialogOpen] = useState(false);
+  const [warningResetDialogMode, setWarningResetDialogMode] = useState<WarningResetDialogMode>('manage');
+  const [warningResetPasswordInput, setWarningResetPasswordInput] = useState('');
+  const [warningResetPasswordConfirm, setWarningResetPasswordConfirm] = useState('');
+  const [warningResetPasswordError, setWarningResetPasswordError] = useState('');
+  const warningResetPasswordEnabled = shouldRequireWarningResetPassword(warningResetPasswordRecord);
+  const isOverlayOpen = isMicTestOpen || isReportOpen || isWarningResetDialogOpen;
   const visualState: MonitorState = isOverlayOpen ? 'calm' : state;
   const sensitivityRef = useRef(50);
   const micTestStageRef = useRef<MicTestStage>('idle');
@@ -958,6 +979,97 @@ const DoraemonMonitorApp: React.FC = () => {
     event.stopPropagation();
     openMicTest();
   };
+  const resetWarnCount = useCallback(() => {
+    warnCountRef.current = 0;
+    setWarnCount(0);
+  }, []);
+  const closeWarningResetDialog = useCallback(() => {
+    setIsWarningResetDialogOpen(false);
+    setWarningResetDialogMode('manage');
+    setWarningResetPasswordInput('');
+    setWarningResetPasswordConfirm('');
+    setWarningResetPasswordError('');
+  }, []);
+  const openWarningResetDialog = useCallback((mode: WarningResetDialogMode) => {
+    setIsMicTestOpen(false);
+    setIsReportOpen(false);
+    setShowHelp(false);
+    setShowThresholdHelp(false);
+    setWarningResetDialogMode(mode);
+    setWarningResetPasswordInput('');
+    setWarningResetPasswordConfirm('');
+    setWarningResetPasswordError('');
+    setIsWarningResetDialogOpen(true);
+  }, []);
+  const handleOpenWarningResetSettings = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openWarningResetDialog('manage');
+  };
+  const handleOpenWarningResetHelp = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openWarningResetDialog('help');
+  };
+  const handleWarningResetDialogClose = (event?: React.SyntheticEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    closeWarningResetDialog();
+  };
+  const handleResetWarnCount = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (warningResetPasswordEnabled) {
+      openWarningResetDialog('verify');
+      return;
+    }
+
+    resetWarnCount();
+  };
+  const handleSaveWarningResetPassword = async (event: React.FormEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const normalizedPassword = normalizeWarningResetPassword(warningResetPasswordInput);
+    const normalizedConfirm = normalizeWarningResetPassword(warningResetPasswordConfirm);
+
+    if (!normalizedPassword) {
+      setWarningResetPasswordError(t('doraemon.warningResetPassword.emptyError'));
+      return;
+    }
+
+    if (normalizedPassword !== normalizedConfirm) {
+      setWarningResetPasswordError(t('doraemon.warningResetPassword.mismatchError'));
+      return;
+    }
+
+    const nextRecord = await saveWarningResetPasswordRecord(normalizedPassword);
+    setWarningResetPasswordRecord(nextRecord);
+    closeWarningResetDialog();
+  };
+  const handleClearWarningResetPassword = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    clearWarningResetPasswordRecord();
+    setWarningResetPasswordRecord(null);
+    closeWarningResetDialog();
+  };
+  const handleVerifyWarningReset = async (event: React.FormEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const verified = await verifyWarningResetPassword(warningResetPasswordInput, warningResetPasswordRecord);
+    if (!verified) {
+      setWarningResetPasswordError(t('doraemon.warningResetPassword.verifyError'));
+      return;
+    }
+
+    resetWarnCount();
+    closeWarningResetDialog();
+  };
 
   const MicTestContent = () => (
     <div className="diagnostic-box mic-test-window">
@@ -1293,6 +1405,155 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   };
 
+  const WarningResetDialog = () => {
+    if (!isWarningResetDialogOpen) return null;
+
+    const dialogTitle = warningResetDialogMode === 'verify'
+      ? t('doraemon.warningResetPassword.verifyTitle')
+      : warningResetDialogMode === 'help'
+        ? t('doraemon.warningResetPassword.helpTitle')
+        : t('doraemon.warningResetPassword.manageTitle');
+    const dialogDescription = warningResetDialogMode === 'verify'
+      ? t('doraemon.warningResetPassword.verifyDesc')
+      : warningResetDialogMode === 'help'
+        ? t('doraemon.warningResetPassword.helpDesc')
+        : warningResetPasswordEnabled
+          ? t('doraemon.warningResetPassword.manageDescSet')
+          : t('doraemon.warningResetPassword.manageDescEmpty');
+
+    return (
+      <div className="floating-modal-layer open">
+        <button
+          type="button"
+          className="floating-modal-backdrop"
+          onClick={closeWarningResetDialog}
+          aria-label={dialogTitle}
+        />
+        <div
+          className="floating-modal-shell warning-reset-dialog-shell"
+          onClick={stopModalPropagation}
+          onMouseDown={stopModalPropagation}
+        >
+          <div className="floating-modal-header">
+            <div className="warning-reset-dialog-heading">
+              <div className={`warning-reset-dialog-icon ${warningResetPasswordEnabled ? 'protected' : ''}`}><Lock size={18} /></div>
+              <div>
+                <strong>{dialogTitle}</strong>
+                <p>{dialogDescription}</p>
+              </div>
+            </div>
+            <button
+              className="floating-close-btn"
+              type="button"
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                closeWarningResetDialog();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                closeWarningResetDialog();
+              }}
+              title={t('doraemon.warningResetPassword.cancel')}
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="floating-modal-body warning-reset-dialog-body">
+            <div className={`warning-reset-status-pill ${warningResetPasswordEnabled ? 'protected' : 'open'}`}>
+              {warningResetPasswordEnabled
+                ? t('doraemon.warningResetPassword.enabled')
+                : t('doraemon.warningResetPassword.disabled')}
+            </div>
+
+            {warningResetDialogMode === 'help' ? (
+              <div className="warning-reset-help-copy">
+                <p>{t('doraemon.warningResetPassword.helpDesc')}</p>
+                <div className="warning-reset-actions">
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                </div>
+              </div>
+            ) : warningResetDialogMode === 'verify' ? (
+              <form className="warning-reset-form" onSubmit={handleVerifyWarningReset}>
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.inputLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetPasswordInput}
+                    onChange={(event) => {
+                      setWarningResetPasswordInput(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.inputPlaceholder')}
+                    autoFocus
+                  />
+                </label>
+                {warningResetPasswordError && <div className="warning-reset-error">{warningResetPasswordError}</div>}
+                <div className="warning-reset-actions">
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                  <button type="submit" className="warning-reset-primary-btn">
+                    {t('doraemon.warningResetPassword.confirmReset')}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form className="warning-reset-form" onSubmit={handleSaveWarningResetPassword}>
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.inputLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetPasswordInput}
+                    onChange={(event) => {
+                      setWarningResetPasswordInput(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.inputPlaceholder')}
+                    autoFocus
+                  />
+                </label>
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.confirmLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetPasswordConfirm}
+                    onChange={(event) => {
+                      setWarningResetPasswordConfirm(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.confirmPlaceholder')}
+                  />
+                </label>
+                {warningResetPasswordError && <div className="warning-reset-error">{warningResetPasswordError}</div>}
+                <div className="warning-reset-actions">
+                  {warningResetPasswordEnabled && (
+                    <button type="button" className="warning-reset-danger-btn" onClick={handleClearWarningResetPassword}>
+                      {t('doraemon.warningResetPassword.clear')}
+                    </button>
+                  )}
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                  <button type="submit" className="warning-reset-primary-btn">
+                    {warningResetPasswordEnabled
+                      ? t('doraemon.warningResetPassword.update')
+                      : t('doraemon.warningResetPassword.save')}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const NoiseLevelReference = () => {
     const levels = [
       { min: 0, max: 20, label: t('doraemon.levels.l0') },
@@ -1454,16 +1715,29 @@ const DoraemonMonitorApp: React.FC = () => {
               <span className="stat-label">{t('doraemon.warnCount')}</span>
               <strong className="stat-value" style={{ color: '#dc2626' }}>{warnCount}</strong>
             </div>
-            <button
-              className="reset-icon-btn"
-              onClick={() => {
-                warnCountRef.current = 0;
-                setWarnCount(0);
-              }}
-              title={t('doraemon.resetCount')}
-            >
-              <RotateCcw size={20} />
-            </button>
+            <div className="stat-action-row">
+              <button
+                className="reset-icon-btn"
+                onClick={handleResetWarnCount}
+                title={t('doraemon.resetCount')}
+              >
+                <RotateCcw size={20} />
+              </button>
+              <button
+                className={`warning-reset-settings-btn ${warningResetPasswordEnabled ? 'protected' : ''}`}
+                onClick={handleOpenWarningResetSettings}
+                title={t('doraemon.warningResetPassword.settingsTrigger')}
+              >
+                <Lock size={18} />
+              </button>
+              <button
+                className="warning-reset-help-btn"
+                onClick={handleOpenWarningResetHelp}
+                title={t('doraemon.warningResetPassword.helpTrigger')}
+              >
+                !
+              </button>
+            </div>
           </div>
           <div className="stat-box">
             <div className="stat-content">
@@ -1551,6 +1825,7 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
         </div>
       </main>
+      <WarningResetDialog />
       <ReportDrawer />
     </div>
   );

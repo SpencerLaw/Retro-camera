@@ -214,6 +214,31 @@
         "warnings": "警報",
         "settings": "設定"
       }
+    },
+    "warningResetPassword": {
+      "manageTitle": "リセット保護パスワード",
+      "manageDescEmpty": "「警告回数をリセット」に保護を付けて、先生がいない時に児童が勝手に消せないようにします。",
+      "manageDescSet": "保護は有効です。これから警告回数をリセットする前に、ここで設定したパスワードが必要になります。",
+      "verifyTitle": "パスワードを入力してリセット",
+      "verifyDesc": "警告回数を消去する前に、先生が設定したパスワードを入力してください。",
+      "helpTitle": "このパスワードの役割は？",
+      "helpDesc": "このパスワードは「警告回数をリセット」ボタンだけを保護します。児童による誤操作や勝手なリセットを防ぎ、監視や閾値、ミュートなど他の機能には影響しません。",
+      "inputLabel": "パスワード",
+      "confirmLabel": "確認用パスワード",
+      "inputPlaceholder": "パスワードを入力",
+      "confirmPlaceholder": "もう一度入力",
+      "cancel": "キャンセル",
+      "save": "保存",
+      "update": "更新",
+      "clear": "解除",
+      "confirmReset": "確認してリセット",
+      "enabled": "パスワード保護が有効です",
+      "disabled": "パスワード保護はオフです",
+      "emptyError": "パスワードを入力してください",
+      "mismatchError": "2回の入力が一致しません",
+      "verifyError": "パスワードが違います",
+      "helpTrigger": "パスワードの説明を見る",
+      "settingsTrigger": "リセット用パスワードを設定"
     }
   },
   "broadcast": {

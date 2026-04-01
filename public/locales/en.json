@@ -221,6 +221,31 @@
         "warnings": "Alerts",
         "settings": "Settings"
       }
+    },
+    "warningResetPassword": {
+      "manageTitle": "Reset Protection Password",
+      "manageDescEmpty": "Add a lock to the warning reset button so students cannot clear it while the teacher is away.",
+      "manageDescSet": "Protection is on. Clearing the warning count now requires the password you set here.",
+      "verifyTitle": "Enter Password to Reset",
+      "verifyDesc": "Enter the teacher password before the warning count can be cleared.",
+      "helpTitle": "What does this password do?",
+      "helpDesc": "This password only protects the warning reset button. It helps prevent students from clearing warnings and does not affect monitoring, thresholds, or mute controls.",
+      "inputLabel": "Password",
+      "confirmLabel": "Confirm Password",
+      "inputPlaceholder": "Enter password",
+      "confirmPlaceholder": "Enter password again",
+      "cancel": "Cancel",
+      "save": "Save Password",
+      "update": "Update Password",
+      "clear": "Clear Password",
+      "confirmReset": "Verify and Reset",
+      "enabled": "Password protection enabled",
+      "disabled": "Password protection is off",
+      "emptyError": "Please enter a password",
+      "mismatchError": "The passwords do not match",
+      "verifyError": "Incorrect password",
+      "helpTrigger": "What this password does",
+      "settingsTrigger": "Set reset password"
     }
   },
   "broadcast": {

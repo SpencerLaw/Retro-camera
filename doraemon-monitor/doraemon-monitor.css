@@ -384,6 +384,198 @@
   transform: scale(0.95) rotate(-15deg);
 }
 
+.stat-action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.warning-reset-settings-btn,
+.warning-reset-help-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.24s ease;
+  color: white;
+  flex-shrink: 0;
+}
+
+.warning-reset-settings-btn {
+  background: linear-gradient(135deg, #10b981, #0f766e);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.28);
+}
+
+.warning-reset-settings-btn.protected {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.32);
+}
+
+.warning-reset-help-btn {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.warning-reset-settings-btn:hover,
+.warning-reset-help-btn:hover {
+  transform: translateY(-1px) scale(1.06);
+}
+
+.warning-reset-settings-btn:active,
+.warning-reset-help-btn:active {
+  transform: scale(0.96);
+}
+
+.warning-reset-dialog-shell {
+  width: min(460px, calc(100vw - 28px));
+}
+
+.warning-reset-dialog-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.warning-reset-dialog-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+.warning-reset-dialog-icon.protected {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.warning-reset-dialog-body {
+  gap: 16px;
+}
+
+.warning-reset-status-pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.warning-reset-status-pill.open {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.warning-reset-status-pill.protected {
+  background: rgba(245, 158, 11, 0.16);
+  color: #f59e0b;
+}
+
+.warning-reset-help-copy p {
+  margin: 0;
+  line-height: 1.65;
+  color: var(--text-primary);
+}
+
+.warning-reset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.warning-reset-label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.warning-reset-input {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  background: rgba(15, 23, 42, 0.32);
+  color: var(--text-primary);
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.doraemon-app:not(.dark-mode) .warning-reset-input {
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.warning-reset-input:focus {
+  border-color: rgba(14, 165, 233, 0.75);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.14);
+}
+
+.warning-reset-error {
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.warning-reset-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.warning-reset-primary-btn,
+.warning-reset-secondary-btn,
+.warning-reset-danger-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 11px 16px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.warning-reset-primary-btn {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: white;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+}
+
+.warning-reset-secondary-btn {
+  background: rgba(148, 163, 184, 0.18);
+  color: var(--text-primary);
+}
+
+.warning-reset-danger-btn {
+  background: rgba(239, 68, 68, 0.14);
+  color: #ef4444;
+}
+
+.warning-reset-primary-btn:hover,
+.warning-reset-secondary-btn:hover,
+.warning-reset-danger-btn:hover {
+  transform: translateY(-1px);
+}
+
 .stat-icon {
   font-size: 2rem;
   line-height: 1;

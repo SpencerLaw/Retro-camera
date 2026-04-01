@@ -1,6 +1,15 @@
 import { kv } from '@vercel/kv';
 import { del, list } from '@vercel/blob';
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import {
+  buildLicenseKey,
+  buildRoomMessageKey,
+  buildRoomOwnerKey,
+  buildRoomOwnerMissKey,
+  extractActiveRoomCode,
+  getConfiguredLicenseCodes,
+  normalizeLicenseCode
+} from './shared/kv-keys.js';
 
 /**
  * Vercel Serverless Function - 授权码验证API (带 Redis 监控版 + 数据压缩)
@@ -110,13 +119,8 @@ function getEffectiveMaxDevices(code: string): number {
 
 // 检查授权码是否在白名单中
 function isCodeInWhitelist(code: string): boolean {
-  const envCodes = process.env.LICENSE_CODES || '';
-  const validCodeSet = new Set(
-    envCodes.split(',')
-      .map(c => c.replace(/[-\s]/g, '').toUpperCase())
-      .filter(c => c.length > 0)
-  );
-  return validCodeSet.has(code.replace(/[-\s]/g, '').toUpperCase());
+  const validCodeSet = new Set(getConfiguredLicenseCodes(process.env.LICENSE_CODES || ''));
+  return validCodeSet.has(normalizeLicenseCode(code));
 }
 
 // === 压缩与解压逻辑 ===
@@ -212,8 +216,8 @@ export default async function handler(
       }
       if (!licenseCode) return res.status(400).json({ success: false, message: '请输入授权码' });
 
-      const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
-      const redisKey = `license:${cleanCode}`;
+      const cleanCode = normalizeLicenseCode(licenseCode);
+      const redisKey = buildLicenseKey(cleanCode);
       const data = await kv.get<CompressedMetadata | LicenseMetadata>(redisKey);
 
       if (!data) return res.status(404).json({ success: false, message: '未找到记录' });
@@ -233,8 +237,21 @@ export default async function handler(
       }
       if (!licenseCode) return res.status(400).json({ success: false, message: '请输入授权码' });
 
-      const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
-      const redisKey = `license:${cleanCode}`;
+      const cleanCode = normalizeLicenseCode(licenseCode);
+      const redisKey = buildLicenseKey(cleanCode);
+
+      const existingData = await kv.get<CompressedMetadata | LicenseMetadata>(redisKey);
+      if (existingData) {
+        const metadata = decompressMetadata(existingData, cleanCode);
+        const activeRoomCode = extractActiveRoomCode(metadata);
+        if (activeRoomCode) {
+          await Promise.all([
+            kv.del(buildRoomOwnerKey(activeRoomCode)),
+            kv.del(buildRoomOwnerMissKey(activeRoomCode)),
+            kv.del(buildRoomMessageKey(activeRoomCode))
+          ]);
+        }
+      }
 
       // 1. (Legacy avatar cleanup for KiddiePlan removed as children data is no longer stored here)
 
@@ -308,9 +325,9 @@ export default async function handler(
       console.log('[Nuclear Cleanup] Starting deep garbage collection...');
 
       const allKeys = await kv.keys('*');
-      const keysToDelete = allKeys.filter(key => 
-        !key.startsWith('license:') || 
-        key.startsWith('license:usage:') || 
+      const keysToDelete = allKeys.filter(key =>
+        !key.startsWith('license:') ||
+        key.startsWith('license:usage:') ||
         key.startsWith('license:attempt:') ||
         key === 'br:rooms'
       );
@@ -354,58 +371,37 @@ export default async function handler(
         return res.status(401).json({ success: false, message: '密码错误' });
       }
 
-      const [keys, attemptKeys] = await Promise.all([
-        kv.keys('license:*'),
-        kv.keys('license:attempt:*')
-      ]);
+      const configuredCodes = getConfiguredLicenseCodes(process.env.LICENSE_CODES || '');
+      const activeKeys = configuredCodes.map(code => buildLicenseKey(code));
+      const attemptKeys = await kv.keys('license:attempt:*');
 
-      if (keys.length === 0 && attemptKeys.length === 0) return res.status(200).json({ success: true, data: [] });
+      if (activeKeys.length === 0 && attemptKeys.length === 0) return res.status(200).json({ success: true, data: [] });
 
-      // === 自动同步：如果 Vercel 环境里已经删掉了，这里也自动删除数据库中的记录 ===
-      const activeKeys: string[] = [];
-      const deletedCount: string[] = [];
+      const values: Array<CompressedMetadata | LicenseMetadata | null> = activeKeys.length > 0
+        ? await kv.mget<any[]>(...activeKeys)
+        : [];
+      const attemptValues: any[] = attemptKeys.length > 0
+        ? await kv.mget<any[]>(...attemptKeys)
+        : [];
 
-      for (const key of keys) {
-        // 跳过尝试记录主键
-        if (key.startsWith('license:attempt:')) continue;
-
-        const code = key.replace('license:', '');
-        if (isCodeInWhitelist(code)) {
-          activeKeys.push(key);
-        } else {
-          // 不在白名单了，执行物理删除
-          console.log(`[Auto-Sync] License ${code} is no longer in whitelist. Deleting from KV.`);
-          await kv.del(key);
-          deletedCount.push(code);
-        }
-      }
-
-      const [values, attemptValues] = await Promise.all([
-        Promise.all(activeKeys.map(key => kv.get<CompressedMetadata | LicenseMetadata>(key))),
-        Promise.all(attemptKeys.map(key => kv.get<any>(key)))
-      ]);
-
-      // 处理正常激活的列表
       const list = values
         .map((v, index) => {
           if (!v) return null;
-          const code = activeKeys[index].replace('license:', '');
+          const code = configuredCodes[index];
           const meta = decompressMetadata(v, code);
           return {
             ...meta,
-            status: 'active' // 既然没被删，肯定是在白名单里的
+            status: 'active'
           };
         })
         .filter((item): item is NonNullable<typeof item> => item !== null);
 
-      // 处理未授权尝试的列表
+      const activeCodeSet = new Set(list.map(item => item.code));
       const attemptItems = attemptValues
         .map((v, index) => {
           if (!v) return null;
           const code = attemptKeys[index].replace('license:attempt:', '');
-
-          // 如果该代码已经在正常列表中（后来被授权了），则跳过尝试记录
-          if (list.some(l => l.code === code)) return null;
+          if (activeCodeSet.has(code)) return null;
 
           return {
             code: code,
@@ -414,7 +410,7 @@ export default async function handler(
             generatedDate: extractDateFromCode(code)?.toISOString() || new Date().toISOString(),
             expiryDate: new Date().toISOString(),
             lastUsedTime: v.lastAttempt || v.firstAttempt || new Date().toISOString(),
-            status: 'unauthorized', // 特殊状态
+            status: 'unauthorized',
             devices: [{
               deviceId: v.deviceId || 'unknown',
               firstSeen: v.firstAttempt || new Date().toISOString(),
@@ -432,7 +428,7 @@ export default async function handler(
       return res.status(200).json({
         success: true,
         data: combined,
-        syncInfo: deletedCount.length > 0 ? `已从数据库同步删除 ${deletedCount.length} 条失效记录` : null
+        syncInfo: null
       });
     }
 
@@ -486,7 +482,7 @@ export default async function handler(
       return res.status(400).json({ success: false, message: '缺少必要参数 (licenseCode/deviceId)' });
     }
 
-    const cleanCode = licenseCode.replace(/[-\s]/g, '').toUpperCase();
+    const cleanCode = normalizeLicenseCode(licenseCode);
 
     // 1. 基础检查
     const generatedDate = extractDateFromCode(cleanCode);
@@ -508,7 +504,7 @@ export default async function handler(
     // 2. 读取 Redis
     // 统一使用不带横杠的 Key 以匹配新旧数据 (如果旧数据也没横杠的话)
     // 提示：如果之前存的是带横杠的，这里可能需要兼容
-    const redisKey = `license:${cleanCode}`;
+    const redisKey = buildLicenseKey(cleanCode);
     const rawData = await kv.get<CompressedMetadata | LicenseMetadata>(redisKey);
 
     // 兼容性检查：如果没搜到，再尝试带原始授权码搜一下 (处理可能有横杠的旧数据)

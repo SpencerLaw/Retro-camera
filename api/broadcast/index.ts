@@ -2,6 +2,18 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv } from '@vercel/kv';
 import WebSocket from 'ws';
 import crypto from 'crypto';
+import {
+    buildLicenseKey,
+    buildRoomMessageKey,
+    buildRoomOwnerKey,
+    buildRoomOwnerMissKey,
+    createRoomIndexEntry,
+    createRoomIndexTransition,
+    extractActiveRoomCode,
+    getConfiguredLicenseCodes,
+    normalizeLicenseCode,
+    normalizeRoomCode
+} from '../shared/kv-keys.js';
 
 // Assuming FISH_AUDIO_KEY is an environment variable or a constant
 const FISH_AUDIO_KEY = process.env.FISH_AUDIO_KEY || 'b3a18f1fd0724399b73f1861d31bef03';
@@ -37,7 +49,7 @@ function extractDateFromCode(code: string): Date | null {
 
 function decompressMetadata(c: any, code: string): any {
     if (!c) return null;
-    
+
     // Check if it's already full metadata (legacy)
     if ('devices' in c) {
         return c;
@@ -54,11 +66,11 @@ function decompressMetadata(c: any, code: string): any {
         expiryDate: expDate.toISOString(),
         firstActivatedAt: new Date(c.f || Date.now()).toISOString(),
         lastUsedTime: new Date(c.l || Date.now()).toISOString(),
-        devices: (c.d || []).map((dev: any) => ({ 
-            deviceId: dev.i, 
-            firstSeen: new Date(dev.f).toISOString(), 
-            lastSeen: new Date(dev.l).toISOString(), 
-            ua: dev.u 
+        devices: (c.d || []).map((dev: any) => ({
+            deviceId: dev.i,
+            firstSeen: new Date(dev.f).toISOString(),
+            lastSeen: new Date(dev.l).toISOString(),
+            ua: dev.u
         })),
         brc: c.brc,
         fu: c.fu,
@@ -95,6 +107,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     else if (url.includes('/fish-tts')) action = 'fish-tts';
     else if (url.includes('/fetch-fish-models')) action = 'fetch-fish-models';
     else if (url.includes('/fish-wallet')) action = 'fish-wallet';
+    else if (url.includes('/migrate-room-indexes')) action = 'migrate-room-indexes';
 
     if (!action) {
         const parts = url.split('?')[0].split('/').filter(Boolean);
@@ -116,6 +129,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             case 'fish-tts': return handleFishTTS(req, res);
             case 'fetch-fish-models': return handleFetchFishModels(req, res);
             case 'fish-wallet': return handleFishWallet(req, res);
+            case 'migrate-room-indexes': return handleMigrateRoomIndexes(req, res);
             default: return res.status(404).json({ error: 'Unknown action: ' + action });
         }
     } catch (e: any) {
@@ -133,12 +147,11 @@ async function handleTTS(req: VercelRequest, res: VercelResponse) {
     return res.status(200).send(audioBuffer);
 }
 
-async function findLicenseByRoom(roomCode: string): Promise<{ license: string, metadata: any } | null> {
+async function findLegacyLicenseByRoom(roomCode: string): Promise<{ license: string, metadata: any } | null> {
     const keys = await kv.keys('license:*');
     if (keys.length === 0) return null;
-    
-    // Fetch all metadata in batches to find the owner
-    const values = await kv.mget<any[]>(...keys);
+
+    const values = await kv.mget<any>(...keys);
     for (let i = 0; i < keys.length; i++) {
         const raw = values[i];
         if (!raw) continue;
@@ -151,29 +164,122 @@ async function findLicenseByRoom(roomCode: string): Promise<{ license: string, m
     return null;
 }
 
+async function hydrateRoomOwner(roomCode: string, license: string) {
+    const normalizedRoomCode = normalizeRoomCode(roomCode);
+    if (!normalizedRoomCode) return;
+
+    await Promise.all([
+        kv.set(buildRoomOwnerKey(normalizedRoomCode), normalizeLicenseCode(license)),
+        kv.del(buildRoomOwnerMissKey(normalizedRoomCode))
+    ]);
+}
+
+async function clearRoomIndex(roomCode: string) {
+    const normalizedRoomCode = normalizeRoomCode(roomCode);
+    if (!normalizedRoomCode) return;
+
+    await Promise.all([
+        kv.del(buildRoomOwnerKey(normalizedRoomCode)),
+        kv.del(buildRoomOwnerMissKey(normalizedRoomCode))
+    ]);
+}
+
+async function markRoomOwnerMiss(roomCode: string) {
+    const normalizedRoomCode = normalizeRoomCode(roomCode);
+    if (!normalizedRoomCode) return;
+
+    await kv.set(buildRoomOwnerMissKey(normalizedRoomCode), '1', { ex: 60 });
+}
+
+async function readIndexedRoomLookup(roomCode: string): Promise<{ roomCode: string; owner: string | null; knownMiss: boolean }> {
+    const normalizedRoomCode = normalizeRoomCode(roomCode);
+    if (!normalizedRoomCode) return { roomCode: '', owner: null, knownMiss: false };
+
+    const values = await kv.mget<any[]>(
+        buildRoomOwnerKey(normalizedRoomCode),
+        buildRoomOwnerMissKey(normalizedRoomCode)
+    );
+    const [ownerRaw, missRaw] = values as [string | null, string | null];
+
+    return {
+        roomCode: normalizedRoomCode,
+        owner: ownerRaw ? normalizeLicenseCode(ownerRaw) : null,
+        knownMiss: !!missRaw
+    };
+}
+
+async function readIndexedRoomState(roomCode: string): Promise<{ roomCode: string; owner: string | null; knownMiss: boolean; message: any | null }> {
+    const normalizedRoomCode = normalizeRoomCode(roomCode);
+    if (!normalizedRoomCode) return { roomCode: '', owner: null, knownMiss: false, message: null };
+
+    const values = await kv.mget<any[]>(
+        buildRoomOwnerKey(normalizedRoomCode),
+        buildRoomOwnerMissKey(normalizedRoomCode),
+        buildRoomMessageKey(normalizedRoomCode)
+    );
+    const [ownerRaw, missRaw, message] = values as [string | null, string | null, any | null];
+
+    return {
+        roomCode: normalizedRoomCode,
+        owner: ownerRaw ? normalizeLicenseCode(ownerRaw) : null,
+        knownMiss: !!missRaw,
+        message: message ?? null
+    };
+}
+
+async function backfillRoomOwnerFromLegacy(roomCode: string): Promise<string | null> {
+    const normalizedRoomCode = normalizeRoomCode(roomCode);
+    if (!normalizedRoomCode) return null;
+
+    const legacyMatch = await findLegacyLicenseByRoom(normalizedRoomCode);
+    if (legacyMatch) {
+        await hydrateRoomOwner(normalizedRoomCode, legacyMatch.license);
+        return normalizeLicenseCode(legacyMatch.license);
+    }
+
+    await markRoomOwnerMiss(normalizedRoomCode);
+    return null;
+}
+
+async function findRoomOwner(roomCode: string): Promise<string | null> {
+    const lookup = await readIndexedRoomLookup(roomCode);
+    if (lookup.owner) return lookup.owner;
+    if (lookup.knownMiss) return null;
+    return backfillRoomOwnerFromLegacy(lookup.roomCode || roomCode);
+}
+
+async function resolveRoomState(roomCode: string): Promise<{ roomCode: string; owner: string | null; knownMiss: boolean; message: any | null }> {
+    const state = await readIndexedRoomState(roomCode);
+    if (state.owner || state.knownMiss) return state;
+
+    const owner = await backfillRoomOwnerFromLegacy(state.roomCode || roomCode);
+    return {
+        ...state,
+        owner,
+        knownMiss: !owner
+    };
+}
+
 async function handleFetch(req: VercelRequest, res: VercelResponse) {
-    const code = (req.query.code as string)?.toUpperCase();
+    const code = normalizeRoomCode((req.query.code as string) || '');
     if (!code) return res.status(400).json({ error: 'Missing code' });
 
-    // 1. Find owner via scan/mget
-    const match = await findLicenseByRoom(code);
-    if (!match) {
+    const state = await resolveRoomState(code);
+    if (!state.owner) {
         return res.status(200).json({ message: null, notFound: true });
     }
 
-    // 2. Get the current transient message (still ephemeral)
-    const message = await kv.get(`br:msg:${code}`);
-    return res.status(200).json({ message });
+    return res.status(200).json({ message: state.message });
 }
 
 async function handleSend(req: VercelRequest, res: VercelResponse) {
     const { code, text, isEmergency, repeatCount, voice, channelName, license } = req.body;
     if (!license) return res.status(400).json({ error: 'Missing license context' });
-    
-    const cleanLicense = license.toUpperCase();
-    const uppercaseCode = code.toUpperCase();
+
+    const cleanLicense = normalizeLicenseCode(license);
+    const uppercaseCode = normalizeRoomCode(code);
     const messageId = Date.now().toString();
-    
+
     const messageData = {
         id: messageId,
         text,
@@ -186,32 +292,45 @@ async function handleSend(req: VercelRequest, res: VercelResponse) {
     };
 
     // Save transient message
-    await kv.set(`br:msg:${uppercaseCode}`, messageData, { ex: 3600 }); // 1h TTL for messages
-    
+    await kv.set(buildRoomMessageKey(uppercaseCode), messageData, { ex: 3600 }); // 1h TTL for messages
+
     return res.status(200).json({ success: true, messageId });
 }
 
 async function handleActivate(req: VercelRequest, res: VercelResponse) {
     const { code, license, brc } = req.body;
     if (!license) return res.status(400).json({ error: 'Missing license context' });
-    
-    const cleanLicense = license.toUpperCase();
-    const uppercaseCode = code.toUpperCase();
-    const redisKey = `license:${cleanLicense}`;
 
-    // 1. Collision Prevention (串台保护)
-    const existing = await findLicenseByRoom(uppercaseCode);
-    if (existing && existing.license !== cleanLicense) {
+    const cleanLicense = normalizeLicenseCode(license);
+    const uppercaseCode = normalizeRoomCode(code);
+    const redisKey = buildLicenseKey(cleanLicense);
+
+    const existingOwner = await findRoomOwner(uppercaseCode);
+    if (existingOwner && existingOwner !== cleanLicense) {
         return res.status(409).json({ error: '该房间号已被其他授权码占用，请尝试其他号码' });
     }
 
-    // 2. Sync to License Metadata
     const rawData = await kv.get(redisKey);
     if (rawData) {
         const metadata = decompressMetadata(rawData, cleanLicense);
-        metadata.a = uppercaseCode; // Active room
-        if (brc) metadata.brc = brc; // Update channels if provided
+        const previousRoomCode = extractActiveRoomCode(metadata);
+        metadata.a = uppercaseCode;
+        if (brc) metadata.brc = brc;
+
+        const transition = createRoomIndexTransition({
+            license: cleanLicense,
+            previousRoomCode,
+            nextRoomCode: uppercaseCode
+        });
+
         await kv.set(redisKey, compressMetadata(metadata));
+        if (transition.cleanupOwnerKeys.length > 0) {
+            await Promise.all(transition.cleanupOwnerKeys.map(key => kv.del(key)));
+        }
+        await Promise.all([
+            kv.set(transition.ownerKey, cleanLicense),
+            kv.del(transition.missKey)
+        ]);
     }
 
     return res.status(200).json({ success: true });
@@ -219,19 +338,18 @@ async function handleActivate(req: VercelRequest, res: VercelResponse) {
 
 async function handleDeactivate(req: VercelRequest, res: VercelResponse) {
     const { code, license } = req.body;
-    const uppercaseCode = code?.toUpperCase();
+    const uppercaseCode = normalizeRoomCode(code || '');
     if (uppercaseCode) {
-        // Only transient message is a separate key now
-        await kv.del(`br:msg:${uppercaseCode}`);
-        
-        // Also clear from license metadata
+        await kv.del(buildRoomMessageKey(uppercaseCode));
+        await clearRoomIndex(uppercaseCode);
+
         if (license) {
-            const cleanLicense = license.toUpperCase();
-            const redisKey = `license:${cleanLicense}`;
+            const cleanLicense = normalizeLicenseCode(license);
+            const redisKey = buildLicenseKey(cleanLicense);
             const rawData = await kv.get(redisKey);
             if (rawData) {
                 const metadata = decompressMetadata(rawData, cleanLicense);
-                if (metadata.a === uppercaseCode) {
+                if (extractActiveRoomCode(metadata) === uppercaseCode) {
                     delete metadata.a;
                     await kv.set(redisKey, compressMetadata(metadata));
                 }
@@ -244,17 +362,20 @@ async function handleDeactivate(req: VercelRequest, res: VercelResponse) {
 async function handleCleanup(req: VercelRequest, res: VercelResponse) {
     const { codes, license } = req.body;
     if (Array.isArray(codes) && codes.length > 0) {
-        const uppercaseCodes = codes.map(c => c.toUpperCase());
-        // Clean up transient messages
-        await Promise.all(uppercaseCodes.map(c => kv.del(`br:msg:${c}`)));
+        const uppercaseCodes = codes.map(c => normalizeRoomCode(c)).filter(Boolean);
+        await Promise.all([
+            ...uppercaseCodes.map(c => kv.del(buildRoomMessageKey(c))),
+            ...uppercaseCodes.map(c => clearRoomIndex(c))
+        ]);
 
         if (license) {
-            const cleanLicense = license.toUpperCase();
-            const redisKey = `license:${cleanLicense}`;
+            const cleanLicense = normalizeLicenseCode(license);
+            const redisKey = buildLicenseKey(cleanLicense);
             const rawData = await kv.get(redisKey);
             if (rawData) {
                 const metadata = decompressMetadata(rawData, cleanLicense);
-                if (metadata.a && uppercaseCodes.includes(metadata.a)) {
+                const activeRoomCode = extractActiveRoomCode(metadata);
+                if (activeRoomCode && uppercaseCodes.includes(activeRoomCode)) {
                     delete metadata.a;
                     await kv.set(redisKey, compressMetadata(metadata));
                 }
@@ -275,10 +396,55 @@ async function handleSaveChannels(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleCheckCode(req: VercelRequest, res: VercelResponse) {
-    const code = (req.query.code as string)?.toUpperCase();
+    const code = normalizeRoomCode((req.query.code as string) || '');
     if (!code) return res.status(400).json({ error: 'Missing code' });
-    const match = await findLicenseByRoom(code);
-    return res.status(200).json({ inUse: !!match });
+    const owner = await findRoomOwner(code);
+    return res.status(200).json({ inUse: !!owner });
+}
+
+async function handleMigrateRoomIndexes(req: VercelRequest, res: VercelResponse) {
+    const { adminKey } = req.body || {};
+    if (!adminKey || adminKey.trim() !== 'spencer') {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const configuredCodes = getConfiguredLicenseCodes(process.env.LICENSE_CODES || '');
+    if (configuredCodes.length === 0) {
+        return res.status(200).json({ success: true, migrated: 0, skipped: 0, scanned: 0 });
+    }
+
+    const values = await kv.mget<any[]>(...configuredCodes.map(code => buildLicenseKey(code)));
+    let migrated = 0;
+    let skipped = 0;
+
+    for (let index = 0; index < configuredCodes.length; index++) {
+        const raw = values[index];
+        if (!raw) {
+            skipped++;
+            continue;
+        }
+
+        const code = configuredCodes[index];
+        const metadata = decompressMetadata(raw, code);
+        const entry = createRoomIndexEntry(code, metadata);
+        if (!entry) {
+            skipped++;
+            continue;
+        }
+
+        await Promise.all([
+            kv.set(entry.ownerKey, entry.license),
+            kv.del(entry.missKey)
+        ]);
+        migrated++;
+    }
+
+    return res.status(200).json({
+        success: true,
+        scanned: configuredCodes.length,
+        migrated,
+        skipped
+    });
 }
 
 async function handleClearLicenseData(req: VercelRequest, res: VercelResponse) {
@@ -294,8 +460,8 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
     let metadata: any = null;
     let redisKey: string = '';
     if (license) {
-        const cleanLicense = license.toUpperCase();
-        redisKey = `license:${cleanLicense}`;
+        const cleanLicense = normalizeLicenseCode(license);
+        redisKey = buildLicenseKey(cleanLicense);
         if (cleanLicense.startsWith('GB')) {
             const rawData = await kv.get(redisKey);
             if (rawData) {
@@ -321,8 +487,8 @@ async function handleFishTTS(req: VercelRequest, res: VercelResponse) {
         try {
             // Fish Audio V3 API typically uses /v1/tts and supports model names like "v3-turbo", "s1", etc.
             // If model is not provided, we can either default to "v1" or "v3-turbo"
-            const requestModel = model || 'v3-turbo'; 
-            
+            const requestModel = model || 'v3-turbo';
+
             const response = await fetch('https://api.fish.audio/v1/tts', {
                 method: 'POST',
                 headers: {

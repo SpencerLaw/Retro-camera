@@ -22,6 +22,10 @@ export function buildRoomMessageKey(roomCode) {
   return `br:msg:${normalizeRoomCode(roomCode)}`;
 }
 
+export function buildRoomIndexMigrationStateKey(version = 'v1') {
+  return `br:index-state:${version}`;
+}
+
 export function extractActiveRoomCode(metadata) {
   const roomCode = normalizeRoomCode(metadata?.a || '');
   return roomCode || null;
@@ -60,6 +64,30 @@ export function createRoomIndexEntry(license, metadata) {
     missKey: buildRoomOwnerMissKey(roomCode),
     messageKey: buildRoomMessageKey(roomCode),
   };
+}
+
+export function collectRoomIndexEntries(items) {
+  const entries = [];
+  const seenRoomCodes = new Set();
+  let skipped = 0;
+
+  for (const item of items || []) {
+    const entry = createRoomIndexEntry(item?.license, item?.metadata);
+    if (!entry) {
+      skipped++;
+      continue;
+    }
+
+    if (seenRoomCodes.has(entry.roomCode)) {
+      skipped++;
+      continue;
+    }
+
+    seenRoomCodes.add(entry.roomCode);
+    entries.push(entry);
+  }
+
+  return { entries, skipped };
 }
 
 export function getConfiguredLicenseCodes(envValue) {

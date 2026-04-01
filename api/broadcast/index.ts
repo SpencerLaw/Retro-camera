@@ -4,9 +4,11 @@ import WebSocket from 'ws';
 import crypto from 'crypto';
 import {
     buildLicenseKey,
+    buildRoomIndexMigrationStateKey,
     buildRoomMessageKey,
     buildRoomOwnerKey,
     buildRoomOwnerMissKey,
+    collectRoomIndexEntries,
     createRoomIndexEntry,
     createRoomIndexTransition,
     extractActiveRoomCode,
@@ -17,6 +19,12 @@ import {
 
 // Assuming FISH_AUDIO_KEY is an environment variable or a constant
 const FISH_AUDIO_KEY = process.env.FISH_AUDIO_KEY || 'b3a18f1fd0724399b73f1861d31bef03';
+const ROOM_INDEX_MIGRATION_VERSION = 'v1';
+const ROOM_INDEX_MIGRATION_CHECK_MS = 5 * 60 * 1000;
+
+let roomIndexMigrationReady = false;
+let roomIndexMigrationPromise: Promise<void> | null = null;
+let roomIndexMigrationLastCheckAt = 0;
 
 // === 授权码辅助逻辑 (同步自 verify-license) ===
 
@@ -88,6 +96,100 @@ function compressMetadata(full: any): any {
         fu: full.fu,
         a: full.a
     };
+}
+
+function buildRoomIndexMigrationState(configuredCodes: string[], stats: { migrated: number; skipped: number }) {
+    return {
+        version: ROOM_INDEX_MIGRATION_VERSION,
+        configuredCodesSignature: configuredCodes.join(','),
+        scanned: configuredCodes.length,
+        migrated: stats.migrated,
+        skipped: stats.skipped,
+        migratedAt: new Date().toISOString()
+    };
+}
+
+async function migrateConfiguredRoomIndexes(): Promise<{ scanned: number; migrated: number; skipped: number }> {
+    const configuredCodes = getConfiguredLicenseCodes(process.env.LICENSE_CODES || '');
+    const migrationStateKey = buildRoomIndexMigrationStateKey(ROOM_INDEX_MIGRATION_VERSION);
+
+    if (configuredCodes.length === 0) {
+        const state = buildRoomIndexMigrationState(configuredCodes, { migrated: 0, skipped: 0 });
+        await kv.set(migrationStateKey, state);
+        return { scanned: 0, migrated: 0, skipped: 0 };
+    }
+
+    const values = await kv.mget<any[]>(...configuredCodes.map(code => buildLicenseKey(code)));
+    const records: Array<{ license: string; metadata: any }> = [];
+    let skipped = 0;
+
+    for (let index = 0; index < configuredCodes.length; index++) {
+        const raw = values[index];
+        if (!raw) {
+            skipped++;
+            continue;
+        }
+
+        records.push({
+            license: configuredCodes[index],
+            metadata: decompressMetadata(raw, configuredCodes[index])
+        });
+    }
+
+    const entryResult = collectRoomIndexEntries(records);
+    skipped += entryResult.skipped;
+
+    await Promise.all(entryResult.entries.flatMap(entry => ([
+        kv.set(entry.ownerKey, entry.license),
+        kv.del(entry.missKey)
+    ])));
+
+    const state = buildRoomIndexMigrationState(configuredCodes, {
+        migrated: entryResult.entries.length,
+        skipped
+    });
+    await kv.set(migrationStateKey, state);
+
+    return {
+        scanned: configuredCodes.length,
+        migrated: entryResult.entries.length,
+        skipped
+    };
+}
+
+async function ensureRoomIndexesMigrated() {
+    if (roomIndexMigrationReady) return;
+    if (roomIndexMigrationPromise) {
+        await roomIndexMigrationPromise;
+        return;
+    }
+
+    const now = Date.now();
+    if (roomIndexMigrationLastCheckAt && now - roomIndexMigrationLastCheckAt < ROOM_INDEX_MIGRATION_CHECK_MS) {
+        return;
+    }
+
+    roomIndexMigrationLastCheckAt = now;
+    const configuredCodes = getConfiguredLicenseCodes(process.env.LICENSE_CODES || '');
+    const expectedSignature = configuredCodes.join(',');
+    const migrationStateKey = buildRoomIndexMigrationStateKey(ROOM_INDEX_MIGRATION_VERSION);
+
+    roomIndexMigrationPromise = (async () => {
+        try {
+            const existingState = await kv.get<any>(migrationStateKey);
+            if (existingState?.configuredCodesSignature === expectedSignature) {
+                roomIndexMigrationReady = true;
+                return;
+            }
+
+            await migrateConfiguredRoomIndexes();
+            roomIndexMigrationReady = true;
+        } finally {
+            roomIndexMigrationPromise = null;
+        }
+    })();
+
+    await roomIndexMigrationPromise;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -242,6 +344,8 @@ async function backfillRoomOwnerFromLegacy(roomCode: string): Promise<string | n
 }
 
 async function findRoomOwner(roomCode: string): Promise<string | null> {
+    await ensureRoomIndexesMigrated();
+
     const lookup = await readIndexedRoomLookup(roomCode);
     if (lookup.owner) return lookup.owner;
     if (lookup.knownMiss) return null;
@@ -249,6 +353,8 @@ async function findRoomOwner(roomCode: string): Promise<string | null> {
 }
 
 async function resolveRoomState(roomCode: string): Promise<{ roomCode: string; owner: string | null; knownMiss: boolean; message: any | null }> {
+    await ensureRoomIndexesMigrated();
+
     const state = await readIndexedRoomState(roomCode);
     if (state.owner || state.knownMiss) return state;
 
@@ -408,42 +514,13 @@ async function handleMigrateRoomIndexes(req: VercelRequest, res: VercelResponse)
         return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
-    const configuredCodes = getConfiguredLicenseCodes(process.env.LICENSE_CODES || '');
-    if (configuredCodes.length === 0) {
-        return res.status(200).json({ success: true, migrated: 0, skipped: 0, scanned: 0 });
-    }
-
-    const values = await kv.mget<any[]>(...configuredCodes.map(code => buildLicenseKey(code)));
-    let migrated = 0;
-    let skipped = 0;
-
-    for (let index = 0; index < configuredCodes.length; index++) {
-        const raw = values[index];
-        if (!raw) {
-            skipped++;
-            continue;
-        }
-
-        const code = configuredCodes[index];
-        const metadata = decompressMetadata(raw, code);
-        const entry = createRoomIndexEntry(code, metadata);
-        if (!entry) {
-            skipped++;
-            continue;
-        }
-
-        await Promise.all([
-            kv.set(entry.ownerKey, entry.license),
-            kv.del(entry.missKey)
-        ]);
-        migrated++;
-    }
+    const result = await migrateConfiguredRoomIndexes();
+    roomIndexMigrationReady = true;
+    roomIndexMigrationLastCheckAt = Date.now();
 
     return res.status(200).json({
         success: true,
-        scanned: configuredCodes.length,
-        migrated,
-        skipped
+        ...result
     });
 }
 

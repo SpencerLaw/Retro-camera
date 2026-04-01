@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 
 import {
   buildLicenseKey,
+  buildRoomIndexMigrationStateKey,
   buildRoomMessageKey,
   buildRoomOwnerKey,
   buildRoomOwnerMissKey,
+  collectRoomIndexEntries,
   createRoomIndexEntry,
   createRoomIndexTransition,
   getConfiguredLicenseCodes,
@@ -77,6 +79,40 @@ runTest('createRoomIndexEntry extracts active room ownership from metadata', () 
 runTest('createRoomIndexEntry returns null when metadata has no active room', () => {
   assert.equal(createRoomIndexEntry('GB-20260401-ABCD', { a: '' }), null);
   assert.equal(createRoomIndexEntry('GB-20260401-ABCD', {}), null);
+});
+
+runTest('collectRoomIndexEntries keeps the first room owner and skips invalid or duplicate rooms', () => {
+  const result = collectRoomIndexEntries([
+    { license: 'GB-20260401-ABCD', metadata: { a: '100003' } },
+    { license: 'GB-20260401-EFGH', metadata: { a: '100003' } },
+    { license: 'GB-20260401-IJKL', metadata: {} },
+    { license: 'GB-20260401-MNOP', metadata: { a: '100004' } },
+  ]);
+
+  assert.deepEqual(result, {
+    entries: [
+      {
+        license: 'GB20260401ABCD',
+        roomCode: '100003',
+        ownerKey: 'br:owner:100003',
+        missKey: 'br:owner-miss:100003',
+        messageKey: 'br:msg:100003',
+      },
+      {
+        license: 'GB20260401MNOP',
+        roomCode: '100004',
+        ownerKey: 'br:owner:100004',
+        missKey: 'br:owner-miss:100004',
+        messageKey: 'br:msg:100004',
+      },
+    ],
+    skipped: 2,
+  });
+});
+
+runTest('buildRoomIndexMigrationStateKey keeps migration marker stable', () => {
+  assert.equal(buildRoomIndexMigrationStateKey(), 'br:index-state:v1');
+  assert.equal(buildRoomIndexMigrationStateKey('v2'), 'br:index-state:v2');
 });
 
 runTest('getConfiguredLicenseCodes normalizes, deduplicates, and drops blanks', () => {

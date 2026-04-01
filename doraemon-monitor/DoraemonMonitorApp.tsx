@@ -1410,7 +1410,7 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   };
 
-  const WarningResetDialog = () => {
+  const renderWarningResetDialog = () => {
     if (!isWarningResetDialogOpen) return null;
 
     const dialogTitle = warningResetDialogMode === 'verify'
@@ -1830,7 +1830,7 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
         </div>
       </main>
-      <WarningResetDialog />
+      {renderWarningResetDialog()}
       <ReportDrawer />
     </div>
   );

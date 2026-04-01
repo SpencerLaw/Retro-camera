@@ -1797,20 +1797,22 @@ const DoraemonMonitorApp: React.FC = () => {
               >
                 <RotateCcw size={20} />
               </button>
-              <button
-                className={`warning-reset-settings-btn ${warningResetPasswordEnabled ? 'protected' : ''}`}
-                onClick={handleOpenWarningResetSettings}
-                title={t('doraemon.warningResetPassword.settingsTrigger')}
-              >
-                <Lock size={18} />
-              </button>
-              <button
-                className="help-icon-btn warning-reset-help-btn"
-                onClick={handleOpenWarningResetHelp}
-                title={t('doraemon.warningResetPassword.helpTrigger')}
-              >
-                <HelpCircle size={16} />
-              </button>
+              <div className="warning-reset-settings-stack">
+                <button
+                  className={`warning-reset-settings-btn ${warningResetPasswordEnabled ? 'protected' : ''}`}
+                  onClick={handleOpenWarningResetSettings}
+                  title={t('doraemon.warningResetPassword.settingsTrigger')}
+                >
+                  <Lock size={18} />
+                </button>
+                <button
+                  className="help-icon-btn warning-reset-help-btn"
+                  onClick={handleOpenWarningResetHelp}
+                  title={t('doraemon.warningResetPassword.helpTrigger')}
+                >
+                  <HelpCircle size={14} />
+                </button>
+              </div>
             </div>
           </div>
           <div className="stat-box">

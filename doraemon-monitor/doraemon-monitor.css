@@ -391,8 +391,7 @@
   flex-shrink: 0;
 }
 
-.warning-reset-settings-btn,
-.warning-reset-help-btn {
+.warning-reset-settings-btn {
   width: 40px;
   height: 40px;
   border-radius: 12px;
@@ -404,9 +403,6 @@
   transition: all 0.24s ease;
   color: white;
   flex-shrink: 0;
-}
-
-.warning-reset-settings-btn {
   background: linear-gradient(135deg, #10b981, #0f766e);
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.28);
 }
@@ -416,21 +412,16 @@
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.32);
 }
 
-.warning-reset-help-btn {
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
-  font-size: 1.1rem;
-  font-weight: 900;
-}
-
-.warning-reset-settings-btn:hover,
-.warning-reset-help-btn:hover {
+.warning-reset-settings-btn:hover {
   transform: translateY(-1px) scale(1.06);
 }
 
-.warning-reset-settings-btn:active,
-.warning-reset-help-btn:active {
+.warning-reset-settings-btn:active {
   transform: scale(0.96);
+}
+
+.warning-reset-help-btn {
+  flex-shrink: 0;
 }
 
 .warning-reset-dialog-shell {

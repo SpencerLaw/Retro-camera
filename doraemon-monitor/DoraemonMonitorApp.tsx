@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX, ChevronUp, ChevronDown, CalendarDays, Lock } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
+import { shouldStopModalMouseDown } from './utils/modalPointerGuards.js';
 import {
   clearWarningResetPasswordRecord,
   loadWarningResetPasswordRecord,
@@ -974,6 +975,10 @@ const DoraemonMonitorApp: React.FC = () => {
   const stopModalPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
   };
+  const stopModalMouseDown = (event: React.MouseEvent) => {
+    if (!shouldStopModalMouseDown(event.target)) return;
+    event.stopPropagation();
+  };
   const handleOpenMicTest = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1188,7 +1193,7 @@ const DoraemonMonitorApp: React.FC = () => {
       <button
         className="mic-test-launcher-btn"
         type="button"
-        onMouseDown={stopModalPropagation}
+        onMouseDown={stopModalMouseDown}
         onClick={handleOpenMicTest}
       >
         {t('doraemon.micTest.openWindow')}
@@ -1210,7 +1215,7 @@ const DoraemonMonitorApp: React.FC = () => {
         <div
           className="floating-modal-shell"
           onClick={stopModalPropagation}
-          onMouseDown={stopModalPropagation}
+          onMouseDown={stopModalMouseDown}
         >
         <div className="floating-modal-header">
           <div>
@@ -1256,7 +1261,7 @@ const DoraemonMonitorApp: React.FC = () => {
         <div
           className="report-modal-shell"
           onClick={stopModalPropagation}
-          onMouseDown={stopModalPropagation}
+          onMouseDown={stopModalMouseDown}
         >
           <div className="report-modal-header">
             <div className="report-drawer-heading">
@@ -1432,7 +1437,7 @@ const DoraemonMonitorApp: React.FC = () => {
         <div
           className="floating-modal-shell warning-reset-dialog-shell"
           onClick={stopModalPropagation}
-          onMouseDown={stopModalPropagation}
+          onMouseDown={stopModalMouseDown}
         >
           <div className="floating-modal-header">
             <div className="warning-reset-dialog-heading">
@@ -1731,11 +1736,11 @@ const DoraemonMonitorApp: React.FC = () => {
                 <Lock size={18} />
               </button>
               <button
-                className="warning-reset-help-btn"
+                className="help-icon-btn warning-reset-help-btn"
                 onClick={handleOpenWarningResetHelp}
                 title={t('doraemon.warningResetPassword.helpTrigger')}
               >
-                !
+                <HelpCircle size={16} />
               </button>
             </div>
           </div>

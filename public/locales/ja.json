@@ -218,7 +218,7 @@
     "warningResetPassword": {
       "manageTitle": "リセット保護パスワード",
       "manageDescEmpty": "「警告回数をリセット」に保護を付けて、先生がいない時に児童が勝手に消せないようにします。",
-      "manageDescSet": "保護は有効です。これから警告回数をリセットする前に、ここで設定したパスワードが必要になります。",
+      "manageDescSet": "保護は有効です。これから警告回数のリセット、パスワード更新、保護解除の前に、現在のパスワード入力が必要になります。",
       "verifyTitle": "パスワードを入力してリセット",
       "verifyDesc": "警告回数を消去する前に、先生が設定したパスワードを入力してください。",
       "helpTitle": "このパスワードの役割は？",
@@ -238,7 +238,13 @@
       "mismatchError": "2回の入力が一致しません",
       "verifyError": "パスワードが違います",
       "helpTrigger": "パスワードの説明を見る",
-      "settingsTrigger": "リセット用パスワードを設定"
+      "settingsTrigger": "リセット用パスワードを設定",
+      "currentPasswordLabel": "現在のパスワード",
+      "currentPasswordPlaceholder": "現在のパスワードを入力",
+      "currentPasswordError": "現在のパスワードが違います",
+      "clearTitle": "保護パスワードを解除",
+      "clearDesc": "保護を解除する前に現在のパスワードを入力し、児童が勝手にオフにできないようにします。",
+      "confirmClear": "解除を確定"
     }
   },
   "broadcast": {

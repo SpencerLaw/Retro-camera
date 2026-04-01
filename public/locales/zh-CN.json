@@ -225,7 +225,7 @@
     "warningResetPassword": {
       "manageTitle": "重置保护密码",
       "manageDescEmpty": "给“清空警告次数”加一道保护，防止学生趁老师不在时随手清空。",
-      "manageDescSet": "已开启保护。以后清空警告次数前，需要先输入你设置的密码。",
+      "manageDescSet": "已开启保护。以后清空警告次数、更新密码或清除密码前，都需要先输入当前密码。",
       "verifyTitle": "输入密码后清空",
       "verifyDesc": "请输入老师设置的密码，验证通过后才会清空警告次数。",
       "helpTitle": "这个密码有什么用？",
@@ -245,7 +245,13 @@
       "mismatchError": "两次输入的密码不一致",
       "verifyError": "密码不正确",
       "helpTrigger": "查看密码说明",
-      "settingsTrigger": "设置清空密码"
+      "settingsTrigger": "设置清空密码",
+      "currentPasswordLabel": "当前密码",
+      "currentPasswordPlaceholder": "请输入当前密码",
+      "currentPasswordError": "当前密码不正确",
+      "clearTitle": "确认清除密码保护",
+      "clearDesc": "清除密码保护前，请先输入当前密码确认，避免学生直接把保护关掉。",
+      "confirmClear": "确认清除密码"
     }
   },
   "broadcast": {

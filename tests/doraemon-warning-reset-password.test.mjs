@@ -7,6 +7,8 @@ import {
   normalizeWarningResetPassword,
   parseWarningResetPasswordRecord,
   shouldRequireWarningResetPassword,
+  validateWarningResetPasswordChange,
+  validateWarningResetPasswordRemoval,
   verifyWarningResetPassword,
 } from '../doraemon-monitor/utils/warningResetPassword.js';
 
@@ -65,6 +67,33 @@ queueTest('verifyWarningResetPassword matches the stored hash', async () => {
   assert.equal(await verifyWarningResetPassword('2468', record), true);
   assert.equal(await verifyWarningResetPassword('1357', record), false);
   assert.equal(await verifyWarningResetPassword('', record), false);
+});
+
+queueTest('validateWarningResetPasswordChange allows first-time setup without current password', async () => {
+  const error = await validateWarningResetPasswordChange({
+    existingRecord: null,
+    currentPassword: '',
+    nextPassword: '2468',
+    confirmPassword: '2468',
+  });
+  assert.equal(error, null);
+});
+
+queueTest('validateWarningResetPasswordChange requires the current password when updating an existing one', async () => {
+  const record = await createWarningResetPasswordRecord('2468');
+  const error = await validateWarningResetPasswordChange({
+    existingRecord: record,
+    currentPassword: '1357',
+    nextPassword: '9999',
+    confirmPassword: '9999',
+  });
+  assert.equal(error, 'current-password');
+});
+
+queueTest('validateWarningResetPasswordRemoval requires the current password', async () => {
+  const record = await createWarningResetPasswordRecord('2468');
+  assert.equal(await validateWarningResetPasswordRemoval({ existingRecord: record, currentPassword: '1111' }), 'current-password');
+  assert.equal(await validateWarningResetPasswordRemoval({ existingRecord: record, currentPassword: '2468' }), null);
 });
 
 await Promise.all(pending);

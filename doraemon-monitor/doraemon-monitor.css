@@ -391,6 +391,24 @@
   flex-shrink: 0;
 }
 
+.warning-stat-box {
+  align-items: stretch;
+  gap: 12px;
+  min-height: 110px;
+}
+
+.warning-stat-box .stat-content {
+  min-height: 0;
+}
+
+.warning-stat-box .stat-label {
+  white-space: nowrap;
+}
+
+.warning-stat-actions {
+  justify-content: flex-end;
+}
+
 .warning-reset-settings-btn {
   width: 40px;
   height: 40px;

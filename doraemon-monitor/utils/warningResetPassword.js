@@ -55,6 +55,28 @@ export async function verifyWarningResetPassword(input, record) {
   return (await hashWarningResetPassword(normalized)) === record.hash;
 }
 
+export async function validateWarningResetPasswordChange({ existingRecord, currentPassword, nextPassword, confirmPassword }) {
+  const normalizedPassword = normalizeWarningResetPassword(nextPassword);
+  const normalizedConfirm = normalizeWarningResetPassword(confirmPassword);
+
+  if (!normalizedPassword) return 'empty';
+  if (normalizedPassword !== normalizedConfirm) return 'mismatch';
+
+  if (shouldRequireWarningResetPassword(existingRecord)) {
+    const currentVerified = await verifyWarningResetPassword(currentPassword, existingRecord);
+    if (!currentVerified) return 'current-password';
+  }
+
+  return null;
+}
+
+export async function validateWarningResetPasswordRemoval({ existingRecord, currentPassword }) {
+  if (!shouldRequireWarningResetPassword(existingRecord)) return null;
+
+  const currentVerified = await verifyWarningResetPassword(currentPassword, existingRecord);
+  return currentVerified ? null : 'current-password';
+}
+
 export function loadWarningResetPasswordRecord(storage = globalThis.localStorage) {
   if (!storage) return null;
   return parseWarningResetPasswordRecord(storage.getItem(WARNING_RESET_PASSWORD_STORAGE_KEY));

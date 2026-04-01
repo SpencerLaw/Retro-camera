@@ -223,7 +223,7 @@
     "warningResetPassword": {
       "manageTitle": "重置保護密碼",
       "manageDescEmpty": "替「清空警告次數」加上一道保護，避免學生趁老師不在時自行清空。",
-      "manageDescSet": "已開啟保護。之後清空警告次數前，需要先輸入你設定的密碼。",
+      "manageDescSet": "已開啟保護。之後清空警告次數、更新密碼或清除密碼前，都需要先輸入目前密碼。",
       "verifyTitle": "輸入密碼後清空",
       "verifyDesc": "請輸入老師設定的密碼，驗證通過後才會清空警告次數。",
       "helpTitle": "這個密碼有什麼作用？",
@@ -243,7 +243,13 @@
       "mismatchError": "兩次輸入的密碼不一致",
       "verifyError": "密碼不正確",
       "helpTrigger": "查看密碼說明",
-      "settingsTrigger": "設定清空密碼"
+      "settingsTrigger": "設定清空密碼",
+      "currentPasswordLabel": "目前密碼",
+      "currentPasswordPlaceholder": "請輸入目前密碼",
+      "currentPasswordError": "目前密碼不正確",
+      "clearTitle": "確認清除密碼保護",
+      "clearDesc": "清除密碼保護前，請先輸入目前密碼確認，避免學生直接把保護關掉。",
+      "confirmClear": "確認清除密碼"
     }
   },
   "broadcast": {

@@ -7,9 +7,10 @@ import { shouldStopModalMouseDown } from './utils/modalPointerGuards.js';
 import {
   clearWarningResetPasswordRecord,
   loadWarningResetPasswordRecord,
-  normalizeWarningResetPassword,
   saveWarningResetPasswordRecord,
   shouldRequireWarningResetPassword,
+  validateWarningResetPasswordChange,
+  validateWarningResetPasswordRemoval,
   verifyWarningResetPassword
 } from './utils/warningResetPassword.js';
 import LicenseInput from './components/LicenseInput';
@@ -19,7 +20,7 @@ type MonitorState = 'calm' | 'alarm';
 type MicTestStage = 'idle' | 'quiet' | 'active' | 'done';
 type MicTestHealth = 'good' | 'flat' | 'noisy' | 'weak';
 type ReportWeekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri';
-type WarningResetDialogMode = 'manage' | 'verify' | 'help';
+type WarningResetDialogMode = 'manage' | 'verify' | 'help' | 'clear';
 
 interface WarningResetPasswordRecord {
   hash: string;
@@ -172,6 +173,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const [warningResetPasswordRecord, setWarningResetPasswordRecord] = useState<WarningResetPasswordRecord | null>(() => loadWarningResetPasswordRecord());
   const [isWarningResetDialogOpen, setIsWarningResetDialogOpen] = useState(false);
   const [warningResetDialogMode, setWarningResetDialogMode] = useState<WarningResetDialogMode>('manage');
+  const [warningResetCurrentPassword, setWarningResetCurrentPassword] = useState('');
   const [warningResetPasswordInput, setWarningResetPasswordInput] = useState('');
   const [warningResetPasswordConfirm, setWarningResetPasswordConfirm] = useState('');
   const [warningResetPasswordError, setWarningResetPasswordError] = useState('');
@@ -991,6 +993,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const closeWarningResetDialog = useCallback(() => {
     setIsWarningResetDialogOpen(false);
     setWarningResetDialogMode('manage');
+    setWarningResetCurrentPassword('');
     setWarningResetPasswordInput('');
     setWarningResetPasswordConfirm('');
     setWarningResetPasswordError('');
@@ -1001,6 +1004,7 @@ const DoraemonMonitorApp: React.FC = () => {
     setShowHelp(false);
     setShowThresholdHelp(false);
     setWarningResetDialogMode(mode);
+    setWarningResetCurrentPassword('');
     setWarningResetPasswordInput('');
     setWarningResetPasswordConfirm('');
     setWarningResetPasswordError('');
@@ -1034,30 +1038,49 @@ const DoraemonMonitorApp: React.FC = () => {
 
     resetWarnCount();
   };
+  const getWarningResetValidationMessage = (code: string | null) => {
+    if (code === 'current-password') return t('doraemon.warningResetPassword.currentPasswordError');
+    if (code === 'mismatch') return t('doraemon.warningResetPassword.mismatchError');
+    if (code === 'empty') return t('doraemon.warningResetPassword.emptyError');
+    return '';
+  };
   const handleSaveWarningResetPassword = async (event: React.FormEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
-    const normalizedPassword = normalizeWarningResetPassword(warningResetPasswordInput);
-    const normalizedConfirm = normalizeWarningResetPassword(warningResetPasswordConfirm);
-
-    if (!normalizedPassword) {
-      setWarningResetPasswordError(t('doraemon.warningResetPassword.emptyError'));
+    const validationError = await validateWarningResetPasswordChange({
+      existingRecord: warningResetPasswordRecord,
+      currentPassword: warningResetCurrentPassword,
+      nextPassword: warningResetPasswordInput,
+      confirmPassword: warningResetPasswordConfirm,
+    });
+    if (validationError) {
+      setWarningResetPasswordError(getWarningResetValidationMessage(validationError));
       return;
     }
 
-    if (normalizedPassword !== normalizedConfirm) {
-      setWarningResetPasswordError(t('doraemon.warningResetPassword.mismatchError'));
-      return;
-    }
-
-    const nextRecord = await saveWarningResetPasswordRecord(normalizedPassword);
+    const nextRecord = await saveWarningResetPasswordRecord(warningResetPasswordInput);
     setWarningResetPasswordRecord(nextRecord);
     closeWarningResetDialog();
   };
-  const handleClearWarningResetPassword = (event: React.SyntheticEvent) => {
+  const handleRequestWarningResetPasswordClear = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    openWarningResetDialog('clear');
+  };
+  const handleConfirmWarningResetPasswordClear = async (event: React.FormEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const validationError = await validateWarningResetPasswordRemoval({
+      existingRecord: warningResetPasswordRecord,
+      currentPassword: warningResetCurrentPassword,
+    });
+    if (validationError) {
+      setWarningResetPasswordError(getWarningResetValidationMessage(validationError));
+      return;
+    }
+
     clearWarningResetPasswordRecord();
     setWarningResetPasswordRecord(null);
     closeWarningResetDialog();
@@ -1417,14 +1440,18 @@ const DoraemonMonitorApp: React.FC = () => {
       ? t('doraemon.warningResetPassword.verifyTitle')
       : warningResetDialogMode === 'help'
         ? t('doraemon.warningResetPassword.helpTitle')
-        : t('doraemon.warningResetPassword.manageTitle');
+        : warningResetDialogMode === 'clear'
+          ? t('doraemon.warningResetPassword.clearTitle')
+          : t('doraemon.warningResetPassword.manageTitle');
     const dialogDescription = warningResetDialogMode === 'verify'
       ? t('doraemon.warningResetPassword.verifyDesc')
       : warningResetDialogMode === 'help'
         ? t('doraemon.warningResetPassword.helpDesc')
-        : warningResetPasswordEnabled
-          ? t('doraemon.warningResetPassword.manageDescSet')
-          : t('doraemon.warningResetPassword.manageDescEmpty');
+        : warningResetDialogMode === 'clear'
+          ? t('doraemon.warningResetPassword.clearDesc')
+          : warningResetPasswordEnabled
+            ? t('doraemon.warningResetPassword.manageDescSet')
+            : t('doraemon.warningResetPassword.manageDescEmpty');
 
     return (
       <div className="floating-modal-layer open">
@@ -1506,8 +1533,50 @@ const DoraemonMonitorApp: React.FC = () => {
                   </button>
                 </div>
               </form>
+            ) : warningResetDialogMode === 'clear' ? (
+              <form className="warning-reset-form" onSubmit={handleConfirmWarningResetPasswordClear}>
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.currentPasswordLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetCurrentPassword}
+                    onChange={(event) => {
+                      setWarningResetCurrentPassword(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.currentPasswordPlaceholder')}
+                    autoFocus
+                  />
+                </label>
+                {warningResetPasswordError && <div className="warning-reset-error">{warningResetPasswordError}</div>}
+                <div className="warning-reset-actions">
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                  <button type="submit" className="warning-reset-danger-btn">
+                    {t('doraemon.warningResetPassword.confirmClear')}
+                  </button>
+                </div>
+              </form>
             ) : (
               <form className="warning-reset-form" onSubmit={handleSaveWarningResetPassword}>
+                {warningResetPasswordEnabled && (
+                  <label className="warning-reset-label">
+                    <span>{t('doraemon.warningResetPassword.currentPasswordLabel')}</span>
+                    <input
+                      className="warning-reset-input"
+                      type="password"
+                      value={warningResetCurrentPassword}
+                      onChange={(event) => {
+                        setWarningResetCurrentPassword(event.target.value);
+                        setWarningResetPasswordError('');
+                      }}
+                      placeholder={t('doraemon.warningResetPassword.currentPasswordPlaceholder')}
+                      autoFocus
+                    />
+                  </label>
+                )}
                 <label className="warning-reset-label">
                   <span>{t('doraemon.warningResetPassword.inputLabel')}</span>
                   <input
@@ -1519,7 +1588,7 @@ const DoraemonMonitorApp: React.FC = () => {
                       setWarningResetPasswordError('');
                     }}
                     placeholder={t('doraemon.warningResetPassword.inputPlaceholder')}
-                    autoFocus
+                    autoFocus={!warningResetPasswordEnabled}
                   />
                 </label>
                 <label className="warning-reset-label">
@@ -1538,7 +1607,7 @@ const DoraemonMonitorApp: React.FC = () => {
                 {warningResetPasswordError && <div className="warning-reset-error">{warningResetPasswordError}</div>}
                 <div className="warning-reset-actions">
                   {warningResetPasswordEnabled && (
-                    <button type="button" className="warning-reset-danger-btn" onClick={handleClearWarningResetPassword}>
+                    <button type="button" className="warning-reset-danger-btn" onClick={handleRequestWarningResetPasswordClear}>
                       {t('doraemon.warningResetPassword.clear')}
                     </button>
                   )}
@@ -1715,12 +1784,12 @@ const DoraemonMonitorApp: React.FC = () => {
               <strong className="stat-value" style={{ color: isDarkMode ? '#0575e6' : '#2563eb' }}>{formatTime(totalTime)}</strong>
             </div>
           </div>
-          <div className={`stat-box stat-box-with-action ${warnCount > 0 ? 'warning' : ''}`}>
+          <div className={`stat-box stat-box-with-action warning-stat-box ${warnCount > 0 ? 'warning' : ''}`}>
             <div className="stat-content">
               <span className="stat-label">{t('doraemon.warnCount')}</span>
               <strong className="stat-value" style={{ color: '#dc2626' }}>{warnCount}</strong>
             </div>
-            <div className="stat-action-row">
+            <div className="stat-action-row warning-stat-actions">
               <button
                 className="reset-icon-btn"
                 onClick={handleResetWarnCount}

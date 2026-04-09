@@ -573,7 +573,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         )}
                     </div>
                 ) : (
-                    <div className="w-full flex-1 flex flex-col min-h-0 relative z-10 pt-32">
+                    <div className="w-full flex-1 flex flex-col min-h-0 relative z-10 pt-24 pb-32">
                         {currentMsg && currentMsg.text.trim() ? (
                             <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col scroll-smooth">
                                 <div className="max-w-4xl mx-auto w-full min-h-full flex flex-col items-center justify-center px-6 py-32 space-y-10 text-center">
@@ -597,7 +597,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center gap-16 animate-in zoom-in-95 duration-1000 min-h-0">
+                            <div className="flex-1 flex flex-col items-center justify-center gap-8 animate-in zoom-in-95 duration-1000 min-h-0">
                                 <div className="relative group">
                                     <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/5 blur-[100px] rounded-full scale-150 animate-pulse" />
                                     <IdleVisualizer isEmergency={false} />

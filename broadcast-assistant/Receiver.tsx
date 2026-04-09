@@ -566,15 +566,15 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center gap-12 animate-in zoom-in-95 duration-1000 mt-24">
+                            <div className="flex flex-col items-center justify-center gap-16 animate-in zoom-in-95 duration-1000">
                                 <div className="relative group">
                                     <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/5 blur-[100px] rounded-full scale-150 animate-pulse" />
                                     <IdleVisualizer isEmergency={false} />
-                                    <div className="absolute bottom-[-80px] left-1/2 -translate-x-1/2 w-full text-center space-y-4">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.5em] text-indigo-500 animate-pulse">{t('broadcast.receiver.monitoring')}</p>
-                                        <div className="flex items-center justify-center gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        </div>
+                                </div>
+                                <div className="text-center space-y-4">
+                                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-indigo-500 animate-pulse">{t('broadcast.receiver.monitoring')}</p>
+                                    <div className="flex items-center justify-center gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                     </div>
                                 </div>
                             </div>

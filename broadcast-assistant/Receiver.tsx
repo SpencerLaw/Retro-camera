@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Volume2, VolumeX, AlertCircle, Tv, Signal, X, History, Clock, Radio, Zap, Moon, Sun, Maximize, Minimize, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, AlertCircle, Tv, Signal, X, History, Clock, Radio, Zap, Moon, Sun, Maximize, Minimize, ChevronUp, ChevronDown } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { getBCLicense } from './utils/licenseManager';
 import { ttsManager } from './utils/ttsManager';
@@ -438,6 +438,17 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                 <div className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] blur-[160px] rounded-full animate-pulse transition-colors duration-[7s] ${emergency ? 'bg-rose-600/15' : 'bg-purple-500/10'}`} />
                 <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full animate-pulse duration-[5s]" />
             </div>
+
+            {/* ─── Back Button ─── */}
+            {onExit && (
+                <button
+                    onClick={onExit}
+                    className={`absolute top-6 left-6 z-[110] w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:scale-110 active:scale-95 shadow-lg border ${theme === 'dark' ? 'bg-white/10 border-white/10 hover:bg-white/20 text-white' : 'bg-white/70 border-white hover:bg-white text-slate-700'}`}
+                    title={t('broadcast.returnDashboard') || '返回'}
+                >
+                    <ArrowLeft size={20} />
+                </button>
+            )}
 
             {/* ─── Floating Glass Header ─── */}
             {isJoined && (

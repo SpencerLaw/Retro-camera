@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { ArrowLeft, Volume2, VolumeX, AlertCircle, Tv, Signal, X, History, Clock, Radio, Zap, Moon, Sun, Maximize, Minimize, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Loader2, Volume2, VolumeX, AlertCircle, Tv, Signal, X, History, Clock, Radio, Zap, Moon, Sun, Maximize, Minimize, ChevronUp, ChevronDown } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import { getBCLicense } from './utils/licenseManager';
 import { ttsManager } from './utils/ttsManager';
@@ -211,6 +211,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [displayChannelName, setDisplayChannelName] = useState('');
     const [msgQueue, setMsgQueue] = useState<Message[]>([]);
     const [needsActivation, setNeedsActivation] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
     const activeRef = useRef<HTMLDivElement>(null);
@@ -239,6 +240,11 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const handleActivate = useCallback(() => {
         ttsManager.startSilentLoop();
         setNeedsActivation(false);
+    }, []);
+
+    const handleDownload = useCallback(() => {
+        setIsDownloading(true);
+        setTimeout(() => setIsDownloading(false), 3500);
     }, []);
 
     // Also resume audio on any global click once joined
@@ -486,10 +492,11 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 <a
                                     href="/ClassBroadcast_Setup.exe"
                                     download="班级广播桌面端.exe"
+                                    onClick={handleDownload}
                                     className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-amber-400/80 hover:text-amber-400' : 'hover:bg-slate-50 text-amber-500/80 hover:text-amber-500'}`}
                                     title="下载高级桌面版(自带最小化强制霸屏功能)"
                                 >
-                                    <Zap size={18} />
+                                    {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} />}
                                 </a>
                             )}
                             <button
@@ -564,10 +571,11 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 <a 
                                     href="/ClassBroadcast_Setup.exe" 
                                     download="班级广播桌面端.exe"
+                                    onClick={handleDownload}
                                     className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:scale-105 active:scale-95 ${theme === 'dark' ? 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                                 >
-                                    <Zap size={14} className="text-amber-400" />
-                                    下载高级桌面版 (支持最小化强制霸屏弹窗)
+                                    {isDownloading ? <Loader2 size={14} className="text-amber-400 animate-spin" /> : <Zap size={14} className="text-amber-400" />}
+                                    {isDownloading ? '正在下载...' : '下载高级桌面版 (支持最小化强制霸屏弹窗)'}
                                 </a>
                             </div>
                         )}

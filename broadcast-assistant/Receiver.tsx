@@ -597,7 +597,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center gap-16 animate-in zoom-in-95 duration-1000">
+                            <div className="flex-1 flex flex-col items-center justify-center gap-16 animate-in zoom-in-95 duration-1000 min-h-0">
                                 <div className="relative group">
                                     <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/5 blur-[100px] rounded-full scale-150 animate-pulse" />
                                     <IdleVisualizer isEmergency={false} />

@@ -573,7 +573,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         )}
                     </div>
                 ) : (
-                    <div className="w-full flex-1 flex flex-col min-h-0 relative z-10">
+                    <div className="w-full flex-1 flex flex-col min-h-0 relative z-10 pt-32">
                         {currentMsg && currentMsg.text.trim() ? (
                             <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col scroll-smooth">
                                 <div className="max-w-4xl mx-auto w-full min-h-full flex flex-col items-center justify-center px-6 py-32 space-y-10 text-center">

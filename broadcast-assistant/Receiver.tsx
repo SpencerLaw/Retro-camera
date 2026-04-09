@@ -440,8 +440,8 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                 <div className="absolute top-[20%] right-[10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full animate-pulse duration-[5s]" />
             </div>
 
-            {/* ─── Back Button ─── */}
-            {onExit && (
+            {/* ─── Back Button (Only when not joined) ─── */}
+            {!isJoined && onExit && (
                 <button
                     onClick={onExit}
                     className={`absolute top-6 left-6 z-[110] w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:scale-110 active:scale-95 shadow-lg border ${theme === 'dark' ? 'bg-white/10 border-white/10 hover:bg-white/20 text-white' : 'bg-white/70 border-white hover:bg-white text-slate-700'}`}
@@ -456,6 +456,15 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                 <div className="absolute top-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50">
                     <GlassCard className="px-8 py-4 flex items-center justify-between border-white/[0.08] dark:border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)]">
                         <div className="flex items-center gap-5">
+                            {onExit && (
+                                <button
+                                    onClick={onExit}
+                                    className={`w-10 h-10 -ml-4 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90 ${theme === 'dark' ? 'hover:bg-white/10 text-white/50 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-700'}`}
+                                    title={t('broadcast.returnDashboard') || '返回'}
+                                >
+                                    <ArrowLeft size={20} />
+                                </button>
+                            )}
                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${isJoined ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-200/50 dark:bg-white/5 text-slate-400'}`}>
                                 {isPlaying ? <Radio className="animate-pulse" size={24} /> : <Tv size={24} />}
                             </div>
@@ -473,6 +482,16 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         </div>
 
                         <div className="flex items-center gap-2">
+                            {!window.electronAPI && (
+                                <a
+                                    href="/ClassBroadcast_Setup.exe"
+                                    download="班级广播桌面端.exe"
+                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-amber-400/80 hover:text-amber-400' : 'hover:bg-slate-50 text-amber-500/80 hover:text-amber-500'}`}
+                                    title="下载高级桌面版(自带最小化强制霸屏功能)"
+                                >
+                                    <Zap size={18} />
+                                </a>
+                            )}
                             <button
                                 onClick={toggleTheme}
                                 className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10' : 'hover:bg-slate-50'}`}

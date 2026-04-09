@@ -217,7 +217,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const audioRef = useRef<HTMLAudioElement>(null);
     const isPlayingRef = useRef(false);
     const engine = useRef({
-        lastId: '',
+        lastId: localStorage.getItem('br_receiver_last_id') || '',
         isJoined: !!localStorage.getItem('br_receiver_roomId'),
         isListening: true
     });
@@ -386,6 +386,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     if (msg) {
                         if (msg.id !== engine.current.lastId) {
                             engine.current.lastId = msg.id;
+                            localStorage.setItem('br_receiver_last_id', msg.id);
                             if (msg.channelName) setDisplayChannelName(msg.channelName);
                             if (msg.text && msg.text.trim()) {
                                 if (engine.current.isListening) {
@@ -553,12 +554,12 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         )}
                     </div>
                 ) : (
-                    <div className="w-full flex flex-col items-center justify-center gap-16 py-20">
+                    <div className="w-full flex-1 flex flex-col min-h-0 relative z-10">
                         {currentMsg && currentMsg.text.trim() ? (
-                            <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col pt-[30vh] pb-[40vh] scroll-smooth">
-                                <div className="max-w-4xl mx-auto w-full flex-none flex flex-col px-10 space-y-4">
+                            <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col scroll-smooth">
+                                <div className="max-w-4xl mx-auto w-full min-h-full flex flex-col items-center justify-center px-6 py-32 space-y-10 text-center">
                                     {isPlaying && (
-                                        <div className="flex justify-center mb-12">
+                                        <div className="flex justify-center shrink-0">
                                             <ActiveVisualizer isEmergency={emergency} />
                                         </div>
                                     )}

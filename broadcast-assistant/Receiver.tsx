@@ -15,6 +15,11 @@ interface Message {
     channelName?: string;
     voice?: string;
 }
+declare global {
+    interface Window {
+        electronAPI?: { showWindow: (isEmergency: boolean) => void };
+    }
+}
 
 const ClockDisplay = React.memo(() => {
     const [time, setTime] = useState(new Date());
@@ -388,6 +393,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                         if (msg.isEmergency) return [msg, ...prev];
                                         return [...prev, msg];
                                     });
+                                    // 触发 Electron 弹窗唤醒
+                                    if (window.electronAPI) {
+                                        window.electronAPI.showWindow(msg.isEmergency);
+                                    }
                                 }
                                 setReceivedHistory(prev => {
                                     const next = [...prev, msg].slice(-20);
@@ -518,6 +527,19 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         >
                             {t('broadcast.receiver.joinButton')}
                         </button>
+
+                        {!window.electronAPI && (
+                            <div className="pt-8 text-center w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+                                <a 
+                                    href="/ClassBroadcast_Setup.exe" 
+                                    download="班级广播桌面端.exe"
+                                    className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:scale-105 active:scale-95 ${theme === 'dark' ? 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                                >
+                                    <Zap size={14} className="text-amber-400" />
+                                    下载高级桌面版 (支持最小化强制霸屏弹窗)
+                                </a>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="w-full flex flex-col items-center justify-center gap-16 py-20">

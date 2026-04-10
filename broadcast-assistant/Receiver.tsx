@@ -213,6 +213,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [needsActivation, setNeedsActivation] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    const [showExitConfirm, setShowExitConfirm] = useState(false);
 
     const activeRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -253,27 +254,8 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             return;
         }
 
-        if (onOpenDialog) {
-            onOpenDialog(
-                t('broadcast.receiver.exitConfirmTitle') || '退出教室',
-                t('broadcast.receiver.exitConfirmDesc') || '确认要退出并清除当前保留的教室码吗？下次进入将需重新输入。',
-                'confirm',
-                () => {
-                    localStorage.removeItem('br_receiver_roomId');
-                    localStorage.removeItem('br_receiver_last_id');
-                    setIsJoined(false);
-                    setRoomId('');
-                    onExit?.();
-                }
-            );
-        } else {
-            localStorage.removeItem('br_receiver_roomId');
-            localStorage.removeItem('br_receiver_last_id');
-            setIsJoined(false);
-            setRoomId('');
-            onExit?.();
-        }
-    }, [isJoined, onExit, onOpenDialog, t]);
+        setShowExitConfirm(true);
+    }, [isJoined, onExit]);
 
     // Also resume audio on any global click once joined
     useEffect(() => {
@@ -754,6 +736,23 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             )}
 
             <audio ref={audioRef} className="hidden" />
+
+            <CustomDialog
+                isOpen={showExitConfirm}
+                title={t('broadcast.receiver.exitConfirmTitle') || '退出教室'}
+                message={t('broadcast.receiver.exitConfirmDesc') || '确认要退出并清除当前记录的教室码吗？退出后下次进入需要重新输入。'}
+                type="confirm"
+                onConfirm={() => {
+                    localStorage.removeItem('br_receiver_roomId');
+                    localStorage.removeItem('br_receiver_last_id');
+                    setIsJoined(false);
+                    setRoomId('');
+                    setShowExitConfirm(false);
+                    onExit?.();
+                }}
+                onCancel={() => setShowExitConfirm(false)}
+                isDark={theme === 'dark'}
+            />
 
             {/* Custom Styles */}
             <style dangerouslySetInnerHTML={{

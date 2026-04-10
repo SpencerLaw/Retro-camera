@@ -247,6 +247,34 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         setTimeout(() => setIsDownloading(false), 3500);
     }, []);
 
+    const handleExit = useCallback(() => {
+        if (!isJoined) {
+            onExit?.();
+            return;
+        }
+
+        if (onOpenDialog) {
+            onOpenDialog(
+                t('broadcast.receiver.exitConfirmTitle') || '退出教室',
+                t('broadcast.receiver.exitConfirmDesc') || '确认要退出并清除当前保留的教室码吗？下次进入将需重新输入。',
+                'confirm',
+                () => {
+                    localStorage.removeItem('br_receiver_roomId');
+                    localStorage.removeItem('br_receiver_last_id');
+                    setIsJoined(false);
+                    setRoomId('');
+                    onExit?.();
+                }
+            );
+        } else {
+            localStorage.removeItem('br_receiver_roomId');
+            localStorage.removeItem('br_receiver_last_id');
+            setIsJoined(false);
+            setRoomId('');
+            onExit?.();
+        }
+    }, [isJoined, onExit, onOpenDialog, t]);
+
     // Also resume audio on any global click once joined
     useEffect(() => {
         if (!isJoined) return;
@@ -449,7 +477,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             {/* ─── Back Button (Only when not joined) ─── */}
             {!isJoined && onExit && (
                 <button
-                    onClick={onExit}
+                    onClick={handleExit}
                     className={`absolute top-6 left-6 z-[110] w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:scale-110 active:scale-95 shadow-lg border ${theme === 'dark' ? 'bg-white/10 border-white/10 hover:bg-white/20 text-white' : 'bg-white/70 border-white hover:bg-white text-slate-700'}`}
                     title={t('broadcast.returnDashboard') || '返回'}
                 >
@@ -464,7 +492,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         <div className="flex items-center gap-5">
                             {onExit && (
                                 <button
-                                    onClick={onExit}
+                                    onClick={handleExit}
                                     className={`w-10 h-10 -ml-4 rounded-xl flex items-center justify-center transition-all duration-300 active:scale-90 ${theme === 'dark' ? 'hover:bg-white/10 text-white/50 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-700'}`}
                                     title={t('broadcast.returnDashboard') || '返回'}
                                 >

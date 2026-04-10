@@ -37,9 +37,10 @@ export function createRoomIndexTransition({ license, previousRoomCode, nextRoomC
   const next = normalizeRoomCode(nextRoomCode);
   const cleanupOwnerKeys = [];
 
-  if (previous && previous !== next) {
-    cleanupOwnerKeys.push(buildRoomOwnerKey(previous), buildRoomOwnerMissKey(previous));
-  }
+  // Allow multiple rooms under one license by skipping cleanup
+  // if (previous && previous !== next) {
+  //   cleanupOwnerKeys.push(buildRoomOwnerKey(previous), buildRoomOwnerMissKey(previous));
+  // }
 
   return {
     license: normalizedLicense,

@@ -229,6 +229,17 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 setStatus({ type: 'error', msg: '验证房间号失败，请检查网络' });
                 return;
             }
+
+            // Deactivate old code to prevent leaks
+            try {
+                await fetch('/api/broadcast/deactivate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: currentChannel.code, license })
+                });
+            } catch (err) {
+                console.error('Failed to deactivate old code:', err);
+            }
         }
 
         setChannels(channels.map(c =>

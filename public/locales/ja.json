@@ -299,6 +299,8 @@
       "clearHistory": "履歴を消去"
     },
     "receiver": {
+      "exitConfirmTitle": "クラスを退出",
+      "exitConfirmDesc": "退出して現在のクラスコードをクリアしますか？次回参加時に再度入力が必要になります。",
       "joinChannel": "チャンネルに入る",
       "joinDesc": "同期を開始するために、先生から割り当てられた固定チャンネル ID を入力してください。",
       "channelPlaceholder": "例: 160234",

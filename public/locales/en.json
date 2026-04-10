@@ -359,6 +359,8 @@
       "clearHistory": "Clear History"
     },
     "receiver": {
+      "exitConfirmTitle": "Exit Classroom",
+      "exitConfirmDesc": "Are you sure you want to exit? The current room code will be cleared and you will need to re-enter it next time.",
       "joinChannel": "Join Channel",
       "joinDesc": "Enter the persistent channel ID assigned by your instructor to begin syncing.",
       "channelPlaceholder": "E.G. 160234",

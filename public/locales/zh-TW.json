@@ -305,6 +305,8 @@
       "clearHistory": "清空記錄"
     },
     "receiver": {
+      "exitConfirmTitle": "退出教室",
+      "exitConfirmDesc": "確定要退出並清除當前保留的教室碼嗎？下次進入將需重新輸入。",
       "joinChannel": "進入通道",
       "joinDesc": "請輸入老師給的通信號碼",
       "channelPlaceholder": "例如: 160234",

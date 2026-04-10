@@ -306,6 +306,8 @@
       "unknownClass": "未知班级",
       "roomCodePlaceholder": "6位数字",
       "classNamePlaceholder": "输入班级名称",
+      "cancel": "取消",
+      "save": "保存",
       "autoLoop": "自动循环",
       "repeatCount": "播报次数",
       "on": "开启",

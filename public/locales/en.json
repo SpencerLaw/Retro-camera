@@ -306,6 +306,8 @@
       "unknownClass": "Unknown Class",
       "roomCodePlaceholder": "4 Digits",
       "classNamePlaceholder": "Enter class name",
+      "cancel": "Cancel",
+      "save": "Save",
       "autoLoop": "Auto Loop",
       "repeatCount": "Repeats",
       "on": "ON",

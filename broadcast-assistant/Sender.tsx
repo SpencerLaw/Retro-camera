@@ -522,52 +522,6 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             </button>
                         </div>
                     </GlassCard>
-                ) : editingChannel ? (
-                    <GlassCard className="p-4 md:p-6 space-y-4 md:space-y-5 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
-                        <div className="flex flex-col gap-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.className')}</label>
-                                <input
-                                    type="text"
-                                    value={editName}
-                                    onChange={(e) => setEditName(e.target.value)}
-                                    className={`w-full p-4 rounded-2xl border bg-slate-50 border-slate-100 focus:bg-white focus:border-blue-400 outline-none font-bold transition-all`}
-                                    placeholder={t('broadcast.sender.unknownClass')}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.roomCode')}</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={editCode}
-                                        onChange={(e) => setEditCode(e.target.value.toUpperCase())}
-                                        className={`flex-1 p-4 rounded-2xl border bg-slate-50 border-slate-100 focus:bg-white focus:border-blue-400 outline-none font-mono font-black transition-all`}
-                                        maxLength={8}
-                                    />
-                                    <button
-                                        onClick={generateRandomChannel}
-                                        className="p-4 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors shrink-0"
-                                    >
-                                        <RefreshCw size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => setEditingChannel(null)}
-                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 transition-colors"
-                            >
-                                {t('broadcast.sender.cancel')}
-                            </button>
-                            <button
-                                onClick={saveEdit}
-                                className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all"
-                            >
-                                {t('broadcast.sender.save')}
-                            </button>
-                        </div>
                     </GlassCard>
                 ) : (
                     <GlassCard className="p-4 sm:p-6 md:p-10 space-y-4 md:space-y-8 shadow-2xl overflow-hidden relative group">
@@ -766,7 +720,79 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 </div>
             )}
 
-            {/* Replay Quick-Editor Dialog - Moved outside scaled container to fix fixed positioning */}
+            {/* Edit Channel Quick-Editor Dialog */}
+            {editingChannel && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 transition-all" style={{ position: 'fixed' }}>
+                    <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-xl" onClick={() => setEditingChannel(null)} />
+                    <div className="relative w-full max-w-md bg-white/95 dark:bg-gray-900/95 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/20 p-6 sm:p-8 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+                        
+                        <div className="flex justify-between items-center mb-8 shrink-0 z-10">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+                                    <Edit2 size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-white">编辑班级</h2>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setEditingChannel(null)}
+                                className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-slate-500"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col gap-5">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('broadcast.sender.className')}</label>
+                                <input
+                                    type="text"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    className="w-full p-4 rounded-2xl border bg-slate-50 dark:bg-white/5 dark:text-white border-slate-100 dark:border-white/10 focus:bg-white dark:focus:bg-white/10 focus:border-blue-400 outline-none font-bold transition-all"
+                                    placeholder={t('broadcast.sender.unknownClass')}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('broadcast.sender.roomCode')}</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={editCode}
+                                        onChange={(e) => setEditCode(e.target.value.toUpperCase())}
+                                        className="flex-1 p-4 rounded-2xl border bg-slate-50 dark:bg-white/5 dark:text-white border-slate-100 dark:border-white/10 focus:bg-white dark:focus:bg-white/10 focus:border-blue-400 outline-none font-mono font-black transition-all"
+                                        maxLength={8}
+                                    />
+                                    <button
+                                        onClick={generateRandomChannel}
+                                        className="px-5 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors shrink-0"
+                                    >
+                                        <RefreshCw size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 mt-8">
+                            <button
+                                onClick={() => setEditingChannel(null)}
+                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-xs bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors"
+                            >
+                                {t('broadcast.sender.cancel')}
+                            </button>
+                            <button
+                                onClick={saveEdit}
+                                className="flex-[1.5] py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all"
+                            >
+                                {t('broadcast.sender.save')}
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Replay Quick-Editor Dialog - Moved outside scaled container... */}
             {showReplayDialog && replayData && typeof document !== 'undefined' && createPortal(
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 transition-all" style={{ position: 'fixed' }}>
                     <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-xl" onClick={() => setShowReplayDialog(false)} />

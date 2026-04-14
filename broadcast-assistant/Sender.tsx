@@ -452,7 +452,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     theme={isDark ? 'dark' : 'light'}
                 />
             )}
-            <div className="space-y-4 md:space-y-8 max-w-2xl mx-auto px-3 md:px-4 pb-24 md:pb-20 origin-top transition-transform">
+            <div className="space-y-3 md:space-y-8 max-w-2xl mx-auto px-3 md:px-4 pb-16 md:pb-20 origin-top transition-transform">
                 {/* Channel Management Section */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between px-2">
@@ -685,14 +685,14 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     </div>
                 </div>
 
-                {/* Schedule Manager Section */}
-                {channels.length > 0 && (
+                {/* Schedule Manager Section - temporarily hidden */}
+                {/* {channels.length > 0 && (
                     <ScheduleManager
                         license={license}
                         activeChannelCode={channelCode}
                         isDark={isDark}
                     />
-                )}
+                )} */}
 
             </div>
 

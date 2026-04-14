@@ -547,59 +547,48 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
                         {/* ─── 控制区：第一行（次数 + 模式 + 紧急）─── */}
                         <div className="flex items-stretch gap-2">
-                            {/* 次数调节器 */}
-                            <div className={`flex items-center gap-0.5 bg-white/50 dark:bg-black/20 backdrop-blur rounded-xl p-1 border border-white/40 dark:border-white/10 transition-all shrink-0 ${isLooping ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
-                                <button
-                                    onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/80 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-400 hover:text-blue-500"
-                                >
-                                    <ChevronDown size={16} />
-                                </button>
-                                <div className="w-8 flex flex-col items-center">
-                                    <span className="text-base font-black text-blue-500 tabular-nums leading-none">
-                                        {isLooping ? '∞' : repeatCount}
-                                    </span>
-                                    <span className="hidden sm:block text-[7px] font-black text-slate-400 uppercase tracking-widest mt-0.5 opacity-60">
-                                        {t('broadcast.sender.repeatCount')}
-                                    </span>
-                                </div>
+                            {/* 次数调节器 - 竖排紧凑版 */}
+                            <div className={`flex flex-col items-center bg-white/50 dark:bg-black/20 backdrop-blur rounded-xl border border-white/40 dark:border-white/10 transition-all shrink-0 overflow-hidden ${isLooping ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
                                 <button
                                     onClick={() => setRepeatCount(Math.min(99, (parseInt(String(repeatCount)) || 1) + 1))}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/80 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-400 hover:text-blue-500"
+                                    className="w-10 px-1 pt-1.5 pb-0.5 flex items-center justify-center hover:bg-white/80 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-400 hover:text-blue-500"
                                 >
-                                    <ChevronUp size={16} />
+                                    <ChevronUp size={14} />
+                                </button>
+                                <span className="text-sm font-black text-blue-500 tabular-nums leading-none py-0.5">
+                                    {isLooping ? '∞' : repeatCount}
+                                </span>
+                                <button
+                                    onClick={() => setRepeatCount(Math.max(1, (parseInt(String(repeatCount)) || 1) - 1))}
+                                    className="w-10 px-1 pb-1.5 pt-0.5 flex items-center justify-center hover:bg-white/80 dark:hover:bg-white/10 active:scale-90 transition-all text-slate-400 hover:text-blue-500"
+                                >
+                                    <ChevronDown size={14} />
                                 </button>
                             </div>
 
-                            {/* 单次/循环切换 */}
+                            {/* 单次/循环切换 - 始终显示文字 */}
                             <button
                                 onClick={() => setIsLooping(!isLooping)}
-                                className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border transition-all duration-500 px-2 py-2 ${isLooping
+                                className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border transition-all duration-300 px-3 py-2 ${isLooping
                                     ? 'bg-blue-500 text-white shadow-[0_8px_20px_-4px_rgba(59,130,246,0.4)] border-transparent'
-                                    : 'bg-white/30 dark:bg-white/[0.03] text-slate-400 border-white/40 dark:border-white/10 hover:bg-white/50'}`}
+                                    : 'bg-white/30 dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 border-white/40 dark:border-white/10'}`}
                             >
-                                <Repeat
-                                    size={15}
-                                    className={`shrink-0 ${isLooping ? 'animate-spin' : ''}`}
-                                    style={isLooping ? { animationDuration: '4s' } : {}}
-                                />
-                                <span className={`hidden sm:inline text-[9px] font-black uppercase tracking-[0.1em] whitespace-nowrap ${isLooping ? 'opacity-100' : 'opacity-60'}`}>
-                                    {isLooping ? t('broadcast.sender.looping') : t('broadcast.sender.once')}
+                                <Repeat size={13} className={`shrink-0 ${isLooping ? 'animate-spin' : ''}`} style={isLooping ? { animationDuration: '4s' } : {}} />
+                                <span className="text-[10px] font-black whitespace-nowrap">
+                                    {isLooping ? '循环' : '单次'}
                                 </span>
                             </button>
 
-                            {/* 紧急播报切换 */}
+                            {/* 紧急播报切换 - 始终显示"紧急" */}
                             <button
                                 onClick={() => setIsEmergency(!isEmergency)}
-                                className={`relative flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border transition-all duration-500 shrink-0 ${isEmergency
+                                className={`relative flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border transition-all duration-300 shrink-0 ${isEmergency
                                     ? 'bg-red-500 text-white shadow-[0_8px_20px_-4px_rgba(239,68,68,0.4)] border-transparent'
-                                    : 'bg-white/30 dark:bg-white/[0.03] text-slate-400 border-white/40 dark:border-white/10 hover:border-red-400/50 hover:text-red-500'}`}
+                                    : 'bg-white/30 dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 border-white/40 dark:border-white/10 hover:border-red-400/50 hover:text-red-500'}`}
                             >
-                                <AlertTriangle size={15} className={isEmergency ? 'animate-bounce' : ''} />
-                                <span className="hidden sm:inline text-[9px] font-black uppercase tracking-[0.1em] whitespace-nowrap opacity-80">
-                                    {t('broadcast.sender.emergency')}
-                                </span>
-                                {isEmergency && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping opacity-30" />}
+                                <AlertTriangle size={13} className={isEmergency ? 'animate-bounce' : ''} />
+                                <span className="text-[10px] font-black whitespace-nowrap">紧急</span>
+                                {isEmergency && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-full animate-ping opacity-40" />}
                             </button>
                         </div>
 

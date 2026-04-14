@@ -224,13 +224,15 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
             </div>
 
             <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-6 lg:py-16">
-                <header className="flex items-center justify-between mb-6 md:mb-16 px-2 md:px-4">
-                    <button
-                        onClick={() => mode === 'selection' ? navigate('/') : setMode('selection')}
-                        className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:scale-110 active:scale-95 transition dark:bg-white/10"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
+                <header className="relative flex items-center justify-center mb-6 md:mb-16 min-h-[48px]">
+                    <div className="absolute left-2 md:left-4">
+                        <button
+                            onClick={() => mode === 'selection' ? navigate('/') : setMode('selection')}
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:scale-110 active:scale-95 transition dark:bg-white/10"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                    </div>
 
                     <div className="flex flex-col items-center">
                         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tighter">
@@ -240,26 +242,26 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                         </h1>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="absolute right-2 md:right-4 flex gap-1.5 md:gap-3">
                         <button
                             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                            className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-white/40 dark:hover:bg-white/20 transition text-orange-500"
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-white/40 dark:hover:bg-white/20 transition text-orange-500"
                         >
-                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                            {theme === 'light' ? <Moon size={18} className="md:w-5 md:h-5" /> : <Sun size={18} className="md:w-5 md:h-5" />}
                         </button>
                         <button
                             onClick={() => setShowFishDebug(true)}
-                            className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-indigo-500/10 text-indigo-500 transition active:scale-95"
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-indigo-500/10 text-indigo-500 transition active:scale-95"
                             title="Fish Audio TTS 调试"
                         >
-                            <Bug size={20} />
+                            <Bug size={18} className="md:w-5 md:h-5" />
                         </button>
                         {isBCVerified() && (
                             <button
                                 onClick={handleLogout}
-                                className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition"
+                                className="w-10 h-10 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition"
                             >
-                                <LogOut size={20} />
+                                <LogOut size={18} className="md:w-5 md:h-5" />
                             </button>
                         )}
                     </div>

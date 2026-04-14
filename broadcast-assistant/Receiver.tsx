@@ -374,7 +374,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         const poll = async () => {
             if (!engine.current.isJoined) return;
 
-            const pollInterval = document.visibilityState === 'visible' ? 5000 : 20000;
+            const pollInterval = document.visibilityState === 'visible' ? 10000 : 30000;
 
             try {
                 const r = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);

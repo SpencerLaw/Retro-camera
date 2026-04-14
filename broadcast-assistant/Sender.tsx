@@ -136,7 +136,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
     const addChannel = async () => {
         const newId = Date.now().toString();
-        setStatus({ type: 'loading', msg: '正在分配唯一房间号...' });
+        setStatus({ type: 'loading', msg: t('broadcast.sender.fetchingCode') });
 
         try {
             let uniqueCode = '';
@@ -154,7 +154,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
             }
 
             if (!uniqueCode) {
-                setStatus({ type: 'error', msg: '生成唯一房间号失败，请重试' });
+                setStatus({ type: 'error', msg: t('broadcast.sender.createError') });
                 return;
             }
 
@@ -165,11 +165,11 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
             };
             setChannels([...channels, newChannel]);
             setActiveChannelId(newId);
-            setStatus({ type: 'success', msg: '新房间已创建并同步至云端' });
+            setStatus({ type: 'success', msg: t('broadcast.sender.createSuccess') });
             setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
         } catch (err) {
             console.error('Failed to add channel:', err);
-            setStatus({ type: 'error', msg: '连接服务器失败，请检查网络' });
+            setStatus({ type: 'error', msg: t('broadcast.sender.networkError') });
             setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
         }
     };
@@ -263,8 +263,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 const { inUse } = await checkResp.json();
                 if (inUse) {
                     openDialog(
-                        t('broadcast.sender.editChannel') || '修改频道',
-                        '该教室码已经被其他教室占用，请确认是否继续使用？',
+                        t('broadcast.sender.editChannel'),
+                        t('broadcast.sender.roomInUseConfirm'),
                         'confirm',
                         performSave
                     );
@@ -272,7 +272,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 }
             } catch (err) {
                 console.error('Check code failed:', err);
-                setStatus({ type: 'error', msg: '验证房间号失败，请检查网络' });
+                setStatus({ type: 'error', msg: t('broadcast.sender.roomCheckError') });
                 return;
             }
         }
@@ -282,7 +282,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
     const generateRandomChannel = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        setStatus({ type: 'loading', msg: '检索可用号码...' });
+        setStatus({ type: 'loading', msg: t('broadcast.sender.retrievingCode') });
         try {
             let uniqueCode = '';
             let attempts = 0;
@@ -301,11 +301,11 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 setEditCode(uniqueCode);
                 setStatus({ type: null, msg: '' });
             } else {
-                setStatus({ type: 'error', msg: '未找到可用号码' });
+                setStatus({ type: 'error', msg: t('broadcast.sender.createError') });
             }
         } catch (err) {
             console.error('Generate random failed:', err);
-            setStatus({ type: 'error', msg: '查询失败，请检查网络' });
+            setStatus({ type: 'error', msg: t('broadcast.sender.roomCheckError') });
         }
     };
 
@@ -424,7 +424,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
             }
         } catch (err: any) {
             console.error('Replay failed:', err);
-            setStatus({ type: 'error', msg: err.name === 'AbortError' ? '发送超时，请重试' : (t('broadcast.sender.failedToSend') || '发送失败') });
+            setStatus({ type: 'error', msg: err.name === 'AbortError' ? t('broadcast.sender.failedToSend') : (t('broadcast.sender.failedToSend') || '发送失败') });
             setTimeout(() => setStatus(prev => prev.type === 'error' ? { type: null, msg: '' } : prev), 3000);
         }
     };
@@ -432,7 +432,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     const clearHistory = () => {
         openDialog(
             t('broadcast.sender.timeline'),
-            '确定要清空当前频道的播报记录吗？(其他频道的记录不受影响)',
+            t('broadcast.sender.clearHistoryConfirm'),
             'warning',
             () => {
                 const filteredHistory = history.filter(m => m.channelName !== activeChannel?.name);
@@ -452,7 +452,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
     const handleSelectFishVoice = (voiceId: string) => {
         onSelectFishVoice?.(voiceId);
-        setStatus({ type: 'success', msg: '音色设置成功！下次播报将生效' });
+        setStatus({ type: 'success', msg: t('broadcast.sender.voiceSetSuccess') });
         setTimeout(() => setStatus({ type: null, msg: '' }), 2000);
         setShowFishAudioDebug(false);
     };
@@ -523,9 +523,9 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             <Radio size={240} />
                         </div>
                         <div className="relative z-10 space-y-4">
-                            <h2 className="text-2xl font-black text-slate-700 dark:text-slate-200">欢迎使用广播助手</h2>
+                            <h2 className="text-2xl font-black text-slate-700 dark:text-slate-200">{t('broadcast.sender.welcome')}</h2>
                             <p className="text-sm font-semibold text-slate-500 max-w-sm mx-auto leading-relaxed">
-                                目前您还没有任何广播频道。请先创建一个频道（虚拟房间），以便学生们通过 6 位房间码加入接收广播。
+                                {t('broadcast.sender.noChannelDesc')}
                             </p>
                             <button
                                 onClick={addChannel}
@@ -589,7 +589,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             >
                                 <Repeat size={13} className={`shrink-0 ${isLooping ? 'animate-spin' : ''}`} style={isLooping ? { animationDuration: '4s' } : {}} />
                                 <span className="text-[10px] font-black whitespace-nowrap">
-                                    {isLooping ? '循环' : '单次'}
+                                    {isLooping ? t('broadcast.sender.loop') : t('broadcast.sender.once')}
                                 </span>
                             </button>
 
@@ -601,7 +601,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                     : 'bg-white/30 dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 border-white/40 dark:border-white/10 hover:border-red-400/50 hover:text-red-500'}`}
                             >
                                 <AlertTriangle size={13} className={isEmergency ? 'animate-bounce' : ''} />
-                                <span className="text-[10px] font-black whitespace-nowrap">紧急</span>
+                                <span className="text-[10px] font-black whitespace-nowrap">{t('broadcast.sender.emergency')}</span>
                                 {isEmergency && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-full animate-ping opacity-40" />}
                             </button>
                         </div>

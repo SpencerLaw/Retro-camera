@@ -234,8 +234,8 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                         </button>
                     </div>
 
-                    <div className="flex flex-col items-center">
-                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tighter">
+                    <div className="flex flex-col items-center px-12 md:px-0">
+                        <h1 className="text-xl md:text-3xl font-extrabold tracking-tighter text-center">
                             <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">
                                 {t('home.broadcast.title')}
                             </span>

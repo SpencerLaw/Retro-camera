@@ -505,7 +505,15 @@ async function handleCheckCode(req: VercelRequest, res: VercelResponse) {
     const code = normalizeRoomCode((req.query.code as string) || '');
     if (!code) return res.status(400).json({ error: 'Missing code' });
     const owner = await findRoomOwner(code);
-    return res.status(200).json({ inUse: !!owner });
+    if (!owner) return res.status(200).json({ inUse: false });
+
+    // If requester's license matches the owner, the room is not "occupied" for them
+    const requestingLicense = req.query.license ? normalizeLicenseCode(req.query.license as string) : null;
+    if (requestingLicense && owner === requestingLicense) {
+        return res.status(200).json({ inUse: false });
+    }
+
+    return res.status(200).json({ inUse: true });
 }
 
 async function handleMigrateRoomIndexes(req: VercelRequest, res: VercelResponse) {

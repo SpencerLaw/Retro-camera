@@ -218,7 +218,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         const currentChannel = channels.find(c => c.id === editingChannel);
         if (currentChannel && currentChannel.code !== newCode) {
             try {
-                const checkResp = await fetch(`/api/broadcast/check-code?code=${newCode}`);
+                const checkResp = await fetch(`/api/broadcast/check-code?code=${newCode}&license=${encodeURIComponent(license || '')}`);
                 if (!checkResp.ok) throw new Error('Network error');
                 const { inUse } = await checkResp.json();
                 if (inUse) {

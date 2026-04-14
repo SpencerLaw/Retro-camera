@@ -222,8 +222,9 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                 if (!checkResp.ok) throw new Error('Network error');
                 const { inUse } = await checkResp.json();
                 if (inUse) {
-                    setStatus({ type: 'error', msg: '该房间号已被其他教室占用，请更换' });
-                    return;
+                    if (!window.confirm('该教室码已经被其他教室占用，请确认是否继续使用？')) {
+                        return;
+                    }
                 }
             } catch (err) {
                 console.error('Check code failed:', err);

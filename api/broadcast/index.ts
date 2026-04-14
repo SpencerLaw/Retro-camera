@@ -31,7 +31,7 @@ let roomIndexMigrationLastCheckAt = 0;
 function getEffectiveMaxDevices(code: string): number {
     const cleanCode = code.toUpperCase();
     if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM')) return 999999;
-    if (cleanCode.startsWith('GB')) return 5;
+    if (cleanCode.startsWith('GB')) return 2;
     return 5;
 }
 
@@ -412,9 +412,10 @@ async function handleActivate(req: VercelRequest, res: VercelResponse) {
     const redisKey = buildLicenseKey(cleanLicense);
 
     const existingOwner = await findRoomOwner(uppercaseCode);
-    if (existingOwner && existingOwner !== cleanLicense) {
-        return res.status(409).json({ error: '该房间号已被其他授权码占用，请尝试其他号码' });
-    }
+    // Allowing room takeover with warning handled on frontend
+    // if (existingOwner && existingOwner !== cleanLicense) {
+    //     return res.status(409).json({ error: '该房间号已被其他授权码占用，请尝试其他号码' });
+    // }
 
     const rawData = await kv.get(redisKey);
     if (rawData) {

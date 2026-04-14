@@ -112,7 +112,7 @@ function getEffectiveMaxDevices(code: string): number {
     return 999999; // 星梦奇旅不限制
   }
   if (cleanCode.startsWith('GB')) {
-    return 5; // 班级广播限制 5 个设备
+    return 2; // 班级广播限制 2 个设备
   }
   return 5; // 其他默认 5
 }

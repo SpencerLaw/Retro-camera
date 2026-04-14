@@ -38,7 +38,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     const licensePrefix = getLicensePrefix(license);
 
     const openDialog = onOpenDialog || ((title: string, msg: string, type: DialogType, onConfirm: () => void) => {
-        if (confirm(msg)) onConfirm();
+        console.warn('onOpenDialog prop is missing, falling back to instant confirm for development');
+        onConfirm(); 
     });
     const closeDialog = () => { };
 
@@ -214,57 +215,69 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         const newName = editName.trim() || t('broadcast.sender.unknownClass');
         const newCode = editCode.toUpperCase().trim();
 
-        // Unique check if code changed
         const currentChannel = channels.find(c => c.id === editingChannel);
-        if (currentChannel && currentChannel.code !== newCode) {
+        if (!currentChannel) return;
+
+        const performSave = async () => {
+            if (currentChannel.code !== newCode) {
+                // Deactivate old code to prevent leaks
+                try {
+                    await fetch('/api/broadcast/deactivate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: currentChannel.code, license })
+                    });
+                } catch (err) {
+                    console.error('Failed to deactivate old code:', err);
+                }
+            }
+
+            setChannels(channels.map(c =>
+                c.id === editingChannel ? { ...c, name: newName, code: newCode } : c
+            ));
+
+            try {
+                fetch('/api/broadcast/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        license,
+                        code: newCode,
+                        text: '', // Silent update
+                        channelName: newName,
+                        isEmergency: false
+                    })
+                });
+            } catch (e) {
+                console.error('Metadata sync failed:', e);
+            }
+
+            setEditingChannel(null);
+        };
+
+        // Unique check if code changed
+        if (currentChannel.code !== newCode) {
             try {
                 const checkResp = await fetch(`/api/broadcast/check-code?code=${newCode}&license=${encodeURIComponent(license || '')}`);
                 if (!checkResp.ok) throw new Error('Network error');
                 const { inUse } = await checkResp.json();
                 if (inUse) {
-                    if (!window.confirm('该教室码已经被其他教室占用，请确认是否继续使用？')) {
-                        return;
-                    }
+                    openDialog(
+                        t('broadcast.sender.editChannel') || '修改频道',
+                        '该教室码已经被其他教室占用，请确认是否继续使用？',
+                        'confirm',
+                        performSave
+                    );
+                    return;
                 }
             } catch (err) {
                 console.error('Check code failed:', err);
                 setStatus({ type: 'error', msg: '验证房间号失败，请检查网络' });
                 return;
             }
-
-            // Deactivate old code to prevent leaks
-            try {
-                await fetch('/api/broadcast/deactivate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: currentChannel.code, license })
-                });
-            } catch (err) {
-                console.error('Failed to deactivate old code:', err);
-            }
         }
 
-        setChannels(channels.map(c =>
-            c.id === editingChannel ? { ...c, name: newName, code: newCode } : c
-        ));
-
-        try {
-            fetch('/api/broadcast/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    license,
-                    code: newCode,
-                    text: '', // Silent update
-                    channelName: newName,
-                    isEmergency: false
-                })
-            });
-        } catch (e) {
-            console.error('Metadata sync failed:', e);
-        }
-
-        setEditingChannel(null);
+        await performSave();
     };
 
     const generateRandomChannel = async (e: React.MouseEvent) => {

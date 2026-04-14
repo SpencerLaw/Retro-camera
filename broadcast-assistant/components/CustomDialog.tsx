@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle2, Info, HelpCircle } from 'lucide-react';
 
 export type DialogType = 'info' | 'confirm' | 'error' | 'success' | 'warning';
@@ -68,8 +69,10 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
                 ? 'bg-gradient-to-r from-green-600 to-emerald-600 shadow-green-600/20'
                 : 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-600/20';
 
-    return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-10">
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-10" style={{ position: 'fixed' }}>
             {/* Dark scrim – always dark so white card always pops against any bg */}
             <div
                 className="absolute inset-0 bg-slate-900/40 backdrop-blur-[12px]"
@@ -129,7 +132,8 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

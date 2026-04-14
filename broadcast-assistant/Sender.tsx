@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X, Bug } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
@@ -451,7 +452,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     theme={isDark ? 'dark' : 'light'}
                 />
             )}
-            <div className="space-y-8 max-w-2xl mx-auto px-4 pb-20 origin-top scale-95 md:scale-100 transition-transform">
+            <div className="space-y-4 md:space-y-8 max-w-2xl mx-auto px-3 md:px-4 pb-24 md:pb-20 origin-top transition-transform">
                 {/* Channel Management Section */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between px-2">
@@ -480,10 +481,10 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                     <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1.5 ${activeChannelId === channel.id ? 'opacity-70 text-white' : 'opacity-40'}`}>{t('broadcast.sender.room')} {channel.code}</p>
                                     <p className={`text-sm font-bold truncate ${activeChannelId === channel.id ? 'text-white' : 'text-slate-600 dark:text-slate-300'}`}>{channel.name}</p>
                                 </div>
-                                <div className={`flex items-center gap-1.5 ${activeChannelId === channel.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-all transform translate-x-1 group-hover:translate-x-0'}`}>
+                                <div className={`flex items-center gap-1.5 ${activeChannelId === channel.id ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all transform md:translate-x-1 md:group-hover:translate-x-0'}`}>
                                     <div
                                         onClick={(e) => startEditing(channel, e)}
-                                        className={`p-2 rounded-xl transition-colors ${activeChannelId === channel.id ? 'hover:bg-white/20' : 'hover:bg-blue-500/10 text-blue-500'}`}
+                                        className={`p-2 rounded-xl transition-colors ${activeChannelId === channel.id ? 'hover:bg-white/20' : 'md:hover:bg-blue-500/10 text-blue-500'}`}
                                     >
                                         <Edit2 size={15} />
                                     </div>
@@ -503,8 +504,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
                 {/* Active Channel Details / Editor / Empty State */}
                 {channels.length === 0 ? (
-                    <GlassCard className="p-12 space-y-6 text-center shadow-2xl overflow-hidden relative group border-2 border-dashed border-slate-200 dark:border-white/10">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] dark:opacity-[0.05] pointer-events-none">
+                    <GlassCard className="p-6 md:p-12 space-y-4 md:space-y-6 text-center shadow-2xl overflow-hidden relative group border-2 border-dashed border-slate-200 dark:border-white/10">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] dark:opacity-[0.05] pointer-events-none hidden md:block">
                             <Radio size={240} />
                         </div>
                         <div className="relative z-10 space-y-4">
@@ -522,7 +523,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
                     </GlassCard>
                 ) : editingChannel ? (
-                    <GlassCard className="p-6 space-y-5 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
+                    <GlassCard className="p-4 md:p-6 space-y-4 md:space-y-5 animate-in fade-in slide-in-from-top-4 duration-300 border-2 border-blue-500/30">
                         <div className="flex flex-col gap-4">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest opacity-30">{t('broadcast.sender.className')}</label>
@@ -569,32 +570,32 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
                     </GlassCard>
                 ) : (
-                    <GlassCard className="p-10 space-y-8 shadow-2xl overflow-hidden relative group">
-                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity -rotate-12 translate-x-4 -translate-y-4">
+                    <GlassCard className="p-4 sm:p-6 md:p-10 space-y-4 md:space-y-8 shadow-2xl overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity -rotate-12 translate-x-4 -translate-y-4 hidden md:block">
                             <Radio size={120} />
                         </div>
 
-                        <div className="space-y-4">
-                            <label className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400/80 ml-2">
+                        <div className="space-y-3 md:space-y-4">
+                            <label className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400/80 ml-1 md:ml-2">
                                 <Plus size={12} className="text-blue-500" /> {t('broadcast.sender.messageContent')}
                             </label>
-                            <div className="relative rounded-[3rem] p-10 transition-all border border-white/40 bg-white/30 dark:bg-black/20 focus-within:bg-white/50 focus-within:border-blue-400/50 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] focus-within:shadow-[0_40px_80px_-20px_rgba(59,130,246,0.1)] group">
+                            <div className="relative rounded-2xl md:rounded-[3rem] p-4 md:p-10 transition-all border border-white/40 bg-white/30 dark:bg-black/20 focus-within:bg-white/50 focus-within:border-blue-400/50 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] focus-within:shadow-[0_40px_80px_-20px_rgba(59,130,246,0.1)] group">
                                 <textarea
                                     value={inputText}
                                     onChange={(e) => setInputText(e.target.value)}
-                                    className="w-full bg-transparent font-bold outline-none resize-none min-h-[350px] text-3xl leading-relaxed text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700"
+                                    className="w-full bg-transparent font-bold outline-none resize-none min-h-[120px] md:min-h-[350px] text-xl md:text-3xl leading-relaxed text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700"
                                     placeholder={t('broadcast.sender.inputPlaceholder')}
                                 />
-                                <div className="absolute bottom-8 right-10 opacity-[0.03] dark:opacity-[0.05] pointer-events-none group-focus-within:opacity-10 transition-opacity">
-                                    <History size={80} />
+                                <div className="absolute bottom-4 right-4 md:bottom-8 md:right-10 opacity-[0.03] dark:opacity-[0.05] pointer-events-none group-focus-within:opacity-10 transition-opacity">
+                                    <History size={80} className="scale-75 md:scale-100 origin-bottom-right" />
                                 </div>
                             </div>
                         </div>
 
                         {/* ─── 核心控制区 ─── */}
-                        <div className="flex flex-wrap gap-4 items-stretch">
+                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch">
                             {/* 左侧：播放次数与模式 (一体化高斯模糊容器) */}
-                            <div className="flex-1 flex items-center min-w-[280px] bg-white/30 dark:bg-white/[0.03] backdrop-blur-xl rounded-[2rem] border border-white/40 dark:border-white/10 p-2 shadow-sm">
+                            <div className="flex-1 flex items-center justify-between sm:justify-start bg-white/30 dark:bg-white/[0.03] backdrop-blur-xl rounded-2xl md:rounded-[2rem] border border-white/40 dark:border-white/10 p-2 shadow-sm">
                                 {/* 次数调节器 */}
                                 <div className={`flex items-center gap-1.5 bg-white/60 dark:bg-black/30 rounded-[1.5rem] p-1.5 transition-all ${isLooping ? 'opacity-40 grayscale pointer-events-none' : 'shadow-sm'}`}>
                                     <button
@@ -640,7 +641,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             </div>
 
                             {/* 右侧：紧急开关 + 发送按钮 */}
-                            <div className="flex flex-1 md:flex-none gap-3 items-stretch min-w-[260px]">
+                            <div className="flex flex-1 md:flex-none gap-3 items-stretch w-full md:min-w-[260px]">
                                 {/* 紧急开关按钮 */}
                                 <button
                                     onClick={() => setIsEmergency(!isEmergency)}
@@ -704,12 +705,12 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 <button
                                     key={msg.id}
                                     onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName)}
-                                    className={`w-full group p-8 rounded-[2.5rem] border transition-all duration-500 hover:scale-[1.01] text-left flex items-start gap-6 relative overflow-hidden ${msg.isEmergency
+                                    className={`w-full group p-5 sm:p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border transition-all duration-500 hover:scale-[1.01] text-left flex items-start gap-4 md:gap-6 relative overflow-hidden ${msg.isEmergency
                                         ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40'
                                         : 'bg-white/40 dark:bg-white/[0.03] border-white/40 dark:border-white/10 hover:border-blue-400/50 hover:bg-white/60 shadow-sm'}`}
                                 >
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-700 group-hover:scale-110 ${msg.isEmergency ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-slate-100/50 dark:bg-white/5 text-slate-400 group-hover:bg-blue-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20'}`}>
-                                        {msg.isEmergency ? <AlertTriangle size={24} /> : <History size={24} />}
+                                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-700 group-hover:scale-110 ${msg.isEmergency ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-slate-100/50 dark:bg-white/5 text-slate-400 group-hover:bg-blue-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20'}`}>
+                                        {msg.isEmergency ? <AlertTriangle size={20} className="md:w-6 md:h-6" /> : <History size={20} className="md:w-6 md:h-6" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-2">
@@ -766,8 +767,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
             )}
 
             {/* Replay Quick-Editor Dialog - Moved outside scaled container to fix fixed positioning */}
-            {showReplayDialog && replayData && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 transition-all">
+            {showReplayDialog && replayData && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 transition-all" style={{ position: 'fixed' }}>
                     <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-xl" onClick={() => setShowReplayDialog(false)} />
                     <div className="relative w-full max-w-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/20 p-6 flex flex-col max-h-[90vh] overflow-hidden">
 
@@ -852,7 +853,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

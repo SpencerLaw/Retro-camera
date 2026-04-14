@@ -523,7 +523,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
                     </GlassCard>
                 ) : (
-                    <GlassCard className="p-4 sm:p-6 md:p-10 space-y-4 md:space-y-8 shadow-2xl overflow-hidden relative group">
+                    <GlassCard className="p-5 sm:p-6 md:p-10 space-y-4 md:space-y-8 shadow-2xl overflow-hidden relative group">
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity -rotate-12 translate-x-4 -translate-y-4 hidden md:block">
                             <Radio size={120} />
                         </div>
@@ -598,7 +598,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 {/* 紧急开关按钮 */}
                                 <button
                                     onClick={() => setIsEmergency(!isEmergency)}
-                                    className={`relative group px-6 rounded-[2rem] flex flex-col items-center justify-center gap-1.5 transition-all duration-700 border border-white/40 dark:border-white/10 shrink-0 ${isEmergency
+                                    className={`relative group px-4 sm:px-6 rounded-[2rem] flex flex-col items-center justify-center gap-1.5 transition-all duration-700 border border-white/40 dark:border-white/10 shrink-0 h-16 sm:h-auto ${isEmergency
                                         ? 'bg-red-500 text-white shadow-[0_20px_40px_-10px_rgba(239,68,68,0.5)] scale-105 z-10'
                                         : 'bg-white/30 dark:bg-white/[0.03] text-slate-400 hover:border-red-400/50 hover:text-red-500'}`}
                                 >

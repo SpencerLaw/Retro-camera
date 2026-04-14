@@ -242,26 +242,26 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                         </h1>
                     </div>
 
-                    <div className="absolute right-2 md:right-4 flex gap-1.5 md:gap-3">
+                    <div className="absolute right-1 md:right-4 flex gap-0.5 md:gap-2">
                         <button
                             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-white/40 dark:hover:bg-white/20 transition text-orange-500"
+                            className="w-9 h-9 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-white/40 dark:hover:bg-white/20 transition text-orange-500"
                         >
-                            {theme === 'light' ? <Moon size={18} className="md:w-5 md:h-5" /> : <Sun size={18} className="md:w-5 md:h-5" />}
+                            {theme === 'light' ? <Moon size={16} className="md:w-5 md:h-5" /> : <Sun size={16} className="md:w-5 md:h-5" />}
                         </button>
                         <button
                             onClick={() => setShowFishDebug(true)}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-indigo-500/10 text-indigo-500 transition active:scale-95"
+                            className="w-9 h-9 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-indigo-500/10 text-indigo-500 transition active:scale-95"
                             title="Fish Audio TTS 调试"
                         >
-                            <Bug size={18} className="md:w-5 md:h-5" />
+                            <Bug size={16} className="md:w-5 md:h-5" />
                         </button>
                         {isBCVerified() && (
                             <button
                                 onClick={handleLogout}
-                                className="w-10 h-10 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition"
+                                className="w-9 h-9 md:w-12 md:h-12 rounded-full GlassContainer flex items-center justify-center hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition"
                             >
-                                <LogOut size={18} className="md:w-5 md:h-5" />
+                                <LogOut size={16} className="md:w-5 md:h-5" />
                             </button>
                         )}
                     </div>

@@ -546,7 +546,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
 
                         {/* ─── 核心控制区 ─── */}
-                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4 items-stretch">
                             {/* 左侧：播放次数与模式 (一体化高斯模糊容器) */}
                             <div className="flex-1 flex items-center justify-between sm:justify-start bg-white/30 dark:bg-white/[0.03] backdrop-blur-xl rounded-2xl md:rounded-[2rem] border border-white/40 dark:border-white/10 p-2 shadow-sm">
                                 {/* 次数调节器 */}
@@ -594,7 +594,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             </div>
 
                             {/* 右侧：紧急开关 + 发送按钮 */}
-                            <div className="flex flex-1 md:flex-none gap-3 items-stretch w-full md:min-w-[260px]">
+                            <div className="flex flex-1 md:flex-none gap-3 items-stretch md:w-auto md:min-w-[260px]">
                                 {/* 紧急开关按钮 */}
                                 <button
                                     onClick={() => setIsEmergency(!isEmergency)}

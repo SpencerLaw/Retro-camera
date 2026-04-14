@@ -223,8 +223,8 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
                 <div className={`absolute bottom-0 left-0 w-[50%] h-[50%] rounded-full blur-[120px] opacity-[0.03] transition-colors ${theme === 'dark' ? 'bg-purple-600' : 'bg-purple-200'}`}></div>
             </div>
 
-            <div className="relative z-10 max-w-5xl mx-auto px-6 py-10 lg:py-16">
-                <header className="flex items-center justify-between mb-16 px-4">
+            <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-6 lg:py-16">
+                <header className="flex items-center justify-between mb-6 md:mb-16 px-2 md:px-4">
                     <button
                         onClick={() => mode === 'selection' ? navigate('/') : setMode('selection')}
                         className="w-12 h-12 rounded-full GlassContainer flex items-center justify-center hover:scale-110 active:scale-95 transition dark:bg-white/10"

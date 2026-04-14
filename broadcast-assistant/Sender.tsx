@@ -522,7 +522,6 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             </button>
                         </div>
                     </GlassCard>
-                    </GlassCard>
                 ) : (
                     <GlassCard className="p-4 sm:p-6 md:p-10 space-y-4 md:space-y-8 shadow-2xl overflow-hidden relative group">
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity -rotate-12 translate-x-4 -translate-y-4 hidden md:block">

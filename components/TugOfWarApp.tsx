@@ -152,14 +152,31 @@ const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen }: {
       </div>
       
       {isFrozen && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl overflow-hidden">
+          {/* 物理阻挡层 - 拦截所有点击 */}
+          <div className="absolute inset-0 bg-blue-100/40 backdrop-blur-[2px] pointer-events-auto cursor-not-allowed" />
+          
+          {/* 霜冻视觉效果 */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 pointer-events-none border-4 border-blue-300/50 rounded-2xl"
+            style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm13-24c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm39 75c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-58-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6-48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25-10c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm14 32c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm16 47c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-26-2c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-42-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-28c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm24-21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\' fill=\'%23ffffff\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
+            }}
+          />
+
           <motion.div 
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex flex-col items-center gap-2"
+            className="relative flex flex-col items-center gap-2 z-10"
           >
-            <Snowflake size={60} className="text-blue-400 animate-pulse" />
-            <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-lg font-black shadow-lg uppercase tracking-widest">Frozen!</span>
+            <div className="bg-white/90 p-4 rounded-full shadow-2xl">
+              <Snowflake size={60} className="text-blue-500 animate-spin-slow" />
+            </div>
+            <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-2xl font-black shadow-xl uppercase tracking-tighter border-4 border-white">
+              FROZEN!
+            </span>
           </motion.div>
         </div>
       )}
@@ -628,15 +645,32 @@ export const TugOfWarApp = () => {
                 )}
 
                 {/* 道具栏 */}
-                <div className="flex gap-2 mb-4 h-12">
-                  {blueItems.map((item, i) => (
-                    <button 
-                      key={i} onClick={() => handleUseItem('blue', item, i)}
-                      className="w-12 h-12 bg-white rounded-xl shadow-md border-2 border-blue-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
-                    >
-                      {getItemIcon(item)}
-                    </button>
-                  ))}
+                <div className="flex flex-col items-center mb-4">
+                  <div className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">{blueItems.length > 0 ? "点击使用道具 TAP TO USE" : "等待连击掉落"}</div>
+                  <div className="flex gap-2 h-12">
+                    <AnimatePresence>
+                      {blueItems.map((item, i) => (
+                        <motion.button 
+                          initial={{ scale: 0, rotate: -45 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          key={`${item}-${i}`} 
+                          onClick={() => handleUseItem('blue', item, i)}
+                          className="w-12 h-12 bg-white rounded-xl shadow-lg border-2 border-blue-200 flex items-center justify-center relative overflow-hidden group"
+                        >
+                          <motion.div 
+                            animate={{ y: [0, -2, 0] }} 
+                            transition={{ repeat: Infinity, duration: 2 }}
+                          >
+                            {getItemIcon(item)}
+                          </motion.div>
+                          <div className="absolute inset-0 bg-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </motion.button>
+                      ))}
+                    </AnimatePresence>
+                    {blueItems.length === 0 && <div className="w-12 h-12 rounded-xl border-2 border-dashed border-blue-100 flex items-center justify-center text-blue-100"><Zap size={20} /></div>}
+                  </div>
                 </div>
                 
                 <Keypad onInput={(val) => setBlueInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => setBlueInput('')} onSubmit={handleBlueSubmit} team="blue" t={t} mode={settings.gameMode} isFrozen={blueFrozenUntil > Date.now()} />

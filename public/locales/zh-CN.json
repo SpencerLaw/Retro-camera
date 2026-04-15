@@ -22,6 +22,11 @@
       "subtitle": "魔法课堂 • 星际穿越",
       "description": "超炫酷的课堂点名神器，让被点名成为一种期待"
     },
+    "tugOfWar": {
+      "title": "数学拔河",
+      "subtitle": "乘法对战 • 脑力竞技",
+      "description": "快节奏的数学乘法挑战，通过快速准确的计算将红心拉向你的队伍！"
+    },
     "kiddiePlan": {
       "title": "星梦奇旅",
       "subtitle": "奇幻习惯养成",
@@ -514,5 +519,31 @@
       "noteDefaultTitle": "每日感悟",
       "noteDefaultBody": "可在这里输入一段励志短文、每日提醒，或当日早读目标。"
     }
+  },
+  "tugOfWar": {
+    "title": "数学拔河",
+    "blueTeam": "蓝队 BLUE TEAM",
+    "redTeam": "红队 RED TEAM",
+    "blueWins": "蓝队获胜!",
+    "redWins": "红队获胜!",
+    "restart": "重新开始",
+    "clear": "清除",
+    "confirm": "确认",
+    "settingsTitle": "对战配置",
+    "operators": "运算类型",
+    "range": "数字范围",
+    "winCondition": "胜利分数",
+    "startGame": "开始对战",
+    "add": "加法 (+)",
+    "sub": "减法 (-)",
+    "mul": "乘法 (×)",
+    "div": "除法 (÷)",
+    "within10": "10以内",
+    "within20": "20以内",
+    "within50": "50以内",
+    "within100": "100以内",
+    "custom": "自定义",
+    "points": "分",
+    "backToSettings": "修改配置"
   }
 }

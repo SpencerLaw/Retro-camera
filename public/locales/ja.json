@@ -22,6 +22,11 @@
       "subtitle": "魔法教室 • 星間旅行",
       "description": "指名されるのが待ち遠しくなる、超クールな点呼ツール"
     },
+    "tugOfWar": {
+      "title": "数学綱引き",
+      "subtitle": "掛け算バトル • 脳トレ競技",
+      "description": "スピーディーな掛け算チャレンジ。素早く正確に計算して、ハートを自分のチームに引き寄せよう！"
+    },
     "morningTree": {
       "title": "朝読エネルギー樹",
       "subtitle": "声で育つ • ゲーム化",
@@ -396,5 +401,15 @@
       "noteDefaultTitle": "今日のメッセージ",
       "noteDefaultBody": "ここに励ましの短文、毎日の注意、または今日の朝読目標を入力できます。"
     }
+  },
+  "tugOfWar": {
+    "title": "数学綱引き",
+    "blueTeam": "青チーム BLUE TEAM",
+    "redTeam": "赤チーム RED TEAM",
+    "blueWins": "青チームの勝利！",
+    "redWins": "赤チームの勝利！",
+    "restart": "ゲームを再開",
+    "clear": "クリア",
+    "confirm": "確定"
   }
 }

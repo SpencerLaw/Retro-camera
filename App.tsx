@@ -8,6 +8,7 @@ import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
 import { GroupMakerApp } from './components/GroupMakerApp';
 import BroadcastApp from './broadcast-assistant/BroadcastApp';
 import KiddiePlanApp from './kiddieplan/KiddiePlanApp';
+import { TugOfWarApp } from './components/TugOfWarApp';
 
 const App: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const App: React.FC = () => {
           <Route path="/broadcast" element={<BroadcastApp />} />
           <Route path="/broadcast/receiver" element={<BroadcastApp forceReceiver />} />
           <Route path="/kiddie-plan" element={<KiddiePlanApp />} />
+          <Route path="/tug-of-war" element={<TugOfWarApp />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

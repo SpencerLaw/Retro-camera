@@ -22,6 +22,11 @@
       "subtitle": "Magic Classroom • Interstellar",
       "description": "Super cool roll call tool that makes being called on something to look forward to"
     },
+    "tugOfWar": {
+      "title": "Math Tug-of-War",
+      "subtitle": "Multiplication Battle • Brain Gym",
+      "description": "A fast-paced multiplication challenge. Pull the heart to your side by calculating quickly and accurately!"
+    },
     "kiddiePlan": {
       "title": "Star Dream Adventure",
       "subtitle": "Magic Habit Builder",
@@ -498,5 +503,15 @@
       "noteDefaultTitle": "Daily Reflection",
       "noteDefaultBody": "You can place a motivational note, a daily reminder, or the goal of today's reading session here."
     }
+  },
+  "tugOfWar": {
+    "title": "Math Tug-of-War",
+    "blueTeam": "BLUE TEAM",
+    "redTeam": "RED TEAM",
+    "blueWins": "Blue Team Wins!",
+    "redWins": "Red Team Wins!",
+    "restart": "Restart Game",
+    "clear": "Clear",
+    "confirm": "Confirm"
   }
 }

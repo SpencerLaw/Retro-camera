@@ -512,6 +512,22 @@
     "redWins": "Red Team Wins!",
     "restart": "Restart Game",
     "clear": "Clear",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "points": "pts",
+    "backToSettings": "Change Settings",
+    "gameMode": "Game Mode",
+    "modeClassic": "Classic",
+    "modeTarget": "Target Master",
+    "enablePowerUps": "Enable Power-ups",
+    "allowedPowerUps": "Allowed Power-ups",
+    "propFreeze": "Freeze 🧊",
+    "propDouble": "Double ⚔️",
+    "propShield": "Shield 🛡️",
+    "triggerCondition": "Power-up Trigger",
+    "everyNCorrect": "Every {n} correct answers",
+    "combo": "{n} Combo!",
+    "frenzy": "FRENZY MODE!",
+    "targetNumber": "Target Number",
+    "inputEquation": "Input equation to match"
   }
 }

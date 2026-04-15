@@ -544,6 +544,25 @@
     "within100": "100以内",
     "custom": "自定义",
     "points": "分",
-    "backToSettings": "修改配置"
+    "backToSettings": "修改配置",
+    "gameMode": "游戏模式",
+    "modeClassic": "经典计算",
+    "modeTarget": "凑数达人",
+    "enablePowerUps": "启用道具系统",
+    "allowedPowerUps": "允许出现的道具",
+    "propFreeze": "冰冻 🧊",
+    "propFreezeDesc": "冻结对手键盘 3秒",
+    "propDouble": "双倍 ⚔️",
+    "propDoubleDesc": "下次答对拉力 x2",
+    "propShield": "护盾 🛡️",
+    "propShieldDesc": "抵挡攻击或下次拉力",
+    "triggerCondition": "获取规则",
+    "everyNCorrect": "每连对 {n} 题掉落",
+    "howToGetItems": "如何获取道具？",
+    "howToGetItemsDesc": "在对战中，只要连续答对题目达到设定数量，系统就会从您上方勾选的道具池中随机掉落一个送给您！",
+    "combo": "{n} 连击!",
+    "frenzy": "狂暴模式!",
+    "targetNumber": "目标数字",
+    "inputEquation": "输入算式得出结果"
   }
 }

@@ -512,60 +512,79 @@ export const TugOfWarApp = () => {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#F8FAFC] text-[#1E293B] font-sans select-none overflow-hidden relative">
-      {/* 顶部区域 */}
-      <header className="h-[70px] bg-white border-b border-slate-200 flex items-center justify-between px-6 z-50 shrink-0 shadow-sm relative">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-600">
-            <ArrowLeft size={24} />
-          </button>
-          <div className="text-[24px] font-black tracking-tight bg-gradient-to-r from-blue-600 to-red-600 bg-clip-text text-transparent">
-            {t('tugOfWar.title')} 2.0
+      {/* 顶部悬浮控制 - 仅在游戏时显示 */}
+      {!showSettings && (
+        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-50 pointer-events-none">
+          <div className="flex gap-2 pointer-events-auto">
+            <button 
+              onClick={() => navigate('/')} 
+              className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-600 hover:bg-white transition-all border border-slate-200"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <button 
+              onClick={() => setShowSettings(true)} 
+              className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-600 hover:bg-white transition-all border border-slate-200"
+            >
+              <SettingsIcon size={20} />
+            </button>
+          </div>
+
+          <div className="pointer-events-auto flex gap-2">
+            <div className="font-mono text-lg font-bold text-slate-600 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-2xl border border-slate-200 shadow-lg">
+              {Math.floor(timeElapsed / 60).toString().padStart(2, '0')}:{(timeElapsed % 60).toString().padStart(2, '0')}
+            </div>
+            <button 
+              onClick={toggleFullscreen} 
+              className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-600 hover:bg-white transition-all border border-slate-200"
+            >
+              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+            </button>
           </div>
         </div>
-        
-        <div className="flex items-center gap-4">
-          {!showSettings && (
-             <div className="font-mono text-[20px] font-bold text-slate-500 bg-slate-100 px-4 py-1 rounded-xl border border-slate-200">
-               {Math.floor(timeElapsed / 60).toString().padStart(2, '0')}:{(timeElapsed % 60).toString().padStart(2, '0')}
-             </div>
-          )}
-          <button onClick={() => setShowSettings(true)} className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-600">
-            <SettingsIcon size={24} />
-          </button>
-          <button onClick={toggleFullscreen} className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-600">
-            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
-          </button>
-        </div>
-      </header>
+      )}
 
       <AnimatePresence>
         {showSettings ? (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-            className="absolute inset-0 z-40 bg-slate-50/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4"
           >
-            <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl border border-white/50 my-auto">
-              <h2 className="text-3xl font-black mb-8 text-center text-slate-800">{t('tugOfWar.settingsTitle')}</h2>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-6 md:p-8 w-full max-w-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/50 max-h-[90vh] overflow-y-auto relative"
+            >
+              {/* 关闭按钮 - 仅在游戏进行中显示，允许返回游戏 */}
+              {blueProblem && (
+                <button 
+                  onClick={() => setShowSettings(false)}
+                  className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400"
+                >
+                  <RotateCcw size={24} />
+                </button>
+              )}
+
+              <h2 className="text-3xl font-black mb-6 text-center text-slate-800">{t('tugOfWar.settingsTitle')}</h2>
               
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {/* 模式选择 */}
                 <div className="flex bg-slate-100 p-1.5 rounded-2xl">
                   <button 
                     onClick={() => setSettings({...settings, gameMode: 'classic'})}
-                    className={`flex-1 py-3 rounded-xl font-black transition-all ${settings.gameMode === 'classic' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
+                    className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'classic' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
                   >
                     {t('tugOfWar.modeClassic')}
                   </button>
                   <button 
                     onClick={() => setSettings({...settings, gameMode: 'target'})}
-                    className={`flex-1 py-3 rounded-xl font-black transition-all ${settings.gameMode === 'target' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
+                    className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'target' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
                   >
                     {t('tugOfWar.modeTarget')}
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">{t('tugOfWar.operators')}</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.operators')}</label>
                   <div className="grid grid-cols-4 gap-2">
                     {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
                       <button
@@ -574,7 +593,7 @@ export const TugOfWarApp = () => {
                           const newOps = settings.operators.includes(op) ? settings.operators.filter(i => i !== op) : [...settings.operators, op];
                           if (newOps.length > 0) setSettings({...settings, operators: newOps});
                         }}
-                        className={`py-3 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
+                        className={`py-2.5 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
                       >
                         {getOpSymbol(op)}
                       </button>
@@ -582,13 +601,13 @@ export const TugOfWarApp = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">{t('tugOfWar.range')}</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.range')}</label>
                     <select 
                       value={settings.maxNumber}
                       onChange={(e) => setSettings({...settings, maxNumber: parseInt(e.target.value)})}
-                      className="w-full p-3 bg-slate-100 rounded-xl font-bold outline-none border-2 border-transparent focus:border-blue-500"
+                      className="w-full p-2.5 bg-slate-100 rounded-xl font-bold outline-none border-2 border-transparent focus:border-blue-500 text-sm"
                     >
                       <option value="10">10</option>
                       <option value="20">20</option>
@@ -597,28 +616,28 @@ export const TugOfWarApp = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">{t('tugOfWar.winCondition')}</label>
-                    <div className="flex items-center gap-3">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.winCondition')}</label>
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
                       <input type="range" min="5" max="30" step="5" value={settings.winScore} onChange={(e) => setSettings({...settings, winScore: parseInt(e.target.value)})} className="flex-1 accent-red-500" />
-                      <span className="font-black text-red-600 w-8">{settings.winScore}</span>
+                      <span className="font-black text-red-600 w-6 text-sm">{settings.winScore}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-5 bg-slate-50 rounded-3xl border border-slate-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <label className="font-black text-slate-700">{t('tugOfWar.enablePowerUps')}</label>
+                <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="font-black text-slate-700 text-sm">{t('tugOfWar.enablePowerUps')}</label>
                     <button 
                       onClick={() => setSettings({...settings, powerUpsEnabled: !settings.powerUpsEnabled})}
-                      className={`w-14 h-8 rounded-full transition-all relative ${settings.powerUpsEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                      className={`w-12 h-7 rounded-full transition-all relative ${settings.powerUpsEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
                     >
-                      <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${settings.powerUpsEnabled ? 'left-7' : 'left-1'}`} />
+                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${settings.powerUpsEnabled ? 'left-6' : 'left-1'}`} />
                     </button>
                   </div>
                   
                   {settings.powerUpsEnabled && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-6 overflow-hidden">
-                      <div className="grid grid-cols-3 gap-3">
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-4 overflow-hidden">
+                      <div className="grid grid-cols-3 gap-2">
                         {(['freeze', 'double', 'shield'] as PowerUpType[]).map(p => (
                           <button
                             key={p}
@@ -626,37 +645,28 @@ export const TugOfWarApp = () => {
                               const newAllowed = settings.allowedPowerUps.includes(p) ? settings.allowedPowerUps.filter(i => i !== p) : [...settings.allowedPowerUps, p];
                               setSettings({...settings, allowedPowerUps: newAllowed});
                             }}
-                            className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${settings.allowedPowerUps.includes(p) ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-100 bg-white opacity-60'}`}
+                            className={`p-2 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${settings.allowedPowerUps.includes(p) ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-100 bg-white opacity-60'}`}
                           >
-                            <div className={`p-2 rounded-full ${settings.allowedPowerUps.includes(p) ? 'bg-white shadow-sm' : 'bg-slate-50'}`}>
+                            <div className={`p-1.5 rounded-full ${settings.allowedPowerUps.includes(p) ? 'bg-white shadow-sm' : 'bg-slate-50'}`}>
                               {getItemIcon(p)}
                             </div>
-                            <div className="flex flex-col items-center text-center">
-                              <span className={`text-xs font-black uppercase ${settings.allowedPowerUps.includes(p) ? 'text-emerald-700' : 'text-slate-400'}`}>
-                                {t(`tugOfWar.prop${p.charAt(0).toUpperCase() + p.slice(1)}`)}
-                              </span>
-                              <span className="text-[10px] font-medium text-slate-400 leading-tight">
-                                {t(`tugOfWar.prop${p.charAt(0).toUpperCase() + p.slice(1)}Desc`)}
-                              </span>
-                            </div>
+                            <span className={`text-[10px] font-black uppercase ${settings.allowedPowerUps.includes(p) ? 'text-emerald-700' : 'text-slate-400'}`}>
+                              {t(`tugOfWar.prop${p.charAt(0).toUpperCase() + p.slice(1)}`)}
+                            </span>
                           </button>
                         ))}
                       </div>
 
-                      <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Zap size={16} className="text-amber-500 fill-current" />
-                          <h4 className="text-sm font-black text-amber-700">{t('tugOfWar.howToGetItems')}</h4>
-                        </div>
-                        <p className="text-xs font-bold text-amber-600/80 leading-relaxed">
-                          {t('tugOfWar.howToGetItemsDesc')}
-                        </p>
-                        <div className="mt-3 flex items-center justify-between bg-white/50 p-2 rounded-xl border border-amber-200/50">
-                          <span className="text-xs font-black text-amber-700">{t('tugOfWar.triggerCondition')}</span>
+                      <div className="bg-amber-50 rounded-2xl p-3 border border-amber-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Zap size={14} className="text-amber-500 fill-current" />
+                            <span className="text-[10px] font-black text-amber-700">{t('tugOfWar.triggerCondition')}</span>
+                          </div>
                           <select 
                             value={settings.powerUpTrigger}
                             onChange={(e) => setSettings({...settings, powerUpTrigger: parseInt(e.target.value)})}
-                            className="bg-white border-none rounded-lg px-2 py-1 text-xs font-black text-amber-600 shadow-sm outline-none"
+                            className="bg-white border-none rounded-lg px-2 py-1 text-[10px] font-black text-amber-600 shadow-sm outline-none"
                           >
                             <option value="2">每连对 2 题</option>
                             <option value="3">每连对 3 题</option>
@@ -670,12 +680,12 @@ export const TugOfWarApp = () => {
 
                 <button
                   onClick={startGame}
-                  className="w-full py-5 bg-gradient-to-r from-blue-600 to-red-600 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-red-600 text-white rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                 >
-                  <Play fill="white" size={24} /> {t('tugOfWar.startGame')}
+                  <Play fill="white" size={20} /> {t('tugOfWar.startGame')}
                 </button>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col flex-1 min-h-0">
@@ -684,76 +694,69 @@ export const TugOfWarApp = () => {
 
             <main className="flex-1 grid grid-cols-2 min-h-0 overflow-hidden">
               {/* 蓝队 */}
-              <section className="bg-[#EFF6FF] border-r border-slate-200 flex flex-col items-center p-4 md:p-6 overflow-y-auto relative">
+              <section className="bg-[#EFF6FF] border-r border-slate-200 flex flex-col items-center p-3 md:p-4 justify-between relative overflow-hidden">
                 {/* 状态指示器 */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  {blueShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-2 rounded-full shadow-lg"><ShieldCheck size={20} /></motion.div>}
-                  {blueDoubleActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-amber-500 text-white p-2 rounded-full shadow-lg"><Sword size={20} /></motion.div>}
+                  {blueShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-1.5 rounded-full shadow-lg"><ShieldCheck size={16} /></motion.div>}
+                  {blueDoubleActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-amber-500 text-white p-1.5 rounded-full shadow-lg"><Sword size={16} /></motion.div>}
                 </div>
 
-                <div className="flex flex-col items-center mb-2 md:mb-4">
-                  <div className="px-6 py-1 bg-blue-600 text-white rounded-full font-black text-sm mb-1 md:mb-2 shadow-lg">{t('tugOfWar.blueTeam')}</div>
-                  <AnimatePresence>
-                    {blueStreak >= 2 && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                        className={`font-black italic ${blueStreak >= 5 ? 'text-red-500 text-xl md:text-2xl' : 'text-orange-500 text-base md:text-lg'}`}
-                      >
-                        {blueStreak >= 5 && <Zap size={20} className="inline mr-1 fill-current" />}
-                        {t('tugOfWar.combo', {n: blueStreak})}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                <div className="flex flex-col items-center w-full">
+                  <div className="px-4 py-1 bg-blue-600 text-white rounded-full font-black text-xs mb-1 shadow-md">{t('tugOfWar.blueTeam')}</div>
+                  <div className="h-6">
+                    <AnimatePresence>
+                      {blueStreak >= 2 && (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                          className={`font-black italic ${blueStreak >= 5 ? 'text-red-500 text-lg' : 'text-orange-500 text-sm'}`}
+                        >
+                          {blueStreak >= 5 && <Zap size={16} className="inline mr-1 fill-current" />}
+                          {t('tugOfWar.combo', {n: blueStreak})}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
                 
                 {blueProblem && (
-                  <div className="bg-white rounded-3xl p-3 md:p-5 w-full max-w-[340px] shadow-xl border-2 border-white text-center mb-2 md:mb-4">
-                    <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase mb-1 md:mb-2">
+                  <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-blue-100 text-center">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
                       {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
                     </div>
-                    <div className="text-[32px] md:text-[50px] font-black text-slate-800 leading-none mb-2 md:mb-4">
+                    <div className="text-[28px] md:text-[40px] font-black text-slate-800 leading-none mb-2 min-h-[40px] flex items-center justify-center">
                       {settings.gameMode === 'target' ? (
                         <div className="flex flex-col items-center">
                           <div>{blueProblem.answer}</div>
-                          <div className="text-xs md:text-sm font-bold text-blue-500 mt-1 md:mt-2">{t('tugOfWar.mustUse')}{getOpSymbol(blueProblem.operator)}</div>
+                          <div className="text-[10px] font-bold text-blue-500">{t('tugOfWar.mustUse')}{getOpSymbol(blueProblem.operator)}</div>
                         </div>
                       ) : (
                         <>{blueProblem.num1} <span className="text-blue-500">{getOpSymbol(blueProblem.operator)}</span> {blueProblem.num2}</>
                       )}
                     </div>
-                    <div className="h-[48px] md:h-[60px] w-full bg-slate-50 rounded-2xl text-[28px] md:text-[36px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
-                      {blueInput || (settings.gameMode === 'target' ? '?' : '?')}
+                    <div className="h-[44px] md:h-[52px] w-full bg-slate-50 rounded-xl text-[24px] md:text-[30px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
+                      {blueInput || '?'}
                     </div>
                   </div>
                 )}
 
                 {/* 道具栏 */}
-                <div className="flex flex-col items-center mb-2 md:mb-4">
-                  <div className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">{blueItems.length > 0 ? "点击使用道具 TAP TO USE" : "等待连击掉落"}</div>
-                  <div className="flex gap-2 h-10 md:h-12">
+                <div className="flex flex-col items-center w-full">
+                  <div className="flex gap-2 h-9">
                     <AnimatePresence>
                       {blueItems.map((item, i) => (
                         <motion.button 
-                          initial={{ scale: 0, rotate: -45 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }}
                           key={`${item}-${i}`} 
                           onClick={() => handleUseItem('blue', item, i)}
-                          className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl shadow-lg border-2 border-blue-200 flex items-center justify-center relative overflow-hidden group"
+                          className="w-9 h-9 bg-white rounded-lg shadow-md border border-blue-200 flex items-center justify-center"
                         >
-                          <motion.div 
-                            animate={{ y: [0, -2, 0] }} 
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            className="scale-75 md:scale-100"
-                          >
+                          <div className="scale-75">
                             {getItemIcon(item)}
-                          </motion.div>
-                          <div className="absolute inset-0 bg-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
                         </motion.button>
                       ))}
                     </AnimatePresence>
-                    {blueItems.length === 0 && <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl border-2 border-dashed border-blue-100 flex items-center justify-center text-blue-100"><Zap size={20} className="scale-75 md:scale-100" /></div>}
+                    {blueItems.length === 0 && <div className="w-9 h-9 rounded-lg border border-dashed border-blue-100 flex items-center justify-center text-blue-100 opacity-50"><Zap size={16} /></div>}
                   </div>
                 </div>
                 
@@ -761,59 +764,68 @@ export const TugOfWarApp = () => {
               </section>
 
               {/* 红队 */}
-              <section className="bg-[#FEF2F2] flex flex-col items-center p-4 md:p-6 overflow-y-auto relative">
+              <section className="bg-[#FEF2F2] flex flex-col items-center p-3 md:p-4 justify-between relative overflow-hidden">
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
-                  {redShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-2 rounded-full shadow-lg"><ShieldCheck size={20} /></motion.div>}
-                  {redDoubleActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-amber-500 text-white p-2 rounded-full shadow-lg"><Sword size={20} /></motion.div>}
+                  {redShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-1.5 rounded-full shadow-lg"><ShieldCheck size={16} /></motion.div>}
+                  {redDoubleActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-amber-500 text-white p-1.5 rounded-full shadow-lg"><Sword size={16} /></motion.div>}
                 </div>
 
-                <div className="flex flex-col items-center mb-2 md:mb-4">
-                  <div className="px-6 py-1 bg-red-600 text-white rounded-full font-black text-sm mb-1 md:mb-2 shadow-lg">{t('tugOfWar.redTeam')}</div>
-                  <AnimatePresence>
-                    {redStreak >= 2 && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                        className={`font-black italic ${redStreak >= 5 ? 'text-red-500 text-xl md:text-2xl' : 'text-orange-500 text-base md:text-lg'}`}
-                      >
-                        {redStreak >= 5 && <Zap size={20} className="inline mr-1 fill-current" />}
-                        {t('tugOfWar.combo', {n: redStreak})}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                <div className="flex flex-col items-center w-full">
+                  <div className="px-4 py-1 bg-red-600 text-white rounded-full font-black text-xs mb-1 shadow-md">{t('tugOfWar.redTeam')}</div>
+                  <div className="h-6">
+                    <AnimatePresence>
+                      {redStreak >= 2 && (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                          className={`font-black italic ${redStreak >= 5 ? 'text-red-500 text-lg' : 'text-orange-500 text-sm'}`}
+                        >
+                          {redStreak >= 5 && <Zap size={16} className="inline mr-1 fill-current" />}
+                          {t('tugOfWar.combo', {n: redStreak})}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
                 
                 {redProblem && (
-                  <div className="bg-white rounded-3xl p-3 md:p-5 w-full max-w-[340px] shadow-xl border-2 border-white text-center mb-2 md:mb-4">
-                    <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase mb-1 md:mb-2">
+                  <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-red-100 text-center">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
                       {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
                     </div>
-                    <div className="text-[32px] md:text-[50px] font-black text-slate-800 leading-none mb-2 md:mb-4">
+                    <div className="text-[28px] md:text-[40px] font-black text-slate-800 leading-none mb-2 min-h-[40px] flex items-center justify-center">
                       {settings.gameMode === 'target' ? (
                         <div className="flex flex-col items-center">
                           <div>{redProblem.answer}</div>
-                          <div className="text-xs md:text-sm font-bold text-red-500 mt-1 md:mt-2">{t('tugOfWar.mustUse')}{getOpSymbol(redProblem.operator)}</div>
+                          <div className="text-[10px] font-bold text-red-500">{t('tugOfWar.mustUse')}{getOpSymbol(redProblem.operator)}</div>
                         </div>
                       ) : (
                         <>{redProblem.num1} <span className="text-red-500">{getOpSymbol(redProblem.operator)}</span> {redProblem.num2}</>
                       )}
                     </div>
-                    <div className="h-[48px] md:h-[60px] w-full bg-slate-50 rounded-2xl text-[28px] md:text-[36px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
-                      {redInput || (settings.gameMode === 'target' ? '?' : '?')}
+                    <div className="h-[44px] md:h-[52px] w-full bg-slate-50 rounded-xl text-[24px] md:text-[30px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
+                      {redInput || '?'}
                     </div>
                   </div>
                 )}
 
-                <div className="flex gap-2 mb-2 md:mb-4 h-10 md:h-12">
-                  {redItems.map((item, i) => (
-                    <button 
-                      key={i} onClick={() => handleUseItem('red', item, i)}
-                      className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl shadow-md border-2 border-red-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
-                    >
-                      <div className="scale-75 md:scale-100">
-                        {getItemIcon(item)}
-                      </div>
-                    </button>
-                  ))}
+                <div className="flex flex-col items-center w-full">
+                  <div className="flex gap-2 h-9">
+                    <AnimatePresence>
+                      {redItems.map((item, i) => (
+                        <motion.button 
+                          initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }}
+                          key={`${item}-${i}`} 
+                          onClick={() => handleUseItem('red', item, i)}
+                          className="w-9 h-9 bg-white rounded-lg shadow-md border border-red-200 flex items-center justify-center"
+                        >
+                          <div className="scale-75">
+                            {getItemIcon(item)}
+                          </div>
+                        </motion.button>
+                      ))}
+                    </AnimatePresence>
+                    {redItems.length === 0 && <div className="w-9 h-9 rounded-lg border border-dashed border-red-100 flex items-center justify-center text-red-100 opacity-50"><Zap size={16} /></div>}
+                  </div>
                 </div>
                 
                 <Keypad onInput={(val) => setRedInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => setRedInput('')} onSubmit={handleRedSubmit} team="red" t={t} mode={settings.gameMode} isFrozen={redFrozenUntil > Date.now()} requiredOp={redProblem ? getOpSymbol(redProblem.operator) : undefined} />

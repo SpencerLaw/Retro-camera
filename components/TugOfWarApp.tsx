@@ -185,6 +185,80 @@ const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen }: {
   );
 };
 
+// Team Member Animation
+const TeamMember = ({ team, index }: { team: 'blue' | 'red', index: number }) => {
+  const color = team === 'blue' ? '#3B82F6' : '#EF4444';
+  const darkColor = team === 'blue' ? '#1D4ED8' : '#B91C1C';
+  
+  return (
+    <motion.div
+      animate={{ 
+        rotate: team === 'blue' ? [-10, 0, -10] : [10, 0, 10],
+        x: team === 'blue' ? [-2, 2, -2] : [2, -2, 2]
+      }}
+      transition={{ repeat: Infinity, duration: 0.6, delay: index * 0.2, ease: "easeInOut" }}
+      className={`relative z-10 ${team === 'red' ? '-scale-x-100' : ''}`}
+      style={{ transformOrigin: 'bottom center' }}
+    >
+      <svg width="60" height="70" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 40 L15 65" stroke={darkColor} strokeWidth="8" strokeLinecap="round" />
+        <path d="M30 40 L45 65" stroke={color} strokeWidth="8" strokeLinecap="round" />
+        <path d="M30 40 L20 20" stroke={color} strokeWidth="9" strokeLinecap="round" />
+        <path d="M25 25 L45 35" stroke={darkColor} strokeWidth="7" strokeLinecap="round" />
+        <path d="M22 22 L40 32" stroke={color} strokeWidth="7" strokeLinecap="round" />
+        <circle cx="15" cy="12" r="10" fill={color} />
+        <path d="M18 10 L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" />
+        <path d="M19 16 Q21 14 23 16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </motion.div>
+  );
+};
+
+const TugOfWarAnimation = ({ score, winScore }: { score: number, winScore: number }) => {
+  const progress = (score / winScore) * 50; // -50% to +50%
+
+  return (
+    <div className="h-[140px] bg-white flex items-center justify-center relative border-b border-slate-200 shrink-0 overflow-hidden">
+      {/* Background marks */}
+      <div className="absolute inset-0 flex justify-center items-end pb-4 opacity-20 pointer-events-none w-full">
+        <div className="w-[80%] flex justify-between">
+          {[...Array(winScore * 2 + 1)].map((_, i) => (
+            <div key={i} className={`w-0.5 ${i === winScore ? 'bg-red-500 h-10' : 'bg-slate-400 h-6'}`} />
+          ))}
+        </div>
+      </div>
+
+      <motion.div 
+        className="w-full relative h-[100px] flex items-center justify-center"
+        animate={{ x: `${progress}%` }}
+        transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+      >
+        {/* Rope */}
+        <div className="absolute top-[32px] w-[200%] h-4 bg-amber-700/90 rounded-full shadow-sm border-y border-amber-900/40">
+          <div className="w-full h-full opacity-30" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, #000 5px, #000 10px)' }}></div>
+        </div>
+
+        {/* Center Flag */}
+        <div className="absolute top-[32px] left-1/2 -translate-x-1/2 w-6 h-16 bg-red-500 shadow-md z-20 border-2 border-white" style={{ transformOrigin: 'top center', rotate: '-5deg' }} />
+
+        {/* Blue Team */}
+        <div className="absolute top-0 right-1/2 pr-[15%] flex gap-2">
+          {[0, 1, 2].map((i) => (
+            <TeamMember key={`blue-${i}`} team="blue" index={i} />
+          ))}
+        </div>
+
+        {/* Red Team */}
+        <div className="absolute top-0 left-1/2 pl-[15%] flex gap-2">
+          {[0, 1, 2].map((i) => (
+            <TeamMember key={`red-${i}`} team="red" index={i} />
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 export const TugOfWarApp = () => {
   const navigate = useNavigate();
   const t = useTranslations();
@@ -587,22 +661,7 @@ export const TugOfWarApp = () => {
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col flex-1 min-h-0">
             {/* 拔河核心视觉 */}
-            <div className="h-[100px] bg-white flex items-center justify-center relative border-b border-slate-200 shrink-0 px-[40px] md:px-[80px]">
-              <div className="w-full h-3 bg-slate-200 rounded-full relative">
-                {[...Array(settings.winScore * 2 + 1)].map((_, i) => (
-                  <div key={i} className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 bg-slate-300" style={{ left: `${(i / (settings.winScore * 2)) * 100}%` }} />
-                ))}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-blue-600 rounded-full shadow-lg shadow-blue-200" />
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-red-600 rounded-full shadow-lg shadow-red-200" />
-                <motion.div
-                  className="absolute top-1/2 w-[52px] h-[52px] bg-white border-[6px] border-red-500 rounded-full shadow-xl z-10 flex items-center justify-center"
-                  animate={{ left: `calc(50% + ${(score / settings.winScore) * 50}%)`, y: '-50%', x: '-50%' }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                >
-                  <div className="text-red-500 text-2xl">❤️</div>
-                </motion.div>
-              </div>
-            </div>
+            <TugOfWarAnimation score={score} winScore={settings.winScore} />
 
             <main className="flex-1 grid grid-cols-2 min-h-0 overflow-hidden">
               {/* 蓝队 */}

@@ -105,14 +105,7 @@ const loadStoredReports = (): SessionReport[] => {
       .filter((item): item is SessionReport => (
         item &&
         typeof item.id === 'string' &&
-        typeof item.startedAt === 'string' &&
-        (typeof item.endedAt === 'string' || item.endedAt === null) &&
-        typeof item.peakDb === 'number' &&
-        typeof item.quietSeconds === 'number' &&
-        typeof item.totalSeconds === 'number' &&
-        typeof item.warnCount === 'number' &&
-        typeof item.threshold === 'number' &&
-        typeof item.sensitivity === 'number'
+        typeof item.startedAt === 'string'
       ))
       .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
       .slice(0, MAX_STORED_REPORTS);
@@ -210,7 +203,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
   const sessionHistoryRef = useRef<number[]>([]); 
   const sampleCounterRef = useRef(0); 
-  const intervalPeakRef = useRef(0); // 用于抓取区间峰值
+  const intervalPeakRef = useRef(0); // 用于抓取采样间隔内的最高分贝
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -317,6 +310,9 @@ const DoraemonMonitorApp: React.FC = () => {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       startedAt: new Date().toISOString()
     };
+    sessionHistoryRef.current = [];
+    sampleCounterRef.current = 0;
+    intervalPeakRef.current = 0;
   }, []);
 
   const finalizeCurrentSession = useCallback(() => {
@@ -362,6 +358,7 @@ const DoraemonMonitorApp: React.FC = () => {
     activeSessionRef.current = null;
     sessionHistoryRef.current = [];
     sampleCounterRef.current = 0;
+    intervalPeakRef.current = 0;
   }, [persistSessionReports]);
 
   const stopAudioMonitoring = useCallback(() => {
@@ -553,12 +550,14 @@ const DoraemonMonitorApp: React.FC = () => {
         document.title = t('doraemon.appTitle');
       }
 
-      // 稳定采样逻辑：每 25 次分析（约 2.5 秒）存一个点
+      // 强化采样逻辑：记录区间内的峰值
       if (activeSessionRef.current) {
+        intervalPeakRef.current = Math.max(intervalPeakRef.current, effectiveDb);
         sampleCounterRef.current++;
         if (sampleCounterRef.current >= 25) {
-          sessionHistoryRef.current.push(Math.round(effectiveDb));
+          sessionHistoryRef.current.push(Math.round(intervalPeakRef.current));
           sampleCounterRef.current = 0;
+          intervalPeakRef.current = 0;
         }
       }
 
@@ -907,35 +906,6 @@ const DoraemonMonitorApp: React.FC = () => {
     return path;
   };
 
-  const formatPreciseClock = (dateLike: string | number | Date) => {
-    const d = new Date(dateLike);
-    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-  };
-
-  /**
-   * 曲线平滑路径构建 (参考早读树算法)
-   */
-  const buildSmoothCurvePath = (points: Array<{x: number, y: number}>) => {
-    if (!points.length) return '';
-    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
-
-    let path = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = i > 0 ? points[i - 1] : points[i];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = i !== points.length - 2 ? points[i + 2] : p2;
-
-      const cp1x = p1.x + ((p2.x - p0.x) / 6);
-      const cp1y = p1.y + ((p2.y - p0.y) / 6);
-      const cp2x = p2.x - ((p3.x - p1.x) / 6);
-      const cp2y = p2.y - ((p3.y - p1.y) / 6);
-
-      path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
-    }
-    return path;
-  };
-
   const liveSessionPreview: SessionReport | null = activeSessionRef.current
     ? {
         id: activeSessionRef.current.id,
@@ -1076,6 +1046,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const closeWarningResetDialog = useCallback(() => {
     setIsWarningResetDialogOpen(false);
     setWarningResetDialogMode('manage');
+    setWarningResetCurrentPassword('');
     setWarningResetCurrentPassword('');
     setWarningResetPasswordInput('');
     setWarningResetPasswordConfirm('');
@@ -1489,10 +1460,12 @@ const DoraemonMonitorApp: React.FC = () => {
                           const hMin = Math.min(...h);
                           const peakIdx = h.indexOf(hMax);
                           const lowIdx = h.indexOf(hMin);
+                          const currentThreshold = selectedReportRecord.threshold || 60;
                           
-                          const cMax = Math.max(hMax + 8, (selectedReportRecord.threshold || 60) + 12);
-                          const cMin = Math.max(20, Math.min(hMin - 8, 35));
-                          const r = cMax - cMin;
+                          // 智能计算 Y 轴量程，确保 108dB 等高值不爆框
+                          const cMax = Math.max(hMax + 10, currentThreshold + 15);
+                          const cMin = Math.max(0, Math.min(hMin - 10, 30));
+                          const r = Math.max(20, cMax - cMin);
                           
                           const width = 100;
                           const height = 100;
@@ -1503,72 +1476,54 @@ const DoraemonMonitorApp: React.FC = () => {
 
                           const linePath = buildSmoothCurvePath(pts);
                           const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
-                          const thresholdY = height - (((selectedReportRecord.threshold || 60) - cMin) / r) * height;
+                          const thresholdY = height - ((currentThreshold - cMin) / r) * height;
 
                           const startTime = new Date(selectedReportRecord.startedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
                           const endTime = selectedReportRecord.endedAt ? new Date(selectedReportRecord.endedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : "进行中";
 
                           return (
-                            <div className="trend-morning-tree-wrapper">
-                              {/* 极值气泡 - 最高 */}
-                              <div className="trend-bubble peak" style={{ left: `${pts[peakIdx].x}%`, top: `${pts[peakIdx].y}%` }}>
-                                <span>最高 {Math.round(hMax)}dB</span>
-                              </div>
-                              
-                              {/* 极值气泡 - 最低 */}
-                              <div className="trend-bubble low" style={{ left: `${pts[lowIdx].x}%`, top: `${pts[lowIdx].y}%` }}>
-                                <span>最低 {Math.round(hMin)}dB</span>
-                              </div>
-
+                            <div className="trend-morning-tree-wrapper pro">
                               <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="trend-morning-tree-svg">
                                 <defs>
                                   <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#0096E1" stopOpacity="0.24" />
+                                    <stop offset="0%" stopColor="#0096E1" stopOpacity="0.2" />
                                     <stop offset="100%" stopColor="#0096E1" stopOpacity="0" />
                                   </linearGradient>
-                                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                                    <feGaussianBlur stdDeviation="1.5" result="blur" />
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                                  </filter>
-                                  {/* 新增：标记点专用发光 */}
                                   <filter id="markerGlow">
                                     <feGaussianBlur stdDeviation="2" result="blur" />
-                                    <feMerge>
-                                      <feMergeNode in="blur" />
-                                      <feMergeNode in="SourceGraphic" />
-                                    </feMerge>
+                                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                                   </filter>
                                 </defs>
 
                                 {/* 背景参考线 */}
-                                <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
-                                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
-                                <line x1="0" y1="80" x2="100" y2="80" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                                <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+                                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+                                <line x1="0" y1="80" x2="100" y2="80" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
                                 
                                 {/* 阈值虚线 */}
-                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} stroke="#ef4444" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.4" />
+                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} stroke="#ef4444" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.6" />
                                 
-                                {/* 填充区域 */}
+                                {/* 填充与曲线 */}
                                 <path d={fillPath} fill="url(#areaGradient)" />
+                                <path d={linePath} fill="none" stroke="#0096E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                 
-                                {/* 核心曲线 */}
-                                <path d={linePath} fill="none" stroke="#0096E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" filter="url(#glow)" />
-                                
-                                {/* 精修标记点：双层圆环 + 呼吸发光感 */}
+                                {/* 精修标记点 */}
                                 <g filter="url(#markerGlow)">
-                                  {/* 最高点 */}
-                                  <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="3.5" fill="#ff416c" stroke="#fff" strokeWidth="1" />
-                                  <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="6" fill="#ff416c" fillOpacity="0.2" />
-                                  
-                                  {/* 最低点 */}
-                                  <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="3.5" fill="#00f260" stroke="#fff" strokeWidth="1" />
-                                  <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="6" fill="#00f260" fillOpacity="0.2" />
+                                  <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="3" fill="#ff416c" stroke="#fff" strokeWidth="1" />
+                                  <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="3" fill="#00f260" stroke="#fff" strokeWidth="1" />
                                 </g>
                               </svg>
                               
+                              {/* 极值标注与阈值标签 */}
+                              <div className="trend-pro-annotations">
+                                <span className="label-peak" style={{ left: `${pts[peakIdx].x}%`, top: `${pts[peakIdx].y}%` }}>最高 {Math.round(hMax)}dB</span>
+                                <span className="label-low" style={{ left: `${pts[lowIdx].x}%`, top: `${pts[lowIdx].y}%` }}>最低 {Math.round(hMin)}dB</span>
+                                <span className="label-threshold" style={{ top: `${thresholdY}%` }}>设定阈值 {currentThreshold}dB</span>
+                              </div>
+
                               <div className="trend-morning-tree-footer">
-                                <span>开始 {startTime}</span>
-                                <span>结束 {endTime}</span>
+                                <span>{startTime} 开始</span>
+                                <span>{endTime} 结束</span>
                               </div>
                             </div>
                           );
@@ -1775,7 +1730,7 @@ const DoraemonMonitorApp: React.FC = () => {
                   <input
                     className="warning-reset-input"
                     type="password"
-                    value={warningResetPasswordConfirm}
+                    value={warningResetPasswordInput}
                     onChange={(event) => {
                       setWarningResetPasswordConfirm(event.target.value);
                       setWarningResetPasswordError('');
@@ -1816,11 +1771,6 @@ const DoraemonMonitorApp: React.FC = () => {
       { min: 80, max: 120, label: t('doraemon.levels.l80') },
     ];
     const pointerPos = Math.min(100, Math.max(0, currentDb));
-
-    // 恢复内联颜色逻辑
-    // const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
-    // const textColor = isDarkMode ? '#94a3b8' : '#475569';
-    // 改回这里
     const activeTextColor = '#0096E1';
     const textColor = isDarkMode ? '#94a3b8' : '#475569';
 
@@ -1860,14 +1810,12 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   };
 
-  // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
-    const BAR_COUNT = 80; // 减少数量以提高性能和适应性
+    const BAR_COUNT = 80;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     const tick = Date.now();
-    // 在白天模式下使用更深的颜色和更高的不透明度
     const opacity = isDarkMode ? 0.7 : 0.5;
-    const mainColor = `hsl(${hue}, 95%, 50%)`; // 极高饱和度
+    const mainColor = `hsl(${hue}, 95%, 50%)`;
     const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
 
     return (
@@ -1877,16 +1825,14 @@ const DoraemonMonitorApp: React.FC = () => {
           const norm = 1 - (dist / (BAR_COUNT / 2));
           const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
           const wave = Math.sin(i * 0.35 + tick / 150) * 0.15;
-
-          // 优化：边缘高度自然收尾 (Taper height at edges)
           const taperedNorm = Math.pow(norm, 1.5);
           const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
 
           return (
             <div key={i} className="wave-bar" style={{
-              height: `${Math.min(100, height)}%`, // 使用百分比高度
+              height: `${Math.min(100, height)}%`,
               background: `linear-gradient(to top, transparent, ${mainColor})`,
-              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
+              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2),
               boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
             }} />
           );
@@ -2087,4 +2033,3 @@ const DoraemonMonitorApp: React.FC = () => {
 };
 
 export default DoraemonMonitorApp;
-

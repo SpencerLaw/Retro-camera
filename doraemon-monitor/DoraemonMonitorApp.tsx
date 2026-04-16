@@ -906,6 +906,35 @@ const DoraemonMonitorApp: React.FC = () => {
     return path;
   };
 
+  const formatPreciseClock = (dateLike: string | number | Date) => {
+    const d = new Date(dateLike);
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+  };
+
+  /**
+   * 曲线平滑路径构建 (参考早读树算法)
+   */
+  const buildSmoothCurvePath = (points: Array<{x: number, y: number}>) => {
+    if (!points.length) return '';
+    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = i > 0 ? points[i - 1] : points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = i !== points.length - 2 ? points[i + 2] : p2;
+
+      const cp1x = p1.x + ((p2.x - p0.x) / 6);
+      const cp1y = p1.y + ((p2.y - p0.y) / 6);
+      const cp2x = p2.x - ((p3.x - p1.x) / 6);
+      const cp2y = p2.y - ((p3.y - p1.y) / 6);
+
+      path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+    return path;
+  };
+
   const liveSessionPreview: SessionReport | null = activeSessionRef.current
     ? {
         id: activeSessionRef.current.id,
@@ -1475,19 +1504,19 @@ const DoraemonMonitorApp: React.FC = () => {
                           const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
                           const thresholdY = height - (((selectedReportRecord.threshold || 60) - cMin) / r) * height;
 
-                          const startTime = new Date(selectedReportRecord.startedAt).toLocaleTimeString('zh-CN', { hour12: false });
-                          const endTime = selectedReportRecord.endedAt ? new Date(selectedReportRecord.endedAt).toLocaleTimeString('zh-CN', { hour12: false }) : "进行中";
+                          const startTime = new Date(selectedReportRecord.startedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                          const endTime = selectedReportRecord.endedAt ? new Date(selectedReportRecord.endedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : "进行中";
 
                           return (
                             <div className="trend-morning-tree-wrapper">
                               {/* 极值气泡 - 最高 */}
                               <div className="trend-bubble peak" style={{ left: `${pts[peakIdx].x}%`, top: `${pts[peakIdx].y}%` }}>
-                                <span>最高 {hMax}dB</span>
+                                <span>最高 {Math.round(hMax)}dB</span>
                               </div>
                               
                               {/* 极值气泡 - 最低 */}
                               <div className="trend-bubble low" style={{ left: `${pts[lowIdx].x}%`, top: `${pts[lowIdx].y}%` }}>
-                                <span>最低 {hMin}dB</span>
+                                <span>最低 {Math.round(hMin)}dB</span>
                               </div>
 
                               <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="trend-morning-tree-svg">
@@ -1499,6 +1528,14 @@ const DoraemonMonitorApp: React.FC = () => {
                                   <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                                     <feGaussianBlur stdDeviation="1.5" result="blur" />
                                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                  </filter>
+                                  {/* 新增：标记点专用发光 */}
+                                  <filter id="markerGlow">
+                                    <feGaussianBlur stdDeviation="2" result="blur" />
+                                    <feMerge>
+                                      <feMergeNode in="blur" />
+                                      <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
                                   </filter>
                                 </defs>
 
@@ -1516,9 +1553,16 @@ const DoraemonMonitorApp: React.FC = () => {
                                 {/* 核心曲线 */}
                                 <path d={linePath} fill="none" stroke="#0096E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" filter="url(#glow)" />
                                 
-                                {/* 标记点 */}
-                                <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="2" fill="#fff" />
-                                <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="2" fill="#fff" />
+                                {/* 精修标记点：双层圆环 + 呼吸发光感 */}
+                                <g filter="url(#markerGlow)">
+                                  {/* 最高点 */}
+                                  <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="3.5" fill="#ff416c" stroke="#fff" strokeWidth="1" />
+                                  <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="6" fill="#ff416c" fillOpacity="0.2" />
+                                  
+                                  {/* 最低点 */}
+                                  <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="3.5" fill="#00f260" stroke="#fff" strokeWidth="1" />
+                                  <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="6" fill="#00f260" fillOpacity="0.2" />
+                                </g>
                               </svg>
                               
                               <div className="trend-morning-tree-footer">

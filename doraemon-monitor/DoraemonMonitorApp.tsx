@@ -210,6 +210,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
   const sessionHistoryRef = useRef<number[]>([]); 
   const sampleCounterRef = useRef(0); 
+  const intervalPeakRef = useRef(0); // 用于抓取区间峰值
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;

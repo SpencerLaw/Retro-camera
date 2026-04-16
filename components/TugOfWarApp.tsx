@@ -571,36 +571,43 @@ export const TugOfWarApp = () => {
             <h1 className="text-3xl font-black text-slate-800 mb-2">数学拔河</h1>
             <p className="text-slate-400 font-bold mb-8 text-sm uppercase tracking-widest">需要授权码解锁完整版</p>
 
-            <div className="w-full space-y-4">
+            <div className="w-full space-y-6">
               <div className="relative group">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Key size={20} className="text-slate-300 group-focus-within:text-blue-500 transition-colors" />
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none z-20">
+                  <Key size={22} className="text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                 </div>
                 <input 
                   type="text" 
                   value={licenseInput}
                   onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
                   placeholder="请输入 BH 开头的授权码"
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-black text-lg outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-300"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-5 pl-14 pr-4 font-black text-xl outline-none focus:border-blue-500 focus:bg-white shadow-sm transition-all placeholder:text-slate-300 relative z-10"
                 />
               </div>
 
               {error && (
                 <motion.div 
-                  initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2 text-red-500 bg-red-50 p-3 rounded-xl border border-red-100"
+                  initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3 text-red-500 bg-red-50 p-4 rounded-2xl border border-red-100"
                 >
-                  <ShieldAlert size={16} />
-                  <span className="text-xs font-bold">{error}</span>
+                  <ShieldAlert size={18} className="shrink-0" />
+                  <span className="text-sm font-bold leading-tight">{error}</span>
                 </motion.div>
               )}
 
               <button
                 onClick={handleVerify}
                 disabled={verifying || !licenseInput.trim()}
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl text-lg font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center justify-center gap-3"
+                className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl text-xl font-black shadow-xl shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:translate-y-0 transition-all flex items-center justify-center gap-3"
               >
-                {verifying ? "正在验证..." : "激活并开始"}
+                {verifying ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>正在激活...</span>
+                  </div>
+                ) : (
+                  <>解锁完整版</>
+                )}
               </button>
             </div>
           </div>

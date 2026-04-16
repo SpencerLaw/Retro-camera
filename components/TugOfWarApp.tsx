@@ -211,12 +211,14 @@ const TeamMember = ({ team, index }: { team: 'blue' | 'red', index: number }) =>
   
   return (
     <motion.div
+      initial={{ scaleX: team === 'red' ? -1 : 1 }}
       animate={{ 
         rotate: team === 'blue' ? [-10, 0, -10] : [10, 0, 10], // 双方都向各自的后方倾斜
-        x: team === 'blue' ? [-2, 2, -2] : [2, -2, 2]         // 微小位移
+        x: team === 'blue' ? [-2, 2, -2] : [2, -2, 2],         // 微小位移
+        scaleX: team === 'red' ? -1 : 1
       }}
       transition={{ repeat: Infinity, duration: 0.6, delay: index * 0.2, ease: "easeInOut" }}
-      className={`relative z-10 ${team === 'red' ? '-scale-x-100' : ''}`} // 蓝队默认面向右（中心）；红队翻转面向左（中心）
+      className="relative z-10"
       style={{ transformOrigin: 'bottom center' }}
     >
       <svg width="60" height="70" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">

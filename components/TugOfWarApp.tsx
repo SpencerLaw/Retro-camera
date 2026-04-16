@@ -602,13 +602,6 @@ export const TugOfWarApp = () => {
               >
                 {verifying ? "正在验证..." : "激活并开始"}
               </button>
-
-              <div className="pt-4 flex flex-col items-center gap-2">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">机器 ID: {getBHDeviceId().substring(0, 16).toUpperCase()}</p>
-                <div className="flex gap-4">
-                  <a href="#" className="text-xs font-black text-blue-500/60 hover:text-blue-600 transition-colors underline underline-offset-4">联系管理员购买</a>
-                </div>
-              </div>
             </div>
           </div>
         </motion.div>

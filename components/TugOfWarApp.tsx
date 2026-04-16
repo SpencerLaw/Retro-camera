@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap, Lock, Key, ShieldAlert } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import confetti from 'canvas-confetti';
+import { isBHVerified, verifyBHLicense, getBHDeviceId } from './TugOfWarLicenseManager';
 
 type Operator = 'add' | 'sub' | 'mul' | 'div';
 type GameMode = 'classic' | 'target';
@@ -294,8 +295,32 @@ export const TugOfWarApp = () => {
   const navigate = useNavigate();
   const t = useTranslations();
   
+  // 授权状态
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [licenseInput, setLicenseInput] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState('');
+
   // 配置状态
   const [showSettings, setShowSettings] = useState(true);
+
+  // 初始化检查授权
+  useEffect(() => {
+    setIsVerified(isBHVerified());
+  }, []);
+
+  const handleVerify = async () => {
+    if (!licenseInput.trim()) return;
+    setVerifying(true);
+    setError('');
+    const result = await verifyBHLicense(licenseInput);
+    if (result.success) {
+      setIsVerified(true);
+    } else {
+      setError(result.message || '验证失败');
+    }
+    setVerifying(false);
+  };
   const [settings, setSettings] = useState<GameSettings>({
     operators: ['add'],
     maxNumber: 10,
@@ -335,11 +360,11 @@ export const TugOfWarApp = () => {
   // 核心循环：计时器
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (!showSettings && gameState === 'playing') {
+    if (!showSettings && gameState === 'playing' && isVerified) {
       timer = setInterval(() => setTimeElapsed(prev => prev + 1), 1000);
     }
     return () => clearInterval(timer);
-  }, [showSettings, gameState]);
+  }, [showSettings, gameState, isVerified]);
 
   // 核心循环：冻结检查
   useEffect(() => {
@@ -521,6 +546,75 @@ export const TugOfWarApp = () => {
       case 'shield': return <ShieldCheck className="text-emerald-500" />;
     }
   };
+
+  // 如果授权状态未知，显示加载中
+  if (isVerified === null) return <div className="h-screen w-screen bg-slate-50 flex items-center justify-center font-black text-slate-400">Loading...</div>;
+
+  // 如果未授权，显示授权界面
+  if (!isVerified) {
+    return (
+      <div className="h-screen w-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-sans select-none overflow-hidden relative">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(59,130,246,0.1),transparent)] pointer-events-none" />
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="bg-white rounded-[2.5rem] p-8 md:p-12 w-full max-w-md shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-slate-100 relative z-10"
+        >
+          <button onClick={() => navigate('/')} className="absolute top-8 left-8 text-slate-400 hover:text-slate-600 transition-colors">
+            <ArrowLeft size={24} />
+          </button>
+
+          <div className="flex flex-col items-center text-center">
+            <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6">
+              <Lock size={40} className="text-blue-600" />
+            </div>
+            <h1 className="text-3xl font-black text-slate-800 mb-2">数学拔河</h1>
+            <p className="text-slate-400 font-bold mb-8 text-sm uppercase tracking-widest">需要授权码解锁完整版</p>
+
+            <div className="w-full space-y-4">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                  <Key size={20} className="text-slate-300 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <input 
+                  type="text" 
+                  value={licenseInput}
+                  onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
+                  placeholder="请输入 BH 开头的授权码"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-black text-lg outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-300"
+                />
+              </div>
+
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center gap-2 text-red-500 bg-red-50 p-3 rounded-xl border border-red-100"
+                >
+                  <ShieldAlert size={16} />
+                  <span className="text-xs font-bold">{error}</span>
+                </motion.div>
+              )}
+
+              <button
+                onClick={handleVerify}
+                disabled={verifying || !licenseInput.trim()}
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl text-lg font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center justify-center gap-3"
+              >
+                {verifying ? "正在验证..." : "激活并开始"}
+              </button>
+
+              <div className="pt-4 flex flex-col items-center gap-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">机器 ID: {getBHDeviceId().substring(0, 16).toUpperCase()}</p>
+                <div className="flex gap-4">
+                  <a href="#" className="text-xs font-black text-blue-500/60 hover:text-blue-600 transition-colors underline underline-offset-4">联系管理员购买</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#F8FAFC] text-[#1E293B] font-sans select-none overflow-hidden relative">

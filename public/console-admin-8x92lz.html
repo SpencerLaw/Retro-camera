@@ -466,6 +466,7 @@
           <button onclick="generateCodes('magic')" class="btn-primary" style="background: #8b5cf6;">生成点名码 (DM)</button>
           <button onclick="generateCodes('tree')" class="btn-primary" style="background: #eab308;">生成早读码 (ZD)</button>
           <button onclick="generateCodes('gb')" class="btn-primary" style="background: #ec4899;">生成广播码 (GB)</button>
+          <button onclick="generateCodes('bh')" class="btn-primary" style="background: #3b82f6;">生成拔河码 (BH)</button>
           <button onclick="generateCodes('xm')" class="btn-primary" style="background: #E0C3FC; color: #6A5D7B;">生成星梦码
             (XXDK)</button>
           <button onclick="purgeWebAssistant()" id="purgeWebBtn" class="btn-primary"
@@ -516,6 +517,7 @@
       'GB': { name: '班级广播器', color: '#ec4899' },
       'ZY': { name: '作业消消乐', color: '#10b981' },
       'DM': { name: '炫酷点名器', color: '#8b5cf6' },
+      'BH': { name: '数学拔河', color: '#3b82f6' },
       'XXDK': { name: '星梦奇旅', color: '#E0C3FC', textColor: '#6A5D7B' },
       'XM': { name: '星梦奇旅', color: '#E0C3FC', textColor: '#6A5D7B' },
       'DEFAULT': { name: '分贝仪/通用', color: '#6366f1' }
@@ -884,6 +886,13 @@
             random += chars.charAt(Math.floor(Math.random() * chars.length));
           }
           code = 'GB-' + datePart + '-' + random;
+        } else if (type === 'bh') {
+          // BH-YYYYMMDD (8)-Random (6) = 16 chars
+          let random = '';
+          for (let j = 0; j < 6; j++) {
+            random += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          code = 'BH-' + datePart + '-' + random;
         } else if (type === 'xm') {
           // XXDK-YYYYMMDD (8)-Random (4) = 16 chars
           let random = '';

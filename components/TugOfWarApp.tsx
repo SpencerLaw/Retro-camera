@@ -45,8 +45,26 @@ const generateProblem = (settings: GameSettings): Problem => {
   
   if (gameMode === 'target') {
     // 凑数模式：直接给出一个目标数字，并要求使用特定的运算符
-    const target = Math.floor(Math.random() * (maxNumber * 2)) + 5;
     const requiredOp = operators.length > 0 ? operators[Math.floor(Math.random() * operators.length)] : 'add';
+    let target = 0;
+    
+    if (requiredOp === 'mul') {
+      // 乘法：确保目标数字是两个大于1的整数的乘积，避免出现质数
+      const mulMax = Math.min(maxNumber, 12);
+      const f1 = Math.floor(Math.random() * (mulMax - 1)) + 2;
+      const f2 = Math.floor(Math.random() * (mulMax - 1)) + 2;
+      target = f1 * f2;
+    } else if (requiredOp === 'div') {
+      // 除法：目标数字适中即可，因为总可以用 target * N ÷ N 凑出
+      target = Math.floor(Math.random() * Math.min(maxNumber, 20)) + 2;
+    } else if (requiredOp === 'sub') {
+      // 减法：目标数字不宜过大
+      target = Math.floor(Math.random() * maxNumber) + 1;
+    } else {
+      // 加法：正常给出目标
+      target = Math.floor(Math.random() * (maxNumber * 2)) + 5;
+    }
+
     return { num1: 0, num2: 0, operator: requiredOp, answer: target };
   }
 

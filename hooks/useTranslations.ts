@@ -25,13 +25,22 @@ export const useTranslations = () => {
     [language]);
 
   // Memoize the translation function itself
-  return React.useCallback((key: string): string => {
+  return React.useCallback((key: string, options?: Record<string, any>): string => {
     const keys = key.split('.');
     let value: any = currentTranslations;
     for (const k of keys) {
       value = value?.[k];
       if (value === undefined) break;
     }
-    return typeof value === 'string' ? value : key;
+    
+    if (typeof value !== 'string') return key;
+
+    if (options) {
+      Object.keys(options).forEach(optKey => {
+        value = value.replace(new RegExp(`\\{${optKey}\\}`, 'g'), options[optKey]);
+      });
+    }
+    
+    return value;
   }, [currentTranslations]);
 };

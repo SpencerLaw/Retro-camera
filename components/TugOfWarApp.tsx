@@ -44,9 +44,10 @@ const generateProblem = (settings: GameSettings): Problem => {
   const { operators, maxNumber, gameMode } = settings;
   
   if (gameMode === 'target') {
-    // 凑数模式：直接给出一个目标数字
+    // 凑数模式：直接给出一个目标数字，并要求使用特定的运算符
     const target = Math.floor(Math.random() * (maxNumber * 2)) + 5;
-    return { num1: 0, num2: 0, operator: 'add', answer: target };
+    const requiredOp = operators.length > 0 ? operators[Math.floor(Math.random() * operators.length)] : 'add';
+    return { num1: 0, num2: 0, operator: requiredOp, answer: target };
   }
 
   const operator = operators[Math.floor(Math.random() * operators.length)];
@@ -334,7 +335,8 @@ export const TugOfWarApp = () => {
       isCorrect = parseInt(input) === problem.answer;
     } else {
       const result = evaluateExpression(input);
-      isCorrect = result !== null && Math.abs(result - problem.answer) < 0.01;
+      const requiredSymbol = getOpSymbol(problem.operator);
+      isCorrect = result !== null && Math.abs(result - problem.answer) < 0.01 && input.includes(requiredSymbol);
     }
 
     if (isCorrect) {
@@ -469,25 +471,23 @@ export const TugOfWarApp = () => {
                   </button>
                 </div>
 
-                {settings.gameMode === 'classic' && (
-                  <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">{t('tugOfWar.operators')}</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
-                        <button
-                          key={op}
-                          onClick={() => {
-                            const newOps = settings.operators.includes(op) ? settings.operators.filter(i => i !== op) : [...settings.operators, op];
-                            if (newOps.length > 0) setSettings({...settings, operators: newOps});
-                          }}
-                          className={`py-3 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
-                        >
-                          {getOpSymbol(op)}
-                        </button>
-                      ))}
-                    </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">{t('tugOfWar.operators')}</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
+                      <button
+                        key={op}
+                        onClick={() => {
+                          const newOps = settings.operators.includes(op) ? settings.operators.filter(i => i !== op) : [...settings.operators, op];
+                          if (newOps.length > 0) setSettings({...settings, operators: newOps});
+                        }}
+                        className={`py-3 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
+                      >
+                        {getOpSymbol(op)}
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
@@ -634,7 +634,12 @@ export const TugOfWarApp = () => {
                       {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
                     </div>
                     <div className="text-[40px] md:text-[50px] font-black text-slate-800 leading-none mb-4">
-                      {settings.gameMode === 'target' ? blueProblem.answer : (
+                      {settings.gameMode === 'target' ? (
+                        <div className="flex flex-col items-center">
+                          <div>{blueProblem.answer}</div>
+                          <div className="text-sm font-bold text-blue-500 mt-2">{t('tugOfWar.mustUse')}{getOpSymbol(blueProblem.operator)}</div>
+                        </div>
+                      ) : (
                         <>{blueProblem.num1} <span className="text-blue-500">{getOpSymbol(blueProblem.operator)}</span> {blueProblem.num2}</>
                       )}
                     </div>
@@ -704,12 +709,17 @@ export const TugOfWarApp = () => {
                       {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
                     </div>
                     <div className="text-[40px] md:text-[50px] font-black text-slate-800 leading-none mb-4">
-                      {settings.gameMode === 'target' ? redProblem.answer : (
+                      {settings.gameMode === 'target' ? (
+                        <div className="flex flex-col items-center">
+                          <div>{redProblem.answer}</div>
+                          <div className="text-sm font-bold text-red-500 mt-2">{t('tugOfWar.mustUse')}{getOpSymbol(redProblem.operator)}</div>
+                        </div>
+                      ) : (
                         <>{redProblem.num1} <span className="text-red-500">{getOpSymbol(redProblem.operator)}</span> {redProblem.num2}</>
                       )}
                     </div>
                     <div className="h-[60px] w-full bg-slate-50 rounded-2xl text-[36px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
-                      {redInput || '?'}
+                      {redInput || (settings.gameMode === 'target' ? '?' : '?')}
                     </div>
                   </div>
                 )}

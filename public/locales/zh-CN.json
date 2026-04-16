@@ -563,6 +563,7 @@
     "combo": "{n} 连击!",
     "frenzy": "狂暴模式!",
     "targetNumber": "目标数字",
+    "mustUse": "须包含: ",
     "inputEquation": "输入算式得出结果"
   }
 }

@@ -528,6 +528,7 @@
     "combo": "{n} Combo!",
     "frenzy": "FRENZY MODE!",
     "targetNumber": "Target Number",
+    "mustUse": "Must use: ",
     "inputEquation": "Input equation to match"
   }
 }

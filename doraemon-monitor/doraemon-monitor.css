@@ -2743,3 +2743,99 @@
   font-weight: 500;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
+
+/* Improved Session Trend Chart */
+.report-session-trend {
+  margin: 10px 0;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .report-session-trend {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.trend-pro-wrapper {
+  position: relative;
+  width: 100%;
+  height: 140px; /* 增加高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+.trend-pro-svg {
+  flex: 1;
+  width: 100%;
+  overflow: visible;
+}
+
+.trend-grid-labels {
+  position: absolute;
+  left: -28px;
+  top: 0;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.trend-time-axis {
+  height: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  opacity: 0.8;
+  padding: 0 4px;
+}
+
+.trend-extreme-tags {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.trend-extreme-tags span {
+  position: absolute;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 5;
+}
+
+.tag-peak {
+  top: -24px;
+  background: #ff416c;
+  color: white;
+}
+
+.tag-low {
+  bottom: 0;
+  background: #00f260;
+  color: #064e3b;
+}
+
+.trend-empty-hint {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: bold;
+  font-style: italic;
+  opacity: 0.5;
+}

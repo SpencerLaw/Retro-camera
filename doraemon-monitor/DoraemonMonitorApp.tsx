@@ -1330,6 +1330,81 @@ const DoraemonMonitorApp: React.FC = () => {
               </div>
             </div>
 
+            <div className="report-trend-chart">
+              <div className="report-trend-header">
+                <span className="report-trend-title">一周分贝趋势 (Peak dB)</span>
+              </div>
+              <div className="report-trend-svg-container">
+                <svg viewBox="0 0 500 120" className="report-trend-svg" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Grid Lines */}
+                  <line x1="0" y1="20" x2="500" y2="20" stroke="#e2e8f0" strokeDasharray="4 4" strokeWidth="1" />
+                  <line x1="0" y1="60" x2="500" y2="60" stroke="#e2e8f0" strokeDasharray="4 4" strokeWidth="1" />
+                  <line x1="0" y1="100" x2="500" y2="100" stroke="#e2e8f0" strokeDasharray="4 4" strokeWidth="1" />
+                  
+                  {(() => {
+                    // Extract daily peak dBs
+                    const dailyPeaks = reportDayGroups.map(g => {
+                      if (g.records.length === 0) return 0;
+                      return Math.max(...g.records.map(r => r.peakDb));
+                    });
+                    
+                    const hasData = dailyPeaks.some(v => v > 0);
+                    if (!hasData) return null;
+
+                    // SVG Coordinates mapping
+                    const minDb = 40; // baseline
+                    const maxDb = Math.max(80, ...dailyPeaks) + 10;
+                    const getX = (index: number) => (index / 4) * 460 + 20;
+                    const getY = (val: number) => 100 - ((val - minDb) / (maxDb - minDb)) * 80;
+
+                    // Generate Path
+                    let d = `M ${getX(0)} ${getY(dailyPeaks[0] || minDb)}`;
+                    for (let i = 1; i < 5; i++) {
+                      const currVal = dailyPeaks[i] || minDb;
+                      // Bezier curve approximation
+                      const prevX = getX(i - 1);
+                      const prevY = getY(dailyPeaks[i - 1] || minDb);
+                      const currX = getX(i);
+                      const currY = getY(currVal);
+                      const cpX1 = prevX + (currX - prevX) / 2;
+                      const cpX2 = currX - (currX - prevX) / 2;
+                      d += ` C ${cpX1} ${prevY}, ${cpX2} ${currY}, ${currX} ${currY}`;
+                    }
+
+                    return (
+                      <>
+                        <path d={`${d} L ${getX(4)} 100 L ${getX(0)} 100 Z`} fill="url(#trendGradient)" />
+                        <path d={d} fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        
+                        {dailyPeaks.map((val, i) => val > 0 && (
+                          <g key={i}>
+                            <circle cx={getX(i)} cy={getY(val)} r="4" fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
+                            <text x={getX(i)} y={getY(val) - 10} fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">
+                              {Math.round(val)}
+                            </text>
+                          </g>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </svg>
+                
+                {/* X Axis Labels */}
+                <div className="report-trend-x-axis">
+                  {reportDayGroups.map(g => (
+                    <span key={g.key}>{g.label}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <div className="report-viewer-layout">
               <div className="report-day-sidebar">
                 {reportDayGroups.map(group => (

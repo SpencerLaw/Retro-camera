@@ -2743,3 +2743,52 @@
   font-weight: 500;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
+
+/* Report Trend Chart */
+.report-trend-chart {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.report-trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-trend-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.report-trend-svg-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-trend-svg {
+  width: 100%;
+  height: 120px;
+  overflow: visible;
+}
+
+.report-trend-x-axis {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}

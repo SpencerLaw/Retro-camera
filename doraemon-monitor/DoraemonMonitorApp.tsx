@@ -1332,10 +1332,10 @@ const DoraemonMonitorApp: React.FC = () => {
 
             <div className="report-trend-chart">
               <div className="report-trend-header">
-                <span className="report-trend-title">一周分贝趋势 (Peak dB)</span>
+                <span className="report-trend-title">一周分贝趋势 (按场次 Peak dB)</span>
               </div>
               <div className="report-trend-svg-container">
-                <svg viewBox="0 0 500 120" className="report-trend-svg" preserveAspectRatio="none">
+                <svg viewBox="0 0 500 130" className="report-trend-svg" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
@@ -1349,28 +1349,29 @@ const DoraemonMonitorApp: React.FC = () => {
                   <line x1="0" y1="100" x2="500" y2="100" stroke="#e2e8f0" strokeDasharray="4 4" strokeWidth="1" />
                   
                   {(() => {
-                    // Extract daily peak dBs
-                    const dailyPeaks = reportDayGroups.map(g => {
-                      if (g.records.length === 0) return 0;
-                      return Math.max(...g.records.map(r => r.peakDb));
-                    });
+                    // Extract all sessions chronologically
+                    const sortedSessions = [...weeklyRecords].sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime());
                     
-                    const hasData = dailyPeaks.some(v => v > 0);
-                    if (!hasData) return null;
+                    if (sortedSessions.length === 0) return null;
 
-                    // SVG Coordinates mapping
+                    const sessionPeaks = sortedSessions.map(r => r.peakDb);
                     const minDb = 40; // baseline
-                    const maxDb = Math.max(80, ...dailyPeaks) + 10;
-                    const getX = (index: number) => (index / 4) * 460 + 20;
+                    const maxDb = Math.max(80, ...sessionPeaks) + 10;
+                    
+                    const n = sortedSessions.length;
+                    const getX = (index: number) => {
+                      if (n <= 1) return 250;
+                      return (index / (n - 1)) * 460 + 20;
+                    };
                     const getY = (val: number) => 100 - ((val - minDb) / (maxDb - minDb)) * 80;
 
                     // Generate Path
-                    let d = `M ${getX(0)} ${getY(dailyPeaks[0] || minDb)}`;
-                    for (let i = 1; i < 5; i++) {
-                      const currVal = dailyPeaks[i] || minDb;
+                    let d = `M ${getX(0)} ${getY(sessionPeaks[0] || minDb)}`;
+                    for (let i = 1; i < n; i++) {
+                      const currVal = sessionPeaks[i] || minDb;
                       // Bezier curve approximation
                       const prevX = getX(i - 1);
-                      const prevY = getY(dailyPeaks[i - 1] || minDb);
+                      const prevY = getY(sessionPeaks[i - 1] || minDb);
                       const currX = getX(i);
                       const currY = getY(currVal);
                       const cpX1 = prevX + (currX - prevX) / 2;
@@ -1378,30 +1379,48 @@ const DoraemonMonitorApp: React.FC = () => {
                       d += ` C ${cpX1} ${prevY}, ${cpX2} ${currY}, ${currX} ${currY}`;
                     }
 
+                    let lastDay = '';
+
                     return (
                       <>
-                        <path d={`${d} L ${getX(4)} 100 L ${getX(0)} 100 Z`} fill="url(#trendGradient)" />
+                        <path d={`${d} L ${getX(n - 1)} 100 L ${getX(0)} 100 Z`} fill="url(#trendGradient)" />
                         <path d={d} fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                         
-                        {dailyPeaks.map((val, i) => val > 0 && (
-                          <g key={i}>
-                            <circle cx={getX(i)} cy={getY(val)} r="4" fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
-                            <text x={getX(i)} y={getY(val) - 10} fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">
-                              {Math.round(val)}
-                            </text>
-                          </g>
-                        ))}
+                        {sortedSessions.map((session, i) => {
+                          const val = session.peakDb;
+                          const dayKey = getReportWeekdayKey(session.startedAt);
+                          const isFirstOfDay = dayKey !== lastDay;
+                          if (isFirstOfDay && dayKey) lastDay = dayKey;
+
+                          return (
+                            <g key={session.id}>
+                              {/* Draw a vertical separator for new days */}
+                              {isFirstOfDay && i > 0 && (
+                                <line x1={getX(i) - (getX(i) - getX(i-1))/2} y1="10" x2={getX(i) - (getX(i) - getX(i-1))/2} y2="110" stroke="#cbd5e1" strokeDasharray="2 2" strokeWidth="1" />
+                              )}
+                              
+                              <circle cx={getX(i)} cy={getY(val)} r={n > 20 ? "3" : "4"} fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
+                              
+                              {/* Only show text if not too crowded */}
+                              {n <= 25 && val > 0 && (
+                                <text x={getX(i)} y={getY(val) - 10} fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">
+                                  {Math.round(val)}
+                                </text>
+                              )}
+
+                              {/* X Axis Day Label */}
+                              {isFirstOfDay && dayKey && (
+                                <text x={getX(i)} y="120" fontSize="10" fill="#94a3b8" textAnchor="middle" fontWeight="bold">
+                                  {t(`doraemon.report.days.${dayKey}`)}
+                                </text>
+                              )}
+                            </g>
+                          );
+                        })}
                       </>
                     );
                   })()}
                 </svg>
-                
-                {/* X Axis Labels */}
-                <div className="report-trend-x-axis">
-                  {reportDayGroups.map(g => (
-                    <span key={g.key}>{g.label}</span>
-                  ))}
-                </div>
               </div>
             </div>
 

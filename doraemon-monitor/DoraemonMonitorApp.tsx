@@ -54,7 +54,7 @@ interface SessionReport {
   warnCount: number;
   threshold: number;
   sensitivity: number;
-  history?: number[]; // 新增字段：本场波动历史
+  history?: number[]; // 新增：场次波动历史
 }
 
 const REPORT_STORAGE_KEY = 'doraemon_session_reports_v1';
@@ -93,13 +93,26 @@ const getCurrentWeekMonday = (baseDate = new Date()) => {
 
 const loadStoredReports = (): SessionReport[] => {
   if (typeof window === 'undefined') return [];
+
   try {
     const raw = localStorage.getItem(REPORT_STORAGE_KEY);
     if (!raw) return [];
+
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is SessionReport => (
-        item && typeof item.id === 'string' && typeof item.startedAt === 'string'
+
+    return parsed
+      .filter((item): item is SessionReport => (
+        item &&
+        typeof item.id === 'string' &&
+        typeof item.startedAt === 'string' &&
+        (typeof item.endedAt === 'string' || item.endedAt === null) &&
+        typeof item.peakDb === 'number' &&
+        typeof item.quietSeconds === 'number' &&
+        typeof item.totalSeconds === 'number' &&
+        typeof item.warnCount === 'number' &&
+        typeof item.threshold === 'number' &&
+        typeof item.sensitivity === 'number'
       ))
       .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
       .slice(0, MAX_STORED_REPORTS);
@@ -184,6 +197,9 @@ const DoraemonMonitorApp: React.FC = () => {
   const noiseFloorRef = useRef(40);
   const environmentDbRef = useRef(40);
   const recentDbRef = useRef<number[]>([]);
+  const micTestWindowRef = useRef<number[]>([]);
+  const quietTestSamplesRef = useRef<number[]>([]);
+  const activeTestSamplesRef = useRef<number[]>([]);
   const limitRef = useRef(60);
   const currentDbRef = useRef(40);
   const maxDbRef = useRef(0);
@@ -192,7 +208,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const totalTimeRef = useRef(0);
   const sessionReportsRef = useRef<SessionReport[]>(loadStoredReports());
   const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
-  const sessionHistoryRef = useRef<number[]>([]); // 场次波动历史采样
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -257,6 +272,7 @@ const DoraemonMonitorApp: React.FC = () => {
         else {
           setAuthError(res.message);
           clearLicense();
+          // Start countdown
           const timer = setInterval(() => {
             setCountdown((prev) => {
               if (prev <= 1) {
@@ -280,6 +296,7 @@ const DoraemonMonitorApp: React.FC = () => {
       setShowHelp(false);
       setShowThresholdHelp(false);
     };
+
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
@@ -297,7 +314,6 @@ const DoraemonMonitorApp: React.FC = () => {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       startedAt: new Date().toISOString()
     };
-    sessionHistoryRef.current = [];
   }, []);
 
   const finalizeCurrentSession = useCallback(() => {
@@ -305,13 +321,11 @@ const DoraemonMonitorApp: React.FC = () => {
     if (!activeSession) return;
 
     const endedAt = new Date();
-    const totalSeconds = totalTimeRef.current;
-    
-    // 压缩采样点至最多 20 个，平衡视觉与存储
-    const rawHistory = sessionHistoryRef.current;
-    const samplingRate = Math.max(1, Math.floor(rawHistory.length / 15));
-    const history = rawHistory.filter((_, i) => i % samplingRate === 0).slice(0, 20);
-
+    const inferredDuration = Math.max(
+      1,
+      Math.round((endedAt.getTime() - new Date(activeSession.startedAt).getTime()) / 1000)
+    );
+    const totalSeconds = Math.max(totalTimeRef.current, inferredDuration);
     const nextRecord: SessionReport = {
       id: activeSession.id,
       startedAt: activeSession.startedAt,
@@ -321,8 +335,7 @@ const DoraemonMonitorApp: React.FC = () => {
       totalSeconds,
       warnCount: Math.max(0, warnCountRef.current),
       threshold: limitRef.current,
-      sensitivity: sensitivityRef.current,
-      history: history.length > 2 ? history : undefined
+      sensitivity: sensitivityRef.current
     };
 
     const nextReports = [
@@ -334,7 +347,6 @@ const DoraemonMonitorApp: React.FC = () => {
 
     persistSessionReports(nextReports);
     activeSessionRef.current = null;
-    sessionHistoryRef.current = [];
   }, [persistSessionReports]);
 
   const stopAudioMonitoring = useCallback(() => {
@@ -343,7 +355,9 @@ const DoraemonMonitorApp: React.FC = () => {
       clearInterval(alarmIntervalRef.current);
       alarmIntervalRef.current = null;
     }
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
     sourceRef.current?.disconnect();
     sourceRef.current = null;
     muteGainRef.current?.disconnect();
@@ -368,42 +382,111 @@ const DoraemonMonitorApp: React.FC = () => {
     const overallMin = allSamples.length ? Math.min(...allSamples) : 0;
     const overallMax = allSamples.length ? Math.max(...allSamples) : 0;
     const dynamicRange = Math.max(0, activeAvg - quietAvg);
-    let health: MicTestHealth = quietAvg >= 54 ? 'noisy' : dynamicRange < 3 ? 'flat' : dynamicRange < 6 ? 'weak' : 'good';
-    
-    let recommendedSensitivity = sensitivityRef.current;
-    if (health === 'noisy') recommendedSensitivity = clamp(Math.round(sensitivityRef.current - 6), 30, 70);
-    else if (health === 'flat') recommendedSensitivity = clamp(Math.round(sensitivityRef.current + 8), 35, 75);
-    else if (health === 'weak') recommendedSensitivity = clamp(Math.round(sensitivityRef.current + 4), 35, 72);
 
-    const recommendedLimit = clamp(Math.round(quietAvg + Math.max(6, Math.min(10, dynamicRange * 0.9 || 6))), 50, 75);
-    setMicTestResult({ quietAvg, activeAvg, dynamicRange, overallMin, overallMax, recommendedSensitivity, recommendedLimit, health });
+    let health: MicTestHealth = 'good';
+    if (quietAvg >= 54) {
+      health = 'noisy';
+    } else if (dynamicRange < 3) {
+      health = 'flat';
+    } else if (dynamicRange < 6) {
+      health = 'weak';
+    }
+
+    let recommendedSensitivity = sensitivityRef.current;
+    if (health === 'noisy') {
+      recommendedSensitivity = clamp(Math.round(sensitivityRef.current - 6), 30, 70);
+    } else if (health === 'flat') {
+      recommendedSensitivity = clamp(Math.round(sensitivityRef.current + 8), 35, 75);
+    } else if (health === 'weak') {
+      recommendedSensitivity = clamp(Math.round(sensitivityRef.current + 4), 35, 72);
+    }
+
+    const recommendedLimit = clamp(
+      Math.round(quietAvg + Math.max(6, Math.min(10, dynamicRange * 0.9 || 6))),
+      50,
+      75
+    );
+
+    setMicTestResult({
+      quietAvg,
+      activeAvg,
+      dynamicRange,
+      overallMin,
+      overallMax,
+      recommendedSensitivity,
+      recommendedLimit,
+      health
+    });
+    micTestStageRef.current = 'done';
     setMicTestStage('done');
   }, []);
 
   const startMicTest = useCallback(() => {
     if (!isStarted) return;
-    setMicTestStage('quiet');
+    quietTestSamplesRef.current = [];
+    activeTestSamplesRef.current = [];
+    micTestWindowRef.current = [];
+    micTestStageRef.current = 'quiet';
     setMicTestResult(null);
     setQuietSnapshotAvg(null);
     setActiveSnapshotAvg(null);
+    setMicTestStage('quiet');
   }, [isStarted]);
+
+  const captureQuietMicTest = useCallback(() => {
+    if (!isStarted) return;
+
+    const snapshot = micTestWindowRef.current.length ? [...micTestWindowRef.current] : [currentDb];
+    quietTestSamplesRef.current = snapshot;
+    activeTestSamplesRef.current = [];
+    micTestWindowRef.current = [];
+    micTestStageRef.current = 'active';
+    setMicTestResult(null);
+    setQuietSnapshotAvg(average(snapshot));
+    setActiveSnapshotAvg(null);
+    setMicTestStage('active');
+  }, [currentDb, isStarted]);
+
+  const captureActiveMicTest = useCallback(() => {
+    if (!isStarted || quietTestSamplesRef.current.length === 0) return;
+
+    const snapshot = micTestWindowRef.current.length ? [...micTestWindowRef.current] : [currentDb];
+    activeTestSamplesRef.current = snapshot;
+    setActiveSnapshotAvg(average(snapshot));
+    finishMicTest();
+  }, [currentDb, finishMicTest, isStarted]);
+
+  const applyMicTestRecommendation = useCallback(() => {
+    if (!micTestResult) return;
+    setSensitivity(micTestResult.recommendedSensitivity);
+    setLimit(micTestResult.recommendedLimit);
+  }, [micTestResult]);
 
   useEffect(() => {
     analyzeAudioRef.current = () => {
       const analyser = analyserRef.current;
       if (!analyser) return;
-      if (audioContextRef.current?.state === 'suspended') audioContextRef.current.resume().catch(() => undefined);
+
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => undefined);
+      }
 
       const data = new Uint8Array(analyser.fftSize);
       analyser.getByteTimeDomainData(data);
+
       let sum = 0;
       for (let i = 0; i < data.length; i++) {
         const x = (data[i] - 128) / 128;
         sum += x * x;
       }
+
       const rms = Math.sqrt(sum / data.length);
       const baseDb = clamp(rms > 0 ? (Math.log10(rms) * 20 + 100) : 35, 35, 120);
       const isIgnoringOwnAlarm = Date.now() < alarmIgnoreUntilRef.current;
+
+      if (!Number.isFinite(noiseFloorRef.current) || noiseFloorRef.current <= 0) {
+        noiseFloorRef.current = baseDb;
+      }
 
       if (!isIgnoringOwnAlarm) {
         const floorGap = baseDb - noiseFloorRef.current;
@@ -412,191 +495,937 @@ const DoraemonMonitorApp: React.FC = () => {
         noiseFloorRef.current = clamp(noiseFloorRef.current, 30, 80);
       }
 
-      const ratio = sensitivityRef.current / 100;
-      const adjustedDb = clamp(noiseFloorRef.current + (Math.max(0, baseDb - noiseFloorRef.current - (2 + (1 - ratio) * 11)) * (0.16 + ratio * 2.04)), 35, 120);
+      const sensitivityRatio = sensitivityRef.current / 100;
+      const rawDelta = Math.max(0, baseDb - noiseFloorRef.current);
+      const noiseGate = 2 + ((1 - sensitivityRatio) * 11);
+      const deltaAboveGate = Math.max(0, rawDelta - noiseGate);
+      const sensitivityScale = 0.16 + (sensitivityRatio * 2.04);
+      const adjustedDb = clamp(
+        noiseFloorRef.current + (deltaAboveGate * sensitivityScale),
+        35,
+        120
+      );
       const effectiveDb = isIgnoringOwnAlarm ? environmentDbRef.current : adjustedDb;
 
-      if (!isIgnoringOwnAlarm) environmentDbRef.current = adjustedDb;
+      if (!isIgnoringOwnAlarm) {
+        environmentDbRef.current = adjustedDb;
+      }
+
       recentDbRef.current.push(effectiveDb);
-      if (recentDbRef.current.length > 40) recentDbRef.current.shift();
+      if (recentDbRef.current.length > 40) {
+        recentDbRef.current.shift();
+      }
+
+      const minRecent = Math.min(...recentDbRef.current);
+      const maxRecent = Math.max(...recentDbRef.current);
+      const recentRange = maxRecent - minRecent;
+      const liveActivity = clamp(deltaAboveGate * sensitivityScale, 0, 60);
 
       setAmbientDb(noiseFloorRef.current);
-      setActivityDb(clamp(adjustedDb - noiseFloorRef.current, 0, 60));
-      setSignalRange(Math.max(...recentDbRef.current) - Math.min(...recentDbRef.current));
+      setActivityDb(liveActivity);
+      setSignalRange(recentRange);
+      currentDbRef.current = effectiveDb;
       setCurrentDb(effectiveDb);
-      setMaxDb(m => Math.max(m, effectiveDb));
+      setMaxDb(m => {
+        const next = Math.max(m, effectiveDb);
+        maxDbRef.current = next;
+        return next;
+      });
 
-      // 实时采样：大约每 2.5 秒记录一次
-      if (activeSessionRef.current && Date.now() % 2500 < 150) {
-        sessionHistoryRef.current.push(effectiveDb);
+      if (document.hidden) {
+        document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(effectiveDb).toString());
+      } else {
+        document.title = t('doraemon.appTitle');
+      }
+
+      const stage = micTestStageRef.current;
+      if (stage === 'quiet' || stage === 'active') {
+        micTestWindowRef.current.push(effectiveDb);
+        if (micTestWindowRef.current.length > 15) {
+          micTestWindowRef.current.shift();
+        }
       }
     };
-  }, [t]);
+  }, [finishMicTest, t]);
 
   useEffect(() => {
-    const workerBlob = new Blob([`let i = null; self.onmessage = e => { if (e.data === 'start') { if (i) clearInterval(i); i = setInterval(() => self.postMessage('t'), 100); } else if (e.data === 'stop') { clearInterval(i); i = null; } };`], { type: 'application/javascript' });
+    const workerBlob = new Blob([`
+      let interval = null;
+      self.onmessage = function(e) {
+        if (e.data === 'start') {
+          if (interval) clearInterval(interval);
+          interval = setInterval(() => self.postMessage('tick'), 100);
+        } else if (e.data === 'stop') {
+          if (interval) clearInterval(interval);
+          interval = null;
+        }
+      };
+    `], { type: 'application/javascript' });
     workerRef.current = new Worker(URL.createObjectURL(workerBlob));
     workerRef.current.onmessage = () => analyzeAudioRef.current();
-    return () => workerRef.current?.terminate();
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
-    const handlePageHide = () => { finalizeCurrentSession(); stopAudioMonitoring(); };
+    const handlePageHide = () => {
+      finalizeCurrentSession();
+      stopAudioMonitoring();
+    };
+
     window.addEventListener('pagehide', handlePageHide);
-    return () => { window.removeEventListener('pagehide', handlePageHide); finalizeCurrentSession(); stopAudioMonitoring(); };
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+      finalizeCurrentSession();
+      stopAudioMonitoring();
+    };
   }, [finalizeCurrentSession, stopAudioMonitoring]);
 
   const initApp = async () => {
     setIsLoading(true);
     setError('');
-    if (!navigator.mediaDevices?.getUserMedia) { setError(t('doraemon.errors.startFailed')); setIsLoading(false); return; }
-    finalizeCurrentSession(); stopAudioMonitoring();
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError(t('doraemon.errors.startFailed') + t('doraemon.errors.browserNotSupported'));
+      setIsLoading(false);
+      return;
+    }
+
+    finalizeCurrentSession();
+    stopAudioMonitoring();
+    setState('calm');
+    setWarnCount(0);
+    setMaxDb(0);
+    setQuietTime(0);
+    setTotalTime(0);
+    setCurrentDb(40);
+    setAmbientDb(40);
+    setActivityDb(0);
+    setSignalRange(0);
+    setMicTestStage('idle');
+    setMicTestResult(null);
+    setQuietSnapshotAvg(null);
+    setActiveSnapshotAvg(null);
+    recentDbRef.current = [];
+    noiseFloorRef.current = 40;
+    environmentDbRef.current = 40;
+    micTestWindowRef.current = [];
+    currentDbRef.current = 40;
+    maxDbRef.current = 0;
+    warnCountRef.current = 0;
+    quietTimeRef.current = 0;
+    totalTimeRef.current = 0;
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+      const supported = navigator.mediaDevices.getSupportedConstraints?.() || {};
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: supported.echoCancellation ? true : undefined,
+          noiseSuppression: supported.noiseSuppression ? false : undefined,
+          autoGainControl: supported.autoGainControl ? false : undefined,
+          channelCount: supported.channelCount ? 1 : undefined
+        }
+      });
+
+      const track = stream.getAudioTracks()[0];
+      const settings = track?.getSettings?.() || {};
       streamRef.current = stream;
-      const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+      setCaptureSettings({
+        echoCancellation: typeof settings.echoCancellation === 'boolean' ? settings.echoCancellation : null,
+        noiseSuppression: typeof settings.noiseSuppression === 'boolean' ? settings.noiseSuppression : null,
+        autoGainControl: typeof settings.autoGainControl === 'boolean' ? settings.autoGainControl : null
+      });
+
+      track.onended = () => {
+        finalizeCurrentSession();
+        stopAudioMonitoring();
+        setIsStarted(false);
+        setError(t('doraemon.errors.micDisconnected'));
+      };
+
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      const context = new AC();
       audioContextRef.current = context;
-      const analyser = context.createAnalyser(); analyser.fftSize = 512; analyserRef.current = analyser;
-      const source = context.createMediaStreamSource(stream); sourceRef.current = source; source.connect(analyser);
-      const muteGain = context.createGain(); muteGain.gain.value = 0; muteGainRef.current = muteGain; analyser.connect(muteGain); muteGain.connect(context.destination);
-      beginSessionTracking(); setIsStarted(true); workerRef.current?.postMessage('start');
-    } catch (err: any) { setError(t('doraemon.errors.startFailed')); } finally { setIsLoading(false); }
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 512;
+      analyserRef.current = analyser;
+      const source = context.createMediaStreamSource(stream);
+      sourceRef.current = source;
+      source.connect(analyser);
+      const muteGain = context.createGain();
+      muteGain.gain.value = 0;
+      muteGainRef.current = muteGain;
+      analyser.connect(muteGain);
+      muteGain.connect(context.destination);
+      beginSessionTracking();
+      setIsStarted(true);
+      workerRef.current?.postMessage('start');
+    } catch (err: any) {
+      const name = err.name || '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        setError(t('doraemon.errors.startFailed') + t('doraemon.errors.permissionDenied'));
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'DeviceNotFoundError') {
+        setError(t('doraemon.errors.startFailed') + t('doraemon.errors.noMicFound'));
+      } else {
+        setError(t('doraemon.errors.startFailed') + t('doraemon.errors.unknownError') + err.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      const next = !prev;
+      localStorage.setItem('doraemon_muted', String(next));
+      if (next && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      return next;
+    });
+  };
   const playAlarmSound = useCallback((withSpeech = true) => {
     if (!audioContextRef.current || isMuted) return;
+
     try {
-      if (withSpeech && window.speechSynthesis) { window.speechSynthesis.cancel(); const msg = new SpeechSynthesisUtterance(t('doraemon.quiet')); msg.lang = 'zh-CN'; window.speechSynthesis.speak(msg); }
-      const ctx = audioContextRef.current; if (ctx.state === 'suspended') ctx.resume();
-      const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'square'; osc.frequency.setValueAtTime(440, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.28);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime); gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.28);
-    } catch (e) {}
+      if (withSpeech && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(t('doraemon.quiet'));
+        msg.lang = 'zh-CN';
+        msg.rate = 1;
+        msg.pitch = 0.85;
+        msg.volume = 0.85;
+        window.speechSynthesis.speak(msg);
+      }
+
+      if (navigator.vibrate) {
+        navigator.vibrate([160, 80, 160]);
+      }
+
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => undefined);
+      }
+
+      const currentTime = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, currentTime);
+      osc.frequency.exponentialRampToValueAtTime(523.25, currentTime + 0.08);
+      osc.frequency.setValueAtTime(440, currentTime + 0.16);
+      osc.frequency.exponentialRampToValueAtTime(523.25, currentTime + 0.24);
+
+      gain.gain.setValueAtTime(0, currentTime);
+      gain.gain.linearRampToValueAtTime(0.12, currentTime + 0.03);
+      gain.gain.linearRampToValueAtTime(0.12, currentTime + 0.22);
+      gain.gain.linearRampToValueAtTime(0, currentTime + 0.28);
+
+      osc.start(currentTime);
+      osc.stop(currentTime + 0.28);
+    } catch (e) {
+      console.error('Audio play failed', e);
+    }
   }, [isMuted, t]);
 
   useEffect(() => {
     if (!isStarted) return;
+
     if (currentDb >= limit) {
-      if (state === 'alarm') return;
-      if (alarmPendingSinceRef.current === null) { alarmPendingSinceRef.current = Date.now(); return; }
-      if (Date.now() - alarmPendingSinceRef.current >= 2000) {
-        setState('alarm'); setWarnCount(prev => prev + 1);
-        setQuietTime(0); alarmPendingSinceRef.current = null;
+      if (state === 'alarm') {
+        return;
       }
-    } else { alarmPendingSinceRef.current = null; if (state !== 'calm') setState('calm'); }
+
+      if (alarmPendingSinceRef.current === null) {
+        alarmPendingSinceRef.current = Date.now();
+        return;
+      }
+
+      if (Date.now() - alarmPendingSinceRef.current >= 2000) {
+        setState('alarm');
+        setWarnCount(prev => {
+          const next = prev + 1;
+          warnCountRef.current = next;
+          return next;
+        });
+        setQuietTime(0);
+        quietTimeRef.current = 0;
+        alarmPendingSinceRef.current = null;
+      }
+      return;
+    }
+
+    alarmPendingSinceRef.current = null;
+    if (state !== 'calm') {
+      setState('calm');
+    }
   }, [currentDb, isStarted, limit, state]);
 
   useEffect(() => {
+    if (!isStarted) {
+      alarmPendingSinceRef.current = null;
+    }
+  }, [isStarted]);
+
+  useEffect(() => {
     if (state === 'alarm' && !isMuted && !isOverlayOpen) {
-      const loop = () => { playAlarmSound(true); lastAlarmPlayedAtRef.current = Date.now(); alarmIgnoreUntilRef.current = Date.now() + 900; };
-      if (!alarmIntervalRef.current) alarmIntervalRef.current = setInterval(loop, 1500);
-    } else { if (alarmIntervalRef.current) { clearInterval(alarmIntervalRef.current); alarmIntervalRef.current = null; } }
-    return () => { if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current); };
+      const playLoop = () => {
+        const now = Date.now();
+        playAlarmSound(true);
+        lastAlarmPlayedAtRef.current = now;
+        alarmIgnoreUntilRef.current = now + 900;
+      };
+
+      if (Date.now() - lastAlarmPlayedAtRef.current > 1200) {
+        playLoop();
+      }
+
+      if (!alarmIntervalRef.current) {
+        alarmIntervalRef.current = setInterval(() => {
+          if (Date.now() - lastAlarmPlayedAtRef.current < 1200) return;
+          playLoop();
+        }, 1500);
+      }
+    } else {
+      if (alarmIntervalRef.current) {
+        clearInterval(alarmIntervalRef.current);
+        alarmIntervalRef.current = null;
+      }
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+    return () => {
+      if (alarmIntervalRef.current) {
+        clearInterval(alarmIntervalRef.current);
+        alarmIntervalRef.current = null;
+      }
+    };
   }, [state, playAlarmSound, isMuted, isOverlayOpen]);
 
   useEffect(() => {
-    let i: any = null;
-    if (isStarted) i = setInterval(() => { setTotalTime(t => t + 1); if (state !== 'alarm') setQuietTime(q => q + 1); }, 1000);
-    return () => clearInterval(i);
+    let interval: NodeJS.Timeout | null = null;
+    if (isStarted) {
+      interval = setInterval(() => {
+        setTotalTime(prev => {
+          const next = prev + 1;
+          totalTimeRef.current = next;
+          return next;
+        });
+
+        if (state !== 'alarm') {
+          setQuietTime(prev => {
+            const next = prev + 1;
+            quietTimeRef.current = next;
+            return next;
+          });
+        }
+      }, 1000);
+    }
+    return () => { if (interval) clearInterval(interval); };
   }, [isStarted, state]);
 
-  const toggleFullscreen = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
-  const formatReportClock = (d: string) => { const date = new Date(d); return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`; };
-  const formatReportDate = (d: Date) => `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => undefined);
+    } else {
+      document.exitFullscreen().catch(() => undefined);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const formatReportClock = (dateLike: string) => {
+    const date = new Date(dateLike);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  const formatReportDate = (date: Date) => {
+    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+  };
+
+  const liveSessionPreview: SessionReport | null = activeSessionRef.current
+    ? {
+        id: activeSessionRef.current.id,
+        startedAt: activeSessionRef.current.startedAt,
+        endedAt: null,
+        peakDb: Math.round(Math.max(maxDb, currentDb)),
+        quietSeconds: quietTime,
+        totalSeconds: totalTime,
+        warnCount,
+        threshold: limit,
+        sensitivity
+      }
+    : null;
 
   const weekStart = getCurrentWeekMonday();
-  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 4); weekEnd.setHours(23, 59, 59, 999);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 4);
+  weekEnd.setHours(23, 59, 59, 999);
 
-  const reportDayGroups = REPORT_WEEKDAYS.map(({ key, offset }) => {
-    const date = new Date(weekStart); date.setDate(weekStart.getDate() + offset);
-    const dayKey = toDateKey(date);
-    const records = sessionReports.filter(r => toDateKey(r.startedAt) === dayKey);
-    return { key, label: t(`doraemon.report.days.${key}`), dateLabel: formatReportDate(date), records };
+  const currentWeekRecords = sessionReports.filter(report => {
+    const startedAt = new Date(report.startedAt).getTime();
+    return startedAt >= weekStart.getTime() && startedAt <= weekEnd.getTime();
   });
 
-  const selectedReportDay = reportDayGroups.find(g => g.key === activeReportDay) ?? reportDayGroups[0];
+  const liveInCurrentWeek = liveSessionPreview
+    && (() => {
+      const startedAt = new Date(liveSessionPreview.startedAt).getTime();
+      return startedAt >= weekStart.getTime() && startedAt <= weekEnd.getTime();
+    })();
+
+  const weeklyRecords = liveInCurrentWeek
+    ? [liveSessionPreview!, ...currentWeekRecords.filter(report => report.id !== liveSessionPreview!.id)]
+    : currentWeekRecords;
+
+  const weeklyPeak = weeklyRecords.length
+    ? Math.max(...weeklyRecords.map(report => report.peakDb))
+    : 0;
+
+  const reportDayGroups = REPORT_WEEKDAYS.map(({ key, offset }) => {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + offset);
+    const dayKey = toDateKey(date);
+    const records = weeklyRecords
+      .filter(report => toDateKey(report.startedAt) === dayKey)
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+
+    return {
+      key,
+      label: t(`doraemon.report.days.${key}`),
+      dateLabel: formatReportDate(date),
+      records
+    };
+  });
+  const firstReportDayWithData = reportDayGroups.find(group => group.records.length > 0)?.key ?? 'mon';
+  const selectedReportDay = reportDayGroups.find(group => group.key === activeReportDay) ?? reportDayGroups[0];
   const selectedReportIndex = clamp(reportPage, 0, Math.max(0, selectedReportDay.records.length - 1));
   const selectedReportRecord = selectedReportDay.records[selectedReportIndex] ?? null;
   const hasPreviousReport = selectedReportIndex > 0;
   const hasNextReport = selectedReportIndex < selectedReportDay.records.length - 1;
+  const todayReportWeekday = getReportWeekdayKey(new Date());
+  const defaultReportDay = reportDayGroups.find(group => group.key === todayReportWeekday && group.records.length > 0)?.key
+    ?? todayReportWeekday
+    ?? firstReportDayWithData;
 
-  const handleSelectReportDay = (e: any, k: any) => { e.preventDefault(); setActiveReportDay(k); setReportPage(0); };
-  const handleReportSessionMove = (e: any, d: any) => { e.preventDefault(); setReportPage(p => clamp(p + d, 0, selectedReportDay.records.length - 1)); };
+  const captureModeText = captureSettings
+    ? [
+        `${t('doraemon.micTest.echo')}:${captureSettings.echoCancellation === true ? t('doraemon.micTest.on') : captureSettings.echoCancellation === false ? t('doraemon.micTest.off') : t('doraemon.micTest.unknown')}`,
+        `${t('doraemon.micTest.noiseSuppression')}:${captureSettings.noiseSuppression === true ? t('doraemon.micTest.on') : captureSettings.noiseSuppression === false ? t('doraemon.micTest.off') : t('doraemon.micTest.unknown')}`,
+        `${t('doraemon.micTest.autoGain')}:${captureSettings.autoGainControl === true ? t('doraemon.micTest.on') : captureSettings.autoGainControl === false ? t('doraemon.micTest.off') : t('doraemon.micTest.unknown')}`
+      ].join(' · ')
+    : '';
+  const hasMicTestProgress = quietSnapshotAvg !== null || activeSnapshotAvg !== null || micTestResult !== null || micTestStage !== 'idle';
+  const quietCapturedText = quietSnapshotAvg === null
+    ? t('doraemon.micTest.pending')
+    : t('doraemon.micTest.captured').replace('{value}', quietSnapshotAvg.toFixed(1));
+  const activeCapturedText = activeSnapshotAvg === null
+    ? t('doraemon.micTest.pending')
+    : t('doraemon.micTest.captured').replace('{value}', activeSnapshotAvg.toFixed(1));
+  const isMicTestOnQuietStep = quietSnapshotAvg === null;
+  const currentMicTestTitle = micTestResult
+    ? t(`doraemon.micTest.health.${micTestResult.health}`)
+    : isMicTestOnQuietStep
+      ? t('doraemon.micTest.stageQuiet')
+      : t('doraemon.micTest.stageActive');
+  const currentMicTestDesc = micTestResult
+    ? t(`doraemon.micTest.healthDesc.${micTestResult.health}`)
+    : isMicTestOnQuietStep
+      ? t('doraemon.micTest.stageQuietDesc')
+      : t('doraemon.micTest.stageActiveDesc');
+  const closeMicTest = useCallback(() => {
+    setIsMicTestOpen(false);
+  }, []);
+  const closeReport = useCallback(() => {
+    setIsReportOpen(false);
+  }, []);
+  const openMicTest = useCallback(() => {
+    setIsReportOpen(false);
+    setShowHelp(false);
+    setShowThresholdHelp(false);
+    startMicTest();
+    setIsMicTestOpen(true);
+  }, [startMicTest]);
+  const openReport = useCallback(() => {
+    setIsMicTestOpen(false);
+    setShowHelp(false);
+    setShowThresholdHelp(false);
+    setActiveReportDay(defaultReportDay);
+    setReportPage(0);
+    setIsReportOpen(true);
+  }, [defaultReportDay]);
+  const handleSelectReportDay = (event: React.SyntheticEvent, dayKey: ReportWeekday) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setActiveReportDay(dayKey);
+    setReportPage(0);
+  };
+  const handleReportSessionMove = (event: React.SyntheticEvent, direction: -1 | 1) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setReportPage(prev => clamp(prev + direction, 0, Math.max(0, selectedReportDay.records.length - 1)));
+  };
+  const stopModalPropagation = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
+  const stopModalMouseDown = (event: React.MouseEvent) => {
+    if (!shouldStopModalMouseDown(event.target)) return;
+    event.stopPropagation();
+  };
+  const handleOpenMicTest = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openMicTest();
+  };
+  const resetWarnCount = useCallback(() => {
+    warnCountRef.current = 0;
+    setWarnCount(0);
+  }, []);
+  const closeWarningResetDialog = useCallback(() => {
+    setIsWarningResetDialogOpen(false);
+    setWarningResetDialogMode('manage');
+    setWarningResetCurrentPassword('');
+    setWarningResetPasswordInput('');
+    setWarningResetPasswordConfirm('');
+    setWarningResetPasswordError('');
+  }, []);
+  const openWarningResetDialog = useCallback((mode: WarningResetDialogMode) => {
+    setIsMicTestOpen(false);
+    setIsReportOpen(false);
+    setShowHelp(false);
+    setShowThresholdHelp(false);
+    setWarningResetDialogMode(mode);
+    setWarningResetCurrentPassword('');
+    setWarningResetPasswordInput('');
+    setWarningResetPasswordConfirm('');
+    setWarningResetPasswordError('');
+    setIsWarningResetDialogOpen(true);
+  }, []);
+  const handleOpenWarningResetSettings = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openWarningResetDialog('manage');
+  };
+  const handleOpenWarningResetHelp = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openWarningResetDialog('help');
+  };
+  const handleWarningResetDialogClose = (event?: React.SyntheticEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    closeWarningResetDialog();
+  };
+  const handleResetWarnCount = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (warningResetPasswordEnabled) {
+      openWarningResetDialog('verify');
+      return;
+    }
+
+    resetWarnCount();
+  };
+  const getWarningResetValidationMessage = (code: string | null) => {
+    if (code === 'current-password') return t('doraemon.warningResetPassword.currentPasswordError');
+    if (code === 'mismatch') return t('doraemon.warningResetPassword.mismatchError');
+    if (code === 'empty') return t('doraemon.warningResetPassword.emptyError');
+    return '';
+  };
+  const handleSaveWarningResetPassword = async (event: React.FormEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const validationError = await validateWarningResetPasswordChange({
+      existingRecord: warningResetPasswordRecord,
+      currentPassword: warningResetCurrentPassword,
+      nextPassword: warningResetPasswordInput,
+      confirmPassword: warningResetPasswordConfirm,
+    });
+    if (validationError) {
+      setWarningResetPasswordError(getWarningResetValidationMessage(validationError));
+      return;
+    }
+
+    const nextRecord = await saveWarningResetPasswordRecord(warningResetPasswordInput);
+    setWarningResetPasswordRecord(nextRecord);
+    closeWarningResetDialog();
+  };
+  const handleRequestWarningResetPasswordClear = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openWarningResetDialog('clear');
+  };
+  const handleConfirmWarningResetPasswordClear = async (event: React.FormEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const validationError = await validateWarningResetPasswordRemoval({
+      existingRecord: warningResetPasswordRecord,
+      currentPassword: warningResetCurrentPassword,
+    });
+    if (validationError) {
+      setWarningResetPasswordError(getWarningResetValidationMessage(validationError));
+      return;
+    }
+
+    clearWarningResetPasswordRecord();
+    setWarningResetPasswordRecord(null);
+    closeWarningResetDialog();
+  };
+  const handleVerifyWarningReset = async (event: React.FormEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const verified = await verifyWarningResetPassword(warningResetPasswordInput, warningResetPasswordRecord);
+    if (!verified) {
+      setWarningResetPasswordError(t('doraemon.warningResetPassword.verifyError'));
+      return;
+    }
+
+    resetWarnCount();
+    closeWarningResetDialog();
+  };
+
+  const MicTestContent = () => (
+    <div className="diagnostic-box mic-test-window">
+      <div className="slider-header mic-test-window-topbar">
+        <span>{t('doraemon.micTest.guide')}</span>
+        <span className="mic-test-inline-hint">
+          {quietSnapshotAvg === null ? '01' : activeSnapshotAvg === null ? '02' : 'OK'}
+        </span>
+      </div>
+
+      <div className="diagnostic-grid mic-test-grid">
+        <div className="diagnostic-chip">
+          <span>{t('doraemon.micTest.ambient')}</span>
+          <strong>{Math.round(ambientDb)} dB</strong>
+        </div>
+        <div className="diagnostic-chip">
+          <span>{t('doraemon.micTest.activity')}</span>
+          <strong>{activityDb.toFixed(1)} dB</strong>
+        </div>
+        <div className="diagnostic-chip">
+          <span>{t('doraemon.micTest.range')}</span>
+          <strong>{signalRange.toFixed(1)} dB</strong>
+        </div>
+      </div>
+
+      {captureModeText && <div className="capture-mode-note">{captureModeText}</div>}
+
+      <div className={`mic-test-focus-card ${micTestResult ? micTestResult.health : isMicTestOnQuietStep ? 'quiet' : 'active'}`}>
+        <strong>{currentMicTestTitle}</strong>
+        <p>{currentMicTestDesc}</p>
+        {!micTestResult && (
+          <button
+            className="mic-test-main-action"
+            type="button"
+            onClick={isMicTestOnQuietStep ? captureQuietMicTest : captureActiveMicTest}
+            disabled={!isStarted || (!isMicTestOnQuietStep && quietSnapshotAvg === null)}
+          >
+            {isMicTestOnQuietStep ? t('doraemon.micTest.captureQuiet') : t('doraemon.micTest.captureActive')}
+          </button>
+        )}
+      </div>
+
+      <div className="mic-test-capture-status">
+        <div className={`mic-test-step compact ${quietSnapshotAvg !== null ? 'captured' : 'active'}`}>
+          <div className="mic-test-step-copy">
+            <strong>{t('doraemon.micTest.stageQuiet')}</strong>
+            <span className={`mic-test-step-badge ${quietSnapshotAvg !== null ? 'captured' : 'pending'}`}>
+              {quietCapturedText}
+            </span>
+          </div>
+        </div>
+
+        <div className={`mic-test-step compact ${activeSnapshotAvg !== null ? 'captured' : micTestStage === 'active' ? 'active' : ''}`}>
+          <div className="mic-test-step-copy">
+            <strong>{t('doraemon.micTest.stageActive')}</strong>
+            <span className={`mic-test-step-badge ${activeSnapshotAvg !== null ? 'captured' : 'pending'}`}>
+              {activeCapturedText}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {micTestResult && (
+        <div className={`mic-test-result ${micTestResult.health}`}>
+          <div className="mic-test-result-title">
+            {t(`doraemon.micTest.health.${micTestResult.health}`)}
+          </div>
+          <div className="mic-test-result-desc">
+            {t(`doraemon.micTest.healthDesc.${micTestResult.health}`)}
+          </div>
+          <div className="mic-test-result-grid">
+            <div>
+              <span>{t('doraemon.micTest.quietAvg')}</span>
+              <strong>{micTestResult.quietAvg.toFixed(1)} dB</strong>
+            </div>
+            <div>
+              <span>{t('doraemon.micTest.activeAvg')}</span>
+              <strong>{micTestResult.activeAvg.toFixed(1)} dB</strong>
+            </div>
+            <div>
+              <span>{t('doraemon.micTest.dynamicRange')}</span>
+              <strong>{micTestResult.dynamicRange.toFixed(1)} dB</strong>
+            </div>
+            <div>
+              <span>{t('doraemon.micTest.overallRange')}</span>
+              <strong>{micTestResult.overallMin.toFixed(1)}-{micTestResult.overallMax.toFixed(1)}</strong>
+            </div>
+          </div>
+          <div className="mic-test-recommend">
+            <div>{t('doraemon.micTest.recommendedSensitivity').replace('{value}', String(micTestResult.recommendedSensitivity))}</div>
+            <div>{t('doraemon.micTest.recommendedThreshold').replace('{value}', String(micTestResult.recommendedLimit))}</div>
+          </div>
+          <div className="mic-test-result-actions">
+            <button className="diagnostic-apply-btn" type="button" onClick={applyMicTestRecommendation}>
+              {t('doraemon.micTest.apply')}
+            </button>
+            <button className="diagnostic-step-btn secondary" type="button" onClick={startMicTest}>
+              {t('doraemon.micTest.reset')}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const MicTestLauncher = () => (
+    <div className="controls-box mic-test-launcher-box">
+      <div className="mic-test-launcher-copy">
+        <strong>{t('doraemon.micTest.title')}</strong>
+        <p>{t('doraemon.micTest.windowHint')}</p>
+      </div>
+      <div className="mic-test-launcher-meta">
+        <span>{Math.round(ambientDb)} dB</span>
+        <span>{signalRange.toFixed(1)} dB</span>
+      </div>
+      <button
+        className="mic-test-launcher-btn"
+        type="button"
+        onMouseDown={stopModalMouseDown}
+        onClick={handleOpenMicTest}
+      >
+        {t('doraemon.micTest.openWindow')}
+      </button>
+    </div>
+  );
+
+  const MicTestModal = () => {
+    if (!isMicTestOpen) return null;
+
+    return (
+      <div className="floating-modal-layer open">
+        <button
+          type="button"
+          className="floating-modal-backdrop"
+          onClick={closeMicTest}
+          aria-label={t('doraemon.micTest.closeWindow')}
+        />
+        <div
+          className="floating-modal-shell"
+          onClick={stopModalPropagation}
+          onMouseDown={stopModalMouseDown}
+        >
+        <div className="floating-modal-header">
+          <div>
+            <strong>{t('doraemon.micTest.title')}</strong>
+            <p>{t('doraemon.micTest.windowHint')}</p>
+          </div>
+          <button
+            className="floating-close-btn"
+            type="button"
+            onMouseDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              closeMicTest();
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              closeMicTest();
+            }}
+            title={t('doraemon.micTest.closeWindow')}
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <div className="floating-modal-body">
+          <MicTestContent />
+        </div>
+      </div>
+      </div>
+    );
+  };
 
   const ReportDrawer = () => {
     if (!isReportOpen) return null;
+
     return (
       <div className="report-modal-layer open">
-        <button type="button" className="report-modal-backdrop" onClick={() => setIsReportOpen(false)} />
-        <div className="report-modal-shell" onClick={e => e.stopPropagation()}>
+        <button
+          type="button"
+          className="report-modal-backdrop"
+          onClick={closeReport}
+          aria-label={t('doraemon.report.hide')}
+        />
+        <div
+          className="report-modal-shell"
+          onClick={stopModalPropagation}
+          onMouseDown={stopModalMouseDown}
+        >
           <div className="report-modal-header">
-            <div className="report-drawer-heading"><CalendarDays size={18} /><div><strong>{t('doraemon.report.title')}</strong><p>仅保存在本地</p></div></div>
-            <button className="report-modal-close" onClick={() => setIsReportOpen(false)}><X size={16} /></button>
-          </div>
-          <div className="report-modal-body">
-            <div className="report-modal-week">{formatReportDate(weekStart)} - {formatReportDate(weekEnd)}</div>
-            <div className="report-summary-grid">
-              <div className="report-summary-card"><span>总场次</span><strong>{sessionReports.length}</strong></div>
-              <div className="report-summary-card peak"><span>周峰值</span><strong>{sessionReports.length ? Math.max(...sessionReports.map(r => r.peakDb)) : 0}dB</strong></div>
+            <div className="report-drawer-heading">
+              <div className="report-drawer-icon">
+                <CalendarDays size={18} />
+              </div>
+              <div>
+                <strong>{t('doraemon.report.title')}</strong>
+                <p>{t('doraemon.report.localOnly')}</p>
+              </div>
             </div>
+            <button
+              className="report-modal-close"
+              type="button"
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                closeReport();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                closeReport();
+              }}
+              title={t('doraemon.report.hide')}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="report-modal-body">
+            <div className="report-modal-week">
+              {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
+            </div>
+
+            <div className="report-summary-grid">
+              <div className="report-summary-card">
+                <span>{t('doraemon.report.summarySessions')}</span>
+                <strong>{weeklyRecords.length}</strong>
+              </div>
+              <div className="report-summary-card peak">
+                <span>{t('doraemon.report.summaryPeak')}</span>
+                <strong>{weeklyRecords.length ? `${Math.round(weeklyPeak)} dB` : '--'}</strong>
+              </div>
+            </div>
+
             <div className="report-viewer-layout">
               <div className="report-day-sidebar">
-                {reportDayGroups.map(g => (
-                  <button key={g.key} className={`report-day-chip ${g.key === selectedReportDay.key ? 'selected' : ''}`} onPointerDown={e => handleSelectReportDay(e, g.key)}>
-                    <div className="report-day-chip-copy"><span>{g.label}</span><small>{g.dateLabel}</small></div>
-                    <strong>{g.records.length}</strong>
+                {reportDayGroups.map(group => (
+                  <button
+                    key={group.key}
+                    type="button"
+                    className={`report-day-chip ${group.records.length ? 'has-data' : ''} ${group.key === selectedReportDay.key ? 'selected' : ''}`}
+                    onPointerDown={(event) => handleSelectReportDay(event, group.key)}
+                  >
+                    <div className="report-day-chip-copy">
+                      <span>{group.label}</span>
+                      <small>{group.dateLabel}</small>
+                    </div>
+                    <strong>{group.records.length}</strong>
                   </button>
                 ))}
               </div>
+
               <section className="report-focus-shell">
                 <div className="report-day-header">
-                  <div><strong>{selectedReportDay.label}</strong><span>{selectedReportDay.dateLabel}</span></div>
-                  <span className="report-day-count">{selectedReportDay.records.length} 场记录</span>
+                  <div>
+                    <strong>{selectedReportDay.label}</strong>
+                    <span>{selectedReportDay.dateLabel}</span>
+                  </div>
+                  <span className={`report-day-count ${selectedReportDay.records.length ? 'has-data' : ''}`}>
+                    {t('doraemon.report.sessionCount').replace('{count}', String(selectedReportDay.records.length))}
+                  </span>
                 </div>
+
                 {selectedReportRecord ? (
                   <>
                     <div className="report-nav-row">
-                      <button className="report-nav-btn" onPointerDown={e => handleReportSessionMove(e, -1)} disabled={!hasPreviousReport}>上一场</button>
-                      <span className="report-nav-status">{selectedReportIndex + 1} / {selectedReportDay.records.length}</span>
-                      <button className="report-nav-btn" onPointerDown={e => handleReportSessionMove(e, 1)} disabled={!hasNextReport}>下一场</button>
+                      <button
+                        type="button"
+                        className="report-nav-btn"
+                        onPointerDown={(event) => handleReportSessionMove(event, -1)}
+                        disabled={!hasPreviousReport}
+                      >
+                        {t('doraemon.report.prevPage')}
+                      </button>
+                      <span className="report-nav-status">
+                        {t('doraemon.report.pageStatus')
+                          .replace('{current}', String(selectedReportIndex + 1))
+                          .replace('{total}', String(selectedReportDay.records.length))}
+                      </span>
+                      <button
+                        type="button"
+                        className="report-nav-btn"
+                        onPointerDown={(event) => handleReportSessionMove(event, 1)}
+                        disabled={!hasNextReport}
+                      >
+                        {t('doraemon.report.nextPage')}
+                      </button>
                     </div>
+
                     <article className="report-focus-card">
                       <div className="report-focus-top">
-                        <div className="report-time-cell"><strong>{formatReportClock(selectedReportRecord.startedAt)} - {selectedReportRecord.endedAt ? formatReportClock(selectedReportRecord.endedAt) : "运行中"}</strong></div>
-                        <span className="report-peak-pill">{selectedReportRecord.peakDb} dB</span>
-                      </div>
-
-                      {/* 本场精简曲线图 */}
-                      <div className="report-session-trend">
-                        {(() => {
-                          const h = selectedReportRecord.history || [];
-                          if (h.length < 2) return <div className="trend-empty-hint">结束本场后生成分贝曲线</div>;
-                          const hMax = Math.max(...h), hMin = Math.min(...h);
-                          const cMax = Math.max(hMax, selectedReportRecord.threshold + 5), cMin = Math.min(hMin, 35);
-                          const r = Math.max(1, cMax - cMin);
-                          const pts = h.map((v, i) => `${(i / (h.length - 1)) * 100},${100 - ((v - cMin) / r) * 100}`).join(' ');
-                          return (
-                            <div className="trend-mini-wrapper">
-                              <div className="trend-labels"><span>{hMax} Max</span><span>{hMin} Min</span></div>
-                              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="trend-mini-svg">
-                                <path d={`M ${pts}`} fill="none" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                                <line x1="0" y1={100 - ((selectedReportRecord.threshold - cMin) / r) * 100} x2="100" y2={100 - ((selectedReportRecord.threshold - cMin) / r) * 100} stroke="#ef4444" strokeWidth="1" strokeDasharray="3 3" />
-                              </svg>
-                            </div>
-                          );
-                        })()}
+                        <div className="report-time-cell">
+                          <strong>{formatReportClock(selectedReportRecord.startedAt)} - {selectedReportRecord.endedAt ? formatReportClock(selectedReportRecord.endedAt) : t('doraemon.report.ongoing')}</strong>
+                          {selectedReportRecord.endedAt === null && (
+                            <span className="report-live-badge">{t('doraemon.report.live')}</span>
+                          )}
+                        </div>
+                        <span className="report-peak-pill">{Math.round(selectedReportRecord.peakDb)} dB</span>
                       </div>
 
                       <div className="report-focus-grid">
-                        <div className="report-session-metric"><span>时长</span><strong>{formatTime(selectedReportRecord.totalSeconds)}</strong></div>
-                        <div className="report-session-metric"><span>安静</span><strong>{formatTime(selectedReportRecord.quietSeconds)}</strong></div>
-                        <div className="report-session-metric"><span>警告</span><strong>{selectedReportRecord.warnCount}</strong></div>
-                        <div className="report-session-metric"><span>配置</span><strong>{selectedReportRecord.threshold}dB</strong></div>
+                        <div className="report-session-metric">
+                          <span>{t('doraemon.report.columns.duration')}</span>
+                          <strong>{formatTime(selectedReportRecord.totalSeconds)}</strong>
+                        </div>
+                        <div className="report-session-metric">
+                          <span>{t('doraemon.report.columns.quiet')}</span>
+                          <strong>{formatTime(selectedReportRecord.quietSeconds)}</strong>
+                        </div>
+                        <div className="report-session-metric">
+                          <span>{t('doraemon.report.columns.warnings')}</span>
+                          <strong>{selectedReportRecord.warnCount}</strong>
+                        </div>
+                        <div className="report-session-metric">
+                          <span>{t('doraemon.report.columns.settings')}</span>
+                          <strong>{`${selectedReportRecord.threshold} dB / ${selectedReportRecord.sensitivity}%`}</strong>
+                        </div>
+                      </div>
+
+                      <div className="report-settings-band">
+                        {t('doraemon.report.settings')
+                          .replace('{limit}', String(selectedReportRecord.threshold))
+                          .replace('{sensitivity}', String(selectedReportRecord.sensitivity))}
                       </div>
                     </article>
                   </>
-                ) : <div className="report-empty-state">暂无记录</div>}
+                ) : (
+                  <div className="report-empty-state">{t('doraemon.report.empty')}</div>
+                )}
               </section>
             </div>
           </div>
@@ -607,86 +1436,477 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const renderWarningResetDialog = () => {
     if (!isWarningResetDialogOpen) return null;
+
+    const dialogTitle = warningResetDialogMode === 'verify'
+      ? t('doraemon.warningResetPassword.verifyTitle')
+      : warningResetDialogMode === 'help'
+        ? t('doraemon.warningResetPassword.helpTitle')
+        : warningResetDialogMode === 'clear'
+          ? t('doraemon.warningResetPassword.clearTitle')
+          : t('doraemon.warningResetPassword.manageTitle');
+    const dialogDescription = warningResetDialogMode === 'verify'
+      ? t('doraemon.warningResetPassword.verifyDesc')
+      : warningResetDialogMode === 'help'
+        ? t('doraemon.warningResetPassword.helpDesc')
+        : warningResetDialogMode === 'clear'
+          ? t('doraemon.warningResetPassword.clearDesc')
+          : warningResetPasswordEnabled
+            ? t('doraemon.warningResetPassword.manageDescSet')
+            : t('doraemon.warningResetPassword.manageDescEmpty');
+
     return (
       <div className="floating-modal-layer open">
-        <button type="button" className="floating-modal-backdrop" onClick={() => setIsWarningResetDialogOpen(false)} />
-        <div className="floating-modal-shell">
-           <div className="floating-modal-header"><strong>提醒重置设置</strong><button onClick={() => setIsWarningResetDialogOpen(false)}><X size={16} /></button></div>
-           <div className="floating-modal-body">
-             {/* 极简版重置界面 */}
-             <button className="warning-reset-primary-btn" onClick={() => { setWarnCount(0); setIsWarningResetDialogOpen(false); }}>确认重置次数</button>
-           </div>
+        <button
+          type="button"
+          className="floating-modal-backdrop"
+          onClick={closeWarningResetDialog}
+          aria-label={dialogTitle}
+        />
+        <div
+          className="floating-modal-shell warning-reset-dialog-shell"
+          onClick={stopModalPropagation}
+          onMouseDown={stopModalMouseDown}
+        >
+          <div className="floating-modal-header">
+            <div className="warning-reset-dialog-heading">
+              <div className={`warning-reset-dialog-icon ${warningResetPasswordEnabled ? 'protected' : ''}`}><Lock size={18} /></div>
+              <div>
+                <strong>{dialogTitle}</strong>
+                <p>{dialogDescription}</p>
+              </div>
+            </div>
+            <button
+              className="floating-close-btn"
+              type="button"
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                closeWarningResetDialog();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                closeWarningResetDialog();
+              }}
+              title={t('doraemon.warningResetPassword.cancel')}
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="floating-modal-body warning-reset-dialog-body">
+            <div className={`warning-reset-status-pill ${warningResetPasswordEnabled ? 'protected' : 'open'}`}>
+              {warningResetPasswordEnabled
+                ? t('doraemon.warningResetPassword.enabled')
+                : t('doraemon.warningResetPassword.disabled')}
+            </div>
+
+            {warningResetDialogMode === 'help' ? (
+              <div className="warning-reset-help-copy">
+                <p>{t('doraemon.warningResetPassword.helpDesc')}</p>
+                <div className="warning-reset-actions">
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                </div>
+              </div>
+            ) : warningResetDialogMode === 'verify' ? (
+              <form className="warning-reset-form" onSubmit={handleVerifyWarningReset}>
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.inputLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetPasswordInput}
+                    onChange={(event) => {
+                      setWarningResetPasswordInput(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.inputPlaceholder')}
+                    autoFocus
+                  />
+                </label>
+                {warningResetPasswordError && <div className="warning-reset-error">{warningResetPasswordError}</div>}
+                <div className="warning-reset-actions">
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                  <button type="submit" className="warning-reset-primary-btn">
+                    {t('doraemon.warningResetPassword.confirmReset')}
+                  </button>
+                </div>
+              </form>
+            ) : warningResetDialogMode === 'clear' ? (
+              <form className="warning-reset-form" onSubmit={handleConfirmWarningResetPasswordClear}>
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.currentPasswordLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetCurrentPassword}
+                    onChange={(event) => {
+                      setWarningResetCurrentPassword(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.currentPasswordPlaceholder')}
+                    autoFocus
+                  />
+                </label>
+                {warningResetPasswordError && <div className="warning-reset-error">{warningResetPasswordError}</div>}
+                <div className="warning-reset-actions">
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                  <button type="submit" className="warning-reset-danger-btn">
+                    {t('doraemon.warningResetPassword.confirmClear')}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form className="warning-reset-form" onSubmit={handleSaveWarningResetPassword}>
+                {warningResetPasswordEnabled && (
+                  <label className="warning-reset-label">
+                    <span>{t('doraemon.warningResetPassword.currentPasswordLabel')}</span>
+                    <input
+                      className="warning-reset-input"
+                      type="password"
+                      value={warningResetCurrentPassword}
+                      onChange={(event) => {
+                        setWarningResetCurrentPassword(event.target.value);
+                        setWarningResetPasswordError('');
+                      }}
+                      placeholder={t('doraemon.warningResetPassword.currentPasswordPlaceholder')}
+                      autoFocus
+                    />
+                  </label>
+                )}
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.inputLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetPasswordInput}
+                    onChange={(event) => {
+                      setWarningResetPasswordInput(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.inputPlaceholder')}
+                    autoFocus={!warningResetPasswordEnabled}
+                  />
+                </label>
+                <label className="warning-reset-label">
+                  <span>{t('doraemon.warningResetPassword.confirmLabel')}</span>
+                  <input
+                    className="warning-reset-input"
+                    type="password"
+                    value={warningResetPasswordConfirm}
+                    onChange={(event) => {
+                      setWarningResetPasswordConfirm(event.target.value);
+                      setWarningResetPasswordError('');
+                    }}
+                    placeholder={t('doraemon.warningResetPassword.confirmPlaceholder')}
+                  />
+                </label>
+                {warningResetPasswordError && <div className="warning-reset-error">{warningResetPasswordError}</div>}
+                <div className="warning-reset-actions">
+                  {warningResetPasswordEnabled && (
+                    <button type="button" className="warning-reset-danger-btn" onClick={handleRequestWarningResetPasswordClear}>
+                      {t('doraemon.warningResetPassword.clear')}
+                    </button>
+                  )}
+                  <button type="button" className="warning-reset-secondary-btn" onClick={handleWarningResetDialogClose}>
+                    {t('doraemon.warningResetPassword.cancel')}
+                  </button>
+                  <button type="submit" className="warning-reset-primary-btn">
+                    {warningResetPasswordEnabled
+                      ? t('doraemon.warningResetPassword.update')
+                      : t('doraemon.warningResetPassword.save')}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     );
   };
 
-  const NoiseLevelReference = () => (
-    <div className="db-reference-panel">
-      <div className="reference-title">环境参考</div>
-      <div className="vertical-meter-container">
-        <div className="level-nodes">
-          <div style={{ color: currentDb >= 80 ? '#0096E1' : '#94a3b8' }}>喧闹</div>
-          <div style={{ color: currentDb >= 60 && currentDb < 80 ? '#0096E1' : '#94a3b8' }}>正常</div>
-          <div style={{ color: currentDb >= 40 && currentDb < 60 ? '#0096E1' : '#94a3b8' }}>安静</div>
-          <div style={{ color: currentDb < 40 ? '#0096E1' : '#94a3b8' }}>极静</div>
+  const NoiseLevelReference = () => {
+    const levels = [
+      { min: 0, max: 20, label: t('doraemon.levels.l0') },
+      { min: 20, max: 40, label: t('doraemon.levels.l20') },
+      { min: 40, max: 60, label: t('doraemon.levels.l40') },
+      { min: 60, max: 80, label: t('doraemon.levels.l60') },
+      { min: 80, max: 120, label: t('doraemon.levels.l80') },
+    ];
+    const pointerPos = Math.min(100, Math.max(0, currentDb));
+
+    // 恢复内联颜色逻辑
+    // const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
+    // const textColor = isDarkMode ? '#94a3b8' : '#475569';
+    // 改回这里
+    const activeTextColor = '#0096E1';
+    const textColor = isDarkMode ? '#94a3b8' : '#475569';
+
+    return (
+      <div className="reference-stack">
+        <div className="db-reference-panel">
+          <div className="reference-title">{t('doraemon.dbReference')}</div>
+          <div className="vertical-meter-container">
+            <div style={{ position: 'relative', width: '12px' }}>
+              <div className="meter-bar-bg">
+                <div className="meter-gradient-fill"></div>
+              </div>
+              <div
+                className="current-level-pointer"
+                style={{
+                  bottom: `${pointerPos}%`
+                }}
+              >
+                <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid #0096E1` }} />
+              </div>
+            </div>
+            <div className="level-nodes">
+              {levels.reverse().map((l, i) => (
+                <div key={i} style={{
+                  color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor,
+                  opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5,
+                  fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
+                  fontSize: '0.9rem'
+                }}>
+                  {l.label}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
-  const Visualizer = () => (
-    <div className="visualizer-container">
-      {Array.from({ length: 40 }).map((_, i) => (
-        <div key={i} className="wave-bar" style={{ height: `${20 + Math.random() * (currentDb - 35)}%`, opacity: 0.6, background: '#3b82f6' }} />
-      ))}
-    </div>
-  );
+  // --- 核心强化：深色高显眼声纹波浪 ---
+  const Visualizer = () => {
+    const BAR_COUNT = 80; // 减少数量以提高性能和适应性
+    const hue = Math.max(0, 200 - (currentDb - 40) * 4);
+    const tick = Date.now();
+    // 在白天模式下使用更深的颜色和更高的不透明度
+    const opacity = isDarkMode ? 0.7 : 0.5;
+    const mainColor = `hsl(${hue}, 95%, 50%)`; // 极高饱和度
+    const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
+
+    return (
+      <div className="visualizer-container">
+        {Array.from({ length: BAR_COUNT }).map((_, i) => {
+          const dist = Math.abs(i - BAR_COUNT / 2);
+          const norm = 1 - (dist / (BAR_COUNT / 2));
+          const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
+          const wave = Math.sin(i * 0.35 + tick / 150) * 0.15;
+
+          // 优化：边缘高度自然收尾 (Taper height at edges)
+          const taperedNorm = Math.pow(norm, 1.5);
+          const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
+
+          return (
+            <div key={i} className="wave-bar" style={{
+              height: `${Math.min(100, height)}%`, // 使用百分比高度
+              background: `linear-gradient(to top, transparent, ${mainColor})`,
+              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
+              boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
+            }} />
+          );
+        })}
+      </div>
+    );
+  };
 
   const DoraemonSVG = () => (
     <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%' }}>
-      <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" /><circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
-      <circle cx="82" cy="70" r="15" fill="#FFF" stroke="#333" strokeWidth="2" /><circle cx="118" cy="70" r="15" fill="#FFF" stroke="#333" strokeWidth="2" />
-      <circle cx="88" cy="70" r="4" fill="#000" /><circle cx="112" cy="70" r="4" fill="#000" />
-      <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" />
-      {state === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="20" fill="#D9002E" stroke="#333" /> : <path d="M 60 140 Q 100 180 140 140" stroke="#333" strokeWidth="3" fill="none" />}
+      <circle cx="100" cy="100" r="90" fill="#0096E1" stroke="#333" strokeWidth="2" /><circle cx="100" cy="115" r="70" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="82" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" /><ellipse cx="118" cy="70" rx="18" ry="22" fill="#FFFFFF" stroke="#333" strokeWidth="2" />
+      {visualState === 'alarm' ? (
+        <g stroke="#333" strokeWidth="5"><line x1="70" y1="60" x2="90" y2="80" /><line x1="90" y1="60" x2="70" y2="80" /><line x1="110" y1="60" x2="130" y2="80" /><line x1="130" y1="60" x2="110" y2="80" /></g>
+      ) : (
+        <g><circle cx="88" cy="70" r="4" fill="#000" /><circle cx="112" cy="70" r="4" fill="#000" /></g>
+      )}
+      <circle cx="100" cy="92" r="10" fill="#D9002E" stroke="#333" strokeWidth="2" /><line x1="100" y1="102" x2="100" y2="145" stroke="#333" strokeWidth="2" />
+      {visualState === 'alarm' ? <ellipse cx="100" cy="155" rx="30" ry="25" fill="#D9002E" stroke="#333" strokeWidth="2" /> : <path d="M 55 135 Q 100 185 145 135" stroke="#333" strokeWidth="2" fill="none" />}
+      <path d="M 30 165 Q 100 200 170 165 L 170 180 Q 100 215 30 180 Z" fill="#D9002E" stroke="#333" strokeWidth="2" /><circle cx="100" cy="185" r="15" fill="#F3C018" stroke="#333" strokeWidth="2" />
     </svg>
   );
 
+  if (authError) return <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}><h1 style={{ fontSize: '4.4rem', color: '#ff416c' }}>{t('doraemon.authExpired')}</h1><p style={{ fontSize: '2.2rem', margin: '20px 0' }}>{authError}</p><p style={{ color: '#666', fontSize: '1.1rem' }}>{t('doraemon.returnHome').replace('{seconds}', countdown.toString())}</p></div>;
+  if (isLicensed === null) return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>{t('doraemon.verifying')}</h2></div>;
   if (isLicensed === false) return <LicenseInput onVerified={() => setIsLicensed(true)} />;
-  if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div style={{ width: 200, height: 200 }}><DoraemonSVG /></div><h1>哆啦A梦纪律监测</h1><button className="doraemon-btn-big" onClick={initApp}>开启监测</button></div>;
+  if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>{t('doraemon.title')}</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>{t('doraemon.summoning')}</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>{t('doraemon.startMonitor')}</span><span className="btn-sub-text">{t('doraemon.startMonitorSub')}</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;
 
   return (
-    <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${state === 'alarm' ? 'alarm-mode' : ''}`}>
+    <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${visualState === 'alarm' ? 'alarm-mode' : ''}`}>
+      {visualState === 'alarm' && <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>}
       <header className="doraemon-header">
-        <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
-        <div style={{ flex: 1, textAlign: 'center', fontWeight: 'bold' }}>{timeStr}</div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => setIsReportOpen(true)} className="report-header-btn">查看报告</button>
-          <button onClick={toggleMute} className="icon-btn">{isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
+          <div style={{ fontSize: '1.26rem', fontWeight: 'bold', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
+        </div>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <button
+            type="button"
+            onClick={openReport}
+            className="report-header-btn"
+            title={t('doraemon.report.show')}
+          >
+            {t('doraemon.report.trigger')}
+          </button>
+          <button
+            onClick={toggleMute}
+            className="icon-btn"
+            style={{ color: isMuted ? '#ff416c' : 'inherit' }}
+            title={isMuted ? t('doraemon.unmute') : t('doraemon.mute')}
+          >
+            {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
+          </button>
+          <button onClick={toggleFullscreen} className="icon-btn"><Maximize size={32} /></button>
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
         </div>
       </header>
-      <main className="doraemon-main">
-        <NoiseLevelReference />
-        <div className="center-display">
-          <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 200})` }}><DoraemonSVG /></div>
-          <div className="db-display"><strong>{Math.round(currentDb)}</strong><span>dB</span></div>
-          <Visualizer />
-        </div>
+        <main className="doraemon-main">
+          <NoiseLevelReference />
+          <div className="center-display">
+            <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 150})` }}><DoraemonSVG /></div>
+            <div className="db-display"><span className="db-number">{Math.round(currentDb)}</span><span className="db-unit">dB</span></div>
+            <Visualizer />
+          </div>
         <div className="right-panel">
-          <div className="stat-box"><span>安静时长</span><strong>{formatTime(quietTime)}</strong></div>
-          <div className="stat-box"><span>监测总长</span><strong>{formatTime(totalTime)}</strong></div>
-          <div className="stat-box" onClick={() => setIsWarningResetDialogOpen(true)} style={{ cursor: 'pointer' }}><span>警告次数</span><strong style={{ color: '#ef4444' }}>{warnCount}</strong></div>
-          <div className="stat-box"><span>本次峰值</span><strong>{Math.round(maxDb)}</strong></div>
-          <div className="controls-box"><span>灵敏度: {sensitivity}%</span><input type="range" value={sensitivity} onChange={e => setSensitivity(+e.target.value)} /></div>
-          <div className="controls-box"><span>阈值: {limit}dB</span><input type="range" min="40" max="90" value={limit} onChange={e => setLimit(+e.target.value)} /></div>
+          <div className="stat-box">
+            <div className="stat-content">
+              <span className="stat-label">{t('doraemon.quietTime')}</span>
+              <strong className="stat-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{formatTime(quietTime)}</strong>
+            </div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-content">
+              <span className="stat-label">{t('doraemon.totalTime')}</span>
+              <strong className="stat-value" style={{ color: isDarkMode ? '#0575e6' : '#2563eb' }}>{formatTime(totalTime)}</strong>
+            </div>
+          </div>
+          <div className={`stat-box stat-box-with-action warning-stat-box ${warnCount > 0 ? 'warning' : ''}`}>
+            <div className="stat-content">
+              <span className="stat-label">{t('doraemon.warnCount')}</span>
+              <strong className="stat-value" style={{ color: '#dc2626' }}>{warnCount}</strong>
+            </div>
+            <div className="stat-action-row warning-stat-actions">
+              <button
+                className="reset-icon-btn"
+                onClick={handleResetWarnCount}
+                title={t('doraemon.resetCount')}
+              >
+                <RotateCcw size={20} />
+              </button>
+              <div className="warning-reset-settings-stack">
+                <button
+                  className={`warning-reset-settings-btn ${warningResetPasswordEnabled ? 'protected' : ''}`}
+                  onClick={handleOpenWarningResetSettings}
+                  title={t('doraemon.warningResetPassword.settingsTrigger')}
+                >
+                  <Lock size={18} />
+                </button>
+                <button
+                  className="help-icon-btn warning-reset-help-btn"
+                  onClick={handleOpenWarningResetHelp}
+                  title={t('doraemon.warningResetPassword.helpTrigger')}
+                >
+                  <HelpCircle size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-content">
+              <span className="stat-label">{t('doraemon.maxDb')}</span>
+              <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
+            </div>
+          </div>
+
+          <div className="controls-box" style={{ position: 'relative' }}>
+            <div className="slider-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>{t('doraemon.sensitivity')}</span>
+                <button
+                  onClick={() => setShowHelp(!showHelp)}
+                  className="help-icon-btn"
+                  title={t('doraemon.helpTitle')}
+                >
+                  <HelpCircle size={16} />
+                </button>
+              </div>
+              <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{sensitivity}%</span>
+            </div>
+
+            {showHelp && (
+              <div className="help-tooltip">
+                <div className="help-header">
+                  <span>{t('doraemon.helpAdviceTitle')}</span>
+                  <button onClick={() => setShowHelp(false)} className="close-help-btn">
+                    <X size={14} />
+                  </button>
+                </div>
+                <div className="help-content">
+                  <p><strong>{t('doraemon.helpAdviceMute')}</strong>{t('doraemon.helpAdviceMuteDesc')}</p>
+                  <p><strong>{t('doraemon.helpAdviceRead')}</strong>{t('doraemon.helpAdviceReadDesc')}</p>
+                </div>
+                <div className="help-footer" onClick={() => setShowHelp(false)}>
+                  {t('doraemon.tapToClose')}
+                </div>
+              </div>
+            )}
+
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={sensitivity}
+              onChange={(e) => setSensitivity(Number(e.target.value))}
+              className="threshold-slider"
+            />
+          </div>
+
+          <div className="controls-box" style={{ position: 'relative' }}>
+            <div className="slider-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>{t('doraemon.threshold')}</span>
+                <button
+                  onClick={() => setShowThresholdHelp(!showThresholdHelp)}
+                  className="help-icon-btn"
+                  title={t('doraemon.helpTitle')}
+                >
+                  <HelpCircle size={16} />
+                </button>
+              </div>
+              <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{limit} dB</span>
+            </div>
+
+            {showThresholdHelp && (
+              <div className="help-tooltip">
+                <div className="help-header">
+                  <span>{t('doraemon.thresholdHelpTitle')}</span>
+                  <button onClick={() => setShowThresholdHelp(false)} className="close-help-btn">
+                    <X size={14} />
+                  </button>
+                </div>
+                <div className="help-content">
+                  <p><strong>{t('doraemon.threshold')}</strong>{t('doraemon.thresholdHelpDesc')}</p>
+                </div>
+                <div className="help-footer" onClick={() => setShowThresholdHelp(false)}>
+                  {t('doraemon.tapToClose')}
+                </div>
+              </div>
+            )}
+
+            <input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" />
+          </div>
         </div>
       </main>
-      <ReportDrawer />
       {renderWarningResetDialog()}
+      <ReportDrawer />
     </div>
   );
 };
 
 export default DoraemonMonitorApp;
+

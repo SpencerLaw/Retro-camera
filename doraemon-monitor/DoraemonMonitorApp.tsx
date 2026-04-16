@@ -208,6 +208,8 @@ const DoraemonMonitorApp: React.FC = () => {
   const totalTimeRef = useRef(0);
   const sessionReportsRef = useRef<SessionReport[]>(loadStoredReports());
   const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
+  const sessionHistoryRef = useRef<number[]>([]); 
+  const sampleCounterRef = useRef(0); 
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -325,17 +327,27 @@ const DoraemonMonitorApp: React.FC = () => {
       1,
       Math.round((endedAt.getTime() - new Date(activeSession.startedAt).getTime()) / 1000)
     );
-    const totalSeconds = Math.max(totalTimeRef.current, inferredDuration);
+    const totalSeconds = totalTimeRef.current;
+    
+    // 确保历史记录不为空并压缩 (精华 20 个点)
+    const rawHistory = [...sessionHistoryRef.current];
+    let history: number[] | undefined = undefined;
+    if (rawHistory.length > 0) {
+      const samplingRate = Math.max(1, Math.floor(rawHistory.length / 20));
+      history = rawHistory.filter((_, i) => i % samplingRate === 0).slice(0, 20);
+    }
+
     const nextRecord: SessionReport = {
       id: activeSession.id,
       startedAt: activeSession.startedAt,
       endedAt: endedAt.toISOString(),
-      peakDb: Math.round(Math.max(maxDbRef.current, currentDbRef.current)),
+      peakDb: Math.round(maxDbRef.current),
       quietSeconds: Math.max(0, quietTimeRef.current),
       totalSeconds,
       warnCount: Math.max(0, warnCountRef.current),
       threshold: limitRef.current,
-      sensitivity: sensitivityRef.current
+      sensitivity: sensitivityRef.current,
+      history: (history && history.length >= 2) ? history : undefined
     };
 
     const nextReports = [
@@ -347,6 +359,8 @@ const DoraemonMonitorApp: React.FC = () => {
 
     persistSessionReports(nextReports);
     activeSessionRef.current = null;
+    sessionHistoryRef.current = [];
+    sampleCounterRef.current = 0;
   }, [persistSessionReports]);
 
   const stopAudioMonitoring = useCallback(() => {
@@ -536,6 +550,15 @@ const DoraemonMonitorApp: React.FC = () => {
         document.title = t('doraemon.monitorTitle').replace('{db}', Math.round(effectiveDb).toString());
       } else {
         document.title = t('doraemon.appTitle');
+      }
+
+      // 稳定采样逻辑：每 25 次分析（约 2.5 秒）存一个点
+      if (activeSessionRef.current) {
+        sampleCounterRef.current++;
+        if (sampleCounterRef.current >= 25) {
+          sessionHistoryRef.current.push(Math.round(effectiveDb));
+          sampleCounterRef.current = 0;
+        }
       }
 
       const stage = micTestStageRef.current;
@@ -852,6 +875,35 @@ const DoraemonMonitorApp: React.FC = () => {
 
   const formatReportDate = (date: Date) => {
     return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+  };
+
+  const formatPreciseClock = (dateLike: string | number | Date) => {
+    const d = new Date(dateLike);
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+  };
+
+  /**
+   * 曲线平滑路径构建 (参考早读树算法)
+   */
+  const buildSmoothCurvePath = (points: Array<{x: number, y: number}>) => {
+    if (!points.length) return '';
+    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = i > 0 ? points[i - 1] : points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = i !== points.length - 2 ? points[i + 2] : p2;
+
+      const cp1x = p1.x + ((p2.x - p0.x) / 6);
+      const cp1y = p1.y + ((p2.y - p0.y) / 6);
+      const cp2x = p2.x - ((p3.x - p1.x) / 6);
+      const cp2y = p2.y - ((p3.y - p1.y) / 6);
+
+      path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+    return path;
   };
 
   const liveSessionPreview: SessionReport | null = activeSessionRef.current
@@ -1395,6 +1447,87 @@ const DoraemonMonitorApp: React.FC = () => {
                           )}
                         </div>
                         <span className="report-peak-pill">{Math.round(selectedReportRecord.peakDb)} dB</span>
+                      </div>
+
+                      {/* 本场精简曲线图 (参考早读树 100% 视觉还原) */}
+                      <div className="report-session-trend">
+                        {(() => {
+                          const h = selectedReportRecord.history || [];
+                          if (h.length < 2) return <div className="trend-empty-hint">结束本场后生成波动曲线</div>;
+                          
+                          const hMax = Math.max(...h);
+                          const hMin = Math.min(...h);
+                          const peakIdx = h.indexOf(hMax);
+                          const lowIdx = h.indexOf(hMin);
+                          
+                          const cMax = Math.max(hMax + 8, (selectedReportRecord.threshold || 60) + 12);
+                          const cMin = Math.max(20, Math.min(hMin - 8, 35));
+                          const r = cMax - cMin;
+                          
+                          const width = 100;
+                          const height = 100;
+                          const pts = h.map((v, i) => ({
+                            x: (i / (h.length - 1)) * width,
+                            y: height - ((v - cMin) / r) * height
+                          }));
+
+                          const linePath = buildSmoothCurvePath(pts);
+                          const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
+                          const thresholdY = height - (((selectedReportRecord.threshold || 60) - cMin) / r) * height;
+
+                          const startTime = new Date(selectedReportRecord.startedAt).toLocaleTimeString('zh-CN', { hour12: false });
+                          const endTime = selectedReportRecord.endedAt ? new Date(selectedReportRecord.endedAt).toLocaleTimeString('zh-CN', { hour12: false }) : "进行中";
+
+                          return (
+                            <div className="trend-morning-tree-wrapper">
+                              {/* 极值气泡 - 最高 */}
+                              <div className="trend-bubble peak" style={{ left: `${pts[peakIdx].x}%`, top: `${pts[peakIdx].y}%` }}>
+                                <span>最高 {hMax}dB</span>
+                              </div>
+                              
+                              {/* 极值气泡 - 最低 */}
+                              <div className="trend-bubble low" style={{ left: `${pts[lowIdx].x}%`, top: `${pts[lowIdx].y}%` }}>
+                                <span>最低 {hMin}dB</span>
+                              </div>
+
+                              <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="trend-morning-tree-svg">
+                                <defs>
+                                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#0096E1" stopOpacity="0.24" />
+                                    <stop offset="100%" stopColor="#0096E1" stopOpacity="0" />
+                                  </linearGradient>
+                                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                  </filter>
+                                </defs>
+
+                                {/* 背景参考线 */}
+                                <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                                <line x1="0" y1="80" x2="100" y2="80" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                                
+                                {/* 阈值虚线 */}
+                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} stroke="#ef4444" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.4" />
+                                
+                                {/* 填充区域 */}
+                                <path d={fillPath} fill="url(#areaGradient)" />
+                                
+                                {/* 核心曲线 */}
+                                <path d={linePath} fill="none" stroke="#0096E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" filter="url(#glow)" />
+                                
+                                {/* 标记点 */}
+                                <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="2" fill="#fff" />
+                                <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="2" fill="#fff" />
+                              </svg>
+                              
+                              <div className="trend-morning-tree-footer">
+                                <span>开始 {startTime}</span>
+                                <span>结束 {endTime}</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       <div className="report-focus-grid">

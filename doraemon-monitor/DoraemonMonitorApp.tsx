@@ -105,14 +105,7 @@ const loadStoredReports = (): SessionReport[] => {
       .filter((item): item is SessionReport => (
         item &&
         typeof item.id === 'string' &&
-        typeof item.startedAt === 'string' &&
-        (typeof item.endedAt === 'string' || item.endedAt === null) &&
-        typeof item.peakDb === 'number' &&
-        typeof item.quietSeconds === 'number' &&
-        typeof item.totalSeconds === 'number' &&
-        typeof item.warnCount === 'number' &&
-        typeof item.threshold === 'number' &&
-        typeof item.sensitivity === 'number'
+        typeof item.startedAt === 'string'
       ))
       .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
       .slice(0, MAX_STORED_REPORTS);
@@ -208,6 +201,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const totalTimeRef = useRef(0);
   const sessionReportsRef = useRef<SessionReport[]>(loadStoredReports());
   const activeSessionRef = useRef<{ id: string; startedAt: string } | null>(null);
+  const sessionHistoryRef = useRef<number[]>([]); // 新增：分贝历史采样点
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -272,7 +266,6 @@ const DoraemonMonitorApp: React.FC = () => {
         else {
           setAuthError(res.message);
           clearLicense();
-          // Start countdown
           const timer = setInterval(() => {
             setCountdown((prev) => {
               if (prev <= 1) {
@@ -314,6 +307,7 @@ const DoraemonMonitorApp: React.FC = () => {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       startedAt: new Date().toISOString()
     };
+    sessionHistoryRef.current = [];
   }, []);
 
   const finalizeCurrentSession = useCallback(() => {
@@ -326,6 +320,12 @@ const DoraemonMonitorApp: React.FC = () => {
       Math.round((endedAt.getTime() - new Date(activeSession.startedAt).getTime()) / 1000)
     );
     const totalSeconds = Math.max(totalTimeRef.current, inferredDuration);
+    
+    // 压缩采样点至最多 20 个
+    const rawHistory = sessionHistoryRef.current;
+    const samplingRate = Math.max(1, Math.floor(rawHistory.length / 20));
+    const history = rawHistory.filter((_, i) => i % samplingRate === 0).slice(0, 20);
+
     const nextRecord: SessionReport = {
       id: activeSession.id,
       startedAt: activeSession.startedAt,
@@ -335,7 +335,8 @@ const DoraemonMonitorApp: React.FC = () => {
       totalSeconds,
       warnCount: Math.max(0, warnCountRef.current),
       threshold: limitRef.current,
-      sensitivity: sensitivityRef.current
+      sensitivity: sensitivityRef.current,
+      history: history.length > 2 ? history : undefined
     };
 
     const nextReports = [
@@ -347,6 +348,7 @@ const DoraemonMonitorApp: React.FC = () => {
 
     persistSessionReports(nextReports);
     activeSessionRef.current = null;
+    sessionHistoryRef.current = [];
   }, [persistSessionReports]);
 
   const stopAudioMonitoring = useCallback(() => {
@@ -538,6 +540,11 @@ const DoraemonMonitorApp: React.FC = () => {
         document.title = t('doraemon.appTitle');
       }
 
+      // 实时采样：大约每 2.5 秒记录一次有效分贝
+      if (activeSessionRef.current && Date.now() % 2500 < 200) {
+        sessionHistoryRef.current.push(effectiveDb);
+      }
+
       const stage = micTestStageRef.current;
       if (stage === 'quiet' || stage === 'active') {
         micTestWindowRef.current.push(effectiveDb);
@@ -686,6 +693,7 @@ const DoraemonMonitorApp: React.FC = () => {
       return next;
     });
   };
+
   const playAlarmSound = useCallback((withSpeech = true) => {
     if (!audioContextRef.current || isMuted) return;
 
@@ -943,6 +951,7 @@ const DoraemonMonitorApp: React.FC = () => {
     : isMicTestOnQuietStep
       ? t('doraemon.micTest.stageQuietDesc')
       : t('doraemon.micTest.stageActiveDesc');
+
   const closeMicTest = useCallback(() => {
     setIsMicTestOpen(false);
   }, []);
@@ -964,33 +973,40 @@ const DoraemonMonitorApp: React.FC = () => {
     setReportPage(0);
     setIsReportOpen(true);
   }, [defaultReportDay]);
+
   const handleSelectReportDay = (event: React.SyntheticEvent, dayKey: ReportWeekday) => {
     event.preventDefault();
     event.stopPropagation();
     setActiveReportDay(dayKey);
     setReportPage(0);
   };
+
   const handleReportSessionMove = (event: React.SyntheticEvent, direction: -1 | 1) => {
     event.preventDefault();
     event.stopPropagation();
     setReportPage(prev => clamp(prev + direction, 0, Math.max(0, selectedReportDay.records.length - 1)));
   };
+
   const stopModalPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
   };
+
   const stopModalMouseDown = (event: React.MouseEvent) => {
     if (!shouldStopModalMouseDown(event.target)) return;
     event.stopPropagation();
   };
+
   const handleOpenMicTest = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
     openMicTest();
   };
+
   const resetWarnCount = useCallback(() => {
     warnCountRef.current = 0;
     setWarnCount(0);
   }, []);
+
   const closeWarningResetDialog = useCallback(() => {
     setIsWarningResetDialogOpen(false);
     setWarningResetDialogMode('manage');
@@ -999,6 +1015,7 @@ const DoraemonMonitorApp: React.FC = () => {
     setWarningResetPasswordConfirm('');
     setWarningResetPasswordError('');
   }, []);
+
   const openWarningResetDialog = useCallback((mode: WarningResetDialogMode) => {
     setIsMicTestOpen(false);
     setIsReportOpen(false);
@@ -1011,16 +1028,19 @@ const DoraemonMonitorApp: React.FC = () => {
     setWarningResetPasswordError('');
     setIsWarningResetDialogOpen(true);
   }, []);
+
   const handleOpenWarningResetSettings = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
     openWarningResetDialog('manage');
   };
+
   const handleOpenWarningResetHelp = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
     openWarningResetDialog('help');
   };
+
   const handleWarningResetDialogClose = (event?: React.SyntheticEvent) => {
     if (event) {
       event.preventDefault();
@@ -1028,6 +1048,7 @@ const DoraemonMonitorApp: React.FC = () => {
     }
     closeWarningResetDialog();
   };
+
   const handleResetWarnCount = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1039,12 +1060,14 @@ const DoraemonMonitorApp: React.FC = () => {
 
     resetWarnCount();
   };
+
   const getWarningResetValidationMessage = (code: string | null) => {
     if (code === 'current-password') return t('doraemon.warningResetPassword.currentPasswordError');
     if (code === 'mismatch') return t('doraemon.warningResetPassword.mismatchError');
     if (code === 'empty') return t('doraemon.warningResetPassword.emptyError');
     return '';
   };
+
   const handleSaveWarningResetPassword = async (event: React.FormEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1064,11 +1087,13 @@ const DoraemonMonitorApp: React.FC = () => {
     setWarningResetPasswordRecord(nextRecord);
     closeWarningResetDialog();
   };
+
   const handleRequestWarningResetPasswordClear = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
     openWarningResetDialog('clear');
   };
+
   const handleConfirmWarningResetPasswordClear = async (event: React.FormEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1086,6 +1111,7 @@ const DoraemonMonitorApp: React.FC = () => {
     setWarningResetPasswordRecord(null);
     closeWarningResetDialog();
   };
+
   const handleVerifyWarningReset = async (event: React.FormEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1397,6 +1423,27 @@ const DoraemonMonitorApp: React.FC = () => {
                         <span className="report-peak-pill">{Math.round(selectedReportRecord.peakDb)} dB</span>
                       </div>
 
+                      {/* 本场精简波动图 */}
+                      <div className="report-session-trend">
+                        {(() => {
+                          const h = selectedReportRecord.history || [];
+                          if (h.length < 2) return <div className="trend-empty-hint">结束本场后生成波动曲线</div>;
+                          const hMax = Math.max(...h), hMin = Math.min(...h);
+                          const cMax = Math.max(hMax, (selectedReportRecord.threshold || 60) + 5), cMin = Math.min(hMin, 35);
+                          const r = Math.max(1, cMax - cMin);
+                          const pts = h.map((v, i) => `${(i / (h.length - 1)) * 100},${100 - ((v - cMin) / r) * 100}`).join(' ');
+                          return (
+                            <div className="trend-mini-wrapper">
+                              <div className="trend-labels"><span>{Math.round(hMax)} Max</span><span>{Math.round(hMin)} Min</span></div>
+                              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="trend-mini-svg">
+                                <path d={`M ${pts}`} fill="none" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                                <line x1="0" y1={100 - (((selectedReportRecord.threshold || 60) - cMin) / r) * 100} x2="100" y2={100 - (((selectedReportRecord.threshold || 60) - cMin) / r) * 100} stroke="#ef4444" strokeWidth="1" strokeDasharray="3 3" />
+                              </svg>
+                            </div>
+                          );
+                        })()}
+                      </div>
+
                       <div className="report-focus-grid">
                         <div className="report-session-metric">
                           <span>{t('doraemon.report.columns.duration')}</span>
@@ -1406,14 +1453,8 @@ const DoraemonMonitorApp: React.FC = () => {
                           <span>{t('doraemon.report.columns.quiet')}</span>
                           <strong>{formatTime(selectedReportRecord.quietSeconds)}</strong>
                         </div>
-                        <div className="report-session-metric">
-                          <span>{t('doraemon.report.columns.warnings')}</span>
-                          <strong>{selectedReportRecord.warnCount}</strong>
-                        </div>
-                        <div className="report-session-metric">
-                          <span>{t('doraemon.report.columns.settings')}</span>
-                          <strong>{`${selectedReportRecord.threshold} dB / ${selectedReportRecord.sensitivity}%`}</strong>
-                        </div>
+                        <div className="report-session-metric"><span>警告</span><strong>{selectedReportRecord.warnCount}</strong></div>
+                        <div className="report-session-metric"><span>配置</span><strong>{selectedReportRecord.threshold}dB</strong></div>
                       </div>
 
                       <div className="report-settings-band">
@@ -1638,11 +1679,6 @@ const DoraemonMonitorApp: React.FC = () => {
       { min: 80, max: 120, label: t('doraemon.levels.l80') },
     ];
     const pointerPos = Math.min(100, Math.max(0, currentDb));
-
-    // 恢复内联颜色逻辑
-    // const activeTextColor = isDarkMode ? '#fff' : '#0f172a';
-    // const textColor = isDarkMode ? '#94a3b8' : '#475569';
-    // 改回这里
     const activeTextColor = '#0096E1';
     const textColor = isDarkMode ? '#94a3b8' : '#475569';
 
@@ -1682,14 +1718,12 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   };
 
-  // --- 核心强化：深色高显眼声纹波浪 ---
   const Visualizer = () => {
-    const BAR_COUNT = 80; // 减少数量以提高性能和适应性
+    const BAR_COUNT = 80;
     const hue = Math.max(0, 200 - (currentDb - 40) * 4);
     const tick = Date.now();
-    // 在白天模式下使用更深的颜色和更高的不透明度
     const opacity = isDarkMode ? 0.7 : 0.5;
-    const mainColor = `hsl(${hue}, 95%, 50%)`; // 极高饱和度
+    const mainColor = `hsl(${hue}, 95%, 50%)`;
     const glowColor = `hsla(${hue}, 95%, 50%, 0.6)`;
 
     return (
@@ -1699,16 +1733,14 @@ const DoraemonMonitorApp: React.FC = () => {
           const norm = 1 - (dist / (BAR_COUNT / 2));
           const dbPower = Math.pow(Math.max(0, (currentDb - 35) / 45), 1.5);
           const wave = Math.sin(i * 0.35 + tick / 150) * 0.15;
-
-          // 优化：边缘高度自然收尾 (Taper height at edges)
           const taperedNorm = Math.pow(norm, 1.5);
           const height = 10 + (80 * taperedNorm * (dbPower + wave + 0.05));
 
           return (
             <div key={i} className="wave-bar" style={{
-              height: `${Math.min(100, height)}%`, // 使用百分比高度
+              height: `${Math.min(100, height)}%`,
               background: `linear-gradient(to top, transparent, ${mainColor})`,
-              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2), // 边缘渐隐
+              opacity: (opacity + norm * 0.3) * Math.min(1, norm * 2),
               boxShadow: `0 0 ${15 * norm}px ${glowColor}`,
             }} />
           );
@@ -1745,33 +1777,19 @@ const DoraemonMonitorApp: React.FC = () => {
           <div style={{ fontSize: '1.26rem', fontWeight: 'bold', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
         </div>
         <div style={{ display: 'flex', gap: '20px' }}>
-          <button
-            type="button"
-            onClick={openReport}
-            className="report-header-btn"
-            title={t('doraemon.report.show')}
-          >
-            {t('doraemon.report.trigger')}
-          </button>
-          <button
-            onClick={toggleMute}
-            className="icon-btn"
-            style={{ color: isMuted ? '#ff416c' : 'inherit' }}
-            title={isMuted ? t('doraemon.unmute') : t('doraemon.mute')}
-          >
-            {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
-          </button>
+          <button type="button" onClick={openReport} className="report-header-btn" title={t('doraemon.report.show')}>{t('doraemon.report.trigger')}</button>
+          <button onClick={toggleMute} className="icon-btn" style={{ color: isMuted ? '#ff416c' : 'inherit' }} title={isMuted ? t('doraemon.unmute') : t('doraemon.mute')}>{isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}</button>
           <button onClick={toggleFullscreen} className="icon-btn"><Maximize size={32} /></button>
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
         </div>
       </header>
-        <main className="doraemon-main">
-          <NoiseLevelReference />
-          <div className="center-display">
-            <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 150})` }}><DoraemonSVG /></div>
-            <div className="db-display"><span className="db-number">{Math.round(currentDb)}</span><span className="db-unit">dB</span></div>
-            <Visualizer />
-          </div>
+      <main className="doraemon-main">
+        <NoiseLevelReference />
+        <div className="center-display">
+          <div className="doraemon-wrapper" style={{ transform: `scale(${1 + (currentDb - 40) / 150})` }}><DoraemonSVG /></div>
+          <div className="db-display"><span className="db-number">{Math.round(currentDb)}</span><span className="db-unit">dB</span></div>
+          <Visualizer />
+        </div>
         <div className="right-panel">
           <div className="stat-box">
             <div className="stat-content">
@@ -1791,28 +1809,10 @@ const DoraemonMonitorApp: React.FC = () => {
               <strong className="stat-value" style={{ color: '#dc2626' }}>{warnCount}</strong>
             </div>
             <div className="stat-action-row warning-stat-actions">
-              <button
-                className="reset-icon-btn"
-                onClick={handleResetWarnCount}
-                title={t('doraemon.resetCount')}
-              >
-                <RotateCcw size={20} />
-              </button>
+              <button className="reset-icon-btn" onClick={handleResetWarnCount} title={t('doraemon.resetCount')}><RotateCcw size={20} /></button>
               <div className="warning-reset-settings-stack">
-                <button
-                  className={`warning-reset-settings-btn ${warningResetPasswordEnabled ? 'protected' : ''}`}
-                  onClick={handleOpenWarningResetSettings}
-                  title={t('doraemon.warningResetPassword.settingsTrigger')}
-                >
-                  <Lock size={18} />
-                </button>
-                <button
-                  className="help-icon-btn warning-reset-help-btn"
-                  onClick={handleOpenWarningResetHelp}
-                  title={t('doraemon.warningResetPassword.helpTrigger')}
-                >
-                  <HelpCircle size={14} />
-                </button>
+                <button className={`warning-reset-settings-btn ${warningResetPasswordEnabled ? 'protected' : ''}`} onClick={handleOpenWarningResetSettings} title={t('doraemon.warningResetPassword.settingsTrigger')}><Lock size={18} /></button>
+                <button className="help-icon-btn warning-reset-help-btn" onClick={handleOpenWarningResetHelp} title={t('doraemon.warningResetPassword.helpTrigger')}><HelpCircle size={14} /></button>
               </div>
             </div>
           </div>
@@ -1822,82 +1822,35 @@ const DoraemonMonitorApp: React.FC = () => {
               <strong className="stat-value" style={{ color: isDarkMode ? '#ff00ff' : '#d946ef' }}>{Math.round(maxDb)}</strong>
             </div>
           </div>
-
           <div className="controls-box" style={{ position: 'relative' }}>
             <div className="slider-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>{t('doraemon.sensitivity')}</span>
-                <button
-                  onClick={() => setShowHelp(!showHelp)}
-                  className="help-icon-btn"
-                  title={t('doraemon.helpTitle')}
-                >
-                  <HelpCircle size={16} />
-                </button>
-              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>{t('doraemon.sensitivity')}</span><button onClick={() => setShowHelp(!showHelp)} className="help-icon-btn" title={t('doraemon.helpTitle')}><HelpCircle size={16} /></button></div>
               <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{sensitivity}%</span>
             </div>
-
             {showHelp && (
               <div className="help-tooltip">
-                <div className="help-header">
-                  <span>{t('doraemon.helpAdviceTitle')}</span>
-                  <button onClick={() => setShowHelp(false)} className="close-help-btn">
-                    <X size={14} />
-                  </button>
-                </div>
+                <div className="help-header"><span>{t('doraemon.helpAdviceTitle')}</span><button onClick={() => setShowHelp(false)} className="close-help-btn"><X size={14} /></button></div>
                 <div className="help-content">
                   <p><strong>{t('doraemon.helpAdviceMute')}</strong>{t('doraemon.helpAdviceMuteDesc')}</p>
                   <p><strong>{t('doraemon.helpAdviceRead')}</strong>{t('doraemon.helpAdviceReadDesc')}</p>
                 </div>
-                <div className="help-footer" onClick={() => setShowHelp(false)}>
-                  {t('doraemon.tapToClose')}
-                </div>
+                <div className="help-footer" onClick={() => setShowHelp(false)}>{t('doraemon.tapToClose')}</div>
               </div>
             )}
-
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={sensitivity}
-              onChange={(e) => setSensitivity(Number(e.target.value))}
-              className="threshold-slider"
-            />
+            <input type="range" min="0" max="100" value={sensitivity} onChange={(e) => setSensitivity(Number(e.target.value))} className="threshold-slider" />
           </div>
-
           <div className="controls-box" style={{ position: 'relative' }}>
             <div className="slider-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>{t('doraemon.threshold')}</span>
-                <button
-                  onClick={() => setShowThresholdHelp(!showThresholdHelp)}
-                  className="help-icon-btn"
-                  title={t('doraemon.helpTitle')}
-                >
-                  <HelpCircle size={16} />
-                </button>
-              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>{t('doraemon.threshold')}</span><button onClick={() => setShowThresholdHelp(!showThresholdHelp)} className="help-icon-btn" title={t('doraemon.helpTitle')}><HelpCircle size={16} /></button></div>
               <span className="threshold-value" style={{ color: isDarkMode ? '#00f260' : '#059669' }}>{limit} dB</span>
             </div>
-
             {showThresholdHelp && (
               <div className="help-tooltip">
-                <div className="help-header">
-                  <span>{t('doraemon.thresholdHelpTitle')}</span>
-                  <button onClick={() => setShowThresholdHelp(false)} className="close-help-btn">
-                    <X size={14} />
-                  </button>
-                </div>
-                <div className="help-content">
-                  <p><strong>{t('doraemon.threshold')}</strong>{t('doraemon.thresholdHelpDesc')}</p>
-                </div>
-                <div className="help-footer" onClick={() => setShowThresholdHelp(false)}>
-                  {t('doraemon.tapToClose')}
-                </div>
+                <div className="help-header"><span>{t('doraemon.thresholdHelpTitle')}</span><button onClick={() => setShowThresholdHelp(false)} className="close-help-btn"><X size={14} /></button></div>
+                <div className="help-content"><p><strong>{t('doraemon.threshold')}</strong>{t('doraemon.thresholdHelpDesc')}</p></div>
+                <div className="help-footer" onClick={() => setShowThresholdHelp(false)}>{t('doraemon.tapToClose')}</div>
               </div>
             )}
-
             <input type="range" min="40" max="90" value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="threshold-slider" />
           </div>
         </div>
@@ -1909,4 +1862,3 @@ const DoraemonMonitorApp: React.FC = () => {
 };
 
 export default DoraemonMonitorApp;
-

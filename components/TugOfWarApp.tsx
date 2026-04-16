@@ -212,11 +212,11 @@ const TeamMember = ({ team, index }: { team: 'blue' | 'red', index: number }) =>
   return (
     <motion.div
       animate={{ 
-        rotate: team === 'blue' ? [-10, 0, -10] : [10, 0, 10],
-        x: team === 'blue' ? [-2, 2, -2] : [2, -2, 2]
+        rotate: team === 'blue' ? [-10, 0, -10] : [10, 0, 10], // 蓝队向左（后）倾斜，红队向右（后）倾斜
+        x: team === 'blue' ? [-2, 2, -2] : [2, -2, 2]         // 蓝队向左拉，红队向右拉
       }}
       transition={{ repeat: Infinity, duration: 0.6, delay: index * 0.2, ease: "easeInOut" }}
-      className={`relative z-10 ${team === 'red' ? '-scale-x-100' : ''}`}
+      className="relative z-10" // 移除红队的 -scale-x-100，使其方向调换（默认向右）
       style={{ transformOrigin: 'bottom center' }}
     >
       <svg width="60" height="70" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -253,12 +253,22 @@ const TugOfWarAnimation = ({ score, winScore }: { score: number, winScore: numbe
         transition={{ type: 'spring', stiffness: 100, damping: 15 }}
       >
         {/* Rope */}
-        <div className="absolute top-[32px] w-[200%] h-4 bg-amber-700/90 rounded-full shadow-sm border-y border-amber-900/40">
-          <div className="w-full h-full opacity-30" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, #000 5px, #000 10px)' }}></div>
+        <div className="absolute top-[32px] w-[200%] h-4 bg-amber-700/90 rounded-full shadow-sm border-y border-amber-900/40 overflow-hidden">
+          <motion.div 
+            animate={{ x: [-20, 0] }}
+            transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+            className="w-full h-full opacity-30" 
+            style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, #000 5px, #000 10px)' }}
+          />
         </div>
 
         {/* Center Flag */}
-        <div className="absolute top-[32px] left-1/2 -translate-x-1/2 w-6 h-16 bg-red-500 shadow-md z-20 border-2 border-white" style={{ transformOrigin: 'top center', rotate: '-5deg' }} />
+        <motion.div 
+          animate={{ rotate: [-8, 8, -8], x: [-1, 1, -1] }}
+          transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}
+          className="absolute top-[32px] left-1/2 -translate-x-1/2 w-6 h-16 bg-red-500 shadow-md z-20 border-2 border-white" 
+          style={{ transformOrigin: 'top center' }} 
+        />
 
         {/* Blue Team */}
         <div className="absolute top-0 right-1/2 pr-[15%] flex gap-2">

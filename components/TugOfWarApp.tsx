@@ -513,7 +513,7 @@ export const TugOfWarApp = () => {
   return (
     <div className="flex flex-col h-screen w-screen bg-[#F8FAFC] text-[#1E293B] font-sans select-none overflow-hidden relative">
       {/* 顶部区域 */}
-      <header className="h-[70px] bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shrink-0 shadow-sm">
+      <header className="h-[70px] bg-white border-b border-slate-200 flex items-center justify-between px-6 z-50 shrink-0 shadow-sm relative">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-600">
             <ArrowLeft size={24} />

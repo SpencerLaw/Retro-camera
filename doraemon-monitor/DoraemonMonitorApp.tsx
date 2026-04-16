@@ -499,39 +499,55 @@ const DoraemonMonitorApp: React.FC = () => {
                           const linePath = buildSmoothCurvePath(pts);
                           const thresholdY = height - (((selectedReportRecord.threshold || 60) - cMin) / r) * height;
 
-                          const startTime = new Date(selectedReportRecord.startedAt).getTime();
-                          const endTime = selectedReportRecord.endedAt ? new Date(selectedReportRecord.endedAt).getTime() : Date.now();
-                          const duration = endTime - startTime;
-                          
-                          const getTimeLabel = (ratio: number) => {
-                            return formatPreciseClock(new Date(startTime + duration * ratio));
-                          };
+                          const startTime = new Date(selectedReportRecord.startedAt).toLocaleTimeString('zh-CN', { hour12: false });
+                          const endTime = selectedReportRecord.endedAt ? new Date(selectedReportRecord.endedAt).toLocaleTimeString('zh-CN', { hour12: false }) : "进行中";
 
                           return (
-                            <div className="trend-pro-wrapper">
-                              <div className="trend-grid-labels">
-                                <span>{Math.round(cMax)}</span>
-                                <span>{Math.round(cMin)}</span>
+                            <div className="trend-morning-tree-wrapper">
+                              {/* 极值气泡 - 最高 */}
+                              <div className="trend-bubble peak" style={{ left: `${pts[peakIdx].x}%`, top: `${pts[peakIdx].y}%` }}>
+                                <span>最高 {hMax}dB</span>
                               </div>
-                              <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="trend-pro-svg">
-                                <line x1="0" y1="25" x2="100" y2="25" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                                <line x1="0" y1="75" x2="100" y2="75" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
-                                <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="3" fill="#ff416c" />
-                                <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="3" fill="#00f260" />
-                              </svg>
                               
-                              <div className="trend-extreme-tags">
-                                <span className="tag-peak" style={{ left: `${pts[peakIdx].x}%` }}>最高 {hMax}dB</span>
-                                <span className="tag-low" style={{ left: `${pts[lowIdx].x}%` }}>最低 {hMin}dB</span>
+                              {/* 极值气泡 - 最低 */}
+                              <div className="trend-bubble low" style={{ left: `${pts[lowIdx].x}%`, top: `${pts[lowIdx].y}%` }}>
+                                <span>最低 {hMin}dB</span>
                               </div>
 
-                              <div className="trend-time-axis">
-                                <span>{getTimeLabel(0)}</span>
-                                <span>{getTimeLabel(0.5)}</span>
-                                <span>{getTimeLabel(1)}</span>
+                              <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="trend-morning-tree-svg">
+                                <defs>
+                                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#0096E1" stopOpacity="0.24" />
+                                    <stop offset="100%" stopColor="#0096E1" stopOpacity="0" />
+                                  </linearGradient>
+                                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                  </filter>
+                                </defs>
+
+                                {/* 背景参考线 */}
+                                <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                                <line x1="0" y1="80" x2="100" y2="80" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                                
+                                {/* 阈值虚线 */}
+                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} stroke="#ef4444" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.4" />
+                                
+                                {/* 填充区域 */}
+                                <path d={fillPath} fill="url(#areaGradient)" />
+                                
+                                {/* 核心曲线 */}
+                                <path d={linePath} fill="none" stroke="#0096E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" filter="url(#glow)" />
+                                
+                                {/* 标记点 */}
+                                <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="2" fill="#fff" />
+                                <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="2" fill="#fff" />
+                              </svg>
+                              
+                              <div className="trend-morning-tree-footer">
+                                <span>开始 {startTime}</span>
+                                <span>结束 {endTime}</span>
                               </div>
                             </div>
                           );

@@ -2839,3 +2839,72 @@
   font-style: italic;
   opacity: 0.5;
 }
+
+/* Morning Tree Styled Chart */
+.trend-morning-tree-wrapper {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: rgba(0, 0, 0, 0.24);
+  border-radius: 18px;
+  padding: 20px 10px 10px;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.trend-morning-tree-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.trend-bubble {
+  position: absolute;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+  transform: translate(-50%, -130%);
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.trend-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+.trend-bubble.peak {
+  background: #ff416c;
+  color: white;
+}
+.trend-bubble.peak::after { border-top: 4px solid #ff416c; }
+
+.trend-bubble.low {
+  background: #00f260;
+  color: #064e3b;
+  transform: translate(-50%, 40%);
+}
+.trend-bubble.low::after { 
+  top: -4px;
+  bottom: auto;
+  border-bottom: 4px solid #00f260; 
+  border-top: none;
+}
+
+.trend-morning-tree-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}

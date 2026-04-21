@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap, Lock, Key, ShieldAlert, Upload, FileText } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap, Lock, Key, ShieldAlert, Upload, FileText, Trash2, Edit2, X, Plus, Save, BarChart2, Calendar, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import confetti from 'canvas-confetti';
 import * as mammoth from 'mammoth';
@@ -47,6 +47,39 @@ interface WordProblem {
   type: 'word';
   answer: string;
   letters: string[];
+}
+
+export interface WeightedWord {
+  text: string;
+  weight: number;
+}
+
+export interface SavedWordBank {
+  id: string;
+  name: string;
+  words: WeightedWord[];
+  createdAt: number;
+}
+
+export interface TeamStats {
+  correct: number;
+  wrong: number;
+}
+
+export interface QuestionStat {
+  text: string;
+  total: TeamStats;
+  blue: TeamStats;
+  red: TeamStats;
+}
+
+export interface MatchRecord {
+  id: string;
+  date: number;
+  winner: 'blue' | 'red';
+  mode: 'math' | 'word';
+  duration: number;
+  stats: Record<string, QuestionStat>;
 }
 
 type Problem = MathProblem | WordProblem;
@@ -192,7 +225,15 @@ const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen, requiredO
                 key={op}
                 onClick={() => onInput(op)}
                 className="h-[40px] md:h-[48px] rounded-xl text-[20px] md:text-[22px] font-black bg-slate-800 text-white shadow-[0_4px_0_rgba(0,0,0,0.2)] active:translate-y-[2px] active:shadow-none hover:bg-slate-700 transition-all flex items-center justify-center gap-2"
-              {isFrozen && (
+              >
+                {op} {opButtons.length === 1 && <span className="text-sm font-bold text-slate-300">({t('tugOfWar.mustUse').replace(': ', '')})</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {isFrozen && (
         <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
           <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
             {/* 物理阻挡层 - 拦截所有点击 */}
@@ -208,13 +249,6 @@ const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen, requiredO
               }}
             />
           </div>
-
-          <motion.div 
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative flex flex-col items-center gap-2 z-10"f\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
-            }}
-          />
 
           <motion.div 
             initial={{ scale: 0.5, opacity: 0 }}
@@ -296,7 +330,18 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
             onClick={onClear}
             className="h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold bg-slate-200 text-slate-800 shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none hover:bg-slate-300 transition-all"
           >
-            {t('tu      {/* 冻结遮罩：absolute inset-0 覆盖整个键盘（含字母区+操作区），与数学键盘一致 */}
+            {t('tugOfWar.clear')}
+          </button>
+          <button
+            onClick={onSubmit}
+            className={`h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold text-white shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${team === 'blue' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-800/20' : 'bg-red-600 hover:bg-red-700 shadow-red-800/20'}`}
+          >
+            {t('tugOfWar.confirm')}
+          </button>
+        </div>
+      </div>
+
+      {/* 冻结遮罩：absolute inset-0 覆盖整个键盘（含字母区+操作区），与数学键盘一致 */}
       {isFrozen && (
         <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
           <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
@@ -309,17 +354,10 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
               animate={{ opacity: 1 }}
               className="absolute inset-0 pointer-events-none border-4 border-blue-300/50 rounded-2xl"
               style={{
-                backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm13-24c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm39 75c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-58-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6-48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25-10c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm14 32c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm16 47c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-26-2c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-42-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-28c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm24-21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\' fill=\'%23ffffff\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm13-24c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm39 75c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-58-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6-48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25-10c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm14 32c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm16 47c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-26-2c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-42-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-28c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm24-21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\' fill=\'%23ffffff\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
               }}
             />
           </div>
-
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative flex flex-col items-center gap-2 z-10".448-1-1-1-1 .448-1 1 .448 1 1 1zm16 47c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-26-2c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-42-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-28c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm24-21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\' fill=\'%23ffffff\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
-            }}
-          />
 
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
@@ -602,7 +640,40 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     allowedPowerUps: ['freeze', 'double', 'shield'],
     powerUpTrigger: 3
   });
-  const [wordBank, setWordBank] = useState<string[]>([]);
+  
+  const [savedBanks, setSavedBanks] = useState<SavedWordBank[]>(() => {
+    try {
+      const stored = localStorage.getItem('tugOfWar_savedBanks');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [activeBankId, setActiveBankId] = useState<string | null>(savedBanks.length > 0 ? savedBanks[0].id : null);
+  const [wordBank, setWordBank] = useState<WeightedWord[]>(savedBanks.length > 0 ? savedBanks[0].words : []);
+  const [editingBank, setEditingBank] = useState<SavedWordBank | null>(null);
+
+  const [matchHistory, setMatchHistory] = useState<MatchRecord[]>(() => {
+    try {
+      const stored = localStorage.getItem('tugOfWar_matchHistory');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [historyViewMode, setHistoryViewMode] = useState<'combined' | 'split'>('combined');
+  const currentMatchStatsRef = useRef<Record<string, QuestionStat>>({});
+
+  useEffect(() => {
+    localStorage.setItem('tugOfWar_savedBanks', JSON.stringify(savedBanks));
+  }, [savedBanks]);
+
+  useEffect(() => {
+    localStorage.setItem('tugOfWar_matchHistory', JSON.stringify(matchHistory));
+  }, [matchHistory]);
+
   // 蓝红队各自独立的洗牌词池，保证每个单词都能出现
   const blueWordPoolRef = useRef<string[]>([]);
   const redWordPoolRef = useRef<string[]>([]);
@@ -683,14 +754,28 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       const text = isDocx
         ? (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value
         : await file.text();
-      const words = parseWordListText(text).slice(0, 300);
+      const words = parseWordListText(text).slice(0, 300) as WeightedWord[];
 
       if (words.length === 0) {
         setWordImportMessage(t('tugOfWar.wordImportEmpty'));
         return;
       }
 
+      const dateStr = `${new Date().getMonth() + 1}月${new Date().getDate()}日`;
+      const fileName = file.name.replace(/\.[^/.]+$/, "");
+      const bankName = fileName.length > 15 ? dateStr + ' 词库' : fileName;
+
+      const newBank: SavedWordBank = {
+        id: Math.random().toString(36).substring(2, 9),
+        name: bankName,
+        words,
+        createdAt: Date.now(),
+      };
+
+      setSavedBanks(prev => [newBank, ...prev]);
+      setActiveBankId(newBank.id);
       setWordBank(words);
+
       setWordImportMessage(t('tugOfWar.wordImportSuccess', { count: words.length }));
     } catch (error) {
       console.error('Word list parse error', error);
@@ -762,6 +847,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     setLastRedCorrect(0);
     setGameState('playing');
     setTimeElapsed(0);
+    currentMatchStatsRef.current = {};
     setShowSettings(false);
   };
 
@@ -812,14 +898,37 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   // 提交答案核心逻辑
   const processAnswer = (team: 'blue' | 'red', input: string, problem: Problem) => {
     let isCorrect = false;
+    let questionKey = '';
+    
     if (problem.type === 'word') {
       isCorrect = isWordAnswerCorrect(input, problem.answer);
+      questionKey = problem.answer;
     } else if (settings.gameMode === 'classic') {
       isCorrect = parseInt(input) === problem.answer;
+      questionKey = `${problem.num1} ${getOpSymbol(problem.operator)} ${problem.num2}`;
     } else {
       const result = evaluateExpression(input);
       const requiredSymbol = getOpSymbol(problem.operator);
       isCorrect = result !== null && Math.abs(result - problem.answer) < 0.01 && input.includes(requiredSymbol);
+      questionKey = `凑数: 目标 ${problem.answer}`;
+    }
+
+    // 记录统计数据
+    if (!currentMatchStatsRef.current[questionKey]) {
+      currentMatchStatsRef.current[questionKey] = {
+        text: questionKey,
+        total: { correct: 0, wrong: 0 },
+        blue: { correct: 0, wrong: 0 },
+        red: { correct: 0, wrong: 0 }
+      };
+    }
+    const stat = currentMatchStatsRef.current[questionKey];
+    if (isCorrect) {
+      stat.total.correct += 1;
+      stat[team].correct += 1;
+    } else {
+      stat.total.wrong += 1;
+      stat[team].wrong += 1;
     }
 
     if (isCorrect) {
@@ -875,8 +984,22 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       }
 
       // 胜利判定
-      if (newScore <= -settings.winScore) setGameState('blue_wins');
-      if (newScore >= settings.winScore) setGameState('red_wins');
+      let winner: 'blue' | 'red' | null = null;
+      if (newScore <= -settings.winScore) winner = 'blue';
+      if (newScore >= settings.winScore) winner = 'red';
+
+      if (winner) {
+        setGameState(`${winner}_wins` as any);
+        const newRecord: MatchRecord = {
+          id: Math.random().toString(36).substring(2, 9),
+          date: Date.now(),
+          winner,
+          mode: settings.subjectMode,
+          duration: timeElapsed,
+          stats: { ...currentMatchStatsRef.current }
+        };
+        setMatchHistory(prev => [newRecord, ...prev]);
+      }
 
     } else {
       // 答错
@@ -1040,6 +1163,270 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         </div>
       )}
 
+      {/* 词库编辑弹窗 */}
+      <AnimatePresence>
+        {editingBank && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }}
+              className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
+                <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                  <Edit2 size={20} className="text-blue-600" /> 调节频率：{editingBank.name}
+                </h3>
+                <button onClick={() => setEditingBank(null)} className="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center hover:bg-slate-300">
+                  <X size={18} />
+                </button>
+              </div>
+              
+              <div className="p-4 bg-blue-50 shrink-0 border-b border-blue-100 flex items-center gap-2">
+                <input 
+                  type="text" 
+                  id="newWordInput"
+                  placeholder="手动添加新单词..." 
+                  className="flex-1 px-3 py-2 rounded-xl border-2 border-transparent focus:border-blue-300 outline-none font-bold"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = e.currentTarget.value.trim();
+                      if (val.length >= 2) {
+                        setEditingBank(prev => prev ? { ...prev, words: [{ text: val, weight: 1 }, ...prev.words] } : null);
+                        e.currentTarget.value = '';
+                      }
+                    }
+                  }}
+                />
+                <button 
+                  onClick={() => {
+                    const input = document.getElementById('newWordInput') as HTMLInputElement;
+                    const val = input.value.trim();
+                    if (val.length >= 2) {
+                      setEditingBank(prev => prev ? { ...prev, words: [{ text: val, weight: 1 }, ...prev.words] } : null);
+                      input.value = '';
+                    }
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white font-black rounded-xl flex items-center gap-1 hover:bg-blue-700 shrink-0"
+                >
+                  <Plus size={18} /> 添加
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {editingBank.words.map((w, i) => (
+                  <div key={`${w.text}-${i}`} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <span className="font-black text-slate-700 text-lg uppercase tracking-wider">{w.text}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden h-9">
+                        <button 
+                          onClick={() => setEditingBank(prev => prev ? { ...prev, words: prev.words.map((cw, ci) => ci === i ? { ...cw, weight: Math.max(1, cw.weight - 1) } : cw) } : null)}
+                          className="w-9 h-full flex items-center justify-center text-slate-500 hover:bg-slate-100 active:bg-slate-200 font-black text-xl"
+                        >-</button>
+                        <div className="w-12 text-center font-black text-blue-600 text-sm border-x border-slate-200 h-full flex items-center justify-center bg-slate-50">
+                          {w.weight}x
+                        </div>
+                        <button 
+                          onClick={() => setEditingBank(prev => prev ? { ...prev, words: prev.words.map((cw, ci) => ci === i ? { ...cw, weight: cw.weight + 1 } : cw) } : null)}
+                          className="w-9 h-full flex items-center justify-center text-blue-600 hover:bg-blue-50 active:bg-blue-100 font-black text-xl"
+                        >+</button>
+                      </div>
+                      <button 
+                        onClick={() => setEditingBank(prev => prev ? { ...prev, words: prev.words.filter((_, ci) => ci !== i) } : null)}
+                        className="w-9 h-9 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {editingBank.words.length === 0 && (
+                  <div className="text-center text-slate-400 py-10 font-bold">词库空了，加点单词吧~</div>
+                )}
+              </div>
+              
+              <div className="p-4 border-t border-slate-100 bg-white shrink-0">
+                <button 
+                  onClick={() => {
+                    setSavedBanks(prev => prev.map(b => b.id === editingBank.id ? editingBank : b));
+                    if (activeBankId === editingBank.id) {
+                      setWordBank(editingBank.words);
+                    }
+                    setEditingBank(null);
+                  }}
+                  className="w-full py-4 bg-blue-600 text-white rounded-xl font-black text-lg hover:bg-blue-700 shadow-md flex items-center justify-center gap-2"
+                >
+                  <Save size={20} /> 完成编辑并保存
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[80] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-8"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }}
+              className="bg-slate-50 rounded-[2.5rem] w-full max-w-6xl shadow-2xl overflow-hidden flex flex-col h-full max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="p-5 md:p-6 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
+                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
+                  <BarChart2 size={28} className="text-blue-600" /> 全局比赛数据面板
+                </h3>
+                <div className="flex items-center gap-4">
+                  {matchHistory.length > 0 && (
+                    <button 
+                      onClick={() => {
+                        if (confirm('确定要清空所有比赛记录吗？')) {
+                          setMatchHistory([]);
+                          setSelectedMatchId(null);
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-600 font-bold text-sm flex items-center gap-1 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={16} /> 清空记录
+                    </button>
+                  )}
+                  <button onClick={() => setShowHistory(false)} className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors">
+                    <X size={24} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                {/* Left Column: Match List */}
+                <div className="w-full md:w-1/3 bg-white border-r border-slate-200 overflow-y-auto flex flex-col">
+                  {matchHistory.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center gap-3">
+                      <Trophy size={48} className="opacity-20" />
+                      <p className="font-bold">暂无比赛记录，快去完成一局吧！</p>
+                    </div>
+                  ) : (
+                    <div className="p-3 space-y-2">
+                      {matchHistory.map(record => {
+                        const isSelected = record.id === selectedMatchId;
+                        const dateObj = new Date(record.date);
+                        const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                        
+                        return (
+                          <div 
+                            key={record.id}
+                            onClick={() => setSelectedMatchId(record.id)}
+                            className={`p-4 rounded-2xl cursor-pointer transition-all border-2 ${isSelected ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'}`}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className={`px-2 py-0.5 rounded-md text-xs font-black text-white ${record.winner === 'blue' ? 'bg-blue-500' : 'bg-red-500'}`}>
+                                {record.winner === 'blue' ? '蓝队胜' : '红队胜'}
+                              </span>
+                              <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                                <Clock size={12} /> {record.duration}s
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-700 font-bold text-sm">
+                              <Calendar size={16} className="text-slate-400" /> {dateStr}
+                            </div>
+                            <div className="mt-2 text-xs text-slate-500 font-medium">
+                              模式: {record.mode === 'math' ? '数学' : '英文拼词'} | 题目数: {Object.keys(record.stats).length}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: Match Details */}
+                <div className="flex-1 bg-slate-50/50 overflow-y-auto relative">
+                  {selectedMatchId && matchHistory.find(m => m.id === selectedMatchId) ? (
+                    <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
+                      {/* View Mode Toggle */}
+                      <div className="flex justify-center mb-6">
+                        <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-200 inline-flex">
+                          <button 
+                            onClick={() => setHistoryViewMode('combined')}
+                            className={`px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'combined' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                          >
+                            合并总计看
+                          </button>
+                          <button 
+                            onClick={() => setHistoryViewMode('split')}
+                            className={`px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'split' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                          >
+                            红蓝分开看
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Stat Cards Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {Object.values(matchHistory.find(m => m.id === selectedMatchId)!.stats).map(stat => (
+                          <div key={stat.text} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                            <div className="text-lg font-black text-slate-800 mb-4 uppercase tracking-wider truncate" title={stat.text}>
+                              {stat.text}
+                            </div>
+                            
+                            {historyViewMode === 'combined' ? (
+                              <div className="flex items-center gap-4">
+                                <div className="flex-1 bg-green-50 rounded-xl p-3 flex flex-col items-center border border-green-100">
+                                  <span className="text-xs font-bold text-green-600 mb-1 flex items-center gap-1"><CheckCircle2 size={14}/> 正确</span>
+                                  <span className="text-2xl font-black text-green-700">{stat.total.correct}</span>
+                                </div>
+                                <div className="flex-1 bg-red-50 rounded-xl p-3 flex flex-col items-center border border-red-100">
+                                  <span className="text-xs font-bold text-red-600 mb-1 flex items-center gap-1"><XCircle size={14}/> 错误</span>
+                                  <span className="text-2xl font-black text-red-700">{stat.total.wrong}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {/* Blue Team Row */}
+                                <div className="flex items-center gap-3">
+                                  <div className="w-12 text-center text-xs font-black text-blue-600 bg-blue-50 py-1 rounded">蓝队</div>
+                                  <div className="flex-1 flex gap-2">
+                                    <div className="flex-1 bg-green-50/50 rounded-lg py-1 px-2 flex justify-between border border-green-100/50 text-sm">
+                                      <span className="text-green-600 font-bold text-xs">对</span><span className="text-green-700 font-black">{stat.blue.correct}</span>
+                                    </div>
+                                    <div className="flex-1 bg-red-50/50 rounded-lg py-1 px-2 flex justify-between border border-red-100/50 text-sm">
+                                      <span className="text-red-600 font-bold text-xs">错</span><span className="text-red-700 font-black">{stat.blue.wrong}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* Red Team Row */}
+                                <div className="flex items-center gap-3">
+                                  <div className="w-12 text-center text-xs font-black text-red-600 bg-red-50 py-1 rounded">红队</div>
+                                  <div className="flex-1 flex gap-2">
+                                    <div className="flex-1 bg-green-50/50 rounded-lg py-1 px-2 flex justify-between border border-green-100/50 text-sm">
+                                      <span className="text-green-600 font-bold text-xs">对</span><span className="text-green-700 font-black">{stat.red.correct}</span>
+                                    </div>
+                                    <div className="flex-1 bg-red-50/50 rounded-lg py-1 px-2 flex justify-between border border-red-100/50 text-sm">
+                                      <span className="text-red-600 font-bold text-xs">错</span><span className="text-red-700 font-black">{stat.red.wrong}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-slate-400 font-bold">
+                      {matchHistory.length > 0 ? '👈 请在左侧选择一场比赛查看详情' : ''}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showSettings ? (
           <motion.div 
@@ -1096,17 +1483,14 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     </div>
                   </>
                 ) : (
-                  <div className="p-4 bg-blue-50 rounded-3xl border border-blue-100">
-                    <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="p-4 bg-blue-50 rounded-3xl border border-blue-100 space-y-4">
+                    <div className="flex items-start justify-between gap-4">
                       <div>
                         <div className="font-black text-slate-800 flex items-center gap-2">
                           <FileText size={18} className="text-blue-600" />
                           {t('tugOfWar.wordImportTitle')}
                         </div>
                         <p className="text-xs font-bold text-slate-500 mt-1 leading-relaxed">{t('tugOfWar.wordImportHint')}</p>
-                      </div>
-                      <div className="px-3 py-1 rounded-full bg-white text-blue-600 font-black text-xs shrink-0 shadow-sm">
-                        {t('tugOfWar.wordBankCount', { count: wordBank.length })}
                       </div>
                     </div>
                     <label className="w-full py-3 bg-white text-blue-700 rounded-2xl font-black shadow-sm hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer border border-blue-100">
@@ -1121,27 +1505,50 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       />
                     </label>
                     {wordImportMessage && (
-                      <div className="mt-3 text-xs font-black text-blue-700 bg-white/70 rounded-2xl px-3 py-2">
+                      <div className="text-xs font-black text-blue-700 bg-white/70 rounded-2xl px-3 py-2">
                         {wordImportMessage}
                       </div>
                     )}
-                    {wordBank.length > 0 && (
-                      <div className="mt-3">
-                        <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">已导入单词</div>
-                        <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto pr-1">
-                          {wordBank.slice(0, 60).map((word, i) => (
-                            <span
-                              key={`${word}-${i}`}
-                              className="px-2 py-0.5 bg-white rounded-lg text-[11px] font-black text-blue-700 border border-blue-100 shadow-sm"
+                    
+                    {savedBanks.length > 0 && (
+                      <div className="pt-2 border-t border-blue-200/50">
+                        <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-3">本地词库列表 (点击选择)</div>
+                        <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                          {savedBanks.map(bank => (
+                            <div 
+                              key={bank.id} 
+                              onClick={() => { setActiveBankId(bank.id); setWordBank(bank.words); }}
+                              className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${activeBankId === bank.id ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-blue-100 text-slate-600 hover:border-blue-300'}`}
                             >
-                              {word}
-                            </span>
+                              <div className="flex flex-col">
+                                <span className="font-black text-sm">{bank.name}</span>
+                                <span className={`text-[10px] font-bold ${activeBankId === bank.id ? 'text-blue-200' : 'text-slate-400'}`}>
+                                  {bank.words.length} 个单词
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); setEditingBank(bank); }}
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${activeBankId === bank.id ? 'bg-blue-500 hover:bg-blue-400 text-white' : 'bg-slate-100 hover:bg-blue-100 text-blue-600'}`}
+                                >
+                                  <Edit2 size={16} />
+                                </button>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSavedBanks(prev => prev.filter(b => b.id !== bank.id));
+                                    if (activeBankId === bank.id) {
+                                      setActiveBankId(null);
+                                      setWordBank([]);
+                                    }
+                                  }}
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${activeBankId === bank.id ? 'bg-blue-700 hover:bg-blue-800 text-blue-200' : 'bg-slate-100 hover:bg-red-100 text-red-500'}`}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
                           ))}
-                          {wordBank.length > 60 && (
-                            <span className="px-2 py-0.5 bg-blue-100 rounded-lg text-[11px] font-black text-blue-500">
-                              +{wordBank.length - 60} 个…
-                            </span>
-                          )}
                         </div>
                       </div>
                     )}

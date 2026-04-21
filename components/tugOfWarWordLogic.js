@@ -13,7 +13,7 @@ export const parseWordListText = (text) => {
     const word = normalizeWordAnswer(token);
     if (word.length < 2 || seen.has(word)) continue;
     seen.add(word);
-    words.push(word);
+    words.push({ text: word, weight: 1 });
   }
 
   return words;
@@ -39,7 +39,10 @@ export const shuffleLetters = (answer, random = Math.random) => {
 
 export const createWordProblem = (wordBank, random = Math.random) => {
   const cleanBank = Array.from(
-    new Set((wordBank ?? []).map(normalizeWordAnswer).filter((word) => word.length >= 2)),
+    new Set((wordBank ?? []).map(item => {
+      const isObj = typeof item === 'object' && item !== null;
+      return normalizeWordAnswer(isObj ? item.text : item);
+    }).filter((word) => word.length >= 2)),
   );
 
   if (cleanBank.length === 0) return null;
@@ -55,20 +58,31 @@ export const createWordProblem = (wordBank, random = Math.random) => {
 
 /**
  * 构建洗牌词池：对词库做 Fisher-Yates 洗牌，返回一个新数组队列。
- * 保证每个单词在一轮内只出现一次。
+ * 保证每个单词在一轮内只出现一次（除非权重 > 1）。
  */
 export const buildWordPool = (wordBank, random = Math.random) => {
-  const cleanBank = Array.from(
-    new Set((wordBank ?? []).map(normalizeWordAnswer).filter((word) => word.length >= 2)),
-  );
+  const pool = [];
+
+  (wordBank ?? []).forEach(item => {
+    const isObj = typeof item === 'object' && item !== null;
+    const text = isObj ? item.text : item;
+    const weight = isObj ? (item.weight || 1) : 1;
+    
+    const cleanWord = normalizeWordAnswer(text);
+    if (cleanWord.length >= 2) {
+      for (let i = 0; i < weight; i++) {
+        pool.push(cleanWord);
+      }
+    }
+  });
 
   // Fisher-Yates shuffle
-  for (let i = cleanBank.length - 1; i > 0; i--) {
+  for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
-    [cleanBank[i], cleanBank[j]] = [cleanBank[j], cleanBank[i]];
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  return cleanBank;
+  return pool;
 };
 
 /**

@@ -886,7 +886,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       const isDocx = file.name.toLowerCase().endsWith('.docx');
       const text = isDocx
         ? (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value
-        : await file.text();
+        : await (async () => { const buf = await file.arrayBuffer(); try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch(e) { return new TextDecoder('gbk').decode(buf); } })();
       const words = parseWordListText(text).slice(0, 300) as WeightedWord[];
       const importedChallengePairs = parseBilingualWordListText(text).slice(0, 300) as BilingualChallengePair[];
 

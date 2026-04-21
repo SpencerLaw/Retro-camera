@@ -5,17 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="home.morningTree.title">🌳 早读能量树 | Morning Energy Tree</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/morning-energy-tree/style.css">
 </head>
 
 <body>
-
-    <!-- Animated Clouds -->
-    <div class="cloud-layer">
-        <div class="cloud cloud-1"></div>
-        <div class="cloud cloud-2"></div>
-        <div class="cloud cloud-3"></div>
-    </div>
 
 
     <a href="/" class="back-home-btn" data-i18n-title="morningTree.backHome">
@@ -38,7 +31,8 @@
         <div class="auth-card">
             <h1 data-i18n="morningTree.gatekeeperTitle">🔒 班级早读系统</h1>
             <p style="opacity: 0.8; margin-bottom: 20px;" data-i18n="morningTree.gatekeeperSub">请输入授权码以启动</p>
-            <input type="text" id="license-input" class="auth-input" data-i18n-placeholder="morningTree.licensePlaceholder" placeholder="ZD-xxxx-xxxx" autocomplete="off">
+            <input type="text" id="license-input" class="auth-input"
+                data-i18n-placeholder="morningTree.licensePlaceholder" placeholder="ZD-xxxx-xxxx" autocomplete="off">
             <button id="verify-btn" class="auth-btn" data-i18n="morningTree.verifyBtn">开启能量树</button>
             <p id="auth-error" style="color: #ff6b6b; margin-top: 10px; display: none;">无效的授权码 (需以 ZD 开头)</p>
         </div>
@@ -59,70 +53,167 @@
                     <div id="energy-fill"></div>
                 </div>
 
-                <!-- Circular Ring Timer -->
+                <!-- Circular Ring Timer (Segmented Energy Blocks) -->
                 <div class="timer-ring-wrap">
-                    <svg viewBox="0 0 140 140" width="140" height="140">
-                        <circle class="ring-bg" cx="70" cy="70" r="65"/>
-                        <circle class="ring-bar" id="ring-bar" cx="70" cy="70" r="65"/>
+                    <svg viewBox="0 0 160 160" width="160" height="160" overflow="visible">
+                        <defs>
+                            <!-- The mask defines the segments (20 blocks) -->
+                            <mask id="timer-mask">
+                                <circle cx="80" cy="80" r="70" fill="none" stroke="white" stroke-width="14"
+                                    stroke-dasharray="0.1 4.9" stroke-linecap="round" pathLength="100" />
+                            </mask>
+                        </defs>
+                        <!-- Background: the empty slots -->
+                        <circle class="ring-bg" cx="80" cy="80" r="70" />
+                        <!-- Foreground: the actual energy blocks filling up -->
+                        <circle class="ring-bar" id="ring-bar" cx="80" cy="80" r="70" pathLength="100"
+                            mask="url(#timer-mask)" stroke-linecap="round" />
                     </svg>
                     <div class="ring-inner">
                         <span id="countdown-time">--:--</span>
                         <div class="timer-label" data-i18n="morningTree.remainingTime">剩余时间</div>
                     </div>
                 </div>
+                <button id="task-trigger-btn" class="task-trigger-btn" data-i18n="morningTree.tasks.trigger">
+                    今日任务
+                </button>
+                <button id="report-trigger-btn" class="report-trigger-btn" data-i18n="morningTree.report.trigger">
+                    一周报告
+                </button>
             </div>
 
             <!-- Toast / Notifications Center -->
             <div id="toast-container"></div>
 
-            <!-- Bottom: Controls -->
-            <div class="bottom-controls">
-                <!-- Mic Toggle -->
-                <button id="mic-toggle-btn" class="icon-btn" data-i18n-title="morningTree.micToggleTitle">
-                    🎤
-                </button>
-
-                <!-- Timer Settings -->
-                <div class="control-group">
-                    <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
-                    <select id="duration-select" class="duration-select">
-                        <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
-                        <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
-                        <option value="custom" data-i18n="morningTree.customOption">自定义</option>
-                    </select>
-                    <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
-                        data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
-                </div>
-
-                <!-- Sensitivity 3-level -->
-                <div class="sens-group">
-                    <div class="sens-label">灵敏度</div>
-                    <div class="sens-btns">
-                        <button class="sens-btn" data-sens="30">低</button>
-                        <button class="sens-btn active" data-sens="50">中</button>
-                        <button class="sens-btn" data-sens="75">高</button>
+            <div class="left-side-stack">
+                <div id="task-strip" class="task-strip hidden">
+                    <div class="task-strip-head">
+                        <div class="task-strip-badge" data-i18n="morningTree.tasks.todayBadge">今日任务</div>
+                        <div class="task-strip-switch">
+                            <button id="task-strip-prev" class="task-strip-nav-btn" type="button" aria-label="Previous weekday">‹</button>
+                            <div class="task-strip-switch-copy">
+                                <span id="task-strip-day" class="task-strip-day">周一</span>
+                                <span id="task-strip-datetime" class="task-strip-datetime">2026-03-19 14:26</span>
+                            </div>
+                            <button id="task-strip-next" class="task-strip-nav-btn" type="button" aria-label="Next weekday">›</button>
+                        </div>
+                    </div>
+                    <div class="task-strip-copy">
+                        <div id="task-strip-empty" class="task-strip-empty hidden">
+                            <strong id="task-strip-title">今日暂无早读任务</strong>
+                            <span id="task-strip-meta">点击右侧今日任务设置周一到周五内容</span>
+                        </div>
+                        <div id="task-strip-timeline" class="task-strip-timeline hidden"></div>
+                        <div id="task-strip-note-wrap" class="task-strip-note-wrap hidden">
+                            <span id="task-strip-note-title" class="task-strip-note-title">每日感悟</span>
+                            <span id="task-strip-note" class="task-strip-note">每日感悟会显示在这里</span>
+                        </div>
                     </div>
                 </div>
 
-                    <!-- hidden tooltip still used by script -->
-                    <div id="help-tooltip" class="help-tooltip hidden">
-                        <strong data-i18n="morningTree.helpAdviceTitle">📏 校准建议：</strong>
-                        <ul>
-                            <li><strong data-i18n="morningTree.helpAdviceMute">静音测试</strong><span data-i18n="morningTree.helpAdviceMuteDesc">：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</span></li>
-                            <li><strong data-i18n="morningTree.helpAdviceRead">朗读测试</strong><span data-i18n="morningTree.helpAdviceReadDesc">：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</span></li>
-                        </ul>
-                        <p class="tap-close" data-i18n="morningTree.tapToClose">点击此处关闭</p>
+                <!-- Bottom: Controls -->
+                <div class="bottom-controls">
+                    <div class="control-group control-block">
+                        <label class="control-label" data-i18n="morningTree.durationLabel">早读时长</label>
+                        <select id="duration-select" class="duration-select">
+                            <option value="30">30<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                            <option value="40">40<span data-i18n="morningTree.minSuffix">分钟</span></option>
+                            <option value="custom" data-i18n="morningTree.customOption">自定义</option>
+                        </select>
+                        <input type="number" id="custom-duration" class="custom-input hidden" min="1" max="120"
+                            data-i18n-placeholder="morningTree.customPlaceholder" placeholder="分钟">
                     </div>
 
-                <!-- Reset Button -->
-                <button id="reset-btn" class="icon-btn" data-i18n-title="morningTree.resetBtnTitle" style="font-size: 1.2rem;">
-                    🔄
-                </button>
+                    <div class="sens-group control-block">
+                        <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
+                        <div class="sens-btns">
+                            <button class="sens-btn" data-sens="30">低</button>
+                            <button class="sens-btn active" data-sens="50">中</button>
+                            <button class="sens-btn" data-sens="75">高</button>
+                        </div>
+                        <!-- Tooltip Content -->
+                        <div id="help-tooltip" class="help-tooltip hidden">
+                            <strong>📏 校准建议：</strong>
+                            <ul>
+                                <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</li>
+                                <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</li>
+                                <li><strong>低</strong> = 灵敏度低，需较大声音才触发；<strong>高</strong> = 灵敏度高，小声也能读。</li>
+                            </ul>
+                            <p class="tap-close">点击此处关闭</p>
+                        </div>
+                    </div>
+
+                    <button id="mic-toggle-btn" class="start-reading-btn" data-i18n-title="morningTree.micToggleTitle" type="button">
+                        开始早读
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="report-modal" class="report-modal" aria-hidden="true">
+            <button id="report-backdrop" class="report-backdrop" aria-label="Close report"></button>
+            <div class="report-dialog">
+                <div class="report-header">
+                    <div class="report-header-heading">
+                        <div class="report-header-icon">🌿</div>
+                        <div class="report-header-copy">
+                            <strong data-i18n="morningTree.report.title">本周早读报告</strong>
+                            <span data-i18n="morningTree.report.sub">仅保存在本机，按周一到周五查看</span>
+                        </div>
+                    </div>
+                    <button id="report-close-btn" class="report-close-btn" type="button" aria-label="Close report">✕</button>
+                </div>
+                <div class="report-body">
+                    <div id="report-week-label" class="report-week-label"></div>
+                    <div class="report-summary-grid">
+                        <div class="report-summary-card">
+                            <span data-i18n="morningTree.report.summarySessions">记录场次</span>
+                            <strong id="report-summary-count">0</strong>
+                        </div>
+                        <div class="report-summary-card peak">
+                            <span data-i18n="morningTree.report.summaryPeak">本周峰值</span>
+                            <strong id="report-summary-peak">--</strong>
+                        </div>
+                    </div>
+                    <div class="report-viewer-layout">
+                        <div id="report-day-chip-row" class="report-day-sidebar"></div>
+                        <div id="report-day-list" class="report-focus-shell"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="task-modal" class="report-modal task-modal" aria-hidden="true">
+            <button id="task-backdrop" class="report-backdrop" aria-label="Close task editor"></button>
+            <div class="report-dialog task-dialog">
+                <div class="report-header">
+                    <div class="report-header-heading">
+                        <div class="report-header-icon">🗓️</div>
+                        <div class="report-header-copy">
+                            <strong data-i18n="morningTree.tasks.title">本周早读任务</strong>
+                            <span data-i18n="morningTree.tasks.sub">仅保存在本机，到当天会自动显示</span>
+                        </div>
+                    </div>
+                    <button id="task-close-btn" class="report-close-btn" type="button" aria-label="Close task editor">✕</button>
+                </div>
+                <div class="report-body task-body">
+                    <div class="task-toolbar">
+                        <div id="task-week-label" class="report-week-label"></div>
+                        <div class="task-toolbar-actions">
+                            <button id="task-add-slot-btn" class="task-toolbar-btn" type="button" data-i18n="morningTree.tasks.addSlot">新增任务</button>
+                            <button id="task-save-btn" class="task-toolbar-btn primary" type="button" data-i18n="morningTree.tasks.save">保存到本机</button>
+                        </div>
+                    </div>
+                    <div class="report-viewer-layout task-layout">
+                        <div id="task-day-chip-row" class="report-day-sidebar"></div>
+                        <div id="task-day-panel" class="report-focus-shell task-focus-shell"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/morning-energy-tree/script.js"></script>
 </body>
 
 </html>

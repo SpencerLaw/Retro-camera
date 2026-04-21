@@ -49,6 +49,14 @@ runTest('challenge progress labels are not rotated upside down', () => {
   assert.doesNotMatch(source, /rotate-180[\s\S]{0,220}蓝队进度/);
 });
 
+runTest('winner dialog shows readable elapsed time', () => {
+  assert.match(source, /const formatElapsedTime = /);
+  assert.match(source, /Math\.floor\(seconds \/ 60\)/);
+  assert.match(source, /return `\$\{minutes\}分\$\{remainingSeconds\}秒`/);
+  assert.match(source, /耗时：\{formatElapsedTime\(timeElapsed\)\}/);
+  assert.doesNotMatch(source, /耗时: \{timeElapsed\} 秒/);
+});
+
 runTest('math settings explain modes in plain classroom words', () => {
   assert.match(source, /数学怎么玩/);
   assert.match(source, /经典计算/);

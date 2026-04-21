@@ -28,6 +28,15 @@ runTest('correct answers trigger a small team-side confetti burst', () => {
   assert.match(source, /fireTeamConfetti\(team, settings\.subjectMode, currentStreak\)/);
 });
 
+runTest('match victory uses a much bigger celebration effect', () => {
+  assert.match(source, /const fireVictoryCelebration = /);
+  assert.match(source, /duration = 2600/);
+  assert.match(source, /setInterval/);
+  assert.match(source, /particleCount: 70/);
+  assert.match(source, /particleCount: 42/);
+  assert.match(source, /fireVictoryCelebration\(winner, settings\.subjectMode\)/);
+});
+
 runTest('english word battles show responsive encouragement bubbles for leaders and trailing teams', () => {
   assert.match(source, /const getWordEncouragement = /);
   assert.match(source, /You're awesome!/);

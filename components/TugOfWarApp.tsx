@@ -192,6 +192,15 @@ const getOpSymbol = (op: Operator) => {
   }
 };
 
+const formatElapsedTime = (seconds: number) => {
+  const safeSeconds = Math.max(0, Math.floor(seconds || 0));
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = safeSeconds % 60;
+
+  if (minutes <= 0) return `${remainingSeconds}秒`;
+  return `${minutes}分${remainingSeconds}秒`;
+};
+
 const FrozenSquareOverlay = () => (
   <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
     <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
@@ -574,6 +583,43 @@ const fireTeamConfetti = (team: 'blue' | 'red', subjectMode: SubjectMode, streak
       ? (isBlue ? ['#2563EB', '#14B8A6', '#FACC15'] : ['#DC2626', '#F97316', '#FACC15'])
       : (isBlue ? ['#2563EB', '#60A5FA', '#FACC15'] : ['#DC2626', '#FB7185', '#FACC15']),
   });
+};
+
+const fireVictoryCelebration = (winner: 'blue' | 'red', subjectMode: SubjectMode) => {
+  const duration = 2600;
+  const end = Date.now() + duration;
+  const isBlue = winner === 'blue';
+  const colors = isBlue
+    ? ['#2563EB', '#60A5FA', '#FACC15', '#FFFFFF']
+    : ['#DC2626', '#F87171', '#FACC15', '#FFFFFF'];
+
+  confetti({
+    particleCount: 70,
+    spread: 95,
+    startVelocity: 46,
+    origin: { x: isBlue ? 0.3 : 0.7, y: 0.45 },
+    colors,
+    scalar: subjectMode === 'word' ? 1 : 0.92,
+    ticks: 160,
+  });
+
+  const timer = window.setInterval(() => {
+    if (Date.now() > end) {
+      window.clearInterval(timer);
+      return;
+    }
+
+    confetti({
+      particleCount: 42,
+      angle: isBlue ? 60 : 120,
+      spread: 70,
+      startVelocity: 38,
+      origin: { x: Math.random() * 0.8 + 0.1, y: Math.random() * 0.28 + 0.12 },
+      colors,
+      scalar: subjectMode === 'word' ? 0.95 : 0.86,
+      ticks: 130,
+    });
+  }, 260);
 };
 
 // Team Member Animation
@@ -1107,6 +1153,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       }
 
       if (winner) {
+        fireVictoryCelebration(winner, settings.subjectMode);
         setGameState(`${winner}_wins` as any);
         const newRecord: MatchRecord = {
           id: Math.random().toString(36).substring(2, 9),
@@ -2139,21 +2186,65 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         {gameState !== 'playing' && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl flex flex-col items-center justify-center z-[60] text-white p-6"
+            className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl flex flex-col items-center justify-center z-[60] text-white p-6 overflow-hidden"
           >
+            <div className={`absolute inset-0 opacity-30 ${gameState === 'blue_wins' ? 'bg-blue-500' : 'bg-red-500'}`} />
+            {['🎉', '⭐', '✨', '🎊', '🏆', '✨', '⭐', '🎉'].map((mark, index) => (
+              <motion.div
+                key={`${mark}-${index}`}
+                className="absolute text-3xl md:text-5xl font-black select-none"
+                initial={{
+                  opacity: 0,
+                  x: `${(index * 13) % 92}vw`,
+                  y: '105vh',
+                  rotate: -20,
+                  scale: 0.7,
+                }}
+                animate={{
+                  opacity: [0, 1, 1, 0],
+                  y: ['105vh', `${18 + ((index * 9) % 62)}vh`, '-12vh'],
+                  rotate: [-20, 18, 36],
+                  scale: [0.7, 1.25, 0.9],
+                }}
+                transition={{
+                  duration: 2.6 + (index % 3) * 0.4,
+                  delay: index * 0.12,
+                  repeat: Infinity,
+                  repeatDelay: 0.35,
+                  ease: 'easeOut',
+                }}
+              >
+                {mark}
+              </motion.div>
+            ))}
             <motion.div 
               initial={{ scale: 0.5, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }}
-              className="bg-white rounded-[3rem] p-8 md:p-12 flex flex-col items-center text-center shadow-2xl max-w-lg w-full"
+              className={`relative overflow-hidden bg-white rounded-[3rem] p-8 md:p-12 flex flex-col items-center text-center shadow-[0_40px_120px_rgba(0,0,0,0.45)] max-w-lg w-full border-4 ${gameState === 'blue_wins' ? 'border-blue-200' : 'border-red-200'}`}
             >
-              <div className={`w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center mb-6 md:mb-8 ${gameState === 'blue_wins' ? 'bg-blue-100' : 'bg-red-100'}`}>
+              <div className={`absolute inset-x-0 top-0 h-2 ${gameState === 'blue_wins' ? 'bg-blue-500' : 'bg-red-500'}`} />
+              <motion.div
+                className={`absolute -top-20 w-48 h-48 rounded-full blur-3xl opacity-40 ${gameState === 'blue_wins' ? 'bg-blue-300' : 'bg-red-300'}`}
+                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.55, 0.3] }}
+                transition={{ repeat: Infinity, duration: 1.3 }}
+              />
+              <motion.div
+                className={`relative w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center mb-6 md:mb-8 ${gameState === 'blue_wins' ? 'bg-blue-100' : 'bg-red-100'}`}
+                animate={{ scale: [1, 1.14, 1], rotate: [-4, 4, -4] }}
+                transition={{ repeat: Infinity, duration: 0.9, ease: 'easeInOut' }}
+              >
+                <motion.div
+                  className={`absolute inset-0 rounded-full border-4 ${gameState === 'blue_wins' ? 'border-blue-300' : 'border-red-300'}`}
+                  animate={{ scale: [1, 1.45], opacity: [0.65, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.1 }}
+                />
                 <Trophy size={64} className={gameState === 'blue_wins' ? 'text-blue-600' : 'text-red-600'} />
-              </div>
+              </motion.div>
               <h2 className={`text-4xl md:text-5xl font-black mb-4 ${gameState === 'blue_wins' ? 'text-blue-600' : 'text-red-600'}`}>
                 {gameState === 'blue_wins' ? t('tugOfWar.blueWins') : t('tugOfWar.redWins')}
               </h2>
               {settings.gameRule === 'speedrun' && (
                 <div className="mt-4 mb-2 bg-slate-100 rounded-2xl py-3 px-6 text-xl font-bold text-slate-700 shadow-inner">
-                  ⏱️ 耗时: {timeElapsed} 秒
+                  ⏱️ 耗时：{formatElapsedTime(timeElapsed)}
                 </div>
               )}
               <div className="flex flex-col w-full gap-4 mt-6 md:mt-10">

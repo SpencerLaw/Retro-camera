@@ -23,7 +23,8 @@ const App: React.FC = () => {
           <Route path="/broadcast" element={<BroadcastApp />} />
           <Route path="/broadcast/receiver" element={<BroadcastApp forceReceiver />} />
           <Route path="/kiddie-plan" element={<KiddiePlanApp />} />
-          <Route path="/tug-of-war" element={<TugOfWarApp />} />
+          <Route path="/tug-of-war" element={<TugOfWarApp variant="math" />} />
+          <Route path="/word-tug-of-war" element={<TugOfWarApp variant="word" />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

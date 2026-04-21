@@ -449,6 +449,42 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
+          {/* English Word Tug of War - Fresh Green/Blue Battle */}
+          <Link
+            to="/word-tug-of-war"
+            className="group relative bg-gradient-to-br from-[#C6F6D5] via-[#7DD3FC] to-[#A7F3D0] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(20,184,166,0.35)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(20,184,166,0.55)] hover:rotate-2 block"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🔤</div>
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#14B8A6] to-[#38BDF8] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-white rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(20,184,166,0.35)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-[#5EEAD4]"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <BookOpen size={72} className="text-[#0F766E] drop-shadow-lg" />
+              </div>
+            </div>
+
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#0F766E] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">{t('home.wordTugOfWar.title')}</h2>
+              <p className="text-base text-[#0369A1] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                {t('home.wordTugOfWar.subtitle')}
+              </p>
+              <p className="text-sm text-[#075985] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                {t('home.wordTugOfWar.description')}
+              </p>
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#0F766E] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(20,184,166,0.35)] border-[3px] border-[#5EEAD4] hover:bg-gradient-to-r hover:from-[#99F6E4] hover:to-white">
+                  Enter → ABC
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Kiddie Plan - Hand-drawn Style */}
           <Link
             to="/kiddie-plan"

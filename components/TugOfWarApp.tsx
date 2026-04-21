@@ -1,16 +1,31 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap, Lock, Key, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap, Lock, Key, ShieldAlert, Upload, FileText } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import confetti from 'canvas-confetti';
-import { isBHVerified, verifyBHLicense, getBHDeviceId } from './TugOfWarLicenseManager';
+import * as mammoth from 'mammoth';
+import { isTugLicenseVerified, verifyTugLicense } from './TugOfWarLicenseManager';
+import { getTugOfWarProductConfig } from './tugOfWarProductConfig.js';
+import { createWordProblem, isWordAnswerCorrect, parseWordListText } from './tugOfWarWordLogic.js';
+import { getParticleCount, getSpectacleGlyphs, getSpectacleIntensity } from './tugOfWarSpectacleLogic.js';
 
 type Operator = 'add' | 'sub' | 'mul' | 'div';
+type SubjectMode = 'math' | 'word';
+type TugOfWarVariant = SubjectMode;
 type GameMode = 'classic' | 'target';
 type PowerUpType = 'freeze' | 'double' | 'shield';
 
+interface TugOfWarProductConfig {
+  subjectMode: SubjectMode;
+  title: string;
+  licensePrefix: string;
+  storagePrefix: string;
+  deviceInfo?: string;
+}
+
 interface GameSettings {
+  subjectMode: SubjectMode;
   operators: Operator[];
   maxNumber: number;
   winScore: number;
@@ -20,12 +35,21 @@ interface GameSettings {
   powerUpTrigger: number;
 }
 
-interface Problem {
+interface MathProblem {
+  type: 'math';
   num1: number;
   num2: number;
   operator: Operator;
   answer: number;
 }
+
+interface WordProblem {
+  type: 'word';
+  answer: string;
+  letters: string[];
+}
+
+type Problem = MathProblem | WordProblem;
 
 // 安全计算算式结果
 const evaluateExpression = (expr: string): number | null => {
@@ -41,7 +65,7 @@ const evaluateExpression = (expr: string): number | null => {
 };
 
 // 生成随机题目
-const generateProblem = (settings: GameSettings): Problem => {
+const generateMathProblem = (settings: GameSettings): MathProblem => {
   const { operators, maxNumber, gameMode } = settings;
   
   if (gameMode === 'target') {
@@ -66,7 +90,7 @@ const generateProblem = (settings: GameSettings): Problem => {
       target = Math.floor(Math.random() * (maxNumber * 2)) + 5;
     }
 
-    return { num1: 0, num2: 0, operator: requiredOp, answer: target };
+    return { type: 'math', num1: 0, num2: 0, operator: requiredOp, answer: target };
   }
 
   const operator = operators[Math.floor(Math.random() * operators.length)];
@@ -99,7 +123,15 @@ const generateProblem = (settings: GameSettings): Problem => {
       break;
   }
 
-  return { num1, num2, operator, answer };
+  return { type: 'math', num1, num2, operator, answer };
+};
+
+const generateProblem = (settings: GameSettings, wordBank: string[]): Problem | null => {
+  if (settings.subjectMode === 'word') {
+    return createWordProblem(wordBank) as WordProblem | null;
+  }
+
+  return generateMathProblem(settings);
 };
 
 const getOpSymbol = (op: Operator) => {
@@ -205,6 +237,191 @@ const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen, requiredO
   );
 };
 
+// 英语拼词字母键盘组件
+const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team, t, isFrozen }: {
+  problem: WordProblem;
+  pickedIndices: number[];
+  onPick: (index: number) => void;
+  onClear: () => void;
+  onSubmit: () => void;
+  team: 'blue' | 'red';
+  t: (key: string) => string;
+  isFrozen: boolean;
+}) => {
+  const picked = new Set(pickedIndices);
+
+  return (
+    <div className="relative w-full max-w-[360px]">
+      <div className={`grid ${problem.letters.length > 10 ? 'grid-cols-5' : 'grid-cols-4'} gap-2 transition-all ${isFrozen ? 'opacity-20 grayscale pointer-events-none blur-sm' : ''}`}>
+        {problem.letters.map((letter, index) => {
+          const disabled = picked.has(index);
+          return (
+            <button
+              key={`${letter}-${index}`}
+              onClick={() => onPick(index)}
+              disabled={disabled}
+              className={`h-[42px] md:h-[50px] rounded-xl text-[18px] md:text-[22px] font-black shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${disabled ? 'bg-slate-100 text-slate-300 shadow-none' : 'bg-white text-slate-800 hover:bg-slate-50'}`}
+            >
+              {letter}
+            </button>
+          );
+        })}
+        <button
+          onClick={onClear}
+          className="col-span-2 h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold bg-slate-200 text-slate-800 shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none hover:bg-slate-300 transition-all"
+        >
+          {t('tugOfWar.clear')}
+        </button>
+        <button
+          onClick={onSubmit}
+          className={`col-span-2 h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold text-white shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${team === 'blue' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-800/20' : 'bg-red-600 hover:bg-red-700 shadow-red-800/20'}`}
+        >
+          {t('tugOfWar.confirm')}
+        </button>
+      </div>
+
+      {isFrozen && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl overflow-hidden">
+          <div className={`absolute inset-0 ${team === 'blue' ? 'bg-blue-100/40' : 'bg-red-100/40'} backdrop-blur-[2px] pointer-events-auto cursor-not-allowed`} />
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative flex flex-col items-center gap-2 z-10"
+          >
+            <div className="bg-white/90 p-4 rounded-full shadow-2xl">
+              <Snowflake size={54} className="text-blue-500 animate-spin-slow" />
+            </div>
+            <span className="bg-blue-600 text-white px-5 py-2 rounded-full text-xl font-black shadow-xl uppercase tracking-tighter border-4 border-white">
+              FROZEN!
+            </span>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectAt }: {
+  team: 'blue' | 'red';
+  subjectMode: SubjectMode;
+  intensity: number;
+  streak: number;
+  lastCorrectAt: number;
+}) => {
+  const glyphs = getSpectacleGlyphs(subjectMode);
+  const particleCount = getParticleCount(intensity, false);
+  const compactCount = getParticleCount(intensity, true);
+  const accent = team === 'blue' ? '#2563EB' : '#DC2626';
+  const softAccent = team === 'blue' ? 'rgba(37, 99, 235, 0.18)' : 'rgba(220, 38, 38, 0.18)';
+  const ribbonAngle = team === 'blue' ? '115deg' : '65deg';
+  const burstX = team === 'blue' ? '58%' : '42%';
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none motion-reduce:hidden" aria-hidden="true">
+      <motion.div
+        className="absolute inset-0"
+        animate={{ opacity: 0.12 + (intensity * 0.42) }}
+        transition={{ duration: 0.3 }}
+        style={{
+          backgroundImage: `linear-gradient(${ribbonAngle}, transparent 0%, ${softAccent} 35%, transparent 68%)`,
+        }}
+      />
+
+      {streak >= 2 && (
+        <motion.div
+          className="absolute inset-x-[-20%] top-[12%] h-12 md:h-16 skew-y-[-6deg]"
+          animate={{
+            x: team === 'blue' ? ['-8%', '8%', '-8%'] : ['8%', '-8%', '8%'],
+            opacity: [0.12, 0.24 + (intensity * 0.34), 0.12],
+          }}
+          transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
+          style={{
+            backgroundImage: `repeating-linear-gradient(90deg, transparent 0 18px, ${softAccent} 18px 34px)`,
+          }}
+        />
+      )}
+
+      {Array.from({ length: particleCount }).map((_, index) => {
+        const compactHidden = index >= compactCount ? 'hidden sm:block' : '';
+        const left = team === 'blue'
+          ? 10 + ((index * 13) % 58)
+          : 32 + ((index * 11) % 58);
+        const top = 14 + ((index * 17) % 70);
+        const duration = 2.8 + ((index % 4) * 0.45);
+        const delay = (index % 7) * 0.18;
+
+        return (
+          <motion.span
+            key={`${team}-spark-${index}`}
+            className={`absolute text-sm md:text-xl font-black select-none ${compactHidden}`}
+            style={{ left: `${left}%`, top: `${top}%`, color: accent, opacity: 0 }}
+            animate={{
+              y: team === 'blue' ? [8, -18, 8] : [-8, 18, -8],
+              x: team === 'blue' ? [-4, 8, -4] : [4, -8, 4],
+              rotate: [-10, 10, -10],
+              opacity: [0, intensity * 0.62, 0],
+              scale: [0.82, 1.05 + (intensity * 0.25), 0.82],
+            }}
+            transition={{ repeat: Infinity, duration, delay, ease: 'easeInOut' }}
+          >
+            {glyphs[index % glyphs.length]}
+          </motion.span>
+        );
+      })}
+
+      <AnimatePresence>
+        {lastCorrectAt > 0 && (
+          <motion.div
+            key={`${team}-burst-${lastCorrectAt}`}
+            className="absolute top-[38%] flex items-center justify-center"
+            style={{ left: burstX }}
+            initial={{ opacity: 0, scale: 0.4, y: 8 }}
+            animate={{ opacity: [0, 1, 0], scale: [0.4, 1.25, 1.7], y: [8, -8, -20] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.9, ease: 'easeOut' }}
+          >
+            <div
+              className="flex gap-1 md:gap-2 rounded-2xl border-2 bg-white/75 px-3 py-2 shadow-xl backdrop-blur-sm"
+              style={{ borderColor: accent, color: accent }}
+            >
+              {glyphs.slice(0, 4).map((glyph, index) => (
+                <motion.span
+                  key={`${glyph}-${index}`}
+                  className="text-lg md:text-3xl font-black leading-none"
+                  animate={{ y: [0, -8, 0], rotate: [-8, 8, 0] }}
+                  transition={{ duration: 0.45, delay: index * 0.06 }}
+                >
+                  {glyph}
+                </motion.span>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const fireTeamConfetti = (team: 'blue' | 'red', subjectMode: SubjectMode, streak: number) => {
+  const isBlue = team === 'blue';
+  const isWordMode = subjectMode === 'word';
+  const particleCount = Math.min(18 + (Math.max(1, streak) * 4), streak >= 5 ? 48 : 34);
+
+  confetti({
+    particleCount,
+    angle: isBlue ? 55 : 125,
+    spread: streak >= 5 ? 70 : 48,
+    startVelocity: streak >= 5 ? 34 : 25,
+    gravity: 1.05,
+    ticks: 85,
+    scalar: isWordMode ? 0.82 : 0.76,
+    origin: { x: isBlue ? 0.24 : 0.76, y: 0.62 },
+    colors: isWordMode
+      ? (isBlue ? ['#2563EB', '#14B8A6', '#FACC15'] : ['#DC2626', '#F97316', '#FACC15'])
+      : (isBlue ? ['#2563EB', '#60A5FA', '#FACC15'] : ['#DC2626', '#FB7185', '#FACC15']),
+  });
+};
+
 // Team Member Animation
 const TeamMember = ({ team, index }: { team: 'blue' | 'red', index: number }) => {
   const color = team === 'blue' ? '#3B82F6' : '#EF4444';
@@ -238,9 +455,24 @@ const TeamMember = ({ team, index }: { team: 'blue' | 'red', index: number }) =>
 
 const TugOfWarAnimation = ({ score, winScore }: { score: number, winScore: number }) => {
   const progress = (score / winScore) * 50; // -50% to +50%
+  const tension = Math.min(1, Math.abs(score) / Math.max(1, winScore));
+  const leadingTeam = score < 0 ? 'blue' : score > 0 ? 'red' : null;
 
   return (
     <div className="h-[90px] md:h-[120px] bg-white flex items-center justify-center relative border-b border-slate-200 shrink-0 overflow-hidden">
+      {leadingTeam && (
+        <motion.div
+          className="absolute inset-x-0 top-0 h-2 md:h-3"
+          animate={{ opacity: [0.35, 0.75, 0.35], x: leadingTeam === 'blue' ? ['4%', '-4%', '4%'] : ['-4%', '4%', '-4%'] }}
+          transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
+          style={{
+            backgroundImage: leadingTeam === 'blue'
+              ? `linear-gradient(90deg, rgba(37,99,235,${0.25 + tension * 0.5}), transparent)`
+              : `linear-gradient(270deg, rgba(220,38,38,${0.25 + tension * 0.5}), transparent)`,
+          }}
+        />
+      )}
+
       {/* Background marks */}
       <div className="absolute inset-0 flex justify-center items-end pb-2 md:pb-4 opacity-20 pointer-events-none w-full">
         <div className="w-[80%] flex justify-between">
@@ -291,9 +523,10 @@ const TugOfWarAnimation = ({ score, winScore }: { score: number, winScore: numbe
   );
 };
 
-export const TugOfWarApp = () => {
+export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant }) => {
   const navigate = useNavigate();
   const t = useTranslations();
+  const productConfig = getTugOfWarProductConfig(variant) as TugOfWarProductConfig;
   
   // 授权状态
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
@@ -306,14 +539,14 @@ export const TugOfWarApp = () => {
 
   // 初始化检查授权
   useEffect(() => {
-    setIsVerified(isBHVerified());
-  }, []);
+    setIsVerified(isTugLicenseVerified(productConfig));
+  }, [productConfig]);
 
   const handleVerify = async () => {
     if (!licenseInput.trim()) return;
     setVerifying(true);
     setError('');
-    const result = await verifyBHLicense(licenseInput);
+    const result = await verifyTugLicense(productConfig, licenseInput);
     if (result.success) {
       setIsVerified(true);
     } else {
@@ -322,6 +555,7 @@ export const TugOfWarApp = () => {
     setVerifying(false);
   };
   const [settings, setSettings] = useState<GameSettings>({
+    subjectMode: productConfig.subjectMode,
     operators: ['add'],
     maxNumber: 10,
     winScore: 10,
@@ -330,6 +564,9 @@ export const TugOfWarApp = () => {
     allowedPowerUps: ['freeze', 'double', 'shield'],
     powerUpTrigger: 3
   });
+  const [wordBank, setWordBank] = useState<string[]>([]);
+  const [wordImportMessage, setWordImportMessage] = useState('');
+  const [isParsingWordFile, setIsParsingWordFile] = useState(false);
 
   // 核心游戏状态
   const [score, setScore] = useState(0);
@@ -337,6 +574,8 @@ export const TugOfWarApp = () => {
   const [redProblem, setRedProblem] = useState<Problem | null>(null);
   const [blueInput, setBlueInput] = useState('');
   const [redInput, setRedInput] = useState('');
+  const [bluePickedLetterIndices, setBluePickedLetterIndices] = useState<number[]>([]);
+  const [redPickedLetterIndices, setRedPickedLetterIndices] = useState<number[]>([]);
   const [gameState, setGameState] = useState<'playing' | 'blue_wins' | 'red_wins'>('playing');
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -391,14 +630,75 @@ export const TugOfWarApp = () => {
     else document.exitFullscreen();
   };
 
+  const handleWordFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsParsingWordFile(true);
+    setWordImportMessage('');
+
+    try {
+      const isDocx = file.name.toLowerCase().endsWith('.docx');
+      const text = isDocx
+        ? (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value
+        : await file.text();
+      const words = parseWordListText(text).slice(0, 300);
+
+      if (words.length === 0) {
+        setWordImportMessage(t('tugOfWar.wordImportEmpty'));
+        return;
+      }
+
+      setWordBank(words);
+      setWordImportMessage(t('tugOfWar.wordImportSuccess', { count: words.length }));
+    } catch (error) {
+      console.error('Word list parse error', error);
+      setWordImportMessage(t('tugOfWar.wordImportError'));
+    } finally {
+      setIsParsingWordFile(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const clearTeamInput = (team: 'blue' | 'red') => {
+    if (team === 'blue') {
+      setBlueInput('');
+      setBluePickedLetterIndices([]);
+    } else {
+      setRedInput('');
+      setRedPickedLetterIndices([]);
+    }
+  };
+
+  const handleLetterPick = (team: 'blue' | 'red', index: number) => {
+    const problem = team === 'blue' ? blueProblem : redProblem;
+    const picked = team === 'blue' ? bluePickedLetterIndices : redPickedLetterIndices;
+    if (!problem || problem.type !== 'word' || picked.includes(index)) return;
+
+    if (team === 'blue') {
+      setBluePickedLetterIndices(prev => [...prev, index]);
+      setBlueInput(prev => prev + problem.letters[index]);
+    } else {
+      setRedPickedLetterIndices(prev => [...prev, index]);
+      setRedInput(prev => prev + problem.letters[index]);
+    }
+  };
+
   // 游戏开始/重置
   const startGame = () => {
-    if (settings.operators.length === 0 && settings.gameMode === 'classic') return;
-    setBlueProblem(generateProblem(settings));
-    setRedProblem(generateProblem(settings));
+    if (settings.subjectMode === 'math' && settings.operators.length === 0 && settings.gameMode === 'classic') return;
+    if (settings.subjectMode === 'word' && wordBank.length === 0) {
+      setWordImportMessage(t('tugOfWar.wordImportEmpty'));
+      return;
+    }
+
+    setBlueProblem(generateProblem(settings, wordBank));
+    setRedProblem(generateProblem(settings, wordBank));
     setScore(0);
     setBlueInput('');
     setRedInput('');
+    setBluePickedLetterIndices([]);
+    setRedPickedLetterIndices([]);
     setBlueStreak(0);
     setRedStreak(0);
     setBlueItems([]);
@@ -409,6 +709,8 @@ export const TugOfWarApp = () => {
     setRedDoubleActive(false);
     setBlueShieldActive(false);
     setRedShieldActive(false);
+    setLastBlueCorrect(0);
+    setLastRedCorrect(0);
     setGameState('playing');
     setTimeElapsed(0);
     setShowSettings(false);
@@ -461,7 +763,9 @@ export const TugOfWarApp = () => {
   // 提交答案核心逻辑
   const processAnswer = (team: 'blue' | 'red', input: string, problem: Problem) => {
     let isCorrect = false;
-    if (settings.gameMode === 'classic') {
+    if (problem.type === 'word') {
+      isCorrect = isWordAnswerCorrect(input, problem.answer);
+    } else if (settings.gameMode === 'classic') {
       isCorrect = parseInt(input) === problem.answer;
     } else {
       const result = evaluateExpression(input);
@@ -498,16 +802,17 @@ export const TugOfWarApp = () => {
       
       // 更新状态
       setScore(newScore);
+      fireTeamConfetti(team, settings.subjectMode, currentStreak);
       if (team === 'blue') {
         setBlueStreak(currentStreak);
-        setBlueProblem(generateProblem(settings));
-        setBlueInput('');
+        setBlueProblem(generateProblem(settings, wordBank));
+        clearTeamInput('blue');
         setLastBlueCorrect(Date.now());
         checkPowerUpDrop('blue', currentStreak);
       } else {
         setRedStreak(currentStreak);
-        setRedProblem(generateProblem(settings));
-        setRedInput('');
+        setRedProblem(generateProblem(settings, wordBank));
+        clearTeamInput('red');
         setLastRedCorrect(Date.now());
         checkPowerUpDrop('red', currentStreak);
       }
@@ -519,10 +824,10 @@ export const TugOfWarApp = () => {
     } else {
       // 答错
       if (team === 'blue') {
-        setBlueInput('');
+        clearTeamInput('blue');
         setBlueStreak(0);
       } else {
-        setRedInput('');
+        clearTeamInput('red');
         setRedStreak(0);
       }
     }
@@ -531,12 +836,30 @@ export const TugOfWarApp = () => {
   const handleBlueSubmit = useCallback(() => {
     if (gameState !== 'playing' || !blueProblem || blueFrozenUntil > Date.now()) return;
     processAnswer('blue', blueInput, blueProblem);
-  }, [blueInput, blueProblem, score, gameState, settings, blueFrozenUntil, blueDoubleActive, redShieldActive, blueStreak]);
+  }, [blueInput, blueProblem, score, gameState, settings, wordBank, blueFrozenUntil, blueDoubleActive, redShieldActive, blueStreak]);
 
   const handleRedSubmit = useCallback(() => {
     if (gameState !== 'playing' || !redProblem || redFrozenUntil > Date.now()) return;
     processAnswer('red', redInput, redProblem);
-  }, [redInput, redProblem, score, gameState, settings, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
+  }, [redInput, redProblem, score, gameState, settings, wordBank, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
+
+  const spectacleNow = Date.now();
+  const blueSpectacleIntensity = getSpectacleIntensity({
+    team: 'blue',
+    score,
+    winScore: settings.winScore,
+    streak: blueStreak,
+    lastCorrectAt: lastBlueCorrect,
+    now: spectacleNow,
+  });
+  const redSpectacleIntensity = getSpectacleIntensity({
+    team: 'red',
+    score,
+    winScore: settings.winScore,
+    streak: redStreak,
+    lastCorrectAt: lastRedCorrect,
+    now: spectacleNow,
+  });
 
   // 视觉辅助函数
   const getItemIcon = (type: PowerUpType) => {
@@ -568,7 +891,7 @@ export const TugOfWarApp = () => {
             <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6">
               <Lock size={40} className="text-blue-600" />
             </div>
-            <h1 className="text-3xl font-black text-slate-800 mb-2">数学拔河</h1>
+            <h1 className="text-3xl font-black text-slate-800 mb-2">{productConfig.title}</h1>
             <p className="text-slate-400 font-bold mb-8 text-sm uppercase tracking-widest">需要授权码解锁完整版</p>
 
             <div className="w-full space-y-6">
@@ -580,7 +903,7 @@ export const TugOfWarApp = () => {
                   type="text" 
                   value={licenseInput}
                   onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
-                  placeholder="请输入 BH 开头的授权码"
+                  placeholder={`请输入 ${productConfig.licensePrefix} 开头的授权码`}
                   className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-5 pl-14 pr-4 font-black text-xl outline-none focus:border-blue-500 focus:bg-white shadow-sm transition-all placeholder:text-slate-300 relative z-10"
                 />
               </div>
@@ -670,57 +993,102 @@ export const TugOfWarApp = () => {
                 </button>
               )}
 
-              <h2 className="text-3xl font-black mb-6 text-center text-slate-800">{t('tugOfWar.settingsTitle')}</h2>
+              <h2 className="text-3xl font-black mb-6 text-center text-slate-800">
+                {productConfig.title} · {t('tugOfWar.settingsTitle')}
+              </h2>
               
               <div className="space-y-5">
-                {/* 模式选择 */}
-                <div className="flex bg-slate-100 p-1.5 rounded-2xl">
-                  <button 
-                    onClick={() => setSettings({...settings, gameMode: 'classic'})}
-                    className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'classic' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
-                  >
-                    {t('tugOfWar.modeClassic')}
-                  </button>
-                  <button 
-                    onClick={() => setSettings({...settings, gameMode: 'target'})}
-                    className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'target' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
-                  >
-                    {t('tugOfWar.modeTarget')}
-                  </button>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.operators')}</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
+                {settings.subjectMode === 'math' ? (
+                  <>
+                    <div className="flex bg-slate-100 p-1.5 rounded-2xl">
                       <button
-                        key={op}
-                        onClick={() => {
-                          const newOps = settings.operators.includes(op) ? settings.operators.filter(i => i !== op) : [...settings.operators, op];
-                          if (newOps.length > 0) setSettings({...settings, operators: newOps});
-                        }}
-                        className={`py-2.5 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
+                        onClick={() => setSettings({...settings, gameMode: 'classic'})}
+                        className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'classic' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
                       >
-                        {getOpSymbol(op)}
+                        {t('tugOfWar.modeClassic')}
                       </button>
-                    ))}
+                      <button
+                        onClick={() => setSettings({...settings, gameMode: 'target'})}
+                        className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'target' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
+                      >
+                        {t('tugOfWar.modeTarget')}
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.operators')}</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
+                          <button
+                            key={op}
+                            onClick={() => {
+                              const newOps = settings.operators.includes(op) ? settings.operators.filter(i => i !== op) : [...settings.operators, op];
+                              if (newOps.length > 0) setSettings({...settings, operators: newOps});
+                            }}
+                            className={`py-2.5 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
+                          >
+                            {getOpSymbol(op)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-4 bg-blue-50 rounded-3xl border border-blue-100">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div>
+                        <div className="font-black text-slate-800 flex items-center gap-2">
+                          <FileText size={18} className="text-blue-600" />
+                          {t('tugOfWar.wordImportTitle')}
+                        </div>
+                        <p className="text-xs font-bold text-slate-500 mt-1 leading-relaxed">{t('tugOfWar.wordImportHint')}</p>
+                      </div>
+                      <div className="px-3 py-1 rounded-full bg-white text-blue-600 font-black text-xs shrink-0 shadow-sm">
+                        {t('tugOfWar.wordBankCount', { count: wordBank.length })}
+                      </div>
+                    </div>
+                    <label className="w-full py-3 bg-white text-blue-700 rounded-2xl font-black shadow-sm hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer border border-blue-100">
+                      <Upload size={18} />
+                      {isParsingWordFile ? t('tugOfWar.wordParsing') : t('tugOfWar.wordImportButton')}
+                      <input
+                        type="file"
+                        accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        onChange={handleWordFileUpload}
+                        disabled={isParsingWordFile}
+                        className="hidden"
+                      />
+                    </label>
+                    {wordImportMessage && (
+                      <div className="mt-3 text-xs font-black text-blue-700 bg-white/70 rounded-2xl px-3 py-2">
+                        {wordImportMessage}
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.range')}</label>
-                    <select 
-                      value={settings.maxNumber}
-                      onChange={(e) => setSettings({...settings, maxNumber: parseInt(e.target.value)})}
-                      className="w-full p-2.5 bg-slate-100 rounded-xl font-bold outline-none border-2 border-transparent focus:border-blue-500 text-sm"
-                    >
-                      <option value="10">10</option>
-                      <option value="20">20</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
-                    </select>
-                  </div>
+                  {settings.subjectMode === 'math' ? (
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.range')}</label>
+                      <select
+                        value={settings.maxNumber}
+                        onChange={(e) => setSettings({...settings, maxNumber: parseInt(e.target.value)})}
+                        className="w-full p-2.5 bg-slate-100 rounded-xl font-bold outline-none border-2 border-transparent focus:border-blue-500 text-sm"
+                      >
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.wordList')}</label>
+                      <div className="h-[42px] bg-slate-100 rounded-xl font-black text-slate-700 flex items-center justify-center text-sm border-2 border-transparent">
+                        {t('tugOfWar.wordBankCount', { count: wordBank.length })}
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.winCondition')}</label>
                     <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
@@ -786,7 +1154,8 @@ export const TugOfWarApp = () => {
 
                 <button
                   onClick={startGame}
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-red-600 text-white rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                  disabled={settings.subjectMode === 'word' && wordBank.length === 0}
+                  className={`w-full py-4 bg-gradient-to-r from-blue-600 to-red-600 text-white rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed`}
                 >
                   <Play fill="white" size={20} /> {t('tugOfWar.startGame')}
                 </button>
@@ -798,9 +1167,16 @@ export const TugOfWarApp = () => {
             {/* 拔河核心视觉 */}
             <TugOfWarAnimation score={score} winScore={settings.winScore} />
 
-            <main className="flex-1 grid grid-cols-2 min-h-0 overflow-hidden">
+            <main className="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-0 overflow-y-auto md:overflow-hidden">
               {/* 蓝队 */}
-              <section className="bg-[#EFF6FF] border-r border-slate-200 flex flex-col items-center p-3 md:p-4 justify-between relative overflow-hidden">
+              <section className="bg-[#EFF6FF] md:border-r border-b md:border-b-0 border-slate-200 flex flex-col items-center p-3 md:p-4 justify-between relative overflow-hidden min-h-[560px] md:min-h-0">
+                <TeamSpectacleLayer
+                  team="blue"
+                  subjectMode={settings.subjectMode}
+                  intensity={blueSpectacleIntensity}
+                  streak={blueStreak}
+                  lastCorrectAt={lastBlueCorrect}
+                />
                 {/* 状态指示器 */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
                   {blueShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-1.5 rounded-full shadow-lg"><ShieldCheck size={16} /></motion.div>}
@@ -826,22 +1202,42 @@ export const TugOfWarApp = () => {
                 
                 {blueProblem && (
                   <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-blue-100 text-center">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
-                      {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
-                    </div>
-                    <div className="text-[28px] md:text-[40px] font-black text-slate-800 leading-none mb-2 min-h-[40px] flex items-center justify-center">
-                      {settings.gameMode === 'target' ? (
-                        <div className="flex flex-col items-center">
-                          <div>{blueProblem.answer}</div>
-                          <div className="text-[10px] font-bold text-blue-500">{t('tugOfWar.mustUse')}{getOpSymbol(blueProblem.operator)}</div>
+                    {blueProblem.type === 'word' ? (
+                      <>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 h-3">
+                          {t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: blueProblem.answer.length })}
                         </div>
-                      ) : (
-                        <>{blueProblem.num1} <span className="text-blue-500">{getOpSymbol(blueProblem.operator)}</span> {blueProblem.num2}</>
-                      )}
-                    </div>
-                    <div className="h-[44px] md:h-[52px] w-full bg-slate-50 rounded-xl text-[24px] md:text-[30px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
-                      {blueInput || '?'}
-                    </div>
+                        <div className="min-h-[58px] flex flex-wrap items-center justify-center gap-1 mb-2">
+                          {blueProblem.answer.split('').map((_, index) => (
+                            <div key={`blue-slot-${index}`} className="w-7 md:w-8 h-9 md:h-10 rounded-lg bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-[18px] md:text-[22px] font-black text-blue-700">
+                              {blueInput[index] || ''}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="h-[34px] w-full bg-slate-50 rounded-xl text-[16px] md:text-[18px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
+                          {blueInput || t('tugOfWar.wordInputPlaceholder')}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
+                          {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
+                        </div>
+                        <div className="text-[28px] md:text-[40px] font-black text-slate-800 leading-none mb-2 min-h-[40px] flex items-center justify-center">
+                          {settings.gameMode === 'target' ? (
+                            <div className="flex flex-col items-center">
+                              <div>{blueProblem.answer}</div>
+                              <div className="text-[10px] font-bold text-blue-500">{t('tugOfWar.mustUse')}{getOpSymbol(blueProblem.operator)}</div>
+                            </div>
+                          ) : (
+                            <>{blueProblem.num1} <span className="text-blue-500">{getOpSymbol(blueProblem.operator)}</span> {blueProblem.num2}</>
+                          )}
+                        </div>
+                        <div className="h-[44px] md:h-[52px] w-full bg-slate-50 rounded-xl text-[24px] md:text-[30px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
+                          {blueInput || '?'}
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -866,11 +1262,31 @@ export const TugOfWarApp = () => {
                   </div>
                 </div>
                 
-                <Keypad onInput={(val) => setBlueInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => setBlueInput('')} onSubmit={handleBlueSubmit} team="blue" t={t} mode={settings.gameMode} isFrozen={blueFrozenUntil > Date.now()} requiredOp={blueProblem ? getOpSymbol(blueProblem.operator) : undefined} />
+                {blueProblem?.type === 'word' ? (
+                  <LetterKeypad
+                    problem={blueProblem}
+                    pickedIndices={bluePickedLetterIndices}
+                    onPick={(index) => handleLetterPick('blue', index)}
+                    onClear={() => clearTeamInput('blue')}
+                    onSubmit={handleBlueSubmit}
+                    team="blue"
+                    t={t}
+                    isFrozen={blueFrozenUntil > Date.now()}
+                  />
+                ) : (
+                  <Keypad onInput={(val) => setBlueInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => clearTeamInput('blue')} onSubmit={handleBlueSubmit} team="blue" t={t} mode={settings.gameMode} isFrozen={blueFrozenUntil > Date.now()} requiredOp={blueProblem?.type === 'math' ? getOpSymbol(blueProblem.operator) : undefined} />
+                )}
               </section>
 
               {/* 红队 */}
-              <section className="bg-[#FEF2F2] flex flex-col items-center p-3 md:p-4 justify-between relative overflow-hidden">
+              <section className="bg-[#FEF2F2] flex flex-col items-center p-3 md:p-4 justify-between relative overflow-hidden min-h-[560px] md:min-h-0">
+                <TeamSpectacleLayer
+                  team="red"
+                  subjectMode={settings.subjectMode}
+                  intensity={redSpectacleIntensity}
+                  streak={redStreak}
+                  lastCorrectAt={lastRedCorrect}
+                />
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
                   {redShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-1.5 rounded-full shadow-lg"><ShieldCheck size={16} /></motion.div>}
                   {redDoubleActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-amber-500 text-white p-1.5 rounded-full shadow-lg"><Sword size={16} /></motion.div>}
@@ -895,22 +1311,42 @@ export const TugOfWarApp = () => {
                 
                 {redProblem && (
                   <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-red-100 text-center">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
-                      {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
-                    </div>
-                    <div className="text-[28px] md:text-[40px] font-black text-slate-800 leading-none mb-2 min-h-[40px] flex items-center justify-center">
-                      {settings.gameMode === 'target' ? (
-                        <div className="flex flex-col items-center">
-                          <div>{redProblem.answer}</div>
-                          <div className="text-[10px] font-bold text-red-500">{t('tugOfWar.mustUse')}{getOpSymbol(redProblem.operator)}</div>
+                    {redProblem.type === 'word' ? (
+                      <>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 h-3">
+                          {t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: redProblem.answer.length })}
                         </div>
-                      ) : (
-                        <>{redProblem.num1} <span className="text-red-500">{getOpSymbol(redProblem.operator)}</span> {redProblem.num2}</>
-                      )}
-                    </div>
-                    <div className="h-[44px] md:h-[52px] w-full bg-slate-50 rounded-xl text-[24px] md:text-[30px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
-                      {redInput || '?'}
-                    </div>
+                        <div className="min-h-[58px] flex flex-wrap items-center justify-center gap-1 mb-2">
+                          {redProblem.answer.split('').map((_, index) => (
+                            <div key={`red-slot-${index}`} className="w-7 md:w-8 h-9 md:h-10 rounded-lg bg-red-50 border-2 border-red-100 flex items-center justify-center text-[18px] md:text-[22px] font-black text-red-700">
+                              {redInput[index] || ''}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="h-[34px] w-full bg-slate-50 rounded-xl text-[16px] md:text-[18px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
+                          {redInput || t('tugOfWar.wordInputPlaceholder')}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
+                          {settings.gameMode === 'target' ? t('tugOfWar.targetNumber') : ''}
+                        </div>
+                        <div className="text-[28px] md:text-[40px] font-black text-slate-800 leading-none mb-2 min-h-[40px] flex items-center justify-center">
+                          {settings.gameMode === 'target' ? (
+                            <div className="flex flex-col items-center">
+                              <div>{redProblem.answer}</div>
+                              <div className="text-[10px] font-bold text-red-500">{t('tugOfWar.mustUse')}{getOpSymbol(redProblem.operator)}</div>
+                            </div>
+                          ) : (
+                            <>{redProblem.num1} <span className="text-red-500">{getOpSymbol(redProblem.operator)}</span> {redProblem.num2}</>
+                          )}
+                        </div>
+                        <div className="h-[44px] md:h-[52px] w-full bg-slate-50 rounded-xl text-[24px] md:text-[30px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
+                          {redInput || '?'}
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -934,7 +1370,20 @@ export const TugOfWarApp = () => {
                   </div>
                 </div>
                 
-                <Keypad onInput={(val) => setRedInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => setRedInput('')} onSubmit={handleRedSubmit} team="red" t={t} mode={settings.gameMode} isFrozen={redFrozenUntil > Date.now()} requiredOp={redProblem ? getOpSymbol(redProblem.operator) : undefined} />
+                {redProblem?.type === 'word' ? (
+                  <LetterKeypad
+                    problem={redProblem}
+                    pickedIndices={redPickedLetterIndices}
+                    onPick={(index) => handleLetterPick('red', index)}
+                    onClear={() => clearTeamInput('red')}
+                    onSubmit={handleRedSubmit}
+                    team="red"
+                    t={t}
+                    isFrozen={redFrozenUntil > Date.now()}
+                  />
+                ) : (
+                  <Keypad onInput={(val) => setRedInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => clearTeamInput('red')} onSubmit={handleRedSubmit} team="red" t={t} mode={settings.gameMode} isFrozen={redFrozenUntil > Date.now()} requiredOp={redProblem?.type === 'math' ? getOpSymbol(redProblem.operator) : undefined} />
+                )}
               </section>
             </main>
           </motion.div>

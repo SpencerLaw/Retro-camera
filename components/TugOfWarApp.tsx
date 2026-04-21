@@ -895,17 +895,27 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
             <p className="text-slate-400 font-bold mb-8 text-sm uppercase tracking-widest">需要授权码解锁完整版</p>
 
             <div className="w-full space-y-6">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none z-20">
-                  <Key size={22} className="text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <div className="group rounded-3xl border-2 border-slate-100 bg-slate-50 p-2 shadow-sm transition-all focus-within:border-blue-500 focus-within:bg-white">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <div
+                    aria-label="授权码前缀"
+                    className="flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 py-3 text-blue-600 shadow-sm sm:min-w-[106px]"
+                  >
+                    <Key size={19} className="shrink-0" />
+                    <span className="font-mono text-xl font-black tracking-wider">{productConfig.licensePrefix}</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={licenseInput}
+                    onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
+                    placeholder="输入完整授权码"
+                    aria-label={`${productConfig.title}授权码`}
+                    className="min-w-0 flex-1 rounded-2xl bg-transparent px-3 py-3 text-lg font-black text-slate-800 outline-none placeholder:text-slate-300 sm:text-xl"
+                  />
                 </div>
-                <input 
-                  type="text" 
-                  value={licenseInput}
-                  onChange={(e) => setLicenseInput(e.target.value.toUpperCase())}
-                  placeholder={`请输入 ${productConfig.licensePrefix} 开头的授权码`}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-5 pl-14 pr-4 font-black text-xl outline-none focus:border-blue-500 focus:bg-white shadow-sm transition-all placeholder:text-slate-300 relative z-10"
-                />
+                <div className="px-3 pb-1 pt-2 text-left text-xs font-bold text-slate-400">
+                  授权码需以 {productConfig.licensePrefix} 开头
+                </div>
               </div>
 
               {error && (

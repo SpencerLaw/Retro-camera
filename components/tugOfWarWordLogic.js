@@ -22,6 +22,34 @@ export const parseWordListText = (text) => {
 export const isWordAnswerCorrect = (input, answer) =>
   normalizeWordAnswer(input) === normalizeWordAnswer(answer);
 
+const normalizeChinesePrompt = (value) =>
+  String(value ?? '')
+    .match(/[\u3400-\u9FFF]+/g)
+    ?.join('') ?? '';
+
+export const parseBilingualWordListText = (text) => {
+  const seen = new Set();
+  const pairs = [];
+  const lines = String(text ?? '').split(/\r?\n/);
+
+  for (const line of lines) {
+    const englishMatch = line.match(/[A-Za-z]+(?:[-'][A-Za-z]+)*/);
+    const english = normalizeWordAnswer(englishMatch?.[0]);
+    const chinese = normalizeChinesePrompt(line);
+    if (english.length < 2 || chinese.length === 0) continue;
+
+    const key = `${chinese}|${english}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    pairs.push({ chinese, english });
+  }
+
+  return pairs;
+};
+
+export const isBilingualChallengeAnswerCorrect = (input, answer) =>
+  normalizeWordAnswer(input) === normalizeWordAnswer(answer);
+
 export const shuffleLetters = (answer, random = Math.random) => {
   const letters = normalizeWordAnswer(answer).split('');
 
@@ -54,6 +82,55 @@ export const createWordProblem = (wordBank, random = Math.random) => {
     answer,
     letters: shuffleLetters(answer, random),
   };
+};
+
+export const createBilingualChallengeProblem = (pair, random = Math.random) => {
+  if (!pair) return null;
+
+  const answer = normalizeWordAnswer(pair.english);
+  const prompt = normalizeChinesePrompt(pair.chinese);
+  if (answer.length < 2 || prompt.length === 0) return null;
+
+  return {
+    type: 'word',
+    mode: 'challenge',
+    prompt,
+    answer,
+    letters: shuffleLetters(answer, random),
+  };
+};
+
+export const buildBilingualChallengePool = (pairs, random = Math.random) => {
+  const pool = [];
+  const seen = new Set();
+
+  (pairs ?? []).forEach((pair) => {
+    const english = normalizeWordAnswer(pair?.english);
+    const chinese = normalizeChinesePrompt(pair?.chinese);
+    if (english.length < 2 || chinese.length === 0) return;
+    const key = `${chinese}|${english}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    pool.push({ chinese, english });
+  });
+
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  return pool;
+};
+
+export const nextBilingualChallengeFromPool = (pool, pairs) => {
+  if (pool.length === 0) {
+    const newPool = buildBilingualChallengePool(pairs);
+    pool.push(...newPool);
+  }
+
+  if (pool.length === 0) return null;
+
+  return createBilingualChallengeProblem(pool.shift());
 };
 
 /**
@@ -106,4 +183,3 @@ export const nextWordFromPool = (pool, wordBank) => {
     letters: shuffleLetters(answer),
   };
 };
-

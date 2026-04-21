@@ -7,7 +7,17 @@ import confetti from 'canvas-confetti';
 import * as mammoth from 'mammoth';
 import { isTugLicenseVerified, verifyTugLicense } from './TugOfWarLicenseManager';
 import { getTugOfWarProductConfig } from './tugOfWarProductConfig.js';
-import { isWordAnswerCorrect, parseWordListText, buildWordPool, nextWordFromPool } from './tugOfWarWordLogic.js';
+import {
+  buildBilingualChallengePool,
+  buildWordPool,
+  createBilingualChallengeProblem,
+  isBilingualChallengeAnswerCorrect,
+  isWordAnswerCorrect,
+  nextBilingualChallengeFromPool,
+  nextWordFromPool,
+  parseBilingualWordListText,
+  parseWordListText,
+} from './tugOfWarWordLogic.js';
 import { getParticleCount, getSpectacleGlyphs, getSpectacleIntensity } from './tugOfWarSpectacleLogic.js';
 
 type Operator = 'add' | 'sub' | 'mul' | 'div';
@@ -47,6 +57,8 @@ interface MathProblem {
 
 interface WordProblem {
   type: 'word';
+  mode?: 'spelling' | 'challenge';
+  prompt?: string;
   answer: string;
   letters: string[];
 }
@@ -56,10 +68,16 @@ export interface WeightedWord {
   weight: number;
 }
 
+export interface BilingualChallengePair {
+  chinese: string;
+  english: string;
+}
+
 export interface SavedWordBank {
   id: string;
   name: string;
   words: WeightedWord[];
+  challengePairs?: BilingualChallengePair[];
   createdAt: number;
 }
 
@@ -174,6 +192,32 @@ const getOpSymbol = (op: Operator) => {
   }
 };
 
+const FrozenSquareOverlay = () => (
+  <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
+      <div className="absolute inset-0 bg-blue-100/40 backdrop-blur-[2px] pointer-events-auto cursor-not-allowed" />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="absolute inset-0 pointer-events-none border-4 border-blue-300/50 rounded-2xl"
+        style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.38\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
+        }}
+      />
+    </div>
+    <motion.div
+      initial={{ scale: 0.7, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="relative z-10 aspect-square w-[92px] md:w-[112px] rounded-2xl bg-white/95 border-4 border-blue-300 shadow-2xl flex flex-col items-center justify-center gap-1 px-2 text-center"
+    >
+      <Snowflake size={42} className="text-blue-500 animate-spin-slow shrink-0" />
+      <span className="text-[15px] md:text-[17px] font-black text-blue-700 leading-tight whitespace-nowrap">
+        冰冻中！！
+      </span>
+    </motion.div>
+  </div>
+);
+
 // 数字小键盘组件
 const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen, requiredOp }: {
   onInput: (val: string) => void;
@@ -235,37 +279,7 @@ const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen, requiredO
         )}
       </div>
 
-      {isFrozen && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-          <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
-            {/* 物理阻挡层 - 拦截所有点击 */}
-            <div className="absolute inset-0 bg-blue-100/40 backdrop-blur-[2px] pointer-events-auto cursor-not-allowed" />
-            
-            {/* 霜冻视觉效果 */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 pointer-events-none border-4 border-blue-300/50 rounded-2xl"
-              style={{
-                backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm13-24c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm39 75c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-58-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6-48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25-10c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm14 32c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm16 47c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-26-2c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-42-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-28c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm24-21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\' fill=\'%23ffffff\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
-              }}
-            />
-          </div>
-
-          <motion.div 
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative flex flex-col items-center gap-2 z-10"
-          >
-            <div className="bg-white/90 p-4 rounded-full shadow-2xl">
-              <Snowflake size={60} className="text-blue-500 animate-spin-slow" />
-            </div>
-            <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-2xl font-black shadow-xl uppercase tracking-tighter border-4 border-white">
-              FROZEN!
-            </span>
-          </motion.div>
-        </div>
-      )}
+      {isFrozen && <FrozenSquareOverlay />}
     </div>
   );
 };
@@ -344,37 +358,7 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
       </div>
 
       {/* 冻结遮罩：absolute inset-0 覆盖整个键盘（含字母区+操作区），与数学键盘一致 */}
-      {isFrozen && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-          <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
-            {/* 物理阻挡层 */}
-            <div className="absolute inset-0 bg-blue-100/40 backdrop-blur-[2px] pointer-events-auto cursor-not-allowed" />
-
-            {/* 霜冻纹理（与数学键盘相同） */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 pointer-events-none border-4 border-blue-300/50 rounded-2xl"
-              style={{
-                backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm13-24c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm39 75c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-58-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6-48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25-10c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm14 32c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm16 47c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-26-2c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-42-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-28c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm24-21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\' fill=\'%23ffffff\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
-              }}
-            />
-          </div>
-
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative flex flex-col items-center gap-2 z-10"
-          >
-            <div className="bg-white/90 p-4 rounded-full shadow-2xl">
-              <Snowflake size={60} className="text-blue-500 animate-spin-slow" />
-            </div>
-            <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-2xl font-black shadow-xl uppercase tracking-tighter border-4 border-white">
-              FROZEN!
-            </span>
-          </motion.div>
-        </div>
-      )}
+      {isFrozen && <FrozenSquareOverlay />}
     </div>
   );
 };
@@ -655,6 +639,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   });
   const [activeBankId, setActiveBankId] = useState<string | null>(savedBanks.length > 0 ? savedBanks[0].id : null);
   const [wordBank, setWordBank] = useState<WeightedWord[]>(savedBanks.length > 0 ? savedBanks[0].words : []);
+  const [challengePairs, setChallengePairs] = useState<BilingualChallengePair[]>(
+    savedBanks.length > 0 ? (savedBanks[0].challengePairs || []) : []
+  );
   const [editingBank, setEditingBank] = useState<SavedWordBank | null>(null);
 
   const [matchHistory, setMatchHistory] = useState<MatchRecord[]>(() => {
@@ -681,6 +668,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   // 蓝红队各自独立的洗牌词池，保证每个单词都能出现
   const blueWordPoolRef = useRef<string[]>([]);
   const redWordPoolRef = useRef<string[]>([]);
+  const blueChallengePoolRef = useRef<BilingualChallengePair[]>([]);
+  const redChallengePoolRef = useRef<BilingualChallengePair[]>([]);
   const [wordImportMessage, setWordImportMessage] = useState('');
   const [isParsingWordFile, setIsParsingWordFile] = useState(false);
 
@@ -761,6 +750,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         ? (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value
         : await file.text();
       const words = parseWordListText(text).slice(0, 300) as WeightedWord[];
+      const importedChallengePairs = parseBilingualWordListText(text).slice(0, 300) as BilingualChallengePair[];
 
       if (words.length === 0) {
         setWordImportMessage(t('tugOfWar.wordImportEmpty'));
@@ -775,14 +765,16 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         id: Math.random().toString(36).substring(2, 9),
         name: bankName,
         words,
+        challengePairs: importedChallengePairs,
         createdAt: Date.now(),
       };
 
       setSavedBanks(prev => [newBank, ...prev]);
       setActiveBankId(newBank.id);
       setWordBank(words);
+      setChallengePairs(importedChallengePairs);
 
-      setWordImportMessage(t('tugOfWar.wordImportSuccess', { count: words.length }));
+      setWordImportMessage(`${t('tugOfWar.wordImportSuccess', { count: words.length })}；挑战配对 ${importedChallengePairs.length} 组`);
     } catch (error) {
       console.error('Word list parse error', error);
       setWordImportMessage(t('tugOfWar.wordImportError'));
@@ -823,13 +815,24 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       setWordImportMessage(t('tugOfWar.wordImportEmpty'));
       return;
     }
+    if (settings.subjectMode === 'word' && settings.gameRule === 'speedrun' && challengePairs.length === 0) {
+      setWordImportMessage('挑战模式需要导入“中文 + 英文”的双语词表，例如：苹果 apple');
+      return;
+    }
 
     // 英文模式：初始化蓝红队各自的洗牌词池
     if (settings.subjectMode === 'word') {
-      blueWordPoolRef.current = buildWordPool(wordBank);
-      redWordPoolRef.current = buildWordPool(wordBank);
-      setBlueProblem(nextWordFromPool(blueWordPoolRef.current, wordBank) as Problem | null);
-      setRedProblem(nextWordFromPool(redWordPoolRef.current, wordBank) as Problem | null);
+      if (settings.gameRule === 'speedrun') {
+        blueChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
+        redChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
+        setBlueProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null);
+        setRedProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null);
+      } else {
+        blueWordPoolRef.current = buildWordPool(wordBank);
+        redWordPoolRef.current = buildWordPool(wordBank);
+        setBlueProblem(nextWordFromPool(blueWordPoolRef.current, wordBank) as Problem | null);
+        setRedProblem(nextWordFromPool(redWordPoolRef.current, wordBank) as Problem | null);
+      }
     } else {
       setBlueProblem(generateProblem(settings));
       setRedProblem(generateProblem(settings));
@@ -909,8 +912,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     let questionKey = '';
     
     if (problem.type === 'word') {
-      isCorrect = isWordAnswerCorrect(input, problem.answer);
-      questionKey = problem.answer;
+      isCorrect = problem.mode === 'challenge'
+        ? isBilingualChallengeAnswerCorrect(input, problem.answer)
+        : isWordAnswerCorrect(input, problem.answer);
+      questionKey = problem.mode === 'challenge' && problem.prompt
+        ? `${problem.prompt} -> ${problem.answer}`
+        : problem.answer;
     } else if (settings.gameMode === 'classic') {
       isCorrect = parseInt(input) === problem.answer;
       questionKey = `${problem.num1} ${getOpSymbol(problem.operator)} ${problem.num2}`;
@@ -984,7 +991,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       if (team === 'blue') {
         setBlueStreak(currentStreak);
         setBlueProblem(
-          settings.subjectMode === 'word'
+          settings.subjectMode === 'word' && settings.gameRule === 'speedrun'
+            ? nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null
+            : settings.subjectMode === 'word'
             ? nextWordFromPool(blueWordPoolRef.current, wordBank) as Problem | null
             : generateProblem(settings)
         );
@@ -994,7 +1003,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       } else {
         setRedStreak(currentStreak);
         setRedProblem(
-          settings.subjectMode === 'word'
+          settings.subjectMode === 'word' && settings.gameRule === 'speedrun'
+            ? nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null
+            : settings.subjectMode === 'word'
             ? nextWordFromPool(redWordPoolRef.current, wordBank) as Problem | null
             : generateProblem(settings)
         );
@@ -1031,12 +1042,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const handleBlueSubmit = useCallback(() => {
     if (gameState !== 'playing' || !blueProblem || blueFrozenUntil > Date.now()) return;
     processAnswer('blue', blueInput, blueProblem);
-  }, [blueInput, blueProblem, score, gameState, settings, wordBank, blueFrozenUntil, blueDoubleActive, redShieldActive, blueStreak]);
+  }, [blueInput, blueProblem, score, gameState, settings, wordBank, challengePairs, blueFrozenUntil, blueDoubleActive, redShieldActive, blueStreak]);
 
   const handleRedSubmit = useCallback(() => {
     if (gameState !== 'playing' || !redProblem || redFrozenUntil > Date.now()) return;
     processAnswer('red', redInput, redProblem);
-  }, [redInput, redProblem, score, gameState, settings, wordBank, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
+  }, [redInput, redProblem, score, gameState, settings, wordBank, challengePairs, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
 
   const spectacleNow = Date.now();
   const blueSpectacleIntensity = getSpectacleIntensity({
@@ -1267,6 +1278,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     setSavedBanks(prev => prev.map(b => b.id === editingBank.id ? editingBank : b));
                     if (activeBankId === editingBank.id) {
                       setWordBank(editingBank.words);
+                      setChallengePairs(editingBank.challengePairs || []);
                     }
                     setEditingBank(null);
                   }}
@@ -1506,6 +1518,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                           {t('tugOfWar.wordImportTitle')}
                         </div>
                         <p className="text-xs font-bold text-slate-500 mt-1 leading-relaxed">{t('tugOfWar.wordImportHint')}</p>
+                        <p className="text-xs font-bold text-blue-500 mt-1 leading-relaxed">
+                          挑战模式请导入双语行：苹果 apple、banana 香蕉。课堂上只显示中文，学生点击字母拼英文。
+                        </p>
                       </div>
                     </div>
                     <label className="w-full py-3 bg-white text-blue-700 rounded-2xl font-black shadow-sm hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer border border-blue-100">
@@ -1532,13 +1547,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                           {savedBanks.map(bank => (
                             <div 
                               key={bank.id} 
-                              onClick={() => { setActiveBankId(bank.id); setWordBank(bank.words); }}
+                              onClick={() => { setActiveBankId(bank.id); setWordBank(bank.words); setChallengePairs(bank.challengePairs || []); }}
                               className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${activeBankId === bank.id ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-blue-100 text-slate-600 hover:border-blue-300'}`}
                             >
                               <div className="flex flex-col">
                                 <span className="font-black text-sm">{bank.name}</span>
                                 <span className={`text-[10px] font-bold ${activeBankId === bank.id ? 'text-blue-200' : 'text-slate-400'}`}>
-                                  {bank.words.length} 个单词
+                                  {bank.words.length} 个单词 · 挑战 {bank.challengePairs?.length || 0} 组
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -1555,6 +1570,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                                     if (activeBankId === bank.id) {
                                       setActiveBankId(null);
                                       setWordBank([]);
+                                      setChallengePairs([]);
                                     }
                                   }}
                                   className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${activeBankId === bank.id ? 'bg-blue-700 hover:bg-blue-800 text-blue-200' : 'bg-slate-100 hover:bg-red-100 text-red-500'}`}
@@ -1575,8 +1591,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">玩法模式 (Game Rule)</label>
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={() => setSettings({...settings, gameRule: 'tug_of_war'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'tug_of_war' || !settings.gameRule ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>拔河</button>
-                        <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>竞速</button>
+                        <button onClick={() => setSettings({...settings, gameRule: 'tug_of_war'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'tug_of_war' || !settings.gameRule ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>拼词拔河</button>
+                        <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>中英挑战</button>
                       </div>
                     </div>
                   ) : (
@@ -1592,10 +1608,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
                 {settings.subjectMode === 'word' && settings.gameRule === 'speedrun' && (
                   <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 mt-2">
-                    <label className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 block">竞速目标题数 (Target Words)</label>
+                    <label className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 block">挑战目标题数 (Target Words)</label>
                     <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-blue-200 shadow-sm">
                       <input type="range" min="5" max="50" step="5" value={settings.speedrunTarget || 10} onChange={e => setSettings({...settings, speedrunTarget: parseInt(e.target.value)})} className="flex-1 accent-blue-600" />
                       <span className="font-black text-blue-600 w-8 text-center text-lg">{settings.speedrunTarget || 10}</span>
+                    </div>
+                    <div className="mt-2 text-xs font-black text-blue-700 bg-white/70 rounded-xl px-3 py-2">
+                      当前双语挑战配对：{challengePairs.length} 组。先完成目标题数的一队获胜，耗时越短越强。
                     </div>
                   </div>
                 )}
@@ -1619,7 +1638,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.wordList')}</label>
                       <div className="h-[42px] bg-slate-100 rounded-xl font-black text-slate-700 flex items-center justify-center text-sm border-2 border-transparent">
-                        {t('tugOfWar.wordBankCount', { count: wordBank.length })}
+                        {settings.gameRule === 'speedrun'
+                          ? `挑战配对 ${challengePairs.length} 组`
+                          : t('tugOfWar.wordBankCount', { count: wordBank.length })}
                       </div>
                     </div>
                   )}
@@ -1682,13 +1703,37 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                           </select>
                         </div>
                       </div>
+
+                      <div className="bg-white rounded-2xl p-3 border border-slate-200 text-xs font-bold text-slate-600 leading-relaxed">
+                        <div className="font-black text-slate-800 mb-2 flex items-center gap-2">
+                          <ShieldAlert size={15} className="text-blue-600" />
+                          老师道具说明
+                        </div>
+                        <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                          道具使用方法：连续答对达到上面的条件会掉落道具；获得后，在队伍下方道具栏点击道具即可使用。
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                          <div className="rounded-xl bg-blue-50 border border-blue-100 p-2">
+                            <div className="font-black text-blue-700 flex items-center gap-1"><Snowflake size={13} /> 冰冻：</div>
+                            <div>锁住对方键盘 3 秒。</div>
+                          </div>
+                          <div className="rounded-xl bg-amber-50 border border-amber-100 p-2">
+                            <div className="font-black text-amber-700 flex items-center gap-1"><Sword size={13} /> 双倍：</div>
+                            <div>下一次答对加倍推进。</div>
+                          </div>
+                          <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-2">
+                            <div className="font-black text-emerald-700 flex items-center gap-1"><ShieldCheck size={13} /> 护盾：</div>
+                            <div>抵挡一次对方道具或拉力。</div>
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </div>
 
                 <button
                   onClick={startGame}
-                  disabled={settings.subjectMode === 'word' && wordBank.length === 0}
+                  disabled={settings.subjectMode === 'word' && (wordBank.length === 0 || (settings.gameRule === 'speedrun' && challengePairs.length === 0))}
                   className={`w-full py-4 bg-gradient-to-r from-blue-600 to-red-600 text-white rounded-2xl text-lg font-black shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed`}
                 >
                   <Play fill="white" size={20} /> {t('tugOfWar.startGame')}
@@ -1758,8 +1803,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     {blueProblem.type === 'word' ? (
                       <>
                         <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 h-3">
-                          {t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: blueProblem.answer.length })}
+                          {blueProblem.mode === 'challenge' ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: blueProblem.answer.length })}
                         </div>
+                        {blueProblem.mode === 'challenge' && (
+                          <div className="min-h-[48px] mb-2 rounded-xl bg-blue-50 border-2 border-blue-100 px-3 py-2 flex items-center justify-center text-[22px] md:text-[28px] font-black text-blue-700 leading-tight break-words">
+                            {blueProblem.prompt}
+                          </div>
+                        )}
                         <div className="min-h-[58px] flex flex-wrap items-center justify-center gap-1 mb-2">
                           {blueProblem.answer.split('').map((_, index) => (
                             <div key={`blue-slot-${index}`} className="w-7 md:w-8 h-9 md:h-10 rounded-lg bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-[18px] md:text-[22px] font-black text-blue-700">
@@ -1796,6 +1846,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
                 {/* 道具栏 */}
                 <div className="flex flex-col items-center w-full">
+                  {settings.powerUpsEnabled && (
+                    <div className="text-[10px] font-black text-blue-400 mb-1">连续答对获得 · 点击道具使用</div>
+                  )}
                   <div className="flex flex-wrap justify-center gap-2 min-h-[52px]">
                     <AnimatePresence>
                       {blueItems.map((item, i) => (
@@ -1870,8 +1923,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     {redProblem.type === 'word' ? (
                       <>
                         <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 h-3">
-                          {t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: redProblem.answer.length })}
+                          {redProblem.mode === 'challenge' ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: redProblem.answer.length })}
                         </div>
+                        {redProblem.mode === 'challenge' && (
+                          <div className="min-h-[48px] mb-2 rounded-xl bg-red-50 border-2 border-red-100 px-3 py-2 flex items-center justify-center text-[22px] md:text-[28px] font-black text-red-700 leading-tight break-words">
+                            {redProblem.prompt}
+                          </div>
+                        )}
                         <div className="min-h-[58px] flex flex-wrap items-center justify-center gap-1 mb-2">
                           {redProblem.answer.split('').map((_, index) => (
                             <div key={`red-slot-${index}`} className="w-7 md:w-8 h-9 md:h-10 rounded-lg bg-red-50 border-2 border-red-100 flex items-center justify-center text-[18px] md:text-[22px] font-black text-red-700">
@@ -1907,6 +1965,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 )}
 
                 <div className="flex flex-col items-center w-full">
+                  {settings.powerUpsEnabled && (
+                    <div className="text-[10px] font-black text-red-400 mb-1">连续答对获得 · 点击道具使用</div>
+                  )}
                   <div className="flex flex-wrap justify-center gap-2 min-h-[52px]">
                     <AnimatePresence>
                       {redItems.map((item, i) => (

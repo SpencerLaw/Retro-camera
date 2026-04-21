@@ -29,6 +29,8 @@ interface GameSettings {
   operators: Operator[];
   maxNumber: number;
   winScore: number;
+  gameRule?: 'tug_of_war' | 'speedrun';
+  speedrunTarget?: number;
   gameMode: GameMode;
   powerUpsEnabled: boolean;
   allowedPowerUps: PowerUpType[];
@@ -635,6 +637,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     operators: ['add'],
     maxNumber: 10,
     winScore: 10,
+    gameRule: 'tug_of_war',
+    speedrunTarget: 10,
     gameMode: 'classic',
     powerUpsEnabled: true,
     allowedPowerUps: ['freeze', 'double', 'shield'],
@@ -688,6 +692,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const [redInput, setRedInput] = useState('');
   const [bluePickedLetterIndices, setBluePickedLetterIndices] = useState<number[]>([]);
   const [redPickedLetterIndices, setRedPickedLetterIndices] = useState<number[]>([]);
+  const [blueProgress, setBlueProgress] = useState(0);
+  const [redProgress, setRedProgress] = useState(0);
   const [gameState, setGameState] = useState<'playing' | 'blue_wins' | 'red_wins'>('playing');
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -829,6 +835,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       setRedProblem(generateProblem(settings));
     }
     setScore(0);
+    setBlueProgress(0);
+    setRedProgress(0);
     setBlueInput('');
     setRedInput('');
     setBluePickedLetterIndices([]);
@@ -956,10 +964,22 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         else setRedShieldActive(false);
       }
 
-      const newScore = team === 'blue' ? score - pullPower : score + pullPower;
+      // 更新状态与判定胜利
+      let winner: 'blue' | 'red' | null = null;
+      if (settings.gameRule === 'speedrun') {
+        const bp = team === 'blue' ? blueProgress + pullPower : blueProgress;
+        const rp = team === 'red' ? redProgress + pullPower : redProgress;
+        setBlueProgress(bp);
+        setRedProgress(rp);
+        if (bp >= (settings.speedrunTarget || 10)) winner = 'blue';
+        if (rp >= (settings.speedrunTarget || 10)) winner = 'red';
+      } else {
+        const newScore = team === 'blue' ? score - pullPower : score + pullPower;
+        setScore(newScore);
+        if (newScore <= -settings.winScore) winner = 'blue';
+        if (newScore >= settings.winScore) winner = 'red';
+      }
       
-      // 更新状态
-      setScore(newScore);
       fireTeamConfetti(team, settings.subjectMode, currentStreak);
       if (team === 'blue') {
         setBlueStreak(currentStreak);
@@ -982,11 +1002,6 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         setLastRedCorrect(Date.now());
         checkPowerUpDrop('red', currentStreak);
       }
-
-      // 胜利判定
-      let winner: 'blue' | 'red' | null = null;
-      if (newScore <= -settings.winScore) winner = 'blue';
-      if (newScore >= settings.winScore) winner = 'red';
 
       if (winner) {
         setGameState(`${winner}_wins` as any);
@@ -1556,6 +1571,36 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
+                        {settings.subjectMode === 'word' ? (
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">玩法模式 (Game Rule)</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={() => setSettings({...settings, gameRule: 'tug_of_war'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'tug_of_war' || !settings.gameRule ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>拔河</button>
+                        <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>竞速</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.winCondition')}</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                        <input type="range" min="5" max="30" step="5" value={settings.winScore} onChange={(e) => setSettings({...settings, winScore: parseInt(e.target.value)})} className="flex-1 accent-red-500" />
+                        <span className="font-black text-red-600 w-6 text-sm">{settings.winScore}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {settings.subjectMode === 'word' && settings.gameRule === 'speedrun' && (
+                  <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 mt-2">
+                    <label className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 block">竞速目标题数 (Target Words)</label>
+                    <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-blue-200 shadow-sm">
+                      <input type="range" min="5" max="50" step="5" value={settings.speedrunTarget || 10} onChange={e => setSettings({...settings, speedrunTarget: parseInt(e.target.value)})} className="flex-1 accent-blue-600" />
+                      <span className="font-black text-blue-600 w-8 text-center text-lg">{settings.speedrunTarget || 10}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4 pt-4 border-t border-slate-100">
                   {settings.subjectMode === 'math' ? (
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.range')}</label>
@@ -1653,8 +1698,27 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
           </motion.div>
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col flex-1 min-h-0">
-            {/* 拔河核心视觉 */}
-            <TugOfWarAnimation score={score} winScore={settings.winScore} />
+            {/* 中间区域：拔河核心视觉 或 竞速进度条 */}
+            {settings.gameRule === 'speedrun' ? (
+              <div className="h-[90px] md:h-[120px] bg-slate-900 border-b border-slate-700 flex items-center justify-center relative shrink-0 shadow-inner px-8">
+                <div className="w-full max-w-4xl flex flex-col gap-4">
+                  <div className="w-full bg-slate-800 rounded-full h-5 md:h-6 relative overflow-hidden border border-slate-700 shadow-inner">
+                    <div className="absolute left-0 top-0 bottom-0 bg-blue-500 transition-all duration-300" style={{ width: `${Math.min(100, (blueProgress / (settings.speedrunTarget || 10)) * 100)}%` }} />
+                    <span className="absolute inset-0 flex items-center justify-center text-[11px] md:text-xs font-black text-white mix-blend-difference rotate-180">
+                      蓝队进度: {Math.floor(blueProgress)} / {settings.speedrunTarget || 10}
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-full h-5 md:h-6 relative overflow-hidden border border-slate-700 shadow-inner">
+                    <div className="absolute left-0 top-0 bottom-0 bg-red-500 transition-all duration-300" style={{ width: `${Math.min(100, (redProgress / (settings.speedrunTarget || 10)) * 100)}%` }} />
+                    <span className="absolute inset-0 flex items-center justify-center text-[11px] md:text-xs font-black text-white mix-blend-difference">
+                      红队进度: {Math.floor(redProgress)} / {settings.speedrunTarget || 10}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <TugOfWarAnimation score={score} winScore={settings.winScore} />
+            )}
 
             <main className="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-0 overflow-y-auto md:overflow-hidden">
               {/* 蓝队 */}
@@ -1901,6 +1965,11 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               <h2 className={`text-4xl md:text-5xl font-black mb-4 ${gameState === 'blue_wins' ? 'text-blue-600' : 'text-red-600'}`}>
                 {gameState === 'blue_wins' ? t('tugOfWar.blueWins') : t('tugOfWar.redWins')}
               </h2>
+              {settings.gameRule === 'speedrun' && (
+                <div className="mt-4 mb-2 bg-slate-100 rounded-2xl py-3 px-6 text-xl font-bold text-slate-700 shadow-inner">
+                  ⏱️ 耗时: {timeElapsed} 秒
+                </div>
+              )}
               <div className="flex flex-col w-full gap-4 mt-6 md:mt-10">
                 <button onClick={startGame} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3">
                   <RotateCcw size={24} /> {t('tugOfWar.restart')}

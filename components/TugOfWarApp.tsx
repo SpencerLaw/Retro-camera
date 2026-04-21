@@ -448,7 +448,8 @@ const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectA
   const accent = team === 'blue' ? '#2563EB' : '#DC2626';
   const softAccent = team === 'blue' ? 'rgba(37, 99, 235, 0.18)' : 'rgba(220, 38, 38, 0.18)';
   const ribbonAngle = team === 'blue' ? '115deg' : '65deg';
-  const burstX = team === 'blue' ? '58%' : '42%';
+  const burstSideClass = team === 'blue' ? 'left-4 md:left-10' : 'right-4 md:right-10';
+  const burstAlignClass = team === 'blue' ? 'justify-start' : 'justify-end';
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none motion-reduce:hidden" aria-hidden="true">
@@ -536,21 +537,20 @@ const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectA
         {lastCorrectAt > 0 && (
           <motion.div
             key={`${team}-burst-${lastCorrectAt}`}
-            className="absolute top-[38%] flex items-center justify-center"
-            style={{ left: burstX }}
+            className={`absolute top-[38%] ${burstSideClass} max-w-[min(78%,340px)] flex items-center ${burstAlignClass}`}
             initial={{ opacity: 0, scale: 0.4, y: 8 }}
             animate={{ opacity: [0, 1, 0], scale: [0.4, 1.25, 1.7], y: [8, -8, -20] }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.9, ease: 'easeOut' }}
           >
             <div
-              className="flex gap-1 md:gap-2 rounded-2xl border-2 bg-white/75 px-3 py-2 shadow-xl backdrop-blur-sm"
+              className="flex max-w-full flex-wrap justify-center gap-1 md:gap-2 rounded-2xl border-2 bg-white/75 px-3 py-2 shadow-xl backdrop-blur-sm"
               style={{ borderColor: accent, color: accent }}
             >
               {correctBurstLabels.map((label, index) => (
                 <motion.span
                   key={`${label}-${index}`}
-                  className="text-sm md:text-xl font-black leading-none whitespace-nowrap"
+                  className="text-sm md:text-xl font-black leading-tight break-words"
                   animate={{ y: [0, -8, 0], rotate: [-8, 8, 0] }}
                   transition={{ duration: 0.45, delay: index * 0.06 }}
                 >
@@ -1408,7 +1408,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {editingBank.words.map((w, i) => (
                   <div key={`${w.text}-${i}`} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <span className="font-black text-slate-700 text-lg uppercase tracking-wider">{w.text}</span>
+                    <span className="font-black text-slate-700 text-lg lowercase tracking-wider">{w.text}</span>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden h-9">
                         <button 

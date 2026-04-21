@@ -60,6 +60,15 @@ runTest('word correct-answer burst uses praise words instead of ABCD glyphs', ()
   assert.doesNotMatch(source, /glyphs\.slice\(0, 4\)\.map/);
 });
 
+runTest('correct-answer burst stays inside each team panel when scaled', () => {
+  assert.match(source, /burstSideClass/);
+  assert.match(source, /team === 'blue' \? 'left-4 md:left-10' : 'right-4 md:right-10'/);
+  assert.match(source, /max-w-\[min\(78%,340px\)\]/);
+  assert.match(source, /flex-wrap/);
+  assert.match(source, /break-words/);
+  assert.doesNotMatch(source, /style=\{\{ left: burstX \}\}/);
+});
+
 runTest('speed challenge keeps encouragement but removes tugging background clutter', () => {
   assert.match(source, /isTugRule/);
   assert.match(source, /settings\.gameRule !== 'speedrun'/);

@@ -2,7 +2,7 @@ export const normalizeWordAnswer = (value) =>
   String(value ?? '')
     .normalize('NFKD')
     .replace(/[^a-z]/gi, '')
-    .toUpperCase();
+    .toLowerCase();
 
 export const parseWordListText = (text) => {
   const seen = new Set();

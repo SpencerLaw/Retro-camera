@@ -7,7 +7,7 @@ export const normalizeWordAnswer = (value) =>
 export const parseWordListText = (text) => {
   const seen = new Set();
   const words = [];
-  const matches = String(text ?? '').match(/[A-Za-z]+(?:[-'\s]+[A-Za-z]+)*/g) ?? [];
+  const matches = String(text ?? '').match(/[A-Za-z]+(?:[-' \t]+[A-Za-z]+)*/g) ?? [];
 
   for (const token of matches) {
     const word = normalizeWordAnswer(token);
@@ -33,7 +33,7 @@ export const parseBilingualWordListText = (text) => {
   const lines = String(text ?? '').split(/\r?\n/);
 
   for (const line of lines) {
-    const englishMatch = line.match(/[A-Za-z]+(?:[-'\s]+[A-Za-z]+)*/);
+    const englishMatch = line.match(/[A-Za-z]+(?:[-' \t]+[A-Za-z]+)*/);
     const english = normalizeWordAnswer(englishMatch?.[0]);
     const chinese = normalizeChinesePrompt(line);
     if (english.length < 2 || chinese.length === 0) continue;

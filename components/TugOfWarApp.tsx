@@ -1076,6 +1076,14 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     }
   };
 
+  const getPowerUpTeacherDescription = (type: PowerUpType) => {
+    switch (type) {
+      case 'freeze': return '锁住对方键盘 3 秒';
+      case 'double': return '下次答对加倍推进';
+      case 'shield': return '抵挡一次对方道具';
+    }
+  };
+
   // 如果授权状态未知，显示加载中
   if (isVerified === null) return <div className="h-screen w-screen bg-slate-50 flex items-center justify-center font-black text-slate-400">Loading...</div>;
 
@@ -1587,12 +1595,26 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                        {settings.subjectMode === 'word' ? (
-                    <div>
+                  {settings.subjectMode === 'word' ? (
+                    <div className="col-span-2">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">玩法模式 (Game Rule)</label>
                       <div className="grid grid-cols-2 gap-2">
                         <button onClick={() => setSettings({...settings, gameRule: 'tug_of_war'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'tug_of_war' || !settings.gameRule ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>拼词拔河</button>
                         <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>中英挑战</button>
+                      </div>
+                      <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-3 text-xs font-bold leading-relaxed text-slate-600">
+                        <div className="mb-2 font-black text-blue-700">英文单词玩法说明</div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
+                            <div className="font-black text-slate-800">拼词拔河：</div>
+                            <div>导入英文单词，学生点击字母拼出答案；答对推动绳子，先拉到胜利线获胜。</div>
+                          </div>
+                          <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
+                            <div className="font-black text-slate-800">中英挑战：</div>
+                            <div>导入中英词表，课堂只显示中文，学生点击英文字母拼英文；先完成设定题数的一队获胜。</div>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-[11px] font-black text-blue-500">以上说明只针对英文单词模式。</div>
                       </div>
                     </div>
                   ) : (
@@ -1666,7 +1688,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   
                   {settings.powerUpsEnabled && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-4 overflow-hidden">
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {(['freeze', 'double', 'shield'] as PowerUpType[]).map(p => (
                           <button
                             key={p}
@@ -1674,13 +1696,16 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                               const newAllowed = settings.allowedPowerUps.includes(p) ? settings.allowedPowerUps.filter(i => i !== p) : [...settings.allowedPowerUps, p];
                               setSettings({...settings, allowedPowerUps: newAllowed});
                             }}
-                            className={`p-2 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${settings.allowedPowerUps.includes(p) ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-100 bg-white opacity-60'}`}
+                            className={`min-h-[96px] p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1.5 text-center ${settings.allowedPowerUps.includes(p) ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-slate-100 bg-white opacity-60'}`}
                           >
                             <div className={`p-1.5 rounded-full ${settings.allowedPowerUps.includes(p) ? 'bg-white shadow-sm' : 'bg-slate-50'}`}>
                               {getItemIcon(p)}
                             </div>
                             <span className={`text-[10px] font-black uppercase ${settings.allowedPowerUps.includes(p) ? 'text-emerald-700' : 'text-slate-400'}`}>
                               {t(`tugOfWar.prop${p.charAt(0).toUpperCase() + p.slice(1)}`)}
+                            </span>
+                            <span className={`text-[11px] font-bold leading-snug ${settings.allowedPowerUps.includes(p) ? 'text-slate-600' : 'text-slate-400'}`}>
+                              {getPowerUpTeacherDescription(p)}
                             </span>
                           </button>
                         ))}
@@ -1707,7 +1732,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <div className="bg-white rounded-2xl p-3 border border-slate-200 text-xs font-bold text-slate-600 leading-relaxed">
                         <div className="font-black text-slate-800 mb-2 flex items-center gap-2">
                           <ShieldAlert size={15} className="text-blue-600" />
-                          老师道具说明
+                          老师道具说明（数学 / 英文通用）
                         </div>
                         <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
                           道具使用方法：连续答对达到上面的条件会掉落道具；获得后，在队伍下方道具栏点击道具即可使用。

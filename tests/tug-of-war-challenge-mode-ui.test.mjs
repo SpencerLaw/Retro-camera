@@ -21,6 +21,15 @@ runTest('challenge mode uses bilingual import with Chinese prompts and letter cl
   assert.doesNotMatch(source, /answerLanguage/);
 });
 
+runTest('word mode rule selector explains both English-only game rules', () => {
+  assert.match(source, /英文单词玩法说明/);
+  assert.match(source, /拼词拔河：/);
+  assert.match(source, /导入英文单词/);
+  assert.match(source, /中英挑战：/);
+  assert.match(source, /只显示中文/);
+  assert.match(source, /只针对英文单词模式/);
+});
+
 runTest('frozen state renders a reusable square cover with Chinese frozen text', () => {
   assert.match(source, /const FrozenSquareOverlay/);
   assert.match(source, /aspect-square/);
@@ -29,7 +38,10 @@ runTest('frozen state renders a reusable square cover with Chinese frozen text',
 });
 
 runTest('power up usage is explained next to the game controls', () => {
+  assert.match(source, /getPowerUpTeacherDescription/);
+  assert.match(source, /{getPowerUpTeacherDescription\(p\)}/);
   assert.match(source, /老师道具说明/);
+  assert.match(source, /数学 \/ 英文通用/);
   assert.match(source, /道具使用方法/);
   assert.match(source, /连续答对/);
   assert.match(source, /点击道具/);

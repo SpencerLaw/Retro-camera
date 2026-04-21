@@ -882,6 +882,14 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     setIsParsingWordFile(true);
     setWordImportMessage('');
 
+    const fileName = file.name.toLowerCase();
+    if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')) {
+      setWordImportMessage('不支持Excel表格哦，请使用TXT或者Word。\n格式要求 (请换行)：\napple 苹果\nbanana 香蕉');
+      setIsParsingWordFile(false);
+      if (e.target) e.target.value = '';
+      return;
+    }
+
     try {
       const isDocx = file.name.toLowerCase().endsWith('.docx');
       const text = isDocx
@@ -1705,7 +1713,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       />
                     </label>
                     {wordImportMessage && (
-                      <div className="text-xs font-black text-blue-700 bg-white/70 rounded-2xl px-3 py-2">
+                      <div className="text-xs font-black text-blue-700 bg-white/70 rounded-2xl px-3 py-2 whitespace-pre-wrap">
                         {wordImportMessage}
                       </div>
                     )}

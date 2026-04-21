@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
 import * as mammoth from 'mammoth';
 import { isTugLicenseVerified, verifyTugLicense } from './TugOfWarLicenseManager';
 import { getTugOfWarProductConfig } from './tugOfWarProductConfig.js';
-import { createWordProblem, isWordAnswerCorrect, parseWordListText } from './tugOfWarWordLogic.js';
+import { isWordAnswerCorrect, parseWordListText, buildWordPool, nextWordFromPool } from './tugOfWarWordLogic.js';
 import { getParticleCount, getSpectacleGlyphs, getSpectacleIntensity } from './tugOfWarSpectacleLogic.js';
 
 type Operator = 'add' | 'sub' | 'mul' | 'div';
@@ -126,11 +126,7 @@ const generateMathProblem = (settings: GameSettings): MathProblem => {
   return { type: 'math', num1, num2, operator, answer };
 };
 
-const generateProblem = (settings: GameSettings, wordBank: string[]): Problem | null => {
-  if (settings.subjectMode === 'word') {
-    return createWordProblem(wordBank) as WordProblem | null;
-  }
-
+const generateProblem = (settings: GameSettings): Problem | null => {
   return generateMathProblem(settings);
 };
 
@@ -238,6 +234,14 @@ const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen, requiredO
 };
 
 // 英语拼词字母键盘组件
+// 动态列数规则：尽量控制在 2 行以内，按钮随之缩小
+const getLetterCols = (count: number) => {
+  if (count <= 8) return 4;
+  if (count <= 10) return 5;
+  if (count <= 12) return 6;
+  return 7;
+};
+
 const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team, t, isFrozen }: {
   problem: WordProblem;
   pickedIndices: number[];
@@ -249,49 +253,86 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
   isFrozen: boolean;
 }) => {
   const picked = new Set(pickedIndices);
+  const cols = getLetterCols(problem.letters.length);
 
+  // 列数越多，按钮越小
+  const btnH = cols <= 5 ? 'h-[42px] md:h-[50px]' : cols === 6 ? 'h-[38px] md:h-[44px]' : 'h-[34px] md:h-[40px]';
+  const btnText = cols <= 5 ? 'text-[18px] md:text-[22px]' : cols === 6 ? 'text-[15px] md:text-[18px]' : 'text-[13px] md:text-[15px]';
+
+  // 冻结遮罩与数学键盘完全一致：外层 relative，整体一个容器，absolute inset-0 覆盖全部
   return (
-    <div className="relative w-full max-w-[360px]">
-      <div className={`grid ${problem.letters.length > 10 ? 'grid-cols-5' : 'grid-cols-4'} gap-2 transition-all ${isFrozen ? 'opacity-20 grayscale pointer-events-none blur-sm' : ''}`}>
-        {problem.letters.map((letter, index) => {
-          const disabled = picked.has(index);
-          return (
-            <button
-              key={`${letter}-${index}`}
-              onClick={() => onPick(index)}
-              disabled={disabled}
-              className={`h-[42px] md:h-[50px] rounded-xl text-[18px] md:text-[22px] font-black shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${disabled ? 'bg-slate-100 text-slate-300 shadow-none' : 'bg-white text-slate-800 hover:bg-slate-50'}`}
-            >
-              {letter}
-            </button>
-          );
-        })}
-        <button
-          onClick={onClear}
-          className="col-span-2 h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold bg-slate-200 text-slate-800 shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none hover:bg-slate-300 transition-all"
+    <div className="relative w-full max-w-[380px]">
+      {/* 整个键盘区（字母 + 操作）统一控制冻结状态 */}
+      <div className={`flex flex-col gap-2 transition-all ${isFrozen ? 'opacity-20 grayscale pointer-events-none blur-sm' : ''}`}>
+
+        {/* 字母按钮区：动态列数，使用 inline style 避免 Tailwind purge 问题 */}
+        <div
+          className="grid gap-2"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         >
-          {t('tugOfWar.clear')}
-        </button>
-        <button
-          onClick={onSubmit}
-          className={`col-span-2 h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold text-white shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${team === 'blue' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-800/20' : 'bg-red-600 hover:bg-red-700 shadow-red-800/20'}`}
-        >
-          {t('tugOfWar.confirm')}
-        </button>
+          {problem.letters.map((letter, index) => {
+            const disabled = picked.has(index);
+            return (
+              <button
+                key={`${letter}-${index}`}
+                onClick={() => onPick(index)}
+                disabled={disabled}
+                className={`${btnH} rounded-xl ${btnText} font-black shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${
+                  disabled
+                    ? 'bg-slate-100 text-slate-300 shadow-none'
+                    : 'bg-white text-slate-800 hover:bg-slate-50'
+                }`}
+              >
+                {letter}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 操作按钮区：固定 2 列，始终整齐，且与字母区等宽 */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={onClear}
+            className="h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold bg-slate-200 text-slate-800 shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none hover:bg-slate-300 transition-all"
+          >
+            {t('tugOfWar.clear')}
+          </button>
+          <button
+            onClick={onSubmit}
+            className={`h-[44px] md:h-[52px] rounded-xl text-[16px] md:text-[18px] font-bold text-white shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${
+              team === 'blue' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-800/20' : 'bg-red-600 hover:bg-red-700 shadow-red-800/20'
+            }`}
+          >
+            {t('tugOfWar.confirm')}
+          </button>
+        </div>
       </div>
 
+      {/* 冻结遮罩：absolute inset-0 覆盖整个键盘（含字母区+操作区），与数学键盘一致 */}
       {isFrozen && (
         <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl overflow-hidden">
-          <div className={`absolute inset-0 ${team === 'blue' ? 'bg-blue-100/40' : 'bg-red-100/40'} backdrop-blur-[2px] pointer-events-auto cursor-not-allowed`} />
+          {/* 物理阻挡层 */}
+          <div className="absolute inset-0 bg-blue-100/40 backdrop-blur-[2px] pointer-events-auto cursor-not-allowed" />
+
+          {/* 霜冻纹理（与数学键盘相同） */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 pointer-events-none border-4 border-blue-300/50 rounded-2xl"
+            style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm13-24c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm39 75c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-58-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6-48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25-10c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm14 32c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm16 47c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-26-2c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-42-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-28c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm24-21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\' fill=\'%23ffffff\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
+            }}
+          />
+
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="relative flex flex-col items-center gap-2 z-10"
           >
             <div className="bg-white/90 p-4 rounded-full shadow-2xl">
-              <Snowflake size={54} className="text-blue-500 animate-spin-slow" />
+              <Snowflake size={60} className="text-blue-500 animate-spin-slow" />
             </div>
-            <span className="bg-blue-600 text-white px-5 py-2 rounded-full text-xl font-black shadow-xl uppercase tracking-tighter border-4 border-white">
+            <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-2xl font-black shadow-xl uppercase tracking-tighter border-4 border-white">
               FROZEN!
             </span>
           </motion.div>
@@ -565,6 +606,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     powerUpTrigger: 3
   });
   const [wordBank, setWordBank] = useState<string[]>([]);
+  // 蓝红队各自独立的洗牌词池，保证每个单词都能出现
+  const blueWordPoolRef = useRef<string[]>([]);
+  const redWordPoolRef = useRef<string[]>([]);
   const [wordImportMessage, setWordImportMessage] = useState('');
   const [isParsingWordFile, setIsParsingWordFile] = useState(false);
 
@@ -692,8 +736,16 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       return;
     }
 
-    setBlueProblem(generateProblem(settings, wordBank));
-    setRedProblem(generateProblem(settings, wordBank));
+    // 英文模式：初始化蓝红队各自的洗牌词池
+    if (settings.subjectMode === 'word') {
+      blueWordPoolRef.current = buildWordPool(wordBank);
+      redWordPoolRef.current = buildWordPool(wordBank);
+      setBlueProblem(nextWordFromPool(blueWordPoolRef.current, wordBank) as Problem | null);
+      setRedProblem(nextWordFromPool(redWordPoolRef.current, wordBank) as Problem | null);
+    } else {
+      setBlueProblem(generateProblem(settings));
+      setRedProblem(generateProblem(settings));
+    }
     setScore(0);
     setBlueInput('');
     setRedInput('');
@@ -805,13 +857,21 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       fireTeamConfetti(team, settings.subjectMode, currentStreak);
       if (team === 'blue') {
         setBlueStreak(currentStreak);
-        setBlueProblem(generateProblem(settings, wordBank));
+        setBlueProblem(
+          settings.subjectMode === 'word'
+            ? nextWordFromPool(blueWordPoolRef.current, wordBank) as Problem | null
+            : generateProblem(settings)
+        );
         clearTeamInput('blue');
         setLastBlueCorrect(Date.now());
         checkPowerUpDrop('blue', currentStreak);
       } else {
         setRedStreak(currentStreak);
-        setRedProblem(generateProblem(settings, wordBank));
+        setRedProblem(
+          settings.subjectMode === 'word'
+            ? nextWordFromPool(redWordPoolRef.current, wordBank) as Problem | null
+            : generateProblem(settings)
+        );
         clearTeamInput('red');
         setLastRedCorrect(Date.now());
         checkPowerUpDrop('red', currentStreak);
@@ -993,15 +1053,6 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
               className="bg-white rounded-[2.5rem] p-6 md:p-8 w-full max-w-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/50 max-h-[90vh] overflow-y-auto relative"
             >
-              {/* 关闭按钮 - 仅在游戏进行中显示，允许返回游戏 */}
-              {blueProblem && (
-                <button 
-                  onClick={() => setShowSettings(false)}
-                  className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400"
-                >
-                  <RotateCcw size={24} />
-                </button>
-              )}
 
               <h2 className="text-3xl font-black mb-6 text-center text-slate-800">
                 {productConfig.title} · {t('tugOfWar.settingsTitle')}
@@ -1071,6 +1122,26 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     {wordImportMessage && (
                       <div className="mt-3 text-xs font-black text-blue-700 bg-white/70 rounded-2xl px-3 py-2">
                         {wordImportMessage}
+                      </div>
+                    )}
+                    {wordBank.length > 0 && (
+                      <div className="mt-3">
+                        <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">已导入单词</div>
+                        <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto pr-1">
+                          {wordBank.slice(0, 60).map((word, i) => (
+                            <span
+                              key={`${word}-${i}`}
+                              className="px-2 py-0.5 bg-white rounded-lg text-[11px] font-black text-blue-700 border border-blue-100 shadow-sm"
+                            >
+                              {word}
+                            </span>
+                          ))}
+                          {wordBank.length > 60 && (
+                            <span className="px-2 py-0.5 bg-blue-100 rounded-lg text-[11px] font-black text-blue-500">
+                              +{wordBank.length - 60} 个…
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

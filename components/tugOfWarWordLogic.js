@@ -52,3 +52,44 @@ export const createWordProblem = (wordBank, random = Math.random) => {
     letters: shuffleLetters(answer, random),
   };
 };
+
+/**
+ * 构建洗牌词池：对词库做 Fisher-Yates 洗牌，返回一个新数组队列。
+ * 保证每个单词在一轮内只出现一次。
+ */
+export const buildWordPool = (wordBank, random = Math.random) => {
+  const cleanBank = Array.from(
+    new Set((wordBank ?? []).map(normalizeWordAnswer).filter((word) => word.length >= 2)),
+  );
+
+  // Fisher-Yates shuffle
+  for (let i = cleanBank.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [cleanBank[i], cleanBank[j]] = [cleanBank[j], cleanBank[i]];
+  }
+
+  return cleanBank;
+};
+
+/**
+ * 从词池中取下一个单词。
+ * - pool 是一个可变数组（useRef.current）
+ * - 当池为空时自动用 wordBank 重建并重新洗牌（进入下一轮）
+ * - 返回 WordProblem 对象，或 null（词库为空时）
+ */
+export const nextWordFromPool = (pool, wordBank) => {
+  if (pool.length === 0) {
+    const newPool = buildWordPool(wordBank);
+    pool.push(...newPool);
+  }
+
+  if (pool.length === 0) return null;
+
+  const answer = pool.shift();
+  return {
+    type: 'word',
+    answer,
+    letters: shuffleLetters(answer),
+  };
+};
+

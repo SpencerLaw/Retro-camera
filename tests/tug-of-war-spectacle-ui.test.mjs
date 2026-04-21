@@ -40,3 +40,21 @@ runTest('english word battles show responsive encouragement bubbles for leaders 
   assert.match(source, /encouragement\?\.tone === 'leader'/);
   assert.match(source, /encouragement\?\.tone === 'trailing'/);
 });
+
+runTest('word correct-answer burst uses praise words instead of ABCD glyphs', () => {
+  assert.match(source, /const getCorrectBurstLabels = /);
+  assert.match(source, /Good!/);
+  assert.match(source, /Great!/);
+  assert.match(source, /Nice!/);
+  assert.match(source, /Super!/);
+  assert.match(source, /getCorrectBurstLabels\(subjectMode\)/);
+  assert.doesNotMatch(source, /glyphs\.slice\(0, 4\)\.map/);
+});
+
+runTest('speed challenge keeps encouragement but removes tugging background clutter', () => {
+  assert.match(source, /isTugRule/);
+  assert.match(source, /settings\.gameRule !== 'speedrun'/);
+  assert.match(source, /isTugRule && \(/);
+  assert.match(source, /isTugRule && streak >= 2/);
+  assert.match(source, /isTugRule && Array\.from/);
+});

@@ -417,17 +417,25 @@ const getWordEncouragement = ({
   return null;
 };
 
-const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectAt, encouragement }: {
+const getCorrectBurstLabels = (subjectMode: SubjectMode) => (
+  subjectMode === 'word'
+    ? ['Good!', 'Great!', 'Nice!', 'Super!']
+    : ['+', '-', 'x', '=']
+);
+
+const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectAt, encouragement, isTugRule }: {
   team: 'blue' | 'red';
   subjectMode: SubjectMode;
   intensity: number;
   streak: number;
   lastCorrectAt: number;
   encouragement?: WordEncouragement | null;
+  isTugRule: boolean;
 }) => {
   const glyphs = getSpectacleGlyphs(subjectMode);
   const particleCount = getParticleCount(intensity, false);
   const compactCount = getParticleCount(intensity, true);
+  const correctBurstLabels = getCorrectBurstLabels(subjectMode);
   const accent = team === 'blue' ? '#2563EB' : '#DC2626';
   const softAccent = team === 'blue' ? 'rgba(37, 99, 235, 0.18)' : 'rgba(220, 38, 38, 0.18)';
   const ribbonAngle = team === 'blue' ? '115deg' : '65deg';
@@ -435,16 +443,18 @@ const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectA
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none motion-reduce:hidden" aria-hidden="true">
-      <motion.div
-        className="absolute inset-0"
-        animate={{ opacity: 0.12 + (intensity * 0.42) }}
-        transition={{ duration: 0.3 }}
-        style={{
-          backgroundImage: `linear-gradient(${ribbonAngle}, transparent 0%, ${softAccent} 35%, transparent 68%)`,
-        }}
-      />
+      {isTugRule && (
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: 0.12 + (intensity * 0.42) }}
+          transition={{ duration: 0.3 }}
+          style={{
+            backgroundImage: `linear-gradient(${ribbonAngle}, transparent 0%, ${softAccent} 35%, transparent 68%)`,
+          }}
+        />
+      )}
 
-      {streak >= 2 && (
+      {isTugRule && streak >= 2 && (
         <motion.div
           className="absolute inset-x-[-20%] top-[12%] h-12 md:h-16 skew-y-[-6deg]"
           animate={{
@@ -458,7 +468,7 @@ const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectA
         />
       )}
 
-      {Array.from({ length: particleCount }).map((_, index) => {
+      {isTugRule && Array.from({ length: particleCount }).map((_, index) => {
         const compactHidden = index >= compactCount ? 'hidden sm:block' : '';
         const left = team === 'blue'
           ? 10 + ((index * 13) % 58)
@@ -528,14 +538,14 @@ const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectA
               className="flex gap-1 md:gap-2 rounded-2xl border-2 bg-white/75 px-3 py-2 shadow-xl backdrop-blur-sm"
               style={{ borderColor: accent, color: accent }}
             >
-              {glyphs.slice(0, 4).map((glyph, index) => (
+              {correctBurstLabels.map((label, index) => (
                 <motion.span
-                  key={`${glyph}-${index}`}
-                  className="text-lg md:text-3xl font-black leading-none"
+                  key={`${label}-${index}`}
+                  className="text-sm md:text-xl font-black leading-none whitespace-nowrap"
                   animate={{ y: [0, -8, 0], rotate: [-8, 8, 0] }}
                   transition={{ duration: 0.45, delay: index * 0.06 }}
                 >
-                  {glyph}
+                  {label}
                 </motion.span>
               ))}
             </div>
@@ -1860,7 +1870,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 <div className="w-full max-w-4xl flex flex-col gap-4">
                   <div className="w-full bg-slate-800 rounded-full h-5 md:h-6 relative overflow-hidden border border-slate-700 shadow-inner">
                     <div className="absolute left-0 top-0 bottom-0 bg-blue-500 transition-all duration-300" style={{ width: `${Math.min(100, (blueProgress / (settings.speedrunTarget || 10)) * 100)}%` }} />
-                    <span className="absolute inset-0 flex items-center justify-center text-[11px] md:text-xs font-black text-white mix-blend-difference rotate-180">
+                    <span className="absolute inset-0 flex items-center justify-center text-[11px] md:text-xs font-black text-white mix-blend-difference">
                       蓝队进度: {Math.floor(blueProgress)} / {settings.speedrunTarget || 10}
                     </span>
                   </div>
@@ -1886,6 +1896,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   streak={blueStreak}
                   lastCorrectAt={lastBlueCorrect}
                   encouragement={blueWordEncouragement}
+                  isTugRule={settings.gameRule !== 'speedrun'}
                 />
                 {/* 状态指示器 */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -2008,6 +2019,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   streak={redStreak}
                   lastCorrectAt={lastRedCorrect}
                   encouragement={redWordEncouragement}
+                  isTugRule={settings.gameRule !== 'speedrun'}
                 />
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
                   {redShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-1.5 rounded-full shadow-lg"><ShieldCheck size={16} /></motion.div>}

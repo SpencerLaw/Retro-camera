@@ -42,6 +42,13 @@ runTest('tug win score uses plain words and is hidden for English challenge mode
   assert.doesNotMatch(source, /t\('tugOfWar\.winCondition'\)/);
 });
 
+runTest('challenge progress labels are not rotated upside down', () => {
+  assert.match(source, /蓝队进度/);
+  assert.match(source, /红队进度/);
+  assert.doesNotMatch(source, /蓝队进度[\s\S]{0,220}rotate-180/);
+  assert.doesNotMatch(source, /rotate-180[\s\S]{0,220}蓝队进度/);
+});
+
 runTest('math settings explain modes in plain classroom words', () => {
   assert.match(source, /数学怎么玩/);
   assert.match(source, /经典计算/);

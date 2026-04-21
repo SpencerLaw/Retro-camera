@@ -23,11 +23,31 @@ runTest('challenge mode uses bilingual import with Chinese prompts and letter cl
 
 runTest('word mode rule selector explains both English-only game rules', () => {
   assert.match(source, /英文单词玩法说明/);
+  assert.match(source, /英文单词怎么玩/);
   assert.match(source, /拼词拔河：/);
   assert.match(source, /导入英文单词/);
   assert.match(source, /中英挑战：/);
   assert.match(source, /只显示中文/);
+  assert.match(source, /挑战做几题/);
+  assert.match(source, /做完这个数量就赢，不看拉绳子的分数/);
   assert.match(source, /只针对英文单词模式/);
+  assert.doesNotMatch(source, /Game Rule/);
+  assert.doesNotMatch(source, /Target Words/);
+});
+
+runTest('tug win score uses plain words and is hidden for English challenge mode', () => {
+  assert.match(source, /拉到几格获胜/);
+  assert.match(source, /数字越大，比赛越久/);
+  assert.match(source, /settings\.subjectMode !== 'word' \|\| settings\.gameRule !== 'speedrun'/);
+  assert.doesNotMatch(source, /t\('tugOfWar\.winCondition'\)/);
+});
+
+runTest('math settings explain modes in plain classroom words', () => {
+  assert.match(source, /数学怎么玩/);
+  assert.match(source, /经典计算/);
+  assert.match(source, /直接算答案/);
+  assert.match(source, /凑数达人/);
+  assert.match(source, /凑出目标数字/);
 });
 
 runTest('frozen state renders a reusable square cover with Chinese frozen text', () => {
@@ -40,12 +60,12 @@ runTest('frozen state renders a reusable square cover with Chinese frozen text',
 runTest('power up usage is explained next to the game controls', () => {
   assert.match(source, /getPowerUpTeacherDescription/);
   assert.match(source, /{getPowerUpTeacherDescription\(p\)}/);
-  assert.match(source, /老师道具说明/);
-  assert.match(source, /数学 \/ 英文通用/);
-  assert.match(source, /道具使用方法/);
+  assert.match(source, /怎么获得、怎么使用/);
   assert.match(source, /连续答对/);
   assert.match(source, /点击道具/);
-  assert.match(source, /冰冻：/);
-  assert.match(source, /双倍：/);
-  assert.match(source, /护盾：/);
+  assert.doesNotMatch(source, /老师道具说明/);
+  assert.doesNotMatch(source, /数学 \/ 英文通用/);
+  assert.doesNotMatch(source, /冰冻：/);
+  assert.doesNotMatch(source, /双倍：/);
+  assert.doesNotMatch(source, /护盾：/);
 });

@@ -363,12 +363,67 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
   );
 };
 
-const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectAt }: {
+type WordEncouragement = {
+  tone: 'leader' | 'trailing';
+  title: string;
+  subtitle: string;
+};
+
+const getWordEncouragement = ({
+  subjectMode,
+  gameRule,
+  progress,
+  opponentProgress,
+  target,
+  streak,
+  tugAdvantage,
+}: {
+  subjectMode: SubjectMode;
+  gameRule?: 'tug_of_war' | 'speedrun';
+  progress: number;
+  opponentProgress: number;
+  target: number;
+  streak: number;
+  tugAdvantage: number;
+}): WordEncouragement | null => {
+  if (subjectMode !== 'word') return null;
+
+  if (gameRule === 'speedrun') {
+    const safeTarget = Math.max(1, target);
+    const progressRate = progress / safeTarget;
+    const gap = opponentProgress - progress;
+
+    if (progressRate >= 0.7 && progress >= opponentProgress) {
+      return { tone: 'leader', title: "You're awesome!", subtitle: '快到了！' };
+    }
+
+    if (gap >= 2) {
+      return { tone: 'trailing', title: 'Keep going!', subtitle: '别放弃，你可以追上！' };
+    }
+
+    if (progressRate >= 0.5) {
+      return { tone: 'leader', title: 'Almost there!', subtitle: '继续保持！' };
+    }
+  }
+
+  if (streak >= 3) {
+    return { tone: 'leader', title: "You're awesome!", subtitle: '连续答对，太棒了！' };
+  }
+
+  if (tugAdvantage <= -4) {
+    return { tone: 'trailing', title: 'You can do it!', subtitle: '别放弃，下一题追上！' };
+  }
+
+  return null;
+};
+
+const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectAt, encouragement }: {
   team: 'blue' | 'red';
   subjectMode: SubjectMode;
   intensity: number;
   streak: number;
   lastCorrectAt: number;
+  encouragement?: WordEncouragement | null;
 }) => {
   const glyphs = getSpectacleGlyphs(subjectMode);
   const particleCount = getParticleCount(intensity, false);
@@ -432,6 +487,33 @@ const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectA
       })}
 
       <AnimatePresence>
+        {encouragement && (
+          <motion.div
+            key={`${team}-encouragement-${encouragement.tone}-${encouragement.title}`}
+            className={`absolute top-[12%] md:top-[15%] ${team === 'blue' ? 'left-4 md:left-8' : 'right-4 md:right-8'} max-w-[min(72%,260px)] rounded-2xl border-2 bg-white/88 px-3 py-2 md:px-4 md:py-3 text-center shadow-2xl backdrop-blur-sm`}
+            initial={{ opacity: 0, y: 14, scale: 0.88, rotate: team === 'blue' ? -2 : 2 }}
+            animate={{
+              opacity: [0, 1, 1, 0.88],
+              y: [14, -4, 0, -3],
+              scale: [0.88, 1.04, 1, 1.02],
+              rotate: team === 'blue' ? [-2, 1, -1] : [2, -1, 1],
+            }}
+            exit={{ opacity: 0, y: -8, scale: 0.9 }}
+            transition={{ duration: 0.72, ease: 'easeOut' }}
+            style={{
+              borderColor: encouragement?.tone === 'leader' ? accent : encouragement?.tone === 'trailing' ? '#F59E0B' : accent,
+              color: encouragement?.tone === 'leader' ? accent : encouragement?.tone === 'trailing' ? '#B45309' : accent,
+            }}
+          >
+            <div className="text-[13px] md:text-lg font-black leading-tight break-words">
+              {encouragement.title}
+            </div>
+            <div className="mt-0.5 text-[11px] md:text-sm font-black leading-tight text-slate-700 break-words">
+              {encouragement.subtitle}
+            </div>
+          </motion.div>
+        )}
+
         {lastCorrectAt > 0 && (
           <motion.div
             key={`${team}-burst-${lastCorrectAt}`}
@@ -1066,6 +1148,24 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     lastCorrectAt: lastRedCorrect,
     now: spectacleNow,
   });
+  const blueWordEncouragement = getWordEncouragement({
+    subjectMode: settings.subjectMode,
+    gameRule: settings.gameRule,
+    progress: blueProgress,
+    opponentProgress: redProgress,
+    target: settings.speedrunTarget || 10,
+    streak: blueStreak,
+    tugAdvantage: -score,
+  });
+  const redWordEncouragement = getWordEncouragement({
+    subjectMode: settings.subjectMode,
+    gameRule: settings.gameRule,
+    progress: redProgress,
+    opponentProgress: blueProgress,
+    target: settings.speedrunTarget || 10,
+    streak: redStreak,
+    tugAdvantage: score,
+  });
 
   // 视觉辅助函数
   const getItemIcon = (type: PowerUpType) => {
@@ -1484,23 +1584,28 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               <div className="space-y-5">
                 {settings.subjectMode === 'math' ? (
                   <>
-                    <div className="flex bg-slate-100 p-1.5 rounded-2xl">
-                      <button
-                        onClick={() => setSettings({...settings, gameMode: 'classic'})}
-                        className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'classic' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
-                      >
-                        {t('tugOfWar.modeClassic')}
-                      </button>
-                      <button
-                        onClick={() => setSettings({...settings, gameMode: 'target'})}
-                        className={`flex-1 py-2.5 rounded-xl font-black transition-all ${settings.gameMode === 'target' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
-                      >
-                        {t('tugOfWar.modeTarget')}
-                      </button>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">数学怎么玩</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+                        <button
+                          onClick={() => setSettings({...settings, gameMode: 'classic'})}
+                          className={`min-h-[72px] rounded-xl font-black transition-all flex flex-col items-center justify-center gap-1 px-3 text-center ${settings.gameMode === 'classic' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
+                        >
+                          <span className="text-base leading-none">经典计算</span>
+                          <span className={`text-[11px] leading-snug ${settings.gameMode === 'classic' ? 'text-slate-600' : 'text-slate-400'}`}>直接算答案，答对就拉绳子</span>
+                        </button>
+                        <button
+                          onClick={() => setSettings({...settings, gameMode: 'target'})}
+                          className={`min-h-[72px] rounded-xl font-black transition-all flex flex-col items-center justify-center gap-1 px-3 text-center ${settings.gameMode === 'target' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
+                        >
+                          <span className="text-base leading-none">凑数达人</span>
+                          <span className={`text-[11px] leading-snug ${settings.gameMode === 'target' ? 'text-slate-600' : 'text-slate-400'}`}>凑出目标数字，答对就拉绳子</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.operators')}</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">这局用哪些符号</label>
                       <div className="grid grid-cols-4 gap-2">
                         {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
                           <button
@@ -1594,10 +1699,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  {settings.subjectMode === 'word' ? (
-                    <div className="col-span-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">玩法模式 (Game Rule)</label>
+                {settings.subjectMode === 'word' && (
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">英文单词怎么玩</label>
                       <div className="grid grid-cols-2 gap-2">
                         <button onClick={() => setSettings({...settings, gameRule: 'tug_of_war'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'tug_of_war' || !settings.gameRule ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>拼词拔河</button>
                         <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>中英挑战</button>
@@ -1607,36 +1712,28 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
                             <div className="font-black text-slate-800">拼词拔河：</div>
-                            <div>导入英文单词，学生点击字母拼出答案；答对推动绳子，先拉到胜利线获胜。</div>
+                            <div>导入英文单词，学生点击字母拼出答案；答对就把绳子往自己队拉，先拉到设定格数就赢。</div>
                           </div>
                           <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
                             <div className="font-black text-slate-800">中英挑战：</div>
-                            <div>导入中英词表，课堂只显示中文，学生点击英文字母拼英文；先完成设定题数的一队获胜。</div>
+                            <div>导入中英词表，课堂只显示中文，学生点击英文字母拼英文；先做完设定题数的一队赢，用时越短越厉害。</div>
                           </div>
                         </div>
                         <div className="mt-2 text-[11px] font-black text-blue-500">以上说明只针对英文单词模式。</div>
                       </div>
                     </div>
-                  ) : (
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.winCondition')}</label>
-                      <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                        <input type="range" min="5" max="30" step="5" value={settings.winScore} onChange={(e) => setSettings({...settings, winScore: parseInt(e.target.value)})} className="flex-1 accent-red-500" />
-                        <span className="font-black text-red-600 w-6 text-sm">{settings.winScore}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {settings.subjectMode === 'word' && settings.gameRule === 'speedrun' && (
                   <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 mt-2">
-                    <label className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 block">挑战目标题数 (Target Words)</label>
+                    <label className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 block">挑战做几题</label>
                     <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-blue-200 shadow-sm">
                       <input type="range" min="5" max="50" step="5" value={settings.speedrunTarget || 10} onChange={e => setSettings({...settings, speedrunTarget: parseInt(e.target.value)})} className="flex-1 accent-blue-600" />
                       <span className="font-black text-blue-600 w-8 text-center text-lg">{settings.speedrunTarget || 10}</span>
                     </div>
                     <div className="mt-2 text-xs font-black text-blue-700 bg-white/70 rounded-xl px-3 py-2">
-                      当前双语挑战配对：{challengePairs.length} 组。先完成目标题数的一队获胜，耗时越短越强。
+                      当前双语挑战配对：{challengePairs.length} 组。做完这个数量就赢，不看拉绳子的分数；耗时越短越强。
                     </div>
                   </div>
                 )}
@@ -1644,7 +1741,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 <div className="space-y-4 pt-4 border-t border-slate-100">
                   {settings.subjectMode === 'math' ? (
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.range')}</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">题目数字最大到几</label>
                       <select
                         value={settings.maxNumber}
                         onChange={(e) => setSettings({...settings, maxNumber: parseInt(e.target.value)})}
@@ -1658,7 +1755,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     </div>
                   ) : (
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.wordList')}</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">当前词库</label>
                       <div className="h-[42px] bg-slate-100 rounded-xl font-black text-slate-700 flex items-center justify-center text-sm border-2 border-transparent">
                         {settings.gameRule === 'speedrun'
                           ? `挑战配对 ${challengePairs.length} 组`
@@ -1666,13 +1763,16 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       </div>
                     </div>
                   )}
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('tugOfWar.winCondition')}</label>
-                    <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                      <input type="range" min="5" max="30" step="5" value={settings.winScore} onChange={(e) => setSettings({...settings, winScore: parseInt(e.target.value)})} className="flex-1 accent-red-500" />
-                      <span className="font-black text-red-600 w-6 text-sm">{settings.winScore}</span>
+                  {(settings.subjectMode !== 'word' || settings.gameRule !== 'speedrun') && (
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">拉到几格获胜</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                        <input type="range" min="5" max="30" step="5" value={settings.winScore} onChange={(e) => setSettings({...settings, winScore: parseInt(e.target.value)})} className="flex-1 accent-red-500" />
+                        <span className="font-black text-red-600 w-10 text-center text-sm">{settings.winScore} 格</span>
+                      </div>
+                      <div className="mt-2 text-xs font-bold text-slate-500">数字越大，比赛越久。</div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
@@ -1732,24 +1832,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <div className="bg-white rounded-2xl p-3 border border-slate-200 text-xs font-bold text-slate-600 leading-relaxed">
                         <div className="font-black text-slate-800 mb-2 flex items-center gap-2">
                           <ShieldAlert size={15} className="text-blue-600" />
-                          老师道具说明（数学 / 英文通用）
+                          怎么获得、怎么使用
                         </div>
                         <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
                           道具使用方法：连续答对达到上面的条件会掉落道具；获得后，在队伍下方道具栏点击道具即可使用。
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
-                          <div className="rounded-xl bg-blue-50 border border-blue-100 p-2">
-                            <div className="font-black text-blue-700 flex items-center gap-1"><Snowflake size={13} /> 冰冻：</div>
-                            <div>锁住对方键盘 3 秒。</div>
-                          </div>
-                          <div className="rounded-xl bg-amber-50 border border-amber-100 p-2">
-                            <div className="font-black text-amber-700 flex items-center gap-1"><Sword size={13} /> 双倍：</div>
-                            <div>下一次答对加倍推进。</div>
-                          </div>
-                          <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-2">
-                            <div className="font-black text-emerald-700 flex items-center gap-1"><ShieldCheck size={13} /> 护盾：</div>
-                            <div>抵挡一次对方道具或拉力。</div>
-                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -1799,6 +1885,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   intensity={blueSpectacleIntensity}
                   streak={blueStreak}
                   lastCorrectAt={lastBlueCorrect}
+                  encouragement={blueWordEncouragement}
                 />
                 {/* 状态指示器 */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -1920,6 +2007,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   intensity={redSpectacleIntensity}
                   streak={redStreak}
                   lastCorrectAt={lastRedCorrect}
+                  encouragement={redWordEncouragement}
                 />
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
                   {redShieldActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-emerald-500 text-white p-1.5 rounded-full shadow-lg"><ShieldCheck size={16} /></motion.div>}

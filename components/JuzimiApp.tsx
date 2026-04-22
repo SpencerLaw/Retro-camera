@@ -372,7 +372,7 @@ const JuzimiApp: React.FC = () => {
       </div>
 
       {/* ── Header ── */}
-      <header className="relative z-10 px-5 md:px-10 pt-6 flex items-center justify-between gap-3">
+      <header className="relative z-10 pl-[14vw] pr-5 md:pr-10 pt-6 flex items-center justify-between gap-3">
         <button
           onClick={() => navigate('/')}
           className="h-11 w-11 rounded-full bg-white/80 border border-black/10 shadow-sm flex items-center justify-center hover:bg-white transition-colors"
@@ -399,7 +399,7 @@ const JuzimiApp: React.FC = () => {
         </div>
       </header>
 
-      <main className="relative z-10 px-5 md:px-10 pb-16 pt-8 max-w-7xl mx-auto">
+      <main className="relative z-10 pl-[14vw] pr-5 md:pr-10 pb-16 pt-8 max-w-7xl mx-auto">
 
         {/* ── Hero strip ── */}
         <section className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 md:mb-10">

@@ -168,3 +168,8 @@ runTest('power up usage is explained next to the game controls', () => {
   assert.doesNotMatch(source, /双倍：/);
   assert.doesNotMatch(source, /护盾：/);
 });
+
+runTest('word bank editor does not force imported words to lowercase', () => {
+  assert.doesNotMatch(source, /text-lg lowercase tracking-wider/);
+  assert.match(source, /text-lg tracking-wider">\{w\.text\}/);
+});

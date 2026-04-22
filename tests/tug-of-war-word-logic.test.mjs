@@ -21,14 +21,15 @@ function runTest(name, fn) {
   }
 }
 
-runTest('parseWordListText preserves teacher capitalization from mixed text', () => {
-  const words = parseWordListText('1. apple 苹果\nbanana; Thailand\nice-cream\nA\ncat');
+runTest('parseWordListText preserves teacher English display from mixed text', () => {
+  const words = parseWordListText("1. apple 苹果\nbanana; Thailand\nIce-Cream\nO'Neill\nA\ncat");
 
   assert.deepEqual(words, [
     { text: 'apple', weight: 1 },
     { text: 'banana', weight: 1 },
     { text: 'Thailand', weight: 1 },
-    { text: 'icecream', weight: 1 },
+    { text: 'Ice-Cream', weight: 1 },
+    { text: "O'Neill", weight: 1 },
     { text: 'cat', weight: 1 },
   ]);
 });
@@ -50,13 +51,14 @@ runTest('createWordProblem builds a clickable-letter spelling problem', () => {
   assert.deepEqual([...problem.letters].sort(), ['a', 'e', 'l', 'p', 'p']);
 });
 
-runTest('parseBilingualWordListText extracts Chinese prompts with original English capitalization', () => {
-  const pairs = parseBilingualWordListText('苹果 apple\nThailand 泰国\nice-cream 冰淇淋\napple 苹果');
+runTest('parseBilingualWordListText extracts Chinese prompts with original English display', () => {
+  const pairs = parseBilingualWordListText("苹果 apple\nThailand 泰国\nIce-Cream 冰淇淋\nO'Neill 人名\napple 苹果");
 
   assert.deepEqual(pairs, [
     { chinese: '苹果', english: 'apple' },
     { chinese: '泰国', english: 'Thailand' },
-    { chinese: '冰淇淋', english: 'icecream' },
+    { chinese: '冰淇淋', english: 'Ice-Cream' },
+    { chinese: '人名', english: "O'Neill" },
   ]);
 });
 
@@ -67,6 +69,7 @@ runTest('createBilingualChallengeProblem shows Chinese and builds case-sensitive
   assert.equal(problem.mode, 'challenge');
   assert.equal(problem.prompt, '泰国');
   assert.equal(problem.answer, 'Thailand');
+  assert.equal(problem.displayAnswer, 'Thailand');
   assert.deepEqual(problem.fixedLetterIndices, []);
   assert.equal(problem.previewMs, 0);
   assert.equal(problem.letters.length, 8);
@@ -77,6 +80,18 @@ runTest('isBilingualChallengeAnswerCorrect requires exact English capitalization
   assert.equal(isBilingualChallengeAnswerCorrect('IceCream', 'Ice-Cream'), true);
   assert.equal(isBilingualChallengeAnswerCorrect('icecream', 'Ice-Cream'), false);
   assert.equal(isBilingualChallengeAnswerCorrect('ice cram', 'Ice-Cream'), false);
+});
+
+runTest('word problems display teacher spelling while keyboard uses clickable letters', () => {
+  const spellingProblem = createWordProblem([{ text: 'Ice-Cream', weight: 1 }], () => 0);
+  assert.equal(spellingProblem.answer, 'IceCream');
+  assert.equal(spellingProblem.displayAnswer, 'Ice-Cream');
+  assert.deepEqual([...spellingProblem.letters].sort(), ['C', 'I', 'a', 'c', 'e', 'e', 'm', 'r']);
+
+  const challengeProblem = createBilingualChallengeProblem({ chinese: '人名', english: "O'Neill" }, () => 0);
+  assert.equal(challengeProblem.answer, 'ONeill');
+  assert.equal(challengeProblem.displayAnswer, "O'Neill");
+  assert.deepEqual([...challengeProblem.letters].sort(), ['N', 'O', 'e', 'i', 'l', 'l']);
 });
 
 runTest('spelling problems reuse bilingual Chinese prompts without forcing a helper mode', () => {
@@ -192,4 +207,16 @@ runTest('buildWordAnswerAttempt keeps fixed capital letters from proper nouns', 
 
   assert.equal(buildWordAnswerAttempt(problem, 'hailan'), 'Thailand');
   assert.equal(buildWordAnswerAttempt(problem, 'Hailan'), 'THailand');
+});
+
+runTest('cloze distractors avoid lowercase duplicates of imported capital letters', () => {
+  const problem = createBilingualChallengeProblem(
+    { chinese: '泰国', english: 'Thailand' },
+    () => 0,
+    { wordPlayMode: 'cloze' },
+  );
+
+  assert.equal(problem.answer, 'Thailand');
+  assert.equal(problem.displayAnswer, 'Thailand');
+  assert.equal(problem.letters.includes('t'), false);
 });

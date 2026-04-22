@@ -3,16 +3,23 @@ export const normalizeWordAnswer = (value) =>
     .normalize('NFKD')
     .replace(/[^a-z]/gi, '');
 
+export const normalizeWordDisplay = (value) =>
+  String(value ?? '')
+    .normalize('NFKD')
+    .trim()
+    .replace(/\s+/g, ' ');
+
 export const parseWordListText = (text) => {
   const seen = new Set();
   const words = [];
   const matches = String(text ?? '').match(/[A-Za-z]+(?:[-' \t]+[A-Za-z]+)*/g) ?? [];
 
   for (const token of matches) {
-    const word = normalizeWordAnswer(token);
-    if (word.length < 2 || seen.has(word)) continue;
-    seen.add(word);
-    words.push({ text: word, weight: 1 });
+    const displayWord = normalizeWordDisplay(token);
+    const answerKey = normalizeWordAnswer(displayWord);
+    if (answerKey.length < 2 || seen.has(answerKey)) continue;
+    seen.add(answerKey);
+    words.push({ text: displayWord, weight: 1 });
   }
 
   return words;
@@ -33,11 +40,12 @@ export const parseBilingualWordListText = (text) => {
 
   for (const line of lines) {
     const englishMatch = line.match(/[A-Za-z]+(?:[-' \t]+[A-Za-z]+)*/);
-    const english = normalizeWordAnswer(englishMatch?.[0]);
+    const english = normalizeWordDisplay(englishMatch?.[0]);
+    const answerKey = normalizeWordAnswer(english);
     const chinese = normalizeChinesePrompt(line);
-    if (english.length < 2 || chinese.length === 0) continue;
+    if (answerKey.length < 2 || chinese.length === 0) continue;
 
-    const key = `${chinese}|${english}`;
+    const key = `${chinese}|${answerKey}`;
     if (seen.has(key)) continue;
     seen.add(key);
     pairs.push({ chinese, english });
@@ -109,7 +117,10 @@ const getDistractorLetters = (answer, count, random = Math.random) => {
 
   while (distractors.length < count && offset < alphabet.length * 2) {
     const letter = alphabet[offset % alphabet.length];
-    if (!cleanAnswer.includes(letter) && !distractors.includes(letter)) {
+    if (
+      !cleanAnswer.toLowerCase().includes(letter.toLowerCase())
+      && !distractors.some(existing => existing.toLowerCase() === letter.toLowerCase())
+    ) {
       distractors.push(letter);
     }
     offset += 1;
@@ -128,6 +139,7 @@ export const calculateFlashPreviewMs = (answer) => {
 };
 
 const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', random = Math.random, wordPlayMode = 'shuffle', flashPreviewMs }) => {
+  const displayAnswer = normalizeWordDisplay(answer);
   const cleanAnswer = normalizeWordAnswer(answer);
   const fixedLetterIndices = getFixedLetterIndices(cleanAnswer, wordPlayMode);
   const fixed = new Set(fixedLetterIndices);
@@ -142,6 +154,7 @@ const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', rando
     mode,
     prompt,
     answer: cleanAnswer,
+    displayAnswer: displayAnswer || cleanAnswer,
     letters: shuffleLetters(letterChoices.join(''), random),
     fixedLetterIndices,
     previewMs: wordPlayMode === 'flash' ? (flashPreviewMs || calculateFlashPreviewMs(cleanAnswer)) : 0,
@@ -166,12 +179,16 @@ export const buildWordAnswerAttempt = (problem, input) => {
 };
 
 export const createWordProblem = (wordBank, random = Math.random, bilingualPairs = [], options = {}) => {
-  const cleanBank = Array.from(
-    new Set((wordBank ?? []).map(item => {
-      const isObj = typeof item === 'object' && item !== null;
-      return normalizeWordAnswer(isObj ? item.text : item);
-    }).filter((word) => word.length >= 2)),
-  );
+  const bankByAnswer = new Map();
+  (wordBank ?? []).forEach(item => {
+    const isObj = typeof item === 'object' && item !== null;
+    const displayWord = normalizeWordDisplay(isObj ? item.text : item);
+    const answerKey = normalizeWordAnswer(displayWord);
+    if (answerKey.length >= 2 && !bankByAnswer.has(answerKey)) {
+      bankByAnswer.set(answerKey, displayWord);
+    }
+  });
+  const cleanBank = Array.from(bankByAnswer.values());
 
   if (cleanBank.length === 0) return null;
 
@@ -190,9 +207,9 @@ export const createWordProblem = (wordBank, random = Math.random, bilingualPairs
 export const createBilingualChallengeProblem = (pair, random = Math.random, options = {}) => {
   if (!pair) return null;
 
-  const answer = normalizeWordAnswer(pair.english);
+  const answer = normalizeWordDisplay(pair.english);
   const prompt = normalizeChinesePrompt(pair.chinese);
-  if (answer.length < 2 || prompt.length === 0) return null;
+  if (normalizeWordAnswer(answer).length < 2 || prompt.length === 0) return null;
 
   return createMemoryWordProblem({
     answer,
@@ -209,10 +226,11 @@ export const buildBilingualChallengePool = (pairs, random = Math.random) => {
   const seen = new Set();
 
   (pairs ?? []).forEach((pair) => {
-    const english = normalizeWordAnswer(pair?.english);
+    const english = normalizeWordDisplay(pair?.english);
+    const answerKey = normalizeWordAnswer(english);
     const chinese = normalizeChinesePrompt(pair?.chinese);
-    if (english.length < 2 || chinese.length === 0) return;
-    const key = `${chinese}|${english}`;
+    if (answerKey.length < 2 || chinese.length === 0) return;
+    const key = `${chinese}|${answerKey}`;
     if (seen.has(key)) return;
     seen.add(key);
     pool.push({ chinese, english });
@@ -249,10 +267,11 @@ export const buildWordPool = (wordBank, random = Math.random) => {
     const text = isObj ? item.text : item;
     const weight = isObj ? (item.weight || 1) : 1;
     
-    const cleanWord = normalizeWordAnswer(text);
+    const displayWord = normalizeWordDisplay(text);
+    const cleanWord = normalizeWordAnswer(displayWord);
     if (cleanWord.length >= 2) {
       for (let i = 0; i < weight; i++) {
-        pool.push(cleanWord);
+        pool.push(displayWord);
       }
     }
   });

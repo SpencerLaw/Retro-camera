@@ -65,6 +65,7 @@ interface WordProblem {
   mode?: 'spelling' | 'challenge';
   prompt?: string;
   answer: string;
+  displayAnswer?: string;
   letters: string[];
   fixedLetterIndices?: number[];
   previewMs?: number;
@@ -250,6 +251,8 @@ const getWordQuestionParts = (text: string) => {
   const [prompt, answer] = text.split(' -> ');
   return answer ? { prompt, answer } : { prompt: '', answer: text };
 };
+
+const getWordDisplayAnswer = (problem: WordProblem) => problem.displayAnswer || problem.answer;
 
 const FrozenSquareOverlay = () => (
   <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
@@ -568,7 +571,7 @@ const WordProblemCard = ({ problem, input, team, t }: {
         <AnimatePresence>
           {previewActive && (
             <motion.div
-              key={`${team}-word-preview-${problem.answer}`}
+              key={`${team}-word-preview-${getWordDisplayAnswer(problem)}`}
               initial={{ opacity: 0, scale: 0.9, rotate: -1 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               exit={{ opacity: 0, scale: 1.16, rotate: 3 }}
@@ -583,7 +586,7 @@ const WordProblemCard = ({ problem, input, team, t }: {
                 transition={{ duration: 0.8, repeat: Infinity, ease: 'easeInOut' }}
                 className="mt-1 text-[28px] md:text-[34px] font-black leading-none break-words"
               >
-                {problem.answer}
+                {getWordDisplayAnswer(problem)}
               </motion.div>
               <div className="mt-2 text-[11px] md:text-xs font-black opacity-90">记住英文，{getPreviewDurationLabel(problem.previewMs)}后开始拼</div>
             </motion.div>
@@ -1328,12 +1331,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     
     if (problem.type === 'word') {
       const wordAttempt = buildWordAnswerAttempt(problem, input);
+      const displayAnswer = problem.displayAnswer || problem.answer;
       isCorrect = problem.mode === 'challenge'
         ? isBilingualChallengeAnswerCorrect(wordAttempt, problem.answer)
         : isWordAnswerCorrect(wordAttempt, problem.answer);
       questionKey = problem.mode === 'challenge' && problem.prompt
-        ? `${problem.prompt} -> ${problem.answer}`
-        : problem.answer;
+        ? `${problem.prompt} -> ${displayAnswer}`
+        : displayAnswer;
     } else if (settings.gameMode === 'classic') {
       isCorrect = parseInt(input) === problem.answer;
       questionKey = `${problem.num1} ${getOpSymbol(problem.operator)} ${problem.num2}`;
@@ -1711,7 +1715,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {editingBank.words.map((w, i) => (
                   <div key={`${w.text}-${i}`} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <span className="font-black text-slate-700 text-lg lowercase tracking-wider">{w.text}</span>
+                    <span className="font-black text-slate-700 text-lg tracking-wider">{w.text}</span>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden h-9">
                         <button 
@@ -2040,7 +2044,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         </div>
                         <p className="text-xs font-bold text-slate-500 mt-1 leading-relaxed">{t('tugOfWar.wordImportHint')}</p>
                         <p className="text-xs font-bold text-blue-500 mt-1 leading-relaxed">
-                          记忆竞速请导入双语行：苹果 apple、Thailand 泰国。系统会保留大小写，学生也要按大小写拼对。
+                          记忆竞速请导入双语行：苹果 apple、Thailand 泰国。系统会按老师导入的英文原样显示，学生也要按大小写拼对。
                         </p>
                       </div>
                     </div>

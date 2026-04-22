@@ -158,13 +158,13 @@ const SentenceDialog = ({
               onClick={() => { onEdit(sentence); onClose(); }}
               className="flex-1 h-12 rounded-2xl bg-[#171310] text-white font-black flex items-center justify-center gap-2 text-sm"
             >
-              <Edit3 size={16} /> 编辑
+              <Edit3 size={16} /> 编辑句子
             </button>
             <button
               onClick={() => onDelete(sentence)}
               className="flex-1 h-12 rounded-2xl bg-red-50 text-red-700 border border-red-100 font-black flex items-center justify-center gap-2 text-sm"
             >
-              <Trash2 size={16} /> 删除
+              <Trash2 size={16} /> 删除句子
             </button>
           </div>
         )}

@@ -277,6 +277,55 @@ const FrozenSquareOverlay = () => (
   </div>
 );
 
+const OpeningCountdownOverlay = ({ openingCountdown, subjectMode }: { openingCountdown: number; subjectMode: SubjectMode }) => {
+  const isStart = openingCountdown === 0;
+  const accent = subjectMode === 'word' ? '#14B8A6' : '#3B82F6';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-[70] flex items-center justify-center overflow-hidden bg-slate-950/88 backdrop-blur-2xl text-white px-5"
+    >
+      <div
+        className="absolute inset-0 opacity-45"
+        style={{
+          backgroundImage: `radial-gradient(circle at 50% 36%, ${accent}55, transparent 34%), linear-gradient(135deg, rgba(255,255,255,0.12), transparent 45%)`,
+        }}
+      />
+      <motion.div
+        className="absolute w-[64vmin] h-[64vmin] rounded-full border border-white/12"
+        animate={{ scale: [0.88, 1.08, 0.88], rotate: [0, 18, 0] }}
+        transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="relative w-full max-w-xl rounded-[2.5rem] border border-white/15 bg-white/10 shadow-[0_40px_120px_rgba(0,0,0,0.42)] p-7 md:p-10 text-center overflow-hidden"
+        initial={{ y: 18, scale: 0.96 }}
+        animate={{ y: 0, scale: 1 }}
+      >
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+        <div className="text-xs md:text-sm font-black uppercase text-white/60 mb-4">5 秒倒计时</div>
+        <div className="text-lg md:text-2xl font-black text-white/85 mb-4">准备开始</div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={openingCountdown}
+            initial={{ scale: 0.45, opacity: 0, y: 18 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 1.32, opacity: 0, y: -18 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 18 }}
+            className={`${isStart ? 'text-[clamp(4rem,13vw,7.5rem)]' : 'text-[clamp(6rem,20vw,13rem)]'} font-black leading-none`}
+            style={{ textShadow: `0 0 42px ${accent}` }}
+          >
+            {openingCountdown === 0 ? '开始！' : openingCountdown}
+          </motion.div>
+        </AnimatePresence>
+        <div className="mt-6 text-sm md:text-base font-bold text-white/58">请两队准备，倒计时结束后再答题。</div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 // 数字小键盘组件
 const Keypad = ({ onInput, onClear, onSubmit, team, t, mode, isFrozen, requiredOp }: {
   onInput: (val: string) => void;
@@ -996,6 +1045,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const [redProgress, setRedProgress] = useState(0);
   const [gameState, setGameState] = useState<'playing' | 'blue_wins' | 'red_wins'>('playing');
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [openingCountdown, setOpeningCountdown] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 连击与道具状态
@@ -1014,14 +1064,33 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const [lastBlueCorrect, setLastBlueCorrect] = useState(0);
   const [lastRedCorrect, setLastRedCorrect] = useState(0);
 
+  const armCurrentWordPreview = () => {
+    setBlueProblem(prev => prev?.type === 'word' ? prepareWordProblem(prev) : prev);
+    setRedProblem(prev => prev?.type === 'word' ? prepareWordProblem(prev) : prev);
+  };
+
   // 核心循环：计时器
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (!showSettings && gameState === 'playing' && isVerified) {
+    if (!showSettings && gameState === 'playing' && openingCountdown === null && isVerified) {
       timer = setInterval(() => setTimeElapsed(prev => prev + 1), 1000);
     }
     return () => clearInterval(timer);
-  }, [showSettings, gameState, isVerified]);
+  }, [showSettings, gameState, openingCountdown, isVerified]);
+
+  useEffect(() => {
+    if (openingCountdown === null) return;
+    const timer = window.setTimeout(() => {
+      if (openingCountdown > 0) {
+        setOpeningCountdown(openingCountdown - 1);
+      } else {
+        armCurrentWordPreview();
+        setOpeningCountdown(null);
+      }
+    }, openingCountdown > 0 ? 1000 : 700);
+
+    return () => window.clearTimeout(timer);
+  }, [openingCountdown]);
 
   // 核心循环：冻结检查
   useEffect(() => {
@@ -1183,6 +1252,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     setLastRedCorrect(0);
     setGameState('playing');
     setTimeElapsed(0);
+    setOpeningCountdown(5);
     currentMatchStatsRef.current = {};
     setShowSettings(false);
   };
@@ -1201,7 +1271,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
   // 使用道具
   const handleUseItem = (team: 'blue' | 'red', type: PowerUpType, index: number) => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || openingCountdown !== null) return;
     
     // 消耗道具
     if (team === 'blue') setBlueItems(prev => prev.filter((_, i) => i !== index));
@@ -1374,16 +1444,18 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   };
 
   const handleBlueSubmit = useCallback(() => {
-    if (gameState !== 'playing' || !blueProblem || blueFrozenUntil > Date.now()) return;
+    if (gameState !== 'playing' || openingCountdown !== null) return;
+    if (!blueProblem || blueFrozenUntil > Date.now()) return;
     if (blueProblem.type === 'word' && isWordPreviewActive(blueProblem)) return;
     processAnswer('blue', blueInput, blueProblem);
-  }, [blueInput, blueProblem, score, gameState, settings, wordBank, challengePairs, blueFrozenUntil, blueDoubleActive, redShieldActive, blueStreak]);
+  }, [blueInput, blueProblem, score, gameState, openingCountdown, settings, wordBank, challengePairs, blueFrozenUntil, blueDoubleActive, redShieldActive, blueStreak]);
 
   const handleRedSubmit = useCallback(() => {
-    if (gameState !== 'playing' || !redProblem || redFrozenUntil > Date.now()) return;
+    if (gameState !== 'playing' || openingCountdown !== null) return;
+    if (!redProblem || redFrozenUntil > Date.now()) return;
     if (redProblem.type === 'word' && isWordPreviewActive(redProblem)) return;
     processAnswer('red', redInput, redProblem);
-  }, [redInput, redProblem, score, gameState, settings, wordBank, challengePairs, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
+  }, [redInput, redProblem, score, gameState, openingCountdown, settings, wordBank, challengePairs, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
 
   const spectacleNow = Date.now();
   const blueSpectacleIntensity = getSpectacleIntensity({
@@ -1529,13 +1601,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-50 pointer-events-none">
           <div className="flex gap-2 pointer-events-auto">
             <button 
-              onClick={() => setShowSettings(true)} 
+              onClick={() => { setOpeningCountdown(null); setShowSettings(true); }} 
               className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-600 hover:bg-white transition-all border border-slate-200"
             >
               <ArrowLeft size={20} />
             </button>
             <button 
-              onClick={() => setShowSettings(true)} 
+              onClick={() => { setOpeningCountdown(null); setShowSettings(true); }} 
               className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-600 hover:bg-white transition-all border border-slate-200"
             >
               <SettingsIcon size={20} />
@@ -2466,6 +2538,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       </AnimatePresence>
 
       <AnimatePresence>
+        {openingCountdown !== null && !showSettings && (
+          <OpeningCountdownOverlay openingCountdown={openingCountdown} subjectMode={settings.subjectMode} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {gameState !== 'playing' && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -2542,7 +2620,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 <button onClick={startGame} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3">
                   <RotateCcw size={24} /> {t('tugOfWar.restart')}
                 </button>
-                <button onClick={() => { setShowSettings(true); setGameState('playing'); }} className="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl text-xl font-black hover:bg-slate-200 transition-all flex items-center justify-center gap-3">
+                <button onClick={() => { setOpeningCountdown(null); setShowSettings(true); setGameState('playing'); }} className="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl text-xl font-black hover:bg-slate-200 transition-all flex items-center justify-center gap-3">
                   <SettingsIcon size={24} /> {t('tugOfWar.backToSettings')}
                 </button>
               </div>

@@ -103,6 +103,19 @@ runTest('winner dialog shows readable elapsed time', () => {
   assert.doesNotMatch(source, /耗时: \{timeElapsed\} 秒/);
 });
 
+runTest('math and word games show a polished 5 second start countdown', () => {
+  assert.match(source, /const OpeningCountdownOverlay/);
+  assert.match(source, /openingCountdown/);
+  assert.match(source, /setOpeningCountdown\(5\)/);
+  assert.match(source, /openingCountdown !== null/);
+  assert.match(source, /openingCountdown === 0 \? '开始！' : openingCountdown/);
+  assert.match(source, /准备开始/);
+  assert.match(source, /5 秒倒计时/);
+  assert.match(source, /gameState === 'playing' && openingCountdown === null/);
+  assert.match(source, /if \(gameState !== 'playing' \|\| openingCountdown !== null\) return/);
+  assert.match(source, /armCurrentWordPreview/);
+});
+
 runTest('match results can be opened from the winner dialog and viewed by total or team', () => {
   assert.match(source, /const getMatchSummary = \(record: MatchRecord\)/);
   assert.match(source, /const getWordMatchHistory = \(records: MatchRecord\[\]\)/);

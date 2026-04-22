@@ -235,6 +235,22 @@ const getMatchSummary = (record: MatchRecord) => {
   );
 };
 
+const getWordMatchHistory = (records: MatchRecord[]) => (
+  records.filter(record => record.mode === 'word')
+);
+
+const getWordStatReviewLabel = (stats: TeamStats) => {
+  if (stats.correct === 0 && stats.wrong > 0) return '需要复习';
+  if (stats.wrong >= stats.correct && stats.wrong > 0) return '容易出错';
+  if (stats.correct > 0 && stats.wrong === 0) return '掌握很好';
+  return '继续练习';
+};
+
+const getWordQuestionParts = (text: string) => {
+  const [prompt, answer] = text.split(' -> ');
+  return answer ? { prompt, answer } : { prompt: '', answer: text };
+};
+
 const FrozenSquareOverlay = () => (
   <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
     <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
@@ -935,7 +951,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const [matchHistory, setMatchHistory] = useState<MatchRecord[]>(() => {
     try {
       const stored = localStorage.getItem('tugOfWar_matchHistory');
-      return stored ? JSON.parse(stored) : [];
+      return stored ? getWordMatchHistory(JSON.parse(stored)) : [];
     } catch {
       return [];
     }
@@ -950,11 +966,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   }, [savedBanks]);
 
   useEffect(() => {
-    localStorage.setItem('tugOfWar_matchHistory', JSON.stringify(matchHistory));
+    localStorage.setItem('tugOfWar_matchHistory', JSON.stringify(getWordMatchHistory(matchHistory)));
   }, [matchHistory]);
 
   const openMatchHistory = (matchId?: string) => {
-    setSelectedMatchId(matchId || selectedMatchId || matchHistory[0]?.id || null);
+    const wordMatchHistory = getWordMatchHistory(matchHistory);
+    setSelectedMatchId(matchId || selectedMatchId || wordMatchHistory[0]?.id || null);
     setHistoryViewMode('total');
     setShowHistory(true);
   };
@@ -1330,16 +1347,18 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       if (winner) {
         fireVictoryCelebration(winner, settings.subjectMode);
         setGameState(`${winner}_wins` as any);
-        const newRecord: MatchRecord = {
-          id: Math.random().toString(36).substring(2, 9),
-          date: Date.now(),
-          winner,
-          mode: settings.subjectMode,
-          duration: timeElapsed,
-          stats: { ...currentMatchStatsRef.current }
-        };
-        setSelectedMatchId(newRecord.id);
-        setMatchHistory(prev => [newRecord, ...prev]);
+        if (settings.subjectMode === 'word') {
+          const newRecord: MatchRecord = {
+            id: Math.random().toString(36).substring(2, 9),
+            date: Date.now(),
+            winner,
+            mode: settings.subjectMode,
+            duration: timeElapsed,
+            stats: { ...currentMatchStatsRef.current }
+          };
+          setSelectedMatchId(newRecord.id);
+          setMatchHistory(prev => [newRecord, ...prev]);
+        }
       }
 
     } else {
@@ -1419,7 +1438,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     }
   };
 
-  const selectedMatch = selectedMatchId ? matchHistory.find(m => m.id === selectedMatchId) : null;
+  const wordMatchHistory = getWordMatchHistory(matchHistory);
+  const selectedMatch = selectedMatchId ? wordMatchHistory.find(m => m.id === selectedMatchId) : null;
   const selectedMatchSummary = selectedMatch ? getMatchSummary(selectedMatch) : null;
   const getVisibleStat = (stat: QuestionStat) => stat[historyViewMode];
 
@@ -1520,13 +1540,15 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
             >
               <SettingsIcon size={20} />
             </button>
-            <button
-              onClick={() => openMatchHistory()}
-              className="h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white transition-all border border-slate-200 px-3"
-            >
-              <BarChart2 size={18} />
-              <span className="hidden sm:inline text-xs font-black">成绩</span>
-            </button>
+            {settings.subjectMode === 'word' && (
+              <button
+                onClick={() => openMatchHistory()}
+                className="h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white transition-all border border-slate-200 px-3"
+              >
+                <BarChart2 size={18} />
+                <span className="hidden sm:inline text-xs font-black">成绩</span>
+              </button>
+            )}
           </div>
 
           <div className="pointer-events-auto flex gap-2">
@@ -1659,14 +1681,14 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               {/* Header */}
               <div className="p-5 md:p-6 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
                 <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                  <BarChart2 size={28} className="text-blue-600" /> 全局比赛数据面板
+                  <BarChart2 size={28} className="text-blue-600" /> 英语成绩总结
                 </h3>
                 <div className="flex items-center gap-4">
-                  {matchHistory.length > 0 && (
+                  {wordMatchHistory.length > 0 && (
                     <button 
                       onClick={() => {
-                        if (confirm('确定要清空所有比赛记录吗？')) {
-                          setMatchHistory([]);
+                        if (confirm('确定要清空所有英语比赛记录吗？')) {
+                          setMatchHistory(prev => prev.filter(record => record.mode !== 'word'));
                           setSelectedMatchId(null);
                         }
                       }}
@@ -1684,17 +1706,18 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                 {/* Left Column: Match List */}
                 <div className="w-full md:w-1/3 bg-white border-r border-slate-200 overflow-y-auto flex flex-col">
-                  {matchHistory.length === 0 ? (
+                  {wordMatchHistory.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center gap-3">
                       <Trophy size={48} className="opacity-20" />
-                      <p className="font-bold">暂无比赛记录，快去完成一局吧！</p>
+                      <p className="font-bold">暂无英语比赛记录，快去完成一局吧！</p>
                     </div>
                   ) : (
                     <div className="p-3 space-y-2">
-                      {matchHistory.map(record => {
+                      {wordMatchHistory.map(record => {
                         const isSelected = record.id === selectedMatchId;
                         const dateObj = new Date(record.date);
                         const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                        const recordSummary = getMatchSummary(record);
                         
                         return (
                           <div 
@@ -1713,8 +1736,19 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                             <div className="flex items-center gap-2 text-slate-700 font-bold text-sm">
                               <Calendar size={16} className="text-slate-400" /> {dateStr}
                             </div>
-                            <div className="mt-2 text-xs text-slate-500 font-medium">
-                              模式: {record.mode === 'math' ? '数学' : '英文拼词'} | 题目数: {Object.keys(record.stats).length}
+                            <div className="mt-3 grid grid-cols-3 gap-1 text-center">
+                              <div className="rounded-lg bg-slate-50 px-1 py-1">
+                                <div className="text-[10px] font-black text-slate-400">单词</div>
+                                <div className="text-sm font-black text-slate-700">{recordSummary.questions}</div>
+                              </div>
+                              <div className="rounded-lg bg-green-50 px-1 py-1">
+                                <div className="text-[10px] font-black text-green-600">答对</div>
+                                <div className="text-sm font-black text-green-700">{recordSummary.totalCorrect}</div>
+                              </div>
+                              <div className="rounded-lg bg-red-50 px-1 py-1">
+                                <div className="text-[10px] font-black text-red-600">答错</div>
+                                <div className="text-sm font-black text-red-700">{recordSummary.totalWrong}</div>
+                              </div>
                             </div>
                           </div>
                         );
@@ -1730,7 +1764,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <div className="mb-5 rounded-3xl bg-white border border-slate-200 shadow-sm p-4 md:p-5">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
                           <div>
-                            <div className="text-xs font-black text-slate-400 mb-1">本场成绩总结</div>
+                            <div className="text-xs font-black text-slate-400 mb-1">本场英语成绩总结</div>
                             <div className="text-2xl font-black text-slate-800">
                               {selectedMatch.winner === 'blue' ? '蓝队获胜' : '红队获胜'}
                             </div>
@@ -1739,22 +1773,26 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                             <Clock size={16} /> 耗时 {formatElapsedTime(selectedMatch.duration)}
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                           <div className="rounded-2xl bg-slate-50 border border-slate-100 p-3">
-                            <div className="text-[11px] font-black text-slate-400">题目</div>
+                            <div className="text-[11px] font-black text-slate-400">单词数</div>
                             <div className="text-2xl font-black text-slate-800">{selectedMatchSummary.questions}</div>
                           </div>
                           <div className="rounded-2xl bg-green-50 border border-green-100 p-3">
-                            <div className="text-[11px] font-black text-green-600">总共答对</div>
+                            <div className="text-[11px] font-black text-green-600">全班答对</div>
                             <div className="text-2xl font-black text-green-700">{selectedMatchSummary.totalCorrect}</div>
                           </div>
+                          <div className="rounded-2xl bg-red-50 border border-red-100 p-3">
+                            <div className="text-[11px] font-black text-red-600">全班答错</div>
+                            <div className="text-2xl font-black text-red-700">{selectedMatchSummary.totalWrong}</div>
+                          </div>
                           <div className="rounded-2xl bg-blue-50 border border-blue-100 p-3">
-                            <div className="text-[11px] font-black text-blue-600">蓝队答对</div>
-                            <div className="text-2xl font-black text-blue-700">{selectedMatchSummary.blueCorrect}</div>
+                            <div className="text-[11px] font-black text-blue-600">蓝队 对/错</div>
+                            <div className="text-xl font-black text-blue-700">{selectedMatchSummary.blueCorrect}/{selectedMatchSummary.blueWrong}</div>
                           </div>
                           <div className="rounded-2xl bg-red-50 border border-red-100 p-3">
-                            <div className="text-[11px] font-black text-red-600">红队答对</div>
-                            <div className="text-2xl font-black text-red-700">{selectedMatchSummary.redCorrect}</div>
+                            <div className="text-[11px] font-black text-red-600">红队 对/错</div>
+                            <div className="text-xl font-black text-red-700">{selectedMatchSummary.redCorrect}/{selectedMatchSummary.redWrong}</div>
                           </div>
                         </div>
                       </div>
@@ -1766,7 +1804,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                             onClick={() => setHistoryViewMode('total')}
                             className={`px-5 md:px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'total' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                           >
-                            总共
+                            全班
                           </button>
                           <button 
                             onClick={() => setHistoryViewMode('blue')}
@@ -1784,21 +1822,42 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       </div>
 
                       {/* Stat Cards Grid */}
+                      <div className="mb-3 text-sm font-black text-slate-600">单词掌握情况</div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {Object.values(selectedMatch.stats).map(stat => {
                           const visibleStat = getVisibleStat(stat);
+                          const parts = getWordQuestionParts(stat.text);
+                          const reviewLabel = getWordStatReviewLabel(visibleStat);
                           return (
                             <div key={stat.text} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                              <div className="text-lg font-black text-slate-800 mb-4 uppercase tracking-wider truncate" title={stat.text}>
-                                {stat.text}
+                              <div className="flex items-start justify-between gap-3 mb-4">
+                                <div className="min-w-0">
+                                  {parts.prompt && (
+                                    <div className="text-sm font-black text-slate-500 truncate" title={parts.prompt}>
+                                      中文：{parts.prompt}
+                                    </div>
+                                  )}
+                                  <div className="text-xl font-black text-slate-800 uppercase truncate" title={parts.answer}>
+                                    英文：{parts.answer}
+                                  </div>
+                                </div>
+                                <div className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${
+                                  reviewLabel === '掌握很好'
+                                    ? 'bg-green-50 text-green-700 border border-green-100'
+                                    : reviewLabel === '需要复习'
+                                    ? 'bg-red-50 text-red-700 border border-red-100'
+                                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                                }`}>
+                                  {reviewLabel}
+                                </div>
                               </div>
                               <div className="flex items-center gap-4">
                                 <div className="flex-1 bg-green-50 rounded-xl p-3 flex flex-col items-center border border-green-100">
-                                  <span className="text-xs font-bold text-green-600 mb-1 flex items-center gap-1"><CheckCircle2 size={14}/> 正确</span>
+                                  <span className="text-xs font-bold text-green-600 mb-1 flex items-center gap-1"><CheckCircle2 size={14}/> 答对</span>
                                   <span className="text-2xl font-black text-green-700">{visibleStat.correct}</span>
                                 </div>
                                 <div className="flex-1 bg-red-50 rounded-xl p-3 flex flex-col items-center border border-red-100">
-                                  <span className="text-xs font-bold text-red-600 mb-1 flex items-center gap-1"><XCircle size={14}/> 错误</span>
+                                  <span className="text-xs font-bold text-red-600 mb-1 flex items-center gap-1"><XCircle size={14}/> 答错</span>
                                   <span className="text-2xl font-black text-red-700">{visibleStat.wrong}</span>
                                 </div>
                               </div>
@@ -1809,7 +1868,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     </div>
                   ) : (
                     <div className="h-full flex items-center justify-center text-slate-400 font-bold">
-                      {matchHistory.length > 0 ? '👈 请在左侧选择一场比赛查看详情' : ''}
+                      {wordMatchHistory.length > 0 ? '请在左侧选择一场英语比赛查看详情' : ''}
                     </div>
                   )}
                 </div>
@@ -2472,12 +2531,14 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 </div>
               )}
               <div className="flex flex-col w-full gap-4 mt-6 md:mt-10">
-                <button
-                  onClick={() => openMatchHistory(selectedMatchId || matchHistory[0]?.id)}
-                  className="w-full py-4 bg-blue-600 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3"
-                >
-                  <BarChart2 size={24} /> 查看成绩总结
-                </button>
+                {settings.subjectMode === 'word' && (
+                  <button
+                    onClick={() => openMatchHistory(selectedMatchId || wordMatchHistory[0]?.id)}
+                    className="w-full py-4 bg-blue-600 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3"
+                  >
+                    <BarChart2 size={24} /> 查看成绩总结
+                  </button>
+                )}
                 <button onClick={startGame} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3">
                   <RotateCcw size={24} /> {t('tugOfWar.restart')}
                 </button>

@@ -105,19 +105,27 @@ runTest('winner dialog shows readable elapsed time', () => {
 
 runTest('match results can be opened from the winner dialog and viewed by total or team', () => {
   assert.match(source, /const getMatchSummary = \(record: MatchRecord\)/);
+  assert.match(source, /const getWordMatchHistory = \(records: MatchRecord\[\]\)/);
+  assert.match(source, /const getWordStatReviewLabel = \(stats: TeamStats\)/);
   assert.match(source, /const openMatchHistory = \(matchId\?: string\)/);
   assert.match(source, /setSelectedMatchId\(newRecord\.id\)/);
   assert.match(source, /查看成绩总结/);
-  assert.match(source, /openMatchHistory\(selectedMatchId \|\| matchHistory\[0\]\?\.id\)/);
-  assert.match(source, /本场成绩总结/);
-  assert.match(source, /总共/);
+  assert.match(source, /openMatchHistory\(selectedMatchId \|\| wordMatchHistory\[0\]\?\.id\)/);
+  assert.match(source, /英语成绩总结/);
+  assert.match(source, /全班/);
   assert.match(source, /蓝队/);
   assert.match(source, /红队/);
+  assert.match(source, /答错/);
+  assert.match(source, /需要复习/);
+  assert.match(source, /单词掌握情况/);
   assert.match(source, /historyViewMode === 'total'/);
   assert.match(source, /historyViewMode === 'blue'/);
   assert.match(source, /historyViewMode === 'red'/);
+  assert.match(source, /if \(settings\.subjectMode === 'word'\) \{/);
+  assert.match(source, /const wordMatchHistory = getWordMatchHistory\(matchHistory\)/);
   assert.doesNotMatch(source, /合并总计看/);
   assert.doesNotMatch(source, /红蓝分开看/);
+  assert.doesNotMatch(source, /全局比赛数据面板/);
 });
 
 runTest('math settings explain modes in plain classroom words', () => {

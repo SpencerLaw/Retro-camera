@@ -66,6 +66,183 @@ const sentenceToForm = (sentence: JuzimiSentence) => ({
   createdAt: sentence.createdAt,
 });
 
+// ── Card accent colours cycling ──────────────────────────────────────────────
+const CARD_ACCENTS = [
+  { bg: 'bg-white', border: 'border-black/10', tag: 'bg-[#f4efe7] text-[#8c6b3f]' },
+  { bg: 'bg-[#171310]', border: 'border-transparent', tag: 'bg-white/10 text-[#c7a46c]' },
+  { bg: 'bg-[#f4efe7]', border: 'border-[#c7a46c]/30', tag: 'bg-white/70 text-[#8c6b3f]' },
+  { bg: 'bg-white', border: 'border-black/10', tag: 'bg-[#f4efe7] text-[#8c6b3f]' },
+];
+
+const PREVIEW_MAX = 80; // chars before truncating in card
+
+// ── Dialog ───────────────────────────────────────────────────────────────────
+const SentenceDialog = ({
+  sentence,
+  onClose,
+  onEdit,
+  onDelete,
+  isAdmin,
+}: {
+  sentence: JuzimiSentence;
+  onClose: () => void;
+  onEdit: (s: JuzimiSentence) => void;
+  onDelete: (s: JuzimiSentence) => void;
+  isAdmin: boolean;
+}) => {
+  // Close on backdrop click
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/50 backdrop-blur-sm"
+      onClick={handleBackdrop}
+    >
+      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-[#f4efe7] shadow-[0_40px_100px_rgba(23,19,16,0.36)] border border-[#c7a46c]/30 flex flex-col">
+        {/* header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-6 pt-6 pb-4 bg-[#f4efe7]/95 backdrop-blur-sm border-b border-[#c7a46c]/20">
+          <div className="text-xs font-black tracking-[0.28em] uppercase text-[#8c6b3f]">
+            Juzimi · {formatDate(sentence.updatedAt || sentence.createdAt)}
+          </div>
+          <button
+            onClick={onClose}
+            className="h-9 w-9 rounded-full bg-[#171310]/8 flex items-center justify-center hover:bg-[#171310]/14 transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* body */}
+        <div className="px-6 md:px-8 py-6 flex-1">
+          <blockquote className="font-serif text-[clamp(1.7rem,5vw,2.6rem)] leading-[1.35] tracking-[-0.02em] text-[#171310]">
+            "{sentence.text}"
+          </blockquote>
+
+          <div className="mt-6 flex flex-wrap items-baseline gap-2 text-base font-black text-[#171310]">
+            <span>{sentence.author || '佚名'}</span>
+            {sentence.source && (
+              <span className="text-sm font-bold text-[#8c6b3f]">《{sentence.source}》</span>
+            )}
+          </div>
+
+          {sentence.note && (
+            <p className="mt-5 text-[15px] leading-8 text-[#5f5448] font-medium border-l-4 border-[#c7a46c] pl-4">
+              {sentence.note}
+            </p>
+          )}
+
+          {sentence.tags.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {sentence.tags.map(tag => (
+                <span key={tag} className="rounded-full bg-white border border-[#c7a46c]/35 px-3 py-1 text-xs font-black text-[#8c6b3f]">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* admin footer */}
+        {isAdmin && (
+          <div className="sticky bottom-0 flex gap-3 px-6 pb-6 pt-4 bg-[#f4efe7]/95 backdrop-blur-sm border-t border-[#c7a46c]/20">
+            <button
+              onClick={() => { onEdit(sentence); onClose(); }}
+              className="flex-1 h-12 rounded-2xl bg-[#171310] text-white font-black flex items-center justify-center gap-2 text-sm"
+            >
+              <Edit3 size={16} /> 编辑
+            </button>
+            <button
+              onClick={() => onDelete(sentence)}
+              className="flex-1 h-12 rounded-2xl bg-red-50 text-red-700 border border-red-100 font-black flex items-center justify-center gap-2 text-sm"
+            >
+              <Trash2 size={16} /> 删除
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Single card ──────────────────────────────────────────────────────────────
+const SentenceCard = ({
+  sentence,
+  index,
+  onClick,
+}: {
+  sentence: JuzimiSentence;
+  index: number;
+  onClick: () => void;
+}) => {
+  const accent = CARD_ACCENTS[index % CARD_ACCENTS.length];
+  const isDark = index % CARD_ACCENTS.length === 1;
+  const preview =
+    sentence.text.length > PREVIEW_MAX
+      ? sentence.text.slice(0, PREVIEW_MAX).trimEnd() + '…'
+      : sentence.text;
+
+  return (
+    <button
+      onClick={onClick}
+      className={`group w-full text-left rounded-[1.8rem] border ${accent.bg} ${accent.border} p-5 md:p-6 shadow-sm hover:shadow-[0_14px_40px_rgba(23,19,16,0.14)] active:scale-[0.98] transition-all duration-200 cursor-pointer`}
+    >
+      {/* eyebrow */}
+      <div className={`text-[10px] font-black tracking-[0.28em] uppercase mb-3 ${isDark ? 'text-[#c7a46c]' : 'text-[#8c6b3f]'}`}>
+        No. {String(index + 1).padStart(2, '0')}
+      </div>
+
+      {/* sentence preview */}
+      <p className={`font-serif text-[1.18rem] md:text-[1.28rem] leading-snug ${isDark ? 'text-[#f4efe7]' : 'text-[#171310]'}`}>
+        "{preview}"
+      </p>
+
+      {/* meta */}
+      <div className={`mt-4 flex flex-wrap items-center gap-1.5 text-[13px] font-black ${isDark ? 'text-white/55' : 'text-[#6f6254]'}`}>
+        <span>{sentence.author || '佚名'}</span>
+        {sentence.source && (
+          <>
+            <span className={isDark ? 'text-white/25' : 'text-[#c7a46c]/60'}>/</span>
+            <span className={isDark ? 'text-[#c7a46c]/80' : 'text-[#8c6b3f]'}>{sentence.source}</span>
+          </>
+        )}
+      </div>
+
+      {/* tags */}
+      {sentence.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {sentence.tags.slice(0, 4).map(tag => (
+            <span key={tag} className={`rounded-full px-2.5 py-0.5 text-[11px] font-black ${accent.tag}`}>
+              {tag}
+            </span>
+          ))}
+          {sentence.tags.length > 4 && (
+            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-black ${accent.tag} opacity-60`}>
+              +{sentence.tags.length - 4}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* read more hint */}
+      {sentence.text.length > PREVIEW_MAX && (
+        <div className={`mt-3 text-[11px] font-black opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#c7a46c]' : 'text-[#8c6b3f]'}`}>
+          点击查看全文 →
+        </div>
+      )}
+    </button>
+  );
+};
+
+// ── Main component ───────────────────────────────────────────────────────────
 const JuzimiApp: React.FC = () => {
   const navigate = useNavigate();
   const [sentences, setSentences] = useState<JuzimiSentence[]>([]);
@@ -78,6 +255,7 @@ const JuzimiApp: React.FC = () => {
   const [passwordInput, setPasswordInput] = useState('');
   const [form, setForm] = useState(blankForm);
   const [saving, setSaving] = useState(false);
+  const [dialogSentence, setDialogSentence] = useState<JuzimiSentence | null>(null);
 
   const filteredSentences = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -90,9 +268,6 @@ const JuzimiApp: React.FC = () => {
       sentence.tags.join(' '),
     ].join(' ').toLowerCase().includes(keyword));
   }, [query, sentences]);
-
-  const featuredSentence = filteredSentences[0];
-  const secondarySentences = filteredSentences.slice(1);
 
   const loadSentences = async () => {
     setLoading(true);
@@ -179,6 +354,7 @@ const JuzimiApp: React.FC = () => {
       const data = await callJuzimiApi('delete', { id: sentence.id }, adminToken);
       setSentences(sortJuzimiSentences(data));
       if (form.id === sentence.id) setForm(blankForm);
+      if (dialogSentence?.id === sentence.id) setDialogSentence(null);
     } catch (err: any) {
       setError(err.message || '删除失败');
     } finally {
@@ -188,12 +364,14 @@ const JuzimiApp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f4efe7] text-[#171310] relative overflow-hidden">
+      {/* decorative background */}
       <div className="fixed inset-0 pointer-events-none opacity-70">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.9),transparent_28%),radial-gradient(circle_at_82%_4%,rgba(199,164,108,0.24),transparent_30%),linear-gradient(135deg,rgba(17,19,24,0.06),transparent_42%)]" />
         <div className="absolute left-0 top-0 h-full w-[12vw] bg-[#14110f]" />
         <div className="absolute right-[-10vw] top-[8vh] h-[70vh] w-[34vw] rounded-full border border-[#c7a46c]/30" />
       </div>
 
+      {/* ── Header ── */}
       <header className="relative z-10 px-5 md:px-10 pt-6 flex items-center justify-between gap-3">
         <button
           onClick={() => navigate('/')}
@@ -221,32 +399,35 @@ const JuzimiApp: React.FC = () => {
         </div>
       </header>
 
-      <main className="relative z-10 px-5 md:px-10 pb-12 pt-8 md:pt-14 max-w-7xl mx-auto">
-        <section className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-8 md:gap-12 items-end mb-10 md:mb-16">
+      <main className="relative z-10 px-5 md:px-10 pb-16 pt-8 max-w-7xl mx-auto">
+
+        {/* ── Hero strip ── */}
+        <section className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 md:mb-10">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#c7a46c]/50 bg-white/60 px-4 py-2 text-xs font-black tracking-[0.28em] uppercase text-[#8c6b3f] mb-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#c7a46c]/50 bg-white/60 px-4 py-2 text-xs font-black tracking-[0.28em] uppercase text-[#8c6b3f] mb-4">
               <Sparkles size={14} /> Juzimi Magazine
             </div>
-            <h1 className="font-serif text-[clamp(4.5rem,14vw,11rem)] leading-[0.78] tracking-[-0.05em] text-[#171310]">
+            <h1 className="font-serif text-[clamp(3.2rem,10vw,7rem)] leading-[0.82] tracking-[-0.05em] text-[#171310]">
               句子迷
             </h1>
-            <p className="mt-7 max-w-2xl text-lg md:text-xl leading-9 text-[#5f5448] font-medium">
+            <p className="mt-4 text-base md:text-lg leading-8 text-[#5f5448] font-medium">
               像翻开一本安静的杂志，把值得停留的句子放在光里。
             </p>
           </div>
 
-          <div className="rounded-[2rem] bg-[#171310] text-[#f4efe7] p-5 md:p-7 shadow-[0_28px_80px_rgba(23,19,16,0.28)]">
-            <div className="flex items-center justify-between gap-3 mb-5">
-              <div className="text-xs font-black tracking-[0.24em] uppercase text-[#c7a46c]">Index</div>
-              <div className="text-sm font-black text-white/65">{sentences.length} sentences</div>
+          {/* search box */}
+          <div className="w-full md:w-80 shrink-0 rounded-2xl bg-[#171310] p-4 shadow-[0_20px_60px_rgba(23,19,16,0.22)]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs font-black tracking-[0.22em] uppercase text-[#c7a46c]">Index</div>
+              <div className="text-sm font-black text-white/55">{sentences.length} sentences</div>
             </div>
             <div className="relative">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/45" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="搜索句子、作者、标签"
-                className="w-full h-13 rounded-2xl bg-white/10 border border-white/10 pl-11 pr-4 outline-none text-white placeholder:text-white/35 font-bold focus:border-[#c7a46c]"
+                className="w-full h-11 rounded-xl bg-white/10 border border-white/10 pl-10 pr-4 outline-none text-white placeholder:text-white/30 font-bold text-sm focus:border-[#c7a46c] transition-colors"
               />
             </div>
           </div>
@@ -258,8 +439,9 @@ const JuzimiApp: React.FC = () => {
           </div>
         )}
 
+        {/* ── Admin panel ── */}
         {showAdminPanel && (
-          <section className="mb-10 rounded-[2rem] bg-white/85 backdrop-blur border border-black/10 shadow-[0_20px_60px_rgba(23,19,16,0.12)] overflow-hidden">
+          <section className="mb-8 rounded-[2rem] bg-white/85 backdrop-blur border border-black/10 shadow-[0_20px_60px_rgba(23,19,16,0.12)] overflow-hidden">
             <div className="p-5 md:p-6 border-b border-black/10 flex items-center justify-between gap-3">
               <div>
                 <div className="text-xs font-black tracking-[0.22em] uppercase text-[#8c6b3f]">Editor Desk</div>
@@ -279,9 +461,7 @@ const JuzimiApp: React.FC = () => {
                   type="password"
                   value={passwordInput}
                   onChange={(event) => setPasswordInput(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') handleLogin();
-                  }}
+                  onKeyDown={(event) => { if (event.key === 'Enter') handleLogin(); }}
                   placeholder="输入管理员密码"
                   className="h-12 rounded-2xl border border-black/10 bg-[#f8f3eb] px-4 font-bold outline-none focus:border-[#c7a46c]"
                 />
@@ -299,7 +479,7 @@ const JuzimiApp: React.FC = () => {
                     value={form.text}
                     onChange={(event) => setForm(prev => ({ ...prev, text: event.target.value }))}
                     placeholder="写下句子..."
-                    className="min-h-[190px] rounded-3xl border border-black/10 bg-[#f8f3eb] p-5 font-serif text-2xl leading-10 outline-none focus:border-[#c7a46c] resize-none"
+                    className="min-h-[160px] rounded-3xl border border-black/10 bg-[#f8f3eb] p-5 font-serif text-xl leading-9 outline-none focus:border-[#c7a46c] resize-none"
                   />
                   <div className="grid grid-cols-1 gap-3">
                     <input
@@ -324,7 +504,7 @@ const JuzimiApp: React.FC = () => {
                       value={form.note}
                       onChange={(event) => setForm(prev => ({ ...prev, note: event.target.value }))}
                       placeholder="短评 / 备注"
-                      className="min-h-[82px] rounded-2xl border border-black/10 bg-[#f8f3eb] p-4 font-bold outline-none focus:border-[#c7a46c] resize-none"
+                      className="min-h-[72px] rounded-2xl border border-black/10 bg-[#f8f3eb] p-4 font-bold outline-none focus:border-[#c7a46c] resize-none"
                     />
                   </div>
                 </div>
@@ -347,7 +527,7 @@ const JuzimiApp: React.FC = () => {
                       disabled={saving || !form.text.trim()}
                       className="h-12 rounded-2xl bg-[#171310] text-white px-6 font-black flex items-center justify-center gap-2 disabled:opacity-40"
                     >
-                      <Save size={18} /> {form.id ? '保存编辑句子' : '发布新建句子'}
+                      <Save size={18} /> {form.id ? '保存编辑' : '发布句子'}
                     </button>
                   </div>
                 </div>
@@ -356,8 +536,9 @@ const JuzimiApp: React.FC = () => {
           </section>
         )}
 
+        {/* ── Sentence grid ── */}
         {loading ? (
-          <div className="py-24 text-center font-black text-[#8c6b3f]">正在翻页...</div>
+          <div className="py-20 text-center font-black text-[#8c6b3f]">正在翻页...</div>
         ) : filteredSentences.length === 0 ? (
           <section className="rounded-[2.5rem] border border-dashed border-[#c7a46c]/50 bg-white/55 p-10 md:p-16 text-center">
             <Feather size={42} className="mx-auto text-[#8c6b3f] mb-4" />
@@ -365,107 +546,34 @@ const JuzimiApp: React.FC = () => {
             <p className="text-[#6f6254] font-bold">管理员登录后，可以把第一条喜欢的句子放进来。</p>
           </section>
         ) : (
-          <section className="grid grid-cols-1 lg:grid-cols-[1.12fr_0.88fr] gap-6 md:gap-8">
-            {featuredSentence && (
-              <article className="rounded-[2.7rem] bg-white shadow-[0_28px_80px_rgba(23,19,16,0.14)] border border-black/10 overflow-hidden min-h-[520px] flex flex-col">
-                <div className="p-6 md:p-10 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between gap-4 mb-10">
-                    <div className="text-xs font-black tracking-[0.3em] uppercase text-[#8c6b3f]">Cover Story</div>
-                    <div className="text-sm font-black text-slate-400">{formatDate(featuredSentence.updatedAt || featuredSentence.createdAt)}</div>
-                  </div>
-                  <blockquote className="font-serif text-[clamp(2.4rem,5vw,5.8rem)] leading-[1.02] tracking-[-0.04em] text-[#171310]">
-                    “{featuredSentence.text}”
-                  </blockquote>
-                  <div className="mt-auto pt-10">
-                    <div className="text-xl font-black text-[#171310]">
-                      {featuredSentence.author || '佚名'}
-                    </div>
-                    {featuredSentence.source && (
-                      <div className="mt-1 text-sm font-bold text-[#786b5e]">《{featuredSentence.source}》</div>
-                    )}
-                    {featuredSentence.note && (
-                      <p className="mt-5 text-base leading-8 text-[#5f5448] font-medium border-l-4 border-[#c7a46c] pl-4">
-                        {featuredSentence.note}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="px-6 md:px-10 pb-7 flex flex-wrap gap-2">
-                  {featuredSentence.tags.map(tag => (
-                    <span key={tag} className="rounded-full bg-[#f4efe7] border border-[#c7a46c]/35 px-3 py-1 text-xs font-black text-[#8c6b3f]">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            )}
-
-            <div className="grid grid-cols-1 gap-5">
-              {secondarySentences.map((sentence, index) => (
-                <article
-                  key={sentence.id}
-                  className={`rounded-[2rem] border border-black/10 bg-white/80 backdrop-blur p-5 md:p-6 shadow-sm ${
-                    index % 2 === 0 ? 'lg:translate-x-5' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="text-xs font-black tracking-[0.18em] uppercase text-[#8c6b3f]">No. {String(index + 2).padStart(2, '0')}</div>
-                    {isAdmin && (
-                      <div className="flex gap-2 shrink-0">
-                        <button
-                          onClick={() => startEdit(sentence)}
-                          className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-blue-50 hover:text-blue-700"
-                          aria-label="编辑句子"
-                        >
-                          <Edit3 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(sentence)}
-                          className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-red-50 hover:text-red-700"
-                          aria-label="删除句子"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <p className="font-serif text-2xl md:text-3xl leading-snug text-[#171310]">“{sentence.text}”</p>
-                  <div className="mt-5 flex flex-wrap items-center gap-2 text-sm font-black text-[#6f6254]">
-                    <span>{sentence.author || '佚名'}</span>
-                    {sentence.source && <span className="text-[#c7a46c]">/ {sentence.source}</span>}
-                  </div>
-                  {sentence.tags.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {sentence.tags.map(tag => (
-                        <span key={tag} className="rounded-full bg-[#f4efe7] px-2.5 py-1 text-[11px] font-black text-[#8c6b3f]">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </article>
-              ))}
-
-              {featuredSentence && isAdmin && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => startEdit(featuredSentence)}
-                    className="flex-1 h-12 rounded-2xl bg-white border border-black/10 font-black flex items-center justify-center gap-2"
-                  >
-                    <Edit3 size={17} /> 编辑句子
-                  </button>
-                  <button
-                    onClick={() => handleDelete(featuredSentence)}
-                    className="flex-1 h-12 rounded-2xl bg-red-50 text-red-700 border border-red-100 font-black flex items-center justify-center gap-2"
-                  >
-                    <Trash2 size={17} /> 删除句子
-                  </button>
-                </div>
-              )}
-            </div>
+          /* Masonry-style responsive grid — 1 col → 2 col → 3 col */
+          <section
+            className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"
+            style={{ columnFill: 'balance' }}
+          >
+            {filteredSentences.map((sentence, index) => (
+              <div key={sentence.id} className="break-inside-avoid mb-4 md:mb-5">
+                <SentenceCard
+                  sentence={sentence}
+                  index={index}
+                  onClick={() => setDialogSentence(sentence)}
+                />
+              </div>
+            ))}
           </section>
         )}
       </main>
+
+      {/* ── Dialog ── */}
+      {dialogSentence && (
+        <SentenceDialog
+          sentence={dialogSentence}
+          onClose={() => setDialogSentence(null)}
+          onEdit={startEdit}
+          onDelete={handleDelete}
+          isAdmin={isAdmin}
+        />
+      )}
     </div>
   );
 };

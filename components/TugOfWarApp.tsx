@@ -27,6 +27,7 @@ type TugOfWarVariant = SubjectMode;
 type GameMode = 'classic' | 'target';
 type PowerUpType = 'freeze' | 'double' | 'shield';
 type WordPlayMode = 'shuffle' | 'flash' | 'cloze' | 'edge_hint';
+type HistoryViewMode = 'total' | 'blue' | 'red';
 
 interface TugOfWarProductConfig {
   subjectMode: SubjectMode;
@@ -208,6 +209,30 @@ const formatElapsedTime = (seconds: number) => {
 
   if (minutes <= 0) return `${remainingSeconds}秒`;
   return `${minutes}分${remainingSeconds}秒`;
+};
+
+const getMatchSummary = (record: MatchRecord) => {
+  const stats = Object.values(record.stats);
+  return stats.reduce(
+    (summary, stat) => ({
+      questions: summary.questions + 1,
+      totalCorrect: summary.totalCorrect + stat.total.correct,
+      totalWrong: summary.totalWrong + stat.total.wrong,
+      blueCorrect: summary.blueCorrect + stat.blue.correct,
+      blueWrong: summary.blueWrong + stat.blue.wrong,
+      redCorrect: summary.redCorrect + stat.red.correct,
+      redWrong: summary.redWrong + stat.red.wrong,
+    }),
+    {
+      questions: 0,
+      totalCorrect: 0,
+      totalWrong: 0,
+      blueCorrect: 0,
+      blueWrong: 0,
+      redCorrect: 0,
+      redWrong: 0,
+    }
+  );
 };
 
 const FrozenSquareOverlay = () => (
@@ -917,7 +942,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   });
   const [showHistory, setShowHistory] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
-  const [historyViewMode, setHistoryViewMode] = useState<'combined' | 'split'>('combined');
+  const [historyViewMode, setHistoryViewMode] = useState<HistoryViewMode>('total');
   const currentMatchStatsRef = useRef<Record<string, QuestionStat>>({});
 
   useEffect(() => {
@@ -927,6 +952,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   useEffect(() => {
     localStorage.setItem('tugOfWar_matchHistory', JSON.stringify(matchHistory));
   }, [matchHistory]);
+
+  const openMatchHistory = (matchId?: string) => {
+    setSelectedMatchId(matchId || selectedMatchId || matchHistory[0]?.id || null);
+    setHistoryViewMode('total');
+    setShowHistory(true);
+  };
 
   // 蓝红队各自独立的洗牌词池，保证每个单词都能出现
   const blueWordPoolRef = useRef<string[]>([]);
@@ -1307,6 +1338,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
           duration: timeElapsed,
           stats: { ...currentMatchStatsRef.current }
         };
+        setSelectedMatchId(newRecord.id);
         setMatchHistory(prev => [newRecord, ...prev]);
       }
 
@@ -1386,6 +1418,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       case 'shield': return '抵挡一次对方道具';
     }
   };
+
+  const selectedMatch = selectedMatchId ? matchHistory.find(m => m.id === selectedMatchId) : null;
+  const selectedMatchSummary = selectedMatch ? getMatchSummary(selectedMatch) : null;
+  const getVisibleStat = (stat: QuestionStat) => stat[historyViewMode];
 
   // 如果授权状态未知，显示加载中
   if (isVerified === null) return <div className="h-screen w-screen bg-slate-50 flex items-center justify-center font-black text-slate-400">Loading...</div>;
@@ -1483,6 +1519,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
               className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-600 hover:bg-white transition-all border border-slate-200"
             >
               <SettingsIcon size={20} />
+            </button>
+            <button
+              onClick={() => openMatchHistory()}
+              className="h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center gap-1.5 text-slate-600 hover:bg-white transition-all border border-slate-200 px-3"
+            >
+              <BarChart2 size={18} />
+              <span className="hidden sm:inline text-xs font-black">成绩</span>
             </button>
           </div>
 
@@ -1664,7 +1707,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                                 {record.winner === 'blue' ? '蓝队胜' : '红队胜'}
                               </span>
                               <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                                <Clock size={12} /> {record.duration}s
+                                <Clock size={12} /> {formatElapsedTime(record.duration)}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-slate-700 font-bold text-sm">
@@ -1682,75 +1725,86 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
                 {/* Right Column: Match Details */}
                 <div className="flex-1 bg-slate-50/50 overflow-y-auto relative">
-                  {selectedMatchId && matchHistory.find(m => m.id === selectedMatchId) ? (
+                  {selectedMatch && selectedMatchSummary ? (
                     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
+                      <div className="mb-5 rounded-3xl bg-white border border-slate-200 shadow-sm p-4 md:p-5">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                          <div>
+                            <div className="text-xs font-black text-slate-400 mb-1">本场成绩总结</div>
+                            <div className="text-2xl font-black text-slate-800">
+                              {selectedMatch.winner === 'blue' ? '蓝队获胜' : '红队获胜'}
+                            </div>
+                          </div>
+                          <div className="text-sm font-black text-slate-500 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2 flex items-center gap-2 w-fit">
+                            <Clock size={16} /> 耗时 {formatElapsedTime(selectedMatch.duration)}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          <div className="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                            <div className="text-[11px] font-black text-slate-400">题目</div>
+                            <div className="text-2xl font-black text-slate-800">{selectedMatchSummary.questions}</div>
+                          </div>
+                          <div className="rounded-2xl bg-green-50 border border-green-100 p-3">
+                            <div className="text-[11px] font-black text-green-600">总共答对</div>
+                            <div className="text-2xl font-black text-green-700">{selectedMatchSummary.totalCorrect}</div>
+                          </div>
+                          <div className="rounded-2xl bg-blue-50 border border-blue-100 p-3">
+                            <div className="text-[11px] font-black text-blue-600">蓝队答对</div>
+                            <div className="text-2xl font-black text-blue-700">{selectedMatchSummary.blueCorrect}</div>
+                          </div>
+                          <div className="rounded-2xl bg-red-50 border border-red-100 p-3">
+                            <div className="text-[11px] font-black text-red-600">红队答对</div>
+                            <div className="text-2xl font-black text-red-700">{selectedMatchSummary.redCorrect}</div>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* View Mode Toggle */}
                       <div className="flex justify-center mb-6">
                         <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-200 inline-flex">
                           <button 
-                            onClick={() => setHistoryViewMode('combined')}
-                            className={`px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'combined' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                            onClick={() => setHistoryViewMode('total')}
+                            className={`px-5 md:px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'total' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                           >
-                            合并总计看
+                            总共
                           </button>
                           <button 
-                            onClick={() => setHistoryViewMode('split')}
-                            className={`px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'split' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                            onClick={() => setHistoryViewMode('blue')}
+                            className={`px-5 md:px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'blue' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                           >
-                            红蓝分开看
+                            蓝队
+                          </button>
+                          <button
+                            onClick={() => setHistoryViewMode('red')}
+                            className={`px-5 md:px-6 py-2 rounded-lg font-black text-sm transition-all ${historyViewMode === 'red' ? 'bg-red-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                          >
+                            红队
                           </button>
                         </div>
                       </div>
 
                       {/* Stat Cards Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {Object.values(matchHistory.find(m => m.id === selectedMatchId)!.stats).map(stat => (
-                          <div key={stat.text} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                            <div className="text-lg font-black text-slate-800 mb-4 uppercase tracking-wider truncate" title={stat.text}>
-                              {stat.text}
-                            </div>
-                            
-                            {historyViewMode === 'combined' ? (
+                        {Object.values(selectedMatch.stats).map(stat => {
+                          const visibleStat = getVisibleStat(stat);
+                          return (
+                            <div key={stat.text} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                              <div className="text-lg font-black text-slate-800 mb-4 uppercase tracking-wider truncate" title={stat.text}>
+                                {stat.text}
+                              </div>
                               <div className="flex items-center gap-4">
                                 <div className="flex-1 bg-green-50 rounded-xl p-3 flex flex-col items-center border border-green-100">
                                   <span className="text-xs font-bold text-green-600 mb-1 flex items-center gap-1"><CheckCircle2 size={14}/> 正确</span>
-                                  <span className="text-2xl font-black text-green-700">{stat.total.correct}</span>
+                                  <span className="text-2xl font-black text-green-700">{visibleStat.correct}</span>
                                 </div>
                                 <div className="flex-1 bg-red-50 rounded-xl p-3 flex flex-col items-center border border-red-100">
                                   <span className="text-xs font-bold text-red-600 mb-1 flex items-center gap-1"><XCircle size={14}/> 错误</span>
-                                  <span className="text-2xl font-black text-red-700">{stat.total.wrong}</span>
+                                  <span className="text-2xl font-black text-red-700">{visibleStat.wrong}</span>
                                 </div>
                               </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {/* Blue Team Row */}
-                                <div className="flex items-center gap-3">
-                                  <div className="w-12 text-center text-xs font-black text-blue-600 bg-blue-50 py-1 rounded">蓝队</div>
-                                  <div className="flex-1 flex gap-2">
-                                    <div className="flex-1 bg-green-50/50 rounded-lg py-1 px-2 flex justify-between border border-green-100/50 text-sm">
-                                      <span className="text-green-600 font-bold text-xs">对</span><span className="text-green-700 font-black">{stat.blue.correct}</span>
-                                    </div>
-                                    <div className="flex-1 bg-red-50/50 rounded-lg py-1 px-2 flex justify-between border border-red-100/50 text-sm">
-                                      <span className="text-red-600 font-bold text-xs">错</span><span className="text-red-700 font-black">{stat.blue.wrong}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                {/* Red Team Row */}
-                                <div className="flex items-center gap-3">
-                                  <div className="w-12 text-center text-xs font-black text-red-600 bg-red-50 py-1 rounded">红队</div>
-                                  <div className="flex-1 flex gap-2">
-                                    <div className="flex-1 bg-green-50/50 rounded-lg py-1 px-2 flex justify-between border border-green-100/50 text-sm">
-                                      <span className="text-green-600 font-bold text-xs">对</span><span className="text-green-700 font-black">{stat.red.correct}</span>
-                                    </div>
-                                    <div className="flex-1 bg-red-50/50 rounded-lg py-1 px-2 flex justify-between border border-red-100/50 text-sm">
-                                      <span className="text-red-600 font-bold text-xs">错</span><span className="text-red-700 font-black">{stat.red.wrong}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ) : (
@@ -2418,6 +2472,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 </div>
               )}
               <div className="flex flex-col w-full gap-4 mt-6 md:mt-10">
+                <button
+                  onClick={() => openMatchHistory(selectedMatchId || matchHistory[0]?.id)}
+                  className="w-full py-4 bg-blue-600 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3"
+                >
+                  <BarChart2 size={24} /> 查看成绩总结
+                </button>
                 <button onClick={startGame} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xl font-black shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3">
                   <RotateCcw size={24} /> {t('tugOfWar.restart')}
                 </button>

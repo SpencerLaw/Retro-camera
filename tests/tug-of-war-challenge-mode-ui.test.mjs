@@ -103,6 +103,23 @@ runTest('winner dialog shows readable elapsed time', () => {
   assert.doesNotMatch(source, /耗时: \{timeElapsed\} 秒/);
 });
 
+runTest('match results can be opened from the winner dialog and viewed by total or team', () => {
+  assert.match(source, /const getMatchSummary = \(record: MatchRecord\)/);
+  assert.match(source, /const openMatchHistory = \(matchId\?: string\)/);
+  assert.match(source, /setSelectedMatchId\(newRecord\.id\)/);
+  assert.match(source, /查看成绩总结/);
+  assert.match(source, /openMatchHistory\(selectedMatchId \|\| matchHistory\[0\]\?\.id\)/);
+  assert.match(source, /本场成绩总结/);
+  assert.match(source, /总共/);
+  assert.match(source, /蓝队/);
+  assert.match(source, /红队/);
+  assert.match(source, /historyViewMode === 'total'/);
+  assert.match(source, /historyViewMode === 'blue'/);
+  assert.match(source, /historyViewMode === 'red'/);
+  assert.doesNotMatch(source, /合并总计看/);
+  assert.doesNotMatch(source, /红蓝分开看/);
+});
+
 runTest('math settings explain modes in plain classroom words', () => {
   assert.match(source, /数学怎么玩/);
   assert.match(source, /经典计算/);

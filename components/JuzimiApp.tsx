@@ -367,12 +367,11 @@ const JuzimiApp: React.FC = () => {
       {/* decorative background */}
       <div className="fixed inset-0 pointer-events-none opacity-70">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.9),transparent_28%),radial-gradient(circle_at_82%_4%,rgba(199,164,108,0.24),transparent_30%),linear-gradient(135deg,rgba(17,19,24,0.06),transparent_42%)]" />
-        <div className="absolute left-0 top-0 h-full w-[12vw] bg-[#14110f]" />
         <div className="absolute right-[-10vw] top-[8vh] h-[70vh] w-[34vw] rounded-full border border-[#c7a46c]/30" />
       </div>
 
       {/* ── Header ── */}
-      <header className="relative z-10 pl-[14vw] pr-5 md:pr-10 pt-6 flex items-center justify-between gap-3">
+      <header className="relative z-10 px-5 md:px-10 pt-6 flex items-center justify-between gap-3">
         <button
           onClick={() => navigate('/')}
           className="h-11 w-11 rounded-full bg-white/80 border border-black/10 shadow-sm flex items-center justify-center hover:bg-white transition-colors"
@@ -399,7 +398,7 @@ const JuzimiApp: React.FC = () => {
         </div>
       </header>
 
-      <main className="relative z-10 pl-[14vw] pr-5 md:pr-10 pb-16 pt-8 max-w-7xl mx-auto">
+      <main className="relative z-10 px-5 md:px-10 pb-16 pt-8 max-w-7xl mx-auto">
 
         {/* ── Hero strip ── */}
         <section className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 md:mb-10">

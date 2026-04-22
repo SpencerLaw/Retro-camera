@@ -1929,7 +1929,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                                       中文：{parts.prompt}
                                     </div>
                                   )}
-                                  <div className="text-xl font-black text-slate-800 uppercase truncate" title={parts.answer}>
+                                  <div className="text-xl font-black text-slate-800 truncate" title={parts.answer}>
                                     英文：{parts.answer}
                                   </div>
                                 </div>
@@ -2040,7 +2040,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         </div>
                         <p className="text-xs font-bold text-slate-500 mt-1 leading-relaxed">{t('tugOfWar.wordImportHint')}</p>
                         <p className="text-xs font-bold text-blue-500 mt-1 leading-relaxed">
-                          记忆竞速请导入双语行：苹果 apple、banana 香蕉。拼词拔河也会显示中文提示。
+                          记忆竞速请导入双语行：苹果 apple、Thailand 泰国。系统会保留大小写，学生也要按大小写拼对。
                         </p>
                       </div>
                     </div>

@@ -1,8 +1,7 @@
 export const normalizeWordAnswer = (value) =>
   String(value ?? '')
     .normalize('NFKD')
-    .replace(/[^a-z]/gi, '')
-    .toLowerCase();
+    .replace(/[^a-z]/gi, '');
 
 export const parseWordListText = (text) => {
   const seen = new Set();
@@ -70,6 +69,9 @@ const findChinesePromptForAnswer = (answer, bilingualPairs = []) => {
   const pair = (bilingualPairs ?? []).find((item) => (
     normalizeWordAnswer(item?.english) === cleanAnswer
     && normalizeChinesePrompt(item?.chinese).length > 0
+  )) ?? (bilingualPairs ?? []).find((item) => (
+    normalizeWordAnswer(item?.english).toLowerCase() === cleanAnswer.toLowerCase()
+    && normalizeChinesePrompt(item?.chinese).length > 0
   ));
 
   return pair ? normalizeChinesePrompt(pair.chinese) : '';
@@ -99,7 +101,9 @@ const getFixedLetterIndices = (answer, wordPlayMode = 'shuffle') => {
 
 const getDistractorLetters = (answer, count, random = Math.random) => {
   const cleanAnswer = normalizeWordAnswer(answer);
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  const alphabet = /^[A-Z]+$/.test(cleanAnswer)
+    ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+    : 'abcdefghijklmnopqrstuvwxyz'.split('');
   const distractors = [];
   let offset = Math.floor(random() * alphabet.length);
 

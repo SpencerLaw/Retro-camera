@@ -431,14 +431,17 @@ const WordProblemCard = ({ problem, input, team, t }: {
   const softClass = isBlue ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-red-50 border-red-100 text-red-700';
   const slotClass = isBlue ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-red-50 border-red-100 text-red-700';
   const previewClass = isBlue ? 'from-blue-600 to-cyan-500' : 'from-red-600 to-orange-500';
+  const shouldHidePromptAfterFlash = problem.wordPlayMode === 'flash' && !previewActive;
+  const showPromptPanel = Boolean(problem.prompt) && !shouldHidePromptAfterFlash;
+  const promptLabel = shouldHidePromptAfterFlash ? '闪现记忆 · 拼英文' : problem.prompt ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt');
 
   return (
     <>
       <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 min-h-3">
-        {problem.prompt ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: problem.answer.length })}
+        {promptLabel} · {t('tugOfWar.wordLetters', { count: problem.answer.length })}
         {problem.isCloze && <span className="ml-1 text-amber-500">· 完形提示</span>}
       </div>
-      {problem.prompt && (
+      {showPromptPanel && (
         <div className={`min-h-[48px] mb-2 rounded-xl border-2 px-3 py-2 flex items-center justify-center text-[22px] md:text-[28px] font-black leading-tight break-words ${softClass}`}>
           {problem.prompt}
         </div>

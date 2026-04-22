@@ -56,6 +56,14 @@ runTest('word problems share Chinese hints and apply the teacher selected helper
   assert.match(source, /nextWordFromPool\(redWordPoolRef\.current, wordBank, challengePairs, wordProblemOptions\)/);
 });
 
+runTest('flash memory hides the Chinese prompt after the preview ends', () => {
+  assert.match(source, /const shouldHidePromptAfterFlash = problem\.wordPlayMode === 'flash' && !previewActive/);
+  assert.match(source, /const showPromptPanel = Boolean\(problem\.prompt\) && !shouldHidePromptAfterFlash/);
+  assert.match(source, /shouldHidePromptAfterFlash \? '闪现记忆 · 拼英文' : problem\.prompt \? '看中文 · 拼英文' : t\('tugOfWar\.spellPrompt'\)/);
+  assert.match(source, /\{showPromptPanel && \(/);
+  assert.doesNotMatch(source, /\{problem\.prompt && \(/);
+});
+
 runTest('tug win score uses plain words and is hidden for English challenge mode', () => {
   assert.match(source, /拉到几格获胜/);
   assert.match(source, /数字越大，比赛越久/);

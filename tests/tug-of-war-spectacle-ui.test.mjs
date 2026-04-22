@@ -60,6 +60,29 @@ runTest('word correct-answer burst uses praise words instead of ABCD glyphs', ()
   assert.doesNotMatch(source, /glyphs\.slice\(0, 4\)\.map/);
 });
 
+runTest('classroom sounds can be toggled and play on correct answers and wins', () => {
+  assert.match(source, /soundEnabled: true/);
+  assert.match(source, /const playCorrectSound = /);
+  assert.match(source, /const playVictorySound = /);
+  assert.match(source, /AudioContextCtor/);
+  assert.match(source, /settings\.soundEnabled\) playCorrectSound\(settings\.subjectMode, currentStreak\)/);
+  assert.match(source, /settings\.soundEnabled\) playVictorySound\(settings\.subjectMode\)/);
+  assert.match(source, /tugOfWar\.enableSounds/);
+  assert.match(source, /tugOfWar\.enableSoundsDesc/);
+});
+
+runTest('start countdown plays rhythmic sounds before the game begins', () => {
+  assert.match(source, /const playCountdownSound = /);
+  assert.match(source, /playCountdownSound\(openingCountdown, settings\.subjectMode\)/);
+  assert.match(source, /openingCountdown, settings\.soundEnabled, settings\.subjectMode/);
+  assert.match(source, /step === 0/);
+  assert.match(source, /setOpeningCountdown\(openingCountdown - 1\)/);
+});
+
+runTest('wrong answers do not play discouraging sounds', () => {
+  assert.doesNotMatch(source, /playWrongSound/);
+});
+
 runTest('correct-answer burst stays inside each team panel when scaled', () => {
   assert.match(source, /burstSideClass/);
   assert.match(source, /team === 'blue' \? 'left-4 md:left-10' : 'right-4 md:right-10'/);

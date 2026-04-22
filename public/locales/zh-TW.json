@@ -152,6 +152,8 @@
     "spellPrompt": "點擊字母拼單詞",
     "wordLetters": "{count} 個字母",
     "wordInputPlaceholder": "等待拼寫",
+    "enableSounds": "課堂音效",
+    "enableSoundsDesc": "答對、連擊和獲勝時播放短音效，活躍課堂氣氛。",
     "enablePowerUps": "啟用道具系統",
     "allowedPowerUps": "允許出現的道具",
     "propFreeze": "冰凍 🧊",

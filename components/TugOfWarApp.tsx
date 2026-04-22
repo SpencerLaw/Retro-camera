@@ -48,6 +48,7 @@ interface GameSettings {
   flashPreviewMs?: number;
   gameMode: GameMode;
   powerUpsEnabled: boolean;
+  soundEnabled: boolean;
   allowedPowerUps: PowerUpType[];
   powerUpTrigger: number;
 }
@@ -821,6 +822,88 @@ const fireTeamConfetti = (team: 'blue' | 'red', subjectMode: SubjectMode, streak
   });
 };
 
+let tugAudioContext: AudioContext | null = null;
+
+const getTugAudioContext = () => {
+  if (typeof window === 'undefined') return null;
+  const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioContextCtor) return null;
+
+  if (!tugAudioContext || tugAudioContext.state === 'closed') {
+    tugAudioContext = new AudioContextCtor();
+  }
+  if (tugAudioContext.state === 'suspended') {
+    void tugAudioContext.resume().catch(() => {});
+  }
+
+  return tugAudioContext;
+};
+
+const playTugTone = (
+  context: AudioContext,
+  frequency: number,
+  delay: number,
+  duration: number,
+  volume: number,
+  type: OscillatorType = 'sine',
+) => {
+  const startAt = context.currentTime + delay;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, startAt);
+  gain.gain.setValueAtTime(0.0001, startAt);
+  gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.018);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(startAt);
+  oscillator.stop(startAt + duration + 0.035);
+};
+
+const playCorrectSound = (subjectMode: SubjectMode, streak: number) => {
+  const context = getTugAudioContext();
+  if (!context) return;
+
+  const base = subjectMode === 'word' ? 660 : 620;
+  const lift = Math.min(Math.max(streak, 1), 6) * 28;
+  playTugTone(context, base + lift, 0, 0.1, 0.055, 'sine');
+  playTugTone(context, base * 1.28 + lift, 0.075, 0.13, 0.05, 'triangle');
+  if (streak >= 3) {
+    playTugTone(context, base * 1.65 + lift, 0.15, 0.12, 0.04, 'sine');
+  }
+};
+
+const playVictorySound = (subjectMode: SubjectMode) => {
+  const context = getTugAudioContext();
+  if (!context) return;
+
+  const notes = subjectMode === 'word'
+    ? [523.25, 659.25, 783.99, 1046.5]
+    : [493.88, 622.25, 739.99, 987.77];
+  notes.forEach((frequency, index) => {
+    playTugTone(context, frequency, index * 0.105, 0.18, index === notes.length - 1 ? 0.07 : 0.052, 'triangle');
+  });
+  playTugTone(context, notes[notes.length - 1] * 1.25, 0.48, 0.26, 0.045, 'sine');
+};
+
+const playCountdownSound = (step: number, subjectMode: SubjectMode) => {
+  const context = getTugAudioContext();
+  if (!context) return;
+
+  const accent = subjectMode === 'word' ? 40 : 0;
+  if (step === 0) {
+    playTugTone(context, 784 + accent, 0, 0.13, 0.06, 'triangle');
+    playTugTone(context, 1046.5 + accent, 0.12, 0.18, 0.065, 'sine');
+    return;
+  }
+
+  const pitch = step <= 2 ? 720 + accent : 560 + accent + (5 - step) * 24;
+  playTugTone(context, pitch, 0, 0.09, 0.052, 'sine');
+};
+
 const fireVictoryCelebration = (winner: 'blue' | 'red', subjectMode: SubjectMode) => {
   const duration = 2600;
   const end = Date.now() + duration;
@@ -1001,6 +1084,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     flashPreviewMs: 0,
     gameMode: 'classic',
     powerUpsEnabled: true,
+    soundEnabled: true,
     allowedPowerUps: ['freeze', 'double', 'shield'],
     powerUpTrigger: 3
   });
@@ -1103,6 +1187,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
   useEffect(() => {
     if (openingCountdown === null) return;
+    if (settings.soundEnabled) {
+      playCountdownSound(openingCountdown, settings.subjectMode);
+    }
     const timer = window.setTimeout(() => {
       if (openingCountdown > 0) {
         setOpeningCountdown(openingCountdown - 1);
@@ -1113,7 +1200,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     }, openingCountdown > 0 ? 1000 : 700);
 
     return () => window.clearTimeout(timer);
-  }, [openingCountdown]);
+  }, [openingCountdown, settings.soundEnabled, settings.subjectMode]);
 
   // 核心循环：冻结检查
   useEffect(() => {
@@ -1412,6 +1499,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       }
       
       fireTeamConfetti(team, settings.subjectMode, currentStreak);
+      if (settings.soundEnabled) playCorrectSound(settings.subjectMode, currentStreak);
       if (team === 'blue') {
         setBlueStreak(currentStreak);
         setBlueProblem(
@@ -1440,6 +1528,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
       if (winner) {
         fireVictoryCelebration(winner, settings.subjectMode);
+        if (settings.soundEnabled) playVictorySound(settings.subjectMode);
         setGameState(`${winner}_wins` as any);
         if (settings.subjectMode === 'word') {
           const newRecord: MatchRecord = {
@@ -2245,6 +2334,27 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <div className="mt-2 text-xs font-bold text-slate-500">数字越大，比赛越久。</div>
                     </div>
                   )}
+                </div>
+
+                <div className="p-4 bg-white rounded-3xl border border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <label className="font-black text-slate-800 text-sm flex items-center gap-2">
+                        <Zap size={16} className="text-amber-500 fill-current" />
+                        {t('tugOfWar.enableSounds')}
+                      </label>
+                      <div className="mt-1 text-xs font-bold text-slate-500 leading-relaxed">
+                        {t('tugOfWar.enableSoundsDesc')}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSettings({...settings, soundEnabled: !settings.soundEnabled})}
+                      className={`w-12 h-7 rounded-full transition-all relative shrink-0 ${settings.soundEnabled ? 'bg-amber-400' : 'bg-slate-300'}`}
+                      aria-label={t('tugOfWar.enableSounds')}
+                    >
+                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-sm ${settings.soundEnabled ? 'left-6' : 'left-1'}`} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">

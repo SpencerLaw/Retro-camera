@@ -543,6 +543,8 @@
     "spellPrompt": "Tap letters to spell",
     "wordLetters": "{count} letters",
     "wordInputPlaceholder": "Waiting for spelling",
+    "enableSounds": "Classroom Sounds",
+    "enableSoundsDesc": "Play short sounds for correct answers, streaks, and wins.",
     "enablePowerUps": "Enable Power-ups",
     "allowedPowerUps": "Allowed Power-ups",
     "propFreeze": "Freeze 🧊",

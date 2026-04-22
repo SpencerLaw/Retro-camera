@@ -152,6 +152,8 @@
     "spellPrompt": "文字をタップして綴る",
     "wordLetters": "{count} 文字",
     "wordInputPlaceholder": "入力待ち",
+    "enableSounds": "教室サウンド",
+    "enableSoundsDesc": "正解、連続正解、勝利のときに短い効果音を鳴らします。",
     "enablePowerUps": "アイテムを使用",
     "allowedPowerUps": "使用可能なアイテム",
     "propFreeze": "氷結 🧊",

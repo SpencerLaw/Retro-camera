@@ -2060,19 +2060,19 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                               <div className="mt-2">
                                 <input
                                   type="number"
-                                  min="0.3"
+                                  min="0.1"
                                   max="3"
                                   step="0.1"
                                   value={(settings.flashPreviewMs / 1000).toString()}
                                   onChange={(e) => {
                                     const rawSeconds = Number(e.target.value);
-                                    const clampedSeconds = Math.min(3, Math.max(0.3, Number.isFinite(rawSeconds) ? rawSeconds : 0.8));
+                                    const clampedSeconds = Math.min(3, Math.max(0.1, Number.isFinite(rawSeconds) ? rawSeconds : 0.8));
                                     setSettings({...settings, flashPreviewMs: Math.round(clampedSeconds * 1000)});
                                   }}
                                   className="w-full p-2.5 bg-white rounded-xl font-black outline-none border-2 border-transparent focus:border-amber-400 text-sm text-slate-700"
                                 />
                                 <div className="mt-2 text-[11px] font-black leading-relaxed text-amber-700">
-                                  可输入 0.3 到 3 秒。
+                                  可输入 0.1 到 3 秒。
                                 </div>
                               </div>
                             ) : (

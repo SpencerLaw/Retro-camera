@@ -67,10 +67,10 @@ runTest('flash memory duration is configurable with smart default', () => {
   assert.match(source, /<option value="custom">自定义<\/option>/);
   assert.match(source, /type="number"/);
   assert.match(source, /step="0\.1"/);
-  assert.match(source, /min="0\.3"/);
+  assert.match(source, /min="0\.1"/);
   assert.match(source, /max="3"/);
   assert.match(source, /flashPreviewMs: Math\.round\(clampedSeconds \* 1000\)/);
-  assert.match(source, /可输入 0\.3 到 3 秒/);
+  assert.match(source, /可输入 0\.1 到 3 秒/);
 });
 
 runTest('flash memory hides the Chinese prompt after the preview ends', () => {

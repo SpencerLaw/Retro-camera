@@ -9,6 +9,7 @@ import { GroupMakerApp } from './components/GroupMakerApp';
 import BroadcastApp from './broadcast-assistant/BroadcastApp';
 import KiddiePlanApp from './kiddieplan/KiddiePlanApp';
 import { TugOfWarApp } from './components/TugOfWarApp';
+import JuzimiApp from './components/JuzimiApp';
 
 const App: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const App: React.FC = () => {
           <Route path="/kiddie-plan" element={<KiddiePlanApp />} />
           <Route path="/tug-of-war" element={<TugOfWarApp variant="math" />} />
           <Route path="/word-tug-of-war" element={<TugOfWarApp variant="word" />} />
+          <Route path="/juzimi" element={<JuzimiApp />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

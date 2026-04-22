@@ -36,17 +36,24 @@ runTest('word mode rule selector explains spelling tug and memory race in plain 
   assert.doesNotMatch(source, /Target Words/);
 });
 
-runTest('word problems share Chinese hints flash memory and cloze slot helpers across both modes', () => {
+runTest('word problems share Chinese hints and apply the teacher selected helper mode across both modes', () => {
+  assert.match(source, /type WordPlayMode = 'shuffle' \| 'flash' \| 'cloze' \| 'edge_hint'/);
+  assert.match(source, /wordPlayMode\?: WordPlayMode/);
+  assert.match(source, /本局单词玩法/);
+  assert.match(source, /普通拼词/);
+  assert.match(source, /闪现记忆/);
+  assert.match(source, /长词完形/);
+  assert.match(source, /首尾提示/);
   assert.match(source, /isWordPreviewActive/);
   assert.match(source, /prepareWordProblem/);
-  assert.match(source, /previewUntil: Date\.now\(\) \+ \(problem\.previewMs \?\? 2000\)/);
+  assert.match(source, /if \(!problem\.previewMs\) return problem/);
   assert.match(source, /buildWordAnswerAttempt/);
   assert.match(source, /fixedLetterIndices/);
-  assert.match(source, /闪现记忆/);
   assert.match(source, /记住英文/);
   assert.match(source, /2 秒后开始拼/);
-  assert.match(source, /nextWordFromPool\(blueWordPoolRef\.current, wordBank, challengePairs\)/);
-  assert.match(source, /nextWordFromPool\(redWordPoolRef\.current, wordBank, challengePairs\)/);
+  assert.match(source, /wordPlayMode: settings\.wordPlayMode \|\| 'shuffle'/);
+  assert.match(source, /nextWordFromPool\(blueWordPoolRef\.current, wordBank, challengePairs, wordProblemOptions\)/);
+  assert.match(source, /nextWordFromPool\(redWordPoolRef\.current, wordBank, challengePairs, wordProblemOptions\)/);
 });
 
 runTest('tug win score uses plain words and is hidden for English challenge mode', () => {

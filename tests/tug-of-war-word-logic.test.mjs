@@ -40,9 +40,10 @@ runTest('createWordProblem builds a clickable-letter spelling problem', () => {
   const problem = createWordProblem([{ text: 'apple', weight: 1 }], () => 0);
 
   assert.equal(problem.answer, 'apple');
-  assert.deepEqual(problem.fixedLetterIndices, [0, 4]);
-  assert.equal(problem.letters.length, 3);
-  assert.deepEqual([...problem.letters].sort(), ['l', 'p', 'p']);
+  assert.deepEqual(problem.fixedLetterIndices, []);
+  assert.equal(problem.previewMs, 0);
+  assert.equal(problem.letters.length, 5);
+  assert.deepEqual([...problem.letters].sort(), ['a', 'e', 'l', 'p', 'p']);
 });
 
 runTest('parseBilingualWordListText extracts Chinese prompts with English answers', () => {
@@ -62,9 +63,10 @@ runTest('createBilingualChallengeProblem shows Chinese and builds clickable Engl
   assert.equal(problem.mode, 'challenge');
   assert.equal(problem.prompt, '苹果');
   assert.equal(problem.answer, 'apple');
-  assert.deepEqual(problem.fixedLetterIndices, [0, 4]);
-  assert.equal(problem.letters.length, 3);
-  assert.deepEqual([...problem.letters].sort(), ['l', 'p', 'p']);
+  assert.deepEqual(problem.fixedLetterIndices, []);
+  assert.equal(problem.previewMs, 0);
+  assert.equal(problem.letters.length, 5);
+  assert.deepEqual([...problem.letters].sort(), ['a', 'e', 'l', 'p', 'p']);
 });
 
 runTest('isBilingualChallengeAnswerCorrect ignores English case and separators', () => {
@@ -72,7 +74,7 @@ runTest('isBilingualChallengeAnswerCorrect ignores English case and separators',
   assert.equal(isBilingualChallengeAnswerCorrect('ice cram', 'ICECREAM'), false);
 });
 
-runTest('spelling problems reuse bilingual Chinese prompts and flash memory metadata', () => {
+runTest('spelling problems reuse bilingual Chinese prompts without forcing a helper mode', () => {
   const problem = createWordProblem(
     [{ text: 'pear', weight: 1 }],
     () => 0,
@@ -80,20 +82,51 @@ runTest('spelling problems reuse bilingual Chinese prompts and flash memory meta
   );
 
   assert.equal(problem.prompt, '梨');
-  assert.equal(problem.previewMs, 2000);
-  assert.deepEqual(problem.fixedLetterIndices, [0, 3]);
+  assert.equal(problem.previewMs, 0);
+  assert.deepEqual(problem.fixedLetterIndices, []);
   assert.equal(problem.isCloze, false);
-  assert.deepEqual([...problem.letters].sort(), ['a', 'e']);
+  assert.deepEqual([...problem.letters].sort(), ['a', 'e', 'p', 'r']);
 });
 
-runTest('long word problems automatically become cloze with only missing letters and two distractors', () => {
-  const problem = createBilingualChallengeProblem({ chinese: '大象', english: 'elephant' }, () => 0);
+runTest('flash memory mode previews the whole word but still asks for all letters', () => {
+  const problem = createBilingualChallengeProblem(
+    { chinese: '香蕉', english: 'banana' },
+    () => 0,
+    { wordPlayMode: 'flash' },
+  );
+
+  assert.equal(problem.previewMs, 2000);
+  assert.deepEqual(problem.fixedLetterIndices, []);
+  assert.equal(problem.isCloze, false);
+  assert.deepEqual([...problem.letters].sort(), ['a', 'a', 'a', 'b', 'n', 'n']);
+});
+
+runTest('edge hint mode only fixes the first and last letters', () => {
+  const problem = createWordProblem(
+    [{ text: 'strawberry', weight: 1 }],
+    () => 0,
+    [],
+    { wordPlayMode: 'edge_hint' },
+  );
+
+  assert.deepEqual(problem.fixedLetterIndices, [0, 9]);
+  assert.equal(problem.previewMs, 0);
+  assert.equal(problem.isCloze, false);
+  assert.equal(problem.letters.length, 8);
+});
+
+runTest('cloze mode automatically downgrades long words with only missing letters and two distractors', () => {
+  const problem = createBilingualChallengeProblem(
+    { chinese: '大象', english: 'elephant' },
+    () => 0,
+    { wordPlayMode: 'cloze' },
+  );
   const fixed = new Set(problem.fixedLetterIndices);
   const missingLetters = problem.answer.split('').filter((_, index) => !fixed.has(index));
 
   assert.equal(problem.mode, 'challenge');
   assert.equal(problem.prompt, '大象');
-  assert.equal(problem.previewMs, 2000);
+  assert.equal(problem.previewMs, 0);
   assert.equal(problem.isCloze, true);
   assert.equal(fixed.has(0), true);
   assert.equal(fixed.has(problem.answer.length - 1), true);
@@ -102,6 +135,19 @@ runTest('long word problems automatically become cloze with only missing letters
   for (const letter of missingLetters) {
     assert.ok(problem.letters.includes(letter));
   }
+});
+
+runTest('cloze mode leaves short words as normal shuffled spelling', () => {
+  const problem = createWordProblem(
+    [{ text: 'pear', weight: 1 }],
+    () => 0,
+    [],
+    { wordPlayMode: 'cloze' },
+  );
+
+  assert.deepEqual(problem.fixedLetterIndices, []);
+  assert.equal(problem.isCloze, false);
+  assert.deepEqual([...problem.letters].sort(), ['a', 'e', 'p', 'r']);
 });
 
 runTest('buildWordAnswerAttempt merges fixed slot hints with clicked letters', () => {

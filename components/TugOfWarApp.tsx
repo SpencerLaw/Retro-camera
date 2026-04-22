@@ -26,6 +26,7 @@ type SubjectMode = 'math' | 'word';
 type TugOfWarVariant = SubjectMode;
 type GameMode = 'classic' | 'target';
 type PowerUpType = 'freeze' | 'double' | 'shield';
+type WordPlayMode = 'shuffle' | 'flash' | 'cloze' | 'edge_hint';
 
 interface TugOfWarProductConfig {
   subjectMode: SubjectMode;
@@ -42,6 +43,7 @@ interface GameSettings {
   winScore: number;
   gameRule?: 'tug_of_war' | 'speedrun';
   speedrunTarget?: number;
+  wordPlayMode?: WordPlayMode;
   gameMode: GameMode;
   powerUpsEnabled: boolean;
   allowedPowerUps: PowerUpType[];
@@ -66,6 +68,7 @@ interface WordProblem {
   previewMs?: number;
   previewUntil?: number;
   isCloze?: boolean;
+  wordPlayMode?: WordPlayMode;
 }
 
 export interface WeightedWord {
@@ -391,9 +394,10 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
 
 const prepareWordProblem = (problem: Problem | null): Problem | null => {
   if (!problem || problem.type !== 'word') return problem;
+  if (!problem.previewMs) return problem;
   return {
     ...problem,
-    previewUntil: Date.now() + (problem.previewMs ?? 2000),
+    previewUntil: Date.now() + problem.previewMs,
   };
 };
 
@@ -869,6 +873,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     winScore: 10,
     gameRule: 'tug_of_war',
     speedrunTarget: 10,
+    wordPlayMode: 'shuffle',
     gameMode: 'classic',
     powerUpsEnabled: true,
     allowedPowerUps: ['freeze', 'double', 'shield'],
@@ -1078,16 +1083,17 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
     // 英文模式：初始化蓝红队各自的洗牌词池
     if (settings.subjectMode === 'word') {
+      const wordProblemOptions = { wordPlayMode: settings.wordPlayMode || 'shuffle' };
       if (settings.gameRule === 'speedrun') {
         blueChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
         redChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
-        setBlueProblem(prepareWordProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null));
-        setRedProblem(prepareWordProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null));
+        setBlueProblem(prepareWordProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs, wordProblemOptions) as Problem | null));
+        setRedProblem(prepareWordProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs, wordProblemOptions) as Problem | null));
       } else {
         blueWordPoolRef.current = buildWordPool(wordBank);
         redWordPoolRef.current = buildWordPool(wordBank);
-        setBlueProblem(prepareWordProblem(nextWordFromPool(blueWordPoolRef.current, wordBank, challengePairs) as Problem | null));
-        setRedProblem(prepareWordProblem(nextWordFromPool(redWordPoolRef.current, wordBank, challengePairs) as Problem | null));
+        setBlueProblem(prepareWordProblem(nextWordFromPool(blueWordPoolRef.current, wordBank, challengePairs, wordProblemOptions) as Problem | null));
+        setRedProblem(prepareWordProblem(nextWordFromPool(redWordPoolRef.current, wordBank, challengePairs, wordProblemOptions) as Problem | null));
       }
     } else {
       setBlueProblem(generateProblem(settings));
@@ -1230,6 +1236,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
       // 更新状态与判定胜利
       let winner: 'blue' | 'red' | null = null;
+      const wordProblemOptions = { wordPlayMode: settings.wordPlayMode || 'shuffle' };
       if (settings.gameRule === 'speedrun') {
         const bp = team === 'blue' ? blueProgress + pullPower : blueProgress;
         const rp = team === 'red' ? redProgress + pullPower : redProgress;
@@ -1249,9 +1256,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         setBlueStreak(currentStreak);
         setBlueProblem(
           settings.subjectMode === 'word' && settings.gameRule === 'speedrun'
-            ? prepareWordProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null)
+            ? prepareWordProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs, wordProblemOptions) as Problem | null)
             : settings.subjectMode === 'word'
-            ? prepareWordProblem(nextWordFromPool(blueWordPoolRef.current, wordBank, challengePairs) as Problem | null)
+            ? prepareWordProblem(nextWordFromPool(blueWordPoolRef.current, wordBank, challengePairs, wordProblemOptions) as Problem | null)
             : generateProblem(settings)
         );
         clearTeamInput('blue');
@@ -1261,9 +1268,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         setRedStreak(currentStreak);
         setRedProblem(
           settings.subjectMode === 'word' && settings.gameRule === 'speedrun'
-            ? prepareWordProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null)
+            ? prepareWordProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs, wordProblemOptions) as Problem | null)
             : settings.subjectMode === 'word'
-            ? prepareWordProblem(nextWordFromPool(redWordPoolRef.current, wordBank, challengePairs) as Problem | null)
+            ? prepareWordProblem(nextWordFromPool(redWordPoolRef.current, wordBank, challengePairs, wordProblemOptions) as Problem | null)
             : generateProblem(settings)
         );
         clearTeamInput('red');
@@ -1885,16 +1892,36 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         <button onClick={() => setSettings({...settings, gameRule: 'tug_of_war'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'tug_of_war' || !settings.gameRule ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>拼词拔河</button>
                         <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>记忆竞速</button>
                       </div>
+                      <div className="mt-3">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">本局单词玩法</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {([
+                            { key: 'shuffle', title: '普通拼词', desc: '只打乱字母，学生自己拼。' },
+                            { key: 'flash', title: '闪现记忆', desc: '先闪现中文和英文 2 秒，再开始拼。' },
+                            { key: 'cloze', title: '长词完形', desc: '超过 5 个字母自动留空少数字母。' },
+                            { key: 'edge_hint', title: '首尾提示', desc: '固定首字母和尾字母。' },
+                          ] as { key: WordPlayMode; title: string; desc: string }[]).map((mode) => (
+                            <button
+                              key={mode.key}
+                              onClick={() => setSettings({...settings, wordPlayMode: mode.key})}
+                              className={`min-h-[74px] rounded-xl border-2 p-2 text-left transition-all ${settings.wordPlayMode === mode.key || (!settings.wordPlayMode && mode.key === 'shuffle') ? 'border-blue-500 bg-blue-600 text-white shadow-md' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200'}`}
+                            >
+                              <div className="text-sm font-black leading-tight">{mode.title}</div>
+                              <div className={`mt-1 text-[11px] font-bold leading-snug ${settings.wordPlayMode === mode.key || (!settings.wordPlayMode && mode.key === 'shuffle') ? 'text-blue-50' : 'text-slate-500'}`}>{mode.desc}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                       <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-3 text-xs font-bold leading-relaxed text-slate-600">
                         <div className="mb-2 font-black text-blue-700">英文单词玩法说明</div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
                             <div className="font-black text-slate-800">拼词拔河：</div>
-                            <div>导入英文或中英词表，学生先看 2 秒中文和英文，再点击字母拼出答案；答对就把绳子往自己队拉，先拉到设定格数就赢。</div>
+                            <div>导入英文或中英词表，学生点击字母拼出答案；答对就把绳子往自己队拉，先拉到设定格数就赢。</div>
                           </div>
                           <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
                             <div className="font-black text-slate-800">记忆竞速：</div>
-                            <div>导入中英词表，每题先闪现中文和英文，2 秒后变成空槽；学生点击英文字母拼英文，先做完设定题数的一队赢，用时越短越厉害。</div>
+                            <div>导入中英词表，学生看中文提示并点击英文字母拼英文；先做完设定题数的一队赢，用时越短越厉害。</div>
                           </div>
                         </div>
                         <div className="mt-2 text-[11px] font-black text-blue-500">以上说明只针对英文单词模式。</div>

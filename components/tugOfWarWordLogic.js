@@ -75,18 +75,24 @@ const findChinesePromptForAnswer = (answer, bilingualPairs = []) => {
   return pair ? normalizeChinesePrompt(pair.chinese) : '';
 };
 
-const getFixedLetterIndices = (answer) => {
+const getFixedLetterIndices = (answer, wordPlayMode = 'shuffle') => {
   const letters = normalizeWordAnswer(answer).split('');
   if (letters.length <= 2) return [];
 
-  const fixed = new Set([0, letters.length - 1]);
-  if (letters.length > 5) {
-    letters.forEach((_, index) => {
-      if (index !== 0 && index !== letters.length - 1 && index % 3 !== 1) {
-        fixed.add(index);
-      }
-    });
+  if (wordPlayMode === 'edge_hint') {
+    return [0, letters.length - 1];
   }
+
+  if (wordPlayMode !== 'cloze' || letters.length <= 5) {
+    return [];
+  }
+
+  const fixed = new Set([0, letters.length - 1]);
+  letters.forEach((_, index) => {
+    if (index !== 0 && index !== letters.length - 1 && index % 3 !== 1) {
+      fixed.add(index);
+    }
+  });
 
   return [...fixed].sort((a, b) => a - b);
 };
@@ -108,12 +114,12 @@ const getDistractorLetters = (answer, count, random = Math.random) => {
   return distractors;
 };
 
-const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', random = Math.random }) => {
+const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', random = Math.random, wordPlayMode = 'shuffle' }) => {
   const cleanAnswer = normalizeWordAnswer(answer);
-  const fixedLetterIndices = getFixedLetterIndices(cleanAnswer);
+  const fixedLetterIndices = getFixedLetterIndices(cleanAnswer, wordPlayMode);
   const fixed = new Set(fixedLetterIndices);
   const missingLetters = cleanAnswer.split('').filter((_, index) => !fixed.has(index));
-  const isCloze = cleanAnswer.length > 5;
+  const isCloze = wordPlayMode === 'cloze' && cleanAnswer.length > 5;
   const letterChoices = isCloze
     ? [...missingLetters, ...getDistractorLetters(cleanAnswer, 2, random)]
     : missingLetters;
@@ -125,8 +131,9 @@ const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', rando
     answer: cleanAnswer,
     letters: shuffleLetters(letterChoices.join(''), random),
     fixedLetterIndices,
-    previewMs: 2000,
+    previewMs: wordPlayMode === 'flash' ? 2000 : 0,
     isCloze,
+    wordPlayMode,
   };
 };
 
@@ -145,7 +152,7 @@ export const buildWordAnswerAttempt = (problem, input) => {
     .join('');
 };
 
-export const createWordProblem = (wordBank, random = Math.random, bilingualPairs = []) => {
+export const createWordProblem = (wordBank, random = Math.random, bilingualPairs = [], options = {}) => {
   const cleanBank = Array.from(
     new Set((wordBank ?? []).map(item => {
       const isObj = typeof item === 'object' && item !== null;
@@ -162,10 +169,11 @@ export const createWordProblem = (wordBank, random = Math.random, bilingualPairs
     prompt: findChinesePromptForAnswer(answer, bilingualPairs),
     mode: 'spelling',
     random,
+    wordPlayMode: options.wordPlayMode || 'shuffle',
   });
 };
 
-export const createBilingualChallengeProblem = (pair, random = Math.random) => {
+export const createBilingualChallengeProblem = (pair, random = Math.random, options = {}) => {
   if (!pair) return null;
 
   const answer = normalizeWordAnswer(pair.english);
@@ -177,6 +185,7 @@ export const createBilingualChallengeProblem = (pair, random = Math.random) => {
     prompt,
     mode: 'challenge',
     random,
+    wordPlayMode: options.wordPlayMode || 'shuffle',
   });
 };
 
@@ -202,7 +211,7 @@ export const buildBilingualChallengePool = (pairs, random = Math.random) => {
   return pool;
 };
 
-export const nextBilingualChallengeFromPool = (pool, pairs) => {
+export const nextBilingualChallengeFromPool = (pool, pairs, options = {}) => {
   if (pool.length === 0) {
     const newPool = buildBilingualChallengePool(pairs);
     pool.push(...newPool);
@@ -210,7 +219,7 @@ export const nextBilingualChallengeFromPool = (pool, pairs) => {
 
   if (pool.length === 0) return null;
 
-  return createBilingualChallengeProblem(pool.shift());
+  return createBilingualChallengeProblem(pool.shift(), Math.random, options);
 };
 
 /**
@@ -248,7 +257,7 @@ export const buildWordPool = (wordBank, random = Math.random) => {
  * - 当池为空时自动用 wordBank 重建并重新洗牌（进入下一轮）
  * - 返回 WordProblem 对象，或 null（词库为空时）
  */
-export const nextWordFromPool = (pool, wordBank, bilingualPairs = []) => {
+export const nextWordFromPool = (pool, wordBank, bilingualPairs = [], options = {}) => {
   if (pool.length === 0) {
     const newPool = buildWordPool(wordBank);
     pool.push(...newPool);
@@ -261,5 +270,6 @@ export const nextWordFromPool = (pool, wordBank, bilingualPairs = []) => {
     answer,
     prompt: findChinesePromptForAnswer(answer, bilingualPairs),
     mode: 'spelling',
+    wordPlayMode: options.wordPlayMode || 'shuffle',
   });
 };

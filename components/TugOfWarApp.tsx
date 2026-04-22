@@ -280,37 +280,38 @@ const FrozenSquareOverlay = () => (
 const OpeningCountdownOverlay = ({ openingCountdown, subjectMode }: { openingCountdown: number; subjectMode: SubjectMode }) => {
   const isStart = openingCountdown === 0;
   const accent = subjectMode === 'word' ? '#14B8A6' : '#3B82F6';
-  const accentSoft = subjectMode === 'word' ? 'rgba(20,184,166,0.22)' : 'rgba(59,130,246,0.24)';
-  const accentStrong = subjectMode === 'word' ? 'rgba(45,212,191,0.95)' : 'rgba(96,165,250,0.95)';
+  const accentSoft = subjectMode === 'word' ? 'rgba(20,184,166,0.18)' : 'rgba(59,130,246,0.18)';
+  const accentStrong = subjectMode === 'word' ? 'rgba(13,148,136,0.95)' : 'rgba(37,99,235,0.95)';
+  const ink = subjectMode === 'word' ? '#0F766E' : '#1D4ED8';
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-[70] flex items-center justify-center overflow-hidden bg-slate-950/[0.96] backdrop-blur-xl text-white px-5"
+      className="absolute inset-0 z-[70] flex items-center justify-center overflow-hidden bg-white/92 backdrop-blur-xl px-5"
     >
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `radial-gradient(circle at 50% 35%, ${accentSoft}, transparent 36%), linear-gradient(135deg, rgba(255,255,255,0.08), transparent 38%, rgba(255,255,255,0.05) 72%, transparent)`,
+          backgroundImage: `radial-gradient(circle at 50% 34%, ${accentSoft}, transparent 34%), radial-gradient(circle at 14% 16%, rgba(148,163,184,0.18), transparent 26%), radial-gradient(circle at 88% 84%, rgba(251,191,36,0.18), transparent 24%), linear-gradient(135deg, rgba(248,250,252,0.98), rgba(255,255,255,0.9))`,
         }}
       />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
       <motion.div
-        className="absolute w-[62vmin] h-[62vmin] min-w-[260px] min-h-[260px] rounded-full border border-white/20"
+        className="absolute w-[62vmin] h-[62vmin] min-w-[260px] min-h-[260px] rounded-full border border-slate-200/80"
         animate={{ scale: [0.88, 1.08, 0.88], rotate: [0, 18, 0] }}
         transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
       />
       <motion.div
         className="absolute w-[42vmin] h-[42vmin] min-w-[190px] min-h-[190px] rounded-full"
-        style={{ boxShadow: `0 0 90px ${accentSoft}, inset 0 0 70px rgba(255,255,255,0.08)` }}
+        style={{ boxShadow: `0 0 95px ${accentSoft}, inset 0 0 70px rgba(255,255,255,0.9)` }}
         animate={{ opacity: [0.5, 0.9, 0.5], scale: [1, 1.08, 1] }}
         transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
       />
       <motion.div
-        className="relative w-full max-w-xl rounded-[2rem] border border-white/20 bg-slate-950/90 shadow-[0_44px_140px_rgba(0,0,0,0.62)] p-7 md:p-10 text-center overflow-hidden"
-        style={{ boxShadow: `0 44px 140px rgba(0,0,0,0.62), 0 0 0 1px rgba(255,255,255,0.06), 0 0 80px ${accentSoft}` }}
+        className="relative w-full max-w-xl rounded-[2rem] border border-slate-200 bg-white/96 shadow-[0_34px_90px_rgba(15,23,42,0.18)] p-7 md:p-10 text-center overflow-hidden"
+        style={{ boxShadow: `0 34px 90px rgba(15,23,42,0.18), 0 0 0 1px rgba(255,255,255,0.9), 0 0 80px ${accentSoft}` }}
         initial={{ y: 18, scale: 0.96 }}
         animate={{ y: 0, scale: 1 }}
       >
@@ -318,10 +319,10 @@ const OpeningCountdownOverlay = ({ openingCountdown, subjectMode }: { openingCou
           className="absolute inset-x-0 top-0 h-1.5"
           style={{ background: `linear-gradient(90deg, transparent, ${accentStrong}, white, ${accentStrong}, transparent)` }}
         />
-        <div className="relative inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm md:text-base font-black text-white shadow-lg mb-5">
+        <div className="relative inline-flex items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm md:text-base font-black text-slate-700 shadow-sm mb-5">
           5 秒倒计时
         </div>
-        <div className="text-2xl md:text-4xl font-black text-white mb-4 drop-shadow-[0_3px_16px_rgba(0,0,0,0.55)]">准备开始</div>
+        <div className="text-2xl md:text-4xl font-black text-slate-900 mb-4">准备开始</div>
         <AnimatePresence mode="wait">
           <motion.div
             key={openingCountdown}
@@ -329,16 +330,17 @@ const OpeningCountdownOverlay = ({ openingCountdown, subjectMode }: { openingCou
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 1.32, opacity: 0, y: -18 }}
             transition={{ type: 'spring', stiffness: 280, damping: 18 }}
-            className={`${isStart ? 'text-[clamp(4.5rem,13vw,8rem)]' : 'text-[clamp(7rem,21vw,14rem)]'} font-black leading-none text-white`}
+            className={`${isStart ? 'text-[clamp(4.5rem,13vw,8rem)]' : 'text-[clamp(7rem,21vw,14rem)]'} font-black leading-none`}
             style={{
-              textShadow: `0 5px 0 rgba(15,23,42,0.8), 0 0 42px ${accent}, 0 0 92px ${accent}`,
-              WebkitTextStroke: isStart ? '2px rgba(15,23,42,0.35)' : '3px rgba(15,23,42,0.42)',
+              color: ink,
+              textShadow: `0 5px 0 rgba(255,255,255,0.95), 0 12px 28px ${accentSoft}, 0 0 58px ${accentSoft}`,
+              WebkitTextStroke: isStart ? '1px rgba(15,23,42,0.16)' : '2px rgba(15,23,42,0.18)',
             }}
           >
             {openingCountdown === 0 ? '开始！' : openingCountdown}
           </motion.div>
         </AnimatePresence>
-        <div className="mt-7 text-base md:text-xl font-black text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.6)]">请两队准备，倒计时结束后再答题。</div>
+        <div className="mt-7 text-base md:text-xl font-black text-slate-800">请两队准备，倒计时结束后再答题。</div>
       </motion.div>
     </motion.div>
   );

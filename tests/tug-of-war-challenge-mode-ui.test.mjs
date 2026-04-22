@@ -13,7 +13,7 @@ function runTest(name, fn) {
   }
 }
 
-runTest('challenge mode uses bilingual import with Chinese prompts and letter clicks', () => {
+runTest('memory race mode uses bilingual import with Chinese prompts and letter clicks', () => {
   assert.match(source, /parseBilingualWordListText/);
   assert.match(source, /challengePairs/);
   assert.match(source, /createBilingualChallengeProblem/);
@@ -21,18 +21,32 @@ runTest('challenge mode uses bilingual import with Chinese prompts and letter cl
   assert.doesNotMatch(source, /answerLanguage/);
 });
 
-runTest('word mode rule selector explains both English-only game rules', () => {
+runTest('word mode rule selector explains spelling tug and memory race in plain words', () => {
   assert.match(source, /英文单词玩法说明/);
   assert.match(source, /英文单词怎么玩/);
   assert.match(source, /拼词拔河：/);
-  assert.match(source, /导入英文单词/);
-  assert.match(source, /中英挑战：/);
-  assert.match(source, /只显示中文/);
+  assert.match(source, /导入英文或中英词表/);
+  assert.match(source, /记忆竞速：/);
+  assert.match(source, /先闪现中文和英文/);
   assert.match(source, /挑战做几题/);
   assert.match(source, /做完这个数量就赢，不看拉绳子的分数/);
   assert.match(source, /只针对英文单词模式/);
+  assert.doesNotMatch(source, /中英挑战/);
   assert.doesNotMatch(source, /Game Rule/);
   assert.doesNotMatch(source, /Target Words/);
+});
+
+runTest('word problems share Chinese hints flash memory and cloze slot helpers across both modes', () => {
+  assert.match(source, /isWordPreviewActive/);
+  assert.match(source, /prepareWordProblem/);
+  assert.match(source, /previewUntil: Date\.now\(\) \+ \(problem\.previewMs \?\? 2000\)/);
+  assert.match(source, /buildWordAnswerAttempt/);
+  assert.match(source, /fixedLetterIndices/);
+  assert.match(source, /闪现记忆/);
+  assert.match(source, /记住英文/);
+  assert.match(source, /2 秒后开始拼/);
+  assert.match(source, /nextWordFromPool\(blueWordPoolRef\.current, wordBank, challengePairs\)/);
+  assert.match(source, /nextWordFromPool\(redWordPoolRef\.current, wordBank, challengePairs\)/);
 });
 
 runTest('tug win score uses plain words and is hidden for English challenge mode', () => {

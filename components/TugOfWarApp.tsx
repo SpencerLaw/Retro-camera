@@ -8,6 +8,7 @@ import * as mammoth from 'mammoth';
 import { isTugLicenseVerified, verifyTugLicense } from './TugOfWarLicenseManager';
 import { getTugOfWarProductConfig } from './tugOfWarProductConfig.js';
 import {
+  buildWordAnswerAttempt,
   buildBilingualChallengePool,
   buildWordPool,
   createBilingualChallengeProblem,
@@ -61,6 +62,10 @@ interface WordProblem {
   prompt?: string;
   answer: string;
   letters: string[];
+  fixedLetterIndices?: number[];
+  previewMs?: number;
+  previewUntil?: number;
+  isCloze?: boolean;
 }
 
 export interface WeightedWord {
@@ -302,7 +307,11 @@ const getLetterCols = (count: number) => {
   return 7;
 };
 
-const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team, t, isFrozen }: {
+const getMissingLetterCount = (problem: WordProblem) => (
+  Math.max(0, problem.answer.length - (problem.fixedLetterIndices?.length ?? 0))
+);
+
+const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team, t, isFrozen, isPreviewActive }: {
   problem: WordProblem;
   pickedIndices: number[];
   onPick: (index: number) => void;
@@ -311,8 +320,10 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
   team: 'blue' | 'red';
   t: (key: string) => string;
   isFrozen: boolean;
+  isPreviewActive: boolean;
 }) => {
   const picked = new Set(pickedIndices);
+  const isFilled = pickedIndices.length >= getMissingLetterCount(problem);
   const cols = getLetterCols(problem.letters.length);
 
   // 列数越多，按钮越小
@@ -323,7 +334,7 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
   return (
     <div className="relative w-full max-w-[380px]">
       {/* 整个键盘区（字母 + 操作）统一控制冻结状态 */}
-      <div className={`flex flex-col gap-2 transition-all ${isFrozen ? 'opacity-20 grayscale pointer-events-none blur-sm' : ''}`}>
+      <div className={`flex flex-col gap-2 transition-all ${isFrozen || isPreviewActive ? 'opacity-20 grayscale pointer-events-none blur-sm' : ''}`}>
 
         {/* 字母按钮区：动态列数，使用 inline style 避免 Tailwind purge 问题 */}
         <div
@@ -331,12 +342,12 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
           style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         >
           {problem.letters.map((letter, index) => {
-            const disabled = picked.has(index);
+            const disabled = picked.has(index) || isFilled;
             return (
               <button
                 key={`${letter}-${index}`}
                 onClick={() => onPick(index)}
-                disabled={disabled}
+                disabled={disabled || isPreviewActive}
                 className={`${btnH} rounded-xl ${btnText} font-black shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none transition-all ${
                   disabled
                     ? 'bg-slate-100 text-slate-300 shadow-none'
@@ -366,9 +377,106 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
         </div>
       </div>
 
+      {isPreviewActive && !isFrozen && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/75 backdrop-blur-sm border-2 border-amber-200 text-amber-700 text-sm md:text-base font-black text-center px-3">
+          记住英文，2 秒后开始拼
+        </div>
+      )}
+
       {/* 冻结遮罩：absolute inset-0 覆盖整个键盘（含字母区+操作区），与数学键盘一致 */}
       {isFrozen && <FrozenSquareOverlay />}
     </div>
+  );
+};
+
+const prepareWordProblem = (problem: Problem | null): Problem | null => {
+  if (!problem || problem.type !== 'word') return problem;
+  return {
+    ...problem,
+    previewUntil: Date.now() + (problem.previewMs ?? 2000),
+  };
+};
+
+const isWordPreviewActive = (problem?: WordProblem | null) => (
+  Boolean(problem?.previewUntil && Date.now() < problem.previewUntil)
+);
+
+const getWordSlotDisplay = (problem: WordProblem, input: string, index: number, isPreviewActive: boolean) => {
+  if (isPreviewActive) return problem.answer[index] || '';
+
+  const fixedLetterIndices = new Set(problem.fixedLetterIndices ?? []);
+  if (fixedLetterIndices.has(index)) return problem.answer[index] || '';
+
+  const missingIndex = problem.answer
+    .slice(0, index)
+    .split('')
+    .filter((_, slotIndex) => !fixedLetterIndices.has(slotIndex))
+    .length;
+
+  return input[missingIndex] || '';
+};
+
+const WordProblemCard = ({ problem, input, team, t }: {
+  problem: WordProblem;
+  input: string;
+  team: 'blue' | 'red';
+  t: (key: string, params?: Record<string, any>) => string;
+}) => {
+  const previewActive = isWordPreviewActive(problem);
+  const isBlue = team === 'blue';
+  const softClass = isBlue ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-red-50 border-red-100 text-red-700';
+  const slotClass = isBlue ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-red-50 border-red-100 text-red-700';
+  const previewClass = isBlue ? 'from-blue-600 to-cyan-500' : 'from-red-600 to-orange-500';
+
+  return (
+    <>
+      <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 min-h-3">
+        {problem.prompt ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: problem.answer.length })}
+        {problem.isCloze && <span className="ml-1 text-amber-500">· 完形提示</span>}
+      </div>
+      {problem.prompt && (
+        <div className={`min-h-[48px] mb-2 rounded-xl border-2 px-3 py-2 flex items-center justify-center text-[22px] md:text-[28px] font-black leading-tight break-words ${softClass}`}>
+          {problem.prompt}
+        </div>
+      )}
+      <div className="relative min-h-[128px]">
+        <AnimatePresence>
+          {previewActive && (
+            <motion.div
+              key={`${team}-word-preview-${problem.answer}`}
+              initial={{ opacity: 0, scale: 0.9, rotate: -1 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              exit={{ opacity: 0, scale: 1.16, rotate: 3 }}
+              transition={{ duration: 0.28, ease: 'easeOut' }}
+              className={`absolute inset-0 z-10 rounded-2xl bg-gradient-to-br ${previewClass} text-white shadow-2xl flex flex-col items-center justify-center px-3 text-center overflow-hidden`}
+            >
+              <div className="text-[11px] md:text-xs font-black opacity-85 mb-1">闪现记忆</div>
+              {problem.prompt && <div className="text-[20px] md:text-[24px] font-black leading-tight break-words">{problem.prompt}</div>}
+              <motion.div
+                initial={{ letterSpacing: '0.08em' }}
+                animate={{ letterSpacing: ['0.08em', '0.16em', '0.08em'] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: 'easeInOut' }}
+                className="mt-1 text-[28px] md:text-[34px] font-black leading-none break-words"
+              >
+                {problem.answer}
+              </motion.div>
+              <div className="mt-2 text-[11px] md:text-xs font-black opacity-90">记住英文，2 秒后开始拼</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="min-h-[58px] flex flex-wrap items-center justify-center gap-1 mb-2">
+          {problem.answer.split('').map((_, index) => (
+            <div key={`${team}-slot-${index}`} className={`w-7 md:w-8 h-9 md:h-10 rounded-lg border-2 flex items-center justify-center text-[18px] md:text-[22px] font-black ${slotClass}`}>
+              {getWordSlotDisplay(problem, input, index, previewActive)}
+            </div>
+          ))}
+        </div>
+        <div className="h-[34px] w-full bg-slate-50 rounded-xl text-[16px] md:text-[18px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
+          {buildWordAnswerAttempt(problem, input) || t('tugOfWar.wordInputPlaceholder')}
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -944,6 +1052,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     const problem = team === 'blue' ? blueProblem : redProblem;
     const picked = team === 'blue' ? bluePickedLetterIndices : redPickedLetterIndices;
     if (!problem || problem.type !== 'word' || picked.includes(index)) return;
+    if (isWordPreviewActive(problem)) return;
+    if (picked.length >= getMissingLetterCount(problem)) return;
 
     if (team === 'blue') {
       setBluePickedLetterIndices(prev => [...prev, index]);
@@ -962,7 +1072,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       return;
     }
     if (settings.subjectMode === 'word' && settings.gameRule === 'speedrun' && challengePairs.length === 0) {
-      setWordImportMessage('挑战模式需要导入“中文 + 英文”的双语词表，例如：苹果 apple');
+      setWordImportMessage('记忆竞速需要导入“中文 + 英文”的双语词表，例如：苹果 apple');
       return;
     }
 
@@ -971,13 +1081,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       if (settings.gameRule === 'speedrun') {
         blueChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
         redChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
-        setBlueProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null);
-        setRedProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null);
+        setBlueProblem(prepareWordProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null));
+        setRedProblem(prepareWordProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null));
       } else {
         blueWordPoolRef.current = buildWordPool(wordBank);
         redWordPoolRef.current = buildWordPool(wordBank);
-        setBlueProblem(nextWordFromPool(blueWordPoolRef.current, wordBank) as Problem | null);
-        setRedProblem(nextWordFromPool(redWordPoolRef.current, wordBank) as Problem | null);
+        setBlueProblem(prepareWordProblem(nextWordFromPool(blueWordPoolRef.current, wordBank, challengePairs) as Problem | null));
+        setRedProblem(prepareWordProblem(nextWordFromPool(redWordPoolRef.current, wordBank, challengePairs) as Problem | null));
       }
     } else {
       setBlueProblem(generateProblem(settings));
@@ -1058,9 +1168,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     let questionKey = '';
     
     if (problem.type === 'word') {
+      const wordAttempt = buildWordAnswerAttempt(problem, input);
       isCorrect = problem.mode === 'challenge'
-        ? isBilingualChallengeAnswerCorrect(input, problem.answer)
-        : isWordAnswerCorrect(input, problem.answer);
+        ? isBilingualChallengeAnswerCorrect(wordAttempt, problem.answer)
+        : isWordAnswerCorrect(wordAttempt, problem.answer);
       questionKey = problem.mode === 'challenge' && problem.prompt
         ? `${problem.prompt} -> ${problem.answer}`
         : problem.answer;
@@ -1138,9 +1249,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         setBlueStreak(currentStreak);
         setBlueProblem(
           settings.subjectMode === 'word' && settings.gameRule === 'speedrun'
-            ? nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null
+            ? prepareWordProblem(nextBilingualChallengeFromPool(blueChallengePoolRef.current, challengePairs) as Problem | null)
             : settings.subjectMode === 'word'
-            ? nextWordFromPool(blueWordPoolRef.current, wordBank) as Problem | null
+            ? prepareWordProblem(nextWordFromPool(blueWordPoolRef.current, wordBank, challengePairs) as Problem | null)
             : generateProblem(settings)
         );
         clearTeamInput('blue');
@@ -1150,9 +1261,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
         setRedStreak(currentStreak);
         setRedProblem(
           settings.subjectMode === 'word' && settings.gameRule === 'speedrun'
-            ? nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null
+            ? prepareWordProblem(nextBilingualChallengeFromPool(redChallengePoolRef.current, challengePairs) as Problem | null)
             : settings.subjectMode === 'word'
-            ? nextWordFromPool(redWordPoolRef.current, wordBank) as Problem | null
+            ? prepareWordProblem(nextWordFromPool(redWordPoolRef.current, wordBank, challengePairs) as Problem | null)
             : generateProblem(settings)
         );
         clearTeamInput('red');
@@ -1188,11 +1299,13 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
   const handleBlueSubmit = useCallback(() => {
     if (gameState !== 'playing' || !blueProblem || blueFrozenUntil > Date.now()) return;
+    if (blueProblem.type === 'word' && isWordPreviewActive(blueProblem)) return;
     processAnswer('blue', blueInput, blueProblem);
   }, [blueInput, blueProblem, score, gameState, settings, wordBank, challengePairs, blueFrozenUntil, blueDoubleActive, redShieldActive, blueStreak]);
 
   const handleRedSubmit = useCallback(() => {
     if (gameState !== 'playing' || !redProblem || redFrozenUntil > Date.now()) return;
+    if (redProblem.type === 'word' && isWordPreviewActive(redProblem)) return;
     processAnswer('red', redInput, redProblem);
   }, [redInput, redProblem, score, gameState, settings, wordBank, challengePairs, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
 
@@ -1697,7 +1810,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         </div>
                         <p className="text-xs font-bold text-slate-500 mt-1 leading-relaxed">{t('tugOfWar.wordImportHint')}</p>
                         <p className="text-xs font-bold text-blue-500 mt-1 leading-relaxed">
-                          挑战模式请导入双语行：苹果 apple、banana 香蕉。课堂上只显示中文，学生点击字母拼英文。
+                          记忆竞速请导入双语行：苹果 apple、banana 香蕉。拼词拔河也会显示中文提示。
                         </p>
                       </div>
                     </div>
@@ -1770,18 +1883,18 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">英文单词怎么玩</label>
                       <div className="grid grid-cols-2 gap-2">
                         <button onClick={() => setSettings({...settings, gameRule: 'tug_of_war'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'tug_of_war' || !settings.gameRule ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>拼词拔河</button>
-                        <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>中英挑战</button>
+                        <button onClick={() => setSettings({...settings, gameRule: 'speedrun'})} className={`py-2 rounded-xl text-xs font-bold transition-all ${settings.gameRule === 'speedrun' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>记忆竞速</button>
                       </div>
                       <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-3 text-xs font-bold leading-relaxed text-slate-600">
                         <div className="mb-2 font-black text-blue-700">英文单词玩法说明</div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
                             <div className="font-black text-slate-800">拼词拔河：</div>
-                            <div>导入英文单词，学生点击字母拼出答案；答对就把绳子往自己队拉，先拉到设定格数就赢。</div>
+                            <div>导入英文或中英词表，学生先看 2 秒中文和英文，再点击字母拼出答案；答对就把绳子往自己队拉，先拉到设定格数就赢。</div>
                           </div>
                           <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
-                            <div className="font-black text-slate-800">中英挑战：</div>
-                            <div>导入中英词表，课堂只显示中文，学生点击英文字母拼英文；先做完设定题数的一队赢，用时越短越厉害。</div>
+                            <div className="font-black text-slate-800">记忆竞速：</div>
+                            <div>导入中英词表，每题先闪现中文和英文，2 秒后变成空槽；学生点击英文字母拼英文，先做完设定题数的一队赢，用时越短越厉害。</div>
                           </div>
                         </div>
                         <div className="mt-2 text-[11px] font-black text-blue-500">以上说明只针对英文单词模式。</div>
@@ -1798,7 +1911,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <span className="font-black text-blue-600 w-8 text-center text-lg">{settings.speedrunTarget || 10}</span>
                     </div>
                     <div className="mt-2 text-xs font-black text-blue-700 bg-white/70 rounded-xl px-3 py-2">
-                      当前双语挑战配对：{challengePairs.length} 组。做完这个数量就赢，不看拉绳子的分数；耗时越短越强。
+                      当前记忆竞速配对：{challengePairs.length} 组。做完这个数量就赢，不看拉绳子的分数；耗时越短越强。
                     </div>
                   </div>
                 )}
@@ -1823,7 +1936,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">当前词库</label>
                       <div className="h-[42px] bg-slate-100 rounded-xl font-black text-slate-700 flex items-center justify-center text-sm border-2 border-transparent">
                         {settings.gameRule === 'speedrun'
-                          ? `挑战配对 ${challengePairs.length} 组`
+                          ? `记忆竞速 ${challengePairs.length} 组`
                           : t('tugOfWar.wordBankCount', { count: wordBank.length })}
                       </div>
                     </div>
@@ -1979,26 +2092,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 {blueProblem && (
                   <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-blue-100 text-center">
                     {blueProblem.type === 'word' ? (
-                      <>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 h-3">
-                          {blueProblem.mode === 'challenge' ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: blueProblem.answer.length })}
-                        </div>
-                        {blueProblem.mode === 'challenge' && (
-                          <div className="min-h-[48px] mb-2 rounded-xl bg-blue-50 border-2 border-blue-100 px-3 py-2 flex items-center justify-center text-[22px] md:text-[28px] font-black text-blue-700 leading-tight break-words">
-                            {blueProblem.prompt}
-                          </div>
-                        )}
-                        <div className="min-h-[58px] flex flex-wrap items-center justify-center gap-1 mb-2">
-                          {blueProblem.answer.split('').map((_, index) => (
-                            <div key={`blue-slot-${index}`} className="w-7 md:w-8 h-9 md:h-10 rounded-lg bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-[18px] md:text-[22px] font-black text-blue-700">
-                              {blueInput[index] || ''}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="h-[34px] w-full bg-slate-50 rounded-xl text-[16px] md:text-[18px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
-                          {blueInput || t('tugOfWar.wordInputPlaceholder')}
-                        </div>
-                      </>
+                      <WordProblemCard problem={blueProblem} input={blueInput} team="blue" t={t} />
                     ) : (
                       <>
                         <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
@@ -2059,6 +2153,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     team="blue"
                     t={t}
                     isFrozen={blueFrozenUntil > Date.now()}
+                    isPreviewActive={isWordPreviewActive(blueProblem)}
                   />
                 ) : (
                   <Keypad onInput={(val) => setBlueInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => clearTeamInput('blue')} onSubmit={handleBlueSubmit} team="blue" t={t} mode={settings.gameMode} isFrozen={blueFrozenUntil > Date.now()} requiredOp={blueProblem?.type === 'math' ? getOpSymbol(blueProblem.operator) : undefined} />
@@ -2101,26 +2196,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 {redProblem && (
                   <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-red-100 text-center">
                     {redProblem.type === 'word' ? (
-                      <>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase mb-2 h-3">
-                          {redProblem.mode === 'challenge' ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt')} · {t('tugOfWar.wordLetters', { count: redProblem.answer.length })}
-                        </div>
-                        {redProblem.mode === 'challenge' && (
-                          <div className="min-h-[48px] mb-2 rounded-xl bg-red-50 border-2 border-red-100 px-3 py-2 flex items-center justify-center text-[22px] md:text-[28px] font-black text-red-700 leading-tight break-words">
-                            {redProblem.prompt}
-                          </div>
-                        )}
-                        <div className="min-h-[58px] flex flex-wrap items-center justify-center gap-1 mb-2">
-                          {redProblem.answer.split('').map((_, index) => (
-                            <div key={`red-slot-${index}`} className="w-7 md:w-8 h-9 md:h-10 rounded-lg bg-red-50 border-2 border-red-100 flex items-center justify-center text-[18px] md:text-[22px] font-black text-red-700">
-                              {redInput[index] || ''}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="h-[34px] w-full bg-slate-50 rounded-xl text-[16px] md:text-[18px] font-black text-slate-700 flex items-center justify-center border-2 border-slate-100 overflow-hidden px-2">
-                          {redInput || t('tugOfWar.wordInputPlaceholder')}
-                        </div>
-                      </>
+                      <WordProblemCard problem={redProblem} input={redInput} team="red" t={t} />
                     ) : (
                       <>
                         <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
@@ -2180,6 +2256,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     team="red"
                     t={t}
                     isFrozen={redFrozenUntil > Date.now()}
+                    isPreviewActive={isWordPreviewActive(redProblem)}
                   />
                 ) : (
                   <Keypad onInput={(val) => setRedInput(prev => (prev.length < 15 ? prev + val : prev))} onClear={() => clearTeamInput('red')} onSubmit={handleRedSubmit} team="red" t={t} mode={settings.gameMode} isFrozen={redFrozenUntil > Date.now()} requiredOp={redProblem?.type === 'math' ? getOpSymbol(redProblem.operator) : undefined} />

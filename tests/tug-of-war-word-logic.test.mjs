@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 
 import {
   buildWordAnswerAttempt,
+  calculateFlashPreviewMs,
   createBilingualChallengeProblem,
   createWordProblem,
   isBilingualChallengeAnswerCorrect,
@@ -95,10 +96,25 @@ runTest('flash memory mode previews the whole word but still asks for all letter
     { wordPlayMode: 'flash' },
   );
 
-  assert.equal(problem.previewMs, 2000);
+  assert.equal(problem.previewMs, 800);
   assert.deepEqual(problem.fixedLetterIndices, []);
   assert.equal(problem.isCloze, false);
   assert.deepEqual([...problem.letters].sort(), ['a', 'a', 'a', 'b', 'n', 'n']);
+});
+
+runTest('flash memory preview time is dynamic by word length and can be overridden by teacher', () => {
+  assert.equal(calculateFlashPreviewMs('pear'), 500);
+  assert.equal(calculateFlashPreviewMs('banana'), 800);
+  assert.equal(calculateFlashPreviewMs('pineapple'), 1200);
+  assert.equal(calculateFlashPreviewMs('strawberry'), 1500);
+
+  const problem = createBilingualChallengeProblem(
+    { chinese: '苹果', english: 'apple' },
+    () => 0,
+    { wordPlayMode: 'flash', flashPreviewMs: 1000 },
+  );
+
+  assert.equal(problem.previewMs, 1000);
 });
 
 runTest('edge hint mode only fixes the first and last letters', () => {

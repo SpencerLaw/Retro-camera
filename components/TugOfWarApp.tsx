@@ -44,6 +44,7 @@ interface GameSettings {
   gameRule?: 'tug_of_war' | 'speedrun';
   speedrunTarget?: number;
   wordPlayMode?: WordPlayMode;
+  flashPreviewMs?: number;
   gameMode: GameMode;
   powerUpsEnabled: boolean;
   allowedPowerUps: PowerUpType[];
@@ -314,6 +315,13 @@ const getMissingLetterCount = (problem: WordProblem) => (
   Math.max(0, problem.answer.length - (problem.fixedLetterIndices?.length ?? 0))
 );
 
+const getPreviewDurationLabel = (previewMs?: number) => {
+  const ms = Math.max(0, previewMs || 0);
+  if (ms <= 0) return '';
+  const seconds = ms / 1000;
+  return Number.isInteger(seconds) ? `${seconds} 秒` : `${seconds.toFixed(1)} 秒`;
+};
+
 const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team, t, isFrozen, isPreviewActive }: {
   problem: WordProblem;
   pickedIndices: number[];
@@ -382,7 +390,7 @@ const LetterKeypad = ({ problem, pickedIndices, onPick, onClear, onSubmit, team,
 
       {isPreviewActive && !isFrozen && (
         <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/75 backdrop-blur-sm border-2 border-amber-200 text-amber-700 text-sm md:text-base font-black text-center px-3">
-          记住英文，2 秒后开始拼
+          记住英文，{getPreviewDurationLabel(problem.previewMs)}后开始拼
         </div>
       )}
 
@@ -467,7 +475,7 @@ const WordProblemCard = ({ problem, input, team, t }: {
               >
                 {problem.answer}
               </motion.div>
-              <div className="mt-2 text-[11px] md:text-xs font-black opacity-90">记住英文，2 秒后开始拼</div>
+              <div className="mt-2 text-[11px] md:text-xs font-black opacity-90">记住英文，{getPreviewDurationLabel(problem.previewMs)}后开始拼</div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -877,6 +885,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     gameRule: 'tug_of_war',
     speedrunTarget: 10,
     wordPlayMode: 'shuffle',
+    flashPreviewMs: 0,
     gameMode: 'classic',
     powerUpsEnabled: true,
     allowedPowerUps: ['freeze', 'double', 'shield'],
@@ -1086,7 +1095,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
     // 英文模式：初始化蓝红队各自的洗牌词池
     if (settings.subjectMode === 'word') {
-      const wordProblemOptions = { wordPlayMode: settings.wordPlayMode || 'shuffle' };
+      const wordProblemOptions = {
+        wordPlayMode: settings.wordPlayMode || 'shuffle',
+        flashPreviewMs: settings.flashPreviewMs || undefined,
+      };
       if (settings.gameRule === 'speedrun') {
         blueChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
         redChallengePoolRef.current = buildBilingualChallengePool(challengePairs);
@@ -1239,7 +1251,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
       // 更新状态与判定胜利
       let winner: 'blue' | 'red' | null = null;
-      const wordProblemOptions = { wordPlayMode: settings.wordPlayMode || 'shuffle' };
+      const wordProblemOptions = {
+        wordPlayMode: settings.wordPlayMode || 'shuffle',
+        flashPreviewMs: settings.flashPreviewMs || undefined,
+      };
       if (settings.gameRule === 'speedrun') {
         const bp = team === 'blue' ? blueProgress + pullPower : blueProgress;
         const rp = team === 'red' ? redProgress + pullPower : redProgress;
@@ -1900,7 +1915,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         <div className="grid grid-cols-2 gap-2">
                           {([
                             { key: 'shuffle', title: '普通拼词', desc: '只打乱字母，学生自己拼。' },
-                            { key: 'flash', title: '闪现记忆', desc: '先闪现中文和英文 2 秒，再开始拼。' },
+                            { key: 'flash', title: '闪现记忆', desc: '先闪现中文和英文，按设置时间后开始拼。' },
                             { key: 'cloze', title: '长词完形', desc: '超过 5 个字母自动留空少数字母。' },
                             { key: 'edge_hint', title: '首尾提示', desc: '固定首字母和尾字母。' },
                           ] as { key: WordPlayMode; title: string; desc: string }[]).map((mode) => (
@@ -1914,6 +1929,46 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                             </button>
                           ))}
                         </div>
+                        {(settings.wordPlayMode === 'flash') && (
+                          <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50 p-3">
+                            <label className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-2 block">闪现时间</label>
+                            <select
+                              value={settings.flashPreviewMs ? 'custom' : 'smart'}
+                              onChange={(e) => setSettings({
+                                ...settings,
+                                flashPreviewMs: e.target.value === 'smart' ? 0 : (settings.flashPreviewMs || 800)
+                              })}
+                              className="w-full p-2.5 bg-white rounded-xl font-black outline-none border-2 border-transparent focus:border-amber-400 text-sm text-slate-700"
+                            >
+                              <option value="smart">智能</option>
+                              <option value="custom">自定义</option>
+                            </select>
+                            {settings.flashPreviewMs ? (
+                              <div className="mt-2">
+                                <input
+                                  type="number"
+                                  min="0.3"
+                                  max="3"
+                                  step="0.1"
+                                  value={(settings.flashPreviewMs / 1000).toString()}
+                                  onChange={(e) => {
+                                    const rawSeconds = Number(e.target.value);
+                                    const clampedSeconds = Math.min(3, Math.max(0.3, Number.isFinite(rawSeconds) ? rawSeconds : 0.8));
+                                    setSettings({...settings, flashPreviewMs: Math.round(clampedSeconds * 1000)});
+                                  }}
+                                  className="w-full p-2.5 bg-white rounded-xl font-black outline-none border-2 border-transparent focus:border-amber-400 text-sm text-slate-700"
+                                />
+                                <div className="mt-2 text-[11px] font-black leading-relaxed text-amber-700">
+                                  可输入 0.3 到 3 秒。
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-2 text-[11px] font-black leading-relaxed text-amber-700">
+                                自动：短词更快，长词稍久。
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-3 text-xs font-bold leading-relaxed text-slate-600">
                         <div className="mb-2 font-black text-blue-700">英文单词玩法说明</div>

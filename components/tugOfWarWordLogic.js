@@ -114,7 +114,16 @@ const getDistractorLetters = (answer, count, random = Math.random) => {
   return distractors;
 };
 
-const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', random = Math.random, wordPlayMode = 'shuffle' }) => {
+export const calculateFlashPreviewMs = (answer) => {
+  const length = normalizeWordAnswer(answer).length;
+  if (length <= 4) return 500;
+  if (length <= 6) return 800;
+  if (length <= 8) return 1000;
+  if (length <= 9) return 1200;
+  return 1500;
+};
+
+const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', random = Math.random, wordPlayMode = 'shuffle', flashPreviewMs }) => {
   const cleanAnswer = normalizeWordAnswer(answer);
   const fixedLetterIndices = getFixedLetterIndices(cleanAnswer, wordPlayMode);
   const fixed = new Set(fixedLetterIndices);
@@ -131,7 +140,7 @@ const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', rando
     answer: cleanAnswer,
     letters: shuffleLetters(letterChoices.join(''), random),
     fixedLetterIndices,
-    previewMs: wordPlayMode === 'flash' ? 2000 : 0,
+    previewMs: wordPlayMode === 'flash' ? (flashPreviewMs || calculateFlashPreviewMs(cleanAnswer)) : 0,
     isCloze,
     wordPlayMode,
   };
@@ -170,6 +179,7 @@ export const createWordProblem = (wordBank, random = Math.random, bilingualPairs
     mode: 'spelling',
     random,
     wordPlayMode: options.wordPlayMode || 'shuffle',
+    flashPreviewMs: options.flashPreviewMs,
   });
 };
 
@@ -186,6 +196,7 @@ export const createBilingualChallengeProblem = (pair, random = Math.random, opti
     mode: 'challenge',
     random,
     wordPlayMode: options.wordPlayMode || 'shuffle',
+    flashPreviewMs: options.flashPreviewMs,
   });
 };
 
@@ -271,5 +282,6 @@ export const nextWordFromPool = (pool, wordBank, bilingualPairs = [], options = 
     prompt: findChinesePromptForAnswer(answer, bilingualPairs),
     mode: 'spelling',
     wordPlayMode: options.wordPlayMode || 'shuffle',
+    flashPreviewMs: options.flashPreviewMs,
   });
 };

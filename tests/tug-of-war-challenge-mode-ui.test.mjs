@@ -39,6 +39,7 @@ runTest('word mode rule selector explains spelling tug and memory race in plain 
 runTest('word problems share Chinese hints and apply the teacher selected helper mode across both modes', () => {
   assert.match(source, /type WordPlayMode = 'shuffle' \| 'flash' \| 'cloze' \| 'edge_hint'/);
   assert.match(source, /wordPlayMode\?: WordPlayMode/);
+  assert.match(source, /flashPreviewMs\?: number/);
   assert.match(source, /本局单词玩法/);
   assert.match(source, /普通拼词/);
   assert.match(source, /闪现记忆/);
@@ -50,10 +51,26 @@ runTest('word problems share Chinese hints and apply the teacher selected helper
   assert.match(source, /buildWordAnswerAttempt/);
   assert.match(source, /fixedLetterIndices/);
   assert.match(source, /记住英文/);
-  assert.match(source, /2 秒后开始拼/);
+  assert.match(source, /getPreviewDurationLabel\(problem\.previewMs\)/);
+  assert.match(source, /flashPreviewMs: settings\.flashPreviewMs \|\| undefined/);
   assert.match(source, /wordPlayMode: settings\.wordPlayMode \|\| 'shuffle'/);
   assert.match(source, /nextWordFromPool\(blueWordPoolRef\.current, wordBank, challengePairs, wordProblemOptions\)/);
   assert.match(source, /nextWordFromPool\(redWordPoolRef\.current, wordBank, challengePairs, wordProblemOptions\)/);
+  assert.doesNotMatch(source, /2 秒后开始拼/);
+});
+
+runTest('flash memory duration is configurable with smart default', () => {
+  assert.match(source, /闪现时间/);
+  assert.match(source, /自动：短词更快，长词稍久/);
+  assert.match(source, /value=\{settings\.flashPreviewMs \? 'custom' : 'smart'\}/);
+  assert.match(source, /<option value="smart">智能<\/option>/);
+  assert.match(source, /<option value="custom">自定义<\/option>/);
+  assert.match(source, /type="number"/);
+  assert.match(source, /step="0\.1"/);
+  assert.match(source, /min="0\.3"/);
+  assert.match(source, /max="3"/);
+  assert.match(source, /flashPreviewMs: Math\.round\(clampedSeconds \* 1000\)/);
+  assert.match(source, /可输入 0\.3 到 3 秒/);
 });
 
 runTest('flash memory hides the Chinese prompt after the preview ends', () => {

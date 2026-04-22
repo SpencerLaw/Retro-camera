@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit3, Feather, Lock, LogOut, Plus, Save, Search, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Edit3, Feather, Lock, LogOut, Plus, Save, Search, Trash2, X } from 'lucide-react';
 import {
   JUZIMI_ADMIN_PASSWORD_HASH,
   normalizeJuzimiSentence,
@@ -404,9 +404,7 @@ const JuzimiApp: React.FC = () => {
         {/* ── Hero strip ── */}
         <section className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 md:mb-10">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#c7a46c]/50 bg-white/60 px-4 py-2 text-xs font-black tracking-[0.28em] uppercase text-[#8c6b3f] mb-4">
-              <Sparkles size={14} /> Juzimi Magazine
-            </div>
+
             <h1 className="font-serif text-[clamp(3.2rem,10vw,7rem)] leading-[0.82] tracking-[-0.05em] text-[#171310]">
               句子迷
             </h1>

@@ -823,12 +823,34 @@ const fireTeamConfetti = (team: 'blue' | 'red', subjectMode: SubjectMode, streak
 };
 
 let tugAudioContext: AudioContext | null = null;
-let wordPronunciationTimer: number | null = null;
 let wordPronunciationPrimed = false;
 let activeWordPronunciationUtterance: SpeechSynthesisUtterance | null = null;
 let activeWordAudioElement: HTMLAudioElement | null = null;
 const dictionaryAudioUrlCache = new Map<string, string | null>();
 const DICTIONARY_AUDIO_API_BASE = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
+const WORD_AUDIO_DB_NAME = 'tugOfWarWordAudioCache';
+const WORD_AUDIO_DB_VERSION = 1;
+const WORD_AUDIO_STORE_NAME = 'wordAudioFiles';
+interface CachedWordAudio {
+  key: string;
+  url: string;
+  contentType: string;
+  audioData: ArrayBuffer;
+  updatedAt: number;
+}
+interface WordAudioDownloadProgress {
+  total: number;
+  completed: number;
+  percent: number;
+  done: boolean;
+}
+let wordAudioDbPromise: Promise<IDBDatabase | null> | null = null;
+type WordPronunciationQueueItem = {
+  text: string;
+  onStatus?: (status: string) => void;
+};
+const wordPronunciationQueue: WordPronunciationQueueItem[] = [];
+let wordPronunciationQueuePlaying = false;
 
 const getTugAudioContext = () => {
   if (typeof window === 'undefined') return null;
@@ -931,6 +953,54 @@ const normalizeDictionaryAudioUrl = (url: unknown) => {
   return null;
 };
 
+const openWordAudioCacheDb = () => {
+  if (typeof indexedDB === 'undefined') return Promise.resolve(null);
+  if (wordAudioDbPromise) return wordAudioDbPromise;
+
+  wordAudioDbPromise = new Promise<IDBDatabase | null>((resolve) => {
+    const request = indexedDB.open(WORD_AUDIO_DB_NAME, WORD_AUDIO_DB_VERSION);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(WORD_AUDIO_STORE_NAME)) {
+        db.createObjectStore(WORD_AUDIO_STORE_NAME, { keyPath: 'key' });
+      }
+    };
+
+    request.onerror = () => {
+      console.warn('Word audio cache unavailable:', request.error);
+      resolve(null);
+    };
+    request.onsuccess = () => resolve(request.result);
+  });
+
+  return wordAudioDbPromise;
+};
+
+const getCachedWordAudio = async (key: string) => {
+  const db = await openWordAudioCacheDb();
+  if (!db) return null;
+
+  return new Promise<CachedWordAudio | null>((resolve) => {
+    const transaction = db.transaction(WORD_AUDIO_STORE_NAME, 'readonly');
+    const request = transaction.objectStore(WORD_AUDIO_STORE_NAME).get(key);
+    request.onerror = () => resolve(null);
+    request.onsuccess = () => resolve((request.result as CachedWordAudio | undefined) || null);
+  });
+};
+
+const saveCachedWordAudio = async (audio: CachedWordAudio) => {
+  const db = await openWordAudioCacheDb();
+  if (!db) return false;
+
+  return new Promise<boolean>((resolve) => {
+    const transaction = db.transaction(WORD_AUDIO_STORE_NAME, 'readwrite');
+    const request = transaction.objectStore(WORD_AUDIO_STORE_NAME).put(audio);
+    request.onerror = () => resolve(false);
+    request.onsuccess = () => resolve(true);
+  });
+};
+
 const getDictionaryWordAudioUrl = async (text: string) => {
   const key = getDictionaryAudioLookupKey(text);
   if (!key) return null;
@@ -960,14 +1030,39 @@ const getDictionaryWordAudioUrl = async (text: string) => {
   }
 };
 
-const playDecodedWordAudio = async (url: string) => {
+const cacheDictionaryWordAudio = async (text: string) => {
+  const key = getDictionaryAudioLookupKey(text);
+  if (!key) return null;
+
+  const cached = await getCachedWordAudio(key);
+  if (cached?.audioData?.byteLength > 0) return cached;
+
+  const audioUrl = await getDictionaryWordAudioUrl(key);
+  if (!audioUrl) return null;
+
+  try {
+    const response = await fetch(audioUrl);
+    if (!response.ok) return null;
+    const cachedAudio: CachedWordAudio = {
+      key,
+      url: audioUrl,
+      contentType: response.headers.get('Content-Type') || 'audio/mpeg',
+      audioData: await response.arrayBuffer(),
+      updatedAt: Date.now(),
+    };
+    await saveCachedWordAudio(cachedAudio);
+    return cachedAudio;
+  } catch (error) {
+    console.warn('Dictionary pronunciation download failed:', error);
+    return null;
+  }
+};
+
+const playDecodedWordAudio = async (audioData: ArrayBuffer) => {
   const context = getTugAudioContext();
   if (!context) return false;
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) return false;
-    const audioData = await response.arrayBuffer();
     const buffer = await context.decodeAudioData(audioData.slice(0));
     const source = context.createBufferSource();
     const gain = context.createGain();
@@ -975,7 +1070,10 @@ const playDecodedWordAudio = async (url: string) => {
     gain.gain.value = 0.95;
     source.connect(gain);
     gain.connect(context.destination);
-    source.start();
+    await new Promise<void>((resolve) => {
+      source.onended = () => resolve();
+      source.start();
+    });
     return true;
   } catch (error) {
     console.warn('Decoded word audio playback failed:', error);
@@ -983,21 +1081,26 @@ const playDecodedWordAudio = async (url: string) => {
   }
 };
 
-const playElementWordAudio = async (url: string) => {
-  if (typeof Audio === 'undefined') return false;
+const playElementWordAudio = async (audioData: ArrayBuffer, contentType: string) => {
+  if (typeof Audio === 'undefined' || typeof URL === 'undefined' || typeof Blob === 'undefined') return false;
 
   try {
-    if (activeWordAudioElement) {
-      activeWordAudioElement.pause();
-      activeWordAudioElement = null;
-    }
-    const audio = new Audio(url);
+    const objectUrl = URL.createObjectURL(new Blob([audioData], { type: contentType || 'audio/mpeg' }));
+    const audio = new Audio(objectUrl);
     audio.volume = 0.95;
     activeWordAudioElement = audio;
-    await audio.play();
-    audio.onended = () => {
-      if (activeWordAudioElement === audio) activeWordAudioElement = null;
-    };
+    await new Promise<void>((resolve, reject) => {
+      audio.onended = () => {
+        if (activeWordAudioElement === audio) activeWordAudioElement = null;
+        URL.revokeObjectURL(objectUrl);
+        resolve();
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('audio element failed'));
+      };
+      audio.play().catch(reject);
+    });
     return true;
   } catch (error) {
     console.warn('Element word audio playback failed:', error);
@@ -1006,9 +1109,53 @@ const playElementWordAudio = async (url: string) => {
 };
 
 const playDictionaryWordAudio = async (text: string) => {
-  const audioUrl = await getDictionaryWordAudioUrl(text);
-  if (!audioUrl) return false;
-  return (await playDecodedWordAudio(audioUrl)) || (await playElementWordAudio(audioUrl));
+  const cachedAudio = await cacheDictionaryWordAudio(text);
+  if (!cachedAudio) return false;
+  return (await playDecodedWordAudio(cachedAudio.audioData)) || (await playElementWordAudio(cachedAudio.audioData, cachedAudio.contentType));
+};
+
+const getWordAudioDownloadLabel = (progress: WordAudioDownloadProgress | null) => {
+  if (!progress || progress.total === 0) return '';
+  if (progress.done) return '已下载所有单词音频';
+  return `已下载 ${progress.percent}%`;
+};
+
+const prewarmWordPronunciationAudio = (
+  words: WeightedWord[],
+  pairs: BilingualChallengePair[] = [],
+  onProgress?: (progress: WordAudioDownloadProgress) => void,
+) => {
+  const uniqueWords = Array.from(new Set([
+    ...words.map(word => word.text),
+    ...pairs.map(pair => pair.english),
+  ].map(getDictionaryAudioLookupKey).filter(Boolean)));
+
+  if (uniqueWords.length === 0) {
+    onProgress?.({ total: 0, completed: 0, percent: 0, done: true });
+    return;
+  }
+
+  onProgress?.({ total: uniqueWords.length, completed: 0, percent: 0, done: false });
+
+  void (async () => {
+    const queue = [...uniqueWords];
+    let completed = 0;
+    const reportProgress = () => {
+      const percent = Math.round((completed / uniqueWords.length) * 100);
+      onProgress?.({ total: uniqueWords.length, completed, percent, done: completed >= uniqueWords.length });
+    };
+    const workerCount = Math.min(4, queue.length);
+    await Promise.all(Array.from({ length: workerCount }, async () => {
+      while (queue.length > 0) {
+        const word = queue.shift();
+        if (word) {
+          await cacheDictionaryWordAudio(word);
+          completed += 1;
+          reportProgress();
+        }
+      }
+    }));
+  })();
 };
 
 const getEnglishSpeechVoice = () => {
@@ -1049,13 +1196,51 @@ const speakWordPronunciationNow = (text: string, voice: SpeechSynthesisVoice | n
   return true;
 };
 
-const speakWordPronunciationWhenVoicesReady = (text: string) => {
+const speakWordPronunciationNowAndWait = (text: string, voice: SpeechSynthesisVoice | null) => (
+  new Promise<boolean>((resolve) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+      resolve(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang || 'en-US';
+    utterance.rate = 0.86;
+    utterance.pitch = 1;
+    utterance.volume = 0.95;
+    utterance.onend = () => {
+      if (activeWordPronunciationUtterance === utterance) {
+        activeWordPronunciationUtterance = null;
+      }
+      resolve(true);
+    };
+    utterance.onerror = (event) => {
+      console.warn('Word pronunciation failed:', event.error);
+      if (activeWordPronunciationUtterance === utterance) {
+        activeWordPronunciationUtterance = null;
+      }
+      resolve(false);
+    };
+
+    activeWordPronunciationUtterance = utterance;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.resume();
+    window.speechSynthesis.speak(utterance);
+
+    window.setTimeout(() => resolve(true), Math.max(900, text.length * 140));
+  })
+);
+
+const speakWordPronunciationWhenVoicesReady = (text: string, waitForEnd = false) => {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return Promise.resolve(false);
 
   const synthesis = window.speechSynthesis;
   const voice = getEnglishSpeechVoice();
   if (voice || synthesis.getVoices().length > 0) {
-    return Promise.resolve(speakWordPronunciationNow(text, voice));
+    return waitForEnd
+      ? speakWordPronunciationNowAndWait(text, voice)
+      : Promise.resolve(speakWordPronunciationNow(text, voice));
   }
 
   return new Promise<boolean>((resolve) => {
@@ -1064,7 +1249,12 @@ const speakWordPronunciationWhenVoicesReady = (text: string) => {
       if (settled) return;
       settled = true;
       synthesis.removeEventListener?.('voiceschanged', speakOnce);
-      resolve(speakWordPronunciationNow(text, getEnglishSpeechVoice()));
+      const readyVoice = getEnglishSpeechVoice();
+      if (waitForEnd) {
+        void speakWordPronunciationNowAndWait(text, readyVoice).then(resolve);
+      } else {
+        resolve(speakWordPronunciationNow(text, readyVoice));
+      }
     };
 
     synthesis.addEventListener?.('voiceschanged', speakOnce, { once: true });
@@ -1096,29 +1286,42 @@ const primeWordPronunciation = () => {
   wordPronunciationPrimed = true;
 };
 
+const playQueuedWordPronunciation = async (item: WordPronunciationQueueItem) => {
+  item.onStatus?.('正在查找真实单词音频...');
+  if (await playDictionaryWordAudio(item.text)) {
+    item.onStatus?.('已播放真实单词音频');
+    return;
+  }
+
+  item.onStatus?.('没有找到真实音频，正在尝试系统朗读...');
+  const didStartSpeech = await speakWordPronunciationWhenVoicesReady(item.text, true);
+  item.onStatus?.(didStartSpeech ? '已调用系统英文朗读' : '这台设备没有可用英文朗读');
+};
+
+const drainWordPronunciationQueue = () => {
+  if (wordPronunciationQueuePlaying) return;
+  const item = wordPronunciationQueue.shift();
+  if (!item) return;
+
+  wordPronunciationQueuePlaying = true;
+  void playQueuedWordPronunciation(item).finally(() => {
+    wordPronunciationQueuePlaying = false;
+    drainWordPronunciationQueue();
+  });
+};
+
+const enqueueWordPronunciation = (text: string, onStatus?: (status: string) => void) => {
+  wordPronunciationQueue.push({ text, onStatus });
+  drainWordPronunciationQueue();
+};
+
 const playWordPronunciation = (word: string, delayMs = 420, onStatus?: (status: string) => void) => {
   if (typeof window === 'undefined') return;
   const text = getWordPronunciationText(word);
   if (!/[A-Za-z]/.test(text)) return;
 
-  if (wordPronunciationTimer !== null) {
-    window.clearTimeout(wordPronunciationTimer);
-  }
-
-  wordPronunciationTimer = window.setTimeout(() => {
-    void (async () => {
-      onStatus?.('正在查找真实单词音频...');
-      if (await playDictionaryWordAudio(text)) {
-        onStatus?.('已播放真实单词音频');
-        return;
-      }
-
-      onStatus?.('没有找到真实音频，正在尝试系统朗读...');
-      const didStartSpeech = await speakWordPronunciationWhenVoicesReady(text);
-      onStatus?.(didStartSpeech ? '已调用系统英文朗读' : '这台设备没有可用英文朗读');
-    })().finally(() => {
-      wordPronunciationTimer = null;
-    });
+  window.setTimeout(() => {
+    enqueueWordPronunciation(text, onStatus);
   }, delayMs);
 };
 
@@ -1274,6 +1477,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   // 配置状态
   const [showSettings, setShowSettings] = useState(true);
   const [wordPronunciationStatus, setWordPronunciationStatus] = useState('');
+  const [wordAudioDownloadProgress, setWordAudioDownloadProgress] = useState<WordAudioDownloadProgress | null>(null);
 
   // 初始化检查授权
   useEffect(() => {
@@ -1358,6 +1562,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const redChallengePoolRef = useRef<BilingualChallengePair[]>([]);
   const [wordImportMessage, setWordImportMessage] = useState('');
   const [isParsingWordFile, setIsParsingWordFile] = useState(false);
+  const wordAudioDownloadLabel = getWordAudioDownloadLabel(wordAudioDownloadProgress);
 
   // 核心游戏状态
   const [score, setScore] = useState(0);
@@ -1490,6 +1695,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       setActiveBankId(newBank.id);
       setWordBank(words);
       setChallengePairs(importedChallengePairs);
+      prewarmWordPronunciationAudio(words, importedChallengePairs, setWordAudioDownloadProgress);
 
       setWordImportMessage(`${t('tugOfWar.wordImportSuccess', { count: words.length })}；挑战配对 ${importedChallengePairs.length} 组`);
     } catch (error) {
@@ -2078,6 +2284,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     if (activeBankId === editingBank.id) {
                       setWordBank(editingBank.words);
                       setChallengePairs(editingBank.challengePairs || []);
+                      prewarmWordPronunciationAudio(editingBank.words, editingBank.challengePairs || [], setWordAudioDownloadProgress);
                     }
                     setEditingBank(null);
                   }}
@@ -2399,7 +2606,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                           {savedBanks.map(bank => (
                             <div 
                               key={bank.id} 
-                              onClick={() => { setActiveBankId(bank.id); setWordBank(bank.words); setChallengePairs(bank.challengePairs || []); }}
+                              onClick={() => {
+                                setActiveBankId(bank.id);
+                                setWordBank(bank.words);
+                                setChallengePairs(bank.challengePairs || []);
+                                prewarmWordPronunciationAudio(bank.words, bank.challengePairs || [], setWordAudioDownloadProgress);
+                              }}
                               className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${activeBankId === bank.id ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-blue-100 text-slate-600 hover:border-blue-300'}`}
                             >
                               <div className="flex flex-col">
@@ -2554,7 +2766,18 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     </div>
                   ) : (
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">当前词库</label>
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">当前词库</label>
+                        {wordAudioDownloadLabel && (
+                          <span className={`rounded-full px-3 py-1 text-[10px] font-black border ${
+                            wordAudioDownloadProgress?.done
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {wordAudioDownloadLabel}
+                          </span>
+                        )}
+                      </div>
                       <div className="h-[42px] bg-slate-100 rounded-xl font-black text-slate-700 flex items-center justify-center text-sm border-2 border-transparent">
                         {settings.gameRule === 'speedrun'
                           ? `记忆竞速 ${challengePairs.length} 组`

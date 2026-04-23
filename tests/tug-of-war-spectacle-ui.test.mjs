@@ -81,6 +81,11 @@ runTest('start countdown plays rhythmic sounds before the game begins', () => {
 
 runTest('english correct answers play the whole word pronunciation after praise sounds', () => {
   assert.match(source, /const playWordPronunciation = /);
+  assert.match(source, /const enqueueWordPronunciation = /);
+  assert.match(source, /const drainWordPronunciationQueue = /);
+  assert.match(source, /wordPronunciationQueue\.push/);
+  assert.match(source, /wordPronunciationQueue\.shift/);
+  assert.match(source, /source\.onended = /);
   assert.match(source, /const playDictionaryWordAudio = /);
   assert.match(source, /DICTIONARY_AUDIO_API_BASE/);
   assert.match(source, /decodeAudioData/);
@@ -93,7 +98,35 @@ runTest('english correct answers play the whole word pronunciation after praise 
   assert.match(source, /playWordPronunciation\(correctWordPronunciation, winner \? 920 : 420\)/);
   assert.match(source, /voiceschanged/);
   assert.match(source, /window\.speechSynthesis\.speak\(utterance\)/);
+  assert.doesNotMatch(source, /activeWordAudioElement\.pause\(\)/);
   assert.doesNotMatch(source, /correctWordPronunciation\.split\(''\)/);
+});
+
+runTest('imported and selected word banks download pronunciation audio into local cache', () => {
+  assert.match(source, /interface WordAudioDownloadProgress/);
+  assert.match(source, /const getWordAudioDownloadLabel = /);
+  assert.match(source, /setWordAudioDownloadProgress/);
+  assert.match(source, /已下载所有单词音频/);
+  assert.match(source, /已下载 \$\{progress\.percent\}%/);
+  assert.match(source, /WORD_AUDIO_DB_NAME/);
+  assert.match(source, /WORD_AUDIO_STORE_NAME/);
+  assert.match(source, /const openWordAudioCacheDb = /);
+  assert.match(source, /const getCachedWordAudio = /);
+  assert.match(source, /const saveCachedWordAudio = /);
+  assert.match(source, /const cacheDictionaryWordAudio = /);
+  assert.match(source, /audioData: await response\.arrayBuffer\(\)/);
+  assert.match(source, /indexedDB\.open/);
+  assert.match(source, /createObjectStore\(WORD_AUDIO_STORE_NAME/);
+  assert.match(source, /const prewarmWordPronunciationAudio = /);
+  assert.match(source, /\.\.\.words\.map\(word => word\.text\)/);
+  assert.match(source, /\.\.\.pairs\.map\(pair => pair\.english\)/);
+  assert.match(source, /new Set\(/);
+  assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed: 0, percent: 0, done: false \}\)/);
+  assert.match(source, /Math\.round\(\(completed \/ uniqueWords\.length\) \* 100\)/);
+  assert.match(source, /await cacheDictionaryWordAudio\(word\)/);
+  assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed, percent, done: completed >= uniqueWords\.length \}\)/);
+  assert.match(source, /prewarmWordPronunciationAudio\(words, importedChallengePairs, setWordAudioDownloadProgress\)/);
+  assert.match(source, /prewarmWordPronunciationAudio\(bank\.words, bank\.challengePairs \|\| \[\], setWordAudioDownloadProgress\)/);
 });
 
 runTest('word pronunciation is primed from user gestures before delayed speech', () => {

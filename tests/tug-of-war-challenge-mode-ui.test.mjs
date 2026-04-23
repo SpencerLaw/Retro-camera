@@ -169,10 +169,12 @@ runTest('math settings include a standalone two digit no-borrow subtraction mode
   assert.match(source, /gameMode === 'two_digit_no_borrow_sub'/);
   assert.match(source, /operator: 'sub'/);
   assert.match(source, /ones1 >= ones2/);
+  assert.match(source, /ones1 > ones2/);
   assert.match(source, /tens1 >= tens2/);
-  assert.match(source, /let ones1 = Math\.floor\(Math\.random\(\) \* 9\) \+ 1/);
-  assert.match(source, /let ones2 = Math\.floor\(Math\.random\(\) \* ones1\) \+ 1/);
+  assert.match(source, /let ones1 = Math\.floor\(Math\.random\(\) \* 8\) \+ 2/);
+  assert.match(source, /let ones2 = Math\.floor\(Math\.random\(\) \* \(ones1 - 1\)\) \+ 1/);
   assert.doesNotMatch(source, /const ones2 = Math\.floor\(Math\.random\(\) \* \(ones1 \+ 1\)\)/);
+  assert.doesNotMatch(source, /answer: 10/);
   assert.match(source, /settings\.gameMode !== 'two_digit_no_borrow_sub' && \(/);
   assert.match(source, /settings\.subjectMode === 'math' && settings\.gameMode !== 'two_digit_no_borrow_sub'/);
 });

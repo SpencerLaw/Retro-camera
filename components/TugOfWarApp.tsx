@@ -133,8 +133,8 @@ const evaluateExpression = (expr: string): number | null => {
 const generateTwoDigitNoBorrowSubtractionProblem = (): MathProblem => {
   const tens1 = Math.floor(Math.random() * 9) + 1;
   const tens2 = Math.floor(Math.random() * tens1) + 1;
-  let ones1 = Math.floor(Math.random() * 9) + 1;
-  let ones2 = Math.floor(Math.random() * ones1) + 1;
+  let ones1 = Math.floor(Math.random() * 8) + 2;
+  let ones2 = Math.floor(Math.random() * (ones1 - 1)) + 1;
 
   if (tens1 === tens2 && ones1 === ones2) {
     if (ones1 < 9) {
@@ -144,7 +144,7 @@ const generateTwoDigitNoBorrowSubtractionProblem = (): MathProblem => {
     }
   }
 
-  if (tens1 >= tens2 && ones1 >= ones2) {
+  if (tens1 >= tens2 && ones1 >= ones2 && ones1 > ones2) {
     const num1 = tens1 * 10 + ones1;
     const num2 = tens2 * 10 + ones2;
 
@@ -157,7 +157,7 @@ const generateTwoDigitNoBorrowSubtractionProblem = (): MathProblem => {
     };
   }
 
-  return { type: 'math', num1: 21, num2: 11, operator: 'sub', answer: 10 };
+  return { type: 'math', num1: 32, num2: 11, operator: 'sub', answer: 21 };
 };
 
 const generateMathProblem = (settings: GameSettings): MathProblem => {

@@ -544,7 +544,7 @@
     "wordLetters": "{count} letters",
     "wordInputPlaceholder": "Waiting for spelling",
     "enableSounds": "Classroom Sounds",
-    "enableSoundsDesc": "Play short sounds for correct answers, streaks, and wins.",
+    "enableSoundsDesc": "Play short sounds for correct answers, streaks, and wins. English answers also play the word pronunciation.",
     "enablePowerUps": "Enable Power-ups",
     "allowedPowerUps": "Allowed Power-ups",
     "propFreeze": "Freeze 🧊",

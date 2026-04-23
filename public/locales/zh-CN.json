@@ -569,7 +569,7 @@
     "wordLetters": "{count} 个字母",
     "wordInputPlaceholder": "等待拼写",
     "enableSounds": "课堂音效",
-    "enableSoundsDesc": "答对、连击和获胜时播放短音效，活跃课堂气氛。",
+    "enableSoundsDesc": "答对、连击和获胜时播放短音效；英语答对后会播放单词发音。",
     "enablePowerUps": "启用道具系统",
     "allowedPowerUps": "允许出现的道具",
     "propFreeze": "冰冻 🧊",

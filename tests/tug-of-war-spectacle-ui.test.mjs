@@ -65,7 +65,7 @@ runTest('classroom sounds can be toggled and play on correct answers and wins', 
   assert.match(source, /const playCorrectSound = /);
   assert.match(source, /const playVictorySound = /);
   assert.match(source, /AudioContextCtor/);
-  assert.match(source, /settings\.soundEnabled\) playCorrectSound\(settings\.subjectMode, currentStreak\)/);
+  assert.match(source, /if \(settings\.soundEnabled\) \{[\s\S]*playCorrectSound\(settings\.subjectMode, currentStreak\)/);
   assert.match(source, /settings\.soundEnabled\) playVictorySound\(settings\.subjectMode\)/);
   assert.match(source, /tugOfWar\.enableSounds/);
   assert.match(source, /tugOfWar\.enableSoundsDesc/);
@@ -77,6 +77,17 @@ runTest('start countdown plays rhythmic sounds before the game begins', () => {
   assert.match(source, /openingCountdown, settings\.soundEnabled, settings\.subjectMode/);
   assert.match(source, /step === 0/);
   assert.match(source, /setOpeningCountdown\(openingCountdown - 1\)/);
+});
+
+runTest('english correct answers play the whole word pronunciation after praise sounds', () => {
+  assert.match(source, /const playWordPronunciation = /);
+  assert.match(source, /SpeechSynthesisUtterance/);
+  assert.match(source, /getWordPronunciationText/);
+  assert.match(source, /correctWordPronunciation = displayAnswer/);
+  assert.match(source, /settings\.subjectMode === 'word' && correctWordPronunciation/);
+  assert.match(source, /playWordPronunciation\(correctWordPronunciation, winner \? 920 : 420\)/);
+  assert.match(source, /window\.speechSynthesis\.speak\(utterance\)/);
+  assert.doesNotMatch(source, /correctWordPronunciation\.split\(''\)/);
 });
 
 runTest('wrong answers do not play discouraging sounds', () => {

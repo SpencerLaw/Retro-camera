@@ -823,6 +823,7 @@ const fireTeamConfetti = (team: 'blue' | 'red', subjectMode: SubjectMode, streak
 };
 
 let tugAudioContext: AudioContext | null = null;
+let wordPronunciationTimer: number | null = null;
 
 const getTugAudioContext = () => {
   if (typeof window === 'undefined') return null;
@@ -902,6 +903,48 @@ const playCountdownSound = (step: number, subjectMode: SubjectMode) => {
 
   const pitch = step <= 2 ? 720 + accent : 560 + accent + (5 - step) * 24;
   playTugTone(context, pitch, 0, 0.09, 0.052, 'sine');
+};
+
+const getWordPronunciationText = (word: string) => (
+  String(word ?? '')
+    .normalize('NFKD')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+);
+
+const getEnglishSpeechVoice = () => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
+  const voices = window.speechSynthesis.getVoices();
+  return (
+    voices.find(voice => /^en[-_]?US/i.test(voice.lang))
+    || voices.find(voice => /^en/i.test(voice.lang))
+    || null
+  );
+};
+
+const playWordPronunciation = (word: string, delayMs = 420) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+  const text = getWordPronunciationText(word);
+  if (!/[A-Za-z]/.test(text)) return;
+
+  if (wordPronunciationTimer !== null) {
+    window.clearTimeout(wordPronunciationTimer);
+  }
+
+  wordPronunciationTimer = window.setTimeout(() => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = getEnglishSpeechVoice();
+    if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang || 'en-US';
+    utterance.rate = 0.86;
+    utterance.pitch = 1;
+    utterance.volume = 0.95;
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    wordPronunciationTimer = null;
+  }, delayMs);
 };
 
 const fireVictoryCelebration = (winner: 'blue' | 'red', subjectMode: SubjectMode) => {
@@ -1415,10 +1458,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const processAnswer = (team: 'blue' | 'red', input: string, problem: Problem) => {
     let isCorrect = false;
     let questionKey = '';
+    let correctWordPronunciation = '';
     
     if (problem.type === 'word') {
       const wordAttempt = buildWordAnswerAttempt(problem, input);
       const displayAnswer = problem.displayAnswer || problem.answer;
+      correctWordPronunciation = displayAnswer;
       isCorrect = problem.mode === 'challenge'
         ? isBilingualChallengeAnswerCorrect(wordAttempt, problem.answer)
         : isWordAnswerCorrect(wordAttempt, problem.answer);
@@ -1499,7 +1544,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       }
       
       fireTeamConfetti(team, settings.subjectMode, currentStreak);
-      if (settings.soundEnabled) playCorrectSound(settings.subjectMode, currentStreak);
+      if (settings.soundEnabled) {
+        playCorrectSound(settings.subjectMode, currentStreak);
+        if (settings.subjectMode === 'word' && correctWordPronunciation) {
+          playWordPronunciation(correctWordPronunciation, winner ? 920 : 420);
+        }
+      }
       if (team === 'blue') {
         setBlueStreak(currentStreak);
         setBlueProblem(

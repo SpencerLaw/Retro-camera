@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap, Lock, Key, ShieldAlert, Upload, FileText, Trash2, Edit2, X, Plus, Save, BarChart2, Calendar, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCcw, Trophy, Snowflake, Sword, ShieldCheck, Zap, Lock, Key, ShieldAlert, Upload, FileText, Trash2, Edit2, X, Plus, Save, BarChart2, Calendar, Clock, CheckCircle2, XCircle, Volume2 } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 import confetti from 'canvas-confetti';
 import * as mammoth from 'mammoth';
@@ -26,7 +26,7 @@ type SubjectMode = 'math' | 'word';
 type TugOfWarVariant = SubjectMode;
 type GameMode = 'classic' | 'target';
 type PowerUpType = 'freeze' | 'double' | 'shield';
-type WordPlayMode = 'shuffle' | 'flash' | 'cloze' | 'edge_hint';
+type WordPlayMode = 'shuffle' | 'flash' | 'cloze' | 'edge_hint' | 'listening';
 type HistoryViewMode = 'total' | 'blue' | 'red';
 
 interface TugOfWarProductConfig {
@@ -542,11 +542,12 @@ const getWordSlotDisplay = (problem: WordProblem, input: string, index: number, 
   return input[missingIndex] || '';
 };
 
-const WordProblemCard = ({ problem, input, team, t }: {
+const WordProblemCard = ({ problem, input, team, t, onReplayWord }: {
   problem: WordProblem;
   input: string;
   team: 'blue' | 'red';
   t: (key: string, params?: Record<string, any>) => string;
+  onReplayWord?: (problem: WordProblem) => void;
 }) => {
   const previewActive = isWordPreviewActive(problem);
   const isBlue = team === 'blue';
@@ -554,8 +555,9 @@ const WordProblemCard = ({ problem, input, team, t }: {
   const slotClass = isBlue ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-red-50 border-red-100 text-red-700';
   const previewClass = isBlue ? 'from-blue-600 to-cyan-500' : 'from-red-600 to-orange-500';
   const shouldHidePromptAfterFlash = problem.wordPlayMode === 'flash' && !previewActive;
-  const showPromptPanel = Boolean(problem.prompt) && !shouldHidePromptAfterFlash;
-  const promptLabel = shouldHidePromptAfterFlash ? '闪现记忆 · 拼英文' : problem.prompt ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt');
+  const showListeningPanel = problem.wordPlayMode === 'listening';
+  const showPromptPanel = Boolean(problem.prompt) && !shouldHidePromptAfterFlash && !showListeningPanel;
+  const promptLabel = showListeningPanel ? '听音拼词 · 拼英文' : shouldHidePromptAfterFlash ? '闪现记忆 · 拼英文' : problem.prompt ? '看中文 · 拼英文' : t('tugOfWar.spellPrompt');
 
   return (
     <>
@@ -566,6 +568,18 @@ const WordProblemCard = ({ problem, input, team, t }: {
       {showPromptPanel && (
         <div className={`min-h-[48px] mb-2 rounded-xl border-2 px-3 py-2 flex items-center justify-center text-[22px] md:text-[28px] font-black leading-tight break-words ${softClass}`}>
           {problem.prompt}
+        </div>
+      )}
+      {showListeningPanel && (
+        <div className={`min-h-[64px] mb-2 rounded-xl border-2 px-3 py-2 flex items-center justify-center ${softClass}`}>
+          <button
+            type="button"
+            onClick={() => onReplayWord?.(problem)}
+            className={`w-full min-h-[48px] rounded-xl bg-white/80 px-3 py-2 flex items-center justify-center gap-2 text-[16px] md:text-[18px] font-black shadow-sm active:scale-[0.99] transition-all ${isBlue ? 'text-blue-700' : 'text-red-700'}`}
+          >
+            <Volume2 size={22} className="shrink-0" />
+            <span>播放单词 / 重听</span>
+          </button>
         </div>
       )}
       <div className="relative min-h-[128px]">
@@ -843,6 +857,7 @@ interface WordAudioDownloadProgress {
   completed: number;
   percent: number;
   done: boolean;
+  failedWords?: string[];
 }
 let wordAudioDbPromise: Promise<IDBDatabase | null> | null = null;
 type WordPronunciationQueueItem = {
@@ -1125,8 +1140,20 @@ const playDictionaryWordAudio = async (text: string) => {
 
 const getWordAudioDownloadLabel = (progress: WordAudioDownloadProgress | null) => {
   if (!progress || progress.total === 0) return '';
+  const failedCount = progress.failedWords?.length || 0;
+  if (progress.done && failedCount > 0) {
+    return `已下载 ${Math.max(0, progress.total - failedCount)}/${progress.total} 个音频 · ${failedCount} 个暂无真实音频`;
+  }
   if (progress.done) return '已下载所有单词音频';
   return `已下载 ${progress.percent}%`;
+};
+
+const getWordAudioFailedListLabel = (progress: WordAudioDownloadProgress | null) => {
+  const failedWords = progress?.failedWords || [];
+  if (failedWords.length === 0) return '';
+  const visibleWords = failedWords.slice(0, 4).join('、');
+  const extraCount = failedWords.length - 4;
+  return `暂无音频：${visibleWords}${extraCount > 0 ? ` 等 ${failedWords.length} 个` : ''}`;
 };
 
 const prewarmWordPronunciationAudio = (
@@ -1134,44 +1161,53 @@ const prewarmWordPronunciationAudio = (
   pairs: BilingualChallengePair[] = [],
   onProgress?: (progress: WordAudioDownloadProgress) => void,
 ) => {
-  const uniqueWords = Array.from(new Set([
+  const targetLabelByKey = new Map<string, string>();
+  [
     ...words.map(word => word.text),
     ...pairs.map(pair => pair.english),
-  ].map(getDictionaryAudioLookupKey).filter(Boolean)));
+  ].forEach((word) => {
+    const key = getDictionaryAudioLookupKey(word);
+    if (!key || targetLabelByKey.has(key)) return;
+    targetLabelByKey.set(key, getWordPronunciationText(word) || key);
+  });
+  const audioTargets = Array.from(targetLabelByKey.keys());
+  const uniqueWords = audioTargets;
 
-  if (uniqueWords.length === 0) {
-    onProgress?.({ total: 0, completed: 0, percent: 0, done: true });
+  if (audioTargets.length === 0) {
+    onProgress?.({ total: 0, completed: 0, percent: 0, done: true, failedWords: [] });
     return;
   }
 
   void (async () => {
-    const missingWords = await getMissingCachedWordAudioKeys(uniqueWords);
+    const missingWords = await getMissingCachedWordAudioKeys(audioTargets);
     if (missingWords.length === 0) {
-      onProgress?.({ total: uniqueWords.length, completed: uniqueWords.length, percent: 100, done: true });
+      onProgress?.({ total: audioTargets.length, completed: audioTargets.length, percent: 100, done: true, failedWords: [] });
       return;
     }
 
-    onProgress?.({ total: uniqueWords.length, completed: uniqueWords.length - missingWords.length, percent: 0, done: false });
+    const failedWords: string[] = [];
+    onProgress?.({ total: audioTargets.length, completed: audioTargets.length - missingWords.length, percent: 0, done: false, failedWords });
 
     const queue = [...missingWords];
-    let completed = uniqueWords.length - missingWords.length;
+    let completed = audioTargets.length - missingWords.length;
     const reportProgress = () => {
       const percent = Math.round((completed / uniqueWords.length) * 100);
       const visiblePercent = percent >= 85 ? 99 : percent;
-      onProgress?.({ total: uniqueWords.length, completed, percent: visiblePercent, done: false });
+      onProgress?.({ total: audioTargets.length, completed, percent: visiblePercent, done: false, failedWords: [...failedWords] });
     };
     const workerCount = Math.min(4, queue.length);
     await Promise.all(Array.from({ length: workerCount }, async () => {
       while (queue.length > 0) {
         const word = queue.shift();
         if (word) {
-          await cacheDictionaryWordAudio(word);
+          const cached = await cacheDictionaryWordAudio(word);
+          if (!cached) failedWords.push(targetLabelByKey.get(word) || word);
           completed += 1;
           reportProgress();
         }
       }
     }));
-    onProgress?.({ total: uniqueWords.length, completed: uniqueWords.length, percent: 100, done: true });
+    onProgress?.({ total: audioTargets.length, completed: audioTargets.length, percent: 100, done: true, failedWords: [...failedWords] });
   })();
 };
 
@@ -1310,7 +1346,7 @@ const playQueuedWordPronunciation = async (item: WordPronunciationQueueItem) => 
     return;
   }
 
-  item.onStatus?.('没有找到真实音频，正在尝试系统朗读...');
+  item.onStatus?.(`${item.text} 暂无真实音频，正在尝试系统朗读...`);
   const didStartSpeech = await speakWordPronunciationWhenVoicesReady(item.text, true);
   item.onStatus?.(didStartSpeech ? '已调用系统英文朗读' : '这台设备没有可用英文朗读');
 };
@@ -1735,6 +1771,12 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       setRedInput('');
       setRedPickedLetterIndices([]);
     }
+  };
+
+  const replayListeningWord = (problem: WordProblem) => {
+    if (!settings.soundEnabled || problem.wordPlayMode !== 'listening') return;
+    primeWordPronunciation();
+    playWordPronunciation(getWordDisplayAnswer(problem), 0, setWordPronunciationStatus);
   };
 
   const handleLetterPick = (team: 'blue' | 'red', index: number) => {
@@ -2624,7 +2666,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-3">本地词库列表 (点击选择)</div>
                         <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
                           {savedBanks.map(bank => {
-                            const bankAudioDownloadLabel = getWordAudioDownloadLabel(wordAudioDownloadProgressByBank[bank.id] || null);
+                            const bankAudioProgress = wordAudioDownloadProgressByBank[bank.id] || null;
+                            const bankAudioDownloadLabel = getWordAudioDownloadLabel(bankAudioProgress);
+                            const bankAudioFailedListLabel = getWordAudioFailedListLabel(wordAudioDownloadProgressByBank[bank.id] || null);
                             return (
                             <div
                               key={bank.id} 
@@ -2643,15 +2687,22 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                                 </span>
                                 {bankAudioDownloadLabel && (
                                   <span className={`w-fit rounded-full px-2.5 py-0.5 text-[10px] font-black border ${
-                                    wordAudioDownloadProgressByBank[bank.id]?.done
+                                    bankAudioProgress?.done
                                       ? activeBankId === bank.id
                                         ? 'bg-white/15 text-white border-white/20'
-                                        : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                        : bankAudioProgress.failedWords?.length
+                                          ? 'bg-amber-50 text-amber-700 border-amber-100'
+                                          : 'bg-emerald-50 text-emerald-700 border-emerald-100'
                                       : activeBankId === bank.id
                                         ? 'bg-white/15 text-blue-50 border-white/20'
                                         : 'bg-amber-50 text-amber-700 border-amber-100'
                                   }`}>
                                     {bankAudioDownloadLabel}
+                                  </span>
+                                )}
+                                {bankAudioFailedListLabel && (
+                                  <span className={`text-[10px] font-bold leading-snug ${activeBankId === bank.id ? 'text-amber-100' : 'text-amber-600'}`}>
+                                    {bankAudioFailedListLabel}
                                   </span>
                                 )}
                               </div>
@@ -2702,6 +2753,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                             { key: 'flash', title: '闪现记忆', desc: '先闪现中文和英文，按设置时间后开始拼。' },
                             { key: 'cloze', title: '长词完形', desc: '超过 5 个字母自动留空少数字母。' },
                             { key: 'edge_hint', title: '首尾提示', desc: '固定首字母和尾字母。' },
+                            { key: 'listening', title: '听音拼词', desc: '不显示中文，点击播放单词后拼写，键盘会混入干扰字母。' },
                           ] as { key: WordPlayMode; title: string; desc: string }[]).map((mode) => (
                             <button
                               key={mode.key}
@@ -2764,6 +2816,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                           <div className="rounded-xl border border-blue-100 bg-white/80 p-2">
                             <div className="font-black text-slate-800">记忆竞速：</div>
                             <div>导入中英词表，学生看中文提示并点击英文字母拼英文；先做完设定题数的一队赢，用时越短越厉害。</div>
+                          </div>
+                          <div className="rounded-xl border border-blue-100 bg-white/80 p-2 sm:col-span-2">
+                            <div className="font-black text-slate-800">听音拼词：</div>
+                            <div>不显示中文。学生点击播放听单词，再从正确字母和干扰字母里选出正确拼写。</div>
                           </div>
                         </div>
                         <div className="mt-2 text-[11px] font-black text-blue-500">以上说明只针对英文单词模式。</div>
@@ -3002,7 +3058,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 {blueProblem && (
                   <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-blue-100 text-center">
                     {blueProblem.type === 'word' ? (
-                      <WordProblemCard problem={blueProblem} input={blueInput} team="blue" t={t} />
+                      <WordProblemCard problem={blueProblem} input={blueInput} team="blue" t={t} onReplayWord={replayListeningWord} />
                     ) : (
                       <>
                         <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">
@@ -3106,7 +3162,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 {redProblem && (
                   <div className="bg-white rounded-2xl p-3 w-full max-w-[320px] shadow-lg border border-red-100 text-center">
                     {redProblem.type === 'word' ? (
-                      <WordProblemCard problem={redProblem} input={redInput} team="red" t={t} />
+                      <WordProblemCard problem={redProblem} input={redInput} team="red" t={t} onReplayWord={replayListeningWord} />
                     ) : (
                       <>
                         <div className="text-[10px] font-bold text-slate-400 uppercase mb-1 h-3">

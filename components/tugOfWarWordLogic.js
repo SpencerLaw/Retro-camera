@@ -129,6 +129,13 @@ const getDistractorLetters = (answer, count, random = Math.random) => {
   return distractors;
 };
 
+const getListeningDistractorCount = (answer) => {
+  const length = normalizeWordAnswer(answer).length;
+  if (length <= 4) return 3;
+  if (length <= 8) return 4;
+  return 5;
+};
+
 export const calculateFlashPreviewMs = (answer) => {
   const length = normalizeWordAnswer(answer).length;
   if (length <= 4) return 500;
@@ -144,15 +151,18 @@ const createMemoryWordProblem = ({ answer, prompt = '', mode = 'spelling', rando
   const fixedLetterIndices = getFixedLetterIndices(cleanAnswer, wordPlayMode);
   const fixed = new Set(fixedLetterIndices);
   const missingLetters = cleanAnswer.split('').filter((_, index) => !fixed.has(index));
+  const isListening = wordPlayMode === 'listening';
   const isCloze = wordPlayMode === 'cloze' && cleanAnswer.length > 5;
-  const letterChoices = isCloze
+  const letterChoices = isListening
+    ? [...missingLetters, ...getDistractorLetters(cleanAnswer, getListeningDistractorCount(cleanAnswer), random)]
+    : isCloze
     ? [...missingLetters, ...getDistractorLetters(cleanAnswer, 2, random)]
     : missingLetters;
 
   return {
     type: 'word',
     mode,
-    prompt,
+    prompt: isListening ? '' : prompt,
     answer: cleanAnswer,
     displayAnswer: displayAnswer || cleanAnswer,
     letters: shuffleLetters(letterChoices.join(''), random),

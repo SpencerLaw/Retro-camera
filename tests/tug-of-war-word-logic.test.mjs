@@ -108,6 +108,29 @@ runTest('spelling problems reuse bilingual Chinese prompts without forcing a hel
   assert.deepEqual([...problem.letters].sort(), ['a', 'e', 'p', 'r']);
 });
 
+runTest('listening mode hides Chinese prompts and mixes distractor letters into the keyboard', () => {
+  const problem = createWordProblem(
+    [{ text: 'Thai', weight: 1 }],
+    () => 0,
+    [{ chinese: '泰国', english: 'Thai' }],
+    { wordPlayMode: 'listening' },
+  );
+
+  assert.equal(problem.mode, 'spelling');
+  assert.equal(problem.prompt, '');
+  assert.equal(problem.wordPlayMode, 'listening');
+  assert.equal(problem.answer, 'Thai');
+  assert.equal(problem.displayAnswer, 'Thai');
+  assert.equal(problem.fixedLetterIndices.length, 0);
+  assert.equal(problem.previewMs, 0);
+  assert.equal(problem.letters.length, 7);
+  for (const letter of ['T', 'h', 'a', 'i']) {
+    assert.ok(problem.letters.includes(letter));
+  }
+  assert.ok(problem.letters.some(letter => !['T', 'h', 'a', 'i'].includes(letter)));
+  assert.equal(problem.letters.includes('t'), false);
+});
+
 runTest('flash memory mode previews the whole word but still asks for all letters', () => {
   const problem = createBilingualChallengeProblem(
     { chinese: '香蕉', english: 'banana' },

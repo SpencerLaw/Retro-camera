@@ -37,7 +37,7 @@ runTest('word mode rule selector explains spelling tug and memory race in plain 
 });
 
 runTest('word problems share Chinese hints and apply the teacher selected helper mode across both modes', () => {
-  assert.match(source, /type WordPlayMode = 'shuffle' \| 'flash' \| 'cloze' \| 'edge_hint'/);
+  assert.match(source, /type WordPlayMode = 'shuffle' \| 'flash' \| 'cloze' \| 'edge_hint' \| 'listening'/);
   assert.match(source, /wordPlayMode\?: WordPlayMode/);
   assert.match(source, /flashPreviewMs\?: number/);
   assert.match(source, /本局单词玩法/);
@@ -45,6 +45,7 @@ runTest('word problems share Chinese hints and apply the teacher selected helper
   assert.match(source, /闪现记忆/);
   assert.match(source, /长词完形/);
   assert.match(source, /首尾提示/);
+  assert.match(source, /听音拼词/);
   assert.match(source, /isWordPreviewActive/);
   assert.match(source, /prepareWordProblem/);
   assert.match(source, /if \(!problem\.previewMs\) return problem/);
@@ -57,6 +58,17 @@ runTest('word problems share Chinese hints and apply the teacher selected helper
   assert.match(source, /nextWordFromPool\(blueWordPoolRef\.current, wordBank, challengePairs, wordProblemOptions\)/);
   assert.match(source, /nextWordFromPool\(redWordPoolRef\.current, wordBank, challengePairs, wordProblemOptions\)/);
   assert.doesNotMatch(source, /2 秒后开始拼/);
+});
+
+runTest('listening word mode hides Chinese prompts and gives teams replay buttons', () => {
+  assert.match(source, /problem\.wordPlayMode === 'listening'/);
+  assert.match(source, /const showListeningPanel = problem\.wordPlayMode === 'listening'/);
+  assert.match(source, /听音拼词 · 拼英文/);
+  assert.match(source, /播放单词/);
+  assert.match(source, /重听/);
+  assert.match(source, /onReplayWord/);
+  assert.match(source, /playWordPronunciation\(getWordDisplayAnswer\(problem\), 0/);
+  assert.match(source, /不显示中文。学生点击播放听单词/);
 });
 
 runTest('flash memory duration is configurable with smart default', () => {

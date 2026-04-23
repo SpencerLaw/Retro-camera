@@ -143,9 +143,13 @@ export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
 }
 
 export function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, code: string): LicenseMetadata {
-  // 兼容性检查：如果已经是完整版（旧数据），直接返回
+  // 兼容性检查：如果已经是完整版（旧数据），也强制套用最新设备限制
   if ('devices' in compressed) {
-    return compressed as LicenseMetadata;
+    return {
+      ...compressed,
+      totalDevices: compressed.devices.length,
+      maxDevices: getEffectiveMaxDevices(code)
+    } as LicenseMetadata;
   }
 
   // 容错检查：防止数据损坏导致后台崩溃

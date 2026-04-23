@@ -1477,7 +1477,11 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   // 配置状态
   const [showSettings, setShowSettings] = useState(true);
   const [wordPronunciationStatus, setWordPronunciationStatus] = useState('');
-  const [wordAudioDownloadProgress, setWordAudioDownloadProgress] = useState<WordAudioDownloadProgress | null>(null);
+  const [wordAudioDownloadProgressByBank, setWordAudioDownloadProgressByBank] = useState<Record<string, WordAudioDownloadProgress>>({});
+
+  const updateWordAudioDownloadProgress = (bankId: string) => (progress: WordAudioDownloadProgress) => {
+    setWordAudioDownloadProgressByBank(prev => ({ ...prev, [bankId]: progress }));
+  };
 
   // 初始化检查授权
   useEffect(() => {
@@ -1562,7 +1566,6 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
   const redChallengePoolRef = useRef<BilingualChallengePair[]>([]);
   const [wordImportMessage, setWordImportMessage] = useState('');
   const [isParsingWordFile, setIsParsingWordFile] = useState(false);
-  const wordAudioDownloadLabel = getWordAudioDownloadLabel(wordAudioDownloadProgress);
 
   // 核心游戏状态
   const [score, setScore] = useState(0);
@@ -1695,7 +1698,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       setActiveBankId(newBank.id);
       setWordBank(words);
       setChallengePairs(importedChallengePairs);
-      prewarmWordPronunciationAudio(words, importedChallengePairs, setWordAudioDownloadProgress);
+      prewarmWordPronunciationAudio(words, importedChallengePairs, updateWordAudioDownloadProgress(newBank.id));
 
       setWordImportMessage(`${t('tugOfWar.wordImportSuccess', { count: words.length })}；挑战配对 ${importedChallengePairs.length} 组`);
     } catch (error) {
@@ -2284,7 +2287,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     if (activeBankId === editingBank.id) {
                       setWordBank(editingBank.words);
                       setChallengePairs(editingBank.challengePairs || []);
-                      prewarmWordPronunciationAudio(editingBank.words, editingBank.challengePairs || [], setWordAudioDownloadProgress);
+                      prewarmWordPronunciationAudio(editingBank.words, editingBank.challengePairs || [], updateWordAudioDownloadProgress(editingBank.id));
                     }
                     setEditingBank(null);
                   }}
@@ -2603,22 +2606,37 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <div className="pt-2 border-t border-blue-200/50">
                         <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-3">本地词库列表 (点击选择)</div>
                         <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                          {savedBanks.map(bank => (
-                            <div 
+                          {savedBanks.map(bank => {
+                            const bankAudioDownloadLabel = getWordAudioDownloadLabel(wordAudioDownloadProgressByBank[bank.id] || null);
+                            return (
+                            <div
                               key={bank.id} 
                               onClick={() => {
                                 setActiveBankId(bank.id);
                                 setWordBank(bank.words);
                                 setChallengePairs(bank.challengePairs || []);
-                                prewarmWordPronunciationAudio(bank.words, bank.challengePairs || [], setWordAudioDownloadProgress);
+                                prewarmWordPronunciationAudio(bank.words, bank.challengePairs || [], updateWordAudioDownloadProgress(bank.id));
                               }}
-                              className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${activeBankId === bank.id ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-blue-100 text-slate-600 hover:border-blue-300'}`}
+                              className={`flex items-center justify-between gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${activeBankId === bank.id ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-blue-100 text-slate-600 hover:border-blue-300'}`}
                             >
-                              <div className="flex flex-col">
-                                <span className="font-black text-sm">{bank.name}</span>
+                              <div className="flex min-w-0 flex-col gap-1">
+                                <span className="font-black text-sm truncate">{bank.name}</span>
                                 <span className={`text-[10px] font-bold ${activeBankId === bank.id ? 'text-blue-200' : 'text-slate-400'}`}>
                                   {bank.words.length} 个单词 · 挑战 {bank.challengePairs?.length || 0} 组
                                 </span>
+                                {bankAudioDownloadLabel && (
+                                  <span className={`w-fit rounded-full px-2.5 py-0.5 text-[10px] font-black border ${
+                                    wordAudioDownloadProgressByBank[bank.id]?.done
+                                      ? activeBankId === bank.id
+                                        ? 'bg-white/15 text-white border-white/20'
+                                        : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                      : activeBankId === bank.id
+                                        ? 'bg-white/15 text-blue-50 border-white/20'
+                                        : 'bg-amber-50 text-amber-700 border-amber-100'
+                                  }`}>
+                                    {bankAudioDownloadLabel}
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-2">
                                 <button 
@@ -2643,7 +2661,8 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                                 </button>
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -2766,18 +2785,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     </div>
                   ) : (
                     <div>
-                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">当前词库</label>
-                        {wordAudioDownloadLabel && (
-                          <span className={`rounded-full px-3 py-1 text-[10px] font-black border ${
-                            wordAudioDownloadProgress?.done
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                              : 'bg-amber-50 text-amber-700 border-amber-100'
-                          }`}>
-                            {wordAudioDownloadLabel}
-                          </span>
-                        )}
-                      </div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">当前词库</label>
                       <div className="h-[42px] bg-slate-100 rounded-xl font-black text-slate-700 flex items-center justify-center text-sm border-2 border-transparent">
                         {settings.gameRule === 'speedrun'
                           ? `记忆竞速 ${challengePairs.length} 组`

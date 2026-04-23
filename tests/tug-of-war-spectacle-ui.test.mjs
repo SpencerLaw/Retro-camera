@@ -105,7 +105,8 @@ runTest('english correct answers play the whole word pronunciation after praise 
 runTest('imported and selected word banks download pronunciation audio into local cache', () => {
   assert.match(source, /interface WordAudioDownloadProgress/);
   assert.match(source, /const getWordAudioDownloadLabel = /);
-  assert.match(source, /setWordAudioDownloadProgress/);
+  assert.match(source, /wordAudioDownloadProgressByBank/);
+  assert.match(source, /updateWordAudioDownloadProgress/);
   assert.match(source, /已下载所有单词音频/);
   assert.match(source, /已下载 \$\{progress\.percent\}%/);
   assert.match(source, /WORD_AUDIO_DB_NAME/);
@@ -125,8 +126,12 @@ runTest('imported and selected word banks download pronunciation audio into loca
   assert.match(source, /Math\.round\(\(completed \/ uniqueWords\.length\) \* 100\)/);
   assert.match(source, /await cacheDictionaryWordAudio\(word\)/);
   assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed, percent, done: completed >= uniqueWords\.length \}\)/);
-  assert.match(source, /prewarmWordPronunciationAudio\(words, importedChallengePairs, setWordAudioDownloadProgress\)/);
-  assert.match(source, /prewarmWordPronunciationAudio\(bank\.words, bank\.challengePairs \|\| \[\], setWordAudioDownloadProgress\)/);
+  assert.match(source, /prewarmWordPronunciationAudio\(words, importedChallengePairs, updateWordAudioDownloadProgress\(newBank\.id\)\)/);
+  assert.match(source, /prewarmWordPronunciationAudio\(bank\.words, bank\.challengePairs \|\| \[\], updateWordAudioDownloadProgress\(bank\.id\)\)/);
+  assert.match(source, /const bankAudioDownloadLabel = getWordAudioDownloadLabel\(wordAudioDownloadProgressByBank\[bank\.id\] \|\| null\)/);
+  assert.match(source, /bankAudioDownloadLabel &&/);
+  assert.match(source, /wordAudioDownloadProgressByBank\[bank\.id\]\?\.done/);
+  assert.doesNotMatch(source, /const wordAudioDownloadLabel = getWordAudioDownloadLabel\(wordAudioDownloadProgress\)/);
 });
 
 runTest('word pronunciation is primed from user gestures before delayed speech', () => {

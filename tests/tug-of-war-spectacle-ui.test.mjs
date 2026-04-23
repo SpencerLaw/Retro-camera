@@ -118,11 +118,15 @@ runTest('imported and selected word banks download pronunciation audio into loca
   assert.match(source, /audioData: await response\.arrayBuffer\(\)/);
   assert.match(source, /indexedDB\.open/);
   assert.match(source, /createObjectStore\(WORD_AUDIO_STORE_NAME/);
+  assert.match(source, /const getMissingCachedWordAudioKeys = /);
+  assert.match(source, /const missingWords = await getMissingCachedWordAudioKeys\(uniqueWords\)/);
+  assert.match(source, /if \(missingWords\.length === 0\)/);
+  assert.match(source, /completed: uniqueWords\.length, percent: 100, done: true/);
   assert.match(source, /const prewarmWordPronunciationAudio = /);
   assert.match(source, /\.\.\.words\.map\(word => word\.text\)/);
   assert.match(source, /\.\.\.pairs\.map\(pair => pair\.english\)/);
   assert.match(source, /new Set\(/);
-  assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed: 0, percent: 0, done: false \}\)/);
+  assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed: uniqueWords\.length - missingWords\.length, percent: 0, done: false \}\)/);
   assert.match(source, /Math\.round\(\(completed \/ uniqueWords\.length\) \* 100\)/);
   assert.match(source, /const visiblePercent = percent >= 85 \? 99 : percent/);
   assert.match(source, /await cacheDictionaryWordAudio\(word\)/);

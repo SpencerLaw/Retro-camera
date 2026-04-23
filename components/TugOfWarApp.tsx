@@ -1001,6 +1001,15 @@ const saveCachedWordAudio = async (audio: CachedWordAudio) => {
   });
 };
 
+const getMissingCachedWordAudioKeys = async (keys: string[]) => {
+  const missing: string[] = [];
+  for (const key of keys) {
+    const cached = await getCachedWordAudio(key);
+    if (!cached?.audioData?.byteLength) missing.push(key);
+  }
+  return missing;
+};
+
 const getDictionaryWordAudioUrl = async (text: string) => {
   const key = getDictionaryAudioLookupKey(text);
   if (!key) return null;
@@ -1135,11 +1144,17 @@ const prewarmWordPronunciationAudio = (
     return;
   }
 
-  onProgress?.({ total: uniqueWords.length, completed: 0, percent: 0, done: false });
-
   void (async () => {
-    const queue = [...uniqueWords];
-    let completed = 0;
+    const missingWords = await getMissingCachedWordAudioKeys(uniqueWords);
+    if (missingWords.length === 0) {
+      onProgress?.({ total: uniqueWords.length, completed: uniqueWords.length, percent: 100, done: true });
+      return;
+    }
+
+    onProgress?.({ total: uniqueWords.length, completed: uniqueWords.length - missingWords.length, percent: 0, done: false });
+
+    const queue = [...missingWords];
+    let completed = uniqueWords.length - missingWords.length;
     const reportProgress = () => {
       const percent = Math.round((completed / uniqueWords.length) * 100);
       const visiblePercent = percent >= 85 ? 99 : percent;

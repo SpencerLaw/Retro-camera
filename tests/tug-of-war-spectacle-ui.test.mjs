@@ -81,11 +81,14 @@ runTest('start countdown plays rhythmic sounds before the game begins', () => {
 
 runTest('english correct answers play the whole word pronunciation after praise sounds', () => {
   assert.match(source, /const playWordPronunciation = /);
+  assert.match(source, /const speakWordPronunciationWhenVoicesReady = /);
+  assert.match(source, /let activeWordPronunciationUtterance/);
   assert.match(source, /SpeechSynthesisUtterance/);
   assert.match(source, /getWordPronunciationText/);
   assert.match(source, /correctWordPronunciation = displayAnswer/);
   assert.match(source, /settings\.subjectMode === 'word' && correctWordPronunciation/);
   assert.match(source, /playWordPronunciation\(correctWordPronunciation, winner \? 920 : 420\)/);
+  assert.match(source, /voiceschanged/);
   assert.match(source, /window\.speechSynthesis\.speak\(utterance\)/);
   assert.doesNotMatch(source, /correctWordPronunciation\.split\(''\)/);
 });
@@ -99,6 +102,8 @@ runTest('word pronunciation is primed from user gestures before delayed speech',
   assert.match(source, /settings\.soundEnabled && settings\.subjectMode === 'word'[\s\S]*primeWordPronunciation\(\)/);
   assert.match(source, /const toggleSoundEnabled = \(\) =>/);
   assert.match(source, /onClick=\{toggleSoundEnabled\}/);
+  assert.match(source, /测试单词朗读：apple/);
+  assert.match(source, /speakWordPronunciationWhenVoicesReady\('apple'\)/);
 });
 
 runTest('wrong answers do not play discouraging sounds', () => {

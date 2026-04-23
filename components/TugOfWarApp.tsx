@@ -825,6 +825,7 @@ const fireTeamConfetti = (team: 'blue' | 'red', subjectMode: SubjectMode, streak
 let tugAudioContext: AudioContext | null = null;
 let wordPronunciationTimer: number | null = null;
 let wordPronunciationPrimed = false;
+let activeWordPronunciationUtterance: SpeechSynthesisUtterance | null = null;
 
 const getTugAudioContext = () => {
   if (typeof window === 'undefined') return null;
@@ -924,6 +925,55 @@ const getEnglishSpeechVoice = () => {
   );
 };
 
+const speakWordPronunciationNow = (text: string, voice: SpeechSynthesisVoice | null) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  if (voice) utterance.voice = voice;
+  utterance.lang = voice?.lang || 'en-US';
+  utterance.rate = 0.86;
+  utterance.pitch = 1;
+  utterance.volume = 0.95;
+  utterance.onend = () => {
+    if (activeWordPronunciationUtterance === utterance) {
+      activeWordPronunciationUtterance = null;
+    }
+  };
+  utterance.onerror = (event) => {
+    console.warn('Word pronunciation failed:', event.error);
+    if (activeWordPronunciationUtterance === utterance) {
+      activeWordPronunciationUtterance = null;
+    }
+  };
+
+  activeWordPronunciationUtterance = utterance;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.resume();
+  window.speechSynthesis.speak(utterance);
+};
+
+const speakWordPronunciationWhenVoicesReady = (text: string) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+  const synthesis = window.speechSynthesis;
+  const voice = getEnglishSpeechVoice();
+  if (voice || synthesis.getVoices().length > 0) {
+    speakWordPronunciationNow(text, voice);
+    return;
+  }
+
+  let settled = false;
+  const speakOnce = () => {
+    if (settled) return;
+    settled = true;
+    synthesis.removeEventListener?.('voiceschanged', speakOnce);
+    speakWordPronunciationNow(text, getEnglishSpeechVoice());
+  };
+
+  synthesis.addEventListener?.('voiceschanged', speakOnce, { once: true });
+  window.setTimeout(speakOnce, 600);
+};
+
 const primeWordPronunciation = () => {
   if (
     wordPronunciationPrimed
@@ -958,17 +1008,7 @@ const playWordPronunciation = (word: string, delayMs = 420) => {
   }
 
   wordPronunciationTimer = window.setTimeout(() => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voice = getEnglishSpeechVoice();
-    if (voice) utterance.voice = voice;
-    utterance.lang = voice?.lang || 'en-US';
-    utterance.rate = 0.86;
-    utterance.pitch = 1;
-    utterance.volume = 0.95;
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.resume();
-    window.speechSynthesis.speak(utterance);
+    speakWordPronunciationWhenVoicesReady(text);
     wordPronunciationTimer = null;
   }, delayMs);
 };
@@ -2443,6 +2483,18 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-sm ${settings.soundEnabled ? 'left-6' : 'left-1'}`} />
                     </button>
                   </div>
+                  {settings.subjectMode === 'word' && settings.soundEnabled && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        primeWordPronunciation();
+                        speakWordPronunciationWhenVoicesReady('apple');
+                      }}
+                      className="mt-3 w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700 shadow-sm active:scale-[0.99]"
+                    >
+                      测试单词朗读：apple
+                    </button>
+                  )}
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">

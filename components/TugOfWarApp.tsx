@@ -1142,7 +1142,8 @@ const prewarmWordPronunciationAudio = (
     let completed = 0;
     const reportProgress = () => {
       const percent = Math.round((completed / uniqueWords.length) * 100);
-      onProgress?.({ total: uniqueWords.length, completed, percent, done: completed >= uniqueWords.length });
+      const visiblePercent = percent >= 85 ? 99 : percent;
+      onProgress?.({ total: uniqueWords.length, completed, percent: visiblePercent, done: false });
     };
     const workerCount = Math.min(4, queue.length);
     await Promise.all(Array.from({ length: workerCount }, async () => {
@@ -1155,6 +1156,7 @@ const prewarmWordPronunciationAudio = (
         }
       }
     }));
+    onProgress?.({ total: uniqueWords.length, completed: uniqueWords.length, percent: 100, done: true });
   })();
 };
 

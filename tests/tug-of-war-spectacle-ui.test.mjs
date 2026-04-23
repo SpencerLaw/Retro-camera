@@ -124,8 +124,10 @@ runTest('imported and selected word banks download pronunciation audio into loca
   assert.match(source, /new Set\(/);
   assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed: 0, percent: 0, done: false \}\)/);
   assert.match(source, /Math\.round\(\(completed \/ uniqueWords\.length\) \* 100\)/);
+  assert.match(source, /const visiblePercent = percent >= 85 \? 99 : percent/);
   assert.match(source, /await cacheDictionaryWordAudio\(word\)/);
-  assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed, percent, done: completed >= uniqueWords\.length \}\)/);
+  assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed, percent: visiblePercent, done: false \}\)/);
+  assert.match(source, /onProgress\?\.\(\{ total: uniqueWords\.length, completed: uniqueWords\.length, percent: 100, done: true \}\)/);
   assert.match(source, /prewarmWordPronunciationAudio\(words, importedChallengePairs, updateWordAudioDownloadProgress\(newBank\.id\)\)/);
   assert.match(source, /prewarmWordPronunciationAudio\(bank\.words, bank\.challengePairs \|\| \[\], updateWordAudioDownloadProgress\(bank\.id\)\)/);
   assert.match(source, /const bankAudioDownloadLabel = getWordAudioDownloadLabel\(wordAudioDownloadProgressByBank\[bank\.id\] \|\| null\)/);

@@ -824,6 +824,7 @@ const fireTeamConfetti = (team: 'blue' | 'red', subjectMode: SubjectMode, streak
 
 let tugAudioContext: AudioContext | null = null;
 let wordPronunciationTimer: number | null = null;
+let wordPronunciationPrimed = false;
 
 const getTugAudioContext = () => {
   if (typeof window === 'undefined') return null;
@@ -923,6 +924,30 @@ const getEnglishSpeechVoice = () => {
   );
 };
 
+const primeWordPronunciation = () => {
+  if (
+    wordPronunciationPrimed
+    || typeof window === 'undefined'
+    || !('speechSynthesis' in window)
+    || !('SpeechSynthesisUtterance' in window)
+  ) return;
+
+  const utterance = new SpeechSynthesisUtterance('ready');
+  utterance.lang = 'en-US';
+  utterance.volume = 0;
+  utterance.rate = 1;
+  utterance.onend = () => {
+    wordPronunciationPrimed = true;
+  };
+  utterance.onerror = () => {
+    wordPronunciationPrimed = false;
+  };
+
+  window.speechSynthesis.resume();
+  window.speechSynthesis.speak(utterance);
+  wordPronunciationPrimed = true;
+};
+
 const playWordPronunciation = (word: string, delayMs = 420) => {
   if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
   const text = getWordPronunciationText(word);
@@ -942,6 +967,7 @@ const playWordPronunciation = (word: string, delayMs = 420) => {
     utterance.volume = 0.95;
 
     window.speechSynthesis.cancel();
+    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
     wordPronunciationTimer = null;
   }, delayMs);
@@ -1341,6 +1367,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     if (!problem || problem.type !== 'word' || picked.includes(index)) return;
     if (isWordPreviewActive(problem)) return;
     if (picked.length >= getMissingLetterCount(problem)) return;
+    if (settings.soundEnabled) primeWordPronunciation();
 
     if (team === 'blue') {
       setBluePickedLetterIndices(prev => [...prev, index]);
@@ -1361,6 +1388,9 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     if (settings.subjectMode === 'word' && settings.gameRule === 'speedrun' && challengePairs.length === 0) {
       setWordImportMessage('记忆竞速需要导入“中文 + 英文”的双语词表，例如：苹果 apple');
       return;
+    }
+    if (settings.soundEnabled && settings.subjectMode === 'word') {
+      primeWordPronunciation();
     }
 
     // 英文模式：初始化蓝红队各自的洗牌词池
@@ -1619,6 +1649,14 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     if (redProblem.type === 'word' && isWordPreviewActive(redProblem)) return;
     processAnswer('red', redInput, redProblem);
   }, [redInput, redProblem, score, gameState, openingCountdown, settings, wordBank, challengePairs, redFrozenUntil, redDoubleActive, blueShieldActive, redStreak]);
+
+  const toggleSoundEnabled = () => {
+    const nextSoundEnabled = !settings.soundEnabled;
+    if (nextSoundEnabled && settings.subjectMode === 'word') {
+      primeWordPronunciation();
+    }
+    setSettings({...settings, soundEnabled: nextSoundEnabled});
+  };
 
   const spectacleNow = Date.now();
   const blueSpectacleIntensity = getSpectacleIntensity({
@@ -2398,7 +2436,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                       </div>
                     </div>
                     <button
-                      onClick={() => setSettings({...settings, soundEnabled: !settings.soundEnabled})}
+                      onClick={toggleSoundEnabled}
                       className={`w-12 h-7 rounded-full transition-all relative shrink-0 ${settings.soundEnabled ? 'bg-amber-400' : 'bg-slate-300'}`}
                       aria-label={t('tugOfWar.enableSounds')}
                     >

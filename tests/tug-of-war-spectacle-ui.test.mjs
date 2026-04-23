@@ -90,6 +90,17 @@ runTest('english correct answers play the whole word pronunciation after praise 
   assert.doesNotMatch(source, /correctWordPronunciation\.split\(''\)/);
 });
 
+runTest('word pronunciation is primed from user gestures before delayed speech', () => {
+  assert.match(source, /const primeWordPronunciation = /);
+  assert.match(source, /wordPronunciationPrimed/);
+  assert.match(source, /utterance\.volume = 0/);
+  assert.match(source, /window\.speechSynthesis\.resume\(\)/);
+  assert.match(source, /if \(settings\.soundEnabled\) primeWordPronunciation\(\)/);
+  assert.match(source, /settings\.soundEnabled && settings\.subjectMode === 'word'[\s\S]*primeWordPronunciation\(\)/);
+  assert.match(source, /const toggleSoundEnabled = \(\) =>/);
+  assert.match(source, /onClick=\{toggleSoundEnabled\}/);
+});
+
 runTest('wrong answers do not play discouraging sounds', () => {
   assert.doesNotMatch(source, /playWrongSound/);
 });

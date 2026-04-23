@@ -111,8 +111,8 @@ function getEffectiveMaxDevices(code: string): number {
   if (cleanCode.startsWith('XXDK') || cleanCode.startsWith('XM')) {
     return 999999; // 星梦奇旅不限制
   }
-  if (cleanCode.startsWith('GB')) {
-    return 2; // 班级广播限制 2 个设备
+  if (cleanCode.startsWith('GB') || cleanCode.startsWith('SX') || cleanCode.startsWith('YW')) {
+    return 2; // 班级广播、数学拔河、英语单词拔河限制 2 个设备
   }
   return 5; // 其他默认 5
 }

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const verifyLicenseSource = fs.readFileSync('api/verify-license.ts', 'utf8');
+const maxDevicesFunction = verifyLicenseSource.match(/function getEffectiveMaxDevices[\s\S]*?return 5;[^\n]*\r?\n}/)?.[0] || '';
 
 function runTest(name, fn) {
   try {
@@ -15,4 +16,11 @@ function runTest(name, fn) {
 
 runTest('license verification parses SX tug-of-war codes', () => {
   assert.match(verifyLicenseSource, /startsWith\('SX'\)/);
+});
+
+runTest('math and word tug-of-war licenses are limited to two devices', () => {
+  assert.match(
+    maxDevicesFunction,
+    /cleanCode\.startsWith\('SX'\)[\s\S]*cleanCode\.startsWith\('YW'\)[\s\S]*return 2;/
+  );
 });

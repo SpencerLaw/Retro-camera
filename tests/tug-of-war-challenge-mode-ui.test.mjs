@@ -161,6 +161,22 @@ runTest('math settings explain modes in plain classroom words', () => {
   assert.match(source, /凑出目标数字/);
 });
 
+runTest('math settings include a standalone two digit no-borrow subtraction mode', () => {
+  assert.match(source, /type GameMode = 'classic' \| 'target' \| 'two_digit_no_borrow_sub'/);
+  assert.match(source, /两位数不退位减法/);
+  assert.match(source, /只出两位数减两位数/);
+  assert.match(source, /const generateTwoDigitNoBorrowSubtractionProblem = /);
+  assert.match(source, /gameMode === 'two_digit_no_borrow_sub'/);
+  assert.match(source, /operator: 'sub'/);
+  assert.match(source, /ones1 >= ones2/);
+  assert.match(source, /tens1 >= tens2/);
+  assert.match(source, /let ones1 = Math\.floor\(Math\.random\(\) \* 9\) \+ 1/);
+  assert.match(source, /let ones2 = Math\.floor\(Math\.random\(\) \* ones1\) \+ 1/);
+  assert.doesNotMatch(source, /const ones2 = Math\.floor\(Math\.random\(\) \* \(ones1 \+ 1\)\)/);
+  assert.match(source, /settings\.gameMode !== 'two_digit_no_borrow_sub' && \(/);
+  assert.match(source, /settings\.subjectMode === 'math' && settings\.gameMode !== 'two_digit_no_borrow_sub'/);
+});
+
 runTest('frozen state renders a reusable square cover with Chinese frozen text', () => {
   assert.match(source, /const FrozenSquareOverlay/);
   assert.match(source, /aspect-square/);

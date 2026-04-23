@@ -24,7 +24,7 @@ import { getParticleCount, getSpectacleGlyphs, getSpectacleIntensity } from './t
 type Operator = 'add' | 'sub' | 'mul' | 'div';
 type SubjectMode = 'math' | 'word';
 type TugOfWarVariant = SubjectMode;
-type GameMode = 'classic' | 'target';
+type GameMode = 'classic' | 'target' | 'two_digit_no_borrow_sub';
 type PowerUpType = 'freeze' | 'double' | 'shield';
 type WordPlayMode = 'shuffle' | 'flash' | 'cloze' | 'edge_hint' | 'listening';
 type HistoryViewMode = 'total' | 'blue' | 'red';
@@ -130,8 +130,42 @@ const evaluateExpression = (expr: string): number | null => {
 };
 
 // 生成随机题目
+const generateTwoDigitNoBorrowSubtractionProblem = (): MathProblem => {
+  const tens1 = Math.floor(Math.random() * 9) + 1;
+  const tens2 = Math.floor(Math.random() * tens1) + 1;
+  let ones1 = Math.floor(Math.random() * 9) + 1;
+  let ones2 = Math.floor(Math.random() * ones1) + 1;
+
+  if (tens1 === tens2 && ones1 === ones2) {
+    if (ones1 < 9) {
+      ones1 += 1;
+    } else {
+      ones2 -= 1;
+    }
+  }
+
+  if (tens1 >= tens2 && ones1 >= ones2) {
+    const num1 = tens1 * 10 + ones1;
+    const num2 = tens2 * 10 + ones2;
+
+    return {
+      type: 'math',
+      num1,
+      num2,
+      operator: 'sub',
+      answer: num1 - num2,
+    };
+  }
+
+  return { type: 'math', num1: 21, num2: 11, operator: 'sub', answer: 10 };
+};
+
 const generateMathProblem = (settings: GameSettings): MathProblem => {
   const { operators, maxNumber, gameMode } = settings;
+
+  if (gameMode === 'two_digit_no_borrow_sub') {
+    return generateTwoDigitNoBorrowSubtractionProblem();
+  }
   
   if (gameMode === 'target') {
     // 凑数模式：直接给出一个目标数字，并要求使用特定的运算符
@@ -677,10 +711,44 @@ const getWordEncouragement = ({
   return null;
 };
 
+const getMathEncouragement = ({
+  subjectMode,
+  streak,
+  tugAdvantage,
+  winScore,
+}: {
+  subjectMode: SubjectMode;
+  streak: number;
+  tugAdvantage: number;
+  winScore: number;
+}): WordEncouragement | null => {
+  if (subjectMode !== 'math') return null;
+
+  const remainingToWin = Math.max(0, winScore - Math.max(0, tugAdvantage));
+
+  if (remainingToWin > 0 && remainingToWin <= 3 && tugAdvantage > 0) {
+    return { tone: 'leader', title: '马上就赢了！', subtitle: '再稳稳答几题！' };
+  }
+
+  if (streak >= 5) {
+    return { tone: 'leader', title: '计算小高手！', subtitle: '连续答对，火力全开！' };
+  }
+
+  if (streak >= 3) {
+    return { tone: 'leader', title: '太棒了！', subtitle: `连对 ${streak} 题，继续冲！` };
+  }
+
+  if (tugAdvantage <= -4) {
+    return { tone: 'trailing', title: '追得回来！', subtitle: '别急，下一题稳住！' };
+  }
+
+  return null;
+};
+
 const getCorrectBurstLabels = (subjectMode: SubjectMode) => (
   subjectMode === 'word'
     ? ['Good!', 'Great!', 'Nice!', 'Super!']
-    : ['+', '-', 'x', '=']
+    : ['太棒了', '算得准', '继续冲', '稳！']
 );
 
 const TeamSpectacleLayer = ({ team, subjectMode, intensity, streak, lastCorrectAt, encouragement, isTugRule }: {
@@ -1918,7 +1986,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
       questionKey = problem.mode === 'challenge' && problem.prompt
         ? `${problem.prompt} -> ${displayAnswer}`
         : displayAnswer;
-    } else if (settings.gameMode === 'classic') {
+    } else if (settings.gameMode === 'classic' || settings.gameMode === 'two_digit_no_borrow_sub') {
       isCorrect = parseInt(input) === problem.answer;
       questionKey = `${problem.num1} ${getOpSymbol(problem.operator)} ${problem.num2}`;
     } else {
@@ -2110,6 +2178,18 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
     target: settings.speedrunTarget || 10,
     streak: redStreak,
     tugAdvantage: score,
+  });
+  const blueMathEncouragement = getMathEncouragement({
+    subjectMode: settings.subjectMode,
+    streak: blueStreak,
+    tugAdvantage: -score,
+    winScore: settings.winScore,
+  });
+  const redMathEncouragement = getMathEncouragement({
+    subjectMode: settings.subjectMode,
+    streak: redStreak,
+    tugAdvantage: score,
+    winScore: settings.winScore,
   });
 
   // 视觉辅助函数
@@ -2594,7 +2674,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   <>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">数学怎么玩</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-100 p-1.5 rounded-2xl">
                         <button
                           onClick={() => setSettings({...settings, gameMode: 'classic'})}
                           className={`min-h-[72px] rounded-xl font-black transition-all flex flex-col items-center justify-center gap-1 px-3 text-center ${settings.gameMode === 'classic' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
@@ -2609,26 +2689,35 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                           <span className="text-base leading-none">凑数达人</span>
                           <span className={`text-[11px] leading-snug ${settings.gameMode === 'target' ? 'text-slate-600' : 'text-slate-400'}`}>凑出目标数字，答对就拉绳子</span>
                         </button>
+                        <button
+                          onClick={() => setSettings({...settings, gameMode: 'two_digit_no_borrow_sub', operators: ['sub']})}
+                          className={`min-h-[72px] rounded-xl font-black transition-all flex flex-col items-center justify-center gap-1 px-3 text-center ${settings.gameMode === 'two_digit_no_borrow_sub' ? 'bg-white shadow-lg text-blue-600' : 'text-slate-400'}`}
+                        >
+                          <span className="text-base leading-tight">两位数不退位减法</span>
+                          <span className={`text-[11px] leading-snug ${settings.gameMode === 'two_digit_no_borrow_sub' ? 'text-slate-600' : 'text-slate-400'}`}>只出两位数减两位数，不会借位</span>
+                        </button>
                       </div>
                     </div>
 
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">这局用哪些符号</label>
-                      <div className="grid grid-cols-4 gap-2">
-                        {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
-                          <button
-                            key={op}
-                            onClick={() => {
-                              const newOps = settings.operators.includes(op) ? settings.operators.filter(i => i !== op) : [...settings.operators, op];
-                              if (newOps.length > 0) setSettings({...settings, operators: newOps});
-                            }}
-                            className={`py-2.5 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
-                          >
-                            {getOpSymbol(op)}
-                          </button>
-                        ))}
+                    {settings.gameMode !== 'two_digit_no_borrow_sub' && (
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">这局用哪些符号</label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {(['add', 'sub', 'mul', 'div'] as Operator[]).map(op => (
+                            <button
+                              key={op}
+                              onClick={() => {
+                                const newOps = settings.operators.includes(op) ? settings.operators.filter(i => i !== op) : [...settings.operators, op];
+                                if (newOps.length > 0) setSettings({...settings, operators: newOps});
+                              }}
+                              className={`py-2.5 rounded-xl font-bold transition-all border-2 ${settings.operators.includes(op) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500'}`}
+                            >
+                              {getOpSymbol(op)}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 ) : (
                   <div className="p-4 bg-blue-50 rounded-3xl border border-blue-100 space-y-4">
@@ -2842,7 +2931,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                 )}
 
                 <div className="space-y-4 pt-4 border-t border-slate-100">
-                  {settings.subjectMode === 'math' ? (
+                  {settings.subjectMode === 'math' && settings.gameMode !== 'two_digit_no_borrow_sub' ? (
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">题目数字最大到几</label>
                       <select
@@ -2856,7 +2945,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                         <option value="100">100</option>
                       </select>
                     </div>
-                  ) : (
+                  ) : settings.subjectMode === 'word' ? (
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">当前词库</label>
                       <div className="h-[42px] bg-slate-100 rounded-xl font-black text-slate-700 flex items-center justify-center text-sm border-2 border-transparent">
@@ -2864,6 +2953,10 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                           ? `记忆竞速 ${challengePairs.length} 组`
                           : t('tugOfWar.wordBankCount', { count: wordBank.length })}
                       </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-black text-blue-700 leading-relaxed">
+                      当前模式固定出两位数减两位数，不需要设置最大数字。
                     </div>
                   )}
                   {(settings.subjectMode !== 'word' || settings.gameRule !== 'speedrun') && (
@@ -3029,7 +3122,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   intensity={blueSpectacleIntensity}
                   streak={blueStreak}
                   lastCorrectAt={lastBlueCorrect}
-                  encouragement={blueWordEncouragement}
+                  encouragement={settings.subjectMode === 'math' ? blueMathEncouragement : blueWordEncouragement}
                   isTugRule={settings.gameRule !== 'speedrun'}
                 />
                 {/* 状态指示器 */}
@@ -3134,7 +3227,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                   intensity={redSpectacleIntensity}
                   streak={redStreak}
                   lastCorrectAt={lastRedCorrect}
-                  encouragement={redWordEncouragement}
+                  encouragement={settings.subjectMode === 'math' ? redMathEncouragement : redWordEncouragement}
                   isTugRule={settings.gameRule !== 'speedrun'}
                 />
                 <div className="absolute top-4 right-4 flex flex-col gap-2">

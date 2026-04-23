@@ -50,6 +50,18 @@ runTest('english word battles show responsive encouragement bubbles for leaders 
   assert.match(source, /encouragement\?\.tone === 'trailing'/);
 });
 
+runTest('math battles show Chinese encouragement bubbles for streaks leaders and trailing teams', () => {
+  assert.match(source, /const getMathEncouragement = /);
+  assert.match(source, /计算小高手/);
+  assert.match(source, /马上就赢了/);
+  assert.match(source, /追得回来/);
+  assert.match(source, /连对 \$\{streak\} 题/);
+  assert.match(source, /subjectMode !== 'math'/);
+  assert.match(source, /winScore/);
+  assert.match(source, /blueMathEncouragement/);
+  assert.match(source, /redMathEncouragement/);
+});
+
 runTest('word correct-answer burst uses praise words instead of ABCD glyphs', () => {
   assert.match(source, /const getCorrectBurstLabels = /);
   assert.match(source, /Good!/);
@@ -58,6 +70,14 @@ runTest('word correct-answer burst uses praise words instead of ABCD glyphs', ()
   assert.match(source, /Super!/);
   assert.match(source, /getCorrectBurstLabels\(subjectMode\)/);
   assert.doesNotMatch(source, /glyphs\.slice\(0, 4\)\.map/);
+});
+
+runTest('math correct-answer burst uses classroom praise instead of empty math symbols', () => {
+  assert.match(source, /太棒了/);
+  assert.match(source, /算得准/);
+  assert.match(source, /继续冲/);
+  assert.match(source, /稳！/);
+  assert.doesNotMatch(source, /: \['\+', '-', 'x', '='\]/);
 });
 
 runTest('classroom sounds can be toggled and play on correct answers and wins', () => {

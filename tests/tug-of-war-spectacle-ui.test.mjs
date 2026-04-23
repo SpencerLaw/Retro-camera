@@ -81,6 +81,9 @@ runTest('start countdown plays rhythmic sounds before the game begins', () => {
 
 runTest('english correct answers play the whole word pronunciation after praise sounds', () => {
   assert.match(source, /const playWordPronunciation = /);
+  assert.match(source, /const playDictionaryWordAudio = /);
+  assert.match(source, /DICTIONARY_AUDIO_API_BASE/);
+  assert.match(source, /decodeAudioData/);
   assert.match(source, /const speakWordPronunciationWhenVoicesReady = /);
   assert.match(source, /let activeWordPronunciationUtterance/);
   assert.match(source, /SpeechSynthesisUtterance/);
@@ -103,7 +106,8 @@ runTest('word pronunciation is primed from user gestures before delayed speech',
   assert.match(source, /const toggleSoundEnabled = \(\) =>/);
   assert.match(source, /onClick=\{toggleSoundEnabled\}/);
   assert.match(source, /测试单词朗读：apple/);
-  assert.match(source, /speakWordPronunciationWhenVoicesReady\('apple'\)/);
+  assert.match(source, /playWordPronunciation\('apple', 0, setWordPronunciationStatus\)/);
+  assert.match(source, /wordPronunciationStatus/);
 });
 
 runTest('wrong answers do not play discouraging sounds', () => {

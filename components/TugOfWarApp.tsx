@@ -826,6 +826,9 @@ let tugAudioContext: AudioContext | null = null;
 let wordPronunciationTimer: number | null = null;
 let wordPronunciationPrimed = false;
 let activeWordPronunciationUtterance: SpeechSynthesisUtterance | null = null;
+let activeWordAudioElement: HTMLAudioElement | null = null;
+const dictionaryAudioUrlCache = new Map<string, string | null>();
+const DICTIONARY_AUDIO_API_BASE = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
 
 const getTugAudioContext = () => {
   if (typeof window === 'undefined') return null;
@@ -915,6 +918,99 @@ const getWordPronunciationText = (word: string) => (
     .trim()
 );
 
+const getDictionaryAudioLookupKey = (text: string) => {
+  const match = getWordPronunciationText(text).match(/[A-Za-z][A-Za-z'-]*/);
+  return match ? match[0].toLowerCase() : '';
+};
+
+const normalizeDictionaryAudioUrl = (url: unknown) => {
+  if (typeof url !== 'string' || url.trim().length === 0) return null;
+  const cleanUrl = url.trim();
+  if (cleanUrl.startsWith('//')) return `https:${cleanUrl}`;
+  if (/^https?:\/\//i.test(cleanUrl)) return cleanUrl;
+  return null;
+};
+
+const getDictionaryWordAudioUrl = async (text: string) => {
+  const key = getDictionaryAudioLookupKey(text);
+  if (!key) return null;
+  if (dictionaryAudioUrlCache.has(key)) {
+    return dictionaryAudioUrlCache.get(key) || null;
+  }
+
+  try {
+    const response = await fetch(`${DICTIONARY_AUDIO_API_BASE}${encodeURIComponent(key)}`);
+    if (!response.ok) {
+      dictionaryAudioUrlCache.set(key, null);
+      return null;
+    }
+    const entries = await response.json();
+    const audioUrl = Array.isArray(entries)
+      ? entries
+          .flatMap(entry => Array.isArray(entry?.phonetics) ? entry.phonetics : [])
+          .map(phonetic => normalizeDictionaryAudioUrl(phonetic?.audio))
+          .find(Boolean) || null
+      : null;
+    dictionaryAudioUrlCache.set(key, audioUrl);
+    return audioUrl;
+  } catch (error) {
+    console.warn('Dictionary pronunciation lookup failed:', error);
+    dictionaryAudioUrlCache.set(key, null);
+    return null;
+  }
+};
+
+const playDecodedWordAudio = async (url: string) => {
+  const context = getTugAudioContext();
+  if (!context) return false;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return false;
+    const audioData = await response.arrayBuffer();
+    const buffer = await context.decodeAudioData(audioData.slice(0));
+    const source = context.createBufferSource();
+    const gain = context.createGain();
+    source.buffer = buffer;
+    gain.gain.value = 0.95;
+    source.connect(gain);
+    gain.connect(context.destination);
+    source.start();
+    return true;
+  } catch (error) {
+    console.warn('Decoded word audio playback failed:', error);
+    return false;
+  }
+};
+
+const playElementWordAudio = async (url: string) => {
+  if (typeof Audio === 'undefined') return false;
+
+  try {
+    if (activeWordAudioElement) {
+      activeWordAudioElement.pause();
+      activeWordAudioElement = null;
+    }
+    const audio = new Audio(url);
+    audio.volume = 0.95;
+    activeWordAudioElement = audio;
+    await audio.play();
+    audio.onended = () => {
+      if (activeWordAudioElement === audio) activeWordAudioElement = null;
+    };
+    return true;
+  } catch (error) {
+    console.warn('Element word audio playback failed:', error);
+    return false;
+  }
+};
+
+const playDictionaryWordAudio = async (text: string) => {
+  const audioUrl = await getDictionaryWordAudioUrl(text);
+  if (!audioUrl) return false;
+  return (await playDecodedWordAudio(audioUrl)) || (await playElementWordAudio(audioUrl));
+};
+
 const getEnglishSpeechVoice = () => {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
   const voices = window.speechSynthesis.getVoices();
@@ -926,7 +1022,7 @@ const getEnglishSpeechVoice = () => {
 };
 
 const speakWordPronunciationNow = (text: string, voice: SpeechSynthesisVoice | null) => {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+  if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return false;
 
   const utterance = new SpeechSynthesisUtterance(text);
   if (voice) utterance.voice = voice;
@@ -950,28 +1046,30 @@ const speakWordPronunciationNow = (text: string, voice: SpeechSynthesisVoice | n
   window.speechSynthesis.cancel();
   window.speechSynthesis.resume();
   window.speechSynthesis.speak(utterance);
+  return true;
 };
 
 const speakWordPronunciationWhenVoicesReady = (text: string) => {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return Promise.resolve(false);
 
   const synthesis = window.speechSynthesis;
   const voice = getEnglishSpeechVoice();
   if (voice || synthesis.getVoices().length > 0) {
-    speakWordPronunciationNow(text, voice);
-    return;
+    return Promise.resolve(speakWordPronunciationNow(text, voice));
   }
 
-  let settled = false;
-  const speakOnce = () => {
-    if (settled) return;
-    settled = true;
-    synthesis.removeEventListener?.('voiceschanged', speakOnce);
-    speakWordPronunciationNow(text, getEnglishSpeechVoice());
-  };
+  return new Promise<boolean>((resolve) => {
+    let settled = false;
+    const speakOnce = () => {
+      if (settled) return;
+      settled = true;
+      synthesis.removeEventListener?.('voiceschanged', speakOnce);
+      resolve(speakWordPronunciationNow(text, getEnglishSpeechVoice()));
+    };
 
-  synthesis.addEventListener?.('voiceschanged', speakOnce, { once: true });
-  window.setTimeout(speakOnce, 600);
+    synthesis.addEventListener?.('voiceschanged', speakOnce, { once: true });
+    window.setTimeout(speakOnce, 600);
+  });
 };
 
 const primeWordPronunciation = () => {
@@ -998,8 +1096,8 @@ const primeWordPronunciation = () => {
   wordPronunciationPrimed = true;
 };
 
-const playWordPronunciation = (word: string, delayMs = 420) => {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+const playWordPronunciation = (word: string, delayMs = 420, onStatus?: (status: string) => void) => {
+  if (typeof window === 'undefined') return;
   const text = getWordPronunciationText(word);
   if (!/[A-Za-z]/.test(text)) return;
 
@@ -1008,8 +1106,19 @@ const playWordPronunciation = (word: string, delayMs = 420) => {
   }
 
   wordPronunciationTimer = window.setTimeout(() => {
-    speakWordPronunciationWhenVoicesReady(text);
-    wordPronunciationTimer = null;
+    void (async () => {
+      onStatus?.('正在查找真实单词音频...');
+      if (await playDictionaryWordAudio(text)) {
+        onStatus?.('已播放真实单词音频');
+        return;
+      }
+
+      onStatus?.('没有找到真实音频，正在尝试系统朗读...');
+      const didStartSpeech = await speakWordPronunciationWhenVoicesReady(text);
+      onStatus?.(didStartSpeech ? '已调用系统英文朗读' : '这台设备没有可用英文朗读');
+    })().finally(() => {
+      wordPronunciationTimer = null;
+    });
   }, delayMs);
 };
 
@@ -1164,6 +1273,7 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
   // 配置状态
   const [showSettings, setShowSettings] = useState(true);
+  const [wordPronunciationStatus, setWordPronunciationStatus] = useState('');
 
   // 初始化检查授权
   useEffect(() => {
@@ -2484,16 +2594,24 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
                     </button>
                   </div>
                   {settings.subjectMode === 'word' && settings.soundEnabled && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        primeWordPronunciation();
-                        speakWordPronunciationWhenVoicesReady('apple');
-                      }}
-                      className="mt-3 w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700 shadow-sm active:scale-[0.99]"
-                    >
-                      测试单词朗读：apple
-                    </button>
+                    <div className="mt-3 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWordPronunciationStatus('正在测试 apple...');
+                          primeWordPronunciation();
+                          playWordPronunciation('apple', 0, setWordPronunciationStatus);
+                        }}
+                        className="w-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700 shadow-sm active:scale-[0.99]"
+                      >
+                        测试单词朗读：apple
+                      </button>
+                      {wordPronunciationStatus && (
+                        <div className="rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2 text-xs font-bold leading-relaxed text-amber-700">
+                          {wordPronunciationStatus}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 

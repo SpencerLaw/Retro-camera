@@ -9,17 +9,87 @@ export const normalizeWordDisplay = (value) =>
     .trim()
     .replace(/\s+/g, ' ');
 
+const ENGLISH_CANDIDATE_RE = /[A-Za-z]+(?:['-][A-Za-z]+)*(?:(?:\s+|\s*\.\.\.\s*)[A-Za-z]+(?:['-][A-Za-z]+)*)*/g;
+const PART_OF_SPEECH_TAGS = new Set([
+  'n', 'v', 'adj', 'adv', 'pron', 'prep', 'conj', 'det', 'interj', 'num', 'art', 'pl',
+  'noun', 'verb', 'adjective', 'adverb',
+]);
+
+const stripListPrefix = (value) =>
+  String(value ?? '')
+    .replace(/^\s*[\(\[（【]?\d+[\)\]）】]?\s*[.．、)]?\s*/, '')
+    .replace(/^\s*[A-Za-z][.．、)]\s+/, '');
+
+const stripPhonetics = (value) =>
+  String(value ?? '')
+    .replace(/\/[^/\n]+\/|\[[^\]\n]+\]/g, ' ');
+
+const normalizeImportLine = (value) =>
+  stripPhonetics(stripListPrefix(value))
+    .replace(/[：:；;，,|]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const normalizeChinesePrompt = (value) =>
+  String(value ?? '')
+    .match(/[\u3400-\u9FFF]+/g)
+    ?.join('') ?? '';
+
+const isImportHeaderLine = (line) => {
+  const text = String(line ?? '').trim().toLowerCase();
+  const chinese = normalizeChinesePrompt(text);
+  const english = normalizeWordAnswer(text).toLowerCase();
+
+  return (
+    /英语单词|单词表|中英对照|英文短语|英文\/短语|中文释义|中文意思|释义|词汇表/.test(text)
+    || /english.*(word|phrase|term)|chinese.*(meaning|definition)|meaning|definition/.test(text)
+    || ['english', 'word', 'words', 'phrase', 'phrases', 'meaning', 'meanings', 'chinese'].includes(english)
+    || ['英文', '短语', '中文释义', '释义'].includes(chinese)
+  );
+};
+
+const removeTrailingPartOfSpeech = (value) => {
+  const parts = normalizeWordDisplay(value).split(/\s+/).filter(Boolean);
+  while (parts.length > 1 && PART_OF_SPEECH_TAGS.has(parts[parts.length - 1].replace(/\./g, '').toLowerCase())) {
+    parts.pop();
+  }
+  return normalizeWordDisplay(parts.join(' '));
+};
+
+const getEnglishCandidatesFromLine = (line) => {
+  if (isImportHeaderLine(line)) return [];
+
+  const segments = String(line ?? '').split(/[；;，,|]+/);
+  const candidates = [];
+
+  for (const segment of segments) {
+    const normalizedLine = normalizeImportLine(segment);
+    const matches = normalizedLine.match(ENGLISH_CANDIDATE_RE) ?? [];
+
+    for (const match of matches) {
+      const displayWord = removeTrailingPartOfSpeech(match);
+      const answerKey = normalizeWordAnswer(displayWord);
+      if (answerKey.length >= 2 && !PART_OF_SPEECH_TAGS.has(displayWord.toLowerCase())) {
+        candidates.push(displayWord);
+      }
+    }
+  }
+
+  return candidates;
+};
+
 export const parseWordListText = (text) => {
   const seen = new Set();
   const words = [];
-  const matches = String(text ?? '').match(/[A-Za-z]+(?:[-' \t]+[A-Za-z]+)*/g) ?? [];
+  const lines = String(text ?? '').split(/\r?\n/);
 
-  for (const token of matches) {
-    const displayWord = normalizeWordDisplay(token);
-    const answerKey = normalizeWordAnswer(displayWord);
-    if (answerKey.length < 2 || seen.has(answerKey)) continue;
-    seen.add(answerKey);
-    words.push({ text: displayWord, weight: 1 });
+  for (const line of lines) {
+    for (const displayWord of getEnglishCandidatesFromLine(line)) {
+      const answerKey = normalizeWordAnswer(displayWord);
+      if (answerKey.length < 2 || seen.has(answerKey)) continue;
+      seen.add(answerKey);
+      words.push({ text: displayWord, weight: 1 });
+    }
   }
 
   return words;
@@ -28,27 +98,60 @@ export const parseWordListText = (text) => {
 export const isWordAnswerCorrect = (input, answer) =>
   normalizeWordAnswer(input) === normalizeWordAnswer(answer);
 
-const normalizeChinesePrompt = (value) =>
-  String(value ?? '')
-    .match(/[\u3400-\u9FFF]+/g)
-    ?.join('') ?? '';
-
 export const parseBilingualWordListText = (text) => {
   const seen = new Set();
   const pairs = [];
-  const lines = String(text ?? '').split(/\r?\n/);
+  const lines = String(text ?? '')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line.length > 0 && !isImportHeaderLine(line));
 
-  for (const line of lines) {
-    const englishMatch = line.match(/[A-Za-z]+(?:[-' \t]+[A-Za-z]+)*/);
-    const english = normalizeWordDisplay(englishMatch?.[0]);
-    const answerKey = normalizeWordAnswer(english);
-    const chinese = normalizeChinesePrompt(line);
-    if (answerKey.length < 2 || chinese.length === 0) continue;
+  const addPair = (english, chinese) => {
+    const displayEnglish = normalizeWordDisplay(english);
+    const answerKey = normalizeWordAnswer(displayEnglish);
+    const cleanChinese = normalizeChinesePrompt(chinese);
+    if (answerKey.length < 2 || cleanChinese.length === 0) return;
 
-    const key = `${chinese}|${answerKey}`;
-    if (seen.has(key)) continue;
+    const key = `${cleanChinese}|${answerKey}`;
+    if (seen.has(key)) return;
     seen.add(key);
-    pairs.push({ chinese, english });
+    pairs.push({ chinese: cleanChinese, english: displayEnglish });
+  };
+
+  const lineTypes = lines.map(line => ({
+    line,
+    englishCandidates: getEnglishCandidatesFromLine(line),
+    chinese: normalizeChinesePrompt(line),
+  }));
+
+  // Same-line formats: "fox 狐狸", "狐狸 fox", "dangerous adj. 危险的".
+  for (const item of lineTypes) {
+    if (item.englishCandidates.length > 0 && item.chinese.length > 0) {
+      addPair(item.englishCandidates[0], item.chinese);
+    }
+  }
+
+  // Word tables often extract as alternating lines: English, then Chinese.
+  const consumedAdjacentLineIndexes = new Set();
+  for (let index = 0; index < lineTypes.length - 1; index += 1) {
+    if (consumedAdjacentLineIndexes.has(index)) continue;
+
+    const current = lineTypes[index];
+    const next = lineTypes[index + 1];
+    const currentIsEnglishOnly = current.englishCandidates.length > 0 && current.chinese.length === 0;
+    const currentIsChineseOnly = current.chinese.length > 0 && current.englishCandidates.length === 0;
+    const nextIsEnglishOnly = next.englishCandidates.length > 0 && next.chinese.length === 0;
+    const nextIsChineseOnly = next.chinese.length > 0 && next.englishCandidates.length === 0;
+
+    if (currentIsEnglishOnly && nextIsChineseOnly) {
+      addPair(current.englishCandidates[0], next.chinese);
+      consumedAdjacentLineIndexes.add(index);
+      consumedAdjacentLineIndexes.add(index + 1);
+    } else if (currentIsChineseOnly && nextIsEnglishOnly) {
+      addPair(next.englishCandidates[0], current.chinese);
+      consumedAdjacentLineIndexes.add(index);
+      consumedAdjacentLineIndexes.add(index + 1);
+    }
   }
 
   return pairs;

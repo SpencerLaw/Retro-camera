@@ -62,6 +62,53 @@ runTest('parseBilingualWordListText extracts Chinese prompts with original Engli
   ]);
 });
 
+runTest('parseBilingualWordListText pairs adjacent Word table lines after headers', () => {
+  const pairs = parseBilingualWordListText(`
+英语单词表（U1 中英对照版）
+English / Phrases
+Chinese Meaning
+英文/短语
+中文释义
+fox
+狐狸
+giraffe
+长颈鹿
+take care of
+照顾；处理
+not ... at all
+一点也不；完全不
+Thai
+泰国的；泰国人的；泰国人；泰语
+Thailand
+泰国
+`);
+
+  assert.deepEqual(pairs, [
+    { chinese: '狐狸', english: 'fox' },
+    { chinese: '长颈鹿', english: 'giraffe' },
+    { chinese: '照顾处理', english: 'take care of' },
+    { chinese: '一点也不完全不', english: 'not ... at all' },
+    { chinese: '泰国的泰国人的泰国人泰语', english: 'Thai' },
+    { chinese: '泰国', english: 'Thailand' },
+  ]);
+});
+
+runTest('parseBilingualWordListText handles numbered lines phonetics and parts of speech', () => {
+  const pairs = parseBilingualWordListText(`
+1. fox /fɒks/ n. 狐狸
+2、dangerous adj. 危险的；有危害的
+(3) save v. 救；储蓄；保存
+4) Ice-Cream n. 冰淇淋
+`);
+
+  assert.deepEqual(pairs, [
+    { chinese: '狐狸', english: 'fox' },
+    { chinese: '危险的有危害的', english: 'dangerous' },
+    { chinese: '救储蓄保存', english: 'save' },
+    { chinese: '冰淇淋', english: 'Ice-Cream' },
+  ]);
+});
+
 runTest('createBilingualChallengeProblem shows Chinese and builds case-sensitive clickable English letters', () => {
   const problem = createBilingualChallengeProblem({ chinese: '泰国', english: 'Thailand' }, () => 0);
 

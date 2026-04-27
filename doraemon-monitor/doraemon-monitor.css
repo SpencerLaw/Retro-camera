@@ -838,9 +838,9 @@
   overflow-y: auto;
   max-height: calc(min(82vh, 760px) - 72px);
   min-height: 0;
-  overscroll-behavior: contain;
+
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+
 }
 
 .mic-test-window {
@@ -1564,8 +1564,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
+
+
   opacity: 0;
   transform: translateY(8px) scale(0.96);
   transition: transform 0.28s ease, opacity 0.24s ease;
@@ -1618,9 +1618,9 @@
   overflow-x: hidden;
   flex: 1 1 auto;
   min-height: 0;
-  overscroll-behavior: contain;
+
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+
 }
 
 .report-modal-week {
@@ -1772,9 +1772,9 @@
   gap: 10px;
   min-height: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
+
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+
 }
 
 .report-day-chip {
@@ -1855,9 +1855,9 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  overscroll-behavior: contain;
+
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-shell {

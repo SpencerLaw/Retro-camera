@@ -230,6 +230,11 @@ const DoraemonMonitorApp: React.FC = () => {
   const sessionHistoryRef = useRef<number[]>([]); 
   const sampleCounterRef = useRef(0); 
   const intervalPeakRef = useRef(0); // 用于抓取采样间隔内的最高分贝
+  const reportBodyRef = useRef<HTMLDivElement | null>(null);
+  const reportShellRef = useRef<HTMLDivElement | null>(null);
+  const reportTouchLastYRef = useRef<number | null>(null);
+  const reportDragRef = useRef<{ pointerId: number; startY: number; startScrollTop: number } | null>(null);
+  const reportMouseDragRef = useRef<{ startY: number; startScrollTop: number } | null>(null);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -1067,6 +1072,159 @@ const DoraemonMonitorApp: React.FC = () => {
   const closeReport = useCallback(() => {
     setIsReportOpen(false);
   }, []);
+  const scrollReportBodyBy = useCallback((deltaY: number) => {
+    const body = reportBodyRef.current;
+    if (!body) return false;
+
+    const maxScrollTop = Math.max(0, body.scrollHeight - body.clientHeight);
+    if (maxScrollTop <= 0) return false;
+
+    const nextScrollTop = clamp(body.scrollTop + deltaY, 0, maxScrollTop);
+    if (Math.abs(nextScrollTop - body.scrollTop) < 0.5) return false;
+
+    body.scrollTop = nextScrollTop;
+    return true;
+  }, []);
+  const handleReportModalWheel = useCallback((event: React.WheelEvent<HTMLDivElement>) => {
+    if (!reportBodyRef.current?.contains(event.target as Node)) return;
+    if (!scrollReportBodyBy(event.deltaY)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+  }, [scrollReportBodyBy]);
+  const handleReportModalTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    reportTouchLastYRef.current = event.touches[0]?.clientY ?? null;
+  }, []);
+  const handleReportModalTouchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    const currentY = event.touches[0]?.clientY;
+    const lastY = reportTouchLastYRef.current;
+    if (currentY === undefined || lastY === null) return;
+
+    const deltaY = lastY - currentY;
+    reportTouchLastYRef.current = currentY;
+    if (Math.abs(deltaY) < 1) return;
+    if (!scrollReportBodyBy(deltaY)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+  }, [scrollReportBodyBy]);
+  const handleReportModalTouchEnd = useCallback(() => {
+    reportTouchLastYRef.current = null;
+  }, []);
+  const shouldStartReportDrag = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    return !target.closest('button, input, textarea, select, a, [role="button"]');
+  };
+  const handleReportPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!shouldStartReportDrag(event.target)) return;
+    const shell = reportBodyRef.current;
+    if (!shell || shell.scrollHeight <= shell.clientHeight) return;
+
+    reportDragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startScrollTop: shell.scrollTop
+    };
+    shell.setPointerCapture?.(event.pointerId);
+  }, []);
+  const handleReportPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = reportDragRef.current;
+    const shell = reportBodyRef.current;
+    if (!drag || !shell || drag.pointerId !== event.pointerId) return;
+
+    shell.scrollTop = drag.startScrollTop + drag.startY - event.clientY;
+    event.preventDefault();
+  }, []);
+  const handleReportPointerEnd = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const shell = reportBodyRef.current;
+    if (reportDragRef.current?.pointerId === event.pointerId) {
+      reportDragRef.current = null;
+      shell?.releasePointerCapture?.(event.pointerId);
+    }
+  }, []);
+  const handleReportMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (!shouldStartReportDrag(event.target)) return;
+    const body = reportBodyRef.current;
+    if (!body || body.scrollHeight <= body.clientHeight) return;
+
+    reportMouseDragRef.current = {
+      startY: event.clientY,
+      startScrollTop: body.scrollTop
+    };
+  }, []);
+  const handleReportMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const drag = reportMouseDragRef.current;
+    const body = reportBodyRef.current;
+    if (!drag || !body) return;
+
+    body.scrollTop = drag.startScrollTop + drag.startY - event.clientY;
+    event.preventDefault();
+  }, []);
+  const handleReportMouseUp = useCallback(() => {
+    reportMouseDragRef.current = null;
+  }, []);
+  useEffect(() => {
+    const getReportScrollShell = (target: EventTarget | null): HTMLElement | null => {
+      if (!(target instanceof Element)) return null;
+      return target.closest('.report-modal-shell');
+    };
+    const scrollReportShellBy = (shell: HTMLElement, deltaY: number) => {
+      const maxScrollTop = Math.max(0, shell.scrollHeight - shell.clientHeight);
+      if (maxScrollTop <= 0) return false;
+
+      const nextScrollTop = clamp(shell.scrollTop + deltaY, 0, maxScrollTop);
+      if (Math.abs(nextScrollTop - shell.scrollTop) < 0.5) return false;
+
+      shell.scrollTop = nextScrollTop;
+      return true;
+    };
+
+    const handleDocumentWheel = (event: WheelEvent) => {
+      const shell = getReportScrollShell(event.target);
+      if (!shell) return;
+      if (!scrollReportShellBy(shell, event.deltaY)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const handleDocumentTouchStart = (event: TouchEvent) => {
+      if (!getReportScrollShell(event.target)) return;
+      reportTouchLastYRef.current = event.touches[0]?.clientY ?? null;
+    };
+    const handleDocumentTouchMove = (event: TouchEvent) => {
+      const shell = getReportScrollShell(event.target);
+      if (!shell) return;
+
+      const currentY = event.touches[0]?.clientY;
+      const lastY = reportTouchLastYRef.current;
+      if (currentY === undefined || lastY === null) return;
+
+      const deltaY = lastY - currentY;
+      reportTouchLastYRef.current = currentY;
+      if (Math.abs(deltaY) < 1) return;
+      if (!scrollReportShellBy(shell, deltaY)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const handleDocumentTouchEnd = () => {
+      reportTouchLastYRef.current = null;
+    };
+
+    document.addEventListener('wheel', handleDocumentWheel, { capture: true, passive: false });
+    document.addEventListener('touchstart', handleDocumentTouchStart, { capture: true, passive: true });
+    document.addEventListener('touchmove', handleDocumentTouchMove, { capture: true, passive: false });
+    document.addEventListener('touchend', handleDocumentTouchEnd, { capture: true, passive: true });
+    document.addEventListener('touchcancel', handleDocumentTouchEnd, { capture: true, passive: true });
+
+    return () => {
+      document.removeEventListener('wheel', handleDocumentWheel, { capture: true });
+      document.removeEventListener('touchstart', handleDocumentTouchStart, { capture: true });
+      document.removeEventListener('touchmove', handleDocumentTouchMove, { capture: true });
+      document.removeEventListener('touchend', handleDocumentTouchEnd, { capture: true });
+      document.removeEventListener('touchcancel', handleDocumentTouchEnd, { capture: true });
+    };
+  }, []);
   const openMicTest = useCallback(() => {
     setIsReportOpen(false);
     setShowHelp(false);
@@ -1402,9 +1560,23 @@ const DoraemonMonitorApp: React.FC = () => {
           aria-label={t('doraemon.report.hide')}
         />
         <div
+          ref={reportShellRef}
           className="report-modal-shell"
           onClick={stopModalPropagation}
           onMouseDown={stopModalMouseDown}
+          onMouseDownCapture={handleReportMouseDown}
+          onMouseMoveCapture={handleReportMouseMove}
+          onMouseUpCapture={handleReportMouseUp}
+          onMouseLeave={handleReportMouseUp}
+          onWheelCapture={handleReportModalWheel}
+          onTouchStartCapture={handleReportModalTouchStart}
+          onTouchMoveCapture={handleReportModalTouchMove}
+          onTouchEndCapture={handleReportModalTouchEnd}
+          onTouchCancelCapture={handleReportModalTouchEnd}
+          onPointerDown={handleReportPointerDown}
+          onPointerMove={handleReportPointerMove}
+          onPointerUp={handleReportPointerEnd}
+          onPointerCancel={handleReportPointerEnd}
         >
           <div className="report-modal-header">
             <div className="report-drawer-heading">
@@ -1434,7 +1606,15 @@ const DoraemonMonitorApp: React.FC = () => {
             </button>
           </div>
 
-          <div className="report-modal-body">
+          <div
+            ref={reportBodyRef}
+            className="report-modal-body"
+            onWheel={handleReportModalWheel}
+            onTouchStart={handleReportModalTouchStart}
+            onTouchMove={handleReportModalTouchMove}
+            onTouchEnd={handleReportModalTouchEnd}
+            onTouchCancel={handleReportModalTouchEnd}
+          >
             <div className="report-modal-week">
               {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
             </div>

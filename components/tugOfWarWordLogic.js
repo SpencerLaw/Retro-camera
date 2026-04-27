@@ -44,7 +44,7 @@ const isImportHeaderLine = (line) => {
     /英语单词|单词表|中英对照|英文短语|英文\/短语|中文释义|中文意思|释义|词汇表/.test(text)
     || /english.*(word|phrase|term)|chinese.*(meaning|definition)|meaning|definition/.test(text)
     || ['english', 'word', 'words', 'phrase', 'phrases', 'meaning', 'meanings', 'chinese'].includes(english)
-    || ['英文', '短语', '中文释义', '释义'].includes(chinese)
+    || ['英文', '中文', '短语', '中文释义', '释义'].includes(chinese)
   );
 };
 

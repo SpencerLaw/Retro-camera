@@ -232,8 +232,11 @@ const DoraemonMonitorApp: React.FC = () => {
   const sampleCounterRef = useRef(0); 
   const intervalPeakRef = useRef(0); // 用于抓取采样间隔内的最高分贝
   const reportBodyRef = useRef<HTMLDivElement | null>(null);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
+  const focusShellRef = useRef<HTMLElement | null>(null);
 
-  useDragScroll(reportBodyRef);
+  useDragScroll(sidebarRef);
+  useDragScroll(focusShellRef);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -1458,7 +1461,7 @@ const DoraemonMonitorApp: React.FC = () => {
             </div>
 
             <div className="report-viewer-layout">
-              <div className="report-day-sidebar">
+              <div className="report-day-sidebar" ref={sidebarRef}>
                 {reportDayGroups.map(group => (
                   <button
                     key={group.key}
@@ -1475,7 +1478,7 @@ const DoraemonMonitorApp: React.FC = () => {
                 ))}
               </div>
 
-              <section className="report-focus-shell">
+              <section className="report-focus-shell" ref={focusShellRef}>
                 <div className="report-day-header">
                   <div>
                     <strong>{selectedReportDay.label}</strong>

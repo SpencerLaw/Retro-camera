@@ -1413,8 +1413,9 @@ const DoraemonMonitorApp: React.FC = () => {
           className="report-modal-shell"
           onClick={stopModalPropagation}
           onMouseDown={stopModalMouseDown}
+          style={{ display: 'flex', flexDirection: 'column' }}
         >
-          <div className="report-modal-header">
+          <div className="report-modal-header" style={{ flexShrink: 0 }}>
             <div className="report-drawer-heading">
               <div className="report-drawer-icon">
                 <CalendarDays size={18} />
@@ -1445,237 +1446,170 @@ const DoraemonMonitorApp: React.FC = () => {
           <div
             ref={reportBodyRef}
             className="report-modal-body"
+            style={{ display: 'block', overflowY: 'auto', padding: '24px', flex: '1 1 auto', minHeight: 0 }}
           >
-            <div className="report-modal-week">
+            <div className="report-modal-week" style={{ marginBottom: '24px', textAlign: 'center', fontSize: '15px', color: '#94a3b8', fontWeight: 'bold' }}>
               {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
             </div>
 
-            <div className="report-summary-grid">
-              <div className="report-summary-card">
-                <span>{t('doraemon.report.summarySessions')}</span>
-                <strong>{weeklyRecords.length}</strong>
+            {currentWeekRecords.length === 0 ? (
+              <div className="report-empty-state" style={{ padding: '60px 0', textAlign: 'center', color: '#64748b' }}>
+                {t('doraemon.report.empty')}
               </div>
-              <div className="report-summary-card peak">
-                <span>{t('doraemon.report.summaryPeak')}</span>
-                <strong>{weeklyRecords.length ? `${Math.round(weeklyPeak)} dB` : '--'}</strong>
-              </div>
-            </div>
+            ) : (
+              <div className="new-report-list" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {currentWeekRecords.map((record) => {
+                  const samples = buildReportTrendData(record);
+                  const values = samples.map(point => point.db);
+                  const hMax = values.length ? Math.max(...values) : 0;
+                  const hMin = values.length ? Math.min(...values) : 0;
+                  const peakIdx = values.indexOf(hMax);
+                  const lowIdx = values.indexOf(hMin);
+                  const currentThreshold = record.threshold || 60;
+                  
+                  let chartContent = null;
+                  if (samples.length >= 2) {
+                    const cMax = Math.ceil(Math.max(hMax + 8, currentThreshold + 12) / 5) * 5;
+                    const cMin = Math.max(0, Math.floor(Math.min(hMin - 8, currentThreshold - 18, 30) / 5) * 5);
+                    const r = Math.max(20, cMax - cMin);
+                    
+                    const width = 100;
+                    const height = 100;
+                    const pts = samples.map((sample, i) => ({
+                      x: (i / (samples.length - 1)) * width,
+                      y: height - ((sample.db - cMin) / r) * height,
+                      db: sample.db,
+                      at: sample.at,
+                      elapsedSeconds: sample.elapsedSeconds
+                    }));
 
-            <div className="report-viewer-layout">
-              <div className="report-day-sidebar" ref={sidebarRef}>
-                {reportDayGroups.map(group => (
-                  <button
-                    key={group.key}
-                    type="button"
-                    className={`report-day-chip ${group.records.length ? 'has-data' : ''} ${group.key === selectedReportDay.key ? 'selected' : ''}`}
-                    onPointerDown={(event) => handleSelectReportDay(event, group.key)}
-                  >
-                    <div className="report-day-chip-copy">
-                      <span>{group.label}</span>
-                      <small>{group.dateLabel}</small>
-                    </div>
-                    <strong>{group.records.length}</strong>
-                  </button>
-                ))}
-              </div>
+                    const linePath = buildSmoothCurvePath(pts);
+                    const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
+                    const thresholdY = height - ((currentThreshold - cMin) / r) * height;
 
-              <section className="report-focus-shell" ref={focusShellRef}>
-                <div className="report-day-header">
-                  <div>
-                    <strong>{selectedReportDay.label}</strong>
-                    <span>{selectedReportDay.dateLabel}</span>
-                  </div>
-                  <span className={`report-day-count ${selectedReportDay.records.length ? 'has-data' : ''}`}>
-                    {t('doraemon.report.sessionCount').replace('{count}', String(selectedReportDay.records.length))}
-                  </span>
-                </div>
+                    const timelineTickIndexes = [0, Math.floor((pts.length - 1) / 2), pts.length - 1]
+                      .filter((value, index, array) => array.indexOf(value) === index);
+                    const yAxisTicks = [cMax, Math.round((cMax + cMin) / 2), cMin];
+                    const averageDb = Math.round(average(values));
+                    const peakPoint = pts[peakIdx];
+                    const lowPoint = pts[lowIdx];
+                    const trendId = record.id.replace(/[^a-zA-Z0-9_-]/g, '');
+                    const areaGradientId = `reportAreaGradient-${trendId}`;
+                    const markerGlowId = `reportMarkerGlow-${trendId}`;
 
-                {selectedReportRecord ? (
-                  <>
-                    <div className="report-nav-row">
-                      <button
-                        type="button"
-                        className="report-nav-btn"
-                        onPointerDown={(event) => handleReportSessionMove(event, -1)}
-                        disabled={!hasPreviousReport}
-                      >
-                        {t('doraemon.report.prevPage')}
-                      </button>
-                      <span className="report-nav-status">
-                        {t('doraemon.report.pageStatus')
-                          .replace('{current}', String(selectedReportIndex + 1))
-                          .replace('{total}', String(selectedReportDay.records.length))}
-                      </span>
-                      <button
-                        type="button"
-                        className="report-nav-btn"
-                        onPointerDown={(event) => handleReportSessionMove(event, 1)}
-                        disabled={!hasNextReport}
-                      >
-                        {t('doraemon.report.nextPage')}
-                      </button>
-                    </div>
-
-                    <article className="report-focus-card">
-                      <div className="report-focus-top">
-                        <div className="report-time-cell">
-                          <strong>{formatReportClock(selectedReportRecord.startedAt)} - {selectedReportRecord.endedAt ? formatReportClock(selectedReportRecord.endedAt) : t('doraemon.report.ongoing')}</strong>
-                          {selectedReportRecord.endedAt === null && (
-                            <span className="report-live-badge">{t('doraemon.report.live')}</span>
-                          )}
+                    chartContent = (
+                      <div className="report-trend-card" style={{ marginTop: '16px', background: 'transparent', padding: '0' }}>
+                        <div className="report-trend-header" style={{ marginBottom: '12px' }}>
+                          <div className="report-trend-stats" style={{ display: 'flex', gap: '12px', fontSize: '13px', color: '#cbd5e1' }}>
+                            <span>最高 {Math.round(hMax)} dB</span>
+                            <span>平均 {averageDb} dB</span>
+                          </div>
                         </div>
-                        <span className="report-peak-pill">{Math.round(selectedReportRecord.peakDb)} dB</span>
-                      </div>
 
-                      {/* 本场分贝曲线：基于真实采样点，并按上课时刻显示时间轴。 */}
-                      <div className="report-session-trend">
-                        {(() => {
-                          const samples = buildReportTrendData(selectedReportRecord);
-                          if (samples.length < 2) return <div className="trend-empty-hint">结束本场后生成波动曲线</div>;
+                        <div className="report-trend-plot">
+                          <div className="report-trend-y-axis" aria-hidden="true">
+                            {yAxisTicks.map(tick => <span key={tick}>{tick}</span>)}
+                          </div>
+                          <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="report-trend-svg">
+                            <defs>
+                              <linearGradient id={areaGradientId} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.36" />
+                                <stop offset="52%" stopColor="#22c55e" stopOpacity="0.16" />
+                                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+                              </linearGradient>
+                              <filter id={markerGlowId}>
+                                <feGaussianBlur stdDeviation="2" result="blur" />
+                                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                              </filter>
+                            </defs>
+
+                            {yAxisTicks.map(tick => {
+                              const y = height - ((tick - cMin) / r) * height;
+                              return <line key={tick} x1="0" y1={y} x2="100" y2={y} className="report-trend-grid-line" />;
+                            })}
+
+                            {timelineTickIndexes.map(index => (
+                              <line key={index} x1={pts[index].x} y1="0" x2={pts[index].x} y2="100" className="report-trend-grid-line vertical" />
+                            ))}
+                            
+                            <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} className="report-trend-threshold" />
+                            
+                            <path d={fillPath} fill={`url(#${areaGradientId})`} />
+                            <path d={linePath} className="report-trend-line-shadow" />
+                            <path d={linePath} className="report-trend-line" />
+                            
+                            <g filter={`url(#${markerGlowId})`}>
+                              <circle cx={peakPoint.x} cy={peakPoint.y} r="3.1" className="report-trend-peak-dot" />
+                              <circle cx={lowPoint.x} cy={lowPoint.y} r="2.6" className="report-trend-low-dot" />
+                            </g>
+                          </svg>
                           
-                          const values = samples.map(point => point.db);
-                          const hMax = Math.max(...values);
-                          const hMin = Math.min(...values);
-                          const peakIdx = values.indexOf(hMax);
-                          const lowIdx = values.indexOf(hMin);
-                          const currentThreshold = selectedReportRecord.threshold || 60;
-                          
-                          const cMax = Math.ceil(Math.max(hMax + 8, currentThreshold + 12) / 5) * 5;
-                          const cMin = Math.max(0, Math.floor(Math.min(hMin - 8, currentThreshold - 18, 30) / 5) * 5);
-                          const r = Math.max(20, cMax - cMin);
-                          
-                          const width = 100;
-                          const height = 100;
-                          const pts = samples.map((sample, i) => ({
-                            x: (i / (samples.length - 1)) * width,
-                            y: height - ((sample.db - cMin) / r) * height,
-                            db: sample.db,
-                            at: sample.at,
-                            elapsedSeconds: sample.elapsedSeconds
-                          }));
+                          <div className="report-trend-annotations">
+                            <span className="report-trend-label peak" style={{ left: `${peakPoint.x}%`, top: `${peakPoint.y}%` }}>
+                              最高 {Math.round(hMax)} dB · {formatTimelineClock(peakPoint.at)}
+                            </span>
+                            <span className="report-trend-label low" style={{ left: `${lowPoint.x}%`, top: `${lowPoint.y}%` }}>
+                              最低 {Math.round(hMin)} dB
+                            </span>
+                            <span className="report-trend-label threshold" style={{ top: `${thresholdY}%` }}>
+                              阈值 {currentThreshold} dB
+                            </span>
+                          </div>
+                        </div>
 
-                          const linePath = buildSmoothCurvePath(pts);
-                          const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
-                          const thresholdY = height - ((currentThreshold - cMin) / r) * height;
+                        <div className="report-trend-timeline">
+                          {timelineTickIndexes.map(index => (
+                            <span key={index}>
+                              <strong>{formatTimelineClock(pts[index].at)}</strong>
+                              <small>{formatTimelineDuration(pts[index].elapsedSeconds)}</small>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
 
-                          const timelineTickIndexes = [0, Math.floor((pts.length - 1) / 2), pts.length - 1]
-                            .filter((value, index, array) => array.indexOf(value) === index);
-                          const yAxisTicks = [cMax, Math.round((cMax + cMin) / 2), cMin];
-                          const averageDb = Math.round(average(values));
-                          const peakPoint = pts[peakIdx];
-                          const lowPoint = pts[lowIdx];
-                          const trendId = selectedReportRecord.id.replace(/[^a-zA-Z0-9_-]/g, '');
-                          const areaGradientId = `reportAreaGradient-${trendId}`;
-                          const markerGlowId = `reportMarkerGlow-${trendId}`;
-
-                          return (
-                            <div className="report-trend-card">
-                              <div className="report-trend-header">
-                                <div>
-                                  <strong>本场声音走势</strong>
-                                  <span>{formatTimelineClock(selectedReportRecord.startedAt)} - {selectedReportRecord.endedAt ? formatTimelineClock(selectedReportRecord.endedAt) : '进行中'}</span>
-                                </div>
-                                <div className="report-trend-stats">
-                                  <span>最高 {Math.round(hMax)} dB</span>
-                                  <span>平均 {averageDb} dB</span>
-                                </div>
-                              </div>
-
-                              <div className="report-trend-plot">
-                                <div className="report-trend-y-axis" aria-hidden="true">
-                                  {yAxisTicks.map(tick => <span key={tick}>{tick}</span>)}
-                                </div>
-                                <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="report-trend-svg">
-                                <defs>
-                                  <linearGradient id={areaGradientId} x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.36" />
-                                    <stop offset="52%" stopColor="#22c55e" stopOpacity="0.16" />
-                                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
-                                  </linearGradient>
-                                  <filter id={markerGlowId}>
-                                    <feGaussianBlur stdDeviation="2" result="blur" />
-                                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                                  </filter>
-                                </defs>
-
-                                {yAxisTicks.map(tick => {
-                                  const y = height - ((tick - cMin) / r) * height;
-                                  return <line key={tick} x1="0" y1={y} x2="100" y2={y} className="report-trend-grid-line" />;
-                                })}
-
-                                {timelineTickIndexes.map(index => (
-                                  <line key={index} x1={pts[index].x} y1="0" x2={pts[index].x} y2="100" className="report-trend-grid-line vertical" />
-                                ))}
-                                
-                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} className="report-trend-threshold" />
-                                
-                                <path d={fillPath} fill={`url(#${areaGradientId})`} />
-                                <path d={linePath} className="report-trend-line-shadow" />
-                                <path d={linePath} className="report-trend-line" />
-                                
-                                <g filter={`url(#${markerGlowId})`}>
-                                  <circle cx={peakPoint.x} cy={peakPoint.y} r="3.1" className="report-trend-peak-dot" />
-                                  <circle cx={lowPoint.x} cy={lowPoint.y} r="2.6" className="report-trend-low-dot" />
-                                </g>
-                              </svg>
-                              
-                                <div className="report-trend-annotations">
-                                  <span className="report-trend-label peak" style={{ left: `${peakPoint.x}%`, top: `${peakPoint.y}%` }}>
-                                    最高 {Math.round(hMax)} dB · {formatTimelineClock(peakPoint.at)}
-                                  </span>
-                                  <span className="report-trend-label low" style={{ left: `${lowPoint.x}%`, top: `${lowPoint.y}%` }}>
-                                    最低 {Math.round(hMin)} dB
-                                  </span>
-                                  <span className="report-trend-label threshold" style={{ top: `${thresholdY}%` }}>
-                                    阈值 {currentThreshold} dB
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="report-trend-timeline">
-                                {timelineTickIndexes.map(index => (
-                                  <span key={index}>
-                                    <strong>{formatTimelineClock(pts[index].at)}</strong>
-                                    <small>{formatTimelineDuration(pts[index].elapsedSeconds)}</small>
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })()}
+                  return (
+                    <article key={record.id} className="report-focus-card" style={{ background: 'rgba(30,41,59,0.7)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div className="report-focus-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div>
+                          <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.05em' }}>
+                            {formatReportDate(new Date(record.startedAt))}
+                          </div>
+                          <strong style={{ fontSize: '20px', color: '#f8fafc', letterSpacing: '-0.02em' }}>
+                            {formatReportClock(record.startedAt)} - {record.endedAt ? formatReportClock(record.endedAt) : ''}
+                          </strong>
+                        </div>
+                        <span className="report-peak-pill" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', padding: '8px 16px', borderRadius: '24px', fontWeight: 'bold', fontSize: '15px' }}>
+                          {Math.round(record.peakDb)} dB
+                        </span>
                       </div>
 
-                      <div className="report-focus-grid">
-                        <div className="report-session-metric">
-                          <span>{t('doraemon.report.columns.duration')}</span>
-                          <strong>{formatTime(selectedReportRecord.totalSeconds)}</strong>
+                      <div className="report-focus-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
+                        <div className="report-session-metric" style={{ background: 'rgba(0,0,0,0.25)', padding: '12px', borderRadius: '10px' }}>
+                          <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('doraemon.report.columns.duration')}</span>
+                          <strong style={{ color: '#e2e8f0', fontSize: '15px' }}>{formatTime(record.totalSeconds)}</strong>
                         </div>
-                        <div className="report-session-metric">
-                          <span>{t('doraemon.report.columns.quiet')}</span>
-                          <strong>{formatTime(selectedReportRecord.quietSeconds)}</strong>
+                        <div className="report-session-metric" style={{ background: 'rgba(0,0,0,0.25)', padding: '12px', borderRadius: '10px' }}>
+                          <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('doraemon.report.columns.quiet')}</span>
+                          <strong style={{ color: '#10b981', fontSize: '15px' }}>{formatTime(record.quietSeconds)}</strong>
                         </div>
-                        <div className="report-session-metric">
-                          <span>{t('doraemon.report.columns.warnings')}</span>
-                          <strong>{selectedReportRecord.warnCount}</strong>
+                        <div className="report-session-metric" style={{ background: 'rgba(0,0,0,0.25)', padding: '12px', borderRadius: '10px' }}>
+                          <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('doraemon.report.columns.warnings')}</span>
+                          <strong style={{ color: '#ef4444', fontSize: '15px' }}>{record.warnCount}</strong>
                         </div>
-                        <div className="report-session-metric">
-                          <span>{t('doraemon.report.columns.settings')}</span>
-                          <strong>{`${selectedReportRecord.threshold} dB / ${selectedReportRecord.sensitivity}%`}</strong>
+                        <div className="report-session-metric" style={{ background: 'rgba(0,0,0,0.25)', padding: '12px', borderRadius: '10px' }}>
+                          <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('doraemon.report.columns.settings')}</span>
+                          <strong style={{ color: '#e2e8f0', fontSize: '14px' }}>{`${record.threshold} dB / ${record.sensitivity}%`}</strong>
                         </div>
                       </div>
 
-                      <div className="report-settings-band">
-                        {t('doraemon.report.settings')
-                          .replace('{limit}', String(selectedReportRecord.threshold))
-                          .replace('{sensitivity}', String(selectedReportRecord.sensitivity))}
-                      </div>
+                      {chartContent}
                     </article>
-                  </>
-                ) : (
-                  <div className="report-empty-state">{t('doraemon.report.empty')}</div>
-                )}
-              </section>
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

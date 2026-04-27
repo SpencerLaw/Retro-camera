@@ -67,24 +67,20 @@ const sentenceToForm = (sentence: JuzimiSentence) => ({
 });
 
 // ── Card accent colours cycling ──────────────────────────────────────────────
+const NOISE_SVG = `data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E`;
+
 // Editorial poster colour palettes – each has a CSS gradient + text scheme
 const CARD_ACCENTS = [
-  // 01 blue-grey periwinkle
-  { gradient: 'linear-gradient(145deg,#b8c5d6 0%,#8fa3bc 60%,#7090ac 100%)', text: '#0d1a2b', sub: 'rgba(13,26,43,0.55)', tag: 'rgba(13,26,43,0.18)', tagText: '#0d1a2b' },
-  // 02 dusty rose
-  { gradient: 'linear-gradient(145deg,#e8c4c0 0%,#d4a09a 55%,#c48880 100%)', text: '#1f0c0a', sub: 'rgba(31,12,10,0.55)', tag: 'rgba(31,12,10,0.14)', tagText: '#1f0c0a' },
-  // 03 sky mist
-  { gradient: 'linear-gradient(145deg,#c9dce8 0%,#a8c6d8 55%,#8fb4cc 100%)', text: '#0a1e2b', sub: 'rgba(10,30,43,0.55)', tag: 'rgba(10,30,43,0.14)', tagText: '#0a1e2b' },
-  // 04 deep navy
-  { gradient: 'linear-gradient(145deg,#0e1526 0%,#1a2540 55%,#0a0f1e 100%)', text: '#e8edf5', sub: 'rgba(232,237,245,0.55)', tag: 'rgba(232,237,245,0.14)', tagText: '#a8c0e0' },
-  // 05 warm sand
-  { gradient: 'linear-gradient(145deg,#e6dcc8 0%,#d4c4a0 55%,#c2ac82 100%)', text: '#1a1208', sub: 'rgba(26,18,8,0.55)', tag: 'rgba(26,18,8,0.14)', tagText: '#1a1208' },
-  // 06 slate violet
-  { gradient: 'linear-gradient(145deg,#c4c0d4 0%,#a8a0c0 55%,#9090b0 100%)', text: '#14102a', sub: 'rgba(20,16,42,0.55)', tag: 'rgba(20,16,42,0.14)', tagText: '#14102a' },
-  // 07 deep teal
-  { gradient: 'linear-gradient(145deg,#0e2428 0%,#183438 55%,#0a1c20 100%)', text: '#c8e8e4', sub: 'rgba(200,232,228,0.55)', tag: 'rgba(200,232,228,0.14)', tagText: '#80c8c0' },
-  // 08 cream parchment
-  { gradient: 'linear-gradient(145deg,#f0ebe0 0%,#e4dac8 55%,#d8ccb4 100%)', text: '#1a1510', sub: 'rgba(26,21,16,0.55)', tag: 'rgba(26,21,16,0.14)', tagText: '#1a1510' },
+  { bg: 'linear-gradient(135deg, #6c8cb0 0%, #87a5c1 40%, #d8c29e 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', tagBg: 'rgba(255,255,255,0.15)', tagText: '#ffffff' },
+  { bg: 'linear-gradient(135deg, #e5aba4 0%, #efcdbe 100%)', text: '#3c282a', sub: 'rgba(60,40,42,0.7)', tagBg: 'rgba(60,40,42,0.1)', tagText: '#3c282a' },
+  { bg: 'linear-gradient(135deg, #abc1b8 0%, #b2ccda 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.8)', tagBg: 'rgba(255,255,255,0.2)', tagText: '#ffffff' },
+  { bg: 'linear-gradient(135deg, #1a1a1c 0%, #2f3032 100%)', text: '#f0ece1', sub: 'rgba(240,236,225,0.7)', tagBg: 'rgba(240,236,225,0.15)', tagText: '#f0ece1' },
+  { bg: 'linear-gradient(135deg, #7c8872 0%, #a2a08c 50%, #465158 100%)', text: '#f0ece1', sub: 'rgba(240,236,225,0.7)', tagBg: 'rgba(240,236,225,0.15)', tagText: '#f0ece1' },
+  { bg: 'linear-gradient(135deg, #9bb0ba 0%, #c1ced4 100%)', text: '#1a1f22', sub: 'rgba(26,31,34,0.7)', tagBg: 'rgba(26,31,34,0.1)', tagText: '#1a1f22' },
+  { bg: 'linear-gradient(135deg, #2a4c7e 0%, #5b81ae 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', tagBg: 'rgba(255,255,255,0.2)', tagText: '#ffffff' },
+  { bg: '#dcd8c8', text: '#2a2622', sub: 'rgba(42,38,34,0.7)', tagBg: 'rgba(42,38,34,0.1)', tagText: '#2a2622' },
+  { bg: 'linear-gradient(135deg, #dfa2ab 0%, #f1ccb5 100%)', text: '#3c282a', sub: 'rgba(60,40,42,0.7)', tagBg: 'rgba(60,40,42,0.1)', tagText: '#3c282a' },
+  { bg: '#d6cdbd', text: '#2a2622', sub: 'rgba(42,38,34,0.7)', tagBg: 'rgba(42,38,34,0.1)', tagText: '#2a2622' },
 ];
 
 const PREVIEW_MAX = 80; // chars before truncating in card
@@ -197,7 +193,6 @@ const SentenceCard = ({
   onClick: () => void;
 }) => {
   const accent = CARD_ACCENTS[index % CARD_ACCENTS.length];
-  const isDark = index % CARD_ACCENTS.length === 1;
   const preview =
     sentence.text.length > PREVIEW_MAX
       ? sentence.text.slice(0, PREVIEW_MAX).trimEnd() + '…'
@@ -206,51 +201,72 @@ const SentenceCard = ({
   return (
     <button
       onClick={onClick}
-      className={`group w-full text-left rounded-[1.8rem] border ${accent.bg} ${accent.border} p-5 md:p-6 shadow-sm hover:shadow-[0_14px_40px_rgba(23,19,16,0.14)] active:scale-[0.98] transition-all duration-200 cursor-pointer`}
+      className="group relative w-full text-left rounded-[1.2rem] p-6 md:p-8 shadow-sm hover:shadow-[0_14px_40px_rgba(23,19,16,0.14)] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col min-h-[300px]"
+      style={{ background: accent.bg }}
     >
-      {/* eyebrow */}
-      <div className={`text-[10px] font-black tracking-[0.28em] uppercase mb-3 ${isDark ? 'text-[#c7a46c]' : 'text-[#8c6b3f]'}`}>
-        No. {String(index + 1).padStart(2, '0')}
-      </div>
+      {/* Noise Overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none mix-blend-overlay"
+        style={{ backgroundImage: `url("${NOISE_SVG}")` }}
+      />
 
-      {/* sentence preview */}
-      <p className={`font-serif text-[1.18rem] md:text-[1.28rem] leading-snug ${isDark ? 'text-[#f4efe7]' : 'text-[#171310]'}`}>
-        "{preview}"
-      </p>
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Number eyebrow */}
+        <div 
+          className="text-[11px] mb-8 font-medium tracking-widest opacity-80" 
+          style={{ color: accent.text }}
+        >
+          {String(index + 1).padStart(2, '0')}
+        </div>
 
-      {/* meta */}
-      <div className={`mt-4 flex flex-wrap items-center gap-1.5 text-[13px] font-black ${isDark ? 'text-white/55' : 'text-[#6f6254]'}`}>
-        <span>{sentence.author || '佚名'}</span>
-        {sentence.source && (
-          <>
-            <span className={isDark ? 'text-white/25' : 'text-[#c7a46c]/60'}>/</span>
-            <span className={isDark ? 'text-[#c7a46c]/80' : 'text-[#8c6b3f]'}>{sentence.source}</span>
-          </>
-        )}
-      </div>
+        {/* Sentence */}
+        <h3 
+          className="font-serif text-[1.65rem] md:text-[1.85rem] leading-[1.12] tracking-tight mb-8 drop-shadow-sm"
+          style={{ color: accent.text }}
+        >
+          {preview}
+        </h3>
 
-      {/* tags */}
-      {sentence.tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {sentence.tags.slice(0, 4).map(tag => (
-            <span key={tag} className={`rounded-full px-2.5 py-0.5 text-[11px] font-black ${accent.tag}`}>
-              {tag}
-            </span>
-          ))}
-          {sentence.tags.length > 4 && (
-            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-black ${accent.tag} opacity-60`}>
-              +{sentence.tags.length - 4}
-            </span>
+        <div className="flex-grow"></div>
+
+        {/* Source/Note/Author info */}
+        <div className="mb-6 w-5/6">
+          <p className="text-[13px] leading-snug font-medium drop-shadow-sm" style={{ color: accent.text, opacity: 0.85 }}>
+            {sentence.author || '佚名'}
+            {sentence.source && <><br />《{sentence.source}》</>}
+          </p>
+        </div>
+
+        {/* Bottom row: Asterisk & Tags */}
+        <div className="flex items-end justify-between mt-auto pt-2">
+          <div className="text-[26px] leading-none font-serif opacity-90" style={{ color: accent.text }}>
+            *
+          </div>
+          
+          {/* Tags */}
+          {sentence.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 justify-end w-4/5">
+              {sentence.tags.slice(0, 3).map(tag => (
+                <span 
+                  key={tag} 
+                  className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-sm"
+                  style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+                >
+                  {tag}
+                </span>
+              ))}
+              {sentence.tags.length > 3 && (
+                <span 
+                  className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-sm opacity-80"
+                  style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+                >
+                  +{sentence.tags.length - 3}
+                </span>
+              )}
+            </div>
           )}
         </div>
-      )}
-
-      {/* read more hint */}
-      {sentence.text.length > PREVIEW_MAX && (
-        <div className={`mt-3 text-[11px] font-black opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#c7a46c]' : 'text-[#8c6b3f]'}`}>
-          点击查看全文 →
-        </div>
-      )}
+      </div>
     </button>
   );
 };

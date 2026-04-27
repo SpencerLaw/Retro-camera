@@ -13,7 +13,6 @@ import {
   validateWarningResetPasswordRemoval,
   verifyWarningResetPassword
 } from './utils/warningResetPassword.js';
-import { useDragScroll } from './hooks/useDragScroll';
 import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
 
@@ -231,9 +230,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const sessionHistoryRef = useRef<number[]>([]); 
   const sampleCounterRef = useRef(0); 
   const intervalPeakRef = useRef(0); // 用于抓取采样间隔内的最高分贝
-  const reportBodyRef = useRef<HTMLDivElement | null>(null);
-  const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const focusShellRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -1394,83 +1390,78 @@ const DoraemonMonitorApp: React.FC = () => {
     );
   };
 
-  useDragScroll(reportBodyRef);
 
   const ReportDrawer = () => {
     if (!isReportOpen) return null;
 
     return (
-      <div className="report-modal-layer open">
-        <button
-          type="button"
-          className="report-modal-backdrop"
-          onClick={closeReport}
-          aria-label={t('doraemon.report.hide')}
-        />
-        <div
-          className="report-modal-shell"
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(5, 10, 26, 0.6)', backdropFilter: 'blur(8px)', animation: 'fadeIn 0.3s ease'
+      }}>
+        {/* Full-screen click-to-close backdrop */}
+        <div style={{ position: 'absolute', inset: 0 }} onClick={closeReport} />
+        
+        <div 
           onClick={stopModalPropagation}
           onMouseDown={stopModalMouseDown}
-          style={{ display: 'flex', flexDirection: 'column' }}
+          style={{
+            position: 'relative', width: 'min(90vw, 860px)', height: 'min(85vh, 800px)',
+            background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(10, 15, 30, 0.98))',
+            borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+            display: 'flex', flexDirection: 'column', overflow: 'hidden'
+          }}
         >
-          <div className="report-modal-header" style={{ flexShrink: 0 }}>
-            <div className="report-drawer-heading">
-              <div className="report-drawer-icon" style={{ background: 'rgba(56,189,248,0.2)', color: '#38bdf8', padding: '8px', borderRadius: '10px' }}>
-                <CalendarDays size={20} />
+          {/* Header (Fixed) */}
+          <div style={{
+            flex: '0 0 auto', padding: '24px 32px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.02)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '12px', borderRadius: '14px' }}>
+                <CalendarDays size={24} />
               </div>
               <div>
-                <strong style={{ fontSize: '1.2rem', color: '#f8fafc' }}>{t('doraemon.report.title')}</strong>
-                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '2px' }}>{t('doraemon.report.localOnly')}</p>
+                <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#f8fafc', fontWeight: 700, letterSpacing: '0.02em' }}>{t('doraemon.report.title')}</h2>
+                <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#94a3b8' }}>{t('doraemon.report.localOnly')}</p>
               </div>
             </div>
-            <button
-              className="report-modal-close"
-              type="button"
-              onMouseDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                closeReport();
+            <button 
+              onClick={closeReport}
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#cbd5e1', padding: '10px', borderRadius: '50%', cursor: 'pointer', transition: 'all 0.2s'
               }}
-              onClick={(event) => {
-                event.stopPropagation();
-                closeReport();
-              }}
-              title={t('doraemon.report.hide')}
-              style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '50%', padding: '8px', color: '#cbd5e1', border: '1px solid rgba(255,255,255,0.1)' }}
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
 
-          <div
-            ref={reportBodyRef}
-            className="report-modal-body custom-scrollbar"
-            style={{ display: 'block', overflowY: 'auto', overflowX: 'hidden', padding: '24px 28px', flex: '1 1 auto', minHeight: 0, touchAction: 'pan-y' }}
-          >
-            <div className="report-modal-week" style={{ marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-              <div style={{ height: '1px', flex: 1, background: 'linear-gradient(90deg, transparent, rgba(148,163,184,0.2))' }} />
-              <span style={{ fontSize: '15px', color: '#94a3b8', fontWeight: 'bold', letterSpacing: '0.05em' }}>
+          {/* Body (Scrollable) */}
+          <div style={{
+            flex: '1 1 auto', overflowY: 'auto', padding: '32px', WebkitOverflowScrolling: 'touch'
+          }}>
+            <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+              <div style={{ height: '1px', flex: 1, background: 'linear-gradient(90deg, transparent, rgba(148,163,184,0.15))' }} />
+              <span style={{ fontSize: '16px', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {formatReportDate(weekStart)} - {formatReportDate(weekEnd)}
               </span>
-              <div style={{ height: '1px', flex: 1, background: 'linear-gradient(270deg, transparent, rgba(148,163,184,0.2))' }} />
+              <div style={{ height: '1px', flex: 1, background: 'linear-gradient(270deg, transparent, rgba(148,163,184,0.15))' }} />
             </div>
 
             {currentWeekRecords.length === 0 ? (
-              <div className="report-empty-state" style={{ padding: '80px 0', textAlign: 'center', color: '#64748b' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(255,255,255,0.03)', marginBottom: '16px' }}>
-                  <CalendarDays size={28} opacity={0.5} />
-                </div>
-                <p style={{ fontSize: '1.1rem' }}>{t('doraemon.report.empty')}</p>
+              <div style={{ padding: '100px 0', textAlign: 'center', color: '#64748b' }}>
+                <CalendarDays size={48} opacity={0.2} style={{ marginBottom: '20px' }} />
+                <p style={{ fontSize: '1.2rem', margin: 0 }}>{t('doraemon.report.empty')}</p>
               </div>
             ) : (
-              <div className="new-report-list" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                 {currentWeekRecords.map((record) => {
                   const samples = buildReportTrendData(record);
                   const values = samples.map(point => point.db);
                   const hMax = values.length ? Math.max(...values) : 0;
                   const hMin = values.length ? Math.min(...values) : 0;
-                  const peakIdx = values.indexOf(hMax);
-                  const lowIdx = values.indexOf(hMin);
                   const currentThreshold = record.threshold || 60;
                   
                   let chartContent = null;
@@ -1480,7 +1471,7 @@ const DoraemonMonitorApp: React.FC = () => {
                     const r = Math.max(20, cMax - cMin);
                     
                     const width = 800;
-                    const height = 240;
+                    const height = 220;
                     const pts = samples.map((sample, i) => ({
                       x: (i / (samples.length - 1)) * width,
                       y: height - ((sample.db - cMin) / r) * height,
@@ -1493,149 +1484,91 @@ const DoraemonMonitorApp: React.FC = () => {
                     const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
                     const thresholdY = height - ((currentThreshold - cMin) / r) * height;
 
-                    const timelineTickIndexes = [0, Math.floor((pts.length - 1) / 2), pts.length - 1]
-                      .filter((value, index, array) => array.indexOf(value) === index);
-                    const yAxisTicks = [cMax, Math.round((cMax + cMin) / 2), cMin];
-                    const averageDb = Math.round(average(values));
-                    const peakPoint = pts[peakIdx];
-                    const lowPoint = pts[lowIdx];
                     const trendId = record.id.replace(/[^a-zA-Z0-9_-]/g, '');
-                    const areaGradientId = `areaGrad-${trendId}`;
-                    const lineGradientId = `lineGrad-${trendId}`;
-                    const glowFilterId = `glow-${trendId}`;
+                    const gradId = `grad-${trendId}`;
+                    const lineGradId = `lgrad-${trendId}`;
 
                     chartContent = (
-                      <div className="report-trend-card" style={{ marginTop: '24px', background: 'transparent', padding: '0' }}>
-                        <div className="report-trend-header" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                          <strong style={{ fontSize: '0.9rem', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>本场噪音波形走势</strong>
-                          <div className="report-trend-stats" style={{ display: 'flex', gap: '16px', fontSize: '13px' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f8fafc' }}><div style={{ width: '8px', height: '8px', borderRadius: '4px', background: '#ef4444', boxShadow: '0 0 8px #ef4444' }}/>最高 {Math.round(hMax)} dB</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8' }}><div style={{ width: '8px', height: '8px', borderRadius: '4px', background: '#38bdf8' }}/>平均 {averageDb} dB</span>
-                          </div>
+                      <div style={{ marginTop: '24px', background: 'rgba(0,0,0,0.2)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>音量走势</span>
+                          <span style={{ color: '#cbd5e1', fontSize: '13px' }}>平均 {Math.round(average(values))} dB</span>
                         </div>
-
-                        <div className="report-trend-plot" style={{ position: 'relative', width: '100%', height: '240px', background: 'rgba(15,23,42,0.4)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                          
-                          {/* Y-axis Labels */}
-                          <div style={{ position: 'absolute', left: '12px', top: '12px', bottom: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '11px', color: '#64748b', fontWeight: 'bold', zIndex: 10, pointerEvents: 'none' }}>
-                            {yAxisTicks.map(tick => <span key={tick}>{tick}</span>)}
-                          </div>
-
-                          <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block', overflow: 'visible' }}>
+                        <div style={{ position: 'relative', height: '220px', width: '100%' }}>
+                          <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
                             <defs>
-                              <linearGradient id={areaGradientId} x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-                                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
+                                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
                               </linearGradient>
-                              <linearGradient id={lineGradientId} x1="0" y1="0" x2="1" y2="0">
+                              <linearGradient id={lineGradId} x1="0" y1="0" x2="1" y2="0">
                                 <stop offset="0%" stopColor="#0ea5e9" />
                                 <stop offset="50%" stopColor="#38bdf8" />
-                                <stop offset="100%" stopColor="#22c55e" />
+                                <stop offset="100%" stopColor="#2dd4bf" />
                               </linearGradient>
-                              <filter id={glowFilterId} x="-20%" y="-20%" width="140%" height="140%">
-                                <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#38bdf8" floodOpacity="0.3" />
-                              </filter>
                             </defs>
-
-                            {/* Grid lines */}
-                            {yAxisTicks.map(tick => {
-                              const y = height - ((tick - cMin) / r) * height;
-                              return <line key={tick} x1="0" y1={y} x2={width} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 4" />;
-                            })}
-                            {timelineTickIndexes.map(index => (
-                              <line key={index} x1={pts[index].x} y1="0" x2={pts[index].x} y2={height} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                            ))}
                             
-                            {/* Threshold Line */}
-                            <line x1="0" y1={thresholdY} x2={width} y2={thresholdY} stroke="#ef4444" strokeWidth="1.5" strokeDasharray="6 4" opacity="0.8" />
+                            {/* Threshold */}
+                            <line x1="0" y1={thresholdY} x2={width} y2={thresholdY} stroke="#ef4444" strokeWidth="1.5" strokeDasharray="6 4" opacity="0.7" />
                             
-                            {/* Filled Area */}
-                            <path d={fillPath} fill={`url(#${areaGradientId})`} />
+                            {/* Area */}
+                            <path d={fillPath} fill={`url(#${gradId})`} />
                             
-                            {/* SVG Glowing Curve */}
-                            <path d={linePath} stroke={`url(#${lineGradientId})`} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" filter={`url(#${glowFilterId})`} />
-                            
-                            {/* Highlight Points */}
-                            <g>
-                              {/* Peak Point */}
-                              <circle cx={peakPoint.x} cy={peakPoint.y} r="5" fill="#ef4444" stroke="#1e293b" strokeWidth="2" />
-                              <circle cx={peakPoint.x} cy={peakPoint.y} r="12" fill="#ef4444" opacity="0.2" className="pulse-anim" />
-                              
-                              {/* Low Point */}
-                              <circle cx={lowPoint.x} cy={lowPoint.y} r="4" fill="#38bdf8" stroke="#1e293b" strokeWidth="1.5" />
-                            </g>
+                            {/* Line */}
+                            <path d={linePath} stroke={`url(#${lineGradId})`} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
-                          
-                          {/* HTML Overlays for sharp text rendering */}
-                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-                            <div style={{ position: 'absolute', left: `${(peakPoint.x / width) * 100}%`, top: `${(peakPoint.y / height) * 100}%`, transform: 'translate(-50%, -120%)', background: 'rgba(15,23,42,0.9)', border: '1px solid rgba(239,68,68,0.3)', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', color: '#f8fafc', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 20 }}>
-                              <strong style={{ color: '#ef4444' }}>{Math.round(hMax)}dB</strong> @ {formatTimelineClock(peakPoint.at)}
-                            </div>
-                            <div style={{ position: 'absolute', right: '12px', top: `calc(${(thresholdY / height) * 100}% - 10px)`, fontSize: '11px', color: '#ef4444', fontWeight: 'bold', background: 'rgba(15,23,42,0.8)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(239,68,68,0.2)' }}>
-                              报警线 {currentThreshold} dB
-                            </div>
+                          <div style={{ position: 'absolute', right: 0, top: `calc(${(thresholdY / height) * 100}% - 22px)`, fontSize: '11px', color: '#ef4444', background: 'rgba(15,23,42,0.8)', padding: '2px 6px', borderRadius: '4px' }}>
+                            报警 {currentThreshold} dB
                           </div>
-                        </div>
-
-                        {/* X-axis labels */}
-                        <div className="report-trend-timeline" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', padding: '0 4px' }}>
-                          {timelineTickIndexes.map((index, i) => (
-                            <div key={index} style={{ textAlign: i === 0 ? 'left' : i === timelineTickIndexes.length - 1 ? 'right' : 'center', color: '#64748b', fontSize: '11px' }}>
-                              <strong style={{ display: 'block', color: '#94a3b8' }}>{formatTimelineClock(pts[index].at)}</strong>
-                              {i > 0 && <span style={{ opacity: 0.7 }}>{formatTimelineDuration(pts[index].elapsedSeconds)}</span>}
-                            </div>
-                          ))}
                         </div>
                       </div>
                     );
                   }
 
                   return (
-                    <article key={record.id} className="report-focus-card" style={{ background: 'linear-gradient(145deg, rgba(30,41,59,0.85) 0%, rgba(15,23,42,0.95) 100%)', padding: '28px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-                      <div className="report-focus-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                    <div key={record.id} style={{ background: 'rgba(30, 41, 59, 0.4)', borderRadius: '24px', padding: '32px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '100px', fontSize: '12px', color: '#e2e8f0', fontWeight: 'bold', letterSpacing: '0.05em' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                            <span style={{ background: 'rgba(255,255,255,0.1)', color: '#f8fafc', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 600 }}>
                               {formatReportDate(new Date(record.startedAt))}
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                              总时长 {formatTime(record.totalSeconds)}
-                            </div>
+                            </span>
+                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>时长 {formatTime(record.totalSeconds)}</span>
                           </div>
-                          <strong style={{ fontSize: '28px', color: '#f8fafc', letterSpacing: '-0.02em', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                          <div style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
                             {formatReportClock(record.startedAt)} 
-                            <span style={{ opacity: 0.4, margin: '0 8px' }}>→</span> 
+                            <span style={{ color: '#64748b', margin: '0 12px', fontWeight: 400 }}>→</span> 
                             {record.endedAt ? formatReportClock(record.endedAt) : ''}
-                          </strong>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                          <span style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', padding: '8px 20px', borderRadius: '30px', fontWeight: '900', fontSize: '18px', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 0 20px rgba(239,68,68,0.1)' }}>
-                            {Math.round(record.peakDb)} dB
-                          </span>
-                          <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Peak Volume</span>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '28px', fontWeight: 900, color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '8px 24px', borderRadius: '30px', border: '1px solid rgba(239,68,68,0.2)' }}>
+                            {Math.round(record.peakDb)} <span style={{ fontSize: '16px', opacity: 0.8 }}>dB</span>
+                          </div>
+                          <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '8px', fontWeight: 600, textTransform: 'uppercase' }}>最高音量</div>
                         </div>
                       </div>
 
-                      <div className="report-focus-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '8px' }}>
-                        <div className="report-session-metric" style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                          <span style={{ fontSize: '12px', color: '#94a3b8', display: 'block', marginBottom: '6px', letterSpacing: '0.05em' }}>安静时长</span>
-                          <strong style={{ color: '#10b981', fontSize: '20px' }}>{formatTime(record.quietSeconds)}</strong>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '24px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '16px' }}>
+                          <div style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '8px' }}>安静时长</div>
+                          <div style={{ color: '#10b981', fontSize: '24px', fontWeight: 700 }}>{formatTime(record.quietSeconds)}</div>
                         </div>
-                        <div className="report-session-metric" style={{ background: 'rgba(239,68,68,0.05)', padding: '16px', borderRadius: '14px', border: '1px solid rgba(239,68,68,0.1)' }}>
-                          <span style={{ fontSize: '12px', color: '#ef4444', display: 'block', marginBottom: '6px', letterSpacing: '0.05em' }}>超标报警次数</span>
-                          <strong style={{ color: '#ef4444', fontSize: '20px' }}>{record.warnCount}</strong>
+                        <div style={{ background: 'rgba(239,68,68,0.05)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.1)' }}>
+                          <div style={{ color: '#ef4444', fontSize: '13px', marginBottom: '8px' }}>超标警告</div>
+                          <div style={{ color: '#ef4444', fontSize: '24px', fontWeight: 700 }}>{record.warnCount} 次</div>
                         </div>
-                        <div className="report-session-metric" style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                          <span style={{ fontSize: '12px', color: '#94a3b8', display: 'block', marginBottom: '6px', letterSpacing: '0.05em' }}>监控配置参数</span>
-                          <strong style={{ color: '#e2e8f0', fontSize: '15px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span>阈值: {record.threshold}dB</span>
-                            <span style={{ color: '#64748b' }}>灵敏: {record.sensitivity}%</span>
-                          </strong>
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '16px' }}>
+                          <div style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '8px' }}>监控配置</div>
+                          <div style={{ color: '#f8fafc', fontSize: '16px', fontWeight: 600, lineHeight: 1.4 }}>
+                            阈值 {record.threshold}dB<br/>
+                            <span style={{ color: '#94a3b8', fontSize: '14px', fontWeight: 400 }}>灵敏度 {record.sensitivity}%</span>
+                          </div>
                         </div>
                       </div>
 
                       {chartContent}
-                    </article>
+                    </div>
                   );
                 })}
               </div>

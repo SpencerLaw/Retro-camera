@@ -55,6 +55,17 @@ runTest('receiver uses direct audio playback and visible diagnostics for Windows
   assert.match(receiverSource, /声音播放失败，请检查系统音量或重新打开接收器。/);
 });
 
+runTest('receiver shows toast errors when broadcast audio cannot play', () => {
+  assert.match(receiverSource, /const \[audioToast, setAudioToast\]/);
+  assert.match(receiverSource, /showAudioToast/);
+  assert.match(receiverSource, /z-\[1200\]/);
+  assert.match(receiverSource, /播报声音提示/);
+  assert.match(receiverSource, /浏览器阻止了声音，请点击“点击开始”激活。/);
+  assert.match(receiverSource, /声音播放失败，请检查系统音量或重新打开接收器。/);
+  assert.match(receiverSource, /播报异常，请重新打开接收器。/);
+  assert.match(receiverSource, /setAudioToast\(null\)/);
+});
+
 runTest('desktop receiver allows autoplay and uses ASCII installer shortcuts for old Windows', () => {
   assert.match(desktopMainSource, /appendSwitch\('autoplay-policy',\s*'no-user-gesture-required'\)/);
   assert.match(desktopPackageSource, /"productName":\s*"ClassBroadcastReceiver"/);

@@ -265,11 +265,13 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [needsActivation, setNeedsActivation] = useState(false);
     const [downloadingTarget, setDownloadingTarget] = useState<'modern' | 'win7' | null>(null);
     const [audioStatus, setAudioStatus] = useState('');
+    const [audioToast, setAudioToast] = useState<{ type: 'info' | 'warning' | 'error'; message: string } | null>(null);
     const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     const [showExitConfirm, setShowExitConfirm] = useState(false);
 
     const activeRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
+    const audioToastTimerRef = useRef<number | null>(null);
     const isPlayingRef = useRef(false);
     const engine = useRef({
         lastId: localStorage.getItem('br_receiver_last_id') || '',
@@ -291,12 +293,34 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     }, []);
 
+    const showAudioToast = useCallback((message: string, type: 'info' | 'warning' | 'error' = 'info') => {
+        if (audioToastTimerRef.current) {
+            window.clearTimeout(audioToastTimerRef.current);
+        }
+
+        setAudioToast({ message, type });
+        audioToastTimerRef.current = window.setTimeout(() => {
+            setAudioToast(null);
+            audioToastTimerRef.current = null;
+        }, type === 'error' ? 9000 : 6000);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (audioToastTimerRef.current) {
+                window.clearTimeout(audioToastTimerRef.current);
+            }
+        };
+    }, []);
+
     const handleActivate = useCallback(async () => {
         const unlocked = await ttsManager.unlockAudio();
         ttsManager.startSilentLoop();
         setNeedsActivation(!unlocked);
-        setAudioStatus(unlocked ? '声音已激活，等待广播。' : '声音还没激活，请再点一次，或检查系统音量。');
-    }, []);
+        const message = unlocked ? '声音已激活，等待广播。' : '声音还没激活，请再点一次，或检查系统音量。';
+        setAudioStatus(message);
+        showAudioToast(message, unlocked ? 'info' : 'warning');
+    }, [showAudioToast]);
 
     const handleDownload = useCallback((target: 'modern' | 'win7') => {
         setDownloadingTarget(target);
@@ -399,10 +423,14 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         console.warn('TTS Speak Failed (Autoplay blocked?):', ttsErr);
                         if (ttsManager.isPlaybackBlockedError?.(ttsErr)) {
                             setNeedsActivation(true);
-                            setAudioStatus('浏览器阻止了声音，请点击“点击开始”激活。');
+                            const message = '浏览器阻止了声音，请点击“点击开始”激活。';
+                            setAudioStatus(message);
+                            showAudioToast(message, 'warning');
                             return;
                         }
-                        setAudioStatus('声音播放失败，请检查系统音量或重新打开接收器。');
+                        const message = '声音播放失败，请检查系统音量或重新打开接收器。';
+                        setAudioStatus(message);
+                        showAudioToast(message, 'error');
                         if (!engine.current.isJoined) break;
                         const delayMs = Math.max(2500, sentences[i].length * 200);
                         await new Promise(res => setTimeout(res, delayMs));
@@ -411,7 +439,9 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             }
         } catch (e) {
             console.error('Playback Error:', e);
-            setAudioStatus('播报异常，请重新打开接收器。');
+            const message = '播报异常，请重新打开接收器。';
+            setAudioStatus(message);
+            showAudioToast(message, 'error');
         } finally {
             isPlayingRef.current = false;
             setIsPlaying(false);
@@ -423,7 +453,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                 }
             }, 1500);
         }
-    }, []);
+    }, [showAudioToast]);
 
     // Queue worker: process messages one by one
     useEffect(() => {
@@ -822,6 +852,39 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                     </div>
                 </div>
             )}
+
+            {audioToast && (
+                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[1200] w-[calc(100%-2rem)] max-w-lg animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className={`flex items-start gap-3 rounded-2xl border px-4 py-3 shadow-2xl backdrop-blur-2xl ${audioToast.type === 'error'
+                        ? 'border-rose-200 bg-rose-50/95 text-rose-700 shadow-rose-900/15 dark:border-rose-400/30 dark:bg-rose-950/90 dark:text-rose-100'
+                        : audioToast.type === 'warning'
+                            ? 'border-amber-200 bg-amber-50/95 text-amber-800 shadow-amber-900/10 dark:border-amber-300/30 dark:bg-amber-950/90 dark:text-amber-100'
+                            : 'border-indigo-200 bg-white/95 text-slate-800 shadow-slate-900/15 dark:border-white/10 dark:bg-slate-900/90 dark:text-white'
+                        }`}>
+                        <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${audioToast.type === 'error'
+                            ? 'bg-rose-100 text-rose-600 dark:bg-rose-400/15 dark:text-rose-200'
+                            : audioToast.type === 'warning'
+                                ? 'bg-amber-100 text-amber-600 dark:bg-amber-400/15 dark:text-amber-100'
+                                : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-400/15 dark:text-indigo-100'
+                            }`}>
+                            {audioToast.type === 'info' ? <Volume2 size={18} /> : <AlertCircle size={18} />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-black leading-snug">播报声音提示</p>
+                            <p className="mt-1 text-sm font-bold leading-relaxed opacity-80">{audioToast.message}</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setAudioToast(null)}
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/5 text-current opacity-60 transition hover:opacity-100 active:scale-95 dark:bg-white/10"
+                            aria-label="关闭声音提示"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* ─── Activation Overlay ─── */}
             {needsActivation && (
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/60 backdrop-blur-2xl animate-in fade-in duration-500">

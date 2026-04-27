@@ -235,8 +235,7 @@ const DoraemonMonitorApp: React.FC = () => {
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const focusShellRef = useRef<HTMLElement | null>(null);
 
-  useDragScroll(sidebarRef);
-  useDragScroll(focusShellRef);
+  useDragScroll(reportBodyRef);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;

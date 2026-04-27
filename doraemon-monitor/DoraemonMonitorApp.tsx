@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX, ChevronUp, ChevronDown, CalendarDays, Lock } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
@@ -13,6 +13,7 @@ import {
   validateWarningResetPasswordRemoval,
   verifyWarningResetPassword
 } from './utils/warningResetPassword.js';
+import { useDragScroll } from './hooks/useDragScroll';
 import LicenseInput from './components/LicenseInput';
 import './doraemon-monitor.css';
 
@@ -231,6 +232,8 @@ const DoraemonMonitorApp: React.FC = () => {
   const sampleCounterRef = useRef(0); 
   const intervalPeakRef = useRef(0); // 用于抓取采样间隔内的最高分贝
   const reportBodyRef = useRef<HTMLDivElement | null>(null);
+
+  useDragScroll(reportBodyRef);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;

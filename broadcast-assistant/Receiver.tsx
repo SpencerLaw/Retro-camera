@@ -264,6 +264,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [msgQueue, setMsgQueue] = useState<Message[]>([]);
     const [needsActivation, setNeedsActivation] = useState(false);
     const [downloadingTarget, setDownloadingTarget] = useState<'modern' | 'win7' | null>(null);
+    const [audioStatus, setAudioStatus] = useState('');
     const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     const [showExitConfirm, setShowExitConfirm] = useState(false);
 
@@ -294,6 +295,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         const unlocked = await ttsManager.unlockAudio();
         ttsManager.startSilentLoop();
         setNeedsActivation(!unlocked);
+        setAudioStatus(unlocked ? '声音已激活，等待广播。' : '声音还没激活，请再点一次，或检查系统音量。');
     }, []);
 
     const handleDownload = useCallback((target: 'modern' | 'win7') => {
@@ -349,6 +351,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         try {
             const sentences = splitSentences(msg.text);
             const repeat = msg.repeatCount || 1;
+            setAudioStatus('正在准备播报声音...');
 
             for (let r = 0; r < (repeat === -1 ? 999 : repeat); r++) {
                 for (let i = 0; i < sentences.length; i++) {
@@ -362,6 +365,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
 
                         if (isFishVoice && fishVoiceId) {
                             try {
+                                setAudioStatus('正在播放鱼声播报...');
                                 await ttsManager.speak(sentences[i], {
                                     voice: fishVoiceId,
                                     engine: 'fish',
@@ -370,6 +374,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 });
                             } catch (e) {
                                 console.error('Fish Audio Playback failed, falling back to Edge TTS:', e);
+                                setAudioStatus('鱼声失败，改用普通播报...');
                                 await ttsManager.speak(sentences[i], {
                                     voice: 'zh-CN-XiaoxiaoNeural',
                                     engine: 'edge',
@@ -377,6 +382,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                 });
                             }
                         } else {
+                            setAudioStatus('正在播放普通播报...');
                             await ttsManager.speak(sentences[i], {
                                 voice: msg.voice || 'zh-CN-XiaoxiaoNeural',
                                 engine: 'edge',
@@ -393,8 +399,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         console.warn('TTS Speak Failed (Autoplay blocked?):', ttsErr);
                         if (ttsManager.isPlaybackBlockedError?.(ttsErr)) {
                             setNeedsActivation(true);
+                            setAudioStatus('浏览器阻止了声音，请点击“点击开始”激活。');
                             return;
                         }
+                        setAudioStatus('声音播放失败，请检查系统音量或重新打开接收器。');
                         if (!engine.current.isJoined) break;
                         const delayMs = Math.max(2500, sentences[i].length * 200);
                         await new Promise(res => setTimeout(res, delayMs));
@@ -403,6 +411,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             }
         } catch (e) {
             console.error('Playback Error:', e);
+            setAudioStatus('播报异常，请重新打开接收器。');
         } finally {
             isPlayingRef.current = false;
             setIsPlaying(false);
@@ -717,12 +726,17 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                     <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/5 blur-[100px] rounded-full scale-150 animate-pulse" />
                                     <IdleVisualizer isEmergency={false} />
                                 </div>
-                                <div className="text-center space-y-4">
-                                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-indigo-500 animate-pulse">{t('broadcast.receiver.monitoring')}</p>
-                                    <div className="flex items-center justify-center gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    </div>
-                                </div>
+                        <div className="text-center space-y-4">
+                            <p className="text-[11px] font-black uppercase tracking-[0.5em] text-indigo-500 animate-pulse">{t('broadcast.receiver.monitoring')}</p>
+                            <div className="flex items-center justify-center gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            </div>
+                            {audioStatus && (
+                                <p className={`mx-auto max-w-sm text-[11px] font-bold leading-relaxed ${theme === 'dark' ? 'text-white/40' : 'text-slate-400'}`}>
+                                    {audioStatus}
+                                </p>
+                            )}
+                        </div>
                             </div>
                         )}
                     </div>
@@ -819,7 +833,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         <div className="space-y-3">
                             <h3 className="text-3xl font-black text-white tracking-tight">激活播报系统</h3>
                             <p className="text-xs text-white/40 leading-relaxed font-bold uppercase tracking-wider">
-                                点击下方按钮以建立音频连接
+                                点击下方按钮以建立音频连接。Win7 首次打开必须点一次。
                             </p>
                         </div>
                         <button

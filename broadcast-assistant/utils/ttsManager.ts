@@ -15,8 +15,6 @@ class TTSManager {
     private static instance: TTSManager;
     private audio: HTMLAudioElement | null = null;
     private audioCtx: AudioContext | null = null;
-    private gainNode: GainNode | null = null;
-    private sourceNode: MediaElementAudioSourceNode | null = null;
     private activePlaybackId: number = 0;
     private activeUtterance: SpeechSynthesisUtterance | null = null;
     private audioUnlocked = false;
@@ -34,13 +32,9 @@ class TTSManager {
     }
 
     private initAudioCtx() {
-        if (!this.audioCtx && this.audio) {
+        if (!this.audioCtx) {
             try {
                 this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-                this.gainNode = this.audioCtx.createGain();
-                this.sourceNode = this.audioCtx.createMediaElementSource(this.audio);
-                this.sourceNode.connect(this.gainNode);
-                this.gainNode.connect(this.audioCtx.destination);
             } catch (e) {
                 console.warn('AudioContext init failed:', e);
             }
@@ -132,7 +126,10 @@ class TTSManager {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text, voice: options.voice, rate: options.rate })
         });
-        if (resp.ok) return await resp.blob();
+        if (resp.ok) {
+            const blob = await resp.blob();
+            if (blob.size > 256) return blob;
+        }
         throw new Error('TTS Fetch Failed');
     }
 
@@ -159,10 +156,6 @@ class TTSManager {
             if (!this.audio) return resolve();
 
             this.initAudioCtx();
-            if (this.gainNode) {
-                const vol = typeof options.volume === 'number' ? options.volume : 1;
-                this.gainNode.gain.setTargetAtTime(vol, this.audioCtx!.currentTime, 0.1);
-            }
 
             const cleanup = () => {
                 if (this.audio) {
@@ -182,6 +175,7 @@ class TTSManager {
             this.audio.src = url;
             this.audio.muted = false;
             this.audio.volume = typeof options.volume === 'number' ? options.volume : 1;
+            this.audio.load();
             this.audio.play().catch((error) => {
                 cleanup();
                 if ((error as any)?.name === 'NotAllowedError' || !this.audioUnlocked) {

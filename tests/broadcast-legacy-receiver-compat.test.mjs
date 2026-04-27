@@ -45,6 +45,16 @@ runTest('receiver surfaces autoplay blocks and unlocks audio from a user gesture
   assert.match(receiverSource, /handleActivate\(\);\s*localStorage\.setItem\('br_receiver_roomId'/);
 });
 
+runTest('receiver uses direct audio playback and visible diagnostics for Windows 7', () => {
+  assert.doesNotMatch(ttsSource, /createMediaElementSource/);
+  assert.doesNotMatch(ttsSource, /gainNode/);
+  assert.match(ttsSource, /this\.audio\.load\(\)/);
+  assert.match(ttsSource, /blob\.size > 256/);
+  assert.match(receiverSource, /const \[audioStatus, setAudioStatus\]/);
+  assert.match(receiverSource, /Win7 首次打开必须点一次/);
+  assert.match(receiverSource, /声音播放失败，请检查系统音量或重新打开接收器。/);
+});
+
 runTest('desktop receiver allows autoplay and uses ASCII installer shortcuts for old Windows', () => {
   assert.match(desktopMainSource, /appendSwitch\('autoplay-policy',\s*'no-user-gesture-required'\)/);
   assert.match(desktopPackageSource, /"productName":\s*"ClassBroadcastReceiver"/);

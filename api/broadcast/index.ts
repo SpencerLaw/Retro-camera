@@ -370,8 +370,12 @@ async function handleFetch(req: VercelRequest, res: VercelResponse) {
     const code = normalizeRoomCode((req.query.code as string) || '');
     if (!code) return res.status(400).json({ error: 'Missing code' });
 
+    res.setHeader('Cache-Control', 'no-store, no-cache, max-age=0, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     const state = await resolveRoomState(code);
-    if (!state.owner) {
+    if (!state.owner && !state.message) {
         return res.status(200).json({ message: null, notFound: true });
     }
 
@@ -396,6 +400,8 @@ async function handleSend(req: VercelRequest, res: VercelResponse) {
         channelName: channelName || '',
         license: cleanLicense
     };
+
+    await hydrateRoomOwner(uppercaseCode, cleanLicense);
 
     // Save transient message
     await kv.set(buildRoomMessageKey(uppercaseCode), messageData, { ex: 3600 }); // 1h TTL for messages

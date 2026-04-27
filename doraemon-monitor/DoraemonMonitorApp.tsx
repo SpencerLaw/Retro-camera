@@ -44,6 +44,12 @@ interface MicTestResult {
   health: MicTestHealth;
 }
 
+type SessionHistoryPoint = number | {
+  db: number;
+  elapsedSeconds: number;
+  at?: string;
+};
+
 interface SessionReport {
   id: string;
   startedAt: string;
@@ -54,11 +60,12 @@ interface SessionReport {
   warnCount: number;
   threshold: number;
   sensitivity: number;
-  history?: number[]; // 新增：场次采样
+  history?: SessionHistoryPoint[];
 }
 
 const REPORT_STORAGE_KEY = 'doraemon_session_reports_v1';
 const MAX_STORED_REPORTS = 180;
+const REPORT_HISTORY_TARGET_POINTS = 48;
 const REPORT_WEEKDAYS: Array<{ key: ReportWeekday; offset: number }> = [
   { key: 'mon', offset: 0 },
   { key: 'tue', offset: 1 },
@@ -72,6 +79,25 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 const average = (values: number[]) => {
   if (!values.length) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
+};
+
+const downsampleReportHistory = (values: number[], totalSeconds: number, startedAt: string): SessionHistoryPoint[] => {
+  if (values.length <= 0) return [];
+
+  const step = Math.max(1, Math.ceil(values.length / REPORT_HISTORY_TARGET_POINTS));
+  const sampled = values.filter((_, index) => index % step === 0).slice(0, REPORT_HISTORY_TARGET_POINTS);
+  const startMs = new Date(startedAt).getTime();
+  const duration = Math.max(1, totalSeconds || values.length);
+  const denominator = Math.max(1, sampled.length - 1);
+
+  return sampled.map((db, index) => {
+    const elapsedSeconds = Math.round((index / denominator) * duration);
+    return {
+      db: Math.round(db),
+      elapsedSeconds,
+      at: new Date(startMs + elapsedSeconds * 1000).toISOString()
+    };
+  });
 };
 
 const toDateKey = (dateLike: string | Date) => {
@@ -326,13 +352,9 @@ const DoraemonMonitorApp: React.FC = () => {
     );
     const totalSeconds = totalTimeRef.current;
     
-    // 确保历史记录不为空并压缩 (精华 20 个点)
+    // 保存本场曲线的真实采样点，用于周报时间轴展示。
     const rawHistory = [...sessionHistoryRef.current];
-    let history: number[] | undefined = undefined;
-    if (rawHistory.length > 0) {
-      const samplingRate = Math.max(1, Math.floor(rawHistory.length / 20));
-      history = rawHistory.filter((_, i) => i % samplingRate === 0).slice(0, 20);
-    }
+    const history = downsampleReportHistory(rawHistory, totalSeconds, activeSession.startedAt);
 
     const nextRecord: SessionReport = {
       id: activeSession.id,
@@ -344,7 +366,7 @@ const DoraemonMonitorApp: React.FC = () => {
       warnCount: Math.max(0, warnCountRef.current),
       threshold: limitRef.current,
       sensitivity: sensitivityRef.current,
-      history: (history && history.length >= 2) ? history : undefined
+      history: history.length >= 2 ? history : undefined
     };
 
     const nextReports = [
@@ -877,9 +899,53 @@ const DoraemonMonitorApp: React.FC = () => {
     return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
   };
 
+  const formatTimelineClock = (dateLike: string | number | Date) => {
+    const date = new Date(dateLike);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  const formatTimelineDuration = (seconds: number) => {
+    const safeSeconds = Math.max(0, Math.round(seconds));
+    const m = Math.floor(safeSeconds / 60);
+    const s = safeSeconds % 60;
+    return m > 0 ? `${m}分${s.toString().padStart(2, '0')}秒` : `${s}秒`;
+  };
+
   const formatPreciseClock = (dateLike: string | number | Date) => {
     const d = new Date(dateLike);
     return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+  };
+
+  const buildReportTrendData = (record: SessionReport) => {
+    const raw = record.history || [];
+    const startMs = new Date(record.startedAt).getTime();
+    const endMs = record.endedAt ? new Date(record.endedAt).getTime() : Date.now();
+    const durationSeconds = Math.max(
+      1,
+      record.totalSeconds || Math.round((endMs - startMs) / 1000) || raw.length
+    );
+    const denominator = Math.max(1, raw.length - 1);
+
+    return raw
+      .map((item, index) => {
+        if (typeof item === 'number') {
+          const elapsedSeconds = Math.round((index / denominator) * durationSeconds);
+          return {
+            db: item,
+            elapsedSeconds,
+            at: startMs + elapsedSeconds * 1000
+          };
+        }
+
+        const elapsedSeconds = Math.max(0, Number(item.elapsedSeconds) || 0);
+        const at = item.at ? new Date(item.at).getTime() : startMs + elapsedSeconds * 1000;
+        return {
+          db: Number(item.db) || 0,
+          elapsedSeconds,
+          at
+        };
+      })
+      .filter(point => point.db > 0);
   };
 
   /**
@@ -1450,80 +1516,118 @@ const DoraemonMonitorApp: React.FC = () => {
                         <span className="report-peak-pill">{Math.round(selectedReportRecord.peakDb)} dB</span>
                       </div>
 
-                      {/* 本场精简曲线图 (参考早读树 100% 视觉还原) */}
+                      {/* 本场分贝曲线：基于真实采样点，并按上课时刻显示时间轴。 */}
                       <div className="report-session-trend">
                         {(() => {
-                          const h = selectedReportRecord.history || [];
-                          if (h.length < 2) return <div className="trend-empty-hint">结束本场后生成波动曲线</div>;
+                          const samples = buildReportTrendData(selectedReportRecord);
+                          if (samples.length < 2) return <div className="trend-empty-hint">结束本场后生成波动曲线</div>;
                           
-                          const hMax = Math.max(...h);
-                          const hMin = Math.min(...h);
-                          const peakIdx = h.indexOf(hMax);
-                          const lowIdx = h.indexOf(hMin);
+                          const values = samples.map(point => point.db);
+                          const hMax = Math.max(...values);
+                          const hMin = Math.min(...values);
+                          const peakIdx = values.indexOf(hMax);
+                          const lowIdx = values.indexOf(hMin);
                           const currentThreshold = selectedReportRecord.threshold || 60;
                           
-                          // 智能计算 Y 轴量程，确保 108dB 等高值不爆框
-                          const cMax = Math.max(hMax + 10, currentThreshold + 15);
-                          const cMin = Math.max(0, Math.min(hMin - 10, 30));
+                          const cMax = Math.ceil(Math.max(hMax + 8, currentThreshold + 12) / 5) * 5;
+                          const cMin = Math.max(0, Math.floor(Math.min(hMin - 8, currentThreshold - 18, 30) / 5) * 5);
                           const r = Math.max(20, cMax - cMin);
                           
                           const width = 100;
                           const height = 100;
-                          const pts = h.map((v, i) => ({
-                            x: (i / (h.length - 1)) * width,
-                            y: height - ((v - cMin) / r) * height
+                          const pts = samples.map((sample, i) => ({
+                            x: (i / (samples.length - 1)) * width,
+                            y: height - ((sample.db - cMin) / r) * height,
+                            db: sample.db,
+                            at: sample.at,
+                            elapsedSeconds: sample.elapsedSeconds
                           }));
 
                           const linePath = buildSmoothCurvePath(pts);
                           const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
                           const thresholdY = height - ((currentThreshold - cMin) / r) * height;
 
-                          const startTime = new Date(selectedReportRecord.startedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                          const endTime = selectedReportRecord.endedAt ? new Date(selectedReportRecord.endedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : "进行中";
+                          const timelineTickIndexes = [0, Math.floor((pts.length - 1) / 2), pts.length - 1]
+                            .filter((value, index, array) => array.indexOf(value) === index);
+                          const yAxisTicks = [cMax, Math.round((cMax + cMin) / 2), cMin];
+                          const averageDb = Math.round(average(values));
+                          const peakPoint = pts[peakIdx];
+                          const lowPoint = pts[lowIdx];
+                          const trendId = selectedReportRecord.id.replace(/[^a-zA-Z0-9_-]/g, '');
+                          const areaGradientId = `reportAreaGradient-${trendId}`;
+                          const markerGlowId = `reportMarkerGlow-${trendId}`;
 
                           return (
-                            <div className="trend-morning-tree-wrapper pro">
-                              <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="trend-morning-tree-svg">
+                            <div className="report-trend-card">
+                              <div className="report-trend-header">
+                                <div>
+                                  <strong>本场声音走势</strong>
+                                  <span>{formatTimelineClock(selectedReportRecord.startedAt)} - {selectedReportRecord.endedAt ? formatTimelineClock(selectedReportRecord.endedAt) : '进行中'}</span>
+                                </div>
+                                <div className="report-trend-stats">
+                                  <span>最高 {Math.round(hMax)} dB</span>
+                                  <span>平均 {averageDb} dB</span>
+                                </div>
+                              </div>
+
+                              <div className="report-trend-plot">
+                                <div className="report-trend-y-axis" aria-hidden="true">
+                                  {yAxisTicks.map(tick => <span key={tick}>{tick}</span>)}
+                                </div>
+                                <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="report-trend-svg">
                                 <defs>
-                                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#0096E1" stopOpacity="0.2" />
-                                    <stop offset="100%" stopColor="#0096E1" stopOpacity="0" />
+                                  <linearGradient id={areaGradientId} x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.36" />
+                                    <stop offset="52%" stopColor="#22c55e" stopOpacity="0.16" />
+                                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
                                   </linearGradient>
-                                  <filter id="markerGlow">
+                                  <filter id={markerGlowId}>
                                     <feGaussianBlur stdDeviation="2" result="blur" />
                                     <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                                   </filter>
                                 </defs>
 
-                                {/* 背景参考线 */}
-                                <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-                                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-                                <line x1="0" y1="80" x2="100" y2="80" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+                                {yAxisTicks.map(tick => {
+                                  const y = height - ((tick - cMin) / r) * height;
+                                  return <line key={tick} x1="0" y1={y} x2="100" y2={y} className="report-trend-grid-line" />;
+                                })}
+
+                                {timelineTickIndexes.map(index => (
+                                  <line key={index} x1={pts[index].x} y1="0" x2={pts[index].x} y2="100" className="report-trend-grid-line vertical" />
+                                ))}
                                 
-                                {/* 阈值虚线 */}
-                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} stroke="#ef4444" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.6" />
+                                <line x1="0" y1={thresholdY} x2="100" y2={thresholdY} className="report-trend-threshold" />
                                 
-                                {/* 填充与曲线 */}
-                                <path d={fillPath} fill="url(#areaGradient)" />
-                                <path d={linePath} fill="none" stroke="#0096E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d={fillPath} fill={`url(#${areaGradientId})`} />
+                                <path d={linePath} className="report-trend-line-shadow" />
+                                <path d={linePath} className="report-trend-line" />
                                 
-                                {/* 精修标记点 */}
-                                <g filter="url(#markerGlow)">
-                                  <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="3" fill="#ff416c" stroke="#fff" strokeWidth="1" />
-                                  <circle cx={pts[lowIdx].x} cy={pts[lowIdx].y} r="3" fill="#00f260" stroke="#fff" strokeWidth="1" />
+                                <g filter={`url(#${markerGlowId})`}>
+                                  <circle cx={peakPoint.x} cy={peakPoint.y} r="3.1" className="report-trend-peak-dot" />
+                                  <circle cx={lowPoint.x} cy={lowPoint.y} r="2.6" className="report-trend-low-dot" />
                                 </g>
                               </svg>
                               
-                              {/* 极值标注与阈值标签 */}
-                              <div className="trend-pro-annotations">
-                                <span className="label-peak" style={{ left: `${pts[peakIdx].x}%`, top: `${pts[peakIdx].y}%` }}>最高 {Math.round(hMax)}dB</span>
-                                <span className="label-low" style={{ left: `${pts[lowIdx].x}%`, top: `${pts[lowIdx].y}%` }}>最低 {Math.round(hMin)}dB</span>
-                                <span className="label-threshold" style={{ top: `${thresholdY}%` }}>设定阈值 {currentThreshold}dB</span>
+                                <div className="report-trend-annotations">
+                                  <span className="report-trend-label peak" style={{ left: `${peakPoint.x}%`, top: `${peakPoint.y}%` }}>
+                                    最高 {Math.round(hMax)} dB · {formatTimelineClock(peakPoint.at)}
+                                  </span>
+                                  <span className="report-trend-label low" style={{ left: `${lowPoint.x}%`, top: `${lowPoint.y}%` }}>
+                                    最低 {Math.round(hMin)} dB
+                                  </span>
+                                  <span className="report-trend-label threshold" style={{ top: `${thresholdY}%` }}>
+                                    阈值 {currentThreshold} dB
+                                  </span>
+                                </div>
                               </div>
 
-                              <div className="trend-morning-tree-footer">
-                                <span>{startTime} 开始</span>
-                                <span>{endTime} 结束</span>
+                              <div className="report-trend-timeline">
+                                {timelineTickIndexes.map(index => (
+                                  <span key={index}>
+                                    <strong>{formatTimelineClock(pts[index].at)}</strong>
+                                    <small>{formatTimelineDuration(pts[index].elapsedSeconds)}</small>
+                                  </span>
+                                ))}
                               </div>
                             </div>
                           );

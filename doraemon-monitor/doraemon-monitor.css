@@ -1554,6 +1554,7 @@
   position: relative;
   z-index: 1;
   width: min(860px, calc(100vw - 40px));
+  height: min(84vh, 700px);
   max-height: min(84vh, 700px);
   border-radius: 28px;
   background: rgba(18, 28, 63, 0.96);
@@ -1563,6 +1564,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   opacity: 0;
   transform: translateY(8px) scale(0.96);
   transition: transform 0.28s ease, opacity 0.24s ease;
@@ -1611,9 +1614,13 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px 18px 18px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   flex: 1 1 auto;
   min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .report-modal-week {
@@ -1764,6 +1771,10 @@
   grid-template-rows: repeat(5, minmax(0, 1fr));
   gap: 10px;
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .report-day-chip {
@@ -1842,7 +1853,11 @@
   gap: 10px;
   min-height: 0;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-shell {
@@ -1931,6 +1946,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 0 0 auto;
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-card {
@@ -2917,4 +2933,291 @@
   color: rgba(255, 255, 255, 0.2);
   font-weight: bold;
   font-style: italic;
+}
+
+
+/* ===== Report trend v2: real sampled timeline ===== */
+.report-session-trend {
+  margin: 12px 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.report-trend-card {
+  position: relative;
+  border-radius: 18px;
+  padding: clamp(14px, 2.2vw, 20px);
+  background: linear-gradient(135deg, rgba(8, 18, 38, 0.84), rgba(18, 33, 62, 0.72));
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 42px rgba(8, 18, 38, 0.24);
+  overflow: hidden;
+}
+
+.doraemon-app:not(.dark-mode) .report-trend-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.9));
+  border-color: rgba(59, 130, 246, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 18px 38px rgba(37, 99, 235, 0.12);
+}
+
+.report-trend-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.report-trend-header strong {
+  display: block;
+  font-size: clamp(0.94rem, 1.4vw, 1.08rem);
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-weight: 900;
+}
+
+.report-trend-header span,
+.report-trend-stats span,
+.report-trend-timeline small {
+  color: rgba(226, 232, 240, 0.68);
+}
+
+.doraemon-app:not(.dark-mode) .report-trend-header span,
+.doraemon-app:not(.dark-mode) .report-trend-stats span,
+.doraemon-app:not(.dark-mode) .report-trend-timeline small {
+  color: #64748b;
+}
+
+.report-trend-header > div:first-child > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.report-trend-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.report-trend-stats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(125, 211, 252, 0.1);
+  border: 1px solid rgba(125, 211, 252, 0.12);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.doraemon-app:not(.dark-mode) .report-trend-stats span {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.12);
+}
+
+.report-trend-plot {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  min-height: clamp(154px, 24vh, 240px);
+  padding: 6px 0 4px;
+}
+
+.report-trend-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px 8px 2px 0;
+  text-align: right;
+  font-size: 0.66rem;
+  font-weight: 900;
+  color: rgba(226, 232, 240, 0.42);
+}
+
+.doraemon-app:not(.dark-mode) .report-trend-y-axis {
+  color: #94a3b8;
+}
+
+.report-trend-svg {
+  width: 100%;
+  height: 100%;
+  min-height: clamp(148px, 22vh, 226px);
+  overflow: visible;
+}
+
+.report-trend-grid-line {
+  stroke: rgba(226, 232, 240, 0.12);
+  stroke-width: 0.55;
+}
+
+.report-trend-grid-line.vertical {
+  stroke-dasharray: 1.5 3;
+}
+
+.doraemon-app:not(.dark-mode) .report-trend-grid-line {
+  stroke: rgba(100, 116, 139, 0.16);
+}
+
+.report-trend-threshold {
+  stroke: rgba(248, 113, 113, 0.9);
+  stroke-width: 1.05;
+  stroke-dasharray: 4 3;
+}
+
+.report-trend-line-shadow,
+.report-trend-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.report-trend-line-shadow {
+  stroke: rgba(56, 189, 248, 0.18);
+  stroke-width: 7;
+}
+
+.report-trend-line {
+  stroke: #38bdf8;
+  stroke-width: 2.8;
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.28));
+}
+
+.report-trend-peak-dot {
+  fill: #fb7185;
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+.report-trend-low-dot {
+  fill: #34d399;
+  stroke: #fff;
+  stroke-width: 0.9;
+}
+
+.report-trend-annotations {
+  position: absolute;
+  inset: 6px 0 4px 34px;
+  pointer-events: none;
+}
+
+.report-trend-label {
+  position: absolute;
+  max-width: min(210px, 42vw);
+  padding: 5px 8px;
+  border-radius: 10px;
+  font-size: clamp(0.62rem, 1.25vw, 0.72rem);
+  line-height: 1.25;
+  font-weight: 900;
+  white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 8px));
+  box-shadow: 0 10px 26px rgba(8, 18, 38, 0.18);
+}
+
+.report-trend-label.peak {
+  background: rgba(251, 113, 133, 0.94);
+  color: #fff;
+}
+
+.report-trend-label.low {
+  background: rgba(52, 211, 153, 0.92);
+  color: #052e25;
+  transform: translate(-50%, 10px);
+}
+
+.report-trend-label.threshold {
+  right: 4px;
+  left: auto !important;
+  transform: translateY(-50%);
+  background: rgba(248, 113, 113, 0.14);
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  color: #fecaca;
+}
+
+.doraemon-app:not(.dark-mode) .report-trend-label.threshold {
+  color: #dc2626;
+  background: rgba(254, 226, 226, 0.78);
+}
+
+.report-trend-timeline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-left: 34px;
+  padding-top: 8px;
+}
+
+.report-trend-timeline span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-trend-timeline span:nth-child(2) {
+  align-items: center;
+}
+
+.report-trend-timeline span:last-child {
+  align-items: flex-end;
+}
+
+.report-trend-timeline strong {
+  font-size: 0.78rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-weight: 900;
+}
+
+.report-trend-timeline small {
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .report-trend-header {
+    flex-direction: column;
+  }
+
+  .report-trend-stats {
+    justify-content: flex-start;
+  }
+
+  .report-trend-plot {
+    grid-template-columns: 30px minmax(0, 1fr);
+    min-height: 168px;
+  }
+
+  .report-trend-annotations {
+    left: 30px;
+  }
+
+  .report-trend-label.low {
+    display: none;
+  }
+
+  .report-trend-label.peak {
+    max-width: 172px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .report-trend-timeline {
+    margin-left: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-trend-label.peak {
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+
+  .report-trend-timeline strong {
+    font-size: 0.72rem;
+  }
 }

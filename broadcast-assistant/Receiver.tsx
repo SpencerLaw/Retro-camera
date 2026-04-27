@@ -178,6 +178,58 @@ const splitSentences = (text: string): string[] => {
     }, []).filter(s => s.trim().length > 0);
 };
 
+const BROADCAST_POLL_VISIBLE_MS = 10000;
+const BROADCAST_POLL_HIDDEN_MS = 30000;
+
+const buildBroadcastFetchUrl = (roomId: string) => {
+    const cacheBust = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    return `/api/broadcast/fetch?code=${encodeURIComponent(roomId.toUpperCase())}&t=${cacheBust}`;
+};
+
+const fetchBroadcastState = async (roomId: string): Promise<{ status: number; ok: boolean; data: any }> => {
+    const url = buildBroadcastFetchUrl(roomId);
+
+    if (typeof window.fetch === 'function') {
+        const response = await window.fetch(url, {
+            method: 'GET',
+            cache: 'no-store',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+            },
+        });
+
+        return {
+            status: response.status,
+            ok: response.ok,
+            data: await response.json(),
+        };
+    }
+
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('Cache-Control', 'no-cache');
+        xhr.setRequestHeader('Pragma', 'no-cache');
+        xhr.onload = () => {
+            let data: any = {};
+            try {
+                data = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+            } catch (error) {
+                data = {};
+            }
+            resolve({ status: xhr.status, ok: xhr.status >= 200 && xhr.status < 300, data });
+        };
+        xhr.onerror = reject;
+        xhr.ontimeout = reject;
+        xhr.timeout = 12000;
+        xhr.send();
+    });
+};
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 interface ReceiverProps {
     isDark: boolean;
@@ -374,10 +426,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         const poll = async () => {
             if (!engine.current.isJoined) return;
 
-            const pollInterval = document.visibilityState === 'visible' ? 10000 : 30000;
+            const pollInterval = document.visibilityState === 'visible' ? BROADCAST_POLL_VISIBLE_MS : BROADCAST_POLL_HIDDEN_MS;
 
             try {
-                const r = await fetch(`/api/broadcast/fetch?code=${fullRoomId.toUpperCase()}&t=${Date.now()}`);
+                const r = await fetchBroadcastState(fullRoomId);
 
                 if (r.status === 404) {
                     failCount++;
@@ -388,18 +440,32 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         return;
                     }
                 } else if (r.ok) {
-                    failCount = 0;
-                    const data = await r.json();
+                    const data = r.data;
 
-                    if (data.roomDeleted || data.notFound) {
+                    if (data.roomDeleted) {
                         engine.current.isJoined = false;
                         ttsManager.cancelAll();
                         setIsJoined(false);
                         return;
                     }
 
+                    if (data.notFound) {
+                        failCount++;
+                        if (failCount >= 15) {
+                            engine.current.isJoined = false;
+                            ttsManager.cancelAll();
+                            setIsJoined(false);
+                            return;
+                        }
+                    }
+
+                    if (!data.notFound) {
+                        failCount = 0;
+                    }
+
                     const msg = data.message as Message;
                     if (msg) {
+                        failCount = 0;
                         if (msg.id !== engine.current.lastId) {
                             engine.current.lastId = msg.id;
                             localStorage.setItem('br_receiver_last_id', msg.id);

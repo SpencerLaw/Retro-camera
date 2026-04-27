@@ -230,6 +230,10 @@ const DoraemonMonitorApp: React.FC = () => {
   const sessionHistoryRef = useRef<number[]>([]); 
   const sampleCounterRef = useRef(0); 
   const intervalPeakRef = useRef(0); // 用于抓取采样间隔内的最高分贝
+  const reportBodyRef = useRef<HTMLDivElement | null>(null);
+  const reportTouchLastYRef = useRef<number | null>(null);
+  const reportPointerDragRef = useRef<{ pointerId: number; startY: number; startScrollTop: number } | null>(null);
+  const reportMouseDragRef = useRef<{ startY: number; startScrollTop: number } | null>(null);
 
   useEffect(() => {
     sensitivityRef.current = sensitivity;
@@ -1029,8 +1033,8 @@ const DoraemonMonitorApp: React.FC = () => {
   const selectedReportDay = reportDayGroups.find(group => group.key === activeReportDay) ?? reportDayGroups[0];
   const selectedReportIndex = clamp(reportPage, 0, Math.max(0, selectedReportDay.records.length - 1));
   const selectedReportRecord = selectedReportDay.records[selectedReportIndex] ?? null;
-  const hasPreviousReport = selectedReportIndex > 0;
-  const hasNextReport = selectedReportIndex < selectedReportDay.records.length - 1;
+  const hasPreviousReport = selectedReportIndex < selectedReportDay.records.length - 1;
+  const hasNextReport = selectedReportIndex > 0;
   const todayReportWeekday = getReportWeekdayKey(new Date());
   const defaultReportDay = reportDayGroups.find(group => group.key === todayReportWeekday && group.records.length > 0)?.key
     ?? todayReportWeekday
@@ -1092,6 +1096,98 @@ const DoraemonMonitorApp: React.FC = () => {
     event.preventDefault();
     event.stopPropagation();
     setReportPage(prev => clamp(prev + direction, 0, Math.max(0, selectedReportDay.records.length - 1)));
+  };
+  const scrollReportBodyBy = useCallback((deltaY: number) => {
+    const body = reportBodyRef.current;
+    if (!body) return false;
+
+    const maxScrollTop = Math.max(0, body.scrollHeight - body.clientHeight);
+    if (maxScrollTop <= 0) return false;
+
+    const nextScrollTop = clamp(body.scrollTop + deltaY, 0, maxScrollTop);
+    if (Math.abs(nextScrollTop - body.scrollTop) < 0.5) return false;
+
+    body.scrollTop = nextScrollTop;
+    return true;
+  }, []);
+  const shouldStartReportDrag = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return true;
+    return !target.closest('button, input, textarea, select, a, [role="button"]');
+  };
+  const handleReportModalWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    if (scrollReportBodyBy(event.deltaY)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+  const handleReportModalTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    reportTouchLastYRef.current = event.touches[0]?.clientY ?? null;
+  };
+  const handleReportModalTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    const currentY = event.touches[0]?.clientY;
+    const lastY = reportTouchLastYRef.current;
+    if (currentY === undefined || lastY === null) return;
+
+    if (scrollReportBodyBy(lastY - currentY)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    reportTouchLastYRef.current = currentY;
+  };
+  const handleReportModalTouchEnd = () => {
+    reportTouchLastYRef.current = null;
+  };
+  const handleReportPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse' || !event.isPrimary || !shouldStartReportDrag(event.target)) return;
+    const body = reportBodyRef.current;
+    if (!body || body.scrollHeight <= body.clientHeight) return;
+
+    reportPointerDragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startScrollTop: body.scrollTop
+    };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+  const handleReportPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = reportPointerDragRef.current;
+    const body = reportBodyRef.current;
+    if (!drag || !body || drag.pointerId !== event.pointerId) return;
+
+    const maxScrollTop = Math.max(0, body.scrollHeight - body.clientHeight);
+    body.scrollTop = clamp(drag.startScrollTop + drag.startY - event.clientY, 0, maxScrollTop);
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const handleReportPointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = reportPointerDragRef.current;
+    if (drag?.pointerId === event.pointerId) {
+      reportPointerDragRef.current = null;
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
+  };
+  const handleReportMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !shouldStartReportDrag(event.target)) return;
+    const body = reportBodyRef.current;
+    if (!body || body.scrollHeight <= body.clientHeight) return;
+
+    reportMouseDragRef.current = {
+      startY: event.clientY,
+      startScrollTop: body.scrollTop
+    };
+  };
+  const handleReportMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const drag = reportMouseDragRef.current;
+    const body = reportBodyRef.current;
+    if (!drag || !body) return;
+
+    const maxScrollTop = Math.max(0, body.scrollHeight - body.clientHeight);
+    body.scrollTop = clamp(drag.startScrollTop + drag.startY - event.clientY, 0, maxScrollTop);
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const handleReportMouseUp = () => {
+    reportMouseDragRef.current = null;
   };
   const stopModalPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
@@ -1404,7 +1500,6 @@ const DoraemonMonitorApp: React.FC = () => {
         
         <div 
           onClick={stopModalPropagation}
-          onMouseDown={stopModalMouseDown}
           style={{
             position: 'relative', width: 'min(90vw, 860px)', height: 'min(85vh, 800px)',
             background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(10, 15, 30, 0.98))',
@@ -1439,9 +1534,33 @@ const DoraemonMonitorApp: React.FC = () => {
           </div>
 
           {/* Body (Scrollable) */}
-          <div style={{
-            flex: '1 1 auto', overflowY: 'auto', padding: '32px', WebkitOverflowScrolling: 'touch'
-          }}>
+          <div
+            ref={reportBodyRef}
+            onWheelCapture={handleReportModalWheel}
+            onTouchStartCapture={handleReportModalTouchStart}
+            onTouchMoveCapture={handleReportModalTouchMove}
+            onTouchEndCapture={handleReportModalTouchEnd}
+            onTouchCancelCapture={handleReportModalTouchEnd}
+            onPointerDown={handleReportPointerDown}
+            onPointerMove={handleReportPointerMove}
+            onPointerUp={handleReportPointerEnd}
+            onPointerCancel={handleReportPointerEnd}
+            onMouseDownCapture={handleReportMouseDown}
+            onMouseMoveCapture={handleReportMouseMove}
+            onMouseUpCapture={handleReportMouseUp}
+            onMouseLeave={handleReportMouseUp}
+            style={{
+              flex: '1 1 auto',
+              minHeight: 0,
+              overflowY: 'scroll',
+              overflowX: 'hidden',
+              padding: '32px',
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              touchAction: 'pan-y',
+              cursor: 'grab'
+            }}
+          >
             <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
               <div style={{ height: '1px', flex: 1, background: 'linear-gradient(90deg, transparent, rgba(148,163,184,0.15))' }} />
               <span style={{ fontSize: '16px', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -1495,7 +1614,7 @@ const DoraemonMonitorApp: React.FC = () => {
                           <span style={{ color: '#cbd5e1', fontSize: '13px' }}>平均 {Math.round(average(values))} dB</span>
                         </div>
                         <div style={{ position: 'relative', height: '220px', width: '100%' }}>
-                          <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                          <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}>
                             <defs>
                               <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />

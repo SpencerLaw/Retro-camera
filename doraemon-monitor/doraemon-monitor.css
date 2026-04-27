@@ -1569,6 +1569,10 @@
   opacity: 0;
   transform: translateY(8px) scale(0.96);
   transition: transform 0.28s ease, opacity 0.24s ease;
+
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .report-modal-layer.open .report-modal-shell {
@@ -1620,6 +1624,8 @@
   min-height: 0;
 
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 
 }
 
@@ -1775,6 +1781,9 @@
 
   -webkit-overflow-scrolling: touch;
 
+
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .report-day-chip {
@@ -1858,6 +1867,9 @@
 
   -webkit-overflow-scrolling: touch;
 
+
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .doraemon-app:not(.dark-mode) .report-focus-shell {
@@ -3223,3 +3235,20 @@
 }
 
 
+
+/* ===== Report modal final scroll surface ===== */
+.report-modal-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.report-day-sidebar,
+.report-focus-shell,
+.report-modal-shell {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}

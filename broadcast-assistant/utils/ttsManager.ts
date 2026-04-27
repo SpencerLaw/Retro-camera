@@ -19,6 +19,7 @@ class TTSManager {
     private sourceNode: MediaElementAudioSourceNode | null = null;
     private activePlaybackId: number = 0;
     private activeUtterance: SpeechSynthesisUtterance | null = null;
+    private audioUnlocked = false;
 
     private constructor() {
         if (typeof window !== 'undefined') {
@@ -46,53 +47,83 @@ class TTSManager {
         }
     }
 
+    private createPlaybackBlockedError() {
+        const error = new Error('Audio playback blocked by browser autoplay policy');
+        (error as any).code = 'AUDIO_PLAYBACK_BLOCKED';
+        return error;
+    }
+
+    public isPlaybackBlockedError(error: unknown) {
+        return !!error && typeof error === 'object' && (error as any).code === 'AUDIO_PLAYBACK_BLOCKED';
+    }
+
+    public async unlockAudio(): Promise<boolean> {
+        if (!this.audio) return false;
+        this.initAudioCtx();
+
+        try {
+            if (this.audioCtx?.state === 'suspended') {
+                await this.audioCtx.resume();
+            }
+
+            this.audio.muted = true;
+            this.audio.volume = 0;
+            this.audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAAAA==';
+            await this.audio.play();
+            this.audio.pause();
+            this.audio.currentTime = 0;
+            this.audio.muted = false;
+            this.audio.volume = 1;
+            this.audioUnlocked = true;
+            return true;
+        } catch (error) {
+            this.audioUnlocked = false;
+            return false;
+        }
+    }
+
     public async speak(text: string, options: TTSOptions = {}): Promise<void> {
         this.stop(false);
         const playbackId = this.activePlaybackId;
 
-        return new Promise(async (resolve) => {
-            if (options.engine === 'edge') {
-                try {
-                    const blob = await this.fetchEdge(text, options);
-                    if (blob && this.activePlaybackId === playbackId) {
-                        const url = URL.createObjectURL(blob);
-                        await this.playUrl(url, options, playbackId);
-                        if (options.onEnd) options.onEnd();
-                        resolve();
-                    } else {
-                        resolve();
-                    }
-                } catch (e) {
-                    if (this.activePlaybackId === playbackId) {
-                        await this.speakNative(text, options);
-                        if (options.onEnd) options.onEnd();
-                    }
-                    resolve();
+        if (options.engine === 'edge') {
+            try {
+                const blob = await this.fetchEdge(text, options);
+                if (blob && this.activePlaybackId === playbackId) {
+                    const url = URL.createObjectURL(blob);
+                    await this.playUrl(url, options, playbackId);
+                    options.onEnd?.();
                 }
-            } else if (options.engine === 'fish') {
-                try {
-                    const blob = await this.fetchFish(text, options);
-                    if (blob && this.activePlaybackId === playbackId) {
-                        const url = URL.createObjectURL(blob);
-                        await this.playUrl(url, options, playbackId);
-                        if (options.onEnd) options.onEnd();
-                        resolve();
-                    } else {
-                        resolve();
-                    }
-                } catch (e) {
-                    if (this.activePlaybackId === playbackId) {
-                        await this.speakNative(text, options);
-                        if (options.onEnd) options.onEnd();
-                    }
-                    resolve();
+            } catch (error) {
+                if (this.isPlaybackBlockedError(error)) throw error;
+                if (this.activePlaybackId === playbackId) {
+                    await this.speakNative(text, options);
+                    options.onEnd?.();
                 }
-            } else {
-                await this.speakNative(text, options);
-                if (options.onEnd) options.onEnd();
-                resolve();
             }
-        });
+            return;
+        }
+
+        if (options.engine === 'fish') {
+            try {
+                const blob = await this.fetchFish(text, options);
+                if (blob && this.activePlaybackId === playbackId) {
+                    const url = URL.createObjectURL(blob);
+                    await this.playUrl(url, options, playbackId);
+                    options.onEnd?.();
+                }
+            } catch (error) {
+                if (this.isPlaybackBlockedError(error)) throw error;
+                if (this.activePlaybackId === playbackId) {
+                    await this.speakNative(text, options);
+                    options.onEnd?.();
+                }
+            }
+            return;
+        }
+
+        await this.speakNative(text, options);
+        options.onEnd?.();
     }
 
     private async fetchEdge(text: string, options: TTSOptions): Promise<Blob | null> {
@@ -124,7 +155,7 @@ class TTSManager {
     }
 
     private playUrl(url: string, options: TTSOptions, playbackId: number): Promise<void> {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             if (!this.audio) return resolve();
 
             this.initAudioCtx();
@@ -139,13 +170,26 @@ class TTSManager {
                     this.audio.onerror = null;
                 }
                 URL.revokeObjectURL(url);
+            };
+
+            const finish = () => {
+                cleanup();
                 resolve();
             };
 
-            this.audio.onended = cleanup;
-            this.audio.onerror = cleanup;
+            this.audio.onended = finish;
+            this.audio.onerror = () => finish();
             this.audio.src = url;
-            this.audio.play().catch(cleanup);
+            this.audio.muted = false;
+            this.audio.volume = typeof options.volume === 'number' ? options.volume : 1;
+            this.audio.play().catch((error) => {
+                cleanup();
+                if ((error as any)?.name === 'NotAllowedError' || !this.audioUnlocked) {
+                    reject(this.createPlaybackBlockedError());
+                    return;
+                }
+                reject(error);
+            });
         });
     }
 

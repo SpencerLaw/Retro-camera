@@ -58,32 +58,27 @@ runTest('weekly report trend renders a readable time axis', () => {
   assert.match(css, /@media \(max-width: 720px\)/);
 });
 
-runTest('weekly report uses one modal-level scroll chain for mouse wheel and touch', () => {
+runTest('weekly report uses one native modal scroll surface', () => {
   assert.match(source, /currentWeekRecords\.map\(\(record\) =>/);
   assert.match(source, /style=\{\{[\s\S]*?overflowY:\s*'scroll'[\s\S]*?touchAction:\s*'pan-y'/);
-  assert.match(source, /onWheelCapture=\{handleReportModalWheel\}/);
-  assert.match(source, /onTouchMoveCapture=\{handleReportModalTouchMove\}/);
+  assert.doesNotMatch(source, /onWheelCapture=\{handleReportModalWheel\}/);
+  assert.doesNotMatch(source, /onTouchMoveCapture=\{handleReportModalTouchMove\}/);
   assert.match(source, /pointerEvents:\s*'none'/);
 });
 
-runTest('weekly report has wheel and touch fallback scrolling on the modal body', () => {
+runTest('weekly report is rendered as a stable subtree instead of a nested component type', () => {
   assert.match(source, /const reportBodyRef = useRef<HTMLDivElement \| null>\(null\)/);
-  assert.match(source, /const scrollReportBodyBy = useCallback/);
-  assert.match(source, /body\.scrollTop = nextScrollTop/);
-  assert.match(source, /onWheelCapture=\{handleReportModalWheel\}/);
-  assert.match(source, /onTouchMoveCapture=\{handleReportModalTouchMove\}/);
-  assert.match(source, /onTouchStartCapture=\{handleReportModalTouchStart\}/);
+  assert.match(source, /const renderReportDrawer = \(\) =>/);
+  assert.match(source, /\{renderReportDrawer\(\)\}/);
+  assert.doesNotMatch(source, /const ReportDrawer = \(\) =>/);
+  assert.doesNotMatch(source, /<ReportDrawer \/>/);
 });
 
-runTest('weekly report supports pointer drag scrolling for mouse and tablets', () => {
-  assert.match(source, /const reportPointerDragRef = useRef/);
-  assert.match(source, /const reportMouseDragRef = useRef/);
-  assert.match(source, /handleReportPointerDown/);
-  assert.match(source, /handleReportPointerMove/);
-  assert.match(source, /handleReportMouseMove/);
-  assert.match(source, /body\.scrollTop = clamp\(drag\.startScrollTop \+ drag\.startY - event\.clientY/);
-  assert.match(source, /onPointerMove=\{handleReportPointerMove\}/);
-  assert.match(source, /onMouseMoveCapture=\{handleReportMouseMove\}/);
+runTest('weekly report close button closes before drag or click handlers can interfere', () => {
+  assert.match(source, /type="button"[\s\S]*?onClick=\{closeReport\}/);
+  assert.match(source, /onPointerDown=\{\(event\) => \{[\s\S]*?closeReport\(\);[\s\S]*?\}\}/);
+  assert.doesNotMatch(source, /onMouseDownCapture=\{handleReportMouseDown\}/);
+  assert.doesNotMatch(source, /onPointerMove=\{handleReportPointerMove\}/);
 });
 
 runTest('weekly report previous/next semantics match latest-first records', () => {

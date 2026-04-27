@@ -6,6 +6,10 @@ let tray;
 // Set to autostart room page url
 const TARGET_URL = 'https://lovedare.baby/broadcast/receiver?autostart=1';
 
+app.setName('班级广播接收器');
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('disable-features', 'PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies');
+
 // Prevent multiple instances
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -37,7 +41,9 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.loadURL(TARGET_URL);
+  mainWindow.loadURL(TARGET_URL).catch((error) => {
+    console.error('Failed to load receiver page:', error);
+  });
 
   // Instead of quitting when X is pressed, minimize to tray
   mainWindow.on('close', (event) => {
@@ -54,8 +60,12 @@ function createTray() {
   try {
     tray = new Tray(path.join(__dirname, 'icon.ico'));
   } catch (e) {
-    // Fallback if no icon.ico is present
-    tray = new Tray(path.join(__dirname, '..', 'public', 'icons', 'icon-72x72.png'));
+    try {
+      tray = new Tray(path.join(__dirname, 'icon.png'));
+    } catch (fallbackError) {
+      console.warn('Tray disabled because no valid icon was found:', fallbackError);
+      return;
+    }
   }
   
   const contextMenu = Menu.buildFromTemplate([

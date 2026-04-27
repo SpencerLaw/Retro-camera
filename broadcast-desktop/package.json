@@ -19,7 +19,8 @@
   },
   "build": {
     "appId": "baby.lovedare.broadcast",
-    "productName": "班级广播接收器",
+    "productName": "ClassBroadcastReceiver",
+    "artifactName": "ClassBroadcastReceiver_Setup.${ext}",
     "copyright": "Copyright © 2024",
     "mac": {
       "category": "public.app-category.education"
@@ -35,6 +36,7 @@
       "perMachine": true,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
+      "shortcutName": "ClassBroadcastReceiver",
       "runAfterFinish": true
     }
   }

@@ -178,8 +178,8 @@ const splitSentences = (text: string): string[] => {
     }, []).filter(s => s.trim().length > 0);
 };
 
-const BROADCAST_POLL_VISIBLE_MS = 10000;
-const BROADCAST_POLL_HIDDEN_MS = 30000;
+const BROADCAST_POLL_VISIBLE_MS = 4000;
+const BROADCAST_POLL_HIDDEN_MS = 8000;
 
 const buildBroadcastFetchUrl = (roomId: string) => {
     const cacheBust = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -263,7 +263,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [displayChannelName, setDisplayChannelName] = useState('');
     const [msgQueue, setMsgQueue] = useState<Message[]>([]);
     const [needsActivation, setNeedsActivation] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadingTarget, setDownloadingTarget] = useState<'modern' | 'win7' | null>(null);
     const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     const [showExitConfirm, setShowExitConfirm] = useState(false);
 
@@ -290,14 +290,15 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     }, []);
 
-    const handleActivate = useCallback(() => {
+    const handleActivate = useCallback(async () => {
+        const unlocked = await ttsManager.unlockAudio();
         ttsManager.startSilentLoop();
-        setNeedsActivation(false);
+        setNeedsActivation(!unlocked);
     }, []);
 
-    const handleDownload = useCallback(() => {
-        setIsDownloading(true);
-        setTimeout(() => setIsDownloading(false), 3500);
+    const handleDownload = useCallback((target: 'modern' | 'win7') => {
+        setDownloadingTarget(target);
+        setTimeout(() => setDownloadingTarget(null), 3500);
     }, []);
 
     const handleExit = useCallback(() => {
@@ -390,6 +391,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         }
                     } catch (ttsErr) {
                         console.warn('TTS Speak Failed (Autoplay blocked?):', ttsErr);
+                        if (ttsManager.isPlaybackBlockedError?.(ttsErr)) {
+                            setNeedsActivation(true);
+                            return;
+                        }
                         if (!engine.current.isJoined) break;
                         const delayMs = Math.max(2500, sentences[i].length * 200);
                         await new Promise(res => setTimeout(res, delayMs));
@@ -567,12 +572,23 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                             {!window.electronAPI && (
                                 <a
                                     href="/ClassBroadcast_Setup.exe"
-                                    download="班级广播桌面端.exe"
-                                    onClick={handleDownload}
+                                    download="ClassBroadcastReceiver_Setup.exe"
+                                    onClick={() => handleDownload('modern')}
                                     className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-amber-400/80 hover:text-amber-400' : 'hover:bg-slate-50 text-amber-500/80 hover:text-amber-500'}`}
-                                    title="下载高级桌面版(自带最小化强制霸屏功能)"
+                                    title="下载 Win10/Win11 桌面版"
                                 >
-                                    {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} />}
+                                    {downloadingTarget === 'modern' ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} />}
+                                </a>
+                            )}
+                            {!window.electronAPI && (
+                                <a
+                                    href="/ClassBroadcastReceiver_Win7_Setup.exe"
+                                    download="ClassBroadcastReceiver_Win7_Setup.exe"
+                                    onClick={() => handleDownload('win7')}
+                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-sky-400/80 hover:text-sky-400' : 'hover:bg-slate-50 text-sky-500/80 hover:text-sky-500'}`}
+                                    title="下载 Windows 7 专用桌面版"
+                                >
+                                    {downloadingTarget === 'win7' ? <Loader2 size={18} className="animate-spin" /> : <Radio size={18} />}
                                 </a>
                             )}
                             <button
@@ -629,6 +645,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         <button
                             disabled={roomId.length < 6}
                             onClick={() => {
+                                handleActivate();
                                 localStorage.setItem('br_receiver_roomId', roomId);
                                 engine.current.isJoined = true;
                                 setIsJoined(true);
@@ -643,16 +660,30 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         </button>
 
                         {!window.electronAPI && (
-                            <div className="pt-8 text-center w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+                            <div className="pt-8 text-center w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 space-y-3">
                                 <a 
                                     href="/ClassBroadcast_Setup.exe" 
-                                    download="班级广播桌面端.exe"
-                                    onClick={handleDownload}
+                                    download="ClassBroadcastReceiver_Setup.exe"
+                                    onClick={() => handleDownload('modern')}
                                     className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:scale-105 active:scale-95 ${theme === 'dark' ? 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                                 >
-                                    {isDownloading ? <Loader2 size={14} className="text-amber-400 animate-spin" /> : <Zap size={14} className="text-amber-400" />}
-                                    {isDownloading ? '正在下载...' : '下载高级桌面版 (支持最小化强制霸屏弹窗)'}
+                                    {downloadingTarget === 'modern' ? <Loader2 size={14} className="text-amber-400 animate-spin" /> : <Zap size={14} className="text-amber-400" />}
+                                    {downloadingTarget === 'modern' ? '正在下载...' : '下载 Win10 / Win11 桌面版'}
                                 </a>
+
+                                <a
+                                    href="/ClassBroadcastReceiver_Win7_Setup.exe"
+                                    download="ClassBroadcastReceiver_Win7_Setup.exe"
+                                    onClick={() => handleDownload('win7')}
+                                    className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:scale-105 active:scale-95 ${theme === 'dark' ? 'bg-sky-500/15 text-sky-100 hover:bg-sky-500/25' : 'bg-sky-50 text-sky-700 hover:bg-sky-100'}`}
+                                >
+                                    {downloadingTarget === 'win7' ? <Loader2 size={14} className="text-sky-400 animate-spin" /> : <Radio size={14} className="text-sky-500" />}
+                                    {downloadingTarget === 'win7' ? '正在下载...' : '下载 Windows 7 专用版'}
+                                </a>
+
+                                <p className={`px-4 text-[10px] font-bold leading-relaxed ${theme === 'dark' ? 'text-white/35' : 'text-slate-400'}`}>
+                                    Windows 7 请使用专用版；Win10 / Win11 使用普通桌面版。
+                                </p>
                             </div>
                         )}
                     </div>

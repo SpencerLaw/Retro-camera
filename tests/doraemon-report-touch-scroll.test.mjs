@@ -58,6 +58,17 @@ runTest('weekly report trend renders a readable time axis', () => {
   assert.match(css, /@media \(max-width: 720px\)/);
 });
 
+runTest('weekly report trend labels duration and high low decibel points', () => {
+  assert.match(source, /formatReportDurationText/);
+  assert.match(source, /全长 \{formatReportDurationText\(record\.totalSeconds\)\}/);
+  assert.match(source, /最高 \{peakPoint\.db\} dB/);
+  assert.match(source, /最低 \{lowPoint\.db\} dB/);
+  assert.match(source, /开始 \{formatPreciseClock\(recordStartMs\)\}/);
+  assert.match(source, /结束 \{formatPreciseClock\(recordEndMs\)\}/);
+  assert.match(source, /安静时长/);
+  assert.match(source, /formatReportDurationText\(record\.quietSeconds\)/);
+});
+
 runTest('weekly report uses one native modal scroll surface', () => {
   assert.match(source, /currentWeekRecords\.map\(\(record\) =>/);
   assert.match(source, /style=\{\{[\s\S]*?overflowY:\s*'scroll'[\s\S]*?touchAction:\s*'pan-y'/);

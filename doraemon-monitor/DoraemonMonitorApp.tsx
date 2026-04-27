@@ -912,6 +912,16 @@ const DoraemonMonitorApp: React.FC = () => {
     return m > 0 ? `${m}分${s.toString().padStart(2, '0')}秒` : `${s}秒`;
   };
 
+  const formatReportDurationText = (seconds: number) => {
+    const safeSeconds = Math.max(0, Math.round(seconds));
+    const h = Math.floor(safeSeconds / 3600);
+    const m = Math.floor((safeSeconds % 3600) / 60);
+    const s = safeSeconds % 60;
+    if (h > 0) return `${h}时${m.toString().padStart(2, '0')}分${s.toString().padStart(2, '0')}秒`;
+    if (m > 0) return `${m}分${s.toString().padStart(2, '0')}秒`;
+    return `${s}秒`;
+  };
+
   const formatPreciseClock = (dateLike: string | number | Date) => {
     const d = new Date(dateLike);
     return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
@@ -1479,6 +1489,8 @@ const DoraemonMonitorApp: React.FC = () => {
                   const hMax = values.length ? Math.max(...values) : 0;
                   const hMin = values.length ? Math.min(...values) : 0;
                   const currentThreshold = record.threshold || 60;
+                  const recordStartMs = new Date(record.startedAt).getTime();
+                  const recordEndMs = record.endedAt ? new Date(record.endedAt).getTime() : recordStartMs + Math.max(0, record.totalSeconds) * 1000;
                   
                   let chartContent = null;
                   if (samples.length >= 2) {
@@ -1499,6 +1511,14 @@ const DoraemonMonitorApp: React.FC = () => {
                     const linePath = buildSmoothCurvePath(pts);
                     const fillPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
                     const thresholdY = height - ((currentThreshold - cMin) / r) * height;
+                    const peakPoint = pts.reduce((best, point) => point.db > best.db ? point : best, pts[0]);
+                    const lowPoint = pts.reduce((best, point) => point.db < best.db ? point : best, pts[0]);
+                    const toPercentX = (x: number) => clamp((x / width) * 100, 4, 96);
+                    const toPercentY = (y: number) => clamp((y / height) * 100, 8, 88);
+                    const peakLabelX = toPercentX(peakPoint.x);
+                    const peakLabelY = clamp(toPercentY(peakPoint.y) - 12, 4, 74);
+                    const lowLabelX = toPercentX(lowPoint.x);
+                    const lowLabelY = clamp(toPercentY(lowPoint.y) + 8, 16, 86);
 
                     const trendId = record.id.replace(/[^a-zA-Z0-9_-]/g, '');
                     const gradId = `grad-${trendId}`;
@@ -1506,9 +1526,11 @@ const DoraemonMonitorApp: React.FC = () => {
 
                     chartContent = (
                       <div style={{ marginTop: '24px', background: 'rgba(0,0,0,0.2)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                           <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>音量走势</span>
-                          <span style={{ color: '#cbd5e1', fontSize: '13px' }}>平均 {Math.round(average(values))} dB</span>
+                          <span style={{ color: '#cbd5e1', fontSize: '13px' }}>
+                            平均 {Math.round(average(values))} dB · 最高 {peakPoint.db} dB · 最低 {lowPoint.db} dB
+                          </span>
                         </div>
                         <div style={{ position: 'relative', height: '220px', width: '100%' }}>
                           <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}>
@@ -1532,10 +1554,49 @@ const DoraemonMonitorApp: React.FC = () => {
                             
                             {/* Line */}
                             <path d={linePath} stroke={`url(#${lineGradId})`} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                            <circle cx={peakPoint.x} cy={peakPoint.y} r="6" fill="#f97316" stroke="#fff7ed" strokeWidth="3" />
+                            <circle cx={lowPoint.x} cy={lowPoint.y} r="6" fill="#22c55e" stroke="#ecfdf5" strokeWidth="3" />
                           </svg>
+                          <div style={{
+                            position: 'absolute',
+                            left: `${peakLabelX}%`,
+                            top: `${peakLabelY}%`,
+                            transform: 'translate(-50%, -50%)',
+                            fontSize: '11px',
+                            color: '#fff7ed',
+                            background: 'rgba(249, 115, 22, 0.92)',
+                            padding: '5px 8px',
+                            borderRadius: '999px',
+                            fontWeight: 800,
+                            boxShadow: '0 10px 24px rgba(249,115,22,0.24)',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            最高 {peakPoint.db} dB
+                          </div>
+                          <div style={{
+                            position: 'absolute',
+                            left: `${lowLabelX}%`,
+                            top: `${lowLabelY}%`,
+                            transform: 'translate(-50%, -50%)',
+                            fontSize: '11px',
+                            color: '#ecfdf5',
+                            background: 'rgba(16, 185, 129, 0.92)',
+                            padding: '5px 8px',
+                            borderRadius: '999px',
+                            fontWeight: 800,
+                            boxShadow: '0 10px 24px rgba(16,185,129,0.2)',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            最低 {lowPoint.db} dB
+                          </div>
                           <div style={{ position: 'absolute', right: 0, top: `calc(${(thresholdY / height) * 100}% - 22px)`, fontSize: '11px', color: '#ef4444', background: 'rgba(15,23,42,0.8)', padding: '2px 6px', borderRadius: '4px' }}>
                             报警 {currentThreshold} dB
                           </div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginTop: '14px', color: '#94a3b8', fontSize: '12px', fontWeight: 700 }}>
+                          <span>开始 {formatPreciseClock(recordStartMs)}</span>
+                          <span style={{ color: '#cbd5e1' }}>全长 {formatReportDurationText(record.totalSeconds)}</span>
+                          <span>结束 {formatPreciseClock(recordEndMs)}</span>
                         </div>
                       </div>
                     );
@@ -1549,7 +1610,7 @@ const DoraemonMonitorApp: React.FC = () => {
                             <span style={{ background: 'rgba(255,255,255,0.1)', color: '#f8fafc', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 600 }}>
                               {formatReportDate(new Date(record.startedAt))}
                             </span>
-                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>时长 {formatTime(record.totalSeconds)}</span>
+                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>全长 {formatReportDurationText(record.totalSeconds)}</span>
                           </div>
                           <div style={{ fontSize: '32px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
                             {formatReportClock(record.startedAt)} 
@@ -1565,10 +1626,14 @@ const DoraemonMonitorApp: React.FC = () => {
                         </div>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '24px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '20px', marginTop: '24px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '16px' }}>
+                          <div style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '8px' }}>总时长</div>
+                          <div style={{ color: '#38bdf8', fontSize: '24px', fontWeight: 700 }}>{formatReportDurationText(record.totalSeconds)}</div>
+                        </div>
                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '16px' }}>
                           <div style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '8px' }}>安静时长</div>
-                          <div style={{ color: '#10b981', fontSize: '24px', fontWeight: 700 }}>{formatTime(record.quietSeconds)}</div>
+                          <div style={{ color: '#10b981', fontSize: '24px', fontWeight: 700 }}>{formatReportDurationText(record.quietSeconds)}</div>
                         </div>
                         <div style={{ background: 'rgba(239,68,68,0.05)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.1)' }}>
                           <div style={{ color: '#ef4444', fontSize: '13px', marginBottom: '8px' }}>超标警告</div>

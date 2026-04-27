@@ -67,11 +67,24 @@ const sentenceToForm = (sentence: JuzimiSentence) => ({
 });
 
 // ── Card accent colours cycling ──────────────────────────────────────────────
+// Editorial poster colour palettes – each has a CSS gradient + text scheme
 const CARD_ACCENTS = [
-  { bg: 'bg-white', border: 'border-black/10', tag: 'bg-[#f4efe7] text-[#8c6b3f]' },
-  { bg: 'bg-[#171310]', border: 'border-transparent', tag: 'bg-white/10 text-[#c7a46c]' },
-  { bg: 'bg-[#f4efe7]', border: 'border-[#c7a46c]/30', tag: 'bg-white/70 text-[#8c6b3f]' },
-  { bg: 'bg-white', border: 'border-black/10', tag: 'bg-[#f4efe7] text-[#8c6b3f]' },
+  // 01 blue-grey periwinkle
+  { gradient: 'linear-gradient(145deg,#b8c5d6 0%,#8fa3bc 60%,#7090ac 100%)', text: '#0d1a2b', sub: 'rgba(13,26,43,0.55)', tag: 'rgba(13,26,43,0.18)', tagText: '#0d1a2b' },
+  // 02 dusty rose
+  { gradient: 'linear-gradient(145deg,#e8c4c0 0%,#d4a09a 55%,#c48880 100%)', text: '#1f0c0a', sub: 'rgba(31,12,10,0.55)', tag: 'rgba(31,12,10,0.14)', tagText: '#1f0c0a' },
+  // 03 sky mist
+  { gradient: 'linear-gradient(145deg,#c9dce8 0%,#a8c6d8 55%,#8fb4cc 100%)', text: '#0a1e2b', sub: 'rgba(10,30,43,0.55)', tag: 'rgba(10,30,43,0.14)', tagText: '#0a1e2b' },
+  // 04 deep navy
+  { gradient: 'linear-gradient(145deg,#0e1526 0%,#1a2540 55%,#0a0f1e 100%)', text: '#e8edf5', sub: 'rgba(232,237,245,0.55)', tag: 'rgba(232,237,245,0.14)', tagText: '#a8c0e0' },
+  // 05 warm sand
+  { gradient: 'linear-gradient(145deg,#e6dcc8 0%,#d4c4a0 55%,#c2ac82 100%)', text: '#1a1208', sub: 'rgba(26,18,8,0.55)', tag: 'rgba(26,18,8,0.14)', tagText: '#1a1208' },
+  // 06 slate violet
+  { gradient: 'linear-gradient(145deg,#c4c0d4 0%,#a8a0c0 55%,#9090b0 100%)', text: '#14102a', sub: 'rgba(20,16,42,0.55)', tag: 'rgba(20,16,42,0.14)', tagText: '#14102a' },
+  // 07 deep teal
+  { gradient: 'linear-gradient(145deg,#0e2428 0%,#183438 55%,#0a1c20 100%)', text: '#c8e8e4', sub: 'rgba(200,232,228,0.55)', tag: 'rgba(200,232,228,0.14)', tagText: '#80c8c0' },
+  // 08 cream parchment
+  { gradient: 'linear-gradient(145deg,#f0ebe0 0%,#e4dac8 55%,#d8ccb4 100%)', text: '#1a1510', sub: 'rgba(26,21,16,0.55)', tag: 'rgba(26,21,16,0.14)', tagText: '#1a1510' },
 ];
 
 const PREVIEW_MAX = 80; // chars before truncating in card

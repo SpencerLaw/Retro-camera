@@ -257,10 +257,10 @@
       "helpTrigger": "What this password does",
       "settingsTrigger": "Set reset password",
       "currentPasswordLabel": "Current Password",
-      "currentPasswordPlaceholder": "Enter current password",
-      "currentPasswordError": "Current password is incorrect",
+      "currentPasswordPlaceholder": "Enter current password, or recovery password if forgotten",
+      "currentPasswordError": "Current password is incorrect. If it was forgotten, contact the administrator for the recovery password.",
       "clearTitle": "Remove Password Protection",
-      "clearDesc": "Enter the current password before removing protection so students cannot simply turn it off.",
+      "clearDesc": "Are you sure you want to remove the password? Enter the current password first. If it was forgotten, contact the administrator for the recovery password.",
       "confirmClear": "Confirm Remove Password"
     }
   },

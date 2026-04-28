@@ -1,4 +1,5 @@
 export const WARNING_RESET_PASSWORD_STORAGE_KEY = 'doraemon_warning_reset_password_v1';
+export const WARNING_RESET_ADMIN_RECOVERY_PASSWORD = '8888';
 
 export function normalizeWarningResetPassword(value) {
   return String(value || '').trim();
@@ -72,6 +73,8 @@ export async function validateWarningResetPasswordChange({ existingRecord, curre
 
 export async function validateWarningResetPasswordRemoval({ existingRecord, currentPassword }) {
   if (!shouldRequireWarningResetPassword(existingRecord)) return null;
+
+  if (normalizeWarningResetPassword(currentPassword) === WARNING_RESET_ADMIN_RECOVERY_PASSWORD) return null;
 
   const currentVerified = await verifyWarningResetPassword(currentPassword, existingRecord);
   return currentVerified ? null : 'current-password';

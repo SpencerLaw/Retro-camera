@@ -257,10 +257,10 @@
       "helpTrigger": "查看密码说明",
       "settingsTrigger": "设置清空密码",
       "currentPasswordLabel": "当前密码",
-      "currentPasswordPlaceholder": "请输入当前密码",
-      "currentPasswordError": "当前密码不正确",
+      "currentPasswordPlaceholder": "请输入当前密码；忘记时可输入最终密码",
+      "currentPasswordError": "当前密码不正确。如忘记密码，请联系管理员获取最终密码。",
       "clearTitle": "确认清除密码保护",
-      "clearDesc": "清除密码保护前，请先输入当前密码确认，避免学生直接把保护关掉。",
+      "clearDesc": "确定要清除密码吗？请先输入当前密码确认；如果不记得密码，请联系管理员拿到最终密码。",
       "confirmClear": "确认清除密码"
     }
   },

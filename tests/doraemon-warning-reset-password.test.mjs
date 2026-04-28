@@ -96,4 +96,9 @@ queueTest('validateWarningResetPasswordRemoval requires the current password', a
   assert.equal(await validateWarningResetPasswordRemoval({ existingRecord: record, currentPassword: '2468' }), null);
 });
 
+queueTest('validateWarningResetPasswordRemoval allows the admin recovery password', async () => {
+  const record = await createWarningResetPasswordRecord('2468');
+  assert.equal(await validateWarningResetPasswordRemoval({ existingRecord: record, currentPassword: '8888' }), null);
+});
+
 await Promise.all(pending);

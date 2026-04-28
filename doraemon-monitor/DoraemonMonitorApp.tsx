@@ -1124,7 +1124,6 @@ const DoraemonMonitorApp: React.FC = () => {
     setIsWarningResetDialogOpen(false);
     setWarningResetDialogMode('manage');
     setWarningResetCurrentPassword('');
-    setWarningResetCurrentPassword('');
     setWarningResetPasswordInput('');
     setWarningResetPasswordConfirm('');
     setWarningResetPasswordError('');
@@ -1822,7 +1821,7 @@ const DoraemonMonitorApp: React.FC = () => {
                   <input
                     className="warning-reset-input"
                     type="password"
-                    value={warningResetPasswordInput}
+                    value={warningResetPasswordConfirm}
                     onChange={(event) => {
                       setWarningResetPasswordConfirm(event.target.value);
                       setWarningResetPasswordError('');

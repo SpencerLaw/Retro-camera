@@ -392,11 +392,19 @@ const JuzimiApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4efe7] text-[#171310] relative overflow-hidden">
+    <div className="min-h-screen bg-[#f7f1e7] text-[#171310] relative overflow-hidden">
       {/* decorative background */}
-      <div className="fixed inset-0 pointer-events-none opacity-70">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.9),transparent_28%),radial-gradient(circle_at_82%_4%,rgba(199,164,108,0.24),transparent_30%),linear-gradient(135deg,rgba(17,19,24,0.06),transparent_42%)]" />
-        <div className="absolute right-[-10vw] top-[8vh] h-[70vh] w-[34vw] rounded-full border border-[#c7a46c]/30" />
+      <div className="fixed inset-0 pointer-events-none opacity-90">
+        <div className="absolute inset-0 bg-[linear-gradient(118deg,rgba(255,250,239,0.96)_0%,rgba(247,238,222,0.92)_34%,rgba(234,230,213,0.86)_64%,rgba(238,225,209,0.92)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_17%_16%,rgba(255,255,255,0.92),transparent_25%),radial-gradient(circle_at_76%_8%,rgba(220,194,142,0.28),transparent_30%),radial-gradient(circle_at_88%_72%,rgba(182,199,190,0.24),transparent_34%),radial-gradient(circle_at_8%_82%,rgba(226,172,151,0.16),transparent_30%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.26)_1px,transparent_1px),linear-gradient(180deg,rgba(116,91,61,0.035)_1px,transparent_1px)] bg-[size:72px_72px]" />
+        <div
+          className="absolute inset-0 opacity-[0.18] mix-blend-multiply"
+          style={{ backgroundImage: `url("${NOISE_SVG}")` }}
+        />
+        <div className="absolute left-[-12vw] top-[14vh] h-[58vh] w-[42vw] rounded-full bg-[#fff8e8]/45 blur-3xl" />
+        <div className="absolute right-[-14vw] top-[6vh] h-[72vh] w-[36vw] rounded-full border border-[#c7a46c]/25 bg-[#f3d8b0]/10 blur-[1px]" />
+        <div className="absolute right-[8vw] bottom-[-18vh] h-[44vh] w-[38vw] rounded-full bg-[#c4d2c9]/20 blur-3xl" />
       </div>
 
       {/* ── Header ── */}

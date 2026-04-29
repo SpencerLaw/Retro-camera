@@ -263,6 +263,22 @@ export const getNextJuzimiThemeMode = (mode) => {
   return JUZIMI_THEME_MODES[(currentIndex + 1) % JUZIMI_THEME_MODES.length];
 };
 
+export const getJuzimiThemeModeAction = (mode) => {
+  const nextMode = getNextJuzimiThemeMode(mode);
+  return {
+    mode: nextMode,
+    label: nextMode === 'night' ? '黑夜' : '白天',
+  };
+};
+
+export const getJuzimiCardMinHeight = (sentence = {}, index = 0, variant = 'poster') => {
+  const textLength = String(sentence.text || '').length;
+  const rhythm = [0, 46, 18, 76, 32, 92][Math.abs(index) % 6];
+  const textLift = Math.min(120, Math.floor(textLength / 22) * 28);
+  const base = variant === 'studio' ? 322 : 286;
+  return base + rhythm + textLift;
+};
+
 export const getJuzimiTheme = (preference = {}) => {
   const normalized = normalizeJuzimiThemePreference(preference);
   return JUZIMI_THEMES[normalized.family][normalized.mode];

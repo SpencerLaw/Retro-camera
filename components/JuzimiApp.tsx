@@ -8,7 +8,9 @@ import {
 } from './juzimiLogic.js';
 import {
   JUZIMI_THEME_STORAGE_KEY,
+  getJuzimiCardMinHeight,
   getJuzimiTheme,
+  getJuzimiThemeModeAction,
   getNextJuzimiThemeFamily,
   getNextJuzimiThemeMode,
   normalizeJuzimiThemePreference,
@@ -215,13 +217,14 @@ const SentenceCard = ({
     sentence.text.length > PREVIEW_MAX
       ? sentence.text.slice(0, PREVIEW_MAX).trimEnd() + '…'
       : sentence.text;
+  const cardMinHeight = getJuzimiCardMinHeight(sentence, index, theme.cardVariant);
 
   if (theme.cardVariant === 'studio') {
     return (
       <button
         onClick={onClick}
-        className="group relative w-full text-left rounded-[1.55rem] p-4 shadow-[0_18px_52px_rgba(15,23,42,0.14)] hover:shadow-[0_24px_72px_rgba(15,23,42,0.2)] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col min-h-[350px] border border-white/18"
-        style={{ background: accent.surface, color: accent.text }}
+        className="group relative w-full text-left rounded-[1.55rem] p-4 shadow-[0_18px_52px_rgba(15,23,42,0.14)] hover:shadow-[0_24px_72px_rgba(15,23,42,0.2)] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col border border-white/18"
+        style={{ background: accent.surface, color: accent.text, minHeight: cardMinHeight }}
       >
         <div
           className="absolute left-3 right-3 top-3 h-[118px] rounded-[1.2rem] overflow-hidden"
@@ -298,8 +301,8 @@ const SentenceCard = ({
   return (
     <button
       onClick={onClick}
-      className={`group relative w-full text-left rounded-[1.2rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col min-h-[300px] ${theme.cardShadowClass}`}
-      style={{ background: accent.bg }}
+      className={`group relative w-full text-left rounded-[1.2rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col ${theme.cardShadowClass}`}
+      style={{ background: accent.bg, minHeight: cardMinHeight }}
     >
       {/* Noise Overlay */}
       <div 
@@ -385,6 +388,7 @@ const JuzimiApp: React.FC = () => {
   const [themePreference, setThemePreference] = useState(readStoredJuzimiThemePreference);
 
   const theme = useMemo(() => getJuzimiTheme(themePreference), [themePreference]);
+  const themeModeAction = useMemo(() => getJuzimiThemeModeAction(theme.mode), [theme.mode]);
 
   const filteredSentences = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -577,8 +581,8 @@ const JuzimiApp: React.FC = () => {
               aria-label="切换白天黑夜模式"
               title="切换白天黑夜"
             >
-              {theme.mode === 'day' ? <Sun size={15} /> : <Moon size={15} />}
-              {theme.modeLabel}
+              {themeModeAction.mode === 'day' ? <Sun size={15} /> : <Moon size={15} />}
+              {themeModeAction.label}
             </button>
           </div>
           {isAdmin && (
@@ -746,7 +750,6 @@ const JuzimiApp: React.FC = () => {
           /* Masonry-style responsive grid — 1 col → 2 col → 3 col */
           <section
             className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"
-            style={{ columnFill: 'balance' }}
           >
             {filteredSentences.map((sentence, index) => (
               <div key={sentence.id} className="break-inside-avoid mb-4 md:mb-5">

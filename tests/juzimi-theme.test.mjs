@@ -37,6 +37,24 @@ await runTest('juzimi theme controls cycle family and day night mode', async () 
   assert.equal(getNextJuzimiThemeMode('unknown'), 'day');
 });
 
+await runTest('juzimi mode toggle labels the next action instead of current state', async () => {
+  const { getJuzimiThemeModeAction } = await loadThemeModule();
+
+  assert.deepEqual(getJuzimiThemeModeAction('day'), { mode: 'night', label: '黑夜' });
+  assert.deepEqual(getJuzimiThemeModeAction('night'), { mode: 'day', label: '白天' });
+  assert.deepEqual(getJuzimiThemeModeAction('unknown'), { mode: 'day', label: '白天' });
+});
+
+await runTest('juzimi card heights vary for a waterfall layout', async () => {
+  const { getJuzimiCardMinHeight } = await loadThemeModule();
+  const shortSentence = { text: '短句。' };
+  const longSentence = { text: '这是一条更长的句子，用来验证卡片高度会随着文本内容和顺序自然变化，而不是所有卡片都排成一样高的整齐网格。' };
+
+  assert.notEqual(getJuzimiCardMinHeight(shortSentence, 0, 'poster'), getJuzimiCardMinHeight(longSentence, 0, 'poster'));
+  assert.notEqual(getJuzimiCardMinHeight(shortSentence, 0, 'studio'), getJuzimiCardMinHeight(shortSentence, 1, 'studio'));
+  assert.ok(getJuzimiCardMinHeight(longSentence, 0, 'poster') > getJuzimiCardMinHeight(shortSentence, 0, 'poster'));
+});
+
 await runTest('juzimi has complete visual theme configs for both families and modes', async () => {
   const { getJuzimiTheme, JUZIMI_THEME_FAMILIES, JUZIMI_THEME_MODES } = await loadThemeModule();
 

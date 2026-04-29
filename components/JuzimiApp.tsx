@@ -392,19 +392,64 @@ const JuzimiApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f1e7] text-[#171310] relative overflow-hidden">
+    <div className="min-h-screen bg-[#f8f0e3] text-[#171310] relative overflow-hidden">
+      <style>{`
+        @keyframes juzimi-breathe-a {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.72; }
+          50% { transform: translate3d(4vw, -3vh, 0) scale(1.08); opacity: 0.98; }
+        }
+
+        @keyframes juzimi-breathe-b {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.58; }
+          50% { transform: translate3d(-3vw, 4vh, 0) scale(1.12); opacity: 0.9; }
+        }
+
+        @keyframes juzimi-gradient-drift {
+          0%, 100% { background-position: 0% 42%, 100% 10%, 50% 50%; }
+          50% { background-position: 18% 36%, 82% 18%, 56% 46%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .juzimi-bg-drift,
+          .juzimi-bg-breathe {
+            animation: none !important;
+          }
+        }
+      `}</style>
       {/* decorative background */}
-      <div className="fixed inset-0 pointer-events-none opacity-90">
-        <div className="absolute inset-0 bg-[linear-gradient(118deg,rgba(255,250,239,0.96)_0%,rgba(247,238,222,0.92)_34%,rgba(234,230,213,0.86)_64%,rgba(238,225,209,0.92)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_17%_16%,rgba(255,255,255,0.92),transparent_25%),radial-gradient(circle_at_76%_8%,rgba(220,194,142,0.28),transparent_30%),radial-gradient(circle_at_88%_72%,rgba(182,199,190,0.24),transparent_34%),radial-gradient(circle_at_8%_82%,rgba(226,172,151,0.16),transparent_30%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.26)_1px,transparent_1px),linear-gradient(180deg,rgba(116,91,61,0.035)_1px,transparent_1px)] bg-[size:72px_72px]" />
+      <div className="fixed inset-0 pointer-events-none opacity-100">
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,#fff7e8_0%,#f5e5cf_34%,#eadfcb_58%,#f6ded2_78%,#edf3e9_100%)]" />
         <div
-          className="absolute inset-0 opacity-[0.18] mix-blend-multiply"
+          className="juzimi-bg-drift absolute inset-0"
+          style={{
+            backgroundImage: [
+              'radial-gradient(circle at 16% 18%, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.56) 16%, transparent 36%)',
+              'radial-gradient(circle at 75% 8%, rgba(230,184,105,0.46) 0%, rgba(230,184,105,0.2) 22%, transparent 42%)',
+              'radial-gradient(circle at 88% 72%, rgba(151,184,173,0.36) 0%, rgba(151,184,173,0.16) 20%, transparent 44%)',
+              'radial-gradient(circle at 10% 86%, rgba(230,150,126,0.28) 0%, rgba(230,150,126,0.12) 18%, transparent 38%)',
+            ].join(', '),
+            backgroundSize: '150% 150%, 130% 130%, 140% 140%, 120% 120%',
+            animation: 'juzimi-gradient-drift 18s ease-in-out infinite',
+          }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(180deg,rgba(116,91,61,0.024)_1px,transparent_1px)] bg-[size:88px_88px]" />
+        <div
+          className="absolute inset-0 opacity-[0.14] mix-blend-multiply"
           style={{ backgroundImage: `url("${NOISE_SVG}")` }}
         />
-        <div className="absolute left-[-12vw] top-[14vh] h-[58vh] w-[42vw] rounded-full bg-[#fff8e8]/45 blur-3xl" />
-        <div className="absolute right-[-14vw] top-[6vh] h-[72vh] w-[36vw] rounded-full border border-[#c7a46c]/25 bg-[#f3d8b0]/10 blur-[1px]" />
-        <div className="absolute right-[8vw] bottom-[-18vh] h-[44vh] w-[38vw] rounded-full bg-[#c4d2c9]/20 blur-3xl" />
+        <div
+          className="juzimi-bg-breathe absolute left-[-16vw] top-[8vh] h-[66vh] w-[52vw] rounded-full bg-[#fff8dc]/70 blur-3xl mix-blend-screen"
+          style={{ animation: 'juzimi-breathe-a 14s ease-in-out infinite' }}
+        />
+        <div
+          className="juzimi-bg-breathe absolute right-[-15vw] top-[2vh] h-[76vh] w-[44vw] rounded-full bg-[#e8c27d]/28 blur-3xl mix-blend-multiply"
+          style={{ animation: 'juzimi-breathe-b 17s ease-in-out infinite' }}
+        />
+        <div
+          className="juzimi-bg-breathe absolute right-[4vw] bottom-[-20vh] h-[52vh] w-[42vw] rounded-full bg-[#9fbcaf]/28 blur-3xl mix-blend-multiply"
+          style={{ animation: 'juzimi-breathe-a 20s ease-in-out infinite reverse' }}
+        />
+        <div className="absolute right-[-8vw] top-[12vh] h-[64vh] w-[36vw] rounded-full border border-[#c7a46c]/18" />
       </div>
 
       {/* ── Header ── */}

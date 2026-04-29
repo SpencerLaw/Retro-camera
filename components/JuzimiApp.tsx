@@ -1,11 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit3, Feather, Lock, LogOut, Plus, Save, Search, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Edit3, Feather, Lock, LogOut, Moon, Palette, Plus, Save, Search, Sun, Trash2, X } from 'lucide-react';
 import {
   JUZIMI_ADMIN_PASSWORD_HASH,
   normalizeJuzimiSentence,
   sortJuzimiSentences,
 } from './juzimiLogic.js';
+import {
+  JUZIMI_THEME_STORAGE_KEY,
+  getJuzimiTheme,
+  getNextJuzimiThemeFamily,
+  getNextJuzimiThemeMode,
+  normalizeJuzimiThemePreference,
+} from './juzimiTheme.js';
 
 interface JuzimiSentence {
   id: string;
@@ -69,21 +76,17 @@ const sentenceToForm = (sentence: JuzimiSentence) => ({
 // ── Card accent colours cycling ──────────────────────────────────────────────
 const NOISE_SVG = `data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E`;
 
-// Editorial poster colour palettes – each has a CSS gradient + text scheme
-const CARD_ACCENTS = [
-  { bg: 'linear-gradient(135deg, #6c8cb0 0%, #87a5c1 40%, #d8c29e 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', tagBg: 'rgba(255,255,255,0.15)', tagText: '#ffffff' },
-  { bg: 'linear-gradient(135deg, #e5aba4 0%, #efcdbe 100%)', text: '#3c282a', sub: 'rgba(60,40,42,0.7)', tagBg: 'rgba(60,40,42,0.1)', tagText: '#3c282a' },
-  { bg: 'linear-gradient(135deg, #abc1b8 0%, #b2ccda 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.8)', tagBg: 'rgba(255,255,255,0.2)', tagText: '#ffffff' },
-  { bg: 'linear-gradient(135deg, #1a1a1c 0%, #2f3032 100%)', text: '#f0ece1', sub: 'rgba(240,236,225,0.7)', tagBg: 'rgba(240,236,225,0.15)', tagText: '#f0ece1' },
-  { bg: 'linear-gradient(135deg, #7c8872 0%, #a2a08c 50%, #465158 100%)', text: '#f0ece1', sub: 'rgba(240,236,225,0.7)', tagBg: 'rgba(240,236,225,0.15)', tagText: '#f0ece1' },
-  { bg: 'linear-gradient(135deg, #9bb0ba 0%, #c1ced4 100%)', text: '#1a1f22', sub: 'rgba(26,31,34,0.7)', tagBg: 'rgba(26,31,34,0.1)', tagText: '#1a1f22' },
-  { bg: 'linear-gradient(135deg, #2a4c7e 0%, #5b81ae 100%)', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', tagBg: 'rgba(255,255,255,0.2)', tagText: '#ffffff' },
-  { bg: '#dcd8c8', text: '#2a2622', sub: 'rgba(42,38,34,0.7)', tagBg: 'rgba(42,38,34,0.1)', tagText: '#2a2622' },
-  { bg: 'linear-gradient(135deg, #dfa2ab 0%, #f1ccb5 100%)', text: '#3c282a', sub: 'rgba(60,40,42,0.7)', tagBg: 'rgba(60,40,42,0.1)', tagText: '#3c282a' },
-  { bg: '#d6cdbd', text: '#2a2622', sub: 'rgba(42,38,34,0.7)', tagBg: 'rgba(42,38,34,0.1)', tagText: '#2a2622' },
-];
-
 const PREVIEW_MAX = 80; // chars before truncating in card
+
+const readStoredJuzimiThemePreference = () => {
+  if (typeof window === 'undefined') return normalizeJuzimiThemePreference();
+  try {
+    const raw = window.localStorage.getItem(JUZIMI_THEME_STORAGE_KEY);
+    return normalizeJuzimiThemePreference(raw ? JSON.parse(raw) : undefined);
+  } catch {
+    return normalizeJuzimiThemePreference();
+  }
+};
 
 // ── Dialog ───────────────────────────────────────────────────────────────────
 const SentenceDialog = ({
@@ -92,13 +95,17 @@ const SentenceDialog = ({
   onEdit,
   onDelete,
   isAdmin,
+  theme,
 }: {
   sentence: JuzimiSentence;
   onClose: () => void;
   onEdit: (s: JuzimiSentence) => void;
   onDelete: (s: JuzimiSentence) => void;
   isAdmin: boolean;
+  theme: any;
 }) => {
+  const isNight = theme.mode === 'night';
+
   // Close on backdrop click
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
@@ -113,18 +120,27 @@ const SentenceDialog = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/50 backdrop-blur-sm"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 backdrop-blur-sm ${isNight ? 'bg-black/70' : 'bg-black/50'}`}
       onClick={handleBackdrop}
     >
-      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-[#f4efe7] shadow-[0_40px_100px_rgba(23,19,16,0.36)] border border-[#c7a46c]/30 flex flex-col">
+      <div className={`relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-[0_40px_100px_rgba(23,19,16,0.36)] flex flex-col ${
+        isNight
+          ? 'bg-[#19130f] border border-[#d6b16e]/22 text-[#fff3e2]'
+          : 'bg-[#f4efe7] border border-[#c7a46c]/30 text-[#171310]'
+      }`}>
         {/* header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-6 pt-6 pb-4 bg-[#f4efe7]/95 backdrop-blur-sm border-b border-[#c7a46c]/20">
-          <div className="text-xs font-black tracking-[0.28em] uppercase text-[#8c6b3f]">
+        <div className={`sticky top-0 z-10 flex items-center justify-between gap-3 px-6 pt-6 pb-4 backdrop-blur-sm border-b ${
+          isNight ? 'bg-[#19130f]/95 border-[#d6b16e]/18' : 'bg-[#f4efe7]/95 border-[#c7a46c]/20'
+        }`}>
+          <div className={`text-xs font-black tracking-[0.28em] uppercase ${theme.accentClass}`}>
             Juzimi · {formatDate(sentence.updatedAt || sentence.createdAt)}
           </div>
           <button
             onClick={onClose}
-            className="h-9 w-9 rounded-full bg-[#171310]/8 flex items-center justify-center hover:bg-[#171310]/14 transition-colors"
+            className={isNight
+              ? 'h-9 w-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/16 transition-colors'
+              : 'h-9 w-9 rounded-full bg-[#171310]/8 flex items-center justify-center hover:bg-[#171310]/14 transition-colors'
+            }
           >
             <X size={18} />
           </button>
@@ -132,19 +148,19 @@ const SentenceDialog = ({
 
         {/* body */}
         <div className="px-6 md:px-8 py-6 flex-1">
-          <blockquote className="font-serif text-[clamp(1.7rem,5vw,2.6rem)] leading-[1.35] tracking-[-0.02em] text-[#171310]">
+          <blockquote className={`font-serif text-[clamp(1.7rem,5vw,2.6rem)] leading-[1.35] tracking-[-0.02em] ${theme.titleClass}`}>
             "{sentence.text}"
           </blockquote>
 
-          <div className="mt-6 flex flex-wrap items-baseline gap-2 text-base font-black text-[#171310]">
+          <div className={`mt-6 flex flex-wrap items-baseline gap-2 text-base font-black ${theme.titleClass}`}>
             <span>{sentence.author || '佚名'}</span>
             {sentence.source && (
-              <span className="text-sm font-bold text-[#8c6b3f]">《{sentence.source}》</span>
+              <span className={`text-sm font-bold ${theme.accentClass}`}>《{sentence.source}》</span>
             )}
           </div>
 
           {sentence.note && (
-            <p className="mt-5 text-[15px] leading-8 text-[#5f5448] font-medium border-l-4 border-[#c7a46c] pl-4">
+            <p className={`mt-5 text-[15px] leading-8 font-medium border-l-4 pl-4 ${theme.mutedClass} ${isNight ? 'border-[#d6b16e]' : 'border-[#c7a46c]'}`}>
               {sentence.note}
             </p>
           )}
@@ -152,7 +168,7 @@ const SentenceDialog = ({
           {sentence.tags.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {sentence.tags.map(tag => (
-                <span key={tag} className="rounded-full bg-white border border-[#c7a46c]/35 px-3 py-1 text-xs font-black text-[#8c6b3f]">
+                <span key={tag} className={`rounded-full px-3 py-1 text-xs font-black ${isNight ? 'bg-white/10 border border-[#d6b16e]/22 text-[#f3d9a0]' : 'bg-white border border-[#c7a46c]/35 text-[#8c6b3f]'}`}>
                   {tag}
                 </span>
               ))}
@@ -162,10 +178,10 @@ const SentenceDialog = ({
 
         {/* admin footer */}
         {isAdmin && (
-          <div className="sticky bottom-0 flex gap-3 px-6 pb-6 pt-4 bg-[#f4efe7]/95 backdrop-blur-sm border-t border-[#c7a46c]/20">
+          <div className={`sticky bottom-0 flex gap-3 px-6 pb-6 pt-4 backdrop-blur-sm border-t ${isNight ? 'bg-[#19130f]/95 border-[#d6b16e]/18' : 'bg-[#f4efe7]/95 border-[#c7a46c]/20'}`}>
             <button
               onClick={() => { onEdit(sentence); onClose(); }}
-              className="flex-1 h-12 rounded-2xl bg-[#171310] text-white font-black flex items-center justify-center gap-2 text-sm"
+              className={`flex-1 h-12 text-sm ${theme.primaryButtonClass}`}
             >
               <Edit3 size={16} /> 编辑句子
             </button>
@@ -187,21 +203,102 @@ const SentenceCard = ({
   sentence,
   index,
   onClick,
+  theme,
 }: {
   sentence: JuzimiSentence;
   index: number;
   onClick: () => void;
+  theme: any;
 }) => {
-  const accent = CARD_ACCENTS[index % CARD_ACCENTS.length];
+  const accent = theme.cardAccents[index % theme.cardAccents.length];
   const preview =
     sentence.text.length > PREVIEW_MAX
       ? sentence.text.slice(0, PREVIEW_MAX).trimEnd() + '…'
       : sentence.text;
 
+  if (theme.cardVariant === 'studio') {
+    return (
+      <button
+        onClick={onClick}
+        className="group relative w-full text-left rounded-[1.55rem] p-4 shadow-[0_18px_52px_rgba(15,23,42,0.14)] hover:shadow-[0_24px_72px_rgba(15,23,42,0.2)] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col min-h-[350px] border border-white/18"
+        style={{ background: accent.surface, color: accent.text }}
+      >
+        <div
+          className="absolute left-3 right-3 top-3 h-[118px] rounded-[1.2rem] overflow-hidden"
+          style={{ background: accent.cover }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_22%,rgba(255,255,255,0.68),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.16),transparent_48%)]" />
+          <div
+            className="absolute inset-0 opacity-[0.2] mix-blend-overlay"
+            style={{ backgroundImage: `url("${NOISE_SVG}")` }}
+          />
+        </div>
+
+        <div className="relative z-10 flex flex-col h-full pt-[92px]">
+          <div className="mb-5 flex items-end justify-between gap-3">
+            <div className="h-14 w-14 rounded-full bg-white/88 shadow-[0_12px_32px_rgba(15,23,42,0.22)] border border-white/70 flex items-center justify-center text-[12px] font-black tracking-widest text-[#151518]">
+              {String(index + 1).padStart(2, '0')}
+            </div>
+            <div
+              className="rounded-full px-3 py-1 text-[10px] font-black tracking-wide backdrop-blur-sm"
+              style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+            >
+              Juzimi
+            </div>
+          </div>
+
+          <h3
+            className="font-serif text-[1.45rem] md:text-[1.62rem] leading-[1.2] tracking-tight mb-7"
+            style={{ color: accent.text }}
+          >
+            {preview}
+          </h3>
+
+          <div className="flex-grow"></div>
+
+          <div className="mb-5 w-5/6">
+            <p className="text-[13px] leading-snug font-black" style={{ color: accent.sub }}>
+              {sentence.author || '佚名'}
+              {sentence.source && <><br />《{sentence.source}》</>}
+            </p>
+          </div>
+
+          <div className="flex items-end justify-between mt-auto pt-2">
+            <div className="text-[26px] leading-none font-serif opacity-80" style={{ color: accent.text }}>
+              *
+            </div>
+
+            {sentence.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 justify-end w-4/5">
+                {sentence.tags.slice(0, 3).map(tag => (
+                  <span
+                    key={tag}
+                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-sm"
+                    style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {sentence.tags.length > 3 && (
+                  <span
+                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-sm opacity-80"
+                    style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+                  >
+                    +{sentence.tags.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={onClick}
-      className="group relative w-full text-left rounded-[1.2rem] p-6 md:p-8 shadow-sm hover:shadow-[0_14px_40px_rgba(23,19,16,0.14)] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col min-h-[300px]"
+      className={`group relative w-full text-left rounded-[1.2rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col min-h-[300px] ${theme.cardShadowClass}`}
       style={{ background: accent.bg }}
     >
       {/* Noise Overlay */}
@@ -285,6 +382,9 @@ const JuzimiApp: React.FC = () => {
   const [form, setForm] = useState(blankForm);
   const [saving, setSaving] = useState(false);
   const [dialogSentence, setDialogSentence] = useState<JuzimiSentence | null>(null);
+  const [themePreference, setThemePreference] = useState(readStoredJuzimiThemePreference);
+
+  const theme = useMemo(() => getJuzimiTheme(themePreference), [themePreference]);
 
   const filteredSentences = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -319,6 +419,10 @@ const JuzimiApp: React.FC = () => {
       setIsAdmin(true);
     }
   }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(JUZIMI_THEME_STORAGE_KEY, JSON.stringify(themePreference));
+  }, [themePreference]);
 
   const handleLogin = async () => {
     const digest = await digestPassword(passwordInput);
@@ -391,8 +495,22 @@ const JuzimiApp: React.FC = () => {
     }
   };
 
+  const toggleThemeFamily = () => {
+    setThemePreference(prev => normalizeJuzimiThemePreference({
+      ...prev,
+      family: getNextJuzimiThemeFamily(prev.family),
+    }));
+  };
+
+  const toggleThemeMode = () => {
+    setThemePreference(prev => normalizeJuzimiThemePreference({
+      ...prev,
+      mode: getNextJuzimiThemeMode(prev.mode),
+    }));
+  };
+
   return (
-    <div className="min-h-screen bg-[#f8f0e3] text-[#171310] relative overflow-hidden">
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-700 ${theme.rootClass}`}>
       <style>{`
         @keyframes juzimi-breathe-a {
           0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.72; }
@@ -418,62 +536,62 @@ const JuzimiApp: React.FC = () => {
       `}</style>
       {/* decorative background */}
       <div className="fixed inset-0 pointer-events-none opacity-100">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,#fff7e8_0%,#f5e5cf_34%,#eadfcb_58%,#f6ded2_78%,#edf3e9_100%)]" />
+        <div className={`absolute inset-0 transition-colors duration-700 ${theme.backgroundBase}`} />
         <div
           className="juzimi-bg-drift absolute inset-0"
-          style={{
-            backgroundImage: [
-              'radial-gradient(circle at 16% 18%, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.56) 16%, transparent 36%)',
-              'radial-gradient(circle at 75% 8%, rgba(230,184,105,0.46) 0%, rgba(230,184,105,0.2) 22%, transparent 42%)',
-              'radial-gradient(circle at 88% 72%, rgba(151,184,173,0.36) 0%, rgba(151,184,173,0.16) 20%, transparent 44%)',
-              'radial-gradient(circle at 10% 86%, rgba(230,150,126,0.28) 0%, rgba(230,150,126,0.12) 18%, transparent 38%)',
-            ].join(', '),
-            backgroundSize: '150% 150%, 130% 130%, 140% 140%, 120% 120%',
-            animation: 'juzimi-gradient-drift 18s ease-in-out infinite',
-          }}
+          style={theme.backgroundDriftStyle}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(180deg,rgba(116,91,61,0.024)_1px,transparent_1px)] bg-[size:88px_88px]" />
+        <div className={`absolute inset-0 ${theme.gridClass}`} />
         <div
-          className="absolute inset-0 opacity-[0.14] mix-blend-multiply"
+          className={`absolute inset-0 ${theme.noiseClass}`}
           style={{ backgroundImage: `url("${NOISE_SVG}")` }}
         />
-        <div
-          className="juzimi-bg-breathe absolute left-[-16vw] top-[8vh] h-[66vh] w-[52vw] rounded-full bg-[#fff8dc]/70 blur-3xl mix-blend-screen"
-          style={{ animation: 'juzimi-breathe-a 14s ease-in-out infinite' }}
-        />
-        <div
-          className="juzimi-bg-breathe absolute right-[-15vw] top-[2vh] h-[76vh] w-[44vw] rounded-full bg-[#e8c27d]/28 blur-3xl mix-blend-multiply"
-          style={{ animation: 'juzimi-breathe-b 17s ease-in-out infinite' }}
-        />
-        <div
-          className="juzimi-bg-breathe absolute right-[4vw] bottom-[-20vh] h-[52vh] w-[42vw] rounded-full bg-[#9fbcaf]/28 blur-3xl mix-blend-multiply"
-          style={{ animation: 'juzimi-breathe-a 20s ease-in-out infinite reverse' }}
-        />
-        <div className="absolute right-[-8vw] top-[12vh] h-[64vh] w-[36vw] rounded-full border border-[#c7a46c]/18" />
+        {theme.glows.map((glow: any, index: number) => (
+          <div key={`${theme.family}-${theme.mode}-glow-${index}`} className={glow.className} style={glow.style} />
+        ))}
       </div>
 
       {/* ── Header ── */}
       <header className="relative z-10 px-5 md:px-10 pt-6 flex items-center justify-between gap-3">
         <button
           onClick={() => navigate('/')}
-          className="h-11 w-11 rounded-full bg-white/80 border border-black/10 shadow-sm flex items-center justify-center hover:bg-white transition-colors"
+          className={theme.headerIconButtonClass}
           aria-label="返回"
         >
           <ArrowLeft size={20} />
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className={theme.switchWrapClass}>
+            <button
+              onClick={toggleThemeFamily}
+              className={theme.switchButtonClass}
+              aria-label="切换句子迷主题"
+              title="切换主题"
+            >
+              <Palette size={15} /> {theme.name}
+            </button>
+            <button
+              onClick={toggleThemeMode}
+              className={theme.switchButtonClass}
+              aria-label="切换白天黑夜模式"
+              title="切换白天黑夜"
+            >
+              {theme.mode === 'day' ? <Sun size={15} /> : <Moon size={15} />}
+              {theme.modeLabel}
+            </button>
+          </div>
           {isAdmin && (
             <button
               onClick={startCreate}
-              className="h-11 rounded-full bg-[#171310] text-white px-4 font-black flex items-center gap-2 shadow-lg"
+              className={`h-11 rounded-full px-4 ${theme.primaryButtonClass}`}
             >
               <Plus size={18} /> 新建句子
             </button>
           )}
           <button
             onClick={() => isAdmin ? setShowAdminPanel(prev => !prev) : setShowAdminPanel(true)}
-            className="h-11 rounded-full bg-white/85 border border-black/10 px-4 font-black flex items-center gap-2 shadow-sm hover:bg-white transition-colors"
+            className={theme.headerPillClass}
           >
             <Lock size={17} /> 管理员
           </button>
@@ -486,49 +604,49 @@ const JuzimiApp: React.FC = () => {
         <section className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 md:mb-10">
           <div>
 
-            <h1 className="font-serif text-[clamp(3.2rem,10vw,7rem)] leading-[0.82] tracking-[-0.05em] text-[#171310]">
+            <h1 className={`font-serif text-[clamp(3.2rem,10vw,7rem)] leading-[0.82] tracking-[-0.05em] ${theme.titleClass}`}>
               句子迷
             </h1>
-            <p className="mt-4 text-base md:text-lg leading-8 text-[#5f5448] font-medium">
+            <p className={`mt-4 text-base md:text-lg leading-8 font-medium ${theme.mutedClass}`}>
               像翻开一本安静的杂志，把值得停留的句子放在光里。
             </p>
           </div>
 
           {/* search box */}
-          <div className="w-full md:w-80 shrink-0 rounded-2xl bg-[#171310] p-4 shadow-[0_20px_60px_rgba(23,19,16,0.22)]">
+          <div className={theme.searchPanelClass}>
             <div className="flex items-center justify-between mb-3">
-              <div className="text-xs font-black tracking-[0.22em] uppercase text-[#c7a46c]">Index</div>
-              <div className="text-sm font-black text-white/55">{sentences.length} sentences</div>
+              <div className={`text-xs font-black tracking-[0.22em] uppercase ${theme.accentClass}`}>Index</div>
+              <div className={theme.searchCountClass}>{sentences.length} sentences</div>
             </div>
             <div className="relative">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+              <Search size={16} className={theme.searchIconClass} />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="搜索句子、作者、标签"
-                className="w-full h-11 rounded-xl bg-white/10 border border-white/10 pl-10 pr-4 outline-none text-white placeholder:text-white/30 font-bold text-sm focus:border-[#c7a46c] transition-colors"
+                className={theme.inputClass}
               />
             </div>
           </div>
         </section>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+          <div className={theme.errorClass}>
             {error}
           </div>
         )}
 
         {/* ── Admin panel ── */}
         {showAdminPanel && (
-          <section className="mb-8 rounded-[2rem] bg-white/85 backdrop-blur border border-black/10 shadow-[0_20px_60px_rgba(23,19,16,0.12)] overflow-hidden">
-            <div className="p-5 md:p-6 border-b border-black/10 flex items-center justify-between gap-3">
+          <section className={theme.panelClass}>
+            <div className={theme.panelHeaderClass}>
               <div>
-                <div className="text-xs font-black tracking-[0.22em] uppercase text-[#8c6b3f]">Editor Desk</div>
-                <h2 className="text-2xl font-black text-[#171310]">{isAdmin ? '句子管理' : '管理员登录'}</h2>
+                <div className={`text-xs font-black tracking-[0.22em] uppercase ${theme.accentClass}`}>Editor Desk</div>
+                <h2 className={`text-2xl font-black ${theme.titleClass}`}>{isAdmin ? '句子管理' : '管理员登录'}</h2>
               </div>
               <button
                 onClick={() => setShowAdminPanel(false)}
-                className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200"
+                className={theme.closeButtonClass}
               >
                 <X size={18} />
               </button>
@@ -542,11 +660,11 @@ const JuzimiApp: React.FC = () => {
                   onChange={(event) => setPasswordInput(event.target.value)}
                   onKeyDown={(event) => { if (event.key === 'Enter') handleLogin(); }}
                   placeholder="输入管理员密码"
-                  className="h-12 rounded-2xl border border-black/10 bg-[#f8f3eb] px-4 font-bold outline-none focus:border-[#c7a46c]"
+                  className={`h-12 ${theme.panelInputClass}`}
                 />
                 <button
                   onClick={handleLogin}
-                  className="h-12 rounded-2xl bg-[#171310] text-white px-6 font-black flex items-center justify-center gap-2"
+                  className={`h-12 px-6 ${theme.primaryButtonClass}`}
                 >
                   <Lock size={17} /> 进入管理
                 </button>
@@ -558,53 +676,53 @@ const JuzimiApp: React.FC = () => {
                     value={form.text}
                     onChange={(event) => setForm(prev => ({ ...prev, text: event.target.value }))}
                     placeholder="写下句子..."
-                    className="min-h-[160px] rounded-3xl border border-black/10 bg-[#f8f3eb] p-5 font-serif text-xl leading-9 outline-none focus:border-[#c7a46c] resize-none"
+                    className={`min-h-[160px] ${theme.panelTextAreaClass}`}
                   />
                   <div className="grid grid-cols-1 gap-3">
                     <input
                       value={form.author}
                       onChange={(event) => setForm(prev => ({ ...prev, author: event.target.value }))}
                       placeholder="作者"
-                      className="h-12 rounded-2xl border border-black/10 bg-[#f8f3eb] px-4 font-bold outline-none focus:border-[#c7a46c]"
+                      className={`h-12 ${theme.panelInputClass}`}
                     />
                     <input
                       value={form.source}
                       onChange={(event) => setForm(prev => ({ ...prev, source: event.target.value }))}
                       placeholder="出处 / 书名"
-                      className="h-12 rounded-2xl border border-black/10 bg-[#f8f3eb] px-4 font-bold outline-none focus:border-[#c7a46c]"
+                      className={`h-12 ${theme.panelInputClass}`}
                     />
                     <input
                       value={form.tagsText}
                       onChange={(event) => setForm(prev => ({ ...prev, tagsText: event.target.value }))}
                       placeholder="标签，用逗号分隔"
-                      className="h-12 rounded-2xl border border-black/10 bg-[#f8f3eb] px-4 font-bold outline-none focus:border-[#c7a46c]"
+                      className={`h-12 ${theme.panelInputClass}`}
                     />
                     <textarea
                       value={form.note}
                       onChange={(event) => setForm(prev => ({ ...prev, note: event.target.value }))}
                       placeholder="短评 / 备注"
-                      className="min-h-[72px] rounded-2xl border border-black/10 bg-[#f8f3eb] p-4 font-bold outline-none focus:border-[#c7a46c] resize-none"
+                      className={`min-h-[72px] p-4 resize-none ${theme.panelInputClass}`}
                     />
                   </div>
                 </div>
                 <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-between">
                   <button
                     onClick={handleLogout}
-                    className="h-12 rounded-2xl bg-slate-100 text-slate-700 px-5 font-black flex items-center justify-center gap-2"
+                    className={`h-12 px-5 flex items-center justify-center gap-2 ${theme.secondaryButtonClass}`}
                   >
                     <LogOut size={18} /> 退出管理员
                   </button>
                   <div className="flex gap-3">
                     <button
                       onClick={() => setForm(blankForm)}
-                      className="h-12 rounded-2xl bg-white border border-black/10 text-slate-700 px-5 font-black"
+                      className={`h-12 px-5 ${theme.secondaryButtonClass}`}
                     >
                       清空
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={saving || !form.text.trim()}
-                      className="h-12 rounded-2xl bg-[#171310] text-white px-6 font-black flex items-center justify-center gap-2 disabled:opacity-40"
+                      className={`h-12 px-6 disabled:opacity-40 ${theme.primaryButtonClass}`}
                     >
                       <Save size={18} /> {form.id ? '保存编辑' : '发布句子'}
                     </button>
@@ -617,12 +735,12 @@ const JuzimiApp: React.FC = () => {
 
         {/* ── Sentence grid ── */}
         {loading ? (
-          <div className="py-20 text-center font-black text-[#8c6b3f]">正在翻页...</div>
+          <div className={`py-20 text-center font-black ${theme.accentClass}`}>正在翻页...</div>
         ) : filteredSentences.length === 0 ? (
-          <section className="rounded-[2.5rem] border border-dashed border-[#c7a46c]/50 bg-white/55 p-10 md:p-16 text-center">
-            <Feather size={42} className="mx-auto text-[#8c6b3f] mb-4" />
-            <h2 className="text-3xl font-black text-[#171310] mb-3">还没有句子</h2>
-            <p className="text-[#6f6254] font-bold">管理员登录后，可以把第一条喜欢的句子放进来。</p>
+          <section className={theme.emptyStateClass}>
+            <Feather size={42} className={`mx-auto mb-4 ${theme.accentClass}`} />
+            <h2 className={`text-3xl font-black mb-3 ${theme.titleClass}`}>还没有句子</h2>
+            <p className={`font-bold ${theme.mutedClass}`}>管理员登录后，可以把第一条喜欢的句子放进来。</p>
           </section>
         ) : (
           /* Masonry-style responsive grid — 1 col → 2 col → 3 col */
@@ -635,6 +753,7 @@ const JuzimiApp: React.FC = () => {
                 <SentenceCard
                   sentence={sentence}
                   index={index}
+                  theme={theme}
                   onClick={() => setDialogSentence(sentence)}
                 />
               </div>
@@ -651,6 +770,7 @@ const JuzimiApp: React.FC = () => {
           onEdit={startEdit}
           onDelete={handleDelete}
           isAdmin={isAdmin}
+          theme={theme}
         />
       )}
     </div>

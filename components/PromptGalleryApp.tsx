@@ -1,0 +1,879 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Copy,
+  Edit3,
+  ExternalLink,
+  ImagePlus,
+  Loader2,
+  Lock,
+  LogOut,
+  Plus,
+  Save,
+  Search,
+  Sparkles,
+  Tags,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
+import {
+  PROMPT_GALLERY_ADMIN_PASSWORD_HASH,
+  PROMPT_GALLERY_MAX_IMAGES,
+  PROMPT_GALLERY_MAX_IMAGE_BYTES,
+  PROMPT_GALLERY_MAX_COVER_BYTES,
+  PROMPT_GALLERY_DEFAULT_LIMIT,
+  getDataUrlByteSize,
+  normalizePromptGalleryEntry,
+} from './promptGalleryLogic.js';
+
+interface PromptGalleryImage {
+  id: string;
+  name: string;
+  dataUrl: string;
+  thumbnail?: string;
+  width: number;
+  height: number;
+  size: number;
+}
+
+interface PromptGallerySummary {
+  id: string;
+  title: string;
+  model: string;
+  category: string;
+  tags: string[];
+  note: string;
+  sourceUrl: string;
+  coverImage: string;
+  imageCount: number;
+  promptPreview: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PromptGalleryEntry extends PromptGallerySummary {
+  prompt: string;
+  negativePrompt: string;
+  images: PromptGalleryImage[];
+}
+
+const blankForm = {
+  id: '',
+  title: '',
+  model: 'GPT Image 2',
+  category: '',
+  prompt: '',
+  negativePrompt: '',
+  note: '',
+  sourceUrl: '',
+  tagsText: '',
+  coverImage: '',
+  images: [] as PromptGalleryImage[],
+  createdAt: '',
+};
+
+const ADMIN_SESSION_KEY = 'prompt_gallery_admin_token';
+
+const digestPassword = async (value: string) => {
+  const input = new TextEncoder().encode(value.trim());
+  const buffer = await crypto.subtle.digest('SHA-256', input);
+  return Array.from(new Uint8Array(buffer))
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+};
+
+const callPromptGalleryApi = async (action: string, data?: any, adminToken?: string) => {
+  const response = await fetch('/api/prompts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, data, adminToken }),
+  });
+  const text = await response.text();
+  let result: any = {};
+  try {
+    result = text ? JSON.parse(text) : {};
+  } catch {
+    result = {};
+  }
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || `接口请求失败 (${response.status})`);
+  }
+  return result.data;
+};
+
+const formatDate = (value: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const formatBytes = (value = 0) => {
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${Math.round(value / 102.4) / 10} KB`;
+  return `${Math.round(value / 1024 / 102.4) / 10} MB`;
+};
+
+const loadImageFromFile = (file: File) => (
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    const url = URL.createObjectURL(file);
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('图片读取失败'));
+    };
+    image.src = url;
+  })
+);
+
+const drawImageToCanvas = (
+  image: HTMLImageElement,
+  maxLongEdge: number,
+  dimensionScale: number,
+) => {
+  const sourceWidth = image.naturalWidth || image.width;
+  const sourceHeight = image.naturalHeight || image.height;
+  const baseScale = Math.min(1, maxLongEdge / Math.max(sourceWidth, sourceHeight));
+  const scale = baseScale * dimensionScale;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+  canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('当前浏览器不支持图片压缩');
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas;
+};
+
+const compressImageElement = (
+  image: HTMLImageElement,
+  maxLongEdge: number,
+  targetBytes: number,
+  startQuality: number,
+) => {
+  const dimensionScales = [1, 0.86, 0.72, 0.6, 0.5];
+  const qualities = [startQuality, 0.72, 0.64, 0.56, 0.48, 0.4];
+  let best = {
+    dataUrl: '',
+    width: 0,
+    height: 0,
+    size: Number.POSITIVE_INFINITY,
+  };
+
+  for (const dimensionScale of dimensionScales) {
+    const canvas = drawImageToCanvas(image, maxLongEdge, dimensionScale);
+    for (const quality of qualities) {
+      const dataUrl = canvas.toDataURL('image/webp', quality);
+      const size = getDataUrlByteSize(dataUrl);
+      best = size < best.size ? { dataUrl, width: canvas.width, height: canvas.height, size } : best;
+      if (size <= targetBytes) return best;
+    }
+  }
+
+  return best;
+};
+
+const compressPromptImageFile = async (file: File, index: number): Promise<PromptGalleryImage> => {
+  const image = await loadImageFromFile(file);
+  const detail = compressImageElement(image, 1280, PROMPT_GALLERY_MAX_IMAGE_BYTES, 0.78);
+  const thumbnail = compressImageElement(image, 560, PROMPT_GALLERY_MAX_COVER_BYTES, 0.7);
+
+  return {
+    id: `image_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 7)}`,
+    name: file.name.replace(/\.[^.]+$/, '.webp'),
+    dataUrl: detail.dataUrl,
+    thumbnail: thumbnail.dataUrl,
+    width: detail.width,
+    height: detail.height,
+    size: detail.size,
+  };
+};
+
+const promptEntryToForm = (entry: PromptGalleryEntry) => ({
+  id: entry.id,
+  title: entry.title,
+  model: entry.model,
+  category: entry.category,
+  prompt: entry.prompt,
+  negativePrompt: entry.negativePrompt,
+  note: entry.note,
+  sourceUrl: entry.sourceUrl,
+  tagsText: entry.tags.join('，'),
+  coverImage: entry.coverImage,
+  images: entry.images || [],
+  createdAt: entry.createdAt,
+});
+
+const PromptCard = ({
+  item,
+  onClick,
+}: {
+  item: PromptGallerySummary;
+  onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className="group mb-4 w-full break-inside-avoid overflow-hidden rounded-lg border border-black/10 bg-white text-left shadow-[0_18px_42px_rgba(15,23,42,0.12)] transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_22px_54px_rgba(15,23,42,0.18)]"
+  >
+    <div className="relative bg-[#171717]">
+      {item.coverImage ? (
+        <img
+          src={item.coverImage}
+          alt={item.title}
+          className="w-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <div className="flex aspect-[4/3] w-full items-center justify-center bg-[linear-gradient(135deg,#111827_0%,#0f766e_45%,#f59e0b_100%)] text-white">
+          <Sparkles size={40} />
+        </div>
+      )}
+      <div className="absolute left-3 top-3 rounded-full bg-black/65 px-2.5 py-1 text-[11px] font-black text-white backdrop-blur">
+        {item.imageCount || 0} 图
+      </div>
+    </div>
+
+    <div className="p-4">
+      <div className="mb-2 flex flex-wrap gap-1.5">
+        {(item.tags || []).slice(0, 3).map(tag => (
+          <span key={tag} className="rounded-full bg-[#e7f6f3] px-2.5 py-1 text-[11px] font-black text-[#0f766e]">
+            {tag}
+          </span>
+        ))}
+      </div>
+      <h2 className="text-lg font-black leading-snug text-[#111827]">{item.title}</h2>
+      <p className="mt-2 line-clamp-3 text-sm font-medium leading-6 text-[#4b5563]">
+        {item.promptPreview || '点击查看完整提示工程'}
+      </p>
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-black/10 pt-3 text-xs font-black text-[#6b7280]">
+        <span>{item.model || '未标注模型'}</span>
+        <span>{item.category || '未分类'}</span>
+      </div>
+    </div>
+  </button>
+);
+
+const PromptGalleryApp: React.FC = () => {
+  const navigate = useNavigate();
+  const [summaries, setSummaries] = useState<PromptGallerySummary[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [query, setQuery] = useState('');
+  const [activeTag, setActiveTag] = useState('');
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminToken, setAdminToken] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [form, setForm] = useState(blankForm);
+  const [saving, setSaving] = useState(false);
+  const [processingImages, setProcessingImages] = useState(false);
+  const [dialogSummary, setDialogSummary] = useState<PromptGallerySummary | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<PromptGalleryEntry | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  const imageBytes = useMemo(() => (
+    form.images.reduce((total, image) => (
+      total + getDataUrlByteSize(image.dataUrl) + getDataUrlByteSize(image.thumbnail)
+    ), 0)
+  ), [form.images]);
+
+  const loadList = async (reset = true) => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await callPromptGalleryApi('list', {
+        query,
+        tag: activeTag,
+        offset: reset ? 0 : summaries.length,
+        limit: PROMPT_GALLERY_DEFAULT_LIMIT,
+      });
+      setSummaries(prev => reset ? data.items || [] : [...prev, ...(data.items || [])]);
+      setAvailableTags(data.tags || []);
+      setHasMore(Boolean(data.hasMore));
+    } catch (err: any) {
+      setError(err.message || '提示词加载失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadList(true);
+  }, [query, activeTag]);
+
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || '';
+    if (storedToken === PROMPT_GALLERY_ADMIN_PASSWORD_HASH) {
+      setAdminToken(storedToken);
+      setIsAdmin(true);
+    }
+  }, []);
+
+  const handleLogin = async () => {
+    const digest = await digestPassword(passwordInput);
+    if (digest !== PROMPT_GALLERY_ADMIN_PASSWORD_HASH) {
+      setError('管理员密码不正确');
+      return;
+    }
+    sessionStorage.setItem(ADMIN_SESSION_KEY, digest);
+    setAdminToken(digest);
+    setIsAdmin(true);
+    setShowAdminPanel(true);
+    setPasswordInput('');
+    setError('');
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    setAdminToken('');
+    setIsAdmin(false);
+    setShowAdminPanel(false);
+    setForm(blankForm);
+  };
+
+  const openDetail = async (summary: PromptGallerySummary) => {
+    setDialogSummary(summary);
+    setSelectedEntry(null);
+    setActiveImageIndex(0);
+    setDetailLoading(true);
+    setError('');
+    try {
+      const entry = await callPromptGalleryApi('detail', { id: summary.id });
+      setSelectedEntry(entry);
+    } catch (err: any) {
+      setError(err.message || '详情加载失败');
+      setDialogSummary(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const startCreate = () => {
+    setForm(blankForm);
+    setShowAdminPanel(true);
+  };
+
+  const startEdit = (entry: PromptGalleryEntry) => {
+    setForm(promptEntryToForm(entry));
+    setShowAdminPanel(true);
+    setDialogSummary(null);
+    setSelectedEntry(null);
+  };
+
+  const handleFiles = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = '';
+    if (files.length === 0) return;
+
+    const availableSlots = Math.max(0, PROMPT_GALLERY_MAX_IMAGES - form.images.length);
+    const selectedFiles = files.slice(0, availableSlots);
+    if (selectedFiles.length === 0) {
+      setError(`最多 5 张图片，请先删除一部分再上传`);
+      return;
+    }
+
+    setProcessingImages(true);
+    setError('');
+    try {
+      const compressed = [];
+      for (let index = 0; index < selectedFiles.length; index += 1) {
+        compressed.push(await compressPromptImageFile(selectedFiles[index], form.images.length + index));
+      }
+
+      setForm(prev => {
+        const images = [...prev.images, ...compressed].slice(0, PROMPT_GALLERY_MAX_IMAGES);
+        return {
+          ...prev,
+          images,
+          coverImage: images[0]?.thumbnail || prev.coverImage,
+        };
+      });
+    } catch (err: any) {
+      setError(err.message || '图片压缩失败');
+    } finally {
+      setProcessingImages(false);
+    }
+  };
+
+  const removeImage = (imageId: string) => {
+    setForm(prev => {
+      const images = prev.images.filter(image => image.id !== imageId);
+      return {
+        ...prev,
+        images,
+        coverImage: images[0]?.thumbnail || '',
+      };
+    });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError('');
+    try {
+      const entry = normalizePromptGalleryEntry({
+        id: form.id,
+        title: form.title,
+        model: form.model,
+        category: form.category,
+        prompt: form.prompt,
+        negativePrompt: form.negativePrompt,
+        note: form.note,
+        sourceUrl: form.sourceUrl,
+        tags: form.tagsText,
+        coverImage: form.images[0]?.thumbnail || form.coverImage,
+        images: form.images,
+        createdAt: form.createdAt,
+      });
+      const data = await callPromptGalleryApi(form.id ? 'update' : 'create', entry, adminToken);
+      setSummaries(data.list || []);
+      setForm(blankForm);
+      setShowAdminPanel(false);
+      setHasMore(false);
+    } catch (err: any) {
+      setError(err.message || '保存失败');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (entryId: string) => {
+    if (!confirm('确定要删除这个提示词案例吗？')) return;
+    setSaving(true);
+    setError('');
+    try {
+      const data = await callPromptGalleryApi('delete', { id: entryId }, adminToken);
+      setSummaries(data.list || []);
+      setDialogSummary(null);
+      setSelectedEntry(null);
+      if (form.id === entryId) setForm(blankForm);
+    } catch (err: any) {
+      setError(err.message || '删除失败');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyPrompt = async (value: string) => {
+    await navigator.clipboard.writeText(value);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  };
+
+  const activeImage = selectedEntry?.images?.[activeImageIndex] || selectedEntry?.images?.[0];
+
+  return (
+    <div className="min-h-screen bg-[#f4f7f2] text-[#111827]">
+      <div className="fixed inset-0 pointer-events-none bg-[linear-gradient(90deg,rgba(17,24,39,0.035)_1px,transparent_1px),linear-gradient(180deg,rgba(17,24,39,0.03)_1px,transparent_1px)] bg-[size:72px_72px]" />
+
+      <header className="relative z-10 border-b border-black/10 bg-white/82 px-4 py-4 backdrop-blur md:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-white hover:bg-[#eef4f0]"
+              aria-label="返回首页"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-2xl font-black tracking-normal md:text-3xl">提示词图库</h1>
+              <p className="text-sm font-bold text-[#5b6472]">图片案例、提示工程、参数备注，一处找齐。</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {isAdmin && (
+              <button
+                onClick={startCreate}
+                className="flex h-10 items-center gap-2 rounded-lg bg-[#111827] px-4 text-sm font-black text-white hover:bg-[#1f2937]"
+              >
+                <Plus size={17} /> 新建提示词
+              </button>
+            )}
+            <button
+              onClick={() => setShowAdminPanel(prev => !prev)}
+              className="flex h-10 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black hover:bg-[#eef4f0]"
+            >
+              <Lock size={17} /> 管理员
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="relative z-10 mx-auto max-w-7xl px-4 py-6 md:px-8">
+        <section className="mb-5 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_auto]">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_220px]">
+            <div className="relative">
+              <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="搜索标题、模型、提示词、标签"
+                className="h-11 w-full rounded-lg border border-black/10 bg-white pl-10 pr-4 text-sm font-bold outline-none focus:border-[#0f766e]"
+              />
+            </div>
+            <select
+              value={activeTag}
+              onChange={(event) => setActiveTag(event.target.value)}
+              className="h-11 rounded-lg border border-black/10 bg-white px-3 text-sm font-black outline-none focus:border-[#0f766e]"
+            >
+              <option value="">全部标签</option>
+              {availableTags.map(tag => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 text-sm font-black text-[#374151]">
+            <Tags size={16} className="text-[#0f766e]" />
+            {summaries.length} / {hasMore ? '更多' : '已加载'}
+          </div>
+        </section>
+
+        {error && (
+          <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+            {error}
+          </div>
+        )}
+
+        {showAdminPanel && (
+          <section className="mb-6 overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_18px_54px_rgba(15,23,42,0.12)]">
+            <div className="flex items-center justify-between gap-3 border-b border-black/10 px-4 py-4 md:px-5">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.22em] text-[#0f766e]">Prompt Desk</div>
+                <h2 className="text-xl font-black">{isAdmin ? '提示词管理' : '管理员登录'}</h2>
+              </div>
+              <button
+                onClick={() => setShowAdminPanel(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f3f4f6] hover:bg-[#e5e7eb]"
+                aria-label="关闭"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {!isAdmin ? (
+              <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-[1fr_auto] md:p-5">
+                <input
+                  type="password"
+                  value={passwordInput}
+                  onChange={(event) => setPasswordInput(event.target.value)}
+                  onKeyDown={(event) => { if (event.key === 'Enter') handleLogin(); }}
+                  placeholder="输入管理员密码"
+                  className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                />
+                <button
+                  onClick={handleLogin}
+                  className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#111827] px-5 text-sm font-black text-white"
+                >
+                  <Lock size={17} /> 进入管理
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-5 p-4 lg:grid-cols-[1fr_320px] md:p-5">
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <input
+                      value={form.title}
+                      onChange={(event) => setForm(prev => ({ ...prev, title: event.target.value }))}
+                      placeholder="标题"
+                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                    />
+                    <input
+                      value={form.model}
+                      onChange={(event) => setForm(prev => ({ ...prev, model: event.target.value }))}
+                      placeholder="模型"
+                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                    />
+                    <input
+                      value={form.category}
+                      onChange={(event) => setForm(prev => ({ ...prev, category: event.target.value }))}
+                      placeholder="分类"
+                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+
+                  <input
+                    value={form.tagsText}
+                    onChange={(event) => setForm(prev => ({ ...prev, tagsText: event.target.value }))}
+                    placeholder="标签，用逗号或空格分隔"
+                    className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                  />
+
+                  <textarea
+                    value={form.prompt}
+                    onChange={(event) => setForm(prev => ({ ...prev, prompt: event.target.value }))}
+                    placeholder="完整提示工程"
+                    className="min-h-[180px] resize-y rounded-lg border border-black/10 bg-[#f9fafb] p-3 text-sm font-medium leading-7 outline-none focus:border-[#0f766e]"
+                  />
+
+                  <textarea
+                    value={form.negativePrompt}
+                    onChange={(event) => setForm(prev => ({ ...prev, negativePrompt: event.target.value }))}
+                    placeholder="负面提示词"
+                    className="min-h-[86px] resize-y rounded-lg border border-black/10 bg-[#f9fafb] p-3 text-sm font-medium leading-7 outline-none focus:border-[#0f766e]"
+                  />
+
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr]">
+                    <input
+                      value={form.sourceUrl}
+                      onChange={(event) => setForm(prev => ({ ...prev, sourceUrl: event.target.value }))}
+                      placeholder="来源链接"
+                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                    />
+                    <input
+                      value={form.note}
+                      onChange={(event) => setForm(prev => ({ ...prev, note: event.target.value }))}
+                      placeholder="备注 / 参数"
+                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+                </div>
+
+                <aside className="flex flex-col gap-3">
+                  <label className="flex min-h-[132px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#0f766e]/50 bg-[#ecfdf5] px-4 text-center text-sm font-black text-[#0f766e] hover:bg-[#dff8ea]">
+                    {processingImages ? <Loader2 className="mb-2 animate-spin" size={28} /> : <ImagePlus className="mb-2" size={30} />}
+                    <span>{processingImages ? '正在压缩图片' : '上传图片，最多 5 张'}</span>
+                    <span className="mt-1 text-xs text-[#47635d]">自动压缩为 WebP 后保存</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFiles}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {form.images.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {form.images.map((image, index) => (
+                        <div key={image.id} className="relative overflow-hidden rounded-lg border border-black/10 bg-[#111827]">
+                          <img
+                            src={image.thumbnail || image.dataUrl}
+                            alt={image.name}
+                            className="aspect-square w-full object-cover"
+                          />
+                          <button
+                            onClick={() => removeImage(image.id)}
+                            className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-lg bg-black/70 text-white"
+                            aria-label="删除图片"
+                          >
+                            <X size={15} />
+                          </button>
+                          <div className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-black text-white">
+                            {index + 1}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="rounded-lg bg-[#f3f4f6] p-3 text-xs font-bold leading-6 text-[#4b5563]">
+                    当前图片体积：{formatBytes(imageBytes)}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={handleLogout}
+                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-black/10 bg-white px-3 text-sm font-black"
+                    >
+                      <LogOut size={16} /> 退出
+                    </button>
+                    <button
+                      onClick={() => setForm(blankForm)}
+                      className="h-10 rounded-lg border border-black/10 bg-white px-4 text-sm font-black"
+                    >
+                      清空
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving || processingImages || !form.prompt.trim()}
+                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[#111827] px-4 text-sm font-black text-white disabled:opacity-40"
+                    >
+                      {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                      {form.id ? '保存编辑' : '发布'}
+                    </button>
+                  </div>
+                </aside>
+              </div>
+            )}
+          </section>
+        )}
+
+        {loading && summaries.length === 0 ? (
+          <div className="py-20 text-center text-sm font-black text-[#0f766e]">正在加载提示词...</div>
+        ) : summaries.length === 0 ? (
+          <section className="py-20 text-center">
+            <Upload size={42} className="mx-auto mb-3 text-[#0f766e]" />
+            <h2 className="text-2xl font-black">还没有提示词案例</h2>
+            <p className="mt-2 text-sm font-bold text-[#5b6472]">管理员登录后，可以上传第一组图片和提示工程。</p>
+          </section>
+        ) : (
+          <section className="columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
+            {summaries.map(item => (
+              <PromptCard key={item.id} item={item} onClick={() => openDetail(item)} />
+            ))}
+          </section>
+        )}
+
+        {hasMore && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => loadList(false)}
+              disabled={loading}
+              className="flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-5 text-sm font-black hover:bg-[#eef4f0] disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="animate-spin" size={17} /> : <Plus size={17} />}
+              加载更多
+            </button>
+          </div>
+        )}
+      </main>
+
+      {dialogSummary && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/64 p-3 backdrop-blur-sm md:p-6">
+          <div className="grid max-h-[92vh] w-full max-w-6xl grid-cols-1 overflow-hidden rounded-lg bg-white shadow-[0_28px_100px_rgba(0,0,0,0.36)] lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="min-h-[320px] bg-[#0b0f17]">
+              {detailLoading ? (
+                <div className="flex h-full min-h-[420px] items-center justify-center text-white">
+                  <Loader2 className="animate-spin" size={30} />
+                </div>
+              ) : activeImage ? (
+                <div className="flex h-full flex-col">
+                  <div className="flex min-h-0 flex-1 items-center justify-center p-3">
+                    <img
+                      src={activeImage.dataUrl}
+                      alt={selectedEntry?.title || dialogSummary.title}
+                      className="max-h-[66vh] w-full object-contain"
+                    />
+                  </div>
+                  {(selectedEntry?.images?.length || 0) > 1 && (
+                    <div className="flex gap-2 overflow-x-auto border-t border-white/10 p-3">
+                      {selectedEntry?.images.map((image, index) => (
+                        <button
+                          key={image.id}
+                          onClick={() => setActiveImageIndex(index)}
+                          className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border ${index === activeImageIndex ? 'border-[#fbbf24]' : 'border-white/20'}`}
+                        >
+                          <img src={image.thumbnail || image.dataUrl} alt={image.name} className="h-full w-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex h-full min-h-[420px] items-center justify-center text-white">
+                  <Sparkles size={42} />
+                </div>
+              )}
+            </div>
+
+            <div className="flex max-h-[92vh] min-h-0 flex-col">
+              <div className="flex items-start justify-between gap-3 border-b border-black/10 p-4">
+                <div>
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-[#111827] px-2.5 py-1 text-[11px] font-black text-white">
+                      {selectedEntry?.model || dialogSummary.model || '未标注模型'}
+                    </span>
+                    <span className="rounded-full bg-[#fef3c7] px-2.5 py-1 text-[11px] font-black text-[#92400e]">
+                      {selectedEntry?.category || dialogSummary.category || '未分类'}
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-black leading-tight">{selectedEntry?.title || dialogSummary.title}</h2>
+                  <p className="mt-1 text-xs font-bold text-[#6b7280]">{formatDate(selectedEntry?.updatedAt || dialogSummary.updatedAt)}</p>
+                </div>
+                <button
+                  onClick={() => { setDialogSummary(null); setSelectedEntry(null); }}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f3f4f6] hover:bg-[#e5e7eb]"
+                  aria-label="关闭详情"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {(selectedEntry?.tags || dialogSummary.tags || []).map(tag => (
+                    <span key={tag} className="rounded-full bg-[#e7f6f3] px-2.5 py-1 text-xs font-black text-[#0f766e]">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mb-4">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-black text-[#111827]">完整提示工程</h3>
+                    <button
+                      onClick={() => copyPrompt(selectedEntry?.prompt || '')}
+                      disabled={!selectedEntry?.prompt}
+                      className="flex h-9 items-center gap-2 rounded-lg bg-[#111827] px-3 text-xs font-black text-white disabled:opacity-40"
+                    >
+                      <Copy size={15} /> {copied ? '已复制' : '复制提示词'}
+                    </button>
+                  </div>
+                  <pre className="whitespace-pre-wrap break-words rounded-lg bg-[#f3f4f6] p-3 text-sm font-medium leading-7 text-[#1f2937]">
+                    {selectedEntry?.prompt || dialogSummary.promptPreview || '正在加载...'}
+                  </pre>
+                </div>
+
+                {(selectedEntry?.negativePrompt || detailLoading) && (
+                  <div className="mb-4">
+                    <h3 className="mb-2 text-sm font-black text-[#111827]">负面提示词</h3>
+                    <pre className="whitespace-pre-wrap break-words rounded-lg bg-[#fff7ed] p-3 text-sm font-medium leading-7 text-[#7c2d12]">
+                      {selectedEntry?.negativePrompt || '正在加载...'}
+                    </pre>
+                  </div>
+                )}
+
+                {selectedEntry?.note && (
+                  <div className="mb-4 rounded-lg border border-black/10 p-3 text-sm font-bold leading-7 text-[#374151]">
+                    {selectedEntry.note}
+                  </div>
+                )}
+
+                {selectedEntry?.sourceUrl && (
+                  <a
+                    href={selectedEntry.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-black text-[#0f766e] hover:underline"
+                  >
+                    <ExternalLink size={16} /> 查看来源
+                  </a>
+                )}
+              </div>
+
+              {isAdmin && selectedEntry && (
+                <div className="flex gap-2 border-t border-black/10 p-4">
+                  <button
+                    onClick={() => startEdit(selectedEntry)}
+                    className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[#111827] px-4 text-sm font-black text-white"
+                  >
+                    <Edit3 size={16} /> 编辑
+                  </button>
+                  <button
+                    onClick={() => handleDelete(selectedEntry.id)}
+                    className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-red-50 px-4 text-sm font-black text-red-700"
+                  >
+                    <Trash2 size={16} /> 删除
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PromptGalleryApp;

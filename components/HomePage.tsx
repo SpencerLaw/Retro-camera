@@ -485,6 +485,44 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
+          {/* Prompt Gallery - AI Image Prompt Library */}
+          <Link
+            to="/prompts"
+            className="group relative bg-gradient-to-br from-[#F8FAFC] via-[#99F6E4] to-[#FBBF24] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(15,118,110,0.28)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(15,118,110,0.42)] hover:rotate-2 block overflow-hidden"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🖼️</div>
+            <div className="absolute -inset-3 bg-gradient-to-r from-[#14B8A6] to-[#F59E0B] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
+            <div className="absolute inset-x-7 top-8 h-px bg-white/70" />
+            <div className="absolute inset-y-7 left-8 w-px bg-white/60" />
+
+            <div className="relative z-10 flex justify-center mb-6">
+              <div
+                className="w-36 h-36 bg-[#111827] rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(17,24,39,0.28)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-white"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <Wand2 size={72} className="text-[#FBBF24] drop-shadow-lg" />
+              </div>
+            </div>
+
+            <div className="relative z-10 text-center">
+              <h2 className="font-bold text-4xl text-[#111827] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">提示词图库</h2>
+              <p className="text-base text-[#0F766E] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
+                AI 生图灵感库
+              </p>
+              <p className="text-sm text-[#374151] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
+                上传效果图和完整提示工程，按图片浏览、搜索、复制。
+              </p>
+              <div className="mt-6 pt-6 border-t-[3px] border-white/70">
+                <div className="inline-block px-6 py-3 bg-white text-[#0F766E] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(15,118,110,0.25)] border-[3px] border-[#99F6E4] hover:bg-gradient-to-r hover:from-[#CCFBF1] hover:to-white">
+                  Enter → ✨
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Juzimi - Editorial Sentence Gallery */}
           <Link
             to="/juzimi"

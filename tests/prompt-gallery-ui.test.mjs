@@ -49,5 +49,17 @@ runTest('prompt gallery page includes prompt copy and multi-image detail control
   assert.match(componentSource, /复制提示词/);
   assert.match(componentSource, /activeImageIndex/);
   assert.match(componentSource, /负面提示词/);
-  assert.match(componentSource, /sourceUrl/);
+  assert.doesNotMatch(componentSource, /sourceUrl/);
+  assert.doesNotMatch(componentSource, /category/);
+  assert.doesNotMatch(componentSource, /note/);
+  assert.doesNotMatch(componentSource, /分类|来源|备注/);
+});
+
+runTest('prompt detail dialog keeps the image compact and sticky on narrow screens', () => {
+  assert.match(componentSource, /overflow-y-auto lg:overflow-hidden/);
+  assert.match(componentSource, /sticky top-0 z-20/);
+  assert.match(componentSource, /max-h-\[38vh\]/);
+  assert.match(componentSource, /lg:max-h-\[66vh\]/);
+  assert.match(componentSource, /min-h-\[52vh\]/);
+  assert.match(componentSource, /overflow-y-visible lg:overflow-y-auto/);
 });

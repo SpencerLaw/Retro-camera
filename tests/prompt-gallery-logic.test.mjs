@@ -45,11 +45,11 @@ await runTest('prompt gallery normalizes text fields tags and max five images', 
   assert.match(entry.id, /^prompt_/);
   assert.equal(entry.title, '复古相机广告');
   assert.equal(entry.model, 'GPT Image 2');
-  assert.equal(entry.category, '广告创意');
   assert.equal(entry.prompt, 'cinematic product shot');
   assert.equal(entry.negativePrompt, 'blurry');
-  assert.equal(entry.note, '私藏模板');
-  assert.equal(entry.sourceUrl, 'https://example.com/case');
+  assert.equal(entry.category, undefined);
+  assert.equal(entry.note, undefined);
+  assert.equal(entry.sourceUrl, undefined);
   assert.deepEqual(entry.tags, ['复古', '广告', 'product']);
   assert.equal(entry.images.length, PROMPT_GALLERY_MAX_IMAGES);
   assert.ok(entry.createdAt);
@@ -98,7 +98,6 @@ await runTest('prompt gallery summaries omit detail images but keep searchable m
   const entry = normalizePromptGalleryEntry({
     title: '电影感海报',
     model: 'Nano Banana Pro',
-    category: '海报',
     prompt: 'dramatic poster with warm rim light',
     negativePrompt: 'low quality',
     tags: ['电影感', 'poster'],
@@ -113,9 +112,13 @@ await runTest('prompt gallery summaries omit detail images but keep searchable m
   assert.equal(summary.coverImage, entry.coverImage);
   assert.equal(summary.images, undefined);
   assert.equal(summary.prompt, undefined);
+  assert.equal(summary.category, undefined);
+  assert.equal(summary.note, undefined);
+  assert.equal(summary.sourceUrl, undefined);
   assert.match(summary.promptPreview, /dramatic poster/);
   assert.match(buildPromptGallerySearchText(entry), /nano banana pro/);
   assert.match(buildPromptGallerySearchText(entry), /电影感/);
+  assert.doesNotMatch(buildPromptGallerySearchText({ ...entry, category: '旧分类', note: '私密备注', sourceUrl: 'https://example.com' }), /私密备注|example|旧分类/);
 });
 
 await runTest('prompt gallery filters paginates and sorts summaries by update time', async () => {
@@ -129,12 +132,9 @@ await runTest('prompt gallery filters paginates and sorts summaries by update ti
     id: 'prompt_old',
     title: '旧广告',
     model: 'GPT Image 2',
-    category: '广告',
     tags: ['product'],
     prompt: 'old product ad',
     negativePrompt: '',
-    note: '',
-    sourceUrl: '',
     coverImage: '',
     images: [],
     createdAt: '2026-04-01T00:00:00.000Z',
@@ -144,12 +144,9 @@ await runTest('prompt gallery filters paginates and sorts summaries by update ti
     id: 'prompt_new',
     title: '新海报',
     model: 'Nano Banana Pro',
-    category: '海报',
     tags: ['poster'],
     prompt: 'fresh poster design',
     negativePrompt: '',
-    note: '',
-    sourceUrl: '',
     coverImage: '',
     images: [],
     createdAt: '2026-04-02T00:00:00.000Z',

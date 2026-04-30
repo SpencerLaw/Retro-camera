@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Copy,
   Edit3,
-  ExternalLink,
   ImagePlus,
   Loader2,
   Lock,
@@ -42,10 +41,7 @@ interface PromptGallerySummary {
   id: string;
   title: string;
   model: string;
-  category: string;
   tags: string[];
-  note: string;
-  sourceUrl: string;
   coverImage: string;
   imageCount: number;
   promptPreview: string;
@@ -63,11 +59,8 @@ const blankForm = {
   id: '',
   title: '',
   model: 'GPT Image 2',
-  category: '',
   prompt: '',
   negativePrompt: '',
-  note: '',
-  sourceUrl: '',
   tagsText: '',
   coverImage: '',
   images: [] as PromptGalleryImage[],
@@ -198,11 +191,8 @@ const promptEntryToForm = (entry: PromptGalleryEntry) => ({
   id: entry.id,
   title: entry.title,
   model: entry.model,
-  category: entry.category,
   prompt: entry.prompt,
   negativePrompt: entry.negativePrompt,
-  note: entry.note,
-  sourceUrl: entry.sourceUrl,
   tagsText: entry.tags.join('，'),
   coverImage: entry.coverImage,
   images: entry.images || [],
@@ -252,7 +242,7 @@ const PromptCard = ({
       </p>
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-black/10 pt-3 text-xs font-black text-[#6b7280]">
         <span>{item.model || '未标注模型'}</span>
-        <span>{item.category || '未分类'}</span>
+        <span>{formatDate(item.updatedAt)}</span>
       </div>
     </div>
   </button>
@@ -423,11 +413,8 @@ const PromptGalleryApp: React.FC = () => {
         id: form.id,
         title: form.title,
         model: form.model,
-        category: form.category,
         prompt: form.prompt,
         negativePrompt: form.negativePrompt,
-        note: form.note,
-        sourceUrl: form.sourceUrl,
         tags: form.tagsText,
         coverImage: form.images[0]?.thumbnail || form.coverImage,
         images: form.images,
@@ -486,7 +473,7 @@ const PromptGalleryApp: React.FC = () => {
             </button>
             <div>
               <h1 className="text-2xl font-black tracking-normal md:text-3xl">提示词图库</h1>
-              <p className="text-sm font-bold text-[#5b6472]">图片案例、提示工程、参数备注，一处找齐。</p>
+              <p className="text-sm font-bold text-[#5b6472]">图片案例、提示工程、标签检索，一处找齐。</p>
             </div>
           </div>
 
@@ -581,7 +568,7 @@ const PromptGalleryApp: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 gap-5 p-4 lg:grid-cols-[1fr_320px] md:p-5">
                 <div className="grid grid-cols-1 gap-3">
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     <input
                       value={form.title}
                       onChange={(event) => setForm(prev => ({ ...prev, title: event.target.value }))}
@@ -592,12 +579,6 @@ const PromptGalleryApp: React.FC = () => {
                       value={form.model}
                       onChange={(event) => setForm(prev => ({ ...prev, model: event.target.value }))}
                       placeholder="模型"
-                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
-                    />
-                    <input
-                      value={form.category}
-                      onChange={(event) => setForm(prev => ({ ...prev, category: event.target.value }))}
-                      placeholder="分类"
                       className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
                     />
                   </div>
@@ -622,21 +603,6 @@ const PromptGalleryApp: React.FC = () => {
                     placeholder="负面提示词"
                     className="min-h-[86px] resize-y rounded-lg border border-black/10 bg-[#f9fafb] p-3 text-sm font-medium leading-7 outline-none focus:border-[#0f766e]"
                   />
-
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr]">
-                    <input
-                      value={form.sourceUrl}
-                      onChange={(event) => setForm(prev => ({ ...prev, sourceUrl: event.target.value }))}
-                      placeholder="来源链接"
-                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
-                    />
-                    <input
-                      value={form.note}
-                      onChange={(event) => setForm(prev => ({ ...prev, note: event.target.value }))}
-                      placeholder="备注 / 参数"
-                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
-                    />
-                  </div>
                 </div>
 
                 <aside className="flex flex-col gap-3">
@@ -740,11 +706,11 @@ const PromptGalleryApp: React.FC = () => {
       </main>
 
       {dialogSummary && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/64 p-3 backdrop-blur-sm md:p-6">
-          <div className="grid max-h-[92vh] w-full max-w-6xl grid-cols-1 overflow-hidden rounded-lg bg-white shadow-[0_28px_100px_rgba(0,0,0,0.36)] lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="min-h-[320px] bg-[#0b0f17]">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/64 p-3 backdrop-blur-sm md:items-center md:p-6">
+          <div className="grid max-h-[94vh] w-full max-w-6xl grid-cols-1 overflow-y-auto lg:overflow-hidden rounded-lg bg-white shadow-[0_28px_100px_rgba(0,0,0,0.36)] lg:max-h-[92vh] lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="sticky top-0 z-20 min-h-0 bg-[#0b0f17] lg:static lg:min-h-[420px]">
               {detailLoading ? (
-                <div className="flex h-full min-h-[420px] items-center justify-center text-white">
+                <div className="flex min-h-[38vh] items-center justify-center text-white lg:h-full lg:min-h-[420px]">
                   <Loader2 className="animate-spin" size={30} />
                 </div>
               ) : activeImage ? (
@@ -753,7 +719,7 @@ const PromptGalleryApp: React.FC = () => {
                     <img
                       src={activeImage.dataUrl}
                       alt={selectedEntry?.title || dialogSummary.title}
-                      className="max-h-[66vh] w-full object-contain"
+                      className="max-h-[38vh] w-full object-contain lg:max-h-[66vh]"
                     />
                   </div>
                   {(selectedEntry?.images?.length || 0) > 1 && (
@@ -771,21 +737,18 @@ const PromptGalleryApp: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex h-full min-h-[420px] items-center justify-center text-white">
+                <div className="flex min-h-[38vh] items-center justify-center text-white lg:h-full lg:min-h-[420px]">
                   <Sparkles size={42} />
                 </div>
               )}
             </div>
 
-            <div className="flex max-h-[92vh] min-h-0 flex-col">
+            <div className="flex min-h-[52vh] flex-col lg:max-h-[92vh] lg:min-h-0">
               <div className="flex items-start justify-between gap-3 border-b border-black/10 p-4">
                 <div>
                   <div className="mb-2 flex flex-wrap gap-2">
                     <span className="rounded-full bg-[#111827] px-2.5 py-1 text-[11px] font-black text-white">
                       {selectedEntry?.model || dialogSummary.model || '未标注模型'}
-                    </span>
-                    <span className="rounded-full bg-[#fef3c7] px-2.5 py-1 text-[11px] font-black text-[#92400e]">
-                      {selectedEntry?.category || dialogSummary.category || '未分类'}
                     </span>
                   </div>
                   <h2 className="text-2xl font-black leading-tight">{selectedEntry?.title || dialogSummary.title}</h2>
@@ -800,7 +763,7 @@ const PromptGalleryApp: React.FC = () => {
                 </button>
               </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto p-4">
+              <div className="min-h-0 flex-1 overflow-y-visible lg:overflow-y-auto p-4">
                 <div className="mb-4 flex flex-wrap gap-2">
                   {(selectedEntry?.tags || dialogSummary.tags || []).map(tag => (
                     <span key={tag} className="rounded-full bg-[#e7f6f3] px-2.5 py-1 text-xs font-black text-[#0f766e]">
@@ -832,23 +795,6 @@ const PromptGalleryApp: React.FC = () => {
                       {selectedEntry?.negativePrompt || '正在加载...'}
                     </pre>
                   </div>
-                )}
-
-                {selectedEntry?.note && (
-                  <div className="mb-4 rounded-lg border border-black/10 p-3 text-sm font-bold leading-7 text-[#374151]">
-                    {selectedEntry.note}
-                  </div>
-                )}
-
-                {selectedEntry?.sourceUrl && (
-                  <a
-                    href={selectedEntry.sourceUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-black text-[#0f766e] hover:underline"
-                  >
-                    <ExternalLink size={16} /> 查看来源
-                  </a>
                 )}
               </div>
 

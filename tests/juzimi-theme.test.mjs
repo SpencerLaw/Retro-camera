@@ -45,6 +45,14 @@ await runTest('juzimi mode toggle labels the next action instead of current stat
   assert.deepEqual(getJuzimiThemeModeAction('unknown'), { mode: 'day', label: '白天' });
 });
 
+await runTest('juzimi family toggle labels the next theme instead of current state', async () => {
+  const { getJuzimiThemeFamilyAction } = await loadThemeModule();
+
+  assert.deepEqual(getJuzimiThemeFamilyAction('morning'), { family: 'studio', label: '流光' });
+  assert.deepEqual(getJuzimiThemeFamilyAction('studio'), { family: 'morning', label: '晨光' });
+  assert.deepEqual(getJuzimiThemeFamilyAction('unknown'), { family: 'morning', label: '晨光' });
+});
+
 await runTest('juzimi card heights vary for a waterfall layout', async () => {
   const { getJuzimiCardMinHeight } = await loadThemeModule();
   const shortSentence = { text: '短句。' };

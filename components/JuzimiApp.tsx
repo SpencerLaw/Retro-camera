@@ -10,6 +10,7 @@ import {
   JUZIMI_THEME_STORAGE_KEY,
   getJuzimiCardMinHeight,
   getJuzimiTheme,
+  getJuzimiThemeFamilyAction,
   getJuzimiThemeModeAction,
   getNextJuzimiThemeFamily,
   getNextJuzimiThemeMode,
@@ -388,6 +389,7 @@ const JuzimiApp: React.FC = () => {
   const [themePreference, setThemePreference] = useState(readStoredJuzimiThemePreference);
 
   const theme = useMemo(() => getJuzimiTheme(themePreference), [themePreference]);
+  const themeFamilyAction = useMemo(() => getJuzimiThemeFamilyAction(theme.family), [theme.family]);
   const themeModeAction = useMemo(() => getJuzimiThemeModeAction(theme.mode), [theme.mode]);
 
   const filteredSentences = useMemo(() => {
@@ -573,7 +575,7 @@ const JuzimiApp: React.FC = () => {
               aria-label="切换句子迷主题"
               title="切换主题"
             >
-              <Palette size={15} /> {theme.name}
+              <Palette size={15} /> {themeFamilyAction.label}
             </button>
             <button
               onClick={toggleThemeMode}

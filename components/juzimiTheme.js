@@ -257,6 +257,14 @@ export const getNextJuzimiThemeFamily = (family) => {
   return JUZIMI_THEME_FAMILIES[(currentIndex + 1) % JUZIMI_THEME_FAMILIES.length];
 };
 
+export const getJuzimiThemeFamilyAction = (family) => {
+  const nextFamily = getNextJuzimiThemeFamily(family);
+  return {
+    family: nextFamily,
+    label: nextFamily === 'studio' ? '流光' : '晨光',
+  };
+};
+
 export const getNextJuzimiThemeMode = (mode) => {
   const currentIndex = JUZIMI_THEME_MODES.indexOf(mode);
   if (currentIndex < 0) return DEFAULT_THEME_PREFERENCE.mode;

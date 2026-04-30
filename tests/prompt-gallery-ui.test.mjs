@@ -48,7 +48,8 @@ runTest('prompt gallery page includes prompt copy and multi-image detail control
   assert.match(componentSource, /navigator\.clipboard\.writeText/);
   assert.match(componentSource, /复制提示词/);
   assert.match(componentSource, /activeImageIndex/);
-  assert.match(componentSource, /负面提示词/);
+  assert.doesNotMatch(componentSource, /negativePrompt/);
+  assert.doesNotMatch(componentSource, /负面提示词/);
   assert.doesNotMatch(componentSource, /sourceUrl/);
   assert.doesNotMatch(componentSource, /category/);
   assert.doesNotMatch(componentSource, /note/);

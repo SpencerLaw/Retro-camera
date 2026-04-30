@@ -36,6 +36,11 @@ runTest('prompt gallery api exposes list detail create update and delete actions
   assert.match(apiSource, /summarizePromptGalleryEntry/);
 });
 
+runTest('prompt gallery api normalizes detail responses before returning legacy records', () => {
+  assert.match(apiSource, /data: normalizePromptGalleryEntry\(entry\)/);
+  assert.doesNotMatch(apiSource, /data: entry \}/);
+});
+
 runTest('prompt gallery api protects mutations with hashed admin auth and validates image limits', () => {
   assert.match(apiSource, /PROMPT_GALLERY_ADMIN_PASSWORD_HASH/);
   assert.match(apiSource, /process\.env\.PROMPT_GALLERY_ADMIN_HASH/);

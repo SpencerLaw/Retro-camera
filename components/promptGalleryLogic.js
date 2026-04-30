@@ -14,7 +14,6 @@ export const emptyPromptGalleryEntry = {
   title: '',
   model: '',
   prompt: '',
-  negativePrompt: '',
   tags: [],
   coverImage: '',
   images: [],
@@ -74,7 +73,6 @@ export const normalizePromptGalleryEntry = (entry = {}) => {
     title,
     model: String(entry.model || '').trim(),
     prompt,
-    negativePrompt: String(entry.negativePrompt || '').trim(),
     tags: normalizeTags(entry.tags),
     coverImage: isAllowedPromptGalleryImage(coverImage) ? coverImage : '',
     images,
@@ -115,7 +113,6 @@ export const buildPromptGallerySearchText = (entry = {}) => (
     entry.title,
     entry.model,
     entry.prompt,
-    entry.negativePrompt,
     ...(entry.tags || []),
   ].join(' ').toLowerCase()
 );

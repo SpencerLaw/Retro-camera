@@ -74,7 +74,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
       if (!entry) {
         return response.status(404).json({ success: false, message: '没有找到这个提示词' });
       }
-      return response.status(200).json({ success: true, data: entry });
+      return response.status(200).json({ success: true, data: normalizePromptGalleryEntry(entry) });
     }
 
     if (!requireAdmin(adminToken)) {

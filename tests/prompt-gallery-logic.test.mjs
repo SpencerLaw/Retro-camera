@@ -46,7 +46,7 @@ await runTest('prompt gallery normalizes text fields tags and max five images', 
   assert.equal(entry.title, '复古相机广告');
   assert.equal(entry.model, 'GPT Image 2');
   assert.equal(entry.prompt, 'cinematic product shot');
-  assert.equal(entry.negativePrompt, 'blurry');
+  assert.equal(entry.negativePrompt, undefined);
   assert.equal(entry.category, undefined);
   assert.equal(entry.note, undefined);
   assert.equal(entry.sourceUrl, undefined);
@@ -112,13 +112,14 @@ await runTest('prompt gallery summaries omit detail images but keep searchable m
   assert.equal(summary.coverImage, entry.coverImage);
   assert.equal(summary.images, undefined);
   assert.equal(summary.prompt, undefined);
+  assert.equal(summary.negativePrompt, undefined);
   assert.equal(summary.category, undefined);
   assert.equal(summary.note, undefined);
   assert.equal(summary.sourceUrl, undefined);
   assert.match(summary.promptPreview, /dramatic poster/);
   assert.match(buildPromptGallerySearchText(entry), /nano banana pro/);
   assert.match(buildPromptGallerySearchText(entry), /电影感/);
-  assert.doesNotMatch(buildPromptGallerySearchText({ ...entry, category: '旧分类', note: '私密备注', sourceUrl: 'https://example.com' }), /私密备注|example|旧分类/);
+  assert.doesNotMatch(buildPromptGallerySearchText({ ...entry, category: '旧分类', note: '私密备注', sourceUrl: 'https://example.com', negativePrompt: 'low quality' }), /私密备注|example|旧分类|low quality/);
 });
 
 await runTest('prompt gallery filters paginates and sorts summaries by update time', async () => {

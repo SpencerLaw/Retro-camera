@@ -51,7 +51,6 @@ interface PromptGallerySummary {
 
 interface PromptGalleryEntry extends PromptGallerySummary {
   prompt: string;
-  negativePrompt: string;
   images: PromptGalleryImage[];
 }
 
@@ -60,7 +59,6 @@ const blankForm = {
   title: '',
   model: 'GPT Image 2',
   prompt: '',
-  negativePrompt: '',
   tagsText: '',
   coverImage: '',
   images: [] as PromptGalleryImage[],
@@ -192,7 +190,6 @@ const promptEntryToForm = (entry: PromptGalleryEntry) => ({
   title: entry.title,
   model: entry.model,
   prompt: entry.prompt,
-  negativePrompt: entry.negativePrompt,
   tagsText: entry.tags.join('，'),
   coverImage: entry.coverImage,
   images: entry.images || [],
@@ -414,7 +411,6 @@ const PromptGalleryApp: React.FC = () => {
         title: form.title,
         model: form.model,
         prompt: form.prompt,
-        negativePrompt: form.negativePrompt,
         tags: form.tagsText,
         coverImage: form.images[0]?.thumbnail || form.coverImage,
         images: form.images,
@@ -597,12 +593,6 @@ const PromptGalleryApp: React.FC = () => {
                     className="min-h-[180px] resize-y rounded-lg border border-black/10 bg-[#f9fafb] p-3 text-sm font-medium leading-7 outline-none focus:border-[#0f766e]"
                   />
 
-                  <textarea
-                    value={form.negativePrompt}
-                    onChange={(event) => setForm(prev => ({ ...prev, negativePrompt: event.target.value }))}
-                    placeholder="负面提示词"
-                    className="min-h-[86px] resize-y rounded-lg border border-black/10 bg-[#f9fafb] p-3 text-sm font-medium leading-7 outline-none focus:border-[#0f766e]"
-                  />
                 </div>
 
                 <aside className="flex flex-col gap-3">
@@ -788,14 +778,6 @@ const PromptGalleryApp: React.FC = () => {
                   </pre>
                 </div>
 
-                {(selectedEntry?.negativePrompt || detailLoading) && (
-                  <div className="mb-4">
-                    <h3 className="mb-2 text-sm font-black text-[#111827]">负面提示词</h3>
-                    <pre className="whitespace-pre-wrap break-words rounded-lg bg-[#fff7ed] p-3 text-sm font-medium leading-7 text-[#7c2d12]">
-                      {selectedEntry?.negativePrompt || '正在加载...'}
-                    </pre>
-                  </div>
-                )}
               </div>
 
               {isAdmin && selectedEntry && (

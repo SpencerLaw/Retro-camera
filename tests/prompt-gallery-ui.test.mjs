@@ -42,6 +42,15 @@ runTest('prompt gallery page has admin upload controls and image compression', (
   assert.match(componentSource, /压缩后/);
 });
 
+runTest('prompt gallery page explains upload failures and storage mode', () => {
+  assert.match(componentSource, /getPromptImageUploadErrorMessage/);
+  assert.match(componentSource, /HEIC\/HEIF/);
+  assert.match(componentSource, /JPG、PNG 或 WebP/);
+  assert.match(componentSource, /storageMode/);
+  assert.match(componentSource, /Vercel Blob/);
+  assert.match(componentSource, /KV 回退/);
+});
+
 runTest('prompt gallery page fetches list and detail separately', () => {
   assert.match(componentSource, /fetch\('\/api\/prompts'/);
   assert.match(componentSource, /response\.text\(\)/);
@@ -50,6 +59,12 @@ runTest('prompt gallery page fetches list and detail separately', () => {
   assert.match(componentSource, /callPromptGalleryApi\('detail'/);
   assert.match(componentSource, /callPromptGalleryApi\(form\.id \? 'update' : 'create'/);
   assert.match(componentSource, /callPromptGalleryApi\('delete'/);
+});
+
+runTest('prompt gallery list cards stay on thumbnails and details use full images', () => {
+  assert.match(componentSource, /src=\{item\.coverImage\}/);
+  assert.match(componentSource, /src=\{getImageSource\(activeImage\)\}/);
+  assert.match(componentSource, /src=\{getImageThumbnail\(image\)\}/);
 });
 
 runTest('prompt gallery exposes model filters from the list API', () => {

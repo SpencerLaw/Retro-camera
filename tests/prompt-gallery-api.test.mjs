@@ -35,6 +35,16 @@ runTest('prompt gallery api can offload images to Vercel Blob before storing KV 
   assert.match(apiSource, /thumbnailUrl: thumbnailBlob\?\.url/);
 });
 
+runTest('prompt gallery api reports active image storage mode', () => {
+  assert.match(apiSource, /getPromptGalleryStorageMode/);
+  assert.match(apiSource, /storageMode: getPromptGalleryStorageMode\(\)/);
+});
+
+runTest('prompt gallery api cleans up blob urls removed during updates', () => {
+  assert.match(apiSource, /getPromptGalleryRemovedBlobUrls/);
+  assert.match(apiSource, /deletePromptGalleryBlobs\(getPromptGalleryRemovedBlobUrls\(existingEntry, persistedEntry\)\)/);
+});
+
 runTest('prompt gallery api exposes list detail create update and delete actions', () => {
   assert.match(apiSource, /action === 'list'/);
   assert.match(apiSource, /action === 'detail'/);

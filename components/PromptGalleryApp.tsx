@@ -190,6 +190,18 @@ const compressPromptImageFile = async (file: File, index: number): Promise<Promp
   };
 };
 
+const getPromptImageUploadErrorMessage = (error: any, files: File[] = []) => {
+  const fileHints = files.map(file => `${file.name} ${file.type}`.toLowerCase()).join(' ');
+  const message = String(error?.message || '');
+  if (/\.(heic|heif)\b|image\/hei[cf]/i.test(fileHints)) {
+    return '当前浏览器不支持 HEIC/HEIF，请先转成 JPG、PNG 或 WebP 后再上传';
+  }
+  if (/读取|decode|load|unsupported|not supported|invalid/i.test(message)) {
+    return '图片无法读取，请换成 JPG、PNG 或 WebP 后重试';
+  }
+  return message || '图片压缩失败，请换成 JPG、PNG 或 WebP 后重试';
+};
+
 const getImageSource = (image?: PromptGalleryImage | null) => (
   image?.url || image?.dataUrl || ''
 );
@@ -263,6 +275,7 @@ const PromptGalleryApp: React.FC = () => {
   const [summaries, setSummaries] = useState<PromptGallerySummary[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [storageMode, setStorageMode] = useState('');
   const [query, setQuery] = useState('');
   const [activeTag, setActiveTag] = useState('');
   const [activeModel, setActiveModel] = useState('');
@@ -305,6 +318,7 @@ const PromptGalleryApp: React.FC = () => {
       setSummaries(prev => reset ? data.items || [] : [...prev, ...(data.items || [])]);
       setAvailableTags(data.tags || []);
       setAvailableModels(data.models || []);
+      setStorageMode(data.storageMode || '');
       setHasMore(Boolean(data.hasMore));
     } catch (err: any) {
       setError(err.message || '提示词加载失败');
@@ -420,7 +434,7 @@ const PromptGalleryApp: React.FC = () => {
         };
       });
     } catch (err: any) {
-      setError(err.message || '图片压缩失败');
+      setError(getPromptImageUploadErrorMessage(err, selectedFiles));
     } finally {
       setProcessingImages(false);
       setDragActive(false);
@@ -479,6 +493,7 @@ const PromptGalleryApp: React.FC = () => {
       });
       const data = await callPromptGalleryApi(form.id ? 'update' : 'create', entry, adminToken);
       setSummaries(data.list || []);
+      setStorageMode(data.storageMode || storageMode);
       setForm(blankForm);
       setShowAdminPanel(false);
       setHasMore(false);
@@ -496,6 +511,7 @@ const PromptGalleryApp: React.FC = () => {
     try {
       const data = await callPromptGalleryApi('delete', { id: entryId }, adminToken);
       setSummaries(data.list || []);
+      setStorageMode(data.storageMode || storageMode);
       setDialogSummary(null);
       setSelectedEntry(null);
       if (form.id === entryId) setForm(blankForm);
@@ -713,6 +729,8 @@ const PromptGalleryApp: React.FC = () => {
                   )}
 
                   <div className="rounded-lg bg-[#f3f4f6] p-3 text-xs font-bold leading-6 text-[#4b5563]">
+                    存储模式：{storageMode === 'blob' ? 'Vercel Blob' : 'KV 回退'}
+                    <br />
                     当前图片体积：{formatBytes(imageBytes)}
                     <br />
                     保存上限：{formatBytes(PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES)}，封面缩略图约 960px。

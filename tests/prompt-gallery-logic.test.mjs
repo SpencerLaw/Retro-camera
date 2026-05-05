@@ -125,6 +125,57 @@ await runTest('prompt gallery accepts blob image urls without counting them as K
   assert.equal(getPromptGalleryImageTotalBytes(entry), 0);
 });
 
+await runTest('prompt gallery summaries prefer thumbnail covers for list cards', async () => {
+  const {
+    summarizePromptGalleryEntry,
+  } = await loadLogicModule();
+
+  const summary = summarizePromptGalleryEntry({
+    id: 'prompt_blob_cover',
+    title: 'Blob 封面',
+    prompt: 'cover should use thumbnail',
+    images: [{
+      id: 'image_blob',
+      url: 'https://example.public.blob.vercel-storage.com/detail.webp',
+      thumbnailUrl: 'https://example.public.blob.vercel-storage.com/thumb.webp',
+      dataUrl: 'data:image/webp;base64,aaaa',
+      thumbnail: 'data:image/webp;base64,bbbb',
+    }],
+  });
+
+  assert.equal(summary.coverImage, 'https://example.public.blob.vercel-storage.com/thumb.webp');
+});
+
+await runTest('prompt gallery detects blob urls removed during updates', async () => {
+  const {
+    getPromptGalleryRemovedBlobUrls,
+  } = await loadLogicModule();
+
+  assert.equal(typeof getPromptGalleryRemovedBlobUrls, 'function');
+
+  const keptDetail = 'https://example.public.blob.vercel-storage.com/kept.webp';
+  const keptThumb = 'https://example.public.blob.vercel-storage.com/kept-thumb.webp';
+  const removedDetail = 'https://example.public.blob.vercel-storage.com/removed.webp';
+  const removedThumb = 'https://example.public.blob.vercel-storage.com/removed-thumb.webp';
+  const previous = {
+    images: [
+      { id: 'kept', url: keptDetail, thumbnailUrl: keptThumb },
+      { id: 'removed', url: removedDetail, thumbnailUrl: removedThumb },
+    ],
+  };
+  const next = {
+    images: [
+      { id: 'kept', url: keptDetail, thumbnailUrl: keptThumb },
+      sampleImage('new_data_url'),
+    ],
+  };
+
+  assert.deepEqual(
+    getPromptGalleryRemovedBlobUrls(previous, next),
+    [removedDetail, removedThumb]
+  );
+});
+
 await runTest('prompt gallery filters summaries by model', async () => {
   const {
     filterPromptGallerySummaries,

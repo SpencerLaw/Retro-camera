@@ -5,6 +5,8 @@ import {
   PROMPT_GALLERY_ADMIN_PASSWORD_HASH,
   assertPromptGalleryEntryWithinLimits,
   filterPromptGallerySummaries,
+  getPromptGalleryBlobUrls,
+  getPromptGalleryRemovedBlobUrls,
   normalizePromptGalleryEntry,
   paginatePromptGallerySummaries,
   sortPromptGallerySummaries,
@@ -17,6 +19,10 @@ const promptGalleryEntryKey = (entryId: string) => `prompt-gallery:entry:${entry
 
 const requireAdmin = (adminToken?: string) => (
   adminToken === (process.env.PROMPT_GALLERY_ADMIN_HASH || PROMPT_GALLERY_ADMIN_PASSWORD_HASH)
+);
+
+const getPromptGalleryStorageMode = () => (
+  process.env.BLOB_READ_WRITE_TOKEN ? 'blob' : 'kv'
 );
 
 const readIndex = async () => {
@@ -96,13 +102,17 @@ const persistPromptGalleryImages = async (entry: any) => {
   };
 };
 
-const deletePromptGalleryBlobs = async (entry: any) => {
+const deletePromptGalleryBlobs = async (entryOrUrls: any) => {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return;
-  const urls = (entry?.images || [])
-    .flatMap((image: any) => [image.url, image.thumbnailUrl])
-    .filter(Boolean);
+  const urls = Array.isArray(entryOrUrls)
+    ? entryOrUrls
+    : getPromptGalleryBlobUrls(entryOrUrls);
   if (urls.length > 0) {
-    await del(urls);
+    try {
+      await del(urls);
+    } catch (error) {
+      console.warn('Prompt Gallery Blob cleanup failed:', error);
+    }
   }
 };
 
@@ -131,6 +141,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
           ...page,
           tags: buildTags(index),
           models: buildModels(index),
+          storageMode: getPromptGalleryStorageMode(),
         },
       });
     }
@@ -180,7 +191,8 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
       await kv.set(promptGalleryEntryKey(entry.id), persistedEntry);
       await writeIndex(nextIndex);
-      return response.status(200).json({ success: true, data: { entry: persistedEntry, list: nextIndex } });
+      await deletePromptGalleryBlobs(getPromptGalleryRemovedBlobUrls(existingEntry, persistedEntry));
+      return response.status(200).json({ success: true, data: { entry: persistedEntry, list: nextIndex, storageMode: getPromptGalleryStorageMode() } });
     }
 
     if (action === 'delete') {
@@ -194,7 +206,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
       await deletePromptGalleryBlobs(existing);
       await kv.del(promptGalleryEntryKey(entryId));
       await writeIndex(nextIndex);
-      return response.status(200).json({ success: true, data: { list: nextIndex } });
+      return response.status(200).json({ success: true, data: { list: nextIndex, storageMode: getPromptGalleryStorageMode() } });
     }
 
     return response.status(400).json({ success: false, message: '无效操作' });

@@ -9,6 +9,7 @@ export const PROMPT_GALLERY_MAX_LIMIT = 24;
 
 const IMAGE_DATA_URL_PATTERN = /^data:image\/(webp|jpeg|jpg|png);base64,[a-z0-9+/=\s]+$/i;
 const IMAGE_URL_PATTERN = /^https?:\/\/\S+$/i;
+const BLOB_IMAGE_URL_PATTERN = /^https:\/\/[^/\s]+\.blob\.vercel-storage\.com\/\S+$/i;
 
 export const emptyPromptGalleryEntry = {
   id: '',
@@ -101,6 +102,32 @@ export const getPromptGalleryImageTotalBytes = (entry = {}) => (
   ), 0)
 );
 
+export const getPromptGalleryBlobUrls = (entry = {}) => (
+  [...new Set(
+    (Array.isArray(entry.images) ? entry.images : [])
+      .flatMap(image => [image?.url, image?.thumbnailUrl])
+      .map(url => String(url || '').trim())
+      .filter(url => BLOB_IMAGE_URL_PATTERN.test(url))
+  )]
+);
+
+export const getPromptGalleryRemovedBlobUrls = (previousEntry = {}, nextEntry = {}) => {
+  const nextUrls = new Set(getPromptGalleryBlobUrls(nextEntry));
+  return getPromptGalleryBlobUrls(previousEntry).filter(url => !nextUrls.has(url));
+};
+
+export const getPromptGalleryCoverImage = (entry = {}) => {
+  const firstImage = Array.isArray(entry.images) ? entry.images[0] : null;
+  return String(
+    entry.coverImage
+    || firstImage?.thumbnailUrl
+    || firstImage?.thumbnail
+    || firstImage?.url
+    || firstImage?.dataUrl
+    || ''
+  );
+};
+
 export const assertPromptGalleryEntryWithinLimits = (entry = {}) => {
   const images = Array.isArray(entry.images) ? entry.images : [];
   if (images.length > PROMPT_GALLERY_MAX_IMAGES) {
@@ -138,7 +165,7 @@ export const summarizePromptGalleryEntry = (entry = {}) => {
     title: String(entry.title || '未命名提示词'),
     model: String(entry.model || ''),
     tags: Array.isArray(entry.tags) ? entry.tags : [],
-    coverImage: String(entry.coverImage || ''),
+    coverImage: getPromptGalleryCoverImage(entry),
     imageCount: Array.isArray(entry.images) ? entry.images.length : Number(entry.imageCount || 0),
     promptPreview: prompt.length > 120 ? `${prompt.slice(0, 120).trimEnd()}...` : prompt,
     searchText: entry.searchText || buildPromptGallerySearchText(entry),

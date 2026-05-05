@@ -9,7 +9,9 @@ import {
   Lock,
   LogOut,
   Maximize2,
+  Minus,
   Plus,
+  RotateCcw,
   Save,
   Search,
   Sparkles,
@@ -71,6 +73,10 @@ const blankForm = {
 };
 
 const ADMIN_SESSION_KEY = 'prompt_gallery_admin_token';
+const IMAGE_PREVIEW_DEFAULT_ZOOM = 1.4;
+const IMAGE_PREVIEW_MIN_ZOOM = 1;
+const IMAGE_PREVIEW_MAX_ZOOM = 4;
+const IMAGE_PREVIEW_ZOOM_STEP = 0.35;
 
 const digestPassword = async (value: string) => {
   const input = new TextEncoder().encode(value.trim());
@@ -297,6 +303,7 @@ const PromptGalleryApp: React.FC = () => {
   const [selectedEntry, setSelectedEntry] = useState<PromptGalleryEntry | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
+  const [imagePreviewZoom, setImagePreviewZoom] = useState(IMAGE_PREVIEW_DEFAULT_ZOOM);
   const [copied, setCopied] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const autoLoadRef = useRef(false);
@@ -361,12 +368,20 @@ const PromptGalleryApp: React.FC = () => {
 
   useEffect(() => {
     if (!imagePreviewOpen) return;
+    setImagePreviewZoom(IMAGE_PREVIEW_DEFAULT_ZOOM);
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setImagePreviewOpen(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [imagePreviewOpen]);
+
+  const changeImagePreviewZoom = (direction: 1 | -1) => {
+    setImagePreviewZoom(prev => Math.min(
+      IMAGE_PREVIEW_MAX_ZOOM,
+      Math.max(IMAGE_PREVIEW_MIN_ZOOM, Math.round((prev + direction * IMAGE_PREVIEW_ZOOM_STEP) * 100) / 100),
+    ));
+  };
 
   const handleLogin = async () => {
     const digest = await digestPassword(passwordInput);
@@ -973,25 +988,59 @@ const PromptGalleryApp: React.FC = () => {
 
       {imagePreviewOpen && activeImage && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/86 p-3 backdrop-blur-sm md:p-8"
+          className="fixed inset-0 z-[60] bg-black/88 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
-          onClick={() => setImagePreviewOpen(false)}
         >
+          <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-lg bg-black/65 p-1.5 text-white shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur md:left-4 md:top-4">
+            <button
+              type="button"
+              onClick={() => changeImagePreviewZoom(-1)}
+              disabled={imagePreviewZoom <= IMAGE_PREVIEW_MIN_ZOOM}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/12 hover:bg-white/20 disabled:opacity-35"
+              aria-label="缩小图片"
+            >
+              <Minus size={18} />
+            </button>
+            <span className="min-w-[58px] text-center text-xs font-black tabular-nums">
+              {Math.round(imagePreviewZoom * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => changeImagePreviewZoom(1)}
+              disabled={imagePreviewZoom >= IMAGE_PREVIEW_MAX_ZOOM}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/12 hover:bg-white/20 disabled:opacity-35"
+              aria-label="放大图片细节"
+            >
+              <Plus size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setImagePreviewZoom(IMAGE_PREVIEW_DEFAULT_ZOOM)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/12 hover:bg-white/20"
+              aria-label="重置图片缩放"
+            >
+              <RotateCcw size={17} />
+            </button>
+          </div>
           <button
             type="button"
             onClick={() => setImagePreviewOpen(false)}
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/12 text-white backdrop-blur hover:bg-white/20"
+            className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-lg bg-white/12 text-white backdrop-blur hover:bg-white/20 md:right-4 md:top-4"
             aria-label="关闭放大图片"
           >
             <X size={20} />
           </button>
-          <img
-            src={getImageSource(activeImage)}
-            alt={selectedEntry?.title || dialogSummary?.title || '放大图片'}
-            className="max-h-[94vh] max-w-[96vw] object-contain shadow-[0_30px_90px_rgba(0,0,0,0.55)]"
-            onClick={(event) => event.stopPropagation()}
-          />
+          <div className="h-full w-full overflow-auto px-4 pb-8 pt-20 md:px-8 md:pt-24">
+            <div className="flex min-h-full min-w-full items-start justify-center">
+              <img
+                src={getImageSource(activeImage)}
+                alt={selectedEntry?.title || dialogSummary?.title || '放大图片'}
+                className="max-w-none object-contain shadow-[0_30px_90px_rgba(0,0,0,0.55)]"
+                style={{ width: `${imagePreviewZoom * 72}vw` }}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

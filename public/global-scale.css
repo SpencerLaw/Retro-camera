@@ -35,7 +35,8 @@ body {
 #app-container,
 #tree-canvas,
 #canvas,
-#cosmos-canvas {
+#cosmos-canvas,
+#result-overlay {
   width: var(--app-scaled-viewport-width) !important;
 }
 
@@ -48,7 +49,8 @@ body {
 #app-container,
 #tree-canvas,
 #canvas,
-#cosmos-canvas {
+#cosmos-canvas,
+#result-overlay {
   height: var(--app-scaled-viewport-height) !important;
 }
 

@@ -44,6 +44,7 @@ runTest('global scale stylesheet renders every deployed page at 80 percent', () 
   assert.match(scaleCssSource, /#tree-canvas/);
   assert.match(scaleCssSource, /#canvas/);
   assert.match(scaleCssSource, /#cosmos-canvas/);
+  assert.match(scaleCssSource, /#result-overlay/);
   assert.match(scaleCssSource, /overflow-x:\s*hidden/);
   assert.doesNotMatch(scaleCssSource, /transform:\s*scale\(var\(--app-global-scale\)\)/);
   assert.doesNotMatch(scaleCssSource, /left:\s*calc\(\(100vw - \(100vw \/ var\(--app-global-scale\)\)\) \/ 2\)/);

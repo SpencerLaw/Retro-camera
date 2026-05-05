@@ -307,6 +307,7 @@ const PromptGalleryApp: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const autoLoadRef = useRef(false);
+  const promptDialogOpen = showPromptFormDialog || Boolean(dialogSummary) || imagePreviewOpen;
 
   const imageBytes = useMemo(() => (
     form.images.reduce((total, image) => (
@@ -365,6 +366,19 @@ const PromptGalleryApp: React.FC = () => {
       setIsAdmin(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!promptDialogOpen) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
+    };
+  }, [promptDialogOpen]);
 
   useEffect(() => {
     if (!imagePreviewOpen) return;
@@ -1026,10 +1040,11 @@ const PromptGalleryApp: React.FC = () => {
           <button
             type="button"
             onClick={() => setImagePreviewOpen(false)}
-            className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-lg bg-white/12 text-white backdrop-blur hover:bg-white/20 md:right-4 md:top-4"
+            className="absolute right-3 top-3 z-20 flex h-10 items-center gap-2 rounded-lg bg-white px-3 text-sm font-black text-[#111827] shadow-[0_12px_40px_rgba(0,0,0,0.34)] hover:bg-[#f3f4f6] md:right-4 md:top-4"
             aria-label="关闭放大图片"
           >
-            <X size={20} />
+            <X size={18} />
+            关闭
           </button>
           <div className="h-full w-full overflow-auto px-4 pb-8 pt-20 md:px-8 md:pt-24">
             <div className="flex min-h-full min-w-full items-start justify-center">

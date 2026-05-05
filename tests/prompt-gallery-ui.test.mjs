@@ -139,12 +139,22 @@ runTest('prompt detail image can open an enlarged image dialog', () => {
   assert.match(componentSource, /aria-label="放大图片细节"/);
   assert.match(componentSource, /aria-label="缩小图片"/);
   assert.match(componentSource, /aria-label="重置图片缩放"/);
+  assert.match(componentSource, /关闭\s*<\/button>/);
   assert.match(componentSource, /Math\.round\(imagePreviewZoom \* 100\)/);
   assert.match(componentSource, /overflow-auto/);
   assert.match(componentSource, /max-w-none/);
   assert.match(componentSource, /aria-modal="true"/);
   assert.match(componentSource, /z-\[60\]/);
   assert.match(componentSource, /关闭放大图片/);
+});
+
+runTest('prompt gallery dialogs lock the background page scroll', () => {
+  assert.match(componentSource, /promptDialogOpen/);
+  assert.match(componentSource, /document\.body\.style\.overflow = 'hidden'/);
+  assert.match(componentSource, /document\.documentElement\.style\.overflow = 'hidden'/);
+  assert.match(componentSource, /previousBodyOverflow/);
+  assert.match(componentSource, /previousDocumentOverflow/);
+  assert.match(componentSource, /showPromptFormDialog \|\| Boolean\(dialogSummary\) \|\| imagePreviewOpen/);
 });
 
 runTest('prompt gallery uses a quiet morning paper background without streaming-light copy', () => {

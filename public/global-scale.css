@@ -1,0 +1,19 @@
+:root {
+  --app-global-scale: 0.8;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: calc(100vh / var(--app-global-scale));
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+  left: calc((100vw - (100vw / var(--app-global-scale))) / 2);
+  width: calc(100vw / var(--app-global-scale));
+  min-height: calc(100vh / var(--app-global-scale));
+  transform: scale(var(--app-global-scale));
+  transform-origin: top center;
+}

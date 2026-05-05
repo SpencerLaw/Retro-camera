@@ -32,6 +32,7 @@
 
     html,
     body {
+      --app-global-scale: 0.8;
       margin: 0;
       padding: 0;
       min-height: 100%;
@@ -48,8 +49,16 @@
     }
 
     #root {
-      width: 100%;
-      min-height: 100%;
+      width: calc(100% / var(--app-global-scale));
+      min-height: calc(100vh / var(--app-global-scale));
+      zoom: var(--app-global-scale);
+      transform-origin: top left;
+    }
+
+    @supports not (zoom: 1) {
+      #root {
+        transform: scale(var(--app-global-scale));
+      }
     }
 
     .font-marker {

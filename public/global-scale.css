@@ -1,19 +1,49 @@
 :root {
   --app-global-scale: 0.8;
+  --app-global-scale-inverse: 1.25;
+  --app-scaled-viewport-width: calc(100vw / var(--app-global-scale));
+  --app-scaled-viewport-height: calc(100vh / var(--app-global-scale));
 }
 
 html,
 body {
   width: 100%;
-  min-height: calc(100vh / var(--app-global-scale));
+  min-height: 100%;
   overflow-x: hidden;
 }
 
 body {
-  position: relative;
-  left: calc((100vw - (100vw / var(--app-global-scale))) / 2);
-  width: calc(100vw / var(--app-global-scale));
-  min-height: calc(100vh / var(--app-global-scale));
-  transform: scale(var(--app-global-scale));
-  transform-origin: top center;
+  width: var(--app-scaled-viewport-width);
+  min-height: var(--app-scaled-viewport-height);
+  zoom: var(--app-global-scale);
+}
+
+#root {
+  width: var(--app-scaled-viewport-width);
+  min-height: var(--app-scaled-viewport-height);
+}
+
+.w-screen,
+.min-w-screen,
+.w-\[100dvw\],
+.min-w-\[100dvw\],
+.doraemon-app,
+.group-maker-app,
+.group-maker-container,
+.couple-game-app {
+  width: var(--app-scaled-viewport-width) !important;
+}
+
+.h-screen,
+.h-\[100dvh\],
+.doraemon-app,
+.group-maker-app,
+.group-maker-container {
+  height: var(--app-scaled-viewport-height) !important;
+}
+
+.min-h-screen,
+.min-h-\[100dvh\],
+.couple-game-app {
+  min-height: var(--app-scaled-viewport-height) !important;
 }

@@ -711,7 +711,7 @@ const PromptGalleryApp: React.FC = () => {
       </main>
 
       {showPromptFormDialog && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/52 p-3 backdrop-blur-sm md:items-center md:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/52 p-3 backdrop-blur-sm md:p-6">
           <div
             role="dialog"
             aria-modal="true"
@@ -843,7 +843,7 @@ const PromptGalleryApp: React.FC = () => {
       )}
 
       {dialogSummary && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/64 p-3 backdrop-blur-sm md:items-center md:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/64 p-3 backdrop-blur-sm md:p-6">
           <div className="grid max-h-[94vh] w-full max-w-6xl grid-cols-1 overflow-y-auto lg:overflow-hidden rounded-lg bg-white shadow-[0_28px_100px_rgba(0,0,0,0.36)] lg:max-h-[92vh] lg:grid-cols-[1.2fr_0.8fr]">
             <div className="sticky top-0 z-20 min-h-0 bg-[#0b0f17] lg:static lg:min-h-[420px]">
               {detailLoading ? (

@@ -46,8 +46,10 @@ runTest('prompt gallery opens create and edit forms in a management dialog', () 
   assert.match(componentSource, /showPromptFormDialog/);
   assert.match(componentSource, /role="dialog"/);
   assert.match(componentSource, /aria-label=\{form\.id \? '编辑提示词' : '新建提示词'\}/);
+  assert.match(componentSource, /fixed inset-0 z-50 flex items-center justify-center/);
   assert.match(componentSource, /max-h-\[92vh\]/);
   assert.match(componentSource, /overflow-y-auto/);
+  assert.doesNotMatch(componentSource, /items-start justify-center[\s\S]*md:items-center/);
   assert.doesNotMatch(componentSource, /showAdminPanel && \([\s\S]*提示词管理[\s\S]*完整提示工程[\s\S]*<\/section>/);
 });
 

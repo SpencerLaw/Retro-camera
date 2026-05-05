@@ -288,6 +288,7 @@ const PromptGalleryApp: React.FC = () => {
   const [adminToken, setAdminToken] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showPromptFormDialog, setShowPromptFormDialog] = useState(false);
   const [form, setForm] = useState(blankForm);
   const [saving, setSaving] = useState(false);
   const [processingImages, setProcessingImages] = useState(false);
@@ -376,7 +377,7 @@ const PromptGalleryApp: React.FC = () => {
     sessionStorage.setItem(ADMIN_SESSION_KEY, digest);
     setAdminToken(digest);
     setIsAdmin(true);
-    setShowAdminPanel(true);
+    setShowAdminPanel(false);
     setPasswordInput('');
     setError('');
   };
@@ -386,6 +387,7 @@ const PromptGalleryApp: React.FC = () => {
     setAdminToken('');
     setIsAdmin(false);
     setShowAdminPanel(false);
+    setShowPromptFormDialog(false);
     setForm(blankForm);
   };
 
@@ -408,14 +410,21 @@ const PromptGalleryApp: React.FC = () => {
 
   const startCreate = () => {
     setForm(blankForm);
-    setShowAdminPanel(true);
+    setShowAdminPanel(false);
+    setShowPromptFormDialog(true);
   };
 
   const startEdit = (entry: PromptGalleryEntry) => {
     setForm(promptEntryToForm(entry));
-    setShowAdminPanel(true);
+    setShowPromptFormDialog(true);
     setDialogSummary(null);
     setSelectedEntry(null);
+  };
+
+  const closePromptFormDialog = () => {
+    if (saving || processingImages) return;
+    setShowPromptFormDialog(false);
+    setDragActive(false);
   };
 
   const processImageFiles = async (files: File[]) => {
@@ -506,7 +515,7 @@ const PromptGalleryApp: React.FC = () => {
       setSummaries(data.list || []);
       setStorageMode(data.storageMode || storageMode);
       setForm(blankForm);
-      setShowAdminPanel(false);
+      setShowPromptFormDialog(false);
       setHasMore(false);
     } catch (err: any) {
       setError(err.message || '保存失败');
@@ -571,12 +580,21 @@ const PromptGalleryApp: React.FC = () => {
                 <Plus size={17} /> 新建提示词
               </button>
             )}
-            <button
-              onClick={() => setShowAdminPanel(prev => !prev)}
-              className="flex h-10 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black hover:bg-[#eef4f0]"
-            >
-              <Lock size={17} /> 管理员
-            </button>
+            {isAdmin ? (
+              <button
+                onClick={handleLogout}
+                className="flex h-10 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black hover:bg-[#eef4f0]"
+              >
+                <LogOut size={17} /> 退出
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAdminPanel(prev => !prev)}
+                className="flex h-10 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black hover:bg-[#eef4f0]"
+              >
+                <Lock size={17} /> 管理员
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -627,12 +645,12 @@ const PromptGalleryApp: React.FC = () => {
           </div>
         )}
 
-        {showAdminPanel && (
+        {showAdminPanel && !isAdmin && (
           <section className="mb-6 overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_18px_54px_rgba(15,23,42,0.12)]">
             <div className="flex items-center justify-between gap-3 border-b border-black/10 px-4 py-4 md:px-5">
               <div>
                 <div className="text-xs font-black uppercase tracking-[0.22em] text-[#0f766e]">Prompt Desk</div>
-                <h2 className="text-xl font-black">{isAdmin ? '提示词管理' : '管理员登录'}</h2>
+                <h2 className="text-xl font-black">管理员登录</h2>
               </div>
               <button
                 onClick={() => setShowAdminPanel(false)}
@@ -643,136 +661,22 @@ const PromptGalleryApp: React.FC = () => {
               </button>
             </div>
 
-            {!isAdmin ? (
-              <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-[1fr_auto] md:p-5">
-                <input
-                  type="password"
-                  value={passwordInput}
-                  onChange={(event) => setPasswordInput(event.target.value)}
-                  onKeyDown={(event) => { if (event.key === 'Enter') handleLogin(); }}
-                  placeholder="输入管理员密码"
-                  className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
-                />
-                <button
-                  onClick={handleLogin}
-                  className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#111827] px-5 text-sm font-black text-white"
-                >
-                  <Lock size={17} /> 进入管理
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-5 p-4 lg:grid-cols-[1fr_320px] md:p-5">
-                <div className="grid grid-cols-1 gap-3">
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <input
-                      value={form.title}
-                      onChange={(event) => setForm(prev => ({ ...prev, title: event.target.value }))}
-                      placeholder="标题"
-                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
-                    />
-                    <input
-                      value={form.model}
-                      onChange={(event) => setForm(prev => ({ ...prev, model: event.target.value }))}
-                      placeholder="模型"
-                      className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
-                    />
-                  </div>
-
-                  <input
-                    value={form.tagsText}
-                    onChange={(event) => setForm(prev => ({ ...prev, tagsText: event.target.value }))}
-                    placeholder="标签，用逗号或空格分隔"
-                    className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
-                  />
-
-                  <textarea
-                    value={form.prompt}
-                    onChange={(event) => setForm(prev => ({ ...prev, prompt: event.target.value }))}
-                    placeholder="完整提示工程"
-                    className="min-h-[180px] resize-y rounded-lg border border-black/10 bg-[#f9fafb] p-3 text-sm font-medium leading-7 outline-none focus:border-[#0f766e]"
-                  />
-
-                </div>
-
-                <aside className="flex flex-col gap-3">
-                  <label
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    className={`flex min-h-[132px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm font-black text-[#0f766e] hover:bg-[#dff8ea] ${dragActive ? 'border-[#f59e0b] bg-[#fff7ed]' : 'border-[#0f766e]/50 bg-[#ecfdf5]'}`}
-                  >
-                    {processingImages ? <Loader2 className="mb-2 animate-spin" size={28} /> : <ImagePlus className="mb-2" size={30} />}
-                    <span>{processingImages ? '正在压缩图片' : dragActive ? '松开后开始压缩' : '上传图片，最多 5 张'}</span>
-                    <span className="mt-1 text-xs text-[#47635d]">大图会自动压缩为 WebP 后保存</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFiles}
-                      className="hidden"
-                    />
-                  </label>
-
-                  {form.images.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {form.images.map((image, index) => (
-                        <div key={image.id} className="relative overflow-hidden rounded-lg border border-black/10 bg-[#111827]">
-                          <img
-                            src={getImageThumbnail(image)}
-                            alt={image.name}
-                            className="aspect-square w-full object-cover"
-                          />
-                          <button
-                            onClick={() => removeImage(image.id)}
-                            className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-lg bg-black/70 text-white"
-                            aria-label="删除图片"
-                          >
-                            <X size={15} />
-                          </button>
-                          <div className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-black text-white">
-                            {index + 1}
-                          </div>
-                          <div className="absolute inset-x-1 bottom-7 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-black text-white">
-                            原图 {formatBytes(image.originalSize || image.size)} {' -> '} 压缩后 {formatBytes(image.size)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="rounded-lg bg-[#f3f4f6] p-3 text-xs font-bold leading-6 text-[#4b5563]">
-                    存储模式：{storageMode === 'blob' ? 'Vercel Blob' : 'KV 回退'}
-                    <br />
-                    当前图片体积：{formatBytes(imageBytes)}
-                    <br />
-                    保存上限：{formatBytes(PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES)}，封面缩略图约 960px。
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={handleLogout}
-                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-black/10 bg-white px-3 text-sm font-black"
-                    >
-                      <LogOut size={16} /> 退出
-                    </button>
-                    <button
-                      onClick={() => setForm(blankForm)}
-                      className="h-10 rounded-lg border border-black/10 bg-white px-4 text-sm font-black"
-                    >
-                      清空
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      disabled={saving || processingImages || !form.prompt.trim()}
-                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[#111827] px-4 text-sm font-black text-white disabled:opacity-40"
-                    >
-                      {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                      {form.id ? '保存编辑' : '发布'}
-                    </button>
-                  </div>
-                </aside>
-              </div>
-            )}
+            <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-[1fr_auto] md:p-5">
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(event) => setPasswordInput(event.target.value)}
+                onKeyDown={(event) => { if (event.key === 'Enter') handleLogin(); }}
+                placeholder="输入管理员密码"
+                className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+              />
+              <button
+                onClick={handleLogin}
+                className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#111827] px-5 text-sm font-black text-white"
+              >
+                <Lock size={17} /> 进入管理
+              </button>
+            </div>
           </section>
         )}
 
@@ -805,6 +709,138 @@ const PromptGalleryApp: React.FC = () => {
           </div>
         )}
       </main>
+
+      {showPromptFormDialog && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/52 p-3 backdrop-blur-sm md:items-center md:p-6">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={form.id ? '编辑提示词' : '新建提示词'}
+            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-lg bg-white shadow-[0_28px_100px_rgba(0,0,0,0.34)]"
+          >
+            <div className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-black/10 bg-white/95 px-4 py-4 backdrop-blur md:px-5">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.22em] text-[#0f766e]">Prompt Desk</div>
+                <h2 className="text-xl font-black">{form.id ? '编辑提示词' : '新建提示词'}</h2>
+              </div>
+              <button
+                onClick={closePromptFormDialog}
+                disabled={saving || processingImages}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f3f4f6] hover:bg-[#e5e7eb] disabled:opacity-40"
+                aria-label="关闭提示词表单"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 p-4 lg:grid-cols-[1fr_320px] md:p-5">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <input
+                    value={form.title}
+                    onChange={(event) => setForm(prev => ({ ...prev, title: event.target.value }))}
+                    placeholder="标题"
+                    className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                  />
+                  <input
+                    value={form.model}
+                    onChange={(event) => setForm(prev => ({ ...prev, model: event.target.value }))}
+                    placeholder="模型"
+                    className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                  />
+                </div>
+
+                <input
+                  value={form.tagsText}
+                  onChange={(event) => setForm(prev => ({ ...prev, tagsText: event.target.value }))}
+                  placeholder="标签，用逗号或空格分隔"
+                  className="h-11 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-sm font-bold outline-none focus:border-[#0f766e]"
+                />
+
+                <textarea
+                  value={form.prompt}
+                  onChange={(event) => setForm(prev => ({ ...prev, prompt: event.target.value }))}
+                  placeholder="完整提示工程"
+                  className="min-h-[320px] resize-y rounded-lg border border-black/10 bg-[#f9fafb] p-3 text-sm font-medium leading-7 outline-none focus:border-[#0f766e]"
+                />
+              </div>
+
+              <aside className="flex flex-col gap-3">
+                <label
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  className={`flex min-h-[132px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm font-black text-[#0f766e] hover:bg-[#dff8ea] ${dragActive ? 'border-[#f59e0b] bg-[#fff7ed]' : 'border-[#0f766e]/50 bg-[#ecfdf5]'}`}
+                >
+                  {processingImages ? <Loader2 className="mb-2 animate-spin" size={28} /> : <ImagePlus className="mb-2" size={30} />}
+                  <span>{processingImages ? '正在压缩图片' : dragActive ? '松开后开始压缩' : '上传图片，最多 5 张'}</span>
+                  <span className="mt-1 text-xs text-[#47635d]">大图会自动压缩为 WebP 后保存</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFiles}
+                    className="hidden"
+                  />
+                </label>
+
+                {form.images.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {form.images.map((image, index) => (
+                      <div key={image.id} className="relative overflow-hidden rounded-lg border border-black/10 bg-[#111827]">
+                        <img
+                          src={getImageThumbnail(image)}
+                          alt={image.name}
+                          className="aspect-square w-full object-cover"
+                        />
+                        <button
+                          onClick={() => removeImage(image.id)}
+                          className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-lg bg-black/70 text-white"
+                          aria-label="删除图片"
+                        >
+                          <X size={15} />
+                        </button>
+                        <div className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-black text-white">
+                          {index + 1}
+                        </div>
+                        <div className="absolute inset-x-1 bottom-7 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-black text-white">
+                          原图 {formatBytes(image.originalSize || image.size)} {' -> '} 压缩后 {formatBytes(image.size)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="rounded-lg bg-[#f3f4f6] p-3 text-xs font-bold leading-6 text-[#4b5563]">
+                  存储模式：{storageMode === 'blob' ? 'Vercel Blob' : 'KV 回退'}
+                  <br />
+                  当前图片体积：{formatBytes(imageBytes)}
+                  <br />
+                  保存上限：{formatBytes(PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES)}，封面缩略图约 960px。
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setForm(blankForm)}
+                    disabled={saving || processingImages}
+                    className="h-10 rounded-lg border border-black/10 bg-white px-4 text-sm font-black disabled:opacity-40"
+                  >
+                    清空
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || processingImages || !form.prompt.trim()}
+                    className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[#111827] px-4 text-sm font-black text-white disabled:opacity-40"
+                  >
+                    {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                    {form.id ? '保存编辑' : '发布'}
+                  </button>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      )}
 
       {dialogSummary && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/64 p-3 backdrop-blur-sm md:items-center md:p-6">

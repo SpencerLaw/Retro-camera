@@ -42,6 +42,15 @@ runTest('prompt gallery page has admin upload controls and image compression', (
   assert.match(componentSource, /压缩后/);
 });
 
+runTest('prompt gallery opens create and edit forms in a management dialog', () => {
+  assert.match(componentSource, /showPromptFormDialog/);
+  assert.match(componentSource, /role="dialog"/);
+  assert.match(componentSource, /aria-label=\{form\.id \? '编辑提示词' : '新建提示词'\}/);
+  assert.match(componentSource, /max-h-\[92vh\]/);
+  assert.match(componentSource, /overflow-y-auto/);
+  assert.doesNotMatch(componentSource, /showAdminPanel && \([\s\S]*提示词管理[\s\S]*完整提示工程[\s\S]*<\/section>/);
+});
+
 runTest('prompt gallery page explains upload failures and storage mode', () => {
   assert.match(componentSource, /getPromptImageUploadErrorMessage/);
   assert.match(componentSource, /HEIC\/HEIF/);

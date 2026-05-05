@@ -430,6 +430,24 @@ const JuzimiApp: React.FC = () => {
     window.localStorage.setItem(JUZIMI_THEME_STORAGE_KEY, JSON.stringify(themePreference));
   }, [themePreference]);
 
+  useEffect(() => {
+    if (!showAdminPanel && !dialogSentence) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
+    };
+  }, [showAdminPanel, dialogSentence]);
+
+  const closeAdminPanel = () => {
+    if (saving) return;
+    setShowAdminPanel(false);
+  };
+
   const handleLogin = async () => {
     const digest = await digestPassword(passwordInput);
     if (digest !== JUZIMI_ADMIN_PASSWORD_HASH) {
@@ -478,6 +496,7 @@ const JuzimiApp: React.FC = () => {
       const data = await callJuzimiApi(sentence.id && form.id ? 'update' : 'create', sentence, adminToken);
       setSentences(sortJuzimiSentences(data));
       setForm(blankForm);
+      setShowAdminPanel(false);
     } catch (err: any) {
       setError(err.message || '保存失败');
     } finally {
@@ -492,7 +511,10 @@ const JuzimiApp: React.FC = () => {
     try {
       const data = await callJuzimiApi('delete', { id: sentence.id }, adminToken);
       setSentences(sortJuzimiSentences(data));
-      if (form.id === sentence.id) setForm(blankForm);
+      if (form.id === sentence.id) {
+        setForm(blankForm);
+        setShowAdminPanel(false);
+      }
       if (dialogSentence?.id === sentence.id) setDialogSentence(null);
     } catch (err: any) {
       setError(err.message || '删除失败');
@@ -642,17 +664,58 @@ const JuzimiApp: React.FC = () => {
           </div>
         )}
 
-        {/* ── Admin panel ── */}
-        {showAdminPanel && (
-          <section className={theme.panelClass}>
+        {/* ── Sentence grid ── */}
+        {loading ? (
+          <div className={`py-20 text-center font-black ${theme.accentClass}`}>正在翻页...</div>
+        ) : filteredSentences.length === 0 ? (
+          <section className={theme.emptyStateClass}>
+            <Feather size={42} className={`mx-auto mb-4 ${theme.accentClass}`} />
+            <h2 className={`text-3xl font-black mb-3 ${theme.titleClass}`}>还没有句子</h2>
+            <p className={`font-bold ${theme.mutedClass}`}>管理员登录后，可以把第一条喜欢的句子放进来。</p>
+          </section>
+        ) : (
+          /* Masonry-style responsive grid — 1 col → 2 col → 3 col */
+          <section
+            className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"
+          >
+            {filteredSentences.map((sentence, index) => (
+              <div key={sentence.id} className="break-inside-avoid mb-4 md:mb-5">
+                <SentenceCard
+                  sentence={sentence}
+                  index={index}
+                  theme={theme}
+                  onClick={() => setDialogSentence(sentence)}
+                />
+              </div>
+            ))}
+          </section>
+        )}
+      </main>
+
+      {/* ── Admin dialog ── */}
+      {showAdminPanel && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/52 p-3 backdrop-blur-sm md:p-6"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeAdminPanel();
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-label={isAdmin ? (form.id ? '编辑句子' : '新建句子') : '管理员登录'}
+            className={`${theme.panelClass} max-h-[92vh] w-full max-w-5xl overflow-y-auto`}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
             <div className={theme.panelHeaderClass}>
               <div>
                 <div className={`text-xs font-black tracking-[0.22em] uppercase ${theme.accentClass}`}>Editor Desk</div>
-                <h2 className={`text-2xl font-black ${theme.titleClass}`}>{isAdmin ? '句子管理' : '管理员登录'}</h2>
+                <h2 className={`text-2xl font-black ${theme.titleClass}`}>{isAdmin ? (form.id ? '编辑句子' : '新建句子') : '管理员登录'}</h2>
               </div>
               <button
-                onClick={() => setShowAdminPanel(false)}
+                onClick={closeAdminPanel}
                 className={theme.closeButtonClass}
+                aria-label="关闭句子管理"
               >
                 <X size={18} />
               </button>
@@ -737,35 +800,8 @@ const JuzimiApp: React.FC = () => {
               </div>
             )}
           </section>
-        )}
-
-        {/* ── Sentence grid ── */}
-        {loading ? (
-          <div className={`py-20 text-center font-black ${theme.accentClass}`}>正在翻页...</div>
-        ) : filteredSentences.length === 0 ? (
-          <section className={theme.emptyStateClass}>
-            <Feather size={42} className={`mx-auto mb-4 ${theme.accentClass}`} />
-            <h2 className={`text-3xl font-black mb-3 ${theme.titleClass}`}>还没有句子</h2>
-            <p className={`font-bold ${theme.mutedClass}`}>管理员登录后，可以把第一条喜欢的句子放进来。</p>
-          </section>
-        ) : (
-          /* Masonry-style responsive grid — 1 col → 2 col → 3 col */
-          <section
-            className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"
-          >
-            {filteredSentences.map((sentence, index) => (
-              <div key={sentence.id} className="break-inside-avoid mb-4 md:mb-5">
-                <SentenceCard
-                  sentence={sentence}
-                  index={index}
-                  theme={theme}
-                  onClick={() => setDialogSentence(sentence)}
-                />
-              </div>
-            ))}
-          </section>
-        )}
-      </main>
+        </div>
+      )}
 
       {/* ── Dialog ── */}
       {dialogSentence && (

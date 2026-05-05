@@ -41,6 +41,17 @@ runTest('juzimi admin check hides the plain password in frontend source', () => 
   assert.doesNotMatch(logicSource, /juzimiadmin/);
 });
 
+runTest('juzimi admin editor opens in a fixed dialog instead of pushing the page top', () => {
+  assert.match(appComponentSource, /showAdminPanel && \(/);
+  assert.match(appComponentSource, /fixed inset-0 z-50 flex items-center justify-center/);
+  assert.match(appComponentSource, /role="dialog"/);
+  assert.match(appComponentSource, /aria-modal="true"/);
+  assert.match(appComponentSource, /aria-label=\{isAdmin \? \(form\.id \? '编辑句子' : '新建句子'\) : '管理员登录'\}/);
+  assert.match(appComponentSource, /max-h-\[92vh\]/);
+  assert.match(appComponentSource, /overflow-y-auto/);
+  assert.doesNotMatch(appComponentSource, /<main[\s\S]*showAdminPanel && \([\s\S]*<section className=\{theme\.panelClass\}[\s\S]*Sentence grid/);
+});
+
 runTest('juzimi api stores sentences in Vercel KV', () => {
   assert.equal(apiFileExists, true);
   assert.match(apiSource, /import \{ kv \} from '@vercel\/kv'/);

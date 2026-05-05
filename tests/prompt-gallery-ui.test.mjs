@@ -112,3 +112,26 @@ runTest('prompt detail dialog keeps the image compact and sticky on narrow scree
   assert.match(componentSource, /min-h-\[52vh\]/);
   assert.match(componentSource, /overflow-y-visible lg:overflow-y-auto/);
 });
+
+runTest('prompt detail image uses a soft preview backdrop instead of plain black space', () => {
+  assert.match(componentSource, /aria-hidden="true"/);
+  assert.match(componentSource, /blur-2xl/);
+  assert.match(componentSource, /scale-110/);
+  assert.match(componentSource, /object-cover/);
+  assert.match(componentSource, /object-contain/);
+});
+
+runTest('prompt detail image can open an enlarged image dialog', () => {
+  assert.match(componentSource, /imagePreviewOpen/);
+  assert.match(componentSource, /aria-label="放大图片"/);
+  assert.match(componentSource, /aria-modal="true"/);
+  assert.match(componentSource, /z-\[60\]/);
+  assert.match(componentSource, /关闭放大图片/);
+});
+
+runTest('prompt gallery uses a quiet morning paper background without streaming-light copy', () => {
+  assert.match(componentSource, /bg-\[#fff8ed\]/);
+  assert.match(componentSource, /bg-\[#f8efe0\]/);
+  assert.match(componentSource, /radial-gradient\(circle_at_12%_8%/);
+  assert.doesNotMatch(componentSource, /流光/);
+});

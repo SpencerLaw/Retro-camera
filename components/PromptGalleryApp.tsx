@@ -8,6 +8,7 @@ import {
   Loader2,
   Lock,
   LogOut,
+  Maximize2,
   Plus,
   Save,
   Search,
@@ -294,6 +295,7 @@ const PromptGalleryApp: React.FC = () => {
   const [dialogSummary, setDialogSummary] = useState<PromptGallerySummary | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<PromptGalleryEntry | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const autoLoadRef = useRef(false);
@@ -355,6 +357,15 @@ const PromptGalleryApp: React.FC = () => {
       setIsAdmin(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!imagePreviewOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setImagePreviewOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [imagePreviewOpen]);
 
   const handleLogin = async () => {
     const digest = await digestPassword(passwordInput);
@@ -531,8 +542,9 @@ const PromptGalleryApp: React.FC = () => {
   const activeImage = selectedEntry?.images?.[activeImageIndex] || selectedEntry?.images?.[0];
 
   return (
-    <div className="min-h-screen bg-[#f4f7f2] text-[#111827]">
-      <div className="fixed inset-0 pointer-events-none bg-[linear-gradient(90deg,rgba(17,24,39,0.035)_1px,transparent_1px),linear-gradient(180deg,rgba(17,24,39,0.03)_1px,transparent_1px)] bg-[size:72px_72px]" />
+    <div className="min-h-screen bg-[#fff8ed] text-[#111827]">
+      <div className="fixed inset-0 pointer-events-none bg-[#f8efe0]" />
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_12%_8%,rgba(255,244,214,0.92),rgba(255,248,237,0.56)_34%,transparent_62%)]" />
 
       <header className="relative z-10 border-b border-black/10 bg-white/82 px-4 py-4 backdrop-blur md:px-8">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
@@ -804,12 +816,29 @@ const PromptGalleryApp: React.FC = () => {
                 </div>
               ) : activeImage ? (
                 <div className="flex h-full flex-col">
-                  <div className="flex min-h-0 flex-1 items-center justify-center p-3">
+                  <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#111827] p-3">
                     <img
                       src={getImageSource(activeImage)}
-                      alt={selectedEntry?.title || dialogSummary.title}
-                      className="max-h-[38vh] w-full object-contain lg:max-h-[66vh]"
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"
                     />
+                    <div className="absolute inset-0 bg-black/24" />
+                    <button
+                      type="button"
+                      onClick={() => setImagePreviewOpen(true)}
+                      className="relative z-10 flex h-full w-full items-center justify-center cursor-zoom-in"
+                      aria-label="放大图片"
+                    >
+                      <img
+                        src={getImageSource(activeImage)}
+                        alt={selectedEntry?.title || dialogSummary.title}
+                        className="max-h-[38vh] w-full object-contain drop-shadow-[0_24px_50px_rgba(0,0,0,0.45)] lg:max-h-[66vh]"
+                      />
+                      <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg bg-black/55 text-white backdrop-blur">
+                        <Maximize2 size={17} />
+                      </span>
+                    </button>
                   </div>
                   {(selectedEntry?.images?.length || 0) > 1 && (
                     <div className="flex gap-2 overflow-x-auto border-t border-white/10 p-3">
@@ -903,6 +932,30 @@ const PromptGalleryApp: React.FC = () => {
 
             </div>
           </div>
+        </div>
+      )}
+
+      {imagePreviewOpen && activeImage && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/86 p-3 backdrop-blur-sm md:p-8"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setImagePreviewOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setImagePreviewOpen(false)}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/12 text-white backdrop-blur hover:bg-white/20"
+            aria-label="关闭放大图片"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={getImageSource(activeImage)}
+            alt={selectedEntry?.title || dialogSummary?.title || '放大图片'}
+            className="max-h-[94vh] max-w-[96vw] object-contain shadow-[0_30px_90px_rgba(0,0,0,0.55)]"
+            onClick={(event) => event.stopPropagation()}
+          />
         </div>
       )}
     </div>

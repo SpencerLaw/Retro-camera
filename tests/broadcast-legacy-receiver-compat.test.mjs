@@ -45,13 +45,13 @@ runTest('receiver surfaces autoplay blocks and unlocks audio from a user gesture
   assert.match(receiverSource, /handleActivate\(\);\s*localStorage\.setItem\('br_receiver_roomId'/);
 });
 
-runTest('receiver uses direct audio playback and visible diagnostics for Windows 7', () => {
+runTest('receiver uses direct audio playback and visible diagnostics', () => {
   assert.doesNotMatch(ttsSource, /createMediaElementSource/);
   assert.doesNotMatch(ttsSource, /gainNode/);
   assert.match(ttsSource, /this\.audio\.load\(\)/);
   assert.match(ttsSource, /blob\.size > 256/);
   assert.match(receiverSource, /const \[audioStatus, setAudioStatus\]/);
-  assert.match(receiverSource, /Win7 首次打开必须点一次/);
+  assert.doesNotMatch(receiverSource, /Win7 首次打开必须点一次/);
   assert.match(receiverSource, /声音播放失败，请检查系统音量或重新打开接收器。/);
 });
 
@@ -73,10 +73,13 @@ runTest('desktop receiver allows autoplay and uses ASCII installer shortcuts for
   assert.match(desktopPackageSource, /"artifactName":\s*"ClassBroadcastReceiver_Setup\.\$\{ext\}"/);
 });
 
-runTest('receiver page offers separate modern and Windows 7 desktop downloads', () => {
+runTest('receiver page offers only the Windows 11 desktop download', () => {
   assert.match(receiverSource, /ClassBroadcast_Setup\.exe/);
-  assert.match(receiverSource, /ClassBroadcastReceiver_Win7_Setup\.exe/);
   assert.match(receiverSource, /download="ClassBroadcastReceiver_Setup\.exe"/);
-  assert.match(receiverSource, /download="ClassBroadcastReceiver_Win7_Setup\.exe"/);
-  assert.match(receiverSource, /Windows 7 请使用专用版/);
+  assert.match(receiverSource, /下载 Win11 桌面版/);
+  assert.doesNotMatch(receiverSource, /ClassBroadcastReceiver_Win7_Setup\.exe/);
+  assert.doesNotMatch(receiverSource, /download="ClassBroadcastReceiver_Win7_Setup\.exe"/);
+  assert.doesNotMatch(receiverSource, /Windows 7 请使用专用版/);
+  assert.doesNotMatch(receiverSource, /下载 Windows 7 专用版/);
+  assert.doesNotMatch(receiverSource, /'modern' \| 'win7'/);
 });

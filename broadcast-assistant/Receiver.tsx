@@ -263,7 +263,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
     const [displayChannelName, setDisplayChannelName] = useState('');
     const [msgQueue, setMsgQueue] = useState<Message[]>([]);
     const [needsActivation, setNeedsActivation] = useState(false);
-    const [downloadingTarget, setDownloadingTarget] = useState<'modern' | 'win7' | null>(null);
+    const [downloadingTarget, setDownloadingTarget] = useState<'modern' | null>(null);
     const [audioStatus, setAudioStatus] = useState('');
     const [audioToast, setAudioToast] = useState<{ type: 'info' | 'warning' | 'error'; message: string } | null>(null);
     const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -322,7 +322,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
         showAudioToast(message, unlocked ? 'info' : 'warning');
     }, [showAudioToast]);
 
-    const handleDownload = useCallback((target: 'modern' | 'win7') => {
+    const handleDownload = useCallback((target: 'modern') => {
         setDownloadingTarget(target);
         setTimeout(() => setDownloadingTarget(null), 3500);
     }, []);
@@ -614,20 +614,9 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                     download="ClassBroadcastReceiver_Setup.exe"
                                     onClick={() => handleDownload('modern')}
                                     className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-amber-400/80 hover:text-amber-400' : 'hover:bg-slate-50 text-amber-500/80 hover:text-amber-500'}`}
-                                    title="下载 Win10/Win11 桌面版"
+                                    title="下载 Win11 桌面版"
                                 >
                                     {downloadingTarget === 'modern' ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} />}
-                                </a>
-                            )}
-                            {!window.electronAPI && (
-                                <a
-                                    href="/ClassBroadcastReceiver_Win7_Setup.exe"
-                                    download="ClassBroadcastReceiver_Win7_Setup.exe"
-                                    onClick={() => handleDownload('win7')}
-                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-sky-400/80 hover:text-sky-400' : 'hover:bg-slate-50 text-sky-500/80 hover:text-sky-500'}`}
-                                    title="下载 Windows 7 专用桌面版"
-                                >
-                                    {downloadingTarget === 'win7' ? <Loader2 size={18} className="animate-spin" /> : <Radio size={18} />}
                                 </a>
                             )}
                             <button
@@ -707,21 +696,11 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                     className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:scale-105 active:scale-95 ${theme === 'dark' ? 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                                 >
                                     {downloadingTarget === 'modern' ? <Loader2 size={14} className="text-amber-400 animate-spin" /> : <Zap size={14} className="text-amber-400" />}
-                                    {downloadingTarget === 'modern' ? '正在下载...' : '下载 Win10 / Win11 桌面版'}
-                                </a>
-
-                                <a
-                                    href="/ClassBroadcastReceiver_Win7_Setup.exe"
-                                    download="ClassBroadcastReceiver_Win7_Setup.exe"
-                                    onClick={() => handleDownload('win7')}
-                                    className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:scale-105 active:scale-95 ${theme === 'dark' ? 'bg-sky-500/15 text-sky-100 hover:bg-sky-500/25' : 'bg-sky-50 text-sky-700 hover:bg-sky-100'}`}
-                                >
-                                    {downloadingTarget === 'win7' ? <Loader2 size={14} className="text-sky-400 animate-spin" /> : <Radio size={14} className="text-sky-500" />}
-                                    {downloadingTarget === 'win7' ? '正在下载...' : '下载 Windows 7 专用版'}
+                                    {downloadingTarget === 'modern' ? '正在下载...' : '下载 Win11 桌面版'}
                                 </a>
 
                                 <p className={`px-4 text-[10px] font-bold leading-relaxed ${theme === 'dark' ? 'text-white/35' : 'text-slate-400'}`}>
-                                    Windows 7 请使用专用版；Win10 / Win11 使用普通桌面版。
+                                    推荐在 Win11 上使用桌面版接收器。
                                 </p>
                             </div>
                         )}
@@ -896,7 +875,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                         <div className="space-y-3">
                             <h3 className="text-3xl font-black text-white tracking-tight">激活播报系统</h3>
                             <p className="text-xs text-white/40 leading-relaxed font-bold uppercase tracking-wider">
-                                点击下方按钮以建立音频连接。Win7 首次打开必须点一次。
+                                点击下方按钮以建立音频连接。
                             </p>
                         </div>
                         <button

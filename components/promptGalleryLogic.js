@@ -1,13 +1,14 @@
 export const PROMPT_GALLERY_ADMIN_PASSWORD_HASH = '17d3fc231a5c679f6904650d4cf0770e615106147f2de1c74b5ce9dd38e9c9ac';
 
 export const PROMPT_GALLERY_MAX_IMAGES = 5;
-export const PROMPT_GALLERY_MAX_IMAGE_BYTES = 700_000;
-export const PROMPT_GALLERY_MAX_COVER_BYTES = 180_000;
-export const PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES = 2_400_000;
+export const PROMPT_GALLERY_MAX_IMAGE_BYTES = 950_000;
+export const PROMPT_GALLERY_MAX_COVER_BYTES = 320_000;
+export const PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES = 6_500_000;
 export const PROMPT_GALLERY_DEFAULT_LIMIT = 18;
 export const PROMPT_GALLERY_MAX_LIMIT = 24;
 
 const IMAGE_DATA_URL_PATTERN = /^data:image\/(webp|jpeg|jpg|png);base64,[a-z0-9+/=\s]+$/i;
+const IMAGE_URL_PATTERN = /^https?:\/\/\S+$/i;
 
 export const emptyPromptGalleryEntry = {
   id: '',
@@ -27,6 +28,11 @@ export const getDataUrlByteSize = (value = '') => (
 
 export const isAllowedPromptGalleryImage = (value = '') => (
   IMAGE_DATA_URL_PATTERN.test(String(value || '').trim())
+  || IMAGE_URL_PATTERN.test(String(value || '').trim())
+);
+
+const isPromptGalleryDataUrl = (value = '') => (
+  IMAGE_DATA_URL_PATTERN.test(String(value || '').trim())
 );
 
 const normalizeTags = (tags = []) => {
@@ -43,16 +49,22 @@ const normalizeTags = (tags = []) => {
 
 const normalizeImage = (image = {}, index = 0) => {
   const dataUrl = String(image.dataUrl || '').trim();
-  if (!isAllowedPromptGalleryImage(dataUrl)) return null;
+  const url = String(image.url || '').trim();
+  if (!isAllowedPromptGalleryImage(dataUrl) && !isAllowedPromptGalleryImage(url)) return null;
+  const thumbnail = String(image.thumbnail || '').trim();
+  const thumbnailUrl = String(image.thumbnailUrl || '').trim();
 
   return {
     id: String(image.id || `image_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 7)}`),
     name: String(image.name || `image-${index + 1}.webp`).trim(),
-    dataUrl,
-    thumbnail: isAllowedPromptGalleryImage(image.thumbnail) ? String(image.thumbnail).trim() : '',
+    dataUrl: isPromptGalleryDataUrl(dataUrl) ? dataUrl : '',
+    url: isAllowedPromptGalleryImage(url) ? url : '',
+    thumbnail: isPromptGalleryDataUrl(thumbnail) ? thumbnail : '',
+    thumbnailUrl: isAllowedPromptGalleryImage(thumbnailUrl) ? thumbnailUrl : '',
     width: Math.max(0, Number(image.width) || 0),
     height: Math.max(0, Number(image.height) || 0),
-    size: Math.max(Number(image.size) || 0, getDataUrlByteSize(dataUrl)),
+    size: Math.max(Number(image.size) || 0, isPromptGalleryDataUrl(dataUrl) ? getDataUrlByteSize(dataUrl) : 0),
+    originalSize: Math.max(0, Number(image.originalSize) || 0),
   };
 };
 
@@ -83,7 +95,9 @@ export const normalizePromptGalleryEntry = (entry = {}) => {
 
 export const getPromptGalleryImageTotalBytes = (entry = {}) => (
   (entry.images || []).reduce((total, image) => (
-    total + getDataUrlByteSize(image.dataUrl) + getDataUrlByteSize(image.thumbnail)
+    total
+    + (isPromptGalleryDataUrl(image.dataUrl) ? getDataUrlByteSize(image.dataUrl) : 0)
+    + (isPromptGalleryDataUrl(image.thumbnail) ? getDataUrlByteSize(image.thumbnail) : 0)
   ), 0)
 );
 
@@ -143,11 +157,13 @@ export const sortPromptGallerySummaries = (summaries = []) => (
 export const filterPromptGallerySummaries = (summaries = [], options = {}) => {
   const query = String(options.query || '').trim().toLowerCase();
   const tag = String(options.tag || '').trim().toLowerCase();
+  const model = String(options.model || '').trim().toLowerCase();
 
   return sortPromptGallerySummaries(summaries).filter(summary => {
     const matchesQuery = !query || String(summary.searchText || '').toLowerCase().includes(query);
     const matchesTag = !tag || (summary.tags || []).some(item => String(item).toLowerCase() === tag);
-    return matchesQuery && matchesTag;
+    const matchesModel = !model || String(summary.model || '').toLowerCase() === model;
+    return matchesQuery && matchesTag && matchesModel;
   });
 };
 

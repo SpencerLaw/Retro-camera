@@ -26,8 +26,11 @@ const sampleImage = (id = 'img_1', repeat = 48) => ({
 
 await runTest('prompt gallery normalizes text fields tags and max five images', async () => {
   const {
+    PROMPT_GALLERY_MAX_COVER_BYTES,
+    PROMPT_GALLERY_MAX_IMAGE_BYTES,
     normalizePromptGalleryEntry,
     PROMPT_GALLERY_MAX_IMAGES,
+    PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES,
   } = await loadLogicModule();
 
   const entry = normalizePromptGalleryEntry({
@@ -52,6 +55,9 @@ await runTest('prompt gallery normalizes text fields tags and max five images', 
   assert.equal(entry.sourceUrl, undefined);
   assert.deepEqual(entry.tags, ['复古', '广告', 'product']);
   assert.equal(entry.images.length, PROMPT_GALLERY_MAX_IMAGES);
+  assert.ok(PROMPT_GALLERY_MAX_IMAGE_BYTES >= 900_000);
+  assert.ok(PROMPT_GALLERY_MAX_COVER_BYTES >= 300_000);
+  assert.ok(PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES >= 6_000_000);
   assert.ok(entry.createdAt);
   assert.ok(entry.updatedAt);
 });
@@ -86,6 +92,51 @@ await runTest('prompt gallery rejects invalid image data urls and oversized payl
     () => assertPromptGalleryEntryWithinLimits(oversized),
     /图片总体积过大/
   );
+});
+
+await runTest('prompt gallery accepts blob image urls without counting them as KV payload bytes', async () => {
+  const {
+    getPromptGalleryImageTotalBytes,
+    normalizePromptGalleryEntry,
+  } = await loadLogicModule();
+
+  const entry = normalizePromptGalleryEntry({
+    title: 'Blob 图床案例',
+    prompt: 'gallery item with blob urls',
+    coverImage: 'https://example.public.blob.vercel-storage.com/cover.webp',
+    images: [{
+      id: 'blob_image',
+      name: 'blob-image.webp',
+      url: 'https://example.public.blob.vercel-storage.com/detail.webp',
+      thumbnailUrl: 'https://example.public.blob.vercel-storage.com/thumb.webp',
+      width: 1800,
+      height: 1200,
+      size: 940000,
+      originalSize: 3_200_000,
+    }],
+  });
+
+  assert.equal(entry.coverImage, 'https://example.public.blob.vercel-storage.com/cover.webp');
+  assert.equal(entry.images.length, 1);
+  assert.equal(entry.images[0].url, 'https://example.public.blob.vercel-storage.com/detail.webp');
+  assert.equal(entry.images[0].thumbnailUrl, 'https://example.public.blob.vercel-storage.com/thumb.webp');
+  assert.equal(entry.images[0].dataUrl, '');
+  assert.equal(entry.images[0].originalSize, 3_200_000);
+  assert.equal(getPromptGalleryImageTotalBytes(entry), 0);
+});
+
+await runTest('prompt gallery filters summaries by model', async () => {
+  const {
+    filterPromptGallerySummaries,
+  } = await loadLogicModule();
+
+  const summaries = [
+    { id: 'gpt', title: 'GPT 图', model: 'GPT Image 2', tags: [], searchText: 'gpt image 2' },
+    { id: 'nano', title: 'Nano 图', model: 'Nano Banana Pro', tags: [], searchText: 'nano banana pro' },
+  ];
+
+  assert.deepEqual(filterPromptGallerySummaries(summaries, { model: 'GPT Image 2' }).map(item => item.id), ['gpt']);
+  assert.deepEqual(filterPromptGallerySummaries(summaries, { model: '' }).map(item => item.id), ['gpt', 'nano']);
 });
 
 await runTest('prompt gallery summaries omit detail images but keep searchable metadata', async () => {

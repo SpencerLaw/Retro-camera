@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -22,6 +22,7 @@ import {
   PROMPT_GALLERY_MAX_IMAGES,
   PROMPT_GALLERY_MAX_IMAGE_BYTES,
   PROMPT_GALLERY_MAX_COVER_BYTES,
+  PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES,
   PROMPT_GALLERY_DEFAULT_LIMIT,
   getDataUrlByteSize,
   normalizePromptGalleryEntry,
@@ -31,10 +32,13 @@ interface PromptGalleryImage {
   id: string;
   name: string;
   dataUrl: string;
+  url?: string;
   thumbnail?: string;
+  thumbnailUrl?: string;
   width: number;
   height: number;
   size: number;
+  originalSize?: number;
 }
 
 interface PromptGallerySummary {
@@ -147,8 +151,8 @@ const compressImageElement = (
   targetBytes: number,
   startQuality: number,
 ) => {
-  const dimensionScales = [1, 0.86, 0.72, 0.6, 0.5];
-  const qualities = [startQuality, 0.72, 0.64, 0.56, 0.48, 0.4];
+  const dimensionScales = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.42, 0.35, 0.28];
+  const qualities = [...new Set([startQuality, 0.78, 0.72, 0.66, 0.6, 0.54, 0.48, 0.42, 0.36, 0.3, 0.24])];
   let best = {
     dataUrl: '',
     width: 0,
@@ -171,8 +175,8 @@ const compressImageElement = (
 
 const compressPromptImageFile = async (file: File, index: number): Promise<PromptGalleryImage> => {
   const image = await loadImageFromFile(file);
-  const detail = compressImageElement(image, 1280, PROMPT_GALLERY_MAX_IMAGE_BYTES, 0.78);
-  const thumbnail = compressImageElement(image, 560, PROMPT_GALLERY_MAX_COVER_BYTES, 0.7);
+  const detail = compressImageElement(image, 1800, PROMPT_GALLERY_MAX_IMAGE_BYTES, 0.84);
+  const thumbnail = compressImageElement(image, 960, PROMPT_GALLERY_MAX_COVER_BYTES, 0.82);
 
   return {
     id: `image_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 7)}`,
@@ -182,8 +186,17 @@ const compressPromptImageFile = async (file: File, index: number): Promise<Promp
     width: detail.width,
     height: detail.height,
     size: detail.size,
+    originalSize: file.size,
   };
 };
+
+const getImageSource = (image?: PromptGalleryImage | null) => (
+  image?.url || image?.dataUrl || ''
+);
+
+const getImageThumbnail = (image?: PromptGalleryImage | null) => (
+  image?.thumbnailUrl || image?.thumbnail || getImageSource(image)
+);
 
 const promptEntryToForm = (entry: PromptGalleryEntry) => ({
   id: entry.id,
@@ -249,8 +262,10 @@ const PromptGalleryApp: React.FC = () => {
   const navigate = useNavigate();
   const [summaries, setSummaries] = useState<PromptGallerySummary[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [query, setQuery] = useState('');
   const [activeTag, setActiveTag] = useState('');
+  const [activeModel, setActiveModel] = useState('');
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -262,14 +277,17 @@ const PromptGalleryApp: React.FC = () => {
   const [form, setForm] = useState(blankForm);
   const [saving, setSaving] = useState(false);
   const [processingImages, setProcessingImages] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const [dialogSummary, setDialogSummary] = useState<PromptGallerySummary | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<PromptGalleryEntry | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const autoLoadRef = useRef(false);
 
   const imageBytes = useMemo(() => (
     form.images.reduce((total, image) => (
-      total + getDataUrlByteSize(image.dataUrl) + getDataUrlByteSize(image.thumbnail)
+      total + getDataUrlByteSize(image.dataUrl || '') + getDataUrlByteSize(image.thumbnail || '')
     ), 0)
   ), [form.images]);
 
@@ -280,11 +298,13 @@ const PromptGalleryApp: React.FC = () => {
       const data = await callPromptGalleryApi('list', {
         query,
         tag: activeTag,
+        model: activeModel,
         offset: reset ? 0 : summaries.length,
         limit: PROMPT_GALLERY_DEFAULT_LIMIT,
       });
       setSummaries(prev => reset ? data.items || [] : [...prev, ...(data.items || [])]);
       setAvailableTags(data.tags || []);
+      setAvailableModels(data.models || []);
       setHasMore(Boolean(data.hasMore));
     } catch (err: any) {
       setError(err.message || '提示词加载失败');
@@ -295,7 +315,24 @@ const PromptGalleryApp: React.FC = () => {
 
   useEffect(() => {
     loadList(true);
-  }, [query, activeTag]);
+  }, [query, activeTag, activeModel]);
+
+  useEffect(() => {
+    if (!hasMore || loading) return;
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some(entry => entry.isIntersecting) || autoLoadRef.current) return;
+      autoLoadRef.current = true;
+      loadList(false).finally(() => {
+        autoLoadRef.current = false;
+      });
+    }, { rootMargin: '640px 0px' });
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loading, summaries.length, query, activeTag, activeModel]);
 
   useEffect(() => {
     const storedToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || '';
@@ -356,9 +393,7 @@ const PromptGalleryApp: React.FC = () => {
     setSelectedEntry(null);
   };
 
-  const handleFiles = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    event.target.value = '';
+  const processImageFiles = async (files: File[]) => {
     if (files.length === 0) return;
 
     const availableSlots = Math.max(0, PROMPT_GALLERY_MAX_IMAGES - form.images.length);
@@ -388,7 +423,33 @@ const PromptGalleryApp: React.FC = () => {
       setError(err.message || '图片压缩失败');
     } finally {
       setProcessingImages(false);
+      setDragActive(false);
     }
+  };
+
+  const handleFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = '';
+    processImageFiles(files);
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const files = Array.from(event.dataTransfer.files || []).filter(file => file.type.startsWith('image/'));
+    processImageFiles(files);
   };
 
   const removeImage = (imageId: string) => {
@@ -494,7 +555,7 @@ const PromptGalleryApp: React.FC = () => {
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-6 md:px-8">
         <section className="mb-5 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_auto]">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_220px]">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_190px_190px]">
             <div className="relative">
               <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]" />
               <input
@@ -512,6 +573,16 @@ const PromptGalleryApp: React.FC = () => {
               <option value="">全部标签</option>
               {availableTags.map(tag => (
                 <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+            <select
+              value={activeModel}
+              onChange={(event) => setActiveModel(event.target.value)}
+              className="h-11 rounded-lg border border-black/10 bg-white px-3 text-sm font-black outline-none focus:border-[#0f766e]"
+            >
+              <option value="">全部模型</option>
+              {availableModels.map(model => (
+                <option key={model} value={model}>{model}</option>
               ))}
             </select>
           </div>
@@ -596,10 +667,15 @@ const PromptGalleryApp: React.FC = () => {
                 </div>
 
                 <aside className="flex flex-col gap-3">
-                  <label className="flex min-h-[132px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#0f766e]/50 bg-[#ecfdf5] px-4 text-center text-sm font-black text-[#0f766e] hover:bg-[#dff8ea]">
+                  <label
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    className={`flex min-h-[132px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm font-black text-[#0f766e] hover:bg-[#dff8ea] ${dragActive ? 'border-[#f59e0b] bg-[#fff7ed]' : 'border-[#0f766e]/50 bg-[#ecfdf5]'}`}
+                  >
                     {processingImages ? <Loader2 className="mb-2 animate-spin" size={28} /> : <ImagePlus className="mb-2" size={30} />}
-                    <span>{processingImages ? '正在压缩图片' : '上传图片，最多 5 张'}</span>
-                    <span className="mt-1 text-xs text-[#47635d]">自动压缩为 WebP 后保存</span>
+                    <span>{processingImages ? '正在压缩图片' : dragActive ? '松开后开始压缩' : '上传图片，最多 5 张'}</span>
+                    <span className="mt-1 text-xs text-[#47635d]">大图会自动压缩为 WebP 后保存</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -614,7 +690,7 @@ const PromptGalleryApp: React.FC = () => {
                       {form.images.map((image, index) => (
                         <div key={image.id} className="relative overflow-hidden rounded-lg border border-black/10 bg-[#111827]">
                           <img
-                            src={image.thumbnail || image.dataUrl}
+                            src={getImageThumbnail(image)}
                             alt={image.name}
                             className="aspect-square w-full object-cover"
                           />
@@ -628,6 +704,9 @@ const PromptGalleryApp: React.FC = () => {
                           <div className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-black text-white">
                             {index + 1}
                           </div>
+                          <div className="absolute inset-x-1 bottom-7 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-black text-white">
+                            原图 {formatBytes(image.originalSize || image.size)} {' -> '} 压缩后 {formatBytes(image.size)}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -635,6 +714,8 @@ const PromptGalleryApp: React.FC = () => {
 
                   <div className="rounded-lg bg-[#f3f4f6] p-3 text-xs font-bold leading-6 text-[#4b5563]">
                     当前图片体积：{formatBytes(imageBytes)}
+                    <br />
+                    保存上限：{formatBytes(PROMPT_GALLERY_MAX_TOTAL_IMAGE_BYTES)}，封面缩略图约 960px。
                   </div>
 
                   <div className="flex flex-wrap gap-2">
@@ -682,15 +763,15 @@ const PromptGalleryApp: React.FC = () => {
         )}
 
         {hasMore && (
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={() => loadList(false)}
-              disabled={loading}
-              className="flex h-11 items-center gap-2 rounded-lg border border-black/10 bg-white px-5 text-sm font-black hover:bg-[#eef4f0] disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="animate-spin" size={17} /> : <Plus size={17} />}
-              加载更多
-            </button>
+          <div ref={loadMoreRef} className="mt-6 flex justify-center py-4 text-sm font-black text-[#0f766e]" aria-live="polite">
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="animate-spin" size={17} />
+                正在自动加载更多...
+              </span>
+            ) : (
+              <span>继续向下滚动，自动加载更多</span>
+            )}
           </div>
         )}
       </main>
@@ -707,7 +788,7 @@ const PromptGalleryApp: React.FC = () => {
                 <div className="flex h-full flex-col">
                   <div className="flex min-h-0 flex-1 items-center justify-center p-3">
                     <img
-                      src={activeImage.dataUrl}
+                      src={getImageSource(activeImage)}
                       alt={selectedEntry?.title || dialogSummary.title}
                       className="max-h-[38vh] w-full object-contain lg:max-h-[66vh]"
                     />
@@ -720,7 +801,7 @@ const PromptGalleryApp: React.FC = () => {
                           onClick={() => setActiveImageIndex(index)}
                           className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border ${index === activeImageIndex ? 'border-[#fbbf24]' : 'border-white/20'}`}
                         >
-                          <img src={image.thumbnail || image.dataUrl} alt={image.name} className="h-full w-full object-cover" />
+                          <img src={getImageThumbnail(image)} alt={image.name} className="h-full w-full object-cover" />
                         </button>
                       ))}
                     </div>
@@ -744,13 +825,35 @@ const PromptGalleryApp: React.FC = () => {
                   <h2 className="text-2xl font-black leading-tight">{selectedEntry?.title || dialogSummary.title}</h2>
                   <p className="mt-1 text-xs font-bold text-[#6b7280]">{formatDate(selectedEntry?.updatedAt || dialogSummary.updatedAt)}</p>
                 </div>
-                <button
-                  onClick={() => { setDialogSummary(null); setSelectedEntry(null); }}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f3f4f6] hover:bg-[#e5e7eb]"
-                  aria-label="关闭详情"
-                >
-                  <X size={18} />
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  {isAdmin && selectedEntry && (
+                    <>
+                      <button
+                        onClick={() => startEdit(selectedEntry)}
+                        className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#111827] text-white hover:bg-[#1f2937]"
+                        aria-label="编辑提示词"
+                        title="编辑提示词"
+                      >
+                        <Edit3 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(selectedEntry.id)}
+                        className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 text-red-700 hover:bg-red-100"
+                        aria-label="删除提示词"
+                        title="删除提示词"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => { setDialogSummary(null); setSelectedEntry(null); }}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f3f4f6] hover:bg-[#e5e7eb]"
+                    aria-label="关闭详情"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-visible lg:overflow-y-auto p-4">
@@ -780,22 +883,6 @@ const PromptGalleryApp: React.FC = () => {
 
               </div>
 
-              {isAdmin && selectedEntry && (
-                <div className="flex gap-2 border-t border-black/10 p-4">
-                  <button
-                    onClick={() => startEdit(selectedEntry)}
-                    className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[#111827] px-4 text-sm font-black text-white"
-                  >
-                    <Edit3 size={16} /> 编辑
-                  </button>
-                  <button
-                    onClick={() => handleDelete(selectedEntry.id)}
-                    className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-red-50 px-4 text-sm font-black text-red-700"
-                  >
-                    <Trash2 size={16} /> 删除
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>

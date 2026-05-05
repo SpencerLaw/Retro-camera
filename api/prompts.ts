@@ -1,3 +1,4 @@
+import { del, put } from '@vercel/blob';
 import { kv } from '@vercel/kv';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import {
@@ -38,6 +39,73 @@ const buildTags = (summaries: any[]) => (
     .sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'))
 );
 
+const buildModels = (summaries: any[]) => (
+  [...new Set(summaries.map(summary => String(summary.model || '').trim()))]
+    .filter(Boolean)
+    .sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'))
+);
+
+const dataUrlToBlobPayload = (dataUrl = '') => {
+  const match = /^data:(image\/(?:webp|jpeg|jpg|png));base64,([\s\S]+)$/i.exec(String(dataUrl || '').trim());
+  if (!match) return null;
+  return {
+    contentType: match[1].replace('image/jpg', 'image/jpeg'),
+    body: Buffer.from(match[2].replace(/\s/g, ''), 'base64'),
+  };
+};
+
+const blobExtensionFromContentType = (contentType = 'image/webp') => (
+  contentType.includes('png') ? 'png' : contentType.includes('jpeg') ? 'jpg' : 'webp'
+);
+
+const persistPromptGalleryImages = async (entry: any) => {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return entry;
+
+  const images = await Promise.all((entry.images || []).map(async (image: any, index: number) => {
+    const detailPayload = dataUrlToBlobPayload(image.dataUrl);
+    const thumbnailPayload = dataUrlToBlobPayload(image.thumbnail);
+    const basePath = `prompt-gallery/${entry.id}/${Date.now()}-${index}`;
+    const detailBlob = detailPayload
+      ? await put(`${basePath}.${blobExtensionFromContentType(detailPayload.contentType)}`, detailPayload.body, {
+        access: 'public',
+        addRandomSuffix: true,
+        contentType: detailPayload.contentType,
+      })
+      : null;
+    const thumbnailBlob = thumbnailPayload
+      ? await put(`${basePath}-thumb.${blobExtensionFromContentType(thumbnailPayload.contentType)}`, thumbnailPayload.body, {
+        access: 'public',
+        addRandomSuffix: true,
+        contentType: thumbnailPayload.contentType,
+      })
+      : null;
+
+    return {
+      ...image,
+      url: detailBlob?.url || image.url || '',
+      thumbnailUrl: thumbnailBlob?.url || image.thumbnailUrl || '',
+      dataUrl: detailBlob ? '' : image.dataUrl,
+      thumbnail: thumbnailBlob ? '' : image.thumbnail,
+    };
+  }));
+
+  return {
+    ...entry,
+    images,
+    coverImage: images[0]?.thumbnailUrl || images[0]?.url || entry.coverImage,
+  };
+};
+
+const deletePromptGalleryBlobs = async (entry: any) => {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return;
+  const urls = (entry?.images || [])
+    .flatMap((image: any) => [image.url, image.thumbnailUrl])
+    .filter(Boolean);
+  if (urls.length > 0) {
+    await del(urls);
+  }
+};
+
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {
     return response.status(405).json({ success: false, message: 'Method Not Allowed' });
@@ -51,6 +119,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
       const filtered = filterPromptGallerySummaries(index, {
         query: data?.query,
         tag: data?.tag,
+        model: data?.model,
       });
       const page = paginatePromptGallerySummaries(filtered, {
         offset: data?.offset,
@@ -61,6 +130,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
         data: {
           ...page,
           tags: buildTags(index),
+          models: buildModels(index),
         },
       });
     }
@@ -85,11 +155,12 @@ export default async function handler(request: VercelRequest, response: VercelRe
       const index = await readIndex();
       const entryId = String(data?.id || '').trim();
       const existing = entryId ? await kv.get(promptGalleryEntryKey(entryId)) : null;
+      const existingEntry = existing && typeof existing === 'object' ? existing as Record<string, any> : {};
       const now = new Date().toISOString();
       const entry = normalizePromptGalleryEntry({
-        ...(existing || {}),
+        ...existingEntry,
         ...(data || {}),
-        createdAt: data?.createdAt || (existing as any)?.createdAt || now,
+        createdAt: data?.createdAt || existingEntry.createdAt || now,
         updatedAt: now,
       });
 
@@ -99,16 +170,17 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
       assertPromptGalleryEntryWithinLimits(entry);
 
-      const summary = summarizePromptGalleryEntry(entry);
+      const persistedEntry = await persistPromptGalleryImages(entry);
+      const summary = summarizePromptGalleryEntry(persistedEntry);
       const nextIndex = sortPromptGallerySummaries(
-        index.some(item => item.id === entry.id)
-          ? index.map(item => item.id === entry.id ? summary : item)
+        index.some(item => item.id === persistedEntry.id)
+          ? index.map(item => item.id === persistedEntry.id ? summary : item)
           : [summary, ...index]
       );
 
-      await kv.set(promptGalleryEntryKey(entry.id), entry);
+      await kv.set(promptGalleryEntryKey(entry.id), persistedEntry);
       await writeIndex(nextIndex);
-      return response.status(200).json({ success: true, data: { entry, list: nextIndex } });
+      return response.status(200).json({ success: true, data: { entry: persistedEntry, list: nextIndex } });
     }
 
     if (action === 'delete') {
@@ -117,7 +189,9 @@ export default async function handler(request: VercelRequest, response: VercelRe
         return response.status(400).json({ success: false, message: '提示词 ID 不能为空' });
       }
       const index = await readIndex();
+      const existing = await kv.get(promptGalleryEntryKey(entryId));
       const nextIndex = index.filter(item => item.id !== entryId);
+      await deletePromptGalleryBlobs(existing);
       await kv.del(promptGalleryEntryKey(entryId));
       await writeIndex(nextIndex);
       return response.status(200).json({ success: true, data: { list: nextIndex } });

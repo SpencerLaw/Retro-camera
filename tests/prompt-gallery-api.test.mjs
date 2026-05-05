@@ -22,7 +22,17 @@ runTest('prompt gallery api stores an index and per-entry detail records in KV',
   assert.match(apiSource, /prompt-gallery:entry:/);
   assert.match(apiSource, /kv\.get\(PROMPT_GALLERY_INDEX_KEY\)/);
   assert.match(apiSource, /kv\.get\(promptGalleryEntryKey\(entryId\)\)/);
-  assert.match(apiSource, /kv\.set\(promptGalleryEntryKey\(entry\.id\), entry\)/);
+  assert.match(apiSource, /kv\.set\(promptGalleryEntryKey\(entry\.id\), persistedEntry\)/);
+});
+
+runTest('prompt gallery api can offload images to Vercel Blob before storing KV records', () => {
+  assert.match(apiSource, /import \{ del, put \} from '@vercel\/blob'/);
+  assert.match(apiSource, /process\.env\.BLOB_READ_WRITE_TOKEN/);
+  assert.match(apiSource, /persistPromptGalleryImages/);
+  assert.match(apiSource, /dataUrlToBlobPayload/);
+  assert.match(apiSource, /addRandomSuffix: true/);
+  assert.match(apiSource, /url: detailBlob\?\.url/);
+  assert.match(apiSource, /thumbnailUrl: thumbnailBlob\?\.url/);
 });
 
 runTest('prompt gallery api exposes list detail create update and delete actions', () => {

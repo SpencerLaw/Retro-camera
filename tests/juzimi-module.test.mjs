@@ -52,6 +52,15 @@ runTest('juzimi admin editor opens in a fixed dialog instead of pushing the page
   assert.doesNotMatch(appComponentSource, /<main[\s\S]*showAdminPanel && \([\s\S]*<section className=\{theme\.panelClass\}[\s\S]*Sentence grid/);
 });
 
+runTest('juzimi admin dialog uses a readable frosted glass surface', () => {
+  assert.match(appComponentSource, /adminDialogSurfaceClass/);
+  assert.match(appComponentSource, /adminDialogInputClass/);
+  assert.match(appComponentSource, /backdrop-blur-2xl/);
+  assert.match(appComponentSource, /shadow-\[inset_0_1px_0_rgba\(255,255,255,0\.28\)\]/);
+  assert.match(appComponentSource, /bg-black\/64/);
+  assert.match(appComponentSource, /theme\.mode === 'night'/);
+});
+
 runTest('juzimi api stores sentences in Vercel KV', () => {
   assert.equal(apiFileExists, true);
   assert.match(apiSource, /import \{ kv \} from '@vercel\/kv'/);

@@ -391,6 +391,18 @@ const JuzimiApp: React.FC = () => {
   const theme = useMemo(() => getJuzimiTheme(themePreference), [themePreference]);
   const themeFamilyAction = useMemo(() => getJuzimiThemeFamilyAction(theme.family), [theme.family]);
   const themeModeAction = useMemo(() => getJuzimiThemeModeAction(theme.mode), [theme.mode]);
+  const adminDialogSurfaceClass = theme.mode === 'night'
+    ? 'rounded-[2rem] border border-[#f6d49d]/26 bg-[#17110e]/94 text-[#fff3e2] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] drop-shadow-[0_32px_90px_rgba(0,0,0,0.52)] backdrop-blur-2xl overflow-hidden'
+    : 'rounded-[2rem] border border-white/70 bg-[#fff8ee]/92 text-[#171310] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] drop-shadow-[0_32px_90px_rgba(92,70,42,0.28)] backdrop-blur-2xl overflow-hidden';
+  const adminDialogHeaderClass = theme.mode === 'night'
+    ? 'p-5 md:p-6 border-b border-[#f6d49d]/22 bg-[#17110e]/78 flex items-center justify-between gap-3 backdrop-blur-2xl'
+    : 'p-5 md:p-6 border-b border-white/58 bg-[#fff8ee]/70 flex items-center justify-between gap-3 backdrop-blur-2xl';
+  const adminDialogInputClass = theme.mode === 'night'
+    ? 'rounded-2xl border border-[#f6d49d]/28 bg-[#fff3e2]/18 px-4 font-bold outline-none focus:border-[#f6d49d] text-[#fff3e2] placeholder:text-[#f2d8af]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl'
+    : 'rounded-2xl border border-white/70 bg-white/72 px-4 font-bold outline-none focus:border-[#c7a46c] text-[#171310] placeholder:text-[#8b7a68]/62 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-xl';
+  const adminDialogTextAreaClass = theme.mode === 'night'
+    ? 'rounded-3xl border border-[#f6d49d]/28 bg-[#fff3e2]/18 p-5 font-serif text-xl leading-9 outline-none focus:border-[#f6d49d] resize-none text-[#fff3e2] placeholder:text-[#f2d8af]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl'
+    : 'rounded-3xl border border-white/70 bg-white/72 p-5 font-serif text-xl leading-9 outline-none focus:border-[#c7a46c] resize-none text-[#171310] placeholder:text-[#8b7a68]/62 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-xl';
 
   const filteredSentences = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -695,7 +707,7 @@ const JuzimiApp: React.FC = () => {
       {/* ── Admin dialog ── */}
       {showAdminPanel && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/52 p-3 backdrop-blur-sm md:p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/64 p-3 backdrop-blur-xl md:p-6"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeAdminPanel();
           }}
@@ -704,10 +716,10 @@ const JuzimiApp: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-label={isAdmin ? (form.id ? '编辑句子' : '新建句子') : '管理员登录'}
-            className={`${theme.panelClass} max-h-[92vh] w-full max-w-5xl overflow-y-auto`}
+            className={`${adminDialogSurfaceClass} max-h-[92vh] w-full max-w-5xl overflow-y-auto`}
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <div className={theme.panelHeaderClass}>
+            <div className={adminDialogHeaderClass}>
               <div>
                 <div className={`text-xs font-black tracking-[0.22em] uppercase ${theme.accentClass}`}>Editor Desk</div>
                 <h2 className={`text-2xl font-black ${theme.titleClass}`}>{isAdmin ? (form.id ? '编辑句子' : '新建句子') : '管理员登录'}</h2>
@@ -729,7 +741,7 @@ const JuzimiApp: React.FC = () => {
                   onChange={(event) => setPasswordInput(event.target.value)}
                   onKeyDown={(event) => { if (event.key === 'Enter') handleLogin(); }}
                   placeholder="输入管理员密码"
-                  className={`h-12 ${theme.panelInputClass}`}
+                  className={`h-12 ${adminDialogInputClass}`}
                 />
                 <button
                   onClick={handleLogin}
@@ -745,32 +757,32 @@ const JuzimiApp: React.FC = () => {
                     value={form.text}
                     onChange={(event) => setForm(prev => ({ ...prev, text: event.target.value }))}
                     placeholder="写下句子..."
-                    className={`min-h-[160px] ${theme.panelTextAreaClass}`}
+                    className={`min-h-[160px] ${adminDialogTextAreaClass}`}
                   />
                   <div className="grid grid-cols-1 gap-3">
                     <input
                       value={form.author}
                       onChange={(event) => setForm(prev => ({ ...prev, author: event.target.value }))}
                       placeholder="作者"
-                      className={`h-12 ${theme.panelInputClass}`}
+                      className={`h-12 ${adminDialogInputClass}`}
                     />
                     <input
                       value={form.source}
                       onChange={(event) => setForm(prev => ({ ...prev, source: event.target.value }))}
                       placeholder="出处 / 书名"
-                      className={`h-12 ${theme.panelInputClass}`}
+                      className={`h-12 ${adminDialogInputClass}`}
                     />
                     <input
                       value={form.tagsText}
                       onChange={(event) => setForm(prev => ({ ...prev, tagsText: event.target.value }))}
                       placeholder="标签，用逗号分隔"
-                      className={`h-12 ${theme.panelInputClass}`}
+                      className={`h-12 ${adminDialogInputClass}`}
                     />
                     <textarea
                       value={form.note}
                       onChange={(event) => setForm(prev => ({ ...prev, note: event.target.value }))}
                       placeholder="短评 / 备注"
-                      className={`min-h-[72px] p-4 resize-none ${theme.panelInputClass}`}
+                      className={`min-h-[72px] p-4 resize-none ${adminDialogInputClass}`}
                     />
                   </div>
                 </div>

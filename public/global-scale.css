@@ -28,17 +28,27 @@ body {
 .w-\[100dvw\],
 .min-w-\[100dvw\],
 .doraemon-app,
+.doraemon-start-layer,
 .group-maker-app,
 .group-maker-container,
-.couple-game-app {
+.couple-game-app,
+#app-container,
+#tree-canvas,
+#canvas,
+#cosmos-canvas {
   width: var(--app-scaled-viewport-width) !important;
 }
 
 .h-screen,
 .h-\[100dvh\],
 .doraemon-app,
+.doraemon-start-layer,
 .group-maker-app,
-.group-maker-container {
+.group-maker-container,
+#app-container,
+#tree-canvas,
+#canvas,
+#cosmos-canvas {
   height: var(--app-scaled-viewport-height) !important;
 }
 

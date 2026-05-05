@@ -37,8 +37,13 @@ runTest('global scale stylesheet renders every deployed page at 80 percent', () 
   assert.match(scaleCssSource, /\.h-\\\[100dvh\\\]/);
   assert.match(scaleCssSource, /\.min-h-\\\[100dvh\\\]/);
   assert.match(scaleCssSource, /\.doraemon-app/);
+  assert.match(scaleCssSource, /\.doraemon-start-layer/);
   assert.match(scaleCssSource, /\.group-maker-app/);
   assert.match(scaleCssSource, /\.couple-game-app/);
+  assert.match(scaleCssSource, /#app-container/);
+  assert.match(scaleCssSource, /#tree-canvas/);
+  assert.match(scaleCssSource, /#canvas/);
+  assert.match(scaleCssSource, /#cosmos-canvas/);
   assert.match(scaleCssSource, /overflow-x:\s*hidden/);
   assert.doesNotMatch(scaleCssSource, /transform:\s*scale\(var\(--app-global-scale\)\)/);
   assert.doesNotMatch(scaleCssSource, /left:\s*calc\(\(100vw - \(100vw \/ var\(--app-global-scale\)\)\) \/ 2\)/);

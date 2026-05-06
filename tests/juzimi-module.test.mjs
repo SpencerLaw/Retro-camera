@@ -103,8 +103,11 @@ runTest('juzimi retreat card uses feathered blur and stronger text contrast', ()
   assert.match(appComponentSource, /backdrop-blur-\[12px\]/);
   assert.match(appComponentSource, /\[mask-image:linear-gradient\(to_bottom,transparent_0%,transparent_32%,black_56%,black_100%\)\]/);
   assert.match(appComponentSource, /text-white\/90/);
-  assert.match(appComponentSource, /bg-black\/28/);
-  assert.match(appComponentSource, /text-white\/96/);
+  assert.match(appComponentSource, /bg-white\/88/);
+  assert.match(appComponentSource, /text-\[#111315\]/);
+  assert.match(appComponentSource, /shadow-\[0_10px_24px_rgba\(0,0,0,0\.24\),inset_0_1px_0_rgba\(255,255,255,0\.72\)\]/);
+  assert.doesNotMatch(appComponentSource, /bg-black\/28/);
+  assert.doesNotMatch(appComponentSource, /text-white\/96/);
   assert.doesNotMatch(appComponentSource, /bottom-0 h-\[58%\] backdrop-blur-\[2px\]/);
 });
 

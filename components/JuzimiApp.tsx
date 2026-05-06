@@ -275,7 +275,7 @@ const SentenceCard = ({
               {sentence.tags.slice(0, 2).map(tag => (
                 <span
                   key={tag}
-                  className="rounded-full bg-black/28 px-3 py-1.5 text-[11px] font-black text-white/96 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_22px_rgba(0,0,0,0.18)] backdrop-blur-xl"
+                  className="rounded-full bg-white/88 px-3 py-1.5 text-[11px] font-black text-[#111315] shadow-[0_10px_24px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-xl"
                 >
                   {tag}
                 </span>

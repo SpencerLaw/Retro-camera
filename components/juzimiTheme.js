@@ -317,12 +317,12 @@ export const JUZIMI_THEMES = {
       titleClass: 'text-[#111315]',
       mutedClass: 'text-[#6a6e72]',
       accentClass: 'text-[#69716b]',
-      backgroundBase: 'bg-[linear-gradient(135deg,#f7f8f7_0%,#eef0ef_45%,#e6e8e6_100%)]',
+      backgroundBase: 'bg-[linear-gradient(135deg,#dceef2_0%,#f5d6cf_42%,#d8e3d2_72%,#eef0dc_100%)]',
       backgroundDriftStyle: {
         backgroundImage: [
-          'radial-gradient(circle at 16% 20%, rgba(255,255,255,0.92) 0%, transparent 34%)',
-          'radial-gradient(circle at 80% 16%, rgba(181,190,184,0.32) 0%, transparent 38%)',
-          'radial-gradient(circle at 50% 86%, rgba(112,123,113,0.12) 0%, transparent 42%)',
+          'radial-gradient(circle at 16% 20%, rgba(74,156,180,0.22) 0%, rgba(74,156,180,0.1) 18%, transparent 40%)',
+          'radial-gradient(circle at 80% 16%, rgba(255,171,151,0.24) 0%, rgba(255,171,151,0.1) 20%, transparent 42%)',
+          'radial-gradient(circle at 50% 86%, rgba(118,153,120,0.16) 0%, rgba(118,153,120,0.07) 22%, transparent 44%)',
         ].join(', '),
         backgroundSize: '140% 140%, 130% 130%, 120% 120%',
         animation: 'juzimi-gradient-drift 18s ease-in-out infinite',
@@ -330,8 +330,9 @@ export const JUZIMI_THEMES = {
       gridClass: 'bg-[linear-gradient(90deg,rgba(17,19,21,0.026)_1px,transparent_1px),linear-gradient(180deg,rgba(17,19,21,0.022)_1px,transparent_1px)] bg-[size:96px_96px]',
       noiseClass: 'opacity-[0.08] mix-blend-multiply',
       glows: [
-        { className: 'juzimi-bg-breathe absolute left-[-18vw] top-[4vh] h-[64vh] w-[48vw] rounded-full bg-white/80 blur-3xl mix-blend-screen', style: { animation: 'juzimi-breathe-a 16s ease-in-out infinite' } },
-        { className: 'juzimi-bg-breathe absolute right-[-12vw] top-[0vh] h-[74vh] w-[46vw] rounded-full bg-[#c9ceca]/42 blur-3xl mix-blend-multiply', style: { animation: 'juzimi-breathe-b 18s ease-in-out infinite' } },
+        { className: 'juzimi-bg-breathe absolute left-[-18vw] top-[4vh] h-[64vh] w-[48vw] rounded-full bg-[#91c8d8]/42 blur-3xl mix-blend-screen', style: { animation: 'juzimi-breathe-a 16s ease-in-out infinite' } },
+        { className: 'juzimi-bg-breathe absolute right-[-12vw] top-[0vh] h-[74vh] w-[46vw] rounded-full bg-[#ffb3a4]/36 blur-3xl mix-blend-multiply', style: { animation: 'juzimi-breathe-b 18s ease-in-out infinite' } },
+        { className: 'juzimi-bg-breathe absolute right-[8vw] bottom-[-20vh] h-[48vh] w-[42vw] rounded-full bg-[#aacb9e]/26 blur-3xl mix-blend-multiply', style: { animation: 'juzimi-breathe-a 20s ease-in-out infinite reverse' } },
       ],
       headerIconButtonClass: 'h-11 w-11 rounded-full bg-white/82 border border-black/8 shadow-[0_12px_34px_rgba(31,41,55,0.12)] flex items-center justify-center hover:bg-white transition-colors text-[#111315]',
       headerPillClass: 'h-11 rounded-full bg-white/82 border border-black/8 px-4 font-black flex items-center gap-2 shadow-[0_12px_34px_rgba(31,41,55,0.12)] hover:bg-white transition-colors text-[#111315]',

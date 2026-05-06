@@ -170,6 +170,21 @@ await runTest('juzimi retreat night background keeps cinematic color drift', asy
   assert.match(retreatNight.glows.map(glow => glow.className).join(' '), /#22d3c5/);
 });
 
+await runTest('juzimi retreat day background uses travel colours instead of a white plain field', async () => {
+  const { getJuzimiTheme } = await loadThemeModule();
+  const retreatDay = getJuzimiTheme({ family: 'retreat', mode: 'day' });
+
+  assert.doesNotMatch(retreatDay.backgroundBase, /#f7f8f7/);
+  assert.doesNotMatch(retreatDay.backgroundBase, /#eef0ef/);
+  assert.match(retreatDay.backgroundBase, /#dceef2/);
+  assert.match(retreatDay.backgroundBase, /#f5d6cf/);
+  assert.match(retreatDay.backgroundBase, /#d8e3d2/);
+  assert.match(retreatDay.backgroundDriftStyle.backgroundImage, /rgba\(74,156,180,0\.22\)/);
+  assert.match(retreatDay.backgroundDriftStyle.backgroundImage, /rgba\(255,171,151,0\.24\)/);
+  assert.match(retreatDay.glows.map(glow => glow.className).join(' '), /#91c8d8/);
+  assert.match(retreatDay.glows.map(glow => glow.className).join(' '), /#ffb3a4/);
+});
+
 await runTest('juzimi themes avoid background orbit lines and framed empty states', async () => {
   const { getJuzimiTheme, JUZIMI_THEME_FAMILIES, JUZIMI_THEME_MODES } = await loadThemeModule();
 

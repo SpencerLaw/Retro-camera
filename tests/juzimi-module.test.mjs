@@ -128,6 +128,12 @@ runTest('juzimi retreat card uses feathered blur and stronger text contrast', ()
   assert.doesNotMatch(appComponentSource, /bottom-0 h-\[58%\] backdrop-blur-\[2px\]/);
 });
 
+runTest('juzimi retreat sentence copy uses the same sans font rhythm as its CTA', () => {
+  assert.match(appComponentSource, /<h3 className="mb-3 font-sans[\s\S]*?tracking-normal[\s\S]*?text-white/);
+  assert.match(appComponentSource, /<div className="rounded-full bg-white px-5 py-4 text-center font-sans text-\[15px\] font-black/);
+  assert.doesNotMatch(appComponentSource, /<h3 className="mb-3 font-sans[\s\S]*?tracking-\[-0\.02em\]/);
+});
+
 runTest('juzimi retreat card draws its edge with a subtle pink glow shadow', () => {
   assert.match(appComponentSource, /0 0 0 1px \$\{accent\.glass\.edge\}/);
   assert.match(appComponentSource, /0 0 30px \$\{accent\.glass\.glow\}/);

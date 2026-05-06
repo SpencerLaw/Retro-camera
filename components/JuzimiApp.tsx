@@ -259,7 +259,7 @@ const SentenceCard = ({
             <span className="h-1.5 w-1.5 rounded-full bg-white/48" />
           </div>
 
-          <h3 className="mb-3 font-sans text-[1.52rem] md:text-[1.75rem] leading-[1.04] font-black tracking-[-0.02em] text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.32)]">
+          <h3 className="mb-3 font-sans text-[1.52rem] md:text-[1.75rem] leading-[1.04] font-black tracking-normal text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.32)]">
             {preview}
           </h3>
 
@@ -281,7 +281,7 @@ const SentenceCard = ({
             </div>
           )}
 
-          <div className="rounded-full bg-white px-5 py-4 text-center text-[15px] font-black text-[#151515] shadow-[0_18px_42px_rgba(0,0,0,0.24)] transition-transform duration-300 group-hover:-translate-y-0.5">
+          <div className="rounded-full bg-white px-5 py-4 text-center font-sans text-[15px] font-black text-[#151515] shadow-[0_18px_42px_rgba(0,0,0,0.24)] transition-transform duration-300 group-hover:-translate-y-0.5">
             阅读句子
           </div>
         </div>

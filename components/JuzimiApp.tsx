@@ -427,11 +427,11 @@ const JuzimiApp: React.FC = () => {
     ? 'p-5 md:p-6 border-b border-[#f6d49d]/22 bg-[#17110e]/78 flex items-center justify-between gap-3 backdrop-blur-2xl'
     : 'p-5 md:p-6 border-b border-white/58 bg-[#fff8ee]/70 flex items-center justify-between gap-3 backdrop-blur-2xl';
   const adminDialogInputClass = theme.mode === 'night'
-    ? 'rounded-2xl border border-[#f6d49d]/28 bg-[#fff3e2]/18 px-4 font-bold outline-none focus:border-[#f6d49d] text-[#fff3e2] placeholder:text-[#f2d8af]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl'
-    : 'rounded-2xl border border-white/70 bg-white/72 px-4 font-bold outline-none focus:border-[#c7a46c] text-[#171310] placeholder:text-[#8b7a68]/62 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-xl';
+    ? 'rounded-2xl border border-[#f6d49d]/42 bg-[#fffdf4]/92 px-4 font-bold outline-none focus:border-[#f6d49d] text-[#211914] placeholder:text-[#7a6143]/72 caret-[#211914] selection:bg-[#d6b16e]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl'
+    : 'rounded-2xl border border-white/80 bg-[#fffdf4]/92 px-4 font-bold outline-none focus:border-[#c7a46c] text-[#211914] placeholder:text-[#7a6143]/72 caret-[#211914] selection:bg-[#d6b16e]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_10px_28px_rgba(92,70,42,0.12)] backdrop-blur-xl';
   const adminDialogTextAreaClass = theme.mode === 'night'
-    ? 'rounded-3xl border border-[#f6d49d]/28 bg-[#fff3e2]/18 p-5 font-serif text-xl leading-9 outline-none focus:border-[#f6d49d] resize-none text-[#fff3e2] placeholder:text-[#f2d8af]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl'
-    : 'rounded-3xl border border-white/70 bg-white/72 p-5 font-serif text-xl leading-9 outline-none focus:border-[#c7a46c] resize-none text-[#171310] placeholder:text-[#8b7a68]/62 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-xl';
+    ? 'rounded-3xl border border-[#f6d49d]/42 bg-[#fffdf4]/92 p-5 font-serif text-xl leading-9 outline-none focus:border-[#f6d49d] resize-none text-[#211914] placeholder:text-[#7a6143]/72 caret-[#211914] selection:bg-[#d6b16e]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl'
+    : 'rounded-3xl border border-white/80 bg-[#fffdf4]/92 p-5 font-serif text-xl leading-9 outline-none focus:border-[#c7a46c] resize-none text-[#211914] placeholder:text-[#7a6143]/72 caret-[#211914] selection:bg-[#d6b16e]/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_10px_28px_rgba(92,70,42,0.12)] backdrop-blur-xl';
 
   const filteredSentences = useMemo(() => {
     const keyword = query.trim().toLowerCase();

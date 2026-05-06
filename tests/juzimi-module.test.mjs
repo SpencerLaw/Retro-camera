@@ -61,6 +61,16 @@ runTest('juzimi admin dialog uses a readable frosted glass surface', () => {
   assert.match(appComponentSource, /theme\.mode === 'night'/);
 });
 
+runTest('juzimi admin editor fields keep typed text readable over glass backgrounds', () => {
+  assert.match(appComponentSource, /adminDialogInputClass/);
+  assert.match(appComponentSource, /adminDialogTextAreaClass/);
+  assert.match(appComponentSource, /bg-\[#fffdf4\]\/92/);
+  assert.match(appComponentSource, /text-\[#211914\]/);
+  assert.match(appComponentSource, /placeholder:text-\[#7a6143\]\/72/);
+  assert.match(appComponentSource, /caret-\[#211914\]/);
+  assert.match(appComponentSource, /selection:bg-\[#d6b16e\]\/30/);
+});
+
 runTest('juzimi api stores sentences in Vercel KV', () => {
   assert.equal(apiFileExists, true);
   assert.match(apiSource, /import \{ kv \} from '@vercel\/kv'/);

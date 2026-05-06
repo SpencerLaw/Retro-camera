@@ -1,18 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit3, Feather, Lock, LogOut, Moon, Palette, Plus, Save, Search, Sun, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Edit3, Feather, Lock, LogOut, Moon, Plus, Save, Search, Sun, Trash2, X } from 'lucide-react';
 import {
   JUZIMI_ADMIN_PASSWORD_HASH,
   normalizeJuzimiSentence,
   sortJuzimiSentences,
 } from './juzimiLogic.js';
 import {
+  JUZIMI_THEME_FAMILIES,
   JUZIMI_THEME_STORAGE_KEY,
   getJuzimiCardMinHeight,
   getJuzimiTheme,
-  getJuzimiThemeFamilyAction,
   getJuzimiThemeModeAction,
-  getNextJuzimiThemeFamily,
   getNextJuzimiThemeMode,
   normalizeJuzimiThemePreference,
 } from './juzimiTheme.js';
@@ -80,6 +79,12 @@ const sentenceToForm = (sentence: JuzimiSentence) => ({
 const NOISE_SVG = `data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E`;
 
 const PREVIEW_MAX = 80; // chars before truncating in card
+
+const themeFamilyLabels: Record<string, string> = {
+  morning: '晨光',
+  studio: '流光',
+  retreat: '旅影',
+};
 
 const readStoredJuzimiThemePreference = () => {
   if (typeof window === 'undefined') return normalizeJuzimiThemePreference();
@@ -234,8 +239,11 @@ const SentenceCard = ({
           minHeight: cardMinHeight,
         }}
       >
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,transparent_36%,rgba(0,0,0,0.18)_62%,rgba(0,0,0,0.34)_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-[58%] backdrop-blur-[2px]" style={{ background: accent.glass.tint }} />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,transparent_30%,rgba(0,0,0,0.24)_66%,rgba(0,0,0,0.48)_100%)]" />
+        <div
+          className="absolute inset-0 backdrop-blur-[12px] [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_32%,black_56%,black_100%)]"
+          style={{ background: accent.glass.tint }}
+        />
         <div className="absolute inset-[1px] rounded-[2.08rem] border border-white/18 pointer-events-none" />
 
         <div className="relative z-10 flex h-full flex-col p-5 md:p-6">
@@ -260,7 +268,7 @@ const SentenceCard = ({
             {preview}
           </h3>
 
-          <p className="mb-4 max-w-[92%] text-[14px] md:text-[15px] leading-5 font-semibold text-white/66 drop-shadow-[0_2px_12px_rgba(0,0,0,0.26)]">
+          <p className="mb-4 max-w-[92%] text-[14px] md:text-[15px] leading-5 font-semibold text-white/90 drop-shadow-[0_2px_12px_rgba(0,0,0,0.42)]">
             {sentence.author || '佚名'}
             {sentence.source && <> · 《{sentence.source}》</>}
           </p>
@@ -269,7 +277,7 @@ const SentenceCard = ({
             {(sentence.tags.length > 0 ? sentence.tags.slice(0, 2) : ['句子', accent.mood]).map(tag => (
               <span
                 key={tag}
-                className="rounded-full border border-white/14 bg-white/18 px-3 py-1.5 text-[11px] font-black text-white/92 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-xl"
+                className="rounded-full bg-black/28 px-3 py-1.5 text-[11px] font-black text-white/96 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_22px_rgba(0,0,0,0.18)] backdrop-blur-xl"
               >
                 {tag}
               </span>
@@ -482,7 +490,6 @@ const JuzimiApp: React.FC = () => {
   const [themePreference, setThemePreference] = useState(readStoredJuzimiThemePreference);
 
   const theme = useMemo(() => getJuzimiTheme(themePreference), [themePreference]);
-  const themeFamilyAction = useMemo(() => getJuzimiThemeFamilyAction(theme.family), [theme.family]);
   const themeModeAction = useMemo(() => getJuzimiThemeModeAction(theme.mode), [theme.mode]);
   const adminDialogSurfaceClass = theme.mode === 'night'
     ? 'rounded-[2rem] border border-[#f6d49d]/26 bg-[#17110e]/94 text-[#fff3e2] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] drop-shadow-[0_32px_90px_rgba(0,0,0,0.52)] backdrop-blur-2xl overflow-hidden'
@@ -628,10 +635,10 @@ const JuzimiApp: React.FC = () => {
     }
   };
 
-  const toggleThemeFamily = () => {
+  const setThemeFamily = (family: string) => {
     setThemePreference(prev => normalizeJuzimiThemePreference({
       ...prev,
-      family: getNextJuzimiThemeFamily(prev.family),
+      family,
     }));
   };
 
@@ -695,15 +702,31 @@ const JuzimiApp: React.FC = () => {
         </button>
 
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <div className={theme.switchWrapClass}>
-            <button
-              onClick={toggleThemeFamily}
-              className={theme.switchButtonClass}
-              aria-label="切换句子迷主题"
-              title="切换主题"
-            >
-              <Palette size={15} /> {themeFamilyAction.label}
-            </button>
+          <div className="flex items-center gap-1 rounded-full bg-white/68 p-1 shadow-[0_14px_42px_rgba(31,41,55,0.12)] backdrop-blur-xl" role="tablist" aria-label="句子迷主题">
+            {JUZIMI_THEME_FAMILIES.map(family => {
+              const isSelected = theme.family === family;
+              return (
+                <button
+                  key={family}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setThemeFamily(family)}
+                  className={`h-9 rounded-full px-3 text-xs font-black transition-colors ${
+                    isSelected
+                      ? theme.mode === 'night'
+                        ? 'bg-white text-[#101214] shadow-[0_8px_22px_rgba(0,0,0,0.18)]'
+                        : 'bg-[#111315] text-white shadow-[0_8px_22px_rgba(31,41,55,0.16)]'
+                      : theme.mode === 'night'
+                        ? 'text-white/74 hover:bg-white/10'
+                        : 'text-[#555b5f] hover:bg-black/6'
+                  }`}
+                >
+                  {themeFamilyLabels[family]}
+                </button>
+              );
+            })}
+          </div>
             <button
               onClick={toggleThemeMode}
               className={theme.switchButtonClass}
@@ -713,7 +736,6 @@ const JuzimiApp: React.FC = () => {
               {themeModeAction.mode === 'day' ? <Sun size={15} /> : <Moon size={15} />}
               {themeModeAction.label}
             </button>
-          </div>
           {isAdmin && (
             <button
               onClick={startCreate}

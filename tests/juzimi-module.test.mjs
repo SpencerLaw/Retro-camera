@@ -81,6 +81,25 @@ runTest('juzimi retreat theme renders the reference-style image glass card UI', 
   assert.match(appComponentSource, /theme\.cardVariant === 'retreat'\s*\?/);
 });
 
+runTest('juzimi theme family selector shows all themes as borderless tabs', () => {
+  assert.match(appComponentSource, /JUZIMI_THEME_FAMILIES\.map/);
+  assert.match(appComponentSource, /role="tablist"/);
+  assert.match(appComponentSource, /role="tab"/);
+  assert.match(appComponentSource, /themeFamilyLabels\[family\]/);
+  assert.match(appComponentSource, /setThemeFamily/);
+  assert.doesNotMatch(appComponentSource, /getJuzimiThemeFamilyAction/);
+  assert.doesNotMatch(appComponentSource, /toggleThemeFamily/);
+});
+
+runTest('juzimi retreat card uses feathered blur and stronger text contrast', () => {
+  assert.match(appComponentSource, /backdrop-blur-\[12px\]/);
+  assert.match(appComponentSource, /\[mask-image:linear-gradient\(to_bottom,transparent_0%,transparent_32%,black_56%,black_100%\)\]/);
+  assert.match(appComponentSource, /text-white\/90/);
+  assert.match(appComponentSource, /bg-black\/28/);
+  assert.match(appComponentSource, /text-white\/96/);
+  assert.doesNotMatch(appComponentSource, /bottom-0 h-\[58%\] backdrop-blur-\[2px\]/);
+});
+
 runTest('juzimi api stores sentences in Vercel KV', () => {
   assert.equal(apiFileExists, true);
   assert.match(apiSource, /import \{ kv \} from '@vercel\/kv'/);

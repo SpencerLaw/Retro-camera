@@ -229,12 +229,11 @@ const SentenceCard = ({
     return (
       <button
         onClick={onClick}
-        className="group relative block w-full aspect-[0.68] min-h-[510px] rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer border"
+        className="group relative block w-full aspect-[0.68] min-h-[510px] rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer"
         style={{
           backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(12,18,22,0.04) 34%, rgba(7,10,12,0.78) 100%), url("${accent.image}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          borderColor: accent.glass.border,
           boxShadow: `0 30px 82px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
           minHeight: cardMinHeight,
         }}
@@ -244,7 +243,6 @@ const SentenceCard = ({
           className="absolute inset-0 backdrop-blur-[12px] [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_32%,black_56%,black_100%)]"
           style={{ background: accent.glass.tint }}
         />
-        <div className="absolute inset-[1px] rounded-[2.08rem] border border-white/18 pointer-events-none" />
 
         <div className="relative z-10 flex h-full flex-col p-5 md:p-6">
           <div className="flex items-start justify-end">
@@ -295,10 +293,9 @@ const SentenceCard = ({
     return (
       <button
         onClick={onClick}
-        className="group relative w-full text-left rounded-[2rem] p-4 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col border backdrop-blur-2xl"
+        className="group relative w-full text-left rounded-[2rem] p-4 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col backdrop-blur-2xl"
         style={{
           background: accent.glass.surface,
-          borderColor: accent.glass.border,
           boxShadow: `0 28px 80px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
           color: '#fff',
           minHeight: cardMinHeight,
@@ -320,15 +317,14 @@ const SentenceCard = ({
           style={{ background: accent.glass.tint }}
         />
         <div className="absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(180deg,rgba(255,255,255,0.24),transparent)] opacity-70" />
-        <div className="absolute inset-[1px] rounded-[1.95rem] border border-white/22 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col h-full">
           <div className="mb-8 flex items-start justify-between gap-3">
-            <div className="h-12 w-12 rounded-full bg-white/24 shadow-[0_12px_32px_rgba(0,0,0,0.18)] border border-white/34 backdrop-blur-xl flex items-center justify-center text-[11px] font-black tracking-widest text-white">
+            <div className="h-12 w-12 rounded-full bg-white/24 shadow-[0_12px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl flex items-center justify-center text-[11px] font-black tracking-widest text-white">
               {String(index + 1).padStart(2, '0')}
             </div>
             <div
-              className="rounded-full px-3 py-1 text-[10px] font-black tracking-wide backdrop-blur-xl border border-white/24"
+              className="rounded-full px-3 py-1 text-[10px] font-black tracking-wide backdrop-blur-xl"
               style={{ backgroundColor: 'rgba(255,255,255,0.18)', color: '#fff' }}
             >
               Juzimi
@@ -361,7 +357,7 @@ const SentenceCard = ({
                 {sentence.tags.slice(0, 3).map(tag => (
                   <span
                     key={tag}
-                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-xl border border-white/20"
+                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-xl"
                     style={{ backgroundColor: 'rgba(255,255,255,0.18)', color: '#fff' }}
                   >
                     {tag}
@@ -369,7 +365,7 @@ const SentenceCard = ({
                 ))}
                 {sentence.tags.length > 3 && (
                   <span
-                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-xl border border-white/20 opacity-80"
+                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-xl opacity-80"
                     style={{ backgroundColor: 'rgba(255,255,255,0.18)', color: '#fff' }}
                   >
                     +{sentence.tags.length - 3}
@@ -386,10 +382,9 @@ const SentenceCard = ({
   return (
     <button
       onClick={onClick}
-      className="group relative w-full text-left rounded-[1.65rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col border backdrop-blur-2xl"
+      className="group relative w-full text-left rounded-[1.65rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col backdrop-blur-2xl"
       style={{
         background: accent.glass.surface,
-        borderColor: accent.glass.border,
         boxShadow: `0 24px 72px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
         minHeight: cardMinHeight,
       }}
@@ -403,7 +398,6 @@ const SentenceCard = ({
         style={{ background: accent.glass.tint }}
       />
       <div className="absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(180deg,rgba(255,255,255,0.26),transparent)] opacity-80" />
-      <div className="absolute inset-[1px] rounded-[1.58rem] border border-white/18 pointer-events-none" />
 
       {/* Noise Overlay */}
       <div 

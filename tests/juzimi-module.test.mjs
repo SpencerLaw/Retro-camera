@@ -93,6 +93,15 @@ runTest('juzimi theme family selector shows all themes as borderless tabs', () =
   assert.doesNotMatch(appComponentSource, /toggleThemeFamily/);
 });
 
+runTest('juzimi sentence cards render without visible border strokes', () => {
+  assert.doesNotMatch(appComponentSource, /rounded-\[2\.15rem\][^"]*\bborder\b/);
+  assert.doesNotMatch(appComponentSource, /rounded-\[2rem\] p-4[^"]*\bborder\b/);
+  assert.doesNotMatch(appComponentSource, /rounded-\[1\.65rem\] p-6[^"]*\bborder\b/);
+  assert.doesNotMatch(appComponentSource, /borderColor: accent\.glass\.border/);
+  assert.doesNotMatch(appComponentSource, /inset-\[1px\][^"]*\bborder\b/);
+  assert.doesNotMatch(appComponentSource, /border border-white\/(?:18|20|22|24|34)/);
+});
+
 runTest('juzimi retreat card removes the top-left mood label', () => {
   assert.doesNotMatch(appComponentSource, /<div className="rounded-full bg-black\/22[\s\S]*?\{accent\.mood\}[\s\S]*?<\/div>/);
   assert.doesNotMatch(appComponentSource, /accent\.mood/);

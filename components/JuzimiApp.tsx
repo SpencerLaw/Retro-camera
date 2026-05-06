@@ -229,7 +229,7 @@ const SentenceCard = ({
     return (
       <button
         onClick={onClick}
-        className="group relative block w-full rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer"
+        className="juzimi-card-hover group relative block w-full rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer"
         style={{
           backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(12,18,22,0.04) 34%, rgba(7,10,12,0.78) 100%), url("${accent.image}")`,
           backgroundSize: 'cover',
@@ -293,7 +293,7 @@ const SentenceCard = ({
     return (
       <button
         onClick={onClick}
-        className="group relative w-full text-left rounded-[2rem] p-4 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col backdrop-blur-2xl"
+        className="juzimi-card-hover group relative w-full text-left rounded-[2rem] p-4 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col backdrop-blur-2xl"
         style={{
           background: accent.glass.surface,
           boxShadow: `0 28px 80px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
@@ -382,7 +382,7 @@ const SentenceCard = ({
   return (
     <button
       onClick={onClick}
-      className="group relative w-full text-left rounded-[1.65rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col backdrop-blur-2xl"
+      className="juzimi-card-hover group relative w-full text-left rounded-[1.65rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col backdrop-blur-2xl"
       style={{
         background: accent.glass.surface,
         boxShadow: `0 24px 72px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
@@ -660,10 +660,28 @@ const JuzimiApp: React.FC = () => {
           50% { background-position: 18% 36%, 82% 18%, 56% 46%; }
         }
 
+        @keyframes juzimi-card-hover-wobble {
+          0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+          34% { transform: translate3d(0, -5px, 0) rotate(0.7deg); }
+          68% { transform: translate3d(0, -3px, 0) rotate(-0.45deg); }
+          100% { transform: translate3d(0, -4px, 0) rotate(0.18deg); }
+        }
+
+        .juzimi-card-hover {
+          will-change: transform;
+          transform-origin: 50% 62%;
+        }
+
+        .juzimi-card-hover:hover {
+          animation: juzimi-card-hover-wobble 900ms ease-in-out both;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .juzimi-bg-drift,
-          .juzimi-bg-breathe {
+          .juzimi-bg-breathe,
+          .juzimi-card-hover {
             animation: none !important;
+            transform: none !important;
           }
         }
       `}</style>

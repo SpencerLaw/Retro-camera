@@ -134,6 +134,15 @@ runTest('juzimi retreat card draws its edge with a subtle pink glow shadow', () 
   assert.doesNotMatch(appComponentSource, /rounded-\[2\.15rem\][^"]*\bborder\b/);
 });
 
+runTest('juzimi sentence cards wobble gently on hover with reduced motion support', () => {
+  assert.match(appComponentSource, /@keyframes juzimi-card-hover-wobble/);
+  assert.match(appComponentSource, /\.juzimi-card-hover:hover/);
+  assert.match(appComponentSource, /animation: juzimi-card-hover-wobble 900ms ease-in-out both/);
+  assert.match(appComponentSource, /\.juzimi-card-hover \{/);
+  assert.match(appComponentSource, /will-change: transform/);
+  assert.match(appComponentSource, /prefers-reduced-motion: reduce[\s\S]*\.juzimi-card-hover/);
+});
+
 runTest('juzimi api stores sentences in Vercel KV', () => {
   assert.equal(apiFileExists, true);
   assert.match(apiSource, /import \{ kv \} from '@vercel\/kv'/);

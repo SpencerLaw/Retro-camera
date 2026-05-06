@@ -76,9 +76,17 @@ runTest('juzimi retreat theme renders the reference-style image glass card UI', 
   assert.match(appComponentSource, /backgroundImage: `linear-gradient/);
   assert.match(appComponentSource, /aria-hidden="true"/);
   assert.match(appComponentSource, /阅读句子/);
-  assert.match(appComponentSource, /aspect-\[0\.68\]/);
   assert.match(appComponentSource, /rounded-\[2\.15rem\]/);
-  assert.match(appComponentSource, /theme\.cardVariant === 'retreat'\s*\?/);
+  assert.match(appComponentSource, /minHeight: cardMinHeight/);
+  assert.doesNotMatch(appComponentSource, /aspect-\[0\.68\]/);
+  assert.doesNotMatch(appComponentSource, /min-h-\[510px\]/);
+});
+
+runTest('juzimi sentence grid uses masonry columns for every theme', () => {
+  assert.match(appComponentSource, /className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"/);
+  assert.match(appComponentSource, /className="break-inside-avoid mb-4 md:mb-5"/);
+  assert.doesNotMatch(appComponentSource, /theme\.cardVariant === 'retreat' \? 'grid grid-cols-1/);
+  assert.doesNotMatch(appComponentSource, /theme\.cardVariant === 'retreat' \? '' : 'break-inside-avoid/);
 });
 
 runTest('juzimi theme family selector shows all themes as borderless tabs', () => {

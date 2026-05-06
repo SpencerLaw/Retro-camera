@@ -229,7 +229,7 @@ const SentenceCard = ({
     return (
       <button
         onClick={onClick}
-        className="group relative block w-full aspect-[0.68] min-h-[510px] rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer"
+        className="group relative block w-full rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer"
         style={{
           backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(12,18,22,0.04) 34%, rgba(7,10,12,0.78) 100%), url("${accent.image}")`,
           backgroundSize: 'cover',
@@ -796,10 +796,10 @@ const JuzimiApp: React.FC = () => {
         ) : (
           /* Masonry-style responsive grid — 1 col → 2 col → 3 col */
           <section
-            className={theme.cardVariant === 'retreat' ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3' : 'columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5'}
+            className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"
           >
             {filteredSentences.map((sentence, index) => (
-              <div key={sentence.id} className={theme.cardVariant === 'retreat' ? '' : 'break-inside-avoid mb-4 md:mb-5'}>
+              <div key={sentence.id} className="break-inside-avoid mb-4 md:mb-5">
                 <SentenceCard
                   sentence={sentence}
                   index={index}

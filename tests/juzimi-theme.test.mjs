@@ -63,6 +63,8 @@ await runTest('juzimi card heights vary for a waterfall layout', async () => {
 
   assert.notEqual(getJuzimiCardMinHeight(shortSentence, 0, 'poster'), getJuzimiCardMinHeight(longSentence, 0, 'poster'));
   assert.notEqual(getJuzimiCardMinHeight(shortSentence, 0, 'studio'), getJuzimiCardMinHeight(shortSentence, 1, 'studio'));
+  assert.notEqual(getJuzimiCardMinHeight(shortSentence, 0, 'retreat'), getJuzimiCardMinHeight(shortSentence, 1, 'retreat'));
+  assert.ok(getJuzimiCardMinHeight(longSentence, 0, 'retreat') > getJuzimiCardMinHeight(shortSentence, 0, 'retreat'));
   assert.ok(getJuzimiCardMinHeight(longSentence, 0, 'poster') > getJuzimiCardMinHeight(shortSentence, 0, 'poster'));
 });
 

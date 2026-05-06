@@ -437,7 +437,7 @@ export const getJuzimiCardMinHeight = (sentence = {}, index = 0, variant = 'post
   const textLength = String(sentence.text || '').length;
   const rhythm = [0, 46, 18, 76, 32, 92][Math.abs(index) % 6];
   const textLift = Math.min(120, Math.floor(textLength / 22) * 28);
-  if (variant === 'retreat') return 510;
+  if (variant === 'retreat') return 460 + rhythm + Math.min(96, Math.floor(textLength / 24) * 24);
   const base = variant === 'studio' ? 322 : 286;
   return base + rhythm + textLift;
 };

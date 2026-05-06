@@ -82,6 +82,15 @@ runTest('juzimi retreat theme renders the reference-style image glass card UI', 
   assert.doesNotMatch(appComponentSource, /min-h-\[510px\]/);
 });
 
+runTest('juzimi retreat card keeps the lower image color instead of adding a black block', () => {
+  assert.match(appComponentSource, /backgroundImage: `linear-gradient\(180deg, rgba\(255,255,255,0\.02\) 0%, rgba\(255,255,255,0\.02\) 100%\), url/);
+  assert.match(appComponentSource, /backdrop-blur-\[14px\]/);
+  assert.match(appComponentSource, /\[mask-image:linear-gradient\(to_bottom,transparent_0%,transparent_36%,black_58%,black_100%\)\]/);
+  assert.doesNotMatch(appComponentSource, /rgba\(7,10,12,0\.78\)/);
+  assert.doesNotMatch(appComponentSource, /rgba\(0,0,0,0\.48\)_100%/);
+  assert.doesNotMatch(appComponentSource, /rgba\(0,0,0,0\.24\)_66%/);
+});
+
 runTest('juzimi sentence grid uses masonry columns for every theme', () => {
   assert.match(appComponentSource, /className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"/);
   assert.match(appComponentSource, /className="break-inside-avoid mb-4 md:mb-5"/);
@@ -117,8 +126,8 @@ runTest('juzimi retreat card removes the top-left mood label', () => {
 });
 
 runTest('juzimi retreat card uses feathered blur and stronger text contrast', () => {
-  assert.match(appComponentSource, /backdrop-blur-\[12px\]/);
-  assert.match(appComponentSource, /\[mask-image:linear-gradient\(to_bottom,transparent_0%,transparent_32%,black_56%,black_100%\)\]/);
+  assert.match(appComponentSource, /backdrop-blur-\[14px\]/);
+  assert.match(appComponentSource, /\[mask-image:linear-gradient\(to_bottom,transparent_0%,transparent_36%,black_58%,black_100%\)\]/);
   assert.match(appComponentSource, /text-white\/90/);
   assert.match(appComponentSource, /bg-white\/88/);
   assert.match(appComponentSource, /text-\[#111315\]/);

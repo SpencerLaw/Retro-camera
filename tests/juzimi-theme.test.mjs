@@ -139,6 +139,21 @@ await runTest('juzimi retreat cards expose a soft pink glowing edge', async () =
   }
 });
 
+await runTest('juzimi retreat glass tint preserves image colour instead of blackening the bottom', async () => {
+  const { getJuzimiTheme, JUZIMI_THEME_MODES } = await loadThemeModule();
+
+  for (const mode of JUZIMI_THEME_MODES) {
+    const retreat = getJuzimiTheme({ family: 'retreat', mode });
+
+    for (const accent of retreat.cardAccents) {
+      assert.doesNotMatch(accent.glass.tint, /rgba\(0,0,0/);
+      assert.doesNotMatch(accent.glass.tint, /rgba\(9,14,18/);
+      assert.doesNotMatch(accent.glass.tint, /rgba\(15,23,42/);
+      assert.match(accent.glass.tint, /rgba\(255,2\d{2},2\d{2},0\.\d+\)/);
+    }
+  }
+});
+
 await runTest('juzimi retreat night background keeps cinematic color drift', async () => {
   const { getJuzimiTheme } = await loadThemeModule();
   const retreatNight = getJuzimiTheme({ family: 'retreat', mode: 'night' });

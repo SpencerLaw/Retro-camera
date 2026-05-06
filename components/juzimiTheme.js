@@ -89,7 +89,7 @@ const GLASS_STUDIO_NIGHT = {
 
 const GLASS_RETREAT_DAY = {
   surface: 'rgba(255,255,255,0.18)',
-  tint: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(15,23,42,0.08) 34%, rgba(9,14,18,0.76) 100%)',
+  tint: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 52%, rgba(255,242,248,0.16) 100%)',
   border: 'rgba(255,255,255,0.48)',
   shadow: 'rgba(31,41,55,0.32)',
   highlight: 'rgba(255,255,255,0.42)',
@@ -99,7 +99,7 @@ const GLASS_RETREAT_DAY = {
 
 const GLASS_RETREAT_NIGHT = {
   surface: 'rgba(255,255,255,0.1)',
-  tint: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.14) 34%, rgba(0,0,0,0.82) 100%)',
+  tint: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,210,226,0.08) 54%, rgba(255,192,214,0.14) 100%)',
   border: 'rgba(255,255,255,0.22)',
   shadow: 'rgba(0,0,0,0.58)',
   highlight: 'rgba(255,255,255,0.22)',

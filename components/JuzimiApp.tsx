@@ -231,16 +231,16 @@ const SentenceCard = ({
         onClick={onClick}
         className="juzimi-card-hover group relative block w-full rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(12,18,22,0.04) 34%, rgba(7,10,12,0.78) 100%), url("${accent.image}")`,
+          backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.02) 100%), url("${accent.image}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           boxShadow: `0 0 0 1px ${accent.glass.edge}, 0 0 30px ${accent.glass.glow}, 0 30px 82px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
           minHeight: cardMinHeight,
         }}
       >
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,transparent_30%,rgba(0,0,0,0.24)_66%,rgba(0,0,0,0.48)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,transparent_38%,rgba(255,255,255,0.04)_100%)]" />
         <div
-          className="absolute inset-0 backdrop-blur-[12px] [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_32%,black_56%,black_100%)]"
+          className="absolute inset-0 backdrop-blur-[14px] [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_36%,black_58%,black_100%)]"
           style={{ background: accent.glass.tint }}
         />
 

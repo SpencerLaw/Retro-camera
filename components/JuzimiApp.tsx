@@ -247,10 +247,7 @@ const SentenceCard = ({
         <div className="absolute inset-[1px] rounded-[2.08rem] border border-white/18 pointer-events-none" />
 
         <div className="relative z-10 flex h-full flex-col p-5 md:p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="rounded-full bg-black/22 px-3 py-1 text-[11px] font-black text-white/86 backdrop-blur-xl border border-white/12">
-              {accent.mood}
-            </div>
+          <div className="flex items-start justify-end">
             <div className="rounded-full bg-black/34 px-3.5 py-1.5 text-[13px] font-black text-white shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-xl">
               {accent.price}
             </div>
@@ -273,16 +270,18 @@ const SentenceCard = ({
             {sentence.source && <> · 《{sentence.source}》</>}
           </p>
 
-          <div className="mb-6 flex min-h-[30px] flex-wrap gap-2">
-            {(sentence.tags.length > 0 ? sentence.tags.slice(0, 2) : ['句子', accent.mood]).map(tag => (
-              <span
-                key={tag}
-                className="rounded-full bg-black/28 px-3 py-1.5 text-[11px] font-black text-white/96 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_22px_rgba(0,0,0,0.18)] backdrop-blur-xl"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+          {sentence.tags.length > 0 && (
+            <div className="mb-6 flex min-h-[30px] flex-wrap gap-2">
+              {sentence.tags.slice(0, 2).map(tag => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-black/28 px-3 py-1.5 text-[11px] font-black text-white/96 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_22px_rgba(0,0,0,0.18)] backdrop-blur-xl"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           <div className="rounded-full bg-white px-5 py-4 text-center text-[15px] font-black text-[#151515] shadow-[0_18px_42px_rgba(0,0,0,0.24)] transition-transform duration-300 group-hover:-translate-y-0.5">
             阅读句子

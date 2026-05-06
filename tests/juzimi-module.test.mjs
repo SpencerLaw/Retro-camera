@@ -87,8 +87,16 @@ runTest('juzimi theme family selector shows all themes as borderless tabs', () =
   assert.match(appComponentSource, /role="tab"/);
   assert.match(appComponentSource, /themeFamilyLabels\[family\]/);
   assert.match(appComponentSource, /setThemeFamily/);
+  assert.doesNotMatch(appComponentSource, /role="tablist"[\s\S]{0,220}\bborder\b/);
+  assert.doesNotMatch(appComponentSource, /role="tab"[\s\S]{0,360}\bborder\b/);
   assert.doesNotMatch(appComponentSource, /getJuzimiThemeFamilyAction/);
   assert.doesNotMatch(appComponentSource, /toggleThemeFamily/);
+});
+
+runTest('juzimi retreat card removes the top-left mood label', () => {
+  assert.doesNotMatch(appComponentSource, /<div className="rounded-full bg-black\/22[\s\S]*?\{accent\.mood\}[\s\S]*?<\/div>/);
+  assert.doesNotMatch(appComponentSource, /accent\.mood/);
+  assert.match(appComponentSource, /\{accent\.price\}/);
 });
 
 runTest('juzimi retreat card uses feathered blur and stronger text contrast', () => {

@@ -1,6 +1,6 @@
 export const JUZIMI_THEME_STORAGE_KEY = 'juzimi_theme_preference';
 
-export const JUZIMI_THEME_FAMILIES = ['morning', 'studio'];
+export const JUZIMI_THEME_FAMILIES = ['morning', 'studio', 'retreat'];
 export const JUZIMI_THEME_MODES = ['day', 'night'];
 
 const DEFAULT_THEME_PREFERENCE = { family: 'morning', mode: 'day' };
@@ -41,6 +41,15 @@ const STUDIO_NIGHT_CARD_ACCENTS = [
   { surface: 'rgba(18,18,18,0.91)', cover: 'linear-gradient(135deg, #030712 0%, #1f2937 28%, #ea580c 64%, #facc15 100%)', text: '#f8fafc', sub: 'rgba(248,250,252,0.62)', tagBg: 'rgba(251,191,36,0.14)', tagText: '#fde68a' },
 ];
 
+const RETREAT_CARD_ACCENTS = [
+  { image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=82', mood: '海风', price: '#01', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', tagBg: 'rgba(255,255,255,0.18)', tagText: '#ffffff' },
+  { image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=900&q=82', mood: '木屋', price: '#02', text: '#ffffff', sub: 'rgba(255,255,255,0.72)', tagBg: 'rgba(255,255,255,0.18)', tagText: '#ffffff' },
+  { image: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=900&q=82', mood: '暮色', price: '#03', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', tagBg: 'rgba(255,255,255,0.16)', tagText: '#ffffff' },
+  { image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=82', mood: '山谷', price: '#04', text: '#ffffff', sub: 'rgba(255,255,255,0.72)', tagBg: 'rgba(255,255,255,0.18)', tagText: '#ffffff' },
+  { image: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&q=82', mood: '森林', price: '#05', text: '#ffffff', sub: 'rgba(255,255,255,0.72)', tagBg: 'rgba(255,255,255,0.16)', tagText: '#ffffff' },
+  { image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=82', mood: '远方', price: '#06', text: '#ffffff', sub: 'rgba(255,255,255,0.7)', tagBg: 'rgba(255,255,255,0.18)', tagText: '#ffffff' },
+];
+
 const withFrostedGlass = (accents, glass) => accents.map(accent => ({
   ...accent,
   glass,
@@ -76,6 +85,22 @@ const GLASS_STUDIO_NIGHT = {
   border: 'rgba(255,255,255,0.2)',
   shadow: 'rgba(0,0,0,0.56)',
   highlight: 'rgba(255,255,255,0.2)',
+};
+
+const GLASS_RETREAT_DAY = {
+  surface: 'rgba(255,255,255,0.18)',
+  tint: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(15,23,42,0.08) 34%, rgba(9,14,18,0.76) 100%)',
+  border: 'rgba(255,255,255,0.48)',
+  shadow: 'rgba(31,41,55,0.32)',
+  highlight: 'rgba(255,255,255,0.42)',
+};
+
+const GLASS_RETREAT_NIGHT = {
+  surface: 'rgba(255,255,255,0.1)',
+  tint: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.14) 34%, rgba(0,0,0,0.82) 100%)',
+  border: 'rgba(255,255,255,0.22)',
+  shadow: 'rgba(0,0,0,0.58)',
+  highlight: 'rgba(255,255,255,0.22)',
 };
 
 const commonTheme = {
@@ -276,6 +301,98 @@ export const JUZIMI_THEMES = {
       cardAccents: withFrostedGlass(STUDIO_NIGHT_CARD_ACCENTS, GLASS_STUDIO_NIGHT),
     },
   },
+  retreat: {
+    day: {
+      ...commonTheme,
+      family: 'retreat',
+      mode: 'day',
+      name: '旅影',
+      modeLabel: '白天',
+      cardVariant: 'retreat',
+      rootClass: 'bg-[#f3f4f2] text-[#111315]',
+      titleClass: 'text-[#111315]',
+      mutedClass: 'text-[#6a6e72]',
+      accentClass: 'text-[#69716b]',
+      backgroundBase: 'bg-[linear-gradient(135deg,#f7f8f7_0%,#eef0ef_45%,#e6e8e6_100%)]',
+      backgroundDriftStyle: {
+        backgroundImage: [
+          'radial-gradient(circle at 16% 20%, rgba(255,255,255,0.92) 0%, transparent 34%)',
+          'radial-gradient(circle at 80% 16%, rgba(181,190,184,0.32) 0%, transparent 38%)',
+          'radial-gradient(circle at 50% 86%, rgba(112,123,113,0.12) 0%, transparent 42%)',
+        ].join(', '),
+        backgroundSize: '140% 140%, 130% 130%, 120% 120%',
+        animation: 'juzimi-gradient-drift 18s ease-in-out infinite',
+      },
+      gridClass: 'bg-[linear-gradient(90deg,rgba(17,19,21,0.026)_1px,transparent_1px),linear-gradient(180deg,rgba(17,19,21,0.022)_1px,transparent_1px)] bg-[size:96px_96px]',
+      noiseClass: 'opacity-[0.08] mix-blend-multiply',
+      glows: [
+        { className: 'juzimi-bg-breathe absolute left-[-18vw] top-[4vh] h-[64vh] w-[48vw] rounded-full bg-white/80 blur-3xl mix-blend-screen', style: { animation: 'juzimi-breathe-a 16s ease-in-out infinite' } },
+        { className: 'juzimi-bg-breathe absolute right-[-12vw] top-[0vh] h-[74vh] w-[46vw] rounded-full bg-[#c9ceca]/42 blur-3xl mix-blend-multiply', style: { animation: 'juzimi-breathe-b 18s ease-in-out infinite' } },
+      ],
+      headerIconButtonClass: 'h-11 w-11 rounded-full bg-white/82 border border-black/8 shadow-[0_12px_34px_rgba(31,41,55,0.12)] flex items-center justify-center hover:bg-white transition-colors text-[#111315]',
+      headerPillClass: 'h-11 rounded-full bg-white/82 border border-black/8 px-4 font-black flex items-center gap-2 shadow-[0_12px_34px_rgba(31,41,55,0.12)] hover:bg-white transition-colors text-[#111315]',
+      primaryButtonClass: 'rounded-2xl bg-[#111315] text-white font-black flex items-center justify-center gap-2 shadow-lg',
+      secondaryButtonClass: 'rounded-2xl bg-white border border-black/10 text-[#555b5f] font-black',
+      switchWrapClass: 'flex items-center gap-1 rounded-full bg-white/74 backdrop-blur-xl border border-white/84 p-1 shadow-[0_14px_42px_rgba(31,41,55,0.12)]',
+      switchButtonClass: 'h-9 rounded-full px-3 text-xs font-black flex items-center gap-1.5 text-[#555b5f] hover:bg-white transition-colors',
+      searchPanelClass: 'w-full md:w-80 shrink-0 rounded-[1.4rem] bg-white/74 backdrop-blur-xl border border-white/84 p-4 shadow-[0_20px_64px_rgba(31,41,55,0.12)]',
+      searchCountClass: 'text-sm font-black text-[#6a6e72]',
+      searchIconClass: 'absolute left-3.5 top-1/2 -translate-y-1/2 text-[#69716b]/76',
+      inputClass: 'w-full h-11 rounded-[1rem] bg-white/86 border border-black/8 pl-10 pr-4 outline-none text-[#111315] placeholder:text-[#7a8085]/68 font-bold text-sm shadow-[inset_0_1px_4px_rgba(15,23,42,0.08)] focus:border-[#69716b]/54 transition-colors',
+      panelClass: 'mb-8 rounded-[2rem] bg-white/78 backdrop-blur border border-white/80 shadow-[0_20px_70px_rgba(31,41,55,0.14)] overflow-hidden',
+      panelHeaderClass: 'p-5 md:p-6 border-b border-black/8 flex items-center justify-between gap-3',
+      panelInputClass: 'rounded-2xl border border-black/10 bg-white/86 px-4 font-bold outline-none focus:border-[#69716b] text-[#111315] placeholder:text-[#7a8085]/68',
+      panelTextAreaClass: 'rounded-3xl border border-black/10 bg-white/86 p-5 font-serif text-xl leading-9 outline-none focus:border-[#69716b] resize-none text-[#111315] placeholder:text-[#7a8085]/68',
+      closeButtonClass: 'h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 text-[#111315]',
+      emptyStateClass: 'py-16 md:py-24 text-center',
+      cardAccents: withFrostedGlass(RETREAT_CARD_ACCENTS, GLASS_RETREAT_DAY),
+    },
+    night: {
+      ...commonTheme,
+      family: 'retreat',
+      mode: 'night',
+      name: '旅影',
+      modeLabel: '黑夜',
+      cardVariant: 'retreat',
+      rootClass: 'bg-[#090b0c] text-[#f8fafc]',
+      titleClass: 'text-[#f8fafc]',
+      mutedClass: 'text-[#bbc2c7]',
+      accentClass: 'text-[#c9d2cc]',
+      backgroundBase: 'bg-[linear-gradient(135deg,#090b0c_0%,#15191b_42%,#0d1112_100%)]',
+      backgroundDriftStyle: {
+        backgroundImage: [
+          'radial-gradient(circle at 18% 18%, rgba(255,255,255,0.08) 0%, transparent 36%)',
+          'radial-gradient(circle at 80% 12%, rgba(125,137,129,0.2) 0%, transparent 42%)',
+          'radial-gradient(circle at 52% 86%, rgba(255,255,255,0.06) 0%, transparent 42%)',
+        ].join(', '),
+        backgroundSize: '145% 145%, 130% 130%, 120% 120%',
+        animation: 'juzimi-gradient-drift 18s ease-in-out infinite',
+      },
+      gridClass: 'bg-[linear-gradient(90deg,rgba(248,250,252,0.04)_1px,transparent_1px),linear-gradient(180deg,rgba(248,250,252,0.032)_1px,transparent_1px)] bg-[size:96px_96px]',
+      noiseClass: 'opacity-[0.14] mix-blend-overlay',
+      glows: [
+        { className: 'juzimi-bg-breathe absolute left-[-18vw] top-[8vh] h-[62vh] w-[48vw] rounded-full bg-white/8 blur-3xl mix-blend-screen', style: { animation: 'juzimi-breathe-a 16s ease-in-out infinite' } },
+        { className: 'juzimi-bg-breathe absolute right-[-12vw] top-[-4vh] h-[74vh] w-[46vw] rounded-full bg-[#718078]/18 blur-3xl mix-blend-screen', style: { animation: 'juzimi-breathe-b 18s ease-in-out infinite' } },
+      ],
+      headerIconButtonClass: 'h-11 w-11 rounded-full bg-white/10 border border-white/14 shadow-[0_12px_34px_rgba(0,0,0,0.28)] flex items-center justify-center hover:bg-white/16 transition-colors text-[#f8fafc]',
+      headerPillClass: 'h-11 rounded-full bg-white/10 border border-white/14 px-4 font-black flex items-center gap-2 shadow-[0_12px_34px_rgba(0,0,0,0.28)] hover:bg-white/16 transition-colors text-[#f8fafc]',
+      primaryButtonClass: 'rounded-2xl bg-[#f8fafc] text-[#090b0c] font-black flex items-center justify-center gap-2 shadow-lg',
+      secondaryButtonClass: 'rounded-2xl bg-white/10 border border-white/14 text-[#f8fafc] font-black',
+      switchWrapClass: 'flex items-center gap-1 rounded-full bg-white/10 backdrop-blur-xl border border-white/14 p-1 shadow-[0_14px_42px_rgba(0,0,0,0.3)]',
+      switchButtonClass: 'h-9 rounded-full px-3 text-xs font-black flex items-center gap-1.5 text-[#f8fafc] hover:bg-white/12 transition-colors',
+      searchPanelClass: 'w-full md:w-80 shrink-0 rounded-[1.4rem] bg-white/10 backdrop-blur-xl border border-white/14 p-4 shadow-[0_20px_64px_rgba(0,0,0,0.32)]',
+      searchCountClass: 'text-sm font-black text-[#bbc2c7]',
+      searchIconClass: 'absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c9d2cc]/78',
+      inputClass: 'w-full h-11 rounded-[1rem] bg-white/12 border border-white/14 pl-10 pr-4 outline-none text-[#f8fafc] placeholder:text-[#bbc2c7]/62 font-bold text-sm shadow-[inset_0_1px_4px_rgba(0,0,0,0.24)] focus:border-[#c9d2cc]/60 transition-colors',
+      panelClass: 'mb-8 rounded-[2rem] bg-white/10 backdrop-blur border border-white/14 shadow-[0_20px_70px_rgba(0,0,0,0.34)] overflow-hidden',
+      panelHeaderClass: 'p-5 md:p-6 border-b border-white/10 flex items-center justify-between gap-3',
+      panelInputClass: 'rounded-2xl border border-white/12 bg-white/10 px-4 font-bold outline-none focus:border-[#c9d2cc] text-[#f8fafc] placeholder:text-[#bbc2c7]/62',
+      panelTextAreaClass: 'rounded-3xl border border-white/12 bg-white/10 p-5 font-serif text-xl leading-9 outline-none focus:border-[#c9d2cc] resize-none text-[#f8fafc] placeholder:text-[#bbc2c7]/62',
+      closeButtonClass: 'h-10 w-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/16 text-[#f8fafc]',
+      emptyStateClass: 'py-16 md:py-24 text-center',
+      cardAccents: withFrostedGlass(RETREAT_CARD_ACCENTS, GLASS_RETREAT_NIGHT),
+    },
+  },
 };
 
 export const normalizeJuzimiThemePreference = (preference = {}) => {
@@ -298,7 +415,7 @@ export const getJuzimiThemeFamilyAction = (family) => {
   const nextFamily = getNextJuzimiThemeFamily(family);
   return {
     family: nextFamily,
-    label: nextFamily === 'studio' ? '流光' : '晨光',
+    label: nextFamily === 'studio' ? '流光' : nextFamily === 'retreat' ? '旅影' : '晨光',
   };
 };
 
@@ -320,6 +437,7 @@ export const getJuzimiCardMinHeight = (sentence = {}, index = 0, variant = 'post
   const textLength = String(sentence.text || '').length;
   const rhythm = [0, 46, 18, 76, 32, 92][Math.abs(index) % 6];
   const textLift = Math.min(120, Math.floor(textLength / 22) * 28);
+  if (variant === 'retreat') return 510;
   const base = variant === 'studio' ? 322 : 286;
   return base + rhythm + textLift;
 };

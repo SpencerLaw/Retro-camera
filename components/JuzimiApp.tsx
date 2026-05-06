@@ -220,6 +220,70 @@ const SentenceCard = ({
       : sentence.text;
   const cardMinHeight = getJuzimiCardMinHeight(sentence, index, theme.cardVariant);
 
+  if (theme.cardVariant === 'retreat') {
+    return (
+      <button
+        onClick={onClick}
+        className="group relative block w-full aspect-[0.68] min-h-[510px] rounded-[2.15rem] overflow-hidden text-left active:scale-[0.985] transition-all duration-300 cursor-pointer border"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(12,18,22,0.04) 34%, rgba(7,10,12,0.78) 100%), url("${accent.image}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          borderColor: accent.glass.border,
+          boxShadow: `0 30px 82px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
+          minHeight: cardMinHeight,
+        }}
+      >
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,transparent_36%,rgba(0,0,0,0.18)_62%,rgba(0,0,0,0.34)_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-[58%] backdrop-blur-[2px]" style={{ background: accent.glass.tint }} />
+        <div className="absolute inset-[1px] rounded-[2.08rem] border border-white/18 pointer-events-none" />
+
+        <div className="relative z-10 flex h-full flex-col p-5 md:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div className="rounded-full bg-black/22 px-3 py-1 text-[11px] font-black text-white/86 backdrop-blur-xl border border-white/12">
+              {accent.mood}
+            </div>
+            <div className="rounded-full bg-black/34 px-3.5 py-1.5 text-[13px] font-black text-white shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-xl">
+              {accent.price}
+            </div>
+          </div>
+
+          <div className="flex-grow" />
+
+          <div className="mb-4 flex justify-center gap-1.5" aria-hidden="true">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/92" />
+            <span className="h-1.5 w-1.5 rounded-full bg-white/48" />
+            <span className="h-1.5 w-1.5 rounded-full bg-white/48" />
+          </div>
+
+          <h3 className="mb-3 font-sans text-[1.52rem] md:text-[1.75rem] leading-[1.04] font-black tracking-[-0.02em] text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.32)]">
+            {preview}
+          </h3>
+
+          <p className="mb-4 max-w-[92%] text-[14px] md:text-[15px] leading-5 font-semibold text-white/66 drop-shadow-[0_2px_12px_rgba(0,0,0,0.26)]">
+            {sentence.author || '佚名'}
+            {sentence.source && <> · 《{sentence.source}》</>}
+          </p>
+
+          <div className="mb-6 flex min-h-[30px] flex-wrap gap-2">
+            {(sentence.tags.length > 0 ? sentence.tags.slice(0, 2) : ['句子', accent.mood]).map(tag => (
+              <span
+                key={tag}
+                className="rounded-full border border-white/14 bg-white/18 px-3 py-1.5 text-[11px] font-black text-white/92 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-xl"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="rounded-full bg-white px-5 py-4 text-center text-[15px] font-black text-[#151515] shadow-[0_18px_42px_rgba(0,0,0,0.24)] transition-transform duration-300 group-hover:-translate-y-0.5">
+            阅读句子
+          </div>
+        </div>
+      </button>
+    );
+  }
+
   if (theme.cardVariant === 'studio') {
     return (
       <button
@@ -717,10 +781,10 @@ const JuzimiApp: React.FC = () => {
         ) : (
           /* Masonry-style responsive grid — 1 col → 2 col → 3 col */
           <section
-            className="columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5"
+            className={theme.cardVariant === 'retreat' ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3' : 'columns-1 sm:columns-2 xl:columns-3 gap-4 md:gap-5'}
           >
             {filteredSentences.map((sentence, index) => (
-              <div key={sentence.id} className="break-inside-avoid mb-4 md:mb-5">
+              <div key={sentence.id} className={theme.cardVariant === 'retreat' ? '' : 'break-inside-avoid mb-4 md:mb-5'}>
                 <SentenceCard
                   sentence={sentence}
                   index={index}

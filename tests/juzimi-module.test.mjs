@@ -71,6 +71,16 @@ runTest('juzimi admin editor fields keep typed text readable over glass backgrou
   assert.match(appComponentSource, /selection:bg-\[#d6b16e\]\/30/);
 });
 
+runTest('juzimi retreat theme renders the reference-style image glass card UI', () => {
+  assert.match(appComponentSource, /theme\.cardVariant === 'retreat'/);
+  assert.match(appComponentSource, /backgroundImage: `linear-gradient/);
+  assert.match(appComponentSource, /aria-hidden="true"/);
+  assert.match(appComponentSource, /阅读句子/);
+  assert.match(appComponentSource, /aspect-\[0\.68\]/);
+  assert.match(appComponentSource, /rounded-\[2\.15rem\]/);
+  assert.match(appComponentSource, /theme\.cardVariant === 'retreat'\s*\?/);
+});
+
 runTest('juzimi api stores sentences in Vercel KV', () => {
   assert.equal(apiFileExists, true);
   assert.match(apiSource, /import \{ kv \} from '@vercel\/kv'/);

@@ -24,13 +24,15 @@ await runTest('juzimi theme preference defaults and rejects invalid stored value
   assert.deepEqual(normalizeJuzimiThemePreference(), { family: 'morning', mode: 'day' });
   assert.deepEqual(normalizeJuzimiThemePreference({ family: 'unknown', mode: 'midnight' }), { family: 'morning', mode: 'day' });
   assert.deepEqual(normalizeJuzimiThemePreference({ family: 'studio', mode: 'night' }), { family: 'studio', mode: 'night' });
+  assert.deepEqual(normalizeJuzimiThemePreference({ family: 'retreat', mode: 'day' }), { family: 'retreat', mode: 'day' });
 });
 
 await runTest('juzimi theme controls cycle family and day night mode', async () => {
   const { getNextJuzimiThemeFamily, getNextJuzimiThemeMode } = await loadThemeModule();
 
   assert.equal(getNextJuzimiThemeFamily('morning'), 'studio');
-  assert.equal(getNextJuzimiThemeFamily('studio'), 'morning');
+  assert.equal(getNextJuzimiThemeFamily('studio'), 'retreat');
+  assert.equal(getNextJuzimiThemeFamily('retreat'), 'morning');
   assert.equal(getNextJuzimiThemeFamily('unknown'), 'morning');
   assert.equal(getNextJuzimiThemeMode('day'), 'night');
   assert.equal(getNextJuzimiThemeMode('night'), 'day');
@@ -49,7 +51,8 @@ await runTest('juzimi family toggle labels the next theme instead of current sta
   const { getJuzimiThemeFamilyAction } = await loadThemeModule();
 
   assert.deepEqual(getJuzimiThemeFamilyAction('morning'), { family: 'studio', label: '流光' });
-  assert.deepEqual(getJuzimiThemeFamilyAction('studio'), { family: 'morning', label: '晨光' });
+  assert.deepEqual(getJuzimiThemeFamilyAction('studio'), { family: 'retreat', label: '旅影' });
+  assert.deepEqual(getJuzimiThemeFamilyAction('retreat'), { family: 'morning', label: '晨光' });
   assert.deepEqual(getJuzimiThemeFamilyAction('unknown'), { family: 'morning', label: '晨光' });
 });
 
@@ -66,7 +69,7 @@ await runTest('juzimi card heights vary for a waterfall layout', async () => {
 await runTest('juzimi has complete visual theme configs for both families and modes', async () => {
   const { getJuzimiTheme, JUZIMI_THEME_FAMILIES, JUZIMI_THEME_MODES } = await loadThemeModule();
 
-  assert.deepEqual(JUZIMI_THEME_FAMILIES, ['morning', 'studio']);
+  assert.deepEqual(JUZIMI_THEME_FAMILIES, ['morning', 'studio', 'retreat']);
   assert.deepEqual(JUZIMI_THEME_MODES, ['day', 'night']);
 
   for (const family of JUZIMI_THEME_FAMILIES) {
@@ -82,6 +85,23 @@ await runTest('juzimi has complete visual theme configs for both families and mo
       assert.equal(typeof theme.searchPanelClass, 'string');
       assert.equal(typeof theme.inputClass, 'string');
     }
+  }
+});
+
+await runTest('juzimi retreat theme adds image-backed travel card tokens without replacing existing variants', async () => {
+  const { getJuzimiTheme } = await loadThemeModule();
+
+  assert.equal(getJuzimiTheme({ family: 'morning', mode: 'day' }).cardVariant, 'poster');
+  assert.equal(getJuzimiTheme({ family: 'studio', mode: 'day' }).cardVariant, 'studio');
+
+  const retreat = getJuzimiTheme({ family: 'retreat', mode: 'day' });
+  assert.equal(retreat.cardVariant, 'retreat');
+  assert.ok(retreat.cardAccents.length >= 6);
+
+  for (const accent of retreat.cardAccents) {
+    assert.match(accent.image, /^https:\/\/images\.unsplash\.com\//);
+    assert.match(accent.mood, /[\u4e00-\u9fff]/);
+    assert.match(accent.price, /^#\d{2}$/);
   }
 });
 

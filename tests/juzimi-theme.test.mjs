@@ -85,6 +85,25 @@ await runTest('juzimi has complete visual theme configs for both families and mo
   }
 });
 
+await runTest('juzimi card accents expose frosted glass styling tokens', async () => {
+  const { getJuzimiTheme, JUZIMI_THEME_FAMILIES, JUZIMI_THEME_MODES } = await loadThemeModule();
+
+  for (const family of JUZIMI_THEME_FAMILIES) {
+    for (const mode of JUZIMI_THEME_MODES) {
+      const theme = getJuzimiTheme({ family, mode });
+
+      for (const accent of theme.cardAccents) {
+        assert.equal(typeof accent.glass, 'object');
+        assert.match(accent.glass.surface, /rgba\(/);
+        assert.match(accent.glass.tint, /gradient/);
+        assert.match(accent.glass.border, /rgba\(/);
+        assert.match(accent.glass.shadow, /rgba\(/);
+        assert.match(accent.glass.highlight, /rgba\(/);
+      }
+    }
+  }
+});
+
 await runTest('juzimi themes avoid background orbit lines and framed empty states', async () => {
   const { getJuzimiTheme, JUZIMI_THEME_FAMILIES, JUZIMI_THEME_MODES } = await loadThemeModule();
 

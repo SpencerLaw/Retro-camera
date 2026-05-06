@@ -224,44 +224,57 @@ const SentenceCard = ({
     return (
       <button
         onClick={onClick}
-        className="group relative w-full text-left rounded-[1.55rem] p-4 shadow-[0_18px_52px_rgba(15,23,42,0.14)] hover:shadow-[0_24px_72px_rgba(15,23,42,0.2)] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col border border-white/18"
-        style={{ background: accent.surface, color: accent.text, minHeight: cardMinHeight }}
+        className="group relative w-full text-left rounded-[2rem] p-4 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col border backdrop-blur-2xl"
+        style={{
+          background: accent.glass.surface,
+          borderColor: accent.glass.border,
+          boxShadow: `0 28px 80px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
+          color: '#fff',
+          minHeight: cardMinHeight,
+        }}
       >
         <div
-          className="absolute left-3 right-3 top-3 h-[118px] rounded-[1.2rem] overflow-hidden"
+          className="absolute inset-0 scale-[1.03] transition-transform duration-700 group-hover:scale-[1.08]"
           style={{ background: accent.cover }}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_22%,rgba(255,255,255,0.68),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.16),transparent_48%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_18%,rgba(255,255,255,0.44),transparent_26%),linear-gradient(145deg,rgba(255,255,255,0.22),transparent_44%)]" />
           <div
-            className="absolute inset-0 opacity-[0.2] mix-blend-overlay"
+            className="absolute inset-0 opacity-[0.18] mix-blend-overlay"
             style={{ backgroundImage: `url("${NOISE_SVG}")` }}
           />
         </div>
 
-        <div className="relative z-10 flex flex-col h-full pt-[92px]">
-          <div className="mb-5 flex items-end justify-between gap-3">
-            <div className="h-14 w-14 rounded-full bg-white/88 shadow-[0_12px_32px_rgba(15,23,42,0.22)] border border-white/70 flex items-center justify-center text-[12px] font-black tracking-widest text-[#151518]">
+        <div
+          className="absolute inset-0"
+          style={{ background: accent.glass.tint }}
+        />
+        <div className="absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(180deg,rgba(255,255,255,0.24),transparent)] opacity-70" />
+        <div className="absolute inset-[1px] rounded-[1.95rem] border border-white/22 pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="mb-8 flex items-start justify-between gap-3">
+            <div className="h-12 w-12 rounded-full bg-white/24 shadow-[0_12px_32px_rgba(0,0,0,0.18)] border border-white/34 backdrop-blur-xl flex items-center justify-center text-[11px] font-black tracking-widest text-white">
               {String(index + 1).padStart(2, '0')}
             </div>
             <div
-              className="rounded-full px-3 py-1 text-[10px] font-black tracking-wide backdrop-blur-sm"
-              style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+              className="rounded-full px-3 py-1 text-[10px] font-black tracking-wide backdrop-blur-xl border border-white/24"
+              style={{ backgroundColor: 'rgba(255,255,255,0.18)', color: '#fff' }}
             >
               Juzimi
             </div>
           </div>
 
+          <div className="flex-grow" />
+
           <h3
-            className="font-serif text-[1.45rem] md:text-[1.62rem] leading-[1.2] tracking-tight mb-7"
-            style={{ color: accent.text }}
+            className="font-serif text-[1.55rem] md:text-[1.78rem] leading-[1.16] tracking-tight mb-6 drop-shadow-[0_2px_14px_rgba(0,0,0,0.28)]"
+            style={{ color: '#fff' }}
           >
             {preview}
           </h3>
 
-          <div className="flex-grow"></div>
-
           <div className="mb-5 w-5/6">
-            <p className="text-[13px] leading-snug font-black" style={{ color: accent.sub }}>
+            <p className="text-[13px] leading-snug font-black drop-shadow-[0_2px_10px_rgba(0,0,0,0.24)]" style={{ color: 'rgba(255,255,255,0.78)' }}>
               {sentence.author || '佚名'}
               {sentence.source && <><br />《{sentence.source}》</>}
             </p>
@@ -277,16 +290,16 @@ const SentenceCard = ({
                 {sentence.tags.slice(0, 3).map(tag => (
                   <span
                     key={tag}
-                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-sm"
-                    style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-xl border border-white/20"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.18)', color: '#fff' }}
                   >
                     {tag}
                   </span>
                 ))}
                 {sentence.tags.length > 3 && (
                   <span
-                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-sm opacity-80"
-                    style={{ backgroundColor: accent.tagBg, color: accent.tagText }}
+                    className="rounded-full px-3 py-1 text-[10px] font-medium tracking-wide backdrop-blur-xl border border-white/20 opacity-80"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.18)', color: '#fff' }}
                   >
                     +{sentence.tags.length - 3}
                   </span>
@@ -302,12 +315,28 @@ const SentenceCard = ({
   return (
     <button
       onClick={onClick}
-      className={`group relative w-full text-left rounded-[1.2rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col ${theme.cardShadowClass}`}
-      style={{ background: accent.bg, minHeight: cardMinHeight }}
+      className="group relative w-full text-left rounded-[1.65rem] p-6 md:p-8 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden flex flex-col border backdrop-blur-2xl"
+      style={{
+        background: accent.glass.surface,
+        borderColor: accent.glass.border,
+        boxShadow: `0 24px 72px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
+        minHeight: cardMinHeight,
+      }}
     >
+      <div
+        className="absolute inset-0 scale-[1.02] transition-transform duration-700 group-hover:scale-[1.06]"
+        style={{ background: accent.bg }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{ background: accent.glass.tint }}
+      />
+      <div className="absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(180deg,rgba(255,255,255,0.26),transparent)] opacity-80" />
+      <div className="absolute inset-[1px] rounded-[1.58rem] border border-white/18 pointer-events-none" />
+
       {/* Noise Overlay */}
       <div 
-        className="absolute inset-0 pointer-events-none mix-blend-overlay"
+        className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-[0.16]"
         style={{ backgroundImage: `url("${NOISE_SVG}")` }}
       />
 

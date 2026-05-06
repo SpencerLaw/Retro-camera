@@ -41,6 +41,43 @@ const STUDIO_NIGHT_CARD_ACCENTS = [
   { surface: 'rgba(18,18,18,0.91)', cover: 'linear-gradient(135deg, #030712 0%, #1f2937 28%, #ea580c 64%, #facc15 100%)', text: '#f8fafc', sub: 'rgba(248,250,252,0.62)', tagBg: 'rgba(251,191,36,0.14)', tagText: '#fde68a' },
 ];
 
+const withFrostedGlass = (accents, glass) => accents.map(accent => ({
+  ...accent,
+  glass,
+}));
+
+const GLASS_MORNING_DAY = {
+  surface: 'rgba(255,255,255,0.28)',
+  tint: 'linear-gradient(180deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 36%, rgba(19,24,28,0.42) 100%)',
+  border: 'rgba(255,255,255,0.62)',
+  shadow: 'rgba(91,71,45,0.24)',
+  highlight: 'rgba(255,255,255,0.58)',
+};
+
+const GLASS_MORNING_NIGHT = {
+  surface: 'rgba(255,246,226,0.12)',
+  tint: 'linear-gradient(180deg, rgba(255,244,218,0.13) 0%, rgba(255,244,218,0.04) 34%, rgba(0,0,0,0.5) 100%)',
+  border: 'rgba(255,230,185,0.24)',
+  shadow: 'rgba(0,0,0,0.46)',
+  highlight: 'rgba(255,239,203,0.25)',
+};
+
+const GLASS_STUDIO_DAY = {
+  surface: 'rgba(255,255,255,0.24)',
+  tint: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 32%, rgba(9,13,22,0.5) 100%)',
+  border: 'rgba(255,255,255,0.7)',
+  shadow: 'rgba(55,65,81,0.28)',
+  highlight: 'rgba(255,255,255,0.66)',
+};
+
+const GLASS_STUDIO_NIGHT = {
+  surface: 'rgba(255,255,255,0.1)',
+  tint: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.02) 30%, rgba(0,0,0,0.58) 100%)',
+  border: 'rgba(255,255,255,0.2)',
+  shadow: 'rgba(0,0,0,0.56)',
+  highlight: 'rgba(255,255,255,0.2)',
+};
+
 const commonTheme = {
   cardShadowClass: 'shadow-[0_18px_52px_rgba(23,19,16,0.13)] hover:shadow-[0_22px_70px_rgba(23,19,16,0.18)]',
   errorClass: 'mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700',
@@ -93,7 +130,7 @@ export const JUZIMI_THEMES = {
       panelTextAreaClass: 'rounded-3xl border border-black/10 bg-[#f8f3eb] p-5 font-serif text-xl leading-9 outline-none focus:border-[#c7a46c] resize-none text-[#171310] placeholder:text-[#8b7a68]/58',
       closeButtonClass: 'h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 text-[#171310]',
       emptyStateClass: 'py-16 md:py-24 text-center',
-      cardAccents: MORNING_DAY_CARD_ACCENTS,
+      cardAccents: withFrostedGlass(MORNING_DAY_CARD_ACCENTS, GLASS_MORNING_DAY),
     },
     night: {
       ...commonTheme,
@@ -140,7 +177,7 @@ export const JUZIMI_THEMES = {
       panelTextAreaClass: 'rounded-3xl border border-[#d6b16e]/18 bg-[#fff3e2]/10 p-5 font-serif text-xl leading-9 outline-none focus:border-[#d6b16e] resize-none text-[#fff3e2] placeholder:text-[#cdbda7]/55',
       closeButtonClass: 'h-10 w-10 rounded-full bg-[#fff3e2]/10 flex items-center justify-center hover:bg-[#fff3e2]/16 text-[#fff3e2]',
       emptyStateClass: 'py-16 md:py-24 text-center',
-      cardAccents: MORNING_NIGHT_CARD_ACCENTS,
+      cardAccents: withFrostedGlass(MORNING_NIGHT_CARD_ACCENTS, GLASS_MORNING_NIGHT),
     },
   },
   studio: {
@@ -189,7 +226,7 @@ export const JUZIMI_THEMES = {
       panelTextAreaClass: 'rounded-3xl border border-black/10 bg-white/86 p-5 font-serif text-xl leading-9 outline-none focus:border-[#ff9b45] resize-none text-[#151518] placeholder:text-[#818794]/68',
       closeButtonClass: 'h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 text-[#151518]',
       emptyStateClass: 'py-16 md:py-24 text-center',
-      cardAccents: STUDIO_DAY_CARD_ACCENTS,
+      cardAccents: withFrostedGlass(STUDIO_DAY_CARD_ACCENTS, GLASS_STUDIO_DAY),
     },
     night: {
       ...commonTheme,
@@ -236,7 +273,7 @@ export const JUZIMI_THEMES = {
       panelTextAreaClass: 'rounded-3xl border border-white/12 bg-white/10 p-5 font-serif text-xl leading-9 outline-none focus:border-[#ffd166] resize-none text-[#f8fafc] placeholder:text-[#b7bdca]/60',
       closeButtonClass: 'h-10 w-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/16 text-[#f8fafc]',
       emptyStateClass: 'py-16 md:py-24 text-center',
-      cardAccents: STUDIO_NIGHT_CARD_ACCENTS,
+      cardAccents: withFrostedGlass(STUDIO_NIGHT_CARD_ACCENTS, GLASS_STUDIO_NIGHT),
     },
   },
 };

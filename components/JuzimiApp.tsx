@@ -259,7 +259,7 @@ const SentenceCard = ({
             <span className="h-1.5 w-1.5 rounded-full bg-white/48" />
           </div>
 
-          <h3 className="mb-3 font-sans text-[1.52rem] md:text-[1.75rem] leading-[1.04] font-black tracking-normal text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.32)]">
+          <h3 className="mb-3 font-sans text-[1.52rem] md:text-[1.75rem] leading-[1.04] font-semibold tracking-normal text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.32)]">
             {preview}
           </h3>
 

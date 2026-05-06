@@ -234,7 +234,7 @@ const SentenceCard = ({
           backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(12,18,22,0.04) 34%, rgba(7,10,12,0.78) 100%), url("${accent.image}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          boxShadow: `0 30px 82px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
+          boxShadow: `0 0 0 1px ${accent.glass.edge}, 0 0 30px ${accent.glass.glow}, 0 30px 82px ${accent.glass.shadow}, inset 0 1px 0 ${accent.glass.highlight}`,
           minHeight: cardMinHeight,
         }}
       >

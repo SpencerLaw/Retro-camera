@@ -126,6 +126,19 @@ await runTest('juzimi card accents expose frosted glass styling tokens', async (
   }
 });
 
+await runTest('juzimi retreat cards expose a soft pink glowing edge', async () => {
+  const { getJuzimiTheme, JUZIMI_THEME_MODES } = await loadThemeModule();
+
+  for (const mode of JUZIMI_THEME_MODES) {
+    const retreat = getJuzimiTheme({ family: 'retreat', mode });
+
+    for (const accent of retreat.cardAccents) {
+      assert.match(accent.glass.edge, /rgba\(255,19\d,21\d,0\.[34]\d\)/);
+      assert.match(accent.glass.glow, /rgba\(255,16\d,19\d,0\.2\d\)/);
+    }
+  }
+});
+
 await runTest('juzimi themes avoid background orbit lines and framed empty states', async () => {
   const { getJuzimiTheme, JUZIMI_THEME_FAMILIES, JUZIMI_THEME_MODES } = await loadThemeModule();
 

@@ -93,6 +93,8 @@ const GLASS_RETREAT_DAY = {
   border: 'rgba(255,255,255,0.48)',
   shadow: 'rgba(31,41,55,0.32)',
   highlight: 'rgba(255,255,255,0.42)',
+  edge: 'rgba(255,198,216,0.42)',
+  glow: 'rgba(255,166,196,0.24)',
 };
 
 const GLASS_RETREAT_NIGHT = {
@@ -101,6 +103,8 @@ const GLASS_RETREAT_NIGHT = {
   border: 'rgba(255,255,255,0.22)',
   shadow: 'rgba(0,0,0,0.58)',
   highlight: 'rgba(255,255,255,0.22)',
+  edge: 'rgba(255,192,214,0.36)',
+  glow: 'rgba(255,162,196,0.22)',
 };
 
 const commonTheme = {

@@ -128,6 +128,12 @@ runTest('juzimi retreat card uses feathered blur and stronger text contrast', ()
   assert.doesNotMatch(appComponentSource, /bottom-0 h-\[58%\] backdrop-blur-\[2px\]/);
 });
 
+runTest('juzimi retreat card draws its edge with a subtle pink glow shadow', () => {
+  assert.match(appComponentSource, /0 0 0 1px \$\{accent\.glass\.edge\}/);
+  assert.match(appComponentSource, /0 0 30px \$\{accent\.glass\.glow\}/);
+  assert.doesNotMatch(appComponentSource, /rounded-\[2\.15rem\][^"]*\bborder\b/);
+});
+
 runTest('juzimi api stores sentences in Vercel KV', () => {
   assert.equal(apiFileExists, true);
   assert.match(apiSource, /import \{ kv \} from '@vercel\/kv'/);

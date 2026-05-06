@@ -139,6 +139,22 @@ await runTest('juzimi retreat cards expose a soft pink glowing edge', async () =
   }
 });
 
+await runTest('juzimi retreat night background keeps cinematic color drift', async () => {
+  const { getJuzimiTheme } = await loadThemeModule();
+  const retreatNight = getJuzimiTheme({ family: 'retreat', mode: 'night' });
+
+  assert.match(retreatNight.backgroundBase, /#07111f/);
+  assert.match(retreatNight.backgroundBase, /#241020/);
+  assert.match(retreatNight.backgroundBase, /#081714/);
+  assert.match(retreatNight.backgroundDriftStyle.backgroundImage, /rgba\(68,93,255,0\.18\)/);
+  assert.match(retreatNight.backgroundDriftStyle.backgroundImage, /rgba\(255,60,105,0\.26\)/);
+  assert.match(retreatNight.backgroundDriftStyle.backgroundImage, /rgba\(43,210,190,0\.16\)/);
+  assert.ok(retreatNight.glows.length >= 3);
+  assert.match(retreatNight.glows.map(glow => glow.className).join(' '), /#3157ff/);
+  assert.match(retreatNight.glows.map(glow => glow.className).join(' '), /#ff4f7a/);
+  assert.match(retreatNight.glows.map(glow => glow.className).join(' '), /#22d3c5/);
+});
+
 await runTest('juzimi themes avoid background orbit lines and framed empty states', async () => {
   const { getJuzimiTheme, JUZIMI_THEME_FAMILIES, JUZIMI_THEME_MODES } = await loadThemeModule();
 

@@ -1,6 +1,6 @@
 import { del, put } from '@vercel/blob';
 import { kv } from '@vercel/kv';
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   PROMPT_GALLERY_ADMIN_PASSWORD_HASH,
   assertPromptGalleryEntryWithinLimits,

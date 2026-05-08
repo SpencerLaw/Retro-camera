@@ -1,6 +1,6 @@
 import { kv } from '@vercel/kv';
 import { del } from '@vercel/blob';
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
  * 学霸成长计划 - 家长管理接口

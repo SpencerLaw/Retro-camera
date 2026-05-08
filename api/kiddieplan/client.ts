@@ -1,5 +1,5 @@
 import { kv } from '@vercel/kv';
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
  * 学霸成长计划 - 学生/客户端接口

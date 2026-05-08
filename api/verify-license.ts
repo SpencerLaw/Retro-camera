@@ -1,6 +1,6 @@
 import { kv } from '@vercel/kv';
 import { del, list } from '@vercel/blob';
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   buildLicenseKey,
   buildRoomMessageKey,

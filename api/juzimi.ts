@@ -1,5 +1,5 @@
 import { kv } from '@vercel/kv';
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   JUZIMI_ADMIN_PASSWORD_HASH,
   normalizeJuzimiSentence,

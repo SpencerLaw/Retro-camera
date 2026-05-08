@@ -1,5 +1,5 @@
 import { put } from '@vercel/blob';
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
  * 星梦奇旅 - 孩子头像上传接口

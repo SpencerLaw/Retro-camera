@@ -21,6 +21,12 @@ import {
   X,
 } from 'lucide-react';
 import {
+  clearTugLicense,
+  getTugLicense,
+  isTugLicenseVerified,
+  verifyTugLicense,
+} from './TugOfWarLicenseManager';
+import {
   PROMPT_GALLERY_ADMIN_PASSWORD_HASH,
   PROMPT_GALLERY_MAX_IMAGES,
   PROMPT_GALLERY_MAX_IMAGE_BYTES,
@@ -73,6 +79,11 @@ const blankForm = {
 };
 
 const ADMIN_SESSION_KEY = 'prompt_gallery_admin_token';
+const PROMPT_GALLERY_LICENSE_CONFIG = {
+  licensePrefix: 'PT',
+  storagePrefix: 'prompt_gallery',
+  deviceInfo: 'Prompt Gallery',
+};
 const IMAGE_PREVIEW_DEFAULT_ZOOM = 1.4;
 const IMAGE_PREVIEW_MIN_ZOOM = 1;
 const IMAGE_PREVIEW_MAX_ZOOM = 4;
@@ -290,6 +301,9 @@ const PromptGalleryApp: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isPromptLicensed, setIsPromptLicensed] = useState(false);
+  const [licenseInput, setLicenseInput] = useState('');
+  const [licenseChecking, setLicenseChecking] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminToken, setAdminToken] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -308,6 +322,7 @@ const PromptGalleryApp: React.FC = () => {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const autoLoadRef = useRef(false);
   const promptDialogOpen = showPromptFormDialog || Boolean(dialogSummary) || imagePreviewOpen;
+  const savedLicenseCode = getTugLicense(PROMPT_GALLERY_LICENSE_CONFIG);
 
   const imageBytes = useMemo(() => (
     form.images.reduce((total, image) => (
@@ -316,6 +331,7 @@ const PromptGalleryApp: React.FC = () => {
   ), [form.images]);
 
   const loadList = async (reset = true) => {
+    if (!isPromptLicensed) return;
     setLoading(true);
     setError('');
     try {
@@ -339,8 +355,9 @@ const PromptGalleryApp: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!isPromptLicensed) return;
     loadList(true);
-  }, [query, activeTag, activeModel]);
+  }, [query, activeTag, activeModel, isPromptLicensed]);
 
   useEffect(() => {
     if (!hasMore || loading) return;
@@ -358,6 +375,11 @@ const PromptGalleryApp: React.FC = () => {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [hasMore, loading, summaries.length, query, activeTag, activeModel]);
+
+  useEffect(() => {
+    setIsPromptLicensed(isTugLicenseVerified(PROMPT_GALLERY_LICENSE_CONFIG));
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     const storedToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || '';
@@ -418,6 +440,40 @@ const PromptGalleryApp: React.FC = () => {
     setShowAdminPanel(false);
     setShowPromptFormDialog(false);
     setForm(blankForm);
+  };
+
+  const handleLicenseSubmit = async () => {
+    if (!licenseInput.trim()) {
+      setError('请输入图片工程提示词授权码');
+      return;
+    }
+
+    setLicenseChecking(true);
+    setError('');
+    try {
+      const result = await verifyTugLicense(PROMPT_GALLERY_LICENSE_CONFIG, licenseInput);
+      if (!result.success) {
+        setError(result.message || '授权码验证失败');
+        return;
+      }
+      setIsPromptLicensed(true);
+      setLicenseInput('');
+    } finally {
+      setLicenseChecking(false);
+    }
+  };
+
+  const handleLicenseLogout = () => {
+    clearTugLicense(PROMPT_GALLERY_LICENSE_CONFIG);
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    setIsPromptLicensed(false);
+    setIsAdmin(false);
+    setAdminToken('');
+    setSummaries([]);
+    setShowAdminPanel(false);
+    setShowPromptFormDialog(false);
+    setDialogSummary(null);
+    setSelectedEntry(null);
   };
 
   const openDetail = async (summary: PromptGallerySummary) => {
@@ -579,6 +635,57 @@ const PromptGalleryApp: React.FC = () => {
 
   const activeImage = selectedEntry?.images?.[activeImageIndex] || selectedEntry?.images?.[0];
 
+  if (!isPromptLicensed) {
+    return (
+      <div className="min-h-screen bg-[#fff8ed] text-[#111827]">
+        <div className="fixed inset-0 pointer-events-none bg-[#f8efe0]" />
+        <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_12%_8%,rgba(255,244,214,0.92),rgba(255,248,237,0.56)_34%,transparent_62%)]" />
+        <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
+          <section className="w-full max-w-md overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+            <div className="border-b border-black/10 px-5 py-5">
+              <button
+                onClick={() => navigate('/')}
+                className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-white hover:bg-[#eef4f0]"
+                aria-label="返回首页"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div className="text-xs font-black uppercase tracking-[0.22em] text-[#0f766e]">Prompt Desk</div>
+              <h1 className="mt-2 text-2xl font-black">提示词图库</h1>
+              <p className="mt-2 text-sm font-bold leading-6 text-[#5b6472]">请输入图片工程提示词授权码后继续查看。</p>
+            </div>
+            <div className="grid gap-3 p-5">
+              <label className="text-sm font-black text-[#374151]" htmlFor="prompt-gallery-license">
+                授权码：
+              </label>
+              <input
+                id="prompt-gallery-license"
+                value={licenseInput}
+                onChange={(event) => setLicenseInput(event.target.value.toUpperCase())}
+                onKeyDown={(event) => { if (event.key === 'Enter') handleLicenseSubmit(); }}
+                placeholder="请输入图片工程提示词授权码"
+                className="h-12 rounded-lg border border-black/10 bg-[#f9fafb] px-3 text-center font-mono text-base font-black tracking-wide outline-none focus:border-[#0f766e]"
+              />
+              <button
+                onClick={handleLicenseSubmit}
+                disabled={licenseChecking}
+                className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#111827] px-5 text-sm font-black text-white disabled:opacity-45"
+              >
+                {licenseChecking ? <Loader2 className="animate-spin" size={17} /> : <Lock size={17} />}
+                验证授权码
+              </button>
+              {error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
+                  {error}
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#fff8ed] text-[#111827]">
       <div className="fixed inset-0 pointer-events-none bg-[#f8efe0]" />
@@ -622,6 +729,14 @@ const PromptGalleryApp: React.FC = () => {
                 className="flex h-10 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black hover:bg-[#eef4f0]"
               >
                 <Lock size={17} /> 管理员
+              </button>
+            )}
+            {savedLicenseCode && (
+              <button
+                onClick={handleLicenseLogout}
+                className="flex h-10 items-center gap-2 rounded-lg border border-black/10 bg-white px-4 text-sm font-black hover:bg-[#eef4f0]"
+              >
+                <Lock size={17} /> 授权码：{savedLicenseCode.slice(0, 6)}...
               </button>
             )}
           </div>

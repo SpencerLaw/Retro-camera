@@ -69,3 +69,9 @@ runTest('prompt gallery api protects mutations with hashed admin auth and valida
   assert.match(apiSource, /管理员密码不正确/);
   assert.doesNotMatch(apiSource, /juzimiadmin/);
 });
+
+runTest('prompt gallery uses PT prefixed licenses in the shared license API', () => {
+  const verifyLicenseSource = fs.readFileSync('api/verify-license.ts', 'utf8');
+  assert.match(verifyLicenseSource, /cleanCode\.startsWith\('PT'\)/);
+  assert.match(verifyLicenseSource, /else if \([\s\S]*startsWith\('PT'\)[\s\S]*cleanCode = cleanCode\.substring\(2\)/);
+});

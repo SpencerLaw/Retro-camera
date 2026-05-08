@@ -77,7 +77,7 @@ function extractDateFromCode(code: string): Date | null {
     // 移除前缀
     if (cleanCode.startsWith('XXDK')) {
       cleanCode = cleanCode.substring(4);
-    } else if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD') || cleanCode.startsWith('GB') || cleanCode.startsWith('XM') || cleanCode.startsWith('SX') || cleanCode.startsWith('YW')) {
+    } else if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD') || cleanCode.startsWith('GB') || cleanCode.startsWith('XM') || cleanCode.startsWith('SX') || cleanCode.startsWith('YW') || cleanCode.startsWith('PT')) {
       cleanCode = cleanCode.substring(2);
     }
 
@@ -113,6 +113,9 @@ function getEffectiveMaxDevices(code: string): number {
   }
   if (cleanCode.startsWith('GB') || cleanCode.startsWith('SX') || cleanCode.startsWith('YW')) {
     return 2; // 班级广播、数学拔河、英语单词拔河限制 2 个设备
+  }
+  if (cleanCode.startsWith('PT')) {
+    return 5; // 图片工程提示词默认 5 个设备
   }
   return 5; // 其他默认 5
 }

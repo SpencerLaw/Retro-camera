@@ -31,3 +31,11 @@ runTest('admin console generates math tug codes with the SX prefix', () => {
   assert.match(adminHtml, /type === 'sx'/);
   assert.match(adminHtml, /code = 'SX-' \+ datePart \+ '-' \+ random/);
 });
+
+runTest('admin console generates prompt gallery codes with the PT prefix', () => {
+  assert.match(adminHtml, /generateCodes\('pt'\)/);
+  assert.match(adminHtml, /生成提示词图库码 \(PT\)/);
+  assert.match(adminHtml, /'PT': \{ name: '提示词图库'/);
+  assert.match(adminHtml, /type === 'pt'/);
+  assert.match(adminHtml, /code = 'PT-' \+ datePart \+ '-' \+ random/);
+});

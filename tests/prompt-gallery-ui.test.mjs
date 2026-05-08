@@ -42,6 +42,18 @@ runTest('prompt gallery page has admin upload controls and image compression', (
   assert.match(componentSource, /压缩后/);
 });
 
+runTest('prompt gallery requires a PT license before loading gallery data', () => {
+  assert.match(componentSource, /PROMPT_GALLERY_LICENSE_CONFIG/);
+  assert.match(componentSource, /licensePrefix:\s*'PT'/);
+  assert.match(componentSource, /verifyTugLicense\(PROMPT_GALLERY_LICENSE_CONFIG, licenseInput\)/);
+  assert.match(componentSource, /isTugLicenseVerified\(PROMPT_GALLERY_LICENSE_CONFIG\)/);
+  assert.match(componentSource, /getTugLicense\(PROMPT_GALLERY_LICENSE_CONFIG\)/);
+  assert.match(componentSource, /clearTugLicense\(PROMPT_GALLERY_LICENSE_CONFIG\)/);
+  assert.match(componentSource, /请输入图片工程提示词授权码/);
+  assert.match(componentSource, /验证授权码/);
+  assert.match(componentSource, /授权码：/);
+});
+
 runTest('prompt gallery opens create and edit forms in a management dialog', () => {
   assert.match(componentSource, /showPromptFormDialog/);
   assert.match(componentSource, /role="dialog"/);

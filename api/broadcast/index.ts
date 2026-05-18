@@ -383,7 +383,7 @@ async function handleFetch(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleSend(req: VercelRequest, res: VercelResponse) {
-    const { code, text, isEmergency, repeatCount, voice, channelName, license } = req.body;
+    const { code, text, isEmergency, repeatCount, voice, channelName, license, keepOnScreen } = req.body;
     if (!license) return res.status(400).json({ error: 'Missing license context' });
 
     const cleanLicense = normalizeLicenseCode(license);
@@ -398,6 +398,7 @@ async function handleSend(req: VercelRequest, res: VercelResponse) {
         repeatCount: repeatCount || 1,
         voice,
         channelName: channelName || '',
+        keepOnScreen: keepOnScreen === true,
         license: cleanLicense
     };
 

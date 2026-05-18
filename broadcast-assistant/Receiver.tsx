@@ -14,6 +14,7 @@ interface Message {
     repeatCount?: number;
     channelName?: string;
     voice?: string;
+    keepOnScreen?: boolean;
 }
 declare global {
     interface Window {
@@ -122,15 +123,18 @@ interface SentenceItemProps {
     textLength: number;
     activeSentenceRef: React.RefObject<HTMLDivElement>;
     theme: 'light' | 'dark';
+    isHeld: boolean;
 }
 
 const SentenceItem: React.FC<SentenceItemProps> = ({
-    sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef, theme
+    sentence, isActive, isPast, isEmergency, textLength, activeSentenceRef, theme, isHeld
 }) => {
     const scaleFactor = Math.max(0.6, Math.min(1.2, 200 / (textLength || 1)));
 
     let textColor = '';
-    if (isEmergency) {
+    if (isHeld) {
+        textColor = isEmergency ? '#fecaca' : (theme === 'dark' ? '#ffffff' : '#1e293b');
+    } else if (isEmergency) {
         textColor = isActive ? '#fca5a5' : 'rgba(127, 29, 29, 0.4)';
     } else {
         if (theme === 'dark') {
@@ -144,16 +148,16 @@ const SentenceItem: React.FC<SentenceItemProps> = ({
         <div
             ref={isActive ? activeSentenceRef : null}
             style={{
-                transform: isActive ? 'scale(1.1)' : isPast ? 'scale(0.9)' : 'scale(0.95)',
-                opacity: isActive ? 1 : isPast ? 0.4 : 0.2,
-                filter: isPast ? 'blur(1px)' : 'none',
+                transform: isHeld ? 'scale(1)' : isActive ? 'scale(1.1)' : isPast ? 'scale(0.9)' : 'scale(0.95)',
+                opacity: isHeld ? 1 : isActive ? 1 : isPast ? 0.4 : 0.2,
+                filter: isHeld ? 'none' : isPast ? 'blur(1px)' : 'none',
                 transition: 'all 0.7s ease-in-out'
             }}
             className="py-6 px-10 text-center select-none"
         >
             <p
                 style={{
-                    fontSize: `${scaleFactor * (isActive ? 32 : 24)}px`,
+                    fontSize: `${scaleFactor * (isHeld ? 28 : isActive ? 32 : 24)}px`,
                     color: textColor,
                     transition: 'all 0.5s ease-in-out'
                 }}
@@ -447,6 +451,10 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
             setIsPlaying(false);
             setActiveSentenceIndex(-1);
 
+            if (msg.keepOnScreen) {
+                return;
+            }
+
             setTimeout(() => {
                 if (!isPlayingRef.current) {
                     setCurrentMsg(null);
@@ -533,7 +541,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                             }
                         }
                     } else if (!isPlayingRef.current) {
-                        setCurrentMsg(null);
+                        setCurrentMsg(prev => prev?.keepOnScreen ? prev : null);
                     }
                 } else {
                     failCount = 0;
@@ -555,6 +563,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
 
     const channelName = displayChannelName || receivedHistory[receivedHistory.length - 1]?.channelName || '';
     const emergency = !!currentMsg?.isEmergency;
+    const isHeldMessage = !!currentMsg?.keepOnScreen && !isPlaying;
 
     return (
         <div className={`fixed inset-0 w-full h-[100dvh] z-[100] flex flex-col items-center justify-center p-6 overflow-hidden transition-all duration-1000 ${emergency ? 'bg-rose-950 text-white' : (theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-950')
@@ -725,6 +734,7 @@ const Receiver: React.FC<ReceiverProps> = ({ isDark, onExit, onOpenDialog }) => 
                                             textLength={currentMsg.text.length}
                                             activeSentenceRef={activeRef}
                                             theme={theme}
+                                            isHeld={isHeldMessage}
                                         />
                                     ))}
                                 </div>

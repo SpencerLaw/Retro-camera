@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X, Bug } from 'lucide-react';
+import { Plus, Trash2, Edit2, History, Send, Clock, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, CheckCircle2, AlertCircle, Copy, RefreshCw, Loader2, Info, Radio, Repeat, X, Bug, Pin } from 'lucide-react';
 import { getLicensePrefix } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import ScheduleManager from './ScheduleManager';
@@ -16,6 +16,7 @@ interface Message {
     voice?: string;
     timestamp: string;
     channelName?: string;
+    keepOnScreen?: boolean;
 }
 
 interface Channel {
@@ -67,6 +68,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
     const [isEmergency, setIsEmergency] = useState(false);
     const [isLooping, setIsLooping] = useState(false);
     const [repeatCount, setRepeatCount] = useState<number | string>(1);
+    const [keepOnScreen, setKeepOnScreen] = useState(false);
 
     const [history, setHistory] = useState<Message[]>([]);
     const [status, setStatus] = useState<{ type: 'loading' | 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
@@ -79,6 +81,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         voice: string;
         isEmergency: boolean;
         channelName?: string;
+        keepOnScreen: boolean;
     } | null>(null);
 
     const [showFishAudioDebug, setShowFishAudioDebug] = useState(false);
@@ -329,6 +332,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     code: channelCode.trim(),
                     text: inputText.trim(),
                     isEmergency,
+                    keepOnScreen,
                     channelName: activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                     voice: fishAudioVoice ? `fish:${fishAudioVoice}` : ''
@@ -347,7 +351,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     voice: fishAudioVoice ? `fish:${fishAudioVoice}` : '',
                     repeatCount: isLooping ? -1 : (parseInt(String(repeatCount)) || 1),
                     timestamp: new Date().toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-                    channelName: activeChannel.name
+                    channelName: activeChannel.name,
+                    keepOnScreen
                 };
 
                 const newHistory = [newMessage, ...history].slice(0, 30);
@@ -356,6 +361,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
 
                 setInputText('');
                 setIsEmergency(false);
+                setKeepOnScreen(false);
                 setStatus({ type: 'success', msg: t('broadcast.sender.broadcastDelivered') });
 
                 setTimeout(() => setStatus({ type: null, msg: '' }), 3000);
@@ -367,13 +373,14 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
         }
     };
 
-    const handleReplay = (text: string, isEmergencyMsg: boolean, voice?: string, repeat?: number, originalChannelName?: string) => {
+    const handleReplay = (text: string, isEmergencyMsg: boolean, voice?: string, repeat?: number, originalChannelName?: string, originalKeepOnScreen: boolean = false) => {
         setReplayData({
             text,
             isEmergency: isEmergencyMsg,
             voice: voice || 'zh-CN-XiaoxiaoNeural',
             repeatCount: repeat || 1,
-            channelName: originalChannelName
+            channelName: originalChannelName,
+            keepOnScreen: originalKeepOnScreen
         });
         setShowReplayDialog(true);
     };
@@ -394,6 +401,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     code: channelCode.trim(),
                     text: replayData.text.trim(),
                     isEmergency: replayData.isEmergency,
+                    keepOnScreen: replayData.keepOnScreen,
                     channelName: replayData.channelName || activeChannel?.name || t('broadcast.sender.unknownClass'),
                     repeatCount: replayData.repeatCount,
                     voice: replayData.voice || (fishAudioVoice ? `fish:${fishAudioVoice}` : '')
@@ -411,7 +419,8 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                     voice: replayData.voice || (fishAudioVoice ? `fish:${fishAudioVoice}` : ''),
                     repeatCount: replayData.repeatCount,
                     timestamp: new Date().toLocaleTimeString(window.navigator.language, { hour12: false, hour: '2-digit', minute: '2-digit' }),
-                    channelName: replayData.channelName || activeChannel.name
+                    channelName: replayData.channelName || activeChannel.name,
+                    keepOnScreen: replayData.keepOnScreen
                 };
 
                 const newHistory = [newMessage, ...history].slice(0, 30);
@@ -560,7 +569,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                         </div>
 
                         {/* ─── 控制区：第一行（次数 + 模式 + 紧急）─── */}
-                        <div className="flex items-stretch gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 items-stretch gap-2">
                             {/* 次数调节器 - 横排紧凑版 */}
                             <div className={`flex-1 flex items-center justify-center gap-0 bg-white/50 dark:bg-black/20 backdrop-blur rounded-xl border border-white/40 dark:border-white/10 transition-all overflow-hidden ${isLooping ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
                                 <button
@@ -603,6 +612,22 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 <AlertTriangle size={13} className={isEmergency ? 'animate-bounce' : ''} />
                                 <span className="text-[10px] font-black whitespace-nowrap">{t('broadcast.sender.emergency')}</span>
                                 {isEmergency && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-full animate-ping opacity-40" />}
+                            </button>
+
+                            {/* 播完显示方式切换 */}
+                            <button
+                                type="button"
+                                aria-pressed={keepOnScreen}
+                                title={keepOnScreen ? t('broadcast.sender.keepScreen') : t('broadcast.sender.clearScreen')}
+                                onClick={() => setKeepOnScreen(!keepOnScreen)}
+                                className={`relative flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl border transition-all duration-300 ${keepOnScreen
+                                    ? 'bg-emerald-500 text-white shadow-[0_8px_20px_-4px_rgba(16,185,129,0.4)] border-transparent'
+                                    : 'bg-white/30 dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 border-white/40 dark:border-white/10 hover:border-emerald-400/50 hover:text-emerald-500'}`}
+                            >
+                                <Pin size={13} className={keepOnScreen ? 'fill-current' : ''} />
+                                <span className="text-[10px] font-black whitespace-nowrap">
+                                    {keepOnScreen ? t('broadcast.sender.keepScreenShort') : t('broadcast.sender.clearScreenShort')}
+                                </span>
                             </button>
                         </div>
 
@@ -652,7 +677,7 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                             return filteredHistory.map((msg) => (
                                 <button
                                     key={msg.id}
-                                    onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName)}
+                                    onClick={() => handleReplay(msg.text, msg.isEmergency, msg.voice, msg.repeatCount, msg.channelName, msg.keepOnScreen)}
                                     className={`w-full group p-5 sm:p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border transition-all duration-500 hover:scale-[1.01] text-left flex items-start gap-4 md:gap-6 relative overflow-hidden ${msg.isEmergency
                                         ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40'
                                         : 'bg-white/40 dark:bg-white/[0.03] border-white/40 dark:border-white/10 hover:border-blue-400/50 hover:bg-white/60 shadow-sm'}`}
@@ -667,11 +692,18 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                                 <div className="w-1 h-1 rounded-full bg-slate-200" />
                                                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-500/60">{msg.channelName}</span>
                                             </div>
-                                            {msg.repeatCount && msg.repeatCount !== 1 && (
-                                                <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-slate-100/80 dark:bg-white/5 text-slate-500">
-                                                    {msg.repeatCount === -1 ? '∞' : `x${msg.repeatCount}`}
-                                                </span>
-                                            )}
+                                            <div className="flex items-center gap-1.5">
+                                                {msg.repeatCount && msg.repeatCount !== 1 && (
+                                                    <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-slate-100/80 dark:bg-white/5 text-slate-500">
+                                                        {msg.repeatCount === -1 ? '∞' : `x${msg.repeatCount}`}
+                                                    </span>
+                                                )}
+                                                {msg.keepOnScreen && (
+                                                    <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500">
+                                                        {t('broadcast.sender.keepScreenShort')}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className={`text-lg font-bold line-clamp-2 leading-relaxed transition-colors ${msg.isEmergency ? 'text-red-600' : 'text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
                                             {msg.text}
@@ -861,6 +893,17 @@ const Sender: React.FC<SenderProps> = ({ license, isDark, onExitToSelection, onO
                                 <div className={`ml-2 w-8 h-4 rounded-full relative transition-colors ${replayData.isEmergency ? 'bg-red-500' : 'bg-slate-300 dark:bg-slate-600'}`}>
                                     <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all overflow-hidden ${replayData.isEmergency ? 'right-0.5' : 'left-0.5'}`} />
                                 </div>
+                            </button>
+
+                            <button
+                                onClick={() => setReplayData({ ...replayData, keepOnScreen: !replayData.keepOnScreen })}
+                                className={`flex items-center gap-2 h-14 px-5 rounded-2xl font-bold text-sm transition-all whitespace-nowrap shrink-0 group ${replayData.keepOnScreen
+                                    ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 border border-emerald-200 dark:border-emerald-500/30'
+                                    : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200'
+                                    }`}
+                            >
+                                <Pin size={18} className={replayData.keepOnScreen ? 'fill-current' : ''} />
+                                <span>{replayData.keepOnScreen ? t('broadcast.sender.keepScreen') : t('broadcast.sender.clearScreen')}</span>
                             </button>
 
                             {/* Submit Button */}

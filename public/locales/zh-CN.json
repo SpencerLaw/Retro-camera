@@ -393,7 +393,11 @@
       "noChannelDesc": "目前您还没有任何广播频道。请先创建一个频道（虚拟房间），以便学生们通过 6 位房间码加入接收广播。",
       "loop": "循环",
       "once": "单次",
-      "emergency": "紧急"
+      "emergency": "紧急",
+      "keepScreen": "保留显示",
+      "clearScreen": "自动消失",
+      "keepScreenShort": "保留",
+      "clearScreenShort": "消失"
     },
     "receiver": {
       "exitConfirmTitle": "退出教室",

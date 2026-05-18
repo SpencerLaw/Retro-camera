@@ -377,7 +377,11 @@
       "syncing": "Syncing...",
       "createSuccess": "New room created and synced to cloud.",
       "createError": "Failed to generate unique room number. Please try again.",
-      "fetchingCode": "Assigning unique room number..."
+      "fetchingCode": "Assigning unique room number...",
+      "keepScreen": "Keep Visible",
+      "clearScreen": "Auto Clear",
+      "keepScreenShort": "Keep",
+      "clearScreenShort": "Clear"
     },
     "receiver": {
       "exitConfirmTitle": "Exit Classroom",

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const receiverSource = fs.readFileSync('broadcast-assistant/Receiver.tsx', 'utf8');
+const senderSource = fs.readFileSync('broadcast-assistant/Sender.tsx', 'utf8');
 const ttsSource = fs.readFileSync('broadcast-assistant/utils/ttsManager.ts', 'utf8');
 const desktopMainSource = fs.readFileSync('broadcast-desktop/main.js', 'utf8');
 const desktopPackageSource = fs.readFileSync('broadcast-desktop/package.json', 'utf8');
@@ -64,6 +65,16 @@ runTest('receiver shows toast errors when broadcast audio cannot play', () => {
   assert.match(receiverSource, /声音播放失败，请检查系统音量或重新打开接收器。/);
   assert.match(receiverSource, /播报异常，请重新打开接收器。/);
   assert.match(receiverSource, /setAudioToast\(null\)/);
+});
+
+runTest('teacher can choose whether broadcast text stays visible after playback', () => {
+  assert.match(senderSource, /const \[keepOnScreen, setKeepOnScreen\] = useState\(false\)/);
+  assert.match(senderSource, /keepOnScreen,\s*channelName:/);
+  assert.match(senderSource, /setKeepOnScreen\(false\)/);
+  assert.match(apiSource, /const \{ code, text, isEmergency, repeatCount, voice, channelName, license, keepOnScreen \} = req\.body/);
+  assert.match(apiSource, /keepOnScreen:\s*keepOnScreen === true/);
+  assert.match(receiverSource, /keepOnScreen\?: boolean/);
+  assert.match(receiverSource, /if \(msg\.keepOnScreen\) \{\s*return;\s*\}/s);
 });
 
 runTest('desktop receiver allows autoplay and uses ASCII installer shortcuts for old Windows', () => {

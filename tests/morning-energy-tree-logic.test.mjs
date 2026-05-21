@@ -1,0 +1,170 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+
+function createClassList() {
+  const values = new Set();
+  return {
+    add: (...names) => names.forEach((name) => values.add(name)),
+    remove: (...names) => names.forEach((name) => values.delete(name)),
+    contains: (name) => values.has(name),
+    toggle: (name) => {
+      if (values.has(name)) {
+        values.delete(name);
+        return false;
+      }
+      values.add(name);
+      return true;
+    },
+  };
+}
+
+function createCanvasContext() {
+  const gradient = { addColorStop() {} };
+  return new Proxy({}, {
+    get(_target, property) {
+      if (property === 'createLinearGradient' || property === 'createRadialGradient') {
+        return () => gradient;
+      }
+      return () => {};
+    },
+    set() {
+      return true;
+    },
+  });
+}
+
+function createElement(id = '') {
+  return {
+    id,
+    dataset: {},
+    style: {},
+    value: '',
+    textContent: '',
+    innerHTML: '',
+    classList: createClassList(),
+    appendChild() {},
+    addEventListener() {},
+    remove() {},
+    setAttribute(name, value) {
+      this[name] = value;
+    },
+    getAttribute(name) {
+      return this[name] || null;
+    },
+    querySelector() {
+      return createElement();
+    },
+    querySelectorAll() {
+      return [];
+    },
+    animate() {},
+  };
+}
+
+function loadMorningTree() {
+  const elements = new Map();
+  const getElement = (id) => {
+    if (!elements.has(id)) {
+      elements.set(id, createElement(id));
+    }
+    return elements.get(id);
+  };
+
+  const canvas = getElement('tree-canvas');
+  canvas.width = 1280;
+  canvas.height = 720;
+  canvas.getContext = () => createCanvasContext();
+
+  const storage = new Map();
+  const document = {
+    getElementById: getElement,
+    querySelector: () => createElement(),
+    querySelectorAll: () => [],
+    createElement: () => createElement(),
+    addEventListener() {},
+  };
+
+  const sandbox = {
+    console,
+    document,
+    window: {
+      innerWidth: 1280,
+      innerHeight: 720,
+      addEventListener() {},
+    },
+    localStorage: {
+      getItem: (key) => storage.get(key) || null,
+      setItem: (key, value) => storage.set(key, String(value)),
+      removeItem: (key) => storage.delete(key),
+    },
+    navigator: { mediaDevices: { getUserMedia: async () => ({ getTracks: () => [] }) } },
+    fetch: async () => ({ json: async () => ({}) }),
+    alert() {},
+    setInterval: () => 1,
+    clearInterval() {},
+    setTimeout: () => 1,
+    clearTimeout() {},
+    requestAnimationFrame() {},
+    Date,
+    Math,
+    parseInt,
+    Number,
+    Boolean,
+    String,
+    JSON,
+  };
+
+  sandbox.window.document = document;
+  sandbox.window.localStorage = sandbox.localStorage;
+
+  const source = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  vm.runInNewContext(`
+    ${source}
+    globalThis.__morningTreeTestApi = {
+      STATE,
+      updateState,
+      triggerSuperMode,
+      getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined
+    };
+  `, sandbox);
+
+  return {
+    api: sandbox.__morningTreeTestApi,
+    elements,
+  };
+}
+
+function runTest(name, fn) {
+  try {
+    fn();
+    console.log(`PASS ${name}`);
+  } catch (error) {
+    console.error(`FAIL ${name}`);
+    throw error;
+  }
+}
+
+runTest('morning energy can decrease after the tree has manifested', () => {
+  const { api, elements } = loadMorningTree();
+  api.STATE.isListening = true;
+  api.STATE.energy = 100;
+  api.STATE.currentDB = 60;
+  api.STATE.hasManifested = true;
+  api.STATE.isSuperMode = false;
+
+  api.updateState();
+
+  assert.ok(api.STATE.energy < 100);
+  assert.equal(api.STATE.hasManifested, true);
+  assert.notEqual(elements.get('energy-fill').style.width, '100%');
+});
+
+runTest('morning tree size returns to sapling range at low energy', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getTreeSizeForEnergy, 'function');
+  assert.ok(api.getTreeSizeForEnergy(0) <= 60);
+  assert.ok(api.getTreeSizeForEnergy(50) > api.getTreeSizeForEnergy(0));
+  assert.equal(api.getTreeSizeForEnergy(100), 240);
+});

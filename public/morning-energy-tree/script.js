@@ -70,6 +70,30 @@ const FX_LIMITS = {
     trunkTransfers: 16,
     soilTransfers: 18
 };
+const READING_THRESHOLD = 70;
+const QUIET_ENERGY_DECAY_RATE = 0.05;
+const SAPLING_TREE_SIZE = 38;
+const MATURE_TREE_SIZE = 240;
+
+function clampEnergy(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(100, value));
+}
+
+function getNextEnergy(currentEnergy, currentDB, baseGrowthRate) {
+    if (currentDB >= READING_THRESHOLD) {
+        const volumeBonus = Math.min((currentDB - READING_THRESHOLD) / 20, 1);
+        const rate = baseGrowthRate * (1 + volumeBonus);
+        return clampEnergy(currentEnergy + rate);
+    }
+
+    return clampEnergy(currentEnergy - QUIET_ENERGY_DECAY_RATE);
+}
+
+function getTreeSizeForEnergy(energy) {
+    const normalizedEnergy = clampEnergy(energy) / 100;
+    return SAPLING_TREE_SIZE + ((MATURE_TREE_SIZE - SAPLING_TREE_SIZE) * normalizedEnergy);
+}
 
 /* --- DOM Elements --- */
 const $ = (id) => document.getElementById(id);
@@ -1466,26 +1490,11 @@ function updateState() {
         if (dbStatus) { dbStatus.textContent = '等待中'; dbStatus.style.color = 'rgba(255,255,255,0.5)'; }
     }
 
-    if (STATE.hasManifested) {
-        STATE.energy = 100;
-        energyFill.style.width = '100%';
-        return;
-    }
+    const isReadingLoudly = STATE.currentDB >= READING_THRESHOLD;
+    STATE.energy = getNextEnergy(STATE.energy, STATE.currentDB, STATE.baseGrowthRate);
 
-    const READING_THRESHOLD = 70;
-    if (STATE.currentDB >= READING_THRESHOLD) {
-        const volumeBonus = Math.min((STATE.currentDB - READING_THRESHOLD) / 20, 1);
-        const rate = STATE.baseGrowthRate * (1 + volumeBonus);
-        STATE.energy += rate;
-
-        // FIX: Reduced shake threshold and diverted to canvas only
-        if (STATE.currentDB > 100) shakeCanvas(2);
-    } else {
-        STATE.energy -= 0.05;
-    }
-
-    if (STATE.energy < 0) STATE.energy = 0;
-    if (STATE.energy > 100) STATE.energy = 100;
+    // FIX: Reduced shake threshold and diverted to canvas only
+    if (isReadingLoudly && STATE.currentDB > 100) shakeCanvas(2);
 
     energyFill.style.width = STATE.energy + '%';
 
@@ -1505,8 +1514,7 @@ function triggerSuperMode() {
 
     STATE.superModeTimer = setTimeout(() => {
         STATE.isSuperMode = false;
-        STATE.energy = 100;
-        STATE.treeColor = '#ffd700';
+        STATE.treeColor = '#4caf50';
         STATE.superModeTimer = null;
     }, 5000);
 }
@@ -2325,7 +2333,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
             const leafPulse = renderMode.lowPower ? 1 : 1.5;
             const size = baseSize + Math.sin(frameTime + depth) * leafPulse;
 
-            const colorSet = (STATE.isSuperMode || STATE.hasManifested) ? GOLDEN_COLORS : FOLIAGE_COLORS;
+            const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
             const color = colorSet[colorIndex];
 
@@ -2425,7 +2433,7 @@ function loop() {
         bird.draw();
     });
 
-    const treeSize = 80 + (STATE.energy * 1.6);
+    const treeSize = getTreeSizeForEnergy(STATE.energy);
     const renderMode = getRenderMode(treeSize);
 
     ctx.beginPath();

@@ -72,6 +72,13 @@ runTest('adventure editor exposes an import control next to export', () => {
   assert.match(editSource, /t\('importHint'\)/);
 });
 
+runTest('adventure editor shows a top-left previous-page button', () => {
+  assert.match(editSource, /ArrowLeft/);
+  assert.match(editSource, /navigate\(-1\)/);
+  assert.match(editSource, /t\('editBack'\)/);
+  assert.match(editSource, /top-4 left-4/);
+});
+
 runTest('adventure editor shows the import guide dialog only before the first import', () => {
   assert.match(editSource, /adventure_import_guide_confirmed/);
   assert.match(editSource, /showImportGuide/);

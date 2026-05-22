@@ -156,6 +156,15 @@ const AdventureGameEdit: React.FC = () => {
   return (
     <div className="couple-game-app">
       <div className="couple-game-main-container" style={{ maxWidth: '800px', position: 'relative' }}>
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 z-50 p-2 rounded-full bg-white/90 hover:bg-blue-50 border-2 border-blue-400 transition-all text-blue-500 hover:text-blue-600 shadow-sm hover:scale-110"
+          title={t('editBack')}
+          aria-label={t('editBack')}
+        >
+          <ArrowLeft size={24} />
+        </button>
+
         {/* Close Button (X) inside the dialog container */}
         <button
           onClick={() => navigate('/adventure')}

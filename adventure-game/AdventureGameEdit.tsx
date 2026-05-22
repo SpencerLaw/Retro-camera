@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, RotateCcw, Download, Plus, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Save, RotateCcw, Download, Upload, Plus, Trash2, X } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
+import { normalizeAdventureDaresImport } from './adventureDaresLogic';
 // @ts-ignore
 import daresEn from './public/dares.en.json';
 // @ts-ignore
@@ -37,6 +38,7 @@ const AdventureGameEdit: React.FC = () => {
   const navigate = useNavigate();
   const { language: globalLanguage } = useLanguage();
   const currentLang = mapGlobalToAdventureLang(globalLanguage);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [activeStage, setActiveStage] = useState<Stage>('stage1');
   const [dares, setDares] = useState<Record<Stage, string[]>>({
@@ -90,6 +92,22 @@ const AdventureGameEdit: React.FC = () => {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const importedDares = normalizeAdventureDaresImport(JSON.parse(text)) as Record<Stage, string[]>;
+      setDares(importedDares);
+      setHasChanges(true);
+      alert(t('importSuccess'));
+    } catch (error) {
+      alert(t('importFailed'));
+    }
   };
 
   const updateDare = (index: number, value: string) => {
@@ -176,6 +194,19 @@ const AdventureGameEdit: React.FC = () => {
         </div>
 
         <div className="flex gap-4 justify-center flex-wrap">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleImport}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-purple-500 text-white font-bold shadow-lg hover:bg-purple-600 transition-all hover:scale-105"
+          >
+            <Upload size={20} /> {t('import')}
+          </button>
           <button
             onClick={handleSave}
             disabled={!hasChanges}

@@ -20,6 +20,9 @@
         "save": "Save",
         "reset": "Reset",
         "export": "Export",
+        "import": "Import",
+        "importSuccess": "Imported! Review the content, then press Save.",
+        "importFailed": "Import failed. Please choose a JSON file exported from this editor.",
         "saveSuccess": "Saved successfully!",
         "resetConfirm": "Are you sure you want to reset to defaults?"
     },
@@ -44,6 +47,9 @@
         "save": "保存",
         "reset": "重置",
         "export": "导出",
+        "import": "导入",
+        "importSuccess": "导入成功！请检查内容后点击保存。",
+        "importFailed": "导入失败，请选择从本编辑器导出的 JSON 文件。",
         "saveSuccess": "保存成功！",
         "resetConfirm": "确定要重置回默认内容吗？"
     },
@@ -68,6 +74,9 @@
         "save": "保存",
         "reset": "重置",
         "export": "導出",
+        "import": "導入",
+        "importSuccess": "導入成功！請檢查內容後點擊保存。",
+        "importFailed": "導入失敗，請選擇從本編輯器導出的 JSON 檔案。",
         "saveSuccess": "保存成功！",
         "resetConfirm": "確定要重置回默認內容嗎？"
     },
@@ -92,6 +101,9 @@
         "save": "保存",
         "reset": "リセット",
         "export": "エクスポート",
+        "import": "インポート",
+        "importSuccess": "インポートしました。内容を確認してから保存してください。",
+        "importFailed": "インポートに失敗しました。このエディターから書き出したJSONファイルを選んでください。",
         "saveSuccess": "保存しました！",
         "resetConfirm": "デフォルトに戻してもよろしいですか？"
     }

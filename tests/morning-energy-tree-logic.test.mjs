@@ -38,7 +38,11 @@ function createElement(id = '') {
   return {
     id,
     dataset: {},
-    style: {},
+    style: {
+      setProperty(name, value) {
+        this[name] = value;
+      },
+    },
     value: '',
     textContent: '',
     innerHTML: '',
@@ -125,7 +129,10 @@ function loadMorningTree() {
       STATE,
       updateState,
       triggerSuperMode,
-      getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined
+      getNextEnergy: typeof getNextEnergy === 'function' ? getNextEnergy : undefined,
+      getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined,
+      applySensitivityToDb: typeof applySensitivityToDb === 'function' ? applySensitivityToDb : undefined,
+      clampSensitivity: typeof clampSensitivity === 'function' ? clampSensitivity : undefined
     };
   `, sandbox);
 
@@ -167,4 +174,34 @@ runTest('morning tree size returns to sapling range at low energy', () => {
   assert.ok(api.getTreeSizeForEnergy(0) <= 60);
   assert.ok(api.getTreeSizeForEnergy(50) > api.getTreeSizeForEnergy(0));
   assert.equal(api.getTreeSizeForEnergy(100), 240);
+});
+
+runTest('lowest sensitivity still allows loud reading to grow the tree', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.applySensitivityToDb, 'function');
+  assert.equal(typeof api.clampSensitivity, 'function');
+
+  const lowestSensitivity = api.clampSensitivity(0);
+  const adjustedDb = api.applySensitivityToDb(75, lowestSensitivity);
+
+  assert.equal(typeof api.getNextEnergy, 'function');
+  assert.ok(adjustedDb >= 70);
+  assert.ok(api.applySensitivityToDb(65, lowestSensitivity) < 70);
+  assert.ok(api.applySensitivityToDb(60, 85) > api.applySensitivityToDb(60, 50));
+  assert.ok(api.getNextEnergy(0, adjustedDb, api.STATE.baseGrowthRate) > 0);
+});
+
+runTest('sensitivity control uses a slider instead of fixed three-level buttons', () => {
+  const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
+  const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+
+  assert.match(html, /id="sensitivity-slider"/);
+  assert.match(html, /type="range"/);
+  assert.match(html, /id="sensitivity-value"/);
+  assert.doesNotMatch(html, /class="sens-btn"/);
+  assert.doesNotMatch(html, /data-sens="30"/);
+  assert.doesNotMatch(html, /data-sens="50"/);
+  assert.doesNotMatch(html, /data-sens="75"/);
+  assert.doesNotMatch(script, /querySelectorAll\('\.sens-btn'\)/);
 });

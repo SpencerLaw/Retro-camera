@@ -74,6 +74,9 @@ const READING_THRESHOLD = 70;
 const QUIET_ENERGY_DECAY_RATE = 0.05;
 const SAPLING_TREE_SIZE = 38;
 const MATURE_TREE_SIZE = 240;
+const SENSITIVITY_MIN = 35;
+const SENSITIVITY_MAX = 85;
+const SENSITIVITY_DEFAULT = 50;
 
 function clampEnergy(value) {
     if (!Number.isFinite(value)) return 0;
@@ -93,6 +96,23 @@ function getNextEnergy(currentEnergy, currentDB, baseGrowthRate) {
 function getTreeSizeForEnergy(energy) {
     const normalizedEnergy = clampEnergy(energy) / 100;
     return SAPLING_TREE_SIZE + ((MATURE_TREE_SIZE - SAPLING_TREE_SIZE) * normalizedEnergy);
+}
+
+function clampSensitivity(value) {
+    const numericValue = Number.parseInt(value, 10);
+    if (!Number.isFinite(numericValue)) return SENSITIVITY_DEFAULT;
+    return Math.max(SENSITIVITY_MIN, Math.min(SENSITIVITY_MAX, numericValue));
+}
+
+function getSensitivityDbOffset(sensitivity) {
+    const safeSensitivity = clampSensitivity(sensitivity);
+    const delta = safeSensitivity - 50;
+    return delta < 0 ? delta * 0.18 : delta * 0.35;
+}
+
+function applySensitivityToDb(rawDb, sensitivity) {
+    const safeDb = Number.isFinite(rawDb) ? rawDb : 30;
+    return Math.max(30, Math.min(120, safeDb + getSensitivityDbOffset(sensitivity)));
 }
 
 /* --- DOM Elements --- */
@@ -144,6 +164,8 @@ const helpTrigger = $('help-trigger');
 const helpTooltip = $('help-tooltip');
 const dbStatus = $('db-status');
 const ringBar = $('ring-bar');
+const sensitivitySlider = $('sensitivity-slider');
+const sensitivityValue = $('sensitivity-value');
 let taskSaveFeedbackTimer = null;
 let taskStripResetTimer = null;
 let taskStripClockTimer = null;
@@ -1454,12 +1476,7 @@ function calculateDB() {
     let db = 30;
     if (rms > 0) db = (Math.log10(rms) * 20) + 100;
 
-    const adj = (STATE.sensitivity - 50) * 0.5;
-    db += adj;
-    if (db < 30) db = 30;
-    if (db > 120) db = 120;
-
-    return db;
+    return applySensitivityToDb(db, STATE.sensitivity);
 }
 
 /* --- 4. Game Logic --- */
@@ -2528,11 +2545,27 @@ function translateUI() {
     if (taskModal?.classList.contains('open')) renderTaskBoard();
 }
 
+function updateSensitivityControl(value = STATE.sensitivity) {
+    const nextSensitivity = clampSensitivity(value);
+    STATE.sensitivity = nextSensitivity;
+
+    if (sensitivitySlider) {
+        sensitivitySlider.value = String(nextSensitivity);
+        const progress = ((nextSensitivity - SENSITIVITY_MIN) / (SENSITIVITY_MAX - SENSITIVITY_MIN)) * 100;
+        sensitivitySlider.style.setProperty('--sens-progress', `${progress}%`);
+    }
+
+    if (sensitivityValue) {
+        sensitivityValue.textContent = `${nextSensitivity}%`;
+    }
+}
+
 // Init
 initLocalization().then(() => {
     initGatekeeper();
     initTaskUI();
     initReportUI();
+    updateSensitivityControl();
 });
 micBtn.onclick = toggleMic;
 if ($('reset-btn')) $('reset-btn').onclick = resetGame;
@@ -2542,14 +2575,6 @@ window.addEventListener('pagehide', () => {
     if (STATE.isListening) stopMic();
 });
 
-// 3-level sensitivity buttons
-document.querySelectorAll('.sens-btn').forEach(btn => {
-    btn.onclick = () => {
-        document.querySelectorAll('.sens-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        STATE.sensitivity = parseInt(btn.dataset.sens);
-    };
-});
-
-// Fallback: keep slider support if it exists
-if ($('sensitivity-slider')) $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };
+if (sensitivitySlider) {
+    sensitivitySlider.oninput = (event) => updateSensitivityControl(event.target.value);
+}

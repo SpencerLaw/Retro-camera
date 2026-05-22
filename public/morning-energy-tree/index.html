@@ -126,11 +126,18 @@
                     </div>
 
                     <div class="sens-group control-block">
-                        <div class="sens-label">灵敏度 <span id="help-trigger" class="help-icon" title="校准建议">❓</span></div>
-                        <div class="sens-btns">
-                            <button class="sens-btn" data-sens="30">低</button>
-                            <button class="sens-btn active" data-sens="50">中</button>
-                            <button class="sens-btn" data-sens="75">高</button>
+                        <div class="sens-label">
+                            <span>灵敏度</span>
+                            <strong id="sensitivity-value">50%</strong>
+                            <span id="help-trigger" class="help-icon" title="校准建议">❓</span>
+                        </div>
+                        <div class="sens-slider-wrap">
+                            <input id="sensitivity-slider" class="sensitivity-slider" type="range" min="35" max="85"
+                                step="1" value="50" aria-label="麦克风灵敏度">
+                            <div class="sens-range-labels" aria-hidden="true">
+                                <span>稳一点</span>
+                                <span>更灵敏</span>
+                            </div>
                         </div>
                         <!-- Tooltip Content -->
                         <div id="help-tooltip" class="help-tooltip hidden">
@@ -138,7 +145,7 @@
                             <ul>
                                 <li><strong>静音测试</strong>：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。</li>
                                 <li><strong>朗读测试</strong>：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。</li>
-                                <li><strong>低</strong> = 灵敏度低，需较大声音才触发；<strong>高</strong> = 灵敏度高，小声也能读。</li>
+                                <li>滑块靠左更稳，能减少环境噪音误触发；靠右更灵敏，适合麦克风收音偏弱。</li>
                             </ul>
                             <p class="tap-close">点击此处关闭</p>
                         </div>

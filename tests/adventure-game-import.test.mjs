@@ -65,8 +65,19 @@ await runTest('adventure import rejects files not exported by this editor', asyn
 runTest('adventure editor exposes an import control next to export', () => {
   assert.match(editSource, /Upload/);
   assert.match(editSource, /handleImport/);
+  assert.match(editSource, /handleImportClick/);
   assert.match(editSource, /type="file"/);
   assert.match(editSource, /accept="application\/json,\.json"/);
   assert.match(editSource, /t\('import'\)/);
   assert.match(editSource, /t\('importHint'\)/);
+});
+
+runTest('adventure editor shows the import guide dialog only before the first import', () => {
+  assert.match(editSource, /adventure_import_guide_confirmed/);
+  assert.match(editSource, /showImportGuide/);
+  assert.match(editSource, /t\('importGuideTitle'\)/);
+  assert.match(editSource, /t\('importGuideBody'\)/);
+  assert.match(editSource, /t\('importGuideConfirm'\)/);
+  assert.match(editSource, /t\('importGuideCancel'\)/);
+  assert.match(editSource, /fileInputRef\.current\?\.click\(\)/);
 });

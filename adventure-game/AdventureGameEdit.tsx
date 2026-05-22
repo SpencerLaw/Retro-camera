@@ -19,6 +19,7 @@ type Language = 'en' | 'zh' | 'zh-TW' | 'ja';
 type Stage = 'stage1' | 'stage2' | 'stage3';
 
 const translations = translationsData as Record<Language, Record<string, string>>;
+const IMPORT_GUIDE_CONFIRMED_KEY = 'adventure_import_guide_confirmed';
 
 const mapGlobalToAdventureLang = (globalLang: GlobalLanguage): Language => {
   if (globalLang === 'zh-CN') return 'zh';
@@ -47,6 +48,7 @@ const AdventureGameEdit: React.FC = () => {
     stage3: []
   });
   const [hasChanges, setHasChanges] = useState(false);
+  const [showImportGuide, setShowImportGuide] = useState(false);
 
   const t = (key: string): string => {
     return translations[currentLang]?.[key] || key;
@@ -93,6 +95,25 @@ const AdventureGameEdit: React.FC = () => {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+  };
+
+  const openImportPicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportClick = () => {
+    if (localStorage.getItem(IMPORT_GUIDE_CONFIRMED_KEY) === 'true') {
+      openImportPicker();
+      return;
+    }
+
+    setShowImportGuide(true);
+  };
+
+  const confirmImportGuide = () => {
+    localStorage.setItem(IMPORT_GUIDE_CONFIRMED_KEY, 'true');
+    setShowImportGuide(false);
+    openImportPicker();
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,7 +216,7 @@ const AdventureGameEdit: React.FC = () => {
         </div>
 
         <div className="flex gap-4 justify-center flex-wrap">
-          <p className="w-full text-center text-sm font-bold text-gray-500">
+          <p className="w-full text-center text-sm font-bold text-gray-500 px-2">
             {t('importHint')}
           </p>
           <input
@@ -206,7 +227,7 @@ const AdventureGameEdit: React.FC = () => {
             className="hidden"
           />
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={handleImportClick}
             className="flex items-center gap-2 px-6 py-3 rounded-full bg-purple-500 text-white font-bold shadow-lg hover:bg-purple-600 transition-all hover:scale-105"
           >
             <Upload size={20} /> {t('import')}
@@ -232,6 +253,43 @@ const AdventureGameEdit: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {showImportGuide && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 px-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="adventure-import-guide-title"
+            className="w-full max-w-md rounded-[28px] border-4 border-purple-300 bg-white p-6 text-left shadow-2xl"
+          >
+            <div className="mb-4 flex items-center gap-3 text-purple-600">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100">
+                <Upload size={24} />
+              </div>
+              <h2 id="adventure-import-guide-title" className="m-0 text-xl font-black text-purple-600">
+                {t('importGuideTitle')}
+              </h2>
+            </div>
+            <p className="mb-5 whitespace-pre-line text-sm font-bold leading-6 text-gray-600">
+              {t('importGuideBody')}
+            </p>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                onClick={() => setShowImportGuide(false)}
+                className="rounded-full border-2 border-gray-200 px-5 py-3 font-bold text-gray-500 transition-colors hover:bg-gray-50"
+              >
+                {t('importGuideCancel')}
+              </button>
+              <button
+                onClick={confirmImportGuide}
+                className="rounded-full bg-purple-500 px-5 py-3 font-bold text-white shadow-lg transition-all hover:bg-purple-600 hover:scale-105"
+              >
+                {t('importGuideConfirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

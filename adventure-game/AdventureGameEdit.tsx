@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, RotateCcw, Download, Upload, Plus, Trash2, X } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
-import { normalizeAdventureDaresImport } from './adventureDaresLogic';
+import { createAdventureDaresExport, normalizeAdventureDaresImport } from './adventureDaresLogic';
 // @ts-ignore
 import daresEn from './public/dares.en.json';
 // @ts-ignore
@@ -85,7 +85,8 @@ const AdventureGameEdit: React.FC = () => {
   };
 
   const handleDownload = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dares, null, 2));
+    const exportPayload = createAdventureDaresExport(dares, currentLang);
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", `dares.${currentLang}.json`);
@@ -194,6 +195,9 @@ const AdventureGameEdit: React.FC = () => {
         </div>
 
         <div className="flex gap-4 justify-center flex-wrap">
+          <p className="w-full text-center text-sm font-bold text-gray-500">
+            {t('importHint')}
+          </p>
           <input
             ref={fileInputRef}
             type="file"

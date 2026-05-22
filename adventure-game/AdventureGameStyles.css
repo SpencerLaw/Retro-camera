@@ -201,6 +201,148 @@
   top: 10px;
 }
 
+.adventure-license-panel {
+  width: min(92vw, 420px);
+  min-height: 180px;
+  border: 6px solid #FFD700;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 0 #E5C100, 0 24px 34px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #576574;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.2rem;
+}
+
+.adventure-license-spinner {
+  color: #FF6B6B;
+  animation: adventure-spin 0.9s linear infinite;
+}
+
+@keyframes adventure-spin {
+  to { transform: rotate(360deg); }
+}
+
+.adventure-license-back {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 3px solid #FF6B6B;
+  background: rgba(255, 255, 255, 0.95);
+  color: #FF6B6B;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 0 #EE5253, 0 14px 18px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.adventure-license-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 0 #EE5253, 0 18px 22px rgba(0, 0, 0, 0.18);
+}
+
+.adventure-license-card {
+  max-width: 560px;
+  padding: 2.6rem 2rem 3rem;
+}
+
+.adventure-license-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: #48DBFB;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 0 #0ABDE3, 0 14px 18px rgba(0, 0, 0, 0.16);
+}
+
+.adventure-license-card h1 {
+  margin-bottom: 0.9rem;
+  font-size: clamp(2.2rem, 8vw, 3.2rem);
+}
+
+.adventure-license-copy {
+  margin: 0 auto 1.4rem;
+  color: #576574;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.adventure-license-label {
+  display: block;
+  margin-bottom: 0.55rem;
+  color: #576574;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: left;
+}
+
+.adventure-license-input-row {
+  display: flex;
+  align-items: stretch;
+  border: 3px solid #74B9FF;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px rgba(116, 185, 255, 0.18);
+}
+
+.adventure-license-input-row span {
+  min-width: 76px;
+  background: #FF9F43;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.adventure-license-input-row input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.adventure-license-input-row input:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.adventure-license-error {
+  margin: 0.8rem 0 0;
+  color: #EE5253;
+  font-weight: 800;
+}
+
+.adventure-license-submit {
+  margin-top: 1.5rem;
+  min-width: 240px;
+  padding: 1.1rem 2.5rem;
+  font-size: 1.35rem;
+}
+
 /* Floating Elements for Decoration */
 .couple-game-main-container::after {
   content: '★';

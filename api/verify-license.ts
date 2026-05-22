@@ -77,6 +77,8 @@ function extractDateFromCode(code: string): Date | null {
     // 移除前缀
     if (cleanCode.startsWith('XXDK')) {
       cleanCode = cleanCode.substring(4);
+    } else if (cleanCode.startsWith('DMX')) {
+      cleanCode = cleanCode.substring(3);
     } else if (cleanCode.startsWith('ZY') || cleanCode.startsWith('DM') || cleanCode.startsWith('ZD') || cleanCode.startsWith('GB') || cleanCode.startsWith('XM') || cleanCode.startsWith('SX') || cleanCode.startsWith('YW') || cleanCode.startsWith('PT')) {
       cleanCode = cleanCode.substring(2);
     }

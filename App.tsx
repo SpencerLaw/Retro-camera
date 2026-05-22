@@ -4,6 +4,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { HomePage } from './components/HomePage';
 import AdventureGameApp from './adventure-game/AdventureGameApp';
 import AdventureGameEdit from './adventure-game/AdventureGameEdit';
+import AdventureLicenseGate from './adventure-game/AdventureLicenseGate';
 import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
 import { GroupMakerApp } from './components/GroupMakerApp';
 import BroadcastApp from './broadcast-assistant/BroadcastApp';
@@ -18,8 +19,8 @@ const App: React.FC = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/adventure" element={<AdventureGameApp />} />
-          <Route path="/adventure/edit" element={<AdventureGameEdit />} />
+          <Route path="/adventure" element={<AdventureLicenseGate><AdventureGameApp /></AdventureLicenseGate>} />
+          <Route path="/adventure/edit" element={<AdventureLicenseGate><AdventureGameEdit /></AdventureLicenseGate>} />
           <Route path="/doraemon" element={<DoraemonMonitorApp />} />
           <Route path="/group-maker" element={<GroupMakerApp />} />
           <Route path="/broadcast" element={<BroadcastApp />} />

@@ -427,8 +427,8 @@ const TslSkinApp: React.FC = () => {
       return;
     }
 
-    const width = vehicleImage?.naturalWidth || 900;
-    const height = vehicleImage?.naturalHeight || 900;
+    const width = 960;
+    const height = 620;
     if (previewCanvas.width !== width || previewCanvas.height !== height) {
       previewCanvas.width = width;
       previewCanvas.height = height;
@@ -436,93 +436,77 @@ const TslSkinApp: React.FC = () => {
 
     context.clearRect(0, 0, width, height);
     const background = context.createLinearGradient(0, 0, width, height);
-    background.addColorStop(0, '#0f172a');
+    background.addColorStop(0, '#111827');
+    background.addColorStop(0.62, '#0b1120');
     background.addColorStop(1, '#020617');
     context.fillStyle = background;
     context.fillRect(0, 0, width, height);
 
+    const drawContainedImage = (
+      image: HTMLCanvasElement | HTMLImageElement,
+      x: number,
+      y: number,
+      boxWidth: number,
+      boxHeight: number,
+    ) => {
+      const imageWidth = image instanceof HTMLCanvasElement ? image.width : image.naturalWidth || image.width;
+      const imageHeight = image instanceof HTMLCanvasElement ? image.height : image.naturalHeight || image.height;
+      if (!imageWidth || !imageHeight) {
+        return;
+      }
+      const scale = Math.min(boxWidth / imageWidth, boxHeight / imageHeight);
+      const drawWidth = imageWidth * scale;
+      const drawHeight = imageHeight * scale;
+      const drawX = x + (boxWidth - drawWidth) / 2;
+      const drawY = y + (boxHeight - drawHeight) / 2;
+      context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    };
+
+    context.save();
+    context.fillStyle = 'rgba(255, 255, 255, 0.045)';
+    context.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.roundRect(28, 28, 904, 352, 28);
+    context.fill();
+    context.stroke();
+    context.restore();
+
     if (vehicleImage) {
-      context.drawImage(vehicleImage, 0, 0, width, height);
+      drawContainedImage(vehicleImage, 56, 50, 848, 308);
     } else {
       context.fillStyle = '#94a3b8';
       context.font = '700 24px sans-serif';
       context.textAlign = 'center';
-      context.fillText('正在加载官方渲染底图...', width / 2, height / 2);
-      return;
+      context.fillText('正在加载官方渲染底图...', width / 2, 205);
     }
-
-    if (!sourceCanvas) {
-      return;
-    }
-
-    const textureCanvas = document.createElement('canvas');
-    textureCanvas.width = 360;
-    textureCanvas.height = 260;
-    const textureContext = textureCanvas.getContext('2d');
-    if (!textureContext) {
-      return;
-    }
-    textureContext.fillStyle = wrapColor;
-    textureContext.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
-    textureContext.drawImage(sourceCanvas, 0, 0, sourceCanvas.width, sourceCanvas.height, 0, 0, textureCanvas.width, textureCanvas.height);
-
-    const pattern = context.createPattern(textureCanvas, 'repeat');
-    if (!pattern) {
-      return;
-    }
-
-    const fillPatch = (points: Array<[number, number]>) => {
-      context.beginPath();
-      points.forEach(([x, y], index) => {
-        if (index === 0) {
-          context.moveTo(x * width, y * height);
-        } else {
-          context.lineTo(x * width, y * height);
-        }
-      });
-      context.closePath();
-      context.fill();
-    };
 
     context.save();
-    context.globalAlpha = 0.68;
-    context.globalCompositeOperation = 'multiply';
-    context.fillStyle = pattern;
-    fillPatch([
-      [0.06, 0.63],
-      [0.25, 0.47],
-      [0.49, 0.44],
-      [0.42, 0.69],
-      [0.18, 0.76],
-    ]);
-    fillPatch([
-      [0.42, 0.39],
-      [0.76, 0.36],
-      [0.92, 0.49],
-      [0.87, 0.64],
-      [0.49, 0.62],
-    ]);
-    fillPatch([
-      [0.33, 0.31],
-      [0.57, 0.27],
-      [0.78, 0.34],
-      [0.66, 0.42],
-      [0.39, 0.41],
-    ]);
-    fillPatch([
-      [0.07, 0.72],
-      [0.19, 0.76],
-      [0.34, 0.74],
-      [0.30, 0.82],
-      [0.14, 0.82],
-    ]);
+    context.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    context.strokeStyle = 'rgba(148, 163, 184, 0.24)';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.roundRect(46, 410, 186, 160, 18);
+    context.fill();
+    context.stroke();
     context.restore();
 
-    context.save();
-    context.globalAlpha = 0.38;
-    context.globalCompositeOperation = 'screen';
-    context.drawImage(vehicleImage, 0, 0, width, height);
-    context.restore();
+    if (sourceCanvas) {
+      context.fillStyle = wrapColor;
+      context.fillRect(66, 438, 146, 104);
+      drawContainedImage(sourceCanvas, 66, 438, 146, 104);
+    }
+
+    context.fillStyle = '#e2e8f0';
+    context.font = '800 28px sans-serif';
+    context.textAlign = 'left';
+    context.fillText('车型渲染参考', 270, 454);
+    context.font = '600 18px sans-serif';
+    context.fillStyle = '#94a3b8';
+    context.fillText('左侧缩略图是当前导出的皮肤贴图，渲染图保持官方比例，用于核对配色和方向。', 270, 492);
+    context.fillStyle = '#e2e8f0';
+    context.font = '800 18px sans-serif';
+    context.fillText('当前皮肤贴图', 66, 424);
   }, [vehicleImage, wrapColor]);
 
   React.useEffect(() => {
@@ -1188,8 +1172,8 @@ const TslSkinApp: React.FC = () => {
           </p>
         </div>
 
-        <main className="grid flex-1 gap-4 py-4 lg:grid-cols-[300px_minmax(0,1fr)_300px]">
-          <aside className="space-y-4 rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:max-h-[calc(100vh-110px)] lg:overflow-y-auto">
+        <main className="tsl-skin-workbench-grid grid flex-1 items-start gap-4 py-4 xl:grid-cols-[280px_minmax(0,1fr)_280px]">
+          <aside className="space-y-4 rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
             <section className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
                 <Palette size={18} className="text-sky-300" />
@@ -1359,7 +1343,7 @@ const TslSkinApp: React.FC = () => {
             )}
           </aside>
 
-          <section className="flex min-h-[520px] flex-col rounded-lg border border-white/10 bg-black/30 p-3 shadow-2xl shadow-black/40 backdrop-blur-xl">
+          <section className="tsl-skin-main-stage rounded-lg border border-white/10 bg-black/30 p-3 shadow-2xl shadow-black/40 backdrop-blur-xl">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-slate-400">
               <span>{status}</span>
               <span>{selectedTemplate.label} · 1024 画布</span>
@@ -1380,10 +1364,13 @@ const TslSkinApp: React.FC = () => {
                     官方免费示例 · 适配车型：{selectedTemplate.label}
                   </span>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="tsl-skin-gallery-strip flex gap-3 overflow-x-auto pb-2">
                   {officialExamples.map((example) => (
-                    <article key={`gallery-${example.id}`} className="overflow-hidden rounded-md border border-white/10 bg-black/25">
-                      <div className="flex h-32 items-center justify-center bg-white p-2">
+                    <article
+                      key={`gallery-${example.id}`}
+                      className="min-w-[220px] max-w-[220px] overflow-hidden rounded-md border border-white/10 bg-black/25"
+                    >
+                      <div className="flex h-24 items-center justify-center bg-white p-2">
                         <img
                           src={example.imageUrl}
                           crossOrigin="anonymous"
@@ -1420,45 +1407,50 @@ const TslSkinApp: React.FC = () => {
                 </div>
               </div>
             )}
-            <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(circle_at_center,rgba(30,41,59,0.9),rgba(2,6,23,0.95))] p-2">
-              {loading && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/70 text-sm font-bold text-sky-200">
-                  加载官方模板中...
-                </div>
-              )}
-              <canvas
-                ref={canvasRef}
-                width={1024}
-                height={1024}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                className="aspect-square max-h-[72vh] w-full max-w-[min(92vw,820px)] touch-none rounded-md border border-white/10 bg-slate-950 object-contain shadow-2xl shadow-black/60"
-              />
-            </div>
-            <div className="mt-3 rounded-md border border-white/10 bg-slate-950/60 p-3">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <div className="text-sm font-black text-white">车机效果预览</div>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                    近似预览：基于官方渲染底图和当前画布纹理抽样，真实车机显示以车辆三维模型为准。
-                  </p>
-                </div>
-                <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-slate-300">
-                  官方渲染底图
-                </span>
+            <div className="tsl-skin-stage-grid grid gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">
+              <div className="relative flex min-h-[360px] items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(circle_at_center,rgba(30,41,59,0.9),rgba(2,6,23,0.95))] p-3">
+                {loading && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/70 text-sm font-bold text-sky-200">
+                    加载官方模板中...
+                  </div>
+                )}
+                <canvas
+                  ref={canvasRef}
+                  width={1024}
+                  height={1024}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                  className="aspect-square h-auto max-h-[58vh] w-full max-w-[620px] touch-none rounded-md border border-white/10 bg-slate-950 shadow-2xl shadow-black/60"
+                />
               </div>
-              <canvas
-                ref={vehiclePreviewCanvasRef}
-                width={900}
-                height={900}
-                className="mx-auto aspect-square max-h-[360px] w-full max-w-[420px] rounded-md border border-white/10 bg-slate-950 object-contain"
-              />
+              <div className="vehicle-reference-panel rounded-md border border-white/10 bg-slate-950/60 p-3">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <div className="text-sm font-black text-white">车型渲染参考</div>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                      当前皮肤贴图会显示在渲染图旁边，方便核对配色和图案方向。
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-slate-300">
+                    官方渲染底图
+                  </span>
+                </div>
+                <canvas
+                  ref={vehiclePreviewCanvasRef}
+                  width={960}
+                  height={620}
+                  className="mx-auto h-auto max-h-[300px] w-full max-w-[320px] rounded-md border border-white/10 bg-slate-950"
+                />
+                <div className="mt-3 rounded-md border border-white/10 bg-black/25 p-3 text-xs leading-relaxed text-slate-400">
+                  当前皮肤贴图用于检查配色和图案方向；最终车机显示仍以特斯拉三维模型为准。
+                </div>
+              </div>
             </div>
           </section>
 
-          <aside className="space-y-4 rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:max-h-[calc(100vh-110px)] lg:overflow-y-auto">
+          <aside className="space-y-4 rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-bold text-slate-200">

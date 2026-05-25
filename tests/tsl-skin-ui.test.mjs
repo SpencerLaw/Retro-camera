@@ -133,10 +133,24 @@ runTest('tsl skin page shows an approximate in-car render preview', () => {
   assert.match(componentSource, /drawVehiclePreview/);
   assert.match(componentSource, /vehicleImageUrl/);
   assert.match(componentSource, /vehicle_image\.png/);
-  assert.match(componentSource, /createPattern/);
-  assert.match(componentSource, /车机效果预览/);
-  assert.match(componentSource, /近似预览/);
+  assert.match(componentSource, /drawContainedImage\(vehicleImage/);
+  assert.match(componentSource, /车型渲染参考/);
+  assert.match(componentSource, /当前皮肤贴图/);
   assert.match(componentSource, /官方渲染底图/);
+  assert.doesNotMatch(componentSource, /createPattern|fillPatch/);
+});
+
+runTest('tsl skin workbench layout keeps preview compact and balanced', () => {
+  assert.match(componentSource, /tsl-skin-workbench-grid/);
+  assert.match(componentSource, /tsl-skin-stage-grid/);
+  assert.match(componentSource, /tsl-skin-gallery-strip/);
+  assert.match(componentSource, /vehicle-reference-panel/);
+  assert.match(componentSource, /lg:sticky/);
+  assert.match(componentSource, /overflow-x-auto/);
+  assert.match(componentSource, /min-w-\[220px\]/);
+  assert.match(componentSource, /max-w-\[620px\]/);
+  assert.match(componentSource, /max-h-\[58vh\]/);
+  assert.doesNotMatch(componentSource, /错误覆盖/);
 });
 
 runTest('tsl skin page is Chinese-first and includes day mode plus help', () => {

@@ -1,15 +1,24 @@
 const GITHUB_TEMPLATE_ROOT = 'https://raw.githubusercontent.com/teslamotors/custom-wraps/master';
 
+function createTeslaTemplate(id, label) {
+  return {
+    id,
+    label,
+    templateUrl: `${GITHUB_TEMPLATE_ROOT}/${id}/template.png`,
+    vehicleImageUrl: `${GITHUB_TEMPLATE_ROOT}/${id}/vehicle_image.png`,
+  };
+}
+
 export const TESLA_MODEL_TEMPLATES = [
-  { id: 'cybertruck', label: '赛博越野旅行车', templateUrl: `${GITHUB_TEMPLATE_ROOT}/cybertruck/template.png` },
-  { id: 'model3', label: '三型车', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3/template.png` },
-  { id: 'model3-2024-base', label: '三型车 2024 基础版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3-2024-base/template.png` },
-  { id: 'model3-2024-performance', label: '三型车 2024 高性能版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3-2024-performance/template.png` },
-  { id: 'modely', label: 'Y 型车', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely/template.png` },
-  { id: 'modely-2025-base', label: 'Y 型车 2025 基础版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-base/template.png` },
-  { id: 'modely-2025-premium', label: 'Y 型车 2025 高级版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-premium/template.png` },
-  { id: 'modely-2025-performance', label: 'Y 型车 2025 高性能版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-performance/template.png` },
-  { id: 'modely-l', label: 'Y 型长轴版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-l/template.png` },
+  createTeslaTemplate('cybertruck', '赛博越野旅行车'),
+  createTeslaTemplate('model3', '三型车'),
+  createTeslaTemplate('model3-2024-base', '三型车 2024 基础版'),
+  createTeslaTemplate('model3-2024-performance', '三型车 2024 高性能版'),
+  createTeslaTemplate('modely', 'Y 型车'),
+  createTeslaTemplate('modely-2025-base', 'Y 型车 2025 基础版'),
+  createTeslaTemplate('modely-2025-premium', 'Y 型车 2025 高级版'),
+  createTeslaTemplate('modely-2025-performance', 'Y 型车 2025 高性能版'),
+  createTeslaTemplate('modely-l', 'Y 型长轴版'),
 ];
 
 const ALL_MODEL_IDS = TESLA_MODEL_TEMPLATES.map((template) => template.id);

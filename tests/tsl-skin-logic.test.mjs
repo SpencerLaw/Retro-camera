@@ -40,6 +40,10 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
     premium.templateUrl,
     'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/modely-2025-premium/template.png',
   );
+  assert.equal(
+    premium.vehicleImageUrl,
+    'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/modely-2025-premium/vehicle_image.png',
+  );
 });
 
 await runTest('tsl skin exposes official GitHub example wraps for galleries', async () => {

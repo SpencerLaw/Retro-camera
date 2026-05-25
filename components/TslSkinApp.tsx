@@ -33,6 +33,7 @@ export type TeslaModelTemplate = {
   id: string;
   label: string;
   templateUrl: string;
+  vehicleImageUrl: string;
 };
 
 export type SkinLayer = {
@@ -326,11 +327,13 @@ function getCanvasPngBytes(canvas: HTMLCanvasElement) {
 
 const TslSkinApp: React.FC = () => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const vehiclePreviewCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const maskCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const dragRef = React.useRef<DragState | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = React.useState('modely-2025-premium');
   const [templateImage, setTemplateImage] = React.useState<HTMLImageElement | null>(null);
+  const [vehicleImage, setVehicleImage] = React.useState<HTMLImageElement | null>(null);
   const [wrapColor, setWrapColor] = React.useState('#ffffff');
   const [layers, setLayers] = React.useState<SkinLayer[]>([]);
   const [selectedLayerId, setSelectedLayerId] = React.useState<string | null>(null);
@@ -341,6 +344,7 @@ const TslSkinApp: React.FC = () => {
   const [status, setStatus] = React.useState('选择车型或上传原创素材，导出图片即可放入车机皮肤文件夹。');
 
   const selectedTemplate = getTeslaTemplateById(selectedTemplateId) as TeslaModelTemplate;
+  const vehicleImageUrl = selectedTemplate.vehicleImageUrl || selectedTemplate.templateUrl.replace('template.png', 'vehicle_image.png');
   const selectedLayer = layers.find((layer) => layer.id === selectedLayerId) || null;
   const catalogProducts = React.useMemo(
     () => getCatalogProductsForTemplate(selectedTemplateId) as SkinCatalogProduct[],
@@ -415,6 +419,112 @@ const TslSkinApp: React.FC = () => {
     [layers, selectedLayer, templateImage, wrapColor],
   );
 
+  const drawVehiclePreview = React.useCallback(() => {
+    const previewCanvas = vehiclePreviewCanvasRef.current;
+    const sourceCanvas = canvasRef.current;
+    const context = previewCanvas?.getContext('2d');
+    if (!previewCanvas || !context) {
+      return;
+    }
+
+    const width = vehicleImage?.naturalWidth || 900;
+    const height = vehicleImage?.naturalHeight || 900;
+    if (previewCanvas.width !== width || previewCanvas.height !== height) {
+      previewCanvas.width = width;
+      previewCanvas.height = height;
+    }
+
+    context.clearRect(0, 0, width, height);
+    const background = context.createLinearGradient(0, 0, width, height);
+    background.addColorStop(0, '#0f172a');
+    background.addColorStop(1, '#020617');
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, height);
+
+    if (vehicleImage) {
+      context.drawImage(vehicleImage, 0, 0, width, height);
+    } else {
+      context.fillStyle = '#94a3b8';
+      context.font = '700 24px sans-serif';
+      context.textAlign = 'center';
+      context.fillText('正在加载官方渲染底图...', width / 2, height / 2);
+      return;
+    }
+
+    if (!sourceCanvas) {
+      return;
+    }
+
+    const textureCanvas = document.createElement('canvas');
+    textureCanvas.width = 360;
+    textureCanvas.height = 260;
+    const textureContext = textureCanvas.getContext('2d');
+    if (!textureContext) {
+      return;
+    }
+    textureContext.fillStyle = wrapColor;
+    textureContext.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
+    textureContext.drawImage(sourceCanvas, 0, 0, sourceCanvas.width, sourceCanvas.height, 0, 0, textureCanvas.width, textureCanvas.height);
+
+    const pattern = context.createPattern(textureCanvas, 'repeat');
+    if (!pattern) {
+      return;
+    }
+
+    const fillPatch = (points: Array<[number, number]>) => {
+      context.beginPath();
+      points.forEach(([x, y], index) => {
+        if (index === 0) {
+          context.moveTo(x * width, y * height);
+        } else {
+          context.lineTo(x * width, y * height);
+        }
+      });
+      context.closePath();
+      context.fill();
+    };
+
+    context.save();
+    context.globalAlpha = 0.68;
+    context.globalCompositeOperation = 'multiply';
+    context.fillStyle = pattern;
+    fillPatch([
+      [0.06, 0.63],
+      [0.25, 0.47],
+      [0.49, 0.44],
+      [0.42, 0.69],
+      [0.18, 0.76],
+    ]);
+    fillPatch([
+      [0.42, 0.39],
+      [0.76, 0.36],
+      [0.92, 0.49],
+      [0.87, 0.64],
+      [0.49, 0.62],
+    ]);
+    fillPatch([
+      [0.33, 0.31],
+      [0.57, 0.27],
+      [0.78, 0.34],
+      [0.66, 0.42],
+      [0.39, 0.41],
+    ]);
+    fillPatch([
+      [0.07, 0.72],
+      [0.19, 0.76],
+      [0.34, 0.74],
+      [0.30, 0.82],
+      [0.14, 0.82],
+    ]);
+    context.restore();
+
+    context.save();
+    context.globalAlpha = 0.38;
+    context.globalCompositeOperation = 'screen';
+    context.drawImage(vehicleImage, 0, 0, width, height);
+    context.restore();
+  }, [vehicleImage, wrapColor]);
+
   React.useEffect(() => {
     const image = new Image();
     image.crossOrigin = 'anonymous';
@@ -443,8 +553,17 @@ const TslSkinApp: React.FC = () => {
   }, [selectedTemplate.label, selectedTemplate.templateUrl]);
 
   React.useEffect(() => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => setVehicleImage(image);
+    image.onerror = () => setVehicleImage(null);
+    image.src = vehicleImageUrl;
+  }, [vehicleImageUrl]);
+
+  React.useEffect(() => {
     drawCanvas(true);
-  }, [drawCanvas]);
+    requestAnimationFrame(() => drawVehiclePreview());
+  }, [drawCanvas, drawVehiclePreview]);
 
   const updateSelectedLayer = React.useCallback((changes: Partial<SkinLayer>) => {
     if (!selectedLayerId) {
@@ -1021,6 +1140,25 @@ const TslSkinApp: React.FC = () => {
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
                 className="aspect-square max-h-[72vh] w-full max-w-[min(92vw,820px)] touch-none rounded-md border border-white/10 bg-slate-950 object-contain shadow-2xl shadow-black/60"
+              />
+            </div>
+            <div className="mt-3 rounded-md border border-white/10 bg-slate-950/60 p-3">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div className="text-sm font-black text-white">车机效果预览</div>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                    近似预览：基于官方渲染底图和当前画布纹理抽样，真实车机显示以车辆三维模型为准。
+                  </p>
+                </div>
+                <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-slate-300">
+                  官方渲染底图
+                </span>
+              </div>
+              <canvas
+                ref={vehiclePreviewCanvasRef}
+                width={900}
+                height={900}
+                className="mx-auto aspect-square max-h-[360px] w-full max-w-[420px] rounded-md border border-white/10 bg-slate-950 object-contain"
               />
             </div>
           </section>

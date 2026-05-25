@@ -82,6 +82,17 @@ runTest('tsl skin page supports zip package export and per-layer crop modes', ()
   assert.match(componentSource, /保留完整图案/);
 });
 
+runTest('tsl skin page shows an approximate in-car render preview', () => {
+  assert.match(componentSource, /vehiclePreviewCanvasRef/);
+  assert.match(componentSource, /drawVehiclePreview/);
+  assert.match(componentSource, /vehicleImageUrl/);
+  assert.match(componentSource, /vehicle_image\.png/);
+  assert.match(componentSource, /createPattern/);
+  assert.match(componentSource, /车机效果预览/);
+  assert.match(componentSource, /近似预览/);
+  assert.match(componentSource, /官方渲染底图/);
+});
+
 runTest('tsl skin page is Chinese-first and includes day mode plus help', () => {
   assert.match(componentSource, /浅色模式/);
   assert.match(componentSource, /深色模式/);

@@ -58,6 +58,14 @@ runTest('tsl skin page separates download and design workflows', () => {
   assert.match(componentSource, /setActiveWorkspace/);
 });
 
+runTest('tsl skin download mode exposes a visible skin gallery', () => {
+  assert.match(componentSource, /皮肤画廊/);
+  assert.match(componentSource, /先挑选现成皮肤/);
+  assert.match(componentSource, /适配车型/);
+  assert.match(componentSource, /马上预览/);
+  assert.match(componentSource, /catalogProducts\.map/);
+});
+
 runTest('tsl skin page supports zip package export and per-layer crop modes', () => {
   assert.match(componentSource, /buildTslSkinZipFileName/);
   assert.match(componentSource, /buildWrapInstallGuide/);

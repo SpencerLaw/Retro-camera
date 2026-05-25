@@ -909,6 +909,65 @@ const TslSkinApp: React.FC = () => {
               <span>{status}</span>
               <span>{selectedTemplate.label} · 1024 画布</span>
             </div>
+            {activeWorkspace === 'download' && (
+              <div className="mb-3 rounded-md border border-white/10 bg-slate-950/55 p-3">
+                <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 text-base font-black text-white">
+                      <ShoppingBag size={18} className="text-sky-300" />
+                      皮肤画廊
+                    </div>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                      先挑选现成皮肤，加入画布后可以换车型、改车身颜色，再导出交付包。
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-sky-300/30 bg-sky-300/10 px-3 py-1 text-xs font-bold text-sky-100">
+                    适配车型：{selectedTemplate.label}
+                  </span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {catalogProducts.map((product) => (
+                    <article key={`gallery-${product.id}`} className="overflow-hidden rounded-md border border-white/10 bg-black/25">
+                      <div className="flex h-28">
+                        {product.previewColors.map((color, colorIndex) => (
+                          <div
+                            key={`gallery-${product.id}-${color}`}
+                            className="flex-1"
+                            style={{
+                              background:
+                                colorIndex === 1
+                                  ? `repeating-linear-gradient(135deg, ${color}, ${color} 10px, ${product.accentColor} 10px, ${product.accentColor} 15px)`
+                                  : color,
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="space-y-3 p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h2 className="truncate text-sm font-black text-white">{product.title}</h2>
+                            <p className="mt-1 text-xs text-slate-400">{product.previewLabel}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-black text-sky-200">{formatPriceCents(product.priceCents)}</div>
+                            <div className="text-[11px] font-bold text-slate-400">{product.tier}</div>
+                          </div>
+                        </div>
+                        <p className="line-clamp-2 text-xs leading-relaxed text-slate-400">{product.description}</p>
+                        <button
+                          type="button"
+                          onClick={() => addCatalogProductLayer(product)}
+                          className="flex w-full items-center justify-center gap-2 rounded-md bg-sky-300 px-3 py-2 text-sm font-black text-slate-950 transition hover:bg-sky-200"
+                        >
+                          <Sparkles size={16} />
+                          马上预览
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(circle_at_center,rgba(30,41,59,0.9),rgba(2,6,23,0.95))] p-2">
               {loading && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/70 text-sm font-bold text-sky-200">

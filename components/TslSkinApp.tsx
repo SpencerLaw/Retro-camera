@@ -89,6 +89,20 @@ type DragState = {
   layerY: number;
 };
 
+type ImageCropBounds = {
+  sx: number;
+  sy: number;
+  sw: number;
+  sh: number;
+};
+
+type ImageSampleColor = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+};
+
 const PRESET_COLORS = [
   '#ffffff',
   '#111827',
@@ -325,9 +339,135 @@ function getCanvasPngBytes(canvas: HTMLCanvasElement) {
   });
 }
 
+function getSourceImageSize(image: HTMLCanvasElement | HTMLImageElement) {
+  return {
+    width: image instanceof HTMLCanvasElement ? image.width : image.naturalWidth || image.width,
+    height: image instanceof HTMLCanvasElement ? image.height : image.naturalHeight || image.height,
+  };
+}
+
+function getPixelSample(pixels: Uint8ClampedArray, width: number, x: number, y: number): ImageSampleColor {
+  const offset = (y * width + x) * 4;
+  return {
+    r: pixels[offset],
+    g: pixels[offset + 1],
+    b: pixels[offset + 2],
+    a: pixels[offset + 3],
+  };
+}
+
+function getImageBackgroundSample(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+): ImageSampleColor {
+  const points = [
+    [0, 0],
+    [width - 1, 0],
+    [0, height - 1],
+    [width - 1, height - 1],
+    [Math.floor(width / 2), 0],
+    [Math.floor(width / 2), height - 1],
+  ];
+
+  const total = points.reduce(
+    (sum, [x, y]) => {
+      const sample = getPixelSample(pixels, width, x, y);
+      return {
+        r: sum.r + sample.r,
+        g: sum.g + sample.g,
+        b: sum.b + sample.b,
+        a: sum.a + sample.a,
+      };
+    },
+    { r: 0, g: 0, b: 0, a: 0 },
+  );
+
+  return {
+    r: total.r / points.length,
+    g: total.g / points.length,
+    b: total.b / points.length,
+    a: total.a / points.length,
+  };
+}
+
+function getBackgroundDistance(sample: ImageSampleColor, background: ImageSampleColor) {
+  return (
+    Math.abs(sample.r - background.r) +
+    Math.abs(sample.g - background.g) +
+    Math.abs(sample.b - background.b) +
+    Math.abs(sample.a - background.a) * 0.5
+  );
+}
+
+function getVisibleImageBounds(image: HTMLCanvasElement | HTMLImageElement): ImageCropBounds | null {
+  const { width, height } = getSourceImageSize(image);
+  if (!width || !height) {
+    return null;
+  }
+
+  const scanCanvas = document.createElement('canvas');
+  scanCanvas.width = width;
+  scanCanvas.height = height;
+  const scanContext = scanCanvas.getContext('2d', { willReadFrequently: true });
+  if (!scanContext) {
+    return null;
+  }
+
+  scanContext.drawImage(image, 0, 0, width, height);
+
+  let pixels: Uint8ClampedArray;
+  try {
+    pixels = scanContext.getImageData(0, 0, width, height).data;
+  } catch {
+    return null;
+  }
+
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  const step = Math.max(1, Math.floor(Math.max(width, height) / 900));
+  const backgroundSample = getImageBackgroundSample(pixels, width, height);
+
+  for (let y = 0; y < height; y += step) {
+    for (let x = 0; x < width; x += step) {
+      const sample = getPixelSample(pixels, width, x, y);
+      const backgroundDistance = getBackgroundDistance(sample, backgroundSample);
+      const isForegroundPixel = sample.a > 12 && backgroundDistance > 54;
+      if (!isForegroundPixel) {
+        continue;
+      }
+
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  if (maxX < minX || maxY < minY) {
+    return null;
+  }
+
+  const padding = 12;
+  const sx = Math.max(0, minX - padding);
+  const sy = Math.max(0, minY - padding);
+  const right = Math.min(width, maxX + padding);
+  const bottom = Math.min(height, maxY + padding);
+
+  return {
+    sx,
+    sy,
+    sw: right - sx,
+    sh: bottom - sy,
+  };
+}
+
 const TslSkinApp: React.FC = () => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const vehiclePreviewCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const vehicleImageBoundsRef = React.useRef<ImageCropBounds | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const maskCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const dragRef = React.useRef<DragState | null>(null);
@@ -442,24 +582,36 @@ const TslSkinApp: React.FC = () => {
     context.fillStyle = background;
     context.fillRect(0, 0, width, height);
 
-    const drawContainedImage = (
+    const drawSmartContainedImage = (
       image: HTMLCanvasElement | HTMLImageElement,
       x: number,
       y: number,
       boxWidth: number,
       boxHeight: number,
+      cropTransparent = false,
     ) => {
-      const imageWidth = image instanceof HTMLCanvasElement ? image.width : image.naturalWidth || image.width;
-      const imageHeight = image instanceof HTMLCanvasElement ? image.height : image.naturalHeight || image.height;
+      const { width: imageWidth, height: imageHeight } = getSourceImageSize(image);
       if (!imageWidth || !imageHeight) {
         return;
       }
-      const scale = Math.min(boxWidth / imageWidth, boxHeight / imageHeight);
-      const drawWidth = imageWidth * scale;
-      const drawHeight = imageHeight * scale;
+
+      const bounds = cropTransparent
+        ? vehicleImageBoundsRef.current ?? getVisibleImageBounds(image)
+        : null;
+      if (cropTransparent && bounds) {
+        vehicleImageBoundsRef.current = bounds;
+      }
+
+      const sourceX = bounds?.sx ?? 0;
+      const sourceY = bounds?.sy ?? 0;
+      const sourceWidth = bounds?.sw ?? imageWidth;
+      const sourceHeight = bounds?.sh ?? imageHeight;
+      const scale = Math.min(boxWidth / sourceWidth, boxHeight / sourceHeight);
+      const drawWidth = sourceWidth * scale;
+      const drawHeight = sourceHeight * scale;
       const drawX = x + (boxWidth - drawWidth) / 2;
       const drawY = y + (boxHeight - drawHeight) / 2;
-      context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+      context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
     };
 
     context.save();
@@ -473,7 +625,7 @@ const TslSkinApp: React.FC = () => {
     context.restore();
 
     if (vehicleImage) {
-      drawContainedImage(vehicleImage, 56, 50, 848, 308);
+      drawSmartContainedImage(vehicleImage, 24, 24, 912, 360, true);
     } else {
       context.fillStyle = '#94a3b8';
       context.font = '700 24px sans-serif';
@@ -494,7 +646,7 @@ const TslSkinApp: React.FC = () => {
     if (sourceCanvas) {
       context.fillStyle = wrapColor;
       context.fillRect(66, 438, 146, 104);
-      drawContainedImage(sourceCanvas, 66, 438, 146, 104);
+      drawSmartContainedImage(sourceCanvas, 66, 438, 146, 104);
     }
 
     context.fillStyle = '#e2e8f0';
@@ -539,8 +691,14 @@ const TslSkinApp: React.FC = () => {
   React.useEffect(() => {
     const image = new Image();
     image.crossOrigin = 'anonymous';
-    image.onload = () => setVehicleImage(image);
-    image.onerror = () => setVehicleImage(null);
+    image.onload = () => {
+      vehicleImageBoundsRef.current = null;
+      setVehicleImage(image);
+    };
+    image.onerror = () => {
+      vehicleImageBoundsRef.current = null;
+      setVehicleImage(null);
+    };
     image.src = vehicleImageUrl;
   }, [vehicleImageUrl]);
 
@@ -1246,7 +1404,7 @@ const TslSkinApp: React.FC = () => {
                 </div>
               </div>
             )}
-            <div className="tsl-skin-stage-grid grid gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="tsl-skin-stage-grid grid gap-3 xl:grid-cols-[minmax(0,1fr)_440px]">
               <div className="relative flex min-h-[360px] items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(circle_at_center,rgba(30,41,59,0.9),rgba(2,6,23,0.95))] p-3">
                 {loading && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/70 text-sm font-bold text-sky-200">
@@ -1280,7 +1438,7 @@ const TslSkinApp: React.FC = () => {
                   ref={vehiclePreviewCanvasRef}
                   width={960}
                   height={620}
-                  className="mx-auto h-auto max-h-[300px] w-full max-w-[320px] rounded-md border border-white/10 bg-slate-950"
+                  className="mx-auto h-auto max-h-[420px] w-full max-w-[440px] rounded-md border border-white/10 bg-slate-950"
                 />
                 <div className="mt-3 rounded-md border border-white/10 bg-black/25 p-3 text-xs leading-relaxed text-slate-400">
                   当前皮肤贴图用于检查配色和图案方向；最终车机显示仍以特斯拉三维模型为准。

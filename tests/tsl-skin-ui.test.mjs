@@ -112,14 +112,17 @@ runTest('tsl skin page shows an approximate in-car render preview', () => {
   assert.match(componentSource, /drawVehiclePreview/);
   assert.match(componentSource, /vehicleImageUrl/);
   assert.match(componentSource, /vehicle_image\.png/);
-  assert.match(componentSource, /drawContainedImage\(vehicleImage/);
+  assert.match(componentSource, /drawSmartContainedImage\(vehicleImage/);
+  assert.match(componentSource, /getVisibleImageBounds/);
+  assert.match(componentSource, /getImageBackgroundSample/);
+  assert.match(componentSource, /backgroundDistance > 54/);
   assert.match(componentSource, /车型渲染参考/);
   assert.match(componentSource, /当前皮肤贴图/);
   assert.match(componentSource, /官方渲染底图/);
   assert.doesNotMatch(componentSource, /createPattern|fillPatch/);
 });
 
-runTest('tsl skin workbench layout keeps preview compact and balanced', () => {
+runTest('tsl skin workbench layout keeps render preview large and balanced', () => {
   assert.match(componentSource, /tsl-skin-workbench-grid/);
   assert.match(componentSource, /tsl-skin-stage-grid/);
   assert.match(componentSource, /tsl-skin-gallery-strip/);
@@ -129,6 +132,10 @@ runTest('tsl skin workbench layout keeps preview compact and balanced', () => {
   assert.match(componentSource, /min-w-\[220px\]/);
   assert.match(componentSource, /max-w-\[620px\]/);
   assert.match(componentSource, /max-h-\[58vh\]/);
+  assert.match(componentSource, /xl:grid-cols-\[minmax\(0,1fr\)_440px\]/);
+  assert.match(componentSource, /max-w-\[440px\]/);
+  assert.match(componentSource, /max-h-\[420px\]/);
+  assert.match(componentSource, /drawSmartContainedImage\(vehicleImage, 24, 24, 912, 360, true\)/);
   assert.doesNotMatch(componentSource, /错误覆盖/);
 });
 

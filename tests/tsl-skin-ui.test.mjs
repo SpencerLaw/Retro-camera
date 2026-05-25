@@ -52,56 +52,35 @@ runTest('tsl skin page includes monetization-ready catalog and custom order UI',
 });
 
 runTest('tsl skin page separates download and design workflows', () => {
-  assert.match(componentSource, /现有皮肤下载/);
-  assert.match(componentSource, /自己设计皮肤/);
+  assert.match(componentSource, /下载现有皮肤/);
+  assert.match(componentSource, /自定义上传裁剪/);
   assert.match(componentSource, /activeWorkspace/);
   assert.match(componentSource, /setActiveWorkspace/);
 });
 
-runTest('tsl skin page has a clear public landing layout', () => {
+runTest('tsl skin page is redesigned around two original product entrances', () => {
   assert.match(componentSource, /特斯拉皮肤/);
-  assert.match(componentSource, /官方模板/);
-  assert.match(componentSource, /排行榜/);
-  assert.match(componentSource, /自己创作/);
-  assert.match(componentSource, /上传模板/);
-  assert.match(componentSource, /使用教程/);
-  assert.match(componentSource, /特斯拉车机皮肤下载与[\s\S]*创作平台/);
-  assert.match(componentSource, /浏览官方示例/);
-  assert.match(componentSource, /上传我的设计/);
-  assert.match(componentSource, /支持的特斯拉车型/);
-  assert.match(componentSource, /landingStats/);
+  assert.match(componentSource, /双入口工作台/);
+  assert.match(componentSource, /下载现有皮肤/);
+  assert.match(componentSource, /自定义上传裁剪/);
+  assert.match(componentSource, /先选车型，再挑现成皮肤/);
+  assert.match(componentSource, /上传图片，拖动缩放裁剪/);
+  assert.match(componentSource, /本地生成，不上传服务器/);
+  assert.match(componentSource, /tsl-skin-entry-panel/);
+  assert.match(componentSource, /tsl-skin-model-strip/);
   assert.match(componentSource, /scrollToWorkbench/);
-});
-
-runTest('tsl skin page includes a full Chinese usage tutorial', () => {
-  assert.match(componentSource, /tsl-skin-tutorial/);
-  assert.match(componentSource, /scrollToTutorial/);
-  assert.match(componentSource, /特斯拉车机皮肤使用教程/);
-  assert.match(componentSource, /分步指南/);
-  assert.match(componentSource, /下载模板/);
-  assert.match(componentSource, /准备 U 盘/);
-  assert.match(componentSource, /在车机中应用/);
-  assert.match(componentSource, /要求与设置/);
-  assert.match(componentSource, /图片要求/);
-  assert.match(componentSource, /U 盘与车机要求/);
-  assert.match(componentSource, /支持的车型/);
-  assert.match(componentSource, /在车机中应用外观设计/);
-  assert.match(componentSource, /发现车型标注错误/);
-  assert.match(componentSource, /1024x1024/);
-  assert.match(componentSource, /exFAT/);
-  assert.match(componentSource, /Wraps/);
+  assert.doesNotMatch(componentSource, /排行榜|联盟计划|联系我们|首页 \/ 使用教程|tsl-skin-brand-tutorial|特斯拉车机皮肤下载与[\s\S]*创作平台|landingStats|scrollToTutorial/);
   assert.doesNotMatch(componentSource, /Network（网络）|抓包|爬虫|Python 脚本|BeautifulSoup|批量下载爬虫/);
 });
 
-runTest('tsl skin tutorial uses the site product style instead of copied docs chrome', () => {
-  assert.match(componentSource, /tsl-skin-brand-tutorial/);
-  assert.match(componentSource, /创作与上车流程/);
-  assert.match(componentSource, /官方模板到车机预览/);
-  assert.match(componentSource, /bg-white\/\[0\.06\]/);
-  assert.match(componentSource, /border-white\/10/);
-  assert.match(componentSource, /shadow-red-950\/30/);
-  assert.doesNotMatch(componentSource, /首页 \/ 使用教程/);
-  assert.doesNotMatch(componentSource, /border-b border-slate-200 bg-white px-4 py-16/);
+runTest('tsl skin page keeps compact help inside the two workflows', () => {
+  assert.match(componentSource, /三步完成/);
+  assert.match(componentSource, /选择车型/);
+  assert.match(componentSource, /预览调整/);
+  assert.match(componentSource, /导出交付包/);
+  assert.match(componentSource, /1024x1024/);
+  assert.match(componentSource, /Wraps/);
+  assert.match(componentSource, /exFAT/);
 });
 
 runTest('tsl skin download mode exposes a visible skin gallery', () => {
@@ -156,10 +135,10 @@ runTest('tsl skin workbench layout keeps preview compact and balanced', () => {
 runTest('tsl skin page is Chinese-first and includes day mode plus help', () => {
   assert.match(componentSource, /浅色模式/);
   assert.match(componentSource, /深色模式/);
-  assert.match(componentSource, /使用说明/);
-  assert.match(componentSource, /第一步/);
-  assert.match(componentSource, /第二步/);
-  assert.match(componentSource, /第三步/);
+  assert.match(componentSource, /三步完成/);
+  assert.match(componentSource, /选择车型/);
+  assert.match(componentSource, /预览调整/);
+  assert.match(componentSource, /导出交付包/);
   assert.match(componentSource, /2 元/);
   assert.match(componentSource, /9\.99 元/);
   assert.match(componentSource, /30 元/);

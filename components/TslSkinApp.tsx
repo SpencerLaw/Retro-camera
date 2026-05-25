@@ -924,145 +924,171 @@ const TslSkinApp: React.FC = () => {
         </div>
       </section>
 
-      <section id="tsl-skin-tutorial" className="border-b border-slate-200 bg-white px-4 py-16 md:px-6">
-        <div className="mx-auto max-w-[1180px]">
-          <div className="text-sm font-bold text-slate-400">首页 / 使用教程</div>
-          <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_360px] lg:items-end">
-            <div>
-              <span className="inline-flex rounded-full bg-red-50 px-4 py-2 text-sm font-black text-[#e82127]">
-                分步指南
-              </span>
-              <h2 className="mt-5 text-4xl font-black leading-tight text-slate-950 md:text-5xl">
+      <section
+        id="tsl-skin-tutorial"
+        className="tsl-skin-brand-tutorial relative overflow-hidden bg-[#07111f] px-4 py-16 text-white md:px-6"
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-35"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
+            backgroundSize: '42px 42px',
+          }}
+        />
+        <div className="relative mx-auto max-w-[1480px]">
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-lg border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-red-950/30 backdrop-blur-xl md:p-8">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-[#e82127]/40 bg-[#e82127]/15 px-4 py-2 text-sm font-black text-red-100">
+                  分步指南
+                </span>
+                <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-4 py-2 text-sm font-black text-sky-100">
+                  官方模板到车机预览
+                </span>
+              </div>
+              <h2 className="mt-6 max-w-3xl text-4xl font-black leading-tight tracking-tight md:text-6xl">
                 特斯拉车机皮肤使用教程
               </h2>
-              <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-500">
-                选择对应车型模板，下载官方免费示例或上传自己的图片，在浏览器本地生成 1024x1024 的皮肤文件，再放进 U 盘的 Wraps 文件夹，就能在车机里切换外观设计。
+              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
+                不做单独的说明书页面，直接把流程放在皮肤工坊里。用户看完就能继续选官方免费示例、上传原创图片、预览车机效果，并在浏览器本地导出 1024x1024 文件。
               </p>
-            </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-              <div className="flex items-center gap-3 text-slate-950">
-                <ShieldCheck className="text-[#e82127]" size={24} />
-                <div className="text-lg font-black">本地处理说明</div>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                用户上传的图片仅在浏览器本地处理，不会上传服务器，也不会占用 Vercel 存储额度。
-              </p>
-              <button
-                type="button"
-                onClick={() => scrollToWorkbench('download')}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#e82127] px-5 py-3 text-sm font-black text-white transition hover:bg-[#c91016]"
-              >
-                <Download size={18} />
-                浏览官方示例
-              </button>
-            </div>
-          </div>
 
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {[
-              {
-                title: '下载模板',
-                icon: Download,
-                items: ['先选择自己的车型版本。', '可使用官方免费示例，也可上传原创或已授权素材。', '完成预览后导出图片或压缩包。', '文件会在浏览器本地生成。'],
-              },
-              {
-                title: '准备 U 盘',
-                icon: Upload,
-                items: ['推荐格式化为 exFAT。', 'FAT32、MS-DOS FAT、ext3、ext4 也可尝试。', '不建议使用 NTFS。', '在根目录创建 Wraps 文件夹，并放入 PNG 图片。'],
-              },
-              {
-                title: '在车机中应用',
-                icon: Palette,
-                items: ['把 U 盘插入扶手箱里的接口。', '打开车机里的玩具箱，再进入喷漆车间。', '切换到 Wraps 标签。', '选择自定义外观设计并应用。'],
-              },
-            ].map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mt-8 grid gap-4 md:grid-cols-3">
+                {[
+                  {
+                    title: '下载模板',
+                    icon: Download,
+                    items: ['选择自己的车型版本。', '使用官方免费示例，或上传原创或已授权素材。', '预览满意后导出图片或压缩包。'],
+                  },
+                  {
+                    title: '准备 U 盘',
+                    icon: Upload,
+                    items: ['推荐格式化为 exFAT。', '根目录创建 Wraps 文件夹。', '放入导出的 PNG 图片。'],
+                  },
+                  {
+                    title: '在车机中应用',
+                    icon: Palette,
+                    items: ['插入扶手箱 USB 接口。', '打开玩具箱和喷漆车间。', '进入 Wraps 标签并选择自定义外观设计。'],
+                  },
+                ].map((step, index) => {
+                  const Icon = step.icon;
+                  return (
+                    <div key={step.title} className="rounded-lg border border-white/10 bg-[#091525]/90 p-5">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e82127] text-sm font-black text-white">
+                          {index + 1}
+                        </span>
+                        <Icon className="text-sky-200" size={22} />
+                      </div>
+                      <h3 className="mt-4 text-xl font-black">{step.title}</h3>
+                      <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+                        {step.items.map((item) => (
+                          <li key={item} className="flex gap-3">
+                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#e82127]" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div className="rounded-lg border border-white/10 bg-white/[0.06] p-5">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e82127] text-sm font-black text-white">
-                      {index + 1}
-                    </span>
-                    <Icon className="text-[#e82127]" size={24} />
-                    <h3 className="text-xl font-black text-slate-950">{step.title}</h3>
+                    <Sparkles className="text-[#e82127]" size={22} />
+                    <h3 className="text-xl font-black">要求与设置</h3>
                   </div>
-                  <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-500">
-                    {step.items.map((item) => (
-                      <li key={item} className="flex gap-3">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#e82127]" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-12 grid gap-5 lg:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
-              <div className="flex items-center gap-3">
-                <Sparkles className="text-[#e82127]" size={24} />
-                <h3 className="text-2xl font-black text-slate-950">要求与设置</h3>
-              </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-lg border border-slate-200 bg-white p-5">
-                  <h4 className="text-lg font-black text-slate-950">图片要求</h4>
-                  <p className="mt-3 text-sm leading-6 text-slate-500">
-                    皮肤图建议使用 1024x1024 的 PNG，文件名保持清晰，图案不要压到模板边缘，避免车身边角出现空白。
+                  <p className="mt-3 text-sm leading-6 text-slate-300">
+                    图片要求：建议使用 1024x1024 的 PNG，图案不要压到模板边缘，避免车身边角出现空白。
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">
+                    U 盘与车机要求：车机系统需要支持外观设计功能，U 盘可用 exFAT、FAT32、MS-DOS FAT、ext3 或 ext4，根目录放 Wraps 文件夹。
                   </p>
                 </div>
-                <div className="rounded-lg border border-slate-200 bg-white p-5">
-                  <h4 className="text-lg font-black text-slate-950">U 盘与车机要求</h4>
-                  <p className="mt-3 text-sm leading-6 text-slate-500">
-                    车机系统需要支持外观设计功能，U 盘根目录放置 Wraps 文件夹，单次展示数量过多时建议分批整理。
+                <div className="rounded-lg border border-white/10 bg-white/[0.06] p-5">
+                  <div className="flex items-center gap-3">
+                    <ShoppingBag className="text-[#e82127]" size={22} />
+                    <h3 className="text-xl font-black">在车机中应用外观设计</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">
+                    操作路径：玩具箱 - 喷漆车间 - Wraps 标签 - 自定义外观设计。发现车型标注错误时，把车型、年份和截图发给站长，后续会补齐模板。
                   </p>
+                  <div className="mt-4 rounded-lg border border-red-400/30 bg-[#e82127]/10 p-4 text-sm font-bold leading-6 text-red-100">
+                    图片仅在你的浏览器本地处理，不会上传服务器，也不会占用 Vercel 免费额度。
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
-              <div className="flex items-center gap-3">
-                <ShoppingBag className="text-[#e82127]" size={24} />
-                <h3 className="text-2xl font-black text-slate-950">在车机中应用外观设计</h3>
+            <div className="flex flex-col gap-6">
+              <div className="rounded-lg border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-red-950/30 backdrop-blur-xl md:p-8">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="text-sky-200" size={26} />
+                  <div>
+                    <p className="text-sm font-black text-sky-200">创作与上车流程</p>
+                    <h3 className="text-2xl font-black">从网页到车机，不绕路</h3>
+                  </div>
+                </div>
+                <div className="mt-6 space-y-4">
+                  {['选择车型模板', '加入官方示例或上传图片', '预览车机效果', '导出压缩包', '放入 U 盘 Wraps 文件夹'].map((item, index) => (
+                    <div key={item} className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#0b1726] px-4 py-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-black text-slate-950">
+                        {index + 1}
+                      </span>
+                      <span className="font-bold text-slate-100">{item}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 grid grid-cols-3 overflow-hidden rounded-lg border border-white/10">
+                  {DOWNLOAD_PRICE_TIERS.map((tier: DownloadPriceTier) => (
+                    <div key={`tutorial-price-${tier.id}`} className="border-r border-white/10 bg-[#0b1726] p-4 last:border-r-0">
+                      <div className="text-2xl font-black text-white">{formatPriceCents(tier.priceCents)}</div>
+                      <div className="mt-1 text-xs font-bold text-slate-400">{tier.title}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => scrollToWorkbench('download')}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#e82127] px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-950/30 transition hover:bg-[#ff3b40]"
+                  >
+                    <Download size={18} />
+                    浏览官方示例
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollToWorkbench('design')}
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/[0.06] px-5 py-3 text-sm font-black text-white transition hover:bg-white/[0.12]"
+                  >
+                    <Upload size={18} />
+                    开始自己设计
+                  </button>
+                </div>
               </div>
-              <p className="mt-5 text-sm leading-6 text-slate-500">
-                推荐操作路径：玩具箱 - 喷漆车间 - Wraps 标签 - 自定义外观设计。应用前先确认车型版本和模板一致，若车机显示错位，回到本页面选择正确车型重新导出。
-              </p>
-              <div className="mt-5 rounded-lg border border-red-100 bg-red-50 p-4 text-sm font-bold leading-6 text-[#b91c1c]">
-                发现车型标注错误？可以把车型、年份和截图发给站长，后续会补齐对应模板和展示图。
-              </div>
-            </div>
-          </div>
 
-          <div className="mt-12 rounded-lg border border-slate-200 bg-white p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h3 className="text-2xl font-black text-slate-950">支持的车型</h3>
-                <p className="mt-2 text-sm text-slate-500">先覆盖官方已开源模板，后续可按销量和用户反馈继续补齐。</p>
+              <div className="rounded-lg border border-white/10 bg-white/[0.06] p-6 backdrop-blur-xl">
+                <h3 className="text-2xl font-black">支持的车型</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">先覆盖官方已开源模板，后续按销量和用户反馈继续补齐。</p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
+                    <button
+                      key={`tutorial-${template.id}`}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTemplateId(template.id);
+                        scrollToWorkbench('download');
+                      }}
+                      className="rounded-full border border-white/10 bg-[#0b1726] px-4 py-2 text-sm font-bold text-slate-100 transition hover:border-[#e82127] hover:text-red-100"
+                    >
+                      {template.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => scrollToWorkbench('design')}
-                className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-black text-slate-950 transition hover:border-[#e82127] hover:text-[#e82127]"
-              >
-                开始自己设计
-              </button>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
-                <button
-                  key={`tutorial-${template.id}`}
-                  type="button"
-                  onClick={() => {
-                    setSelectedTemplateId(template.id);
-                    scrollToWorkbench('download');
-                  }}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-[#e82127] hover:bg-white hover:text-[#e82127]"
-                >
-                  {template.label}
-                </button>
-              ))}
             </div>
           </div>
         </div>

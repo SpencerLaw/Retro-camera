@@ -93,6 +93,17 @@ runTest('tsl skin page includes a full Chinese usage tutorial', () => {
   assert.doesNotMatch(componentSource, /Network（网络）|抓包|爬虫|Python 脚本|BeautifulSoup|批量下载爬虫/);
 });
 
+runTest('tsl skin tutorial uses the site product style instead of copied docs chrome', () => {
+  assert.match(componentSource, /tsl-skin-brand-tutorial/);
+  assert.match(componentSource, /创作与上车流程/);
+  assert.match(componentSource, /官方模板到车机预览/);
+  assert.match(componentSource, /bg-white\/\[0\.06\]/);
+  assert.match(componentSource, /border-white\/10/);
+  assert.match(componentSource, /shadow-red-950\/30/);
+  assert.doesNotMatch(componentSource, /首页 \/ 使用教程/);
+  assert.doesNotMatch(componentSource, /border-b border-slate-200 bg-white px-4 py-16/);
+});
+
 runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.match(componentSource, /皮肤画廊/);
   assert.match(componentSource, /先挑选现成皮肤/);

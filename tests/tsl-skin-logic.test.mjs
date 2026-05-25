@@ -53,6 +53,7 @@ await runTest('tsl skin creates centered layers and export filenames', async () 
   assert.equal(layer.rotation, 0);
   assert.equal(layer.opacity, 1);
   assert.equal(layer.flipX, false);
+  assert.equal(layer.clipMode, 'body');
 
   assert.equal(
     buildTslSkinFileName('Model Y 2025 Premium', 1777777777000),
@@ -75,6 +76,9 @@ await runTest('tsl skin exposes a commercial catalog and custom packages', async
   assert.ok(modelYProducts.length >= 2);
   assert.ok(modelYProducts.every((product) => product.modelIds.includes('modely-2025-premium')));
   assert.ok(modelYProducts.every((product) => product.assetKind === 'procedural'));
+  assert.ok(modelYProducts.every((product) => ['free', 'premium'].includes(product.tier)));
+  assert.ok(modelYProducts.every((product) => product.previewLabel && product.previewColors.length >= 2));
+  assert.ok(CUSTOM_WRAP_PACKAGES.every((item) => item.tier === 'custom'));
   assert.equal(formatPriceCents(4900), '¥49');
   assert.equal(formatPriceCents(19900), '¥199');
 });
@@ -96,4 +100,41 @@ await runTest('tsl skin calculates custom order quotes from package and rush opt
       totalCents: 43900,
     },
   );
+});
+
+await runTest('tsl skin builds local zip download names and install guide text', async () => {
+  const { buildTslSkinZipFileName, buildWrapInstallGuide } = await loadLogicModule();
+
+  assert.equal(
+    buildTslSkinZipFileName('Model Y 2025 Premium', 1777777777000),
+    'tsl-skin-model-y-2025-premium-1777777777000.zip',
+  );
+
+  const guide = buildWrapInstallGuide({
+    modelLabel: 'Model Y 2025 Premium',
+    fileName: 'wrap.png',
+  });
+  assert.match(guide, /Model Y 2025 Premium/);
+  assert.match(guide, /wrap\.png/);
+  assert.match(guide, /U盘|U 盘/);
+  assert.match(guide, /Wraps/);
+  assert.match(guide, /浏览器本地生成/);
+});
+
+await runTest('tsl skin creates a stored zip package without server upload', async () => {
+  const { createStoredZip } = await loadLogicModule();
+
+  const zip = createStoredZip([
+    { name: 'wrap.png', data: new Uint8Array([1, 2, 3]) },
+    { name: 'install-guide.txt', data: 'local only' },
+  ]);
+
+  assert.ok(zip instanceof Uint8Array);
+  assert.equal(zip[0], 0x50);
+  assert.equal(zip[1], 0x4b);
+
+  const zipText = new TextDecoder().decode(zip);
+  assert.match(zipText, /wrap\.png/);
+  assert.match(zipText, /install-guide\.txt/);
+  assert.match(zipText, /local only/);
 });

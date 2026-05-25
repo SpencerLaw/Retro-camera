@@ -12,7 +12,20 @@ import KiddiePlanApp from './kiddieplan/KiddiePlanApp';
 import { TugOfWarApp } from './components/TugOfWarApp';
 import JuzimiApp from './components/JuzimiApp';
 import PromptGalleryApp from './components/PromptGalleryApp';
-import TslSkinApp from './components/TslSkinApp';
+
+const TslSkinApp = React.lazy(() => import('./components/TslSkinApp'));
+
+const TslSkinRoute: React.FC = () => (
+  <React.Suspense
+    fallback={
+      <div className="min-h-screen bg-slate-950 px-6 py-10 text-center text-sm font-bold text-sky-100">
+        Loading TSL Skin...
+      </div>
+    }
+  >
+    <TslSkinApp />
+  </React.Suspense>
+);
 
 const App: React.FC = () => {
   return (
@@ -31,7 +44,7 @@ const App: React.FC = () => {
           <Route path="/word-tug-of-war" element={<TugOfWarApp variant="word" />} />
           <Route path="/juzimi" element={<JuzimiApp />} />
           <Route path="/prompts" element={<PromptGalleryApp />} />
-          <Route path="/tsl-skin" element={<TslSkinApp />} />
+          <Route path="/tsl-skin" element={<TslSkinRoute />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

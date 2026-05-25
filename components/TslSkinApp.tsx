@@ -15,7 +15,10 @@ import {
 } from 'lucide-react';
 import {
   buildTslSkinFileName,
+  buildTslSkinZipFileName,
+  buildWrapInstallGuide,
   calculateCustomOrderQuote,
+  createStoredZip,
   createSkinLayer,
   CUSTOM_WRAP_PACKAGES,
   formatPriceCents,
@@ -40,6 +43,7 @@ export type SkinLayer = {
   rotation: number;
   opacity: number;
   flipX: boolean;
+  clipMode: 'body' | 'full';
   name: string;
 };
 
@@ -49,8 +53,11 @@ type SkinCatalogProduct = {
   priceCents: number;
   modelIds: string[];
   assetKind: string;
+  tier: 'free' | 'premium';
   deliveryLabel: string;
   accentColor: string;
+  previewLabel: string;
+  previewColors: string[];
   description: string;
 };
 
@@ -58,10 +65,13 @@ type CustomWrapPackage = {
   id: string;
   title: string;
   priceCents: number;
+  tier: 'custom';
   revisionCount: number;
   turnaroundLabel: string;
   features: string[];
 };
+
+type WorkspaceMode = 'download' | 'design';
 
 type DragState = {
   layerId: string;
@@ -81,6 +91,12 @@ const PRESET_COLORS = [
   '#fbbf24',
   '#cbd5e1',
 ];
+
+const PRODUCT_TIER_LABELS = {
+  free: '免费',
+  premium: '高级',
+  custom: '定制',
+};
 
 const HANDLE_SIZE = 12;
 
@@ -281,6 +297,22 @@ function createCatalogProductImage(product: SkinCatalogProduct, color: string) {
   });
 }
 
+function getCanvasPngBytes(canvas: HTMLCanvasElement) {
+  return new Promise<Uint8Array>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Canvas export failed.'));
+        return;
+      }
+
+      blob
+        .arrayBuffer()
+        .then((buffer) => resolve(new Uint8Array(buffer)))
+        .catch(reject);
+    }, 'image/png');
+  });
+}
+
 const TslSkinApp: React.FC = () => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -293,6 +325,7 @@ const TslSkinApp: React.FC = () => {
   const [selectedLayerId, setSelectedLayerId] = React.useState<string | null>(null);
   const [clipToBody, setClipToBody] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
+  const [activeWorkspace, setActiveWorkspace] = React.useState<WorkspaceMode>('download');
   const [selectedPackageId, setSelectedPackageId] = React.useState('full-custom');
   const [extraRevisionCount, setExtraRevisionCount] = React.useState(0);
   const [rushOrder, setRushOrder] = React.useState(false);
@@ -352,7 +385,7 @@ const TslSkinApp: React.FC = () => {
       context.restore();
 
       layers.forEach((layer) => {
-        if (clipToBody && maskCanvasRef.current) {
+        if (layer.clipMode !== 'full' && maskCanvasRef.current) {
           const layerCanvas = document.createElement('canvas');
           layerCanvas.width = canvas.width;
           layerCanvas.height = canvas.height;
@@ -372,7 +405,7 @@ const TslSkinApp: React.FC = () => {
         drawSelection(context, selectedLayer);
       }
     },
-    [clipToBody, layers, selectedLayer, templateImage, wrapColor],
+    [layers, selectedLayer, templateImage, wrapColor],
   );
 
   React.useEffect(() => {
@@ -435,6 +468,7 @@ const TslSkinApp: React.FC = () => {
           const layerId = `layer_${Date.now()}_${index}`;
           const layer = {
             ...(createSkinLayer(layerId, image) as Omit<SkinLayer, 'name'>),
+            clipMode: clipToBody ? 'body' : 'full',
             name: file.name,
           };
           setLayers((currentLayers) => [...currentLayers, layer]);
@@ -567,6 +601,55 @@ const TslSkinApp: React.FC = () => {
     }
   };
 
+  const downloadZipPackage = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+
+    drawCanvas(false);
+
+    try {
+      const pngBytes = await getCanvasPngBytes(canvas);
+      const modelInfo = {
+        app: 'TSL Skin',
+        modelId: selectedTemplate.id,
+        modelLabel: selectedTemplate.label,
+        exportedAt: new Date().toISOString(),
+        localOnly: true,
+        layers: layers.map((layer, index) => ({
+          index: index + 1,
+          name: layer.name,
+          opacity: layer.opacity,
+          clipMode: layer.clipMode,
+        })),
+      };
+      const zipBytes = createStoredZip([
+        { name: 'wrap.png', data: pngBytes },
+        {
+          name: 'install-guide.txt',
+          data: buildWrapInstallGuide({
+            modelLabel: selectedTemplate.label,
+            fileName: 'wrap.png',
+          }),
+        },
+        { name: 'model-info.json', data: JSON.stringify(modelInfo, null, 2) },
+      ]);
+      const blob = new Blob([zipBytes], { type: 'application/zip' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.download = buildTslSkinZipFileName(selectedTemplate.label);
+      link.href = url;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus('ZIP 包已在浏览器本地生成，包含 wrap.png、车型说明和 U 盘放置教程。');
+    } catch {
+      setStatus('ZIP 包生成失败，请刷新后重试。');
+    } finally {
+      requestAnimationFrame(() => drawCanvas(true));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#070b12] text-slate-100">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(232,33,39,0.18),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]" />
@@ -586,15 +669,51 @@ const TslSkinApp: React.FC = () => {
               <h1 className="text-2xl font-black tracking-tight md:text-3xl">TSL Skin</h1>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={downloadCanvas}
-            className="inline-flex items-center gap-2 rounded-md bg-[#e82127] px-4 py-2 text-sm font-bold text-white shadow-lg shadow-red-950/40 transition hover:bg-[#ff3b40]"
-          >
-            <Download size={18} />
-            导出 PNG
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={downloadCanvas}
+              className="inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/15"
+            >
+              <Download size={18} />
+              导出 PNG
+            </button>
+            <button
+              type="button"
+              onClick={downloadZipPackage}
+              className="inline-flex items-center gap-2 rounded-md bg-[#e82127] px-4 py-2 text-sm font-bold text-white shadow-lg shadow-red-950/40 transition hover:bg-[#ff3b40]"
+            >
+              <Download size={18} />
+              下载 ZIP 包
+            </button>
+          </div>
         </header>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.06] p-2 shadow-2xl shadow-black/20 backdrop-blur-xl">
+          <div className="grid w-full grid-cols-2 gap-2 sm:w-auto">
+            {[
+              { id: 'download' as WorkspaceMode, label: '现有皮肤下载', hint: '选样张、看价格、导出包' },
+              { id: 'design' as WorkspaceMode, label: '自己设计皮肤', hint: '上传图片、本地编辑' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveWorkspace(item.id)}
+                className={`rounded-md px-4 py-3 text-left transition ${
+                  activeWorkspace === item.id
+                    ? 'bg-sky-300 text-slate-950 shadow-lg shadow-sky-950/30'
+                    : 'bg-slate-950/70 text-slate-200 hover:bg-white/10'
+                }`}
+              >
+                <span className="block text-sm font-black">{item.label}</span>
+                <span className="mt-1 block text-xs opacity-75">{item.hint}</span>
+              </button>
+            ))}
+          </div>
+          <p className="max-w-xl px-2 text-xs leading-relaxed text-slate-300">
+            图片仅在你的浏览器本地处理，不会上传服务器。导出 PNG 或 ZIP 都由当前设备生成，不占用 Vercel 存储额度。
+          </p>
+        </div>
 
         <main className="grid flex-1 gap-4 py-4 lg:grid-cols-[300px_minmax(0,1fr)_300px]">
           <aside className="space-y-4 rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:max-h-[calc(100vh-110px)] lg:overflow-y-auto">
@@ -675,7 +794,7 @@ const TslSkinApp: React.FC = () => {
                   onChange={(event) => setClipToBody(event.target.checked)}
                   className="mt-1"
                 />
-                <span>自动限制贴图到车身区域</span>
+                <span>新上传贴图默认贴合车身区域</span>
               </label>
               <div className="flex gap-2">
                 <button
@@ -693,7 +812,7 @@ const TslSkinApp: React.FC = () => {
               </div>
               <p className="rounded-md border border-emerald-400/20 bg-emerald-400/10 p-3 text-xs leading-relaxed text-emerald-100">
                 <ShieldCheck size={16} className="mb-2 inline text-emerald-300" />
-                {' '}请仅上传原创或已授权素材。本工具不抓取、不代理任何付费皮肤原图。
+                {' '}图片仅在你的浏览器本地处理，不会上传服务器。请仅上传原创或已授权素材。
               </p>
             </section>
 
@@ -718,9 +837,33 @@ const TslSkinApp: React.FC = () => {
                         <div className="truncate text-sm font-bold text-white">{product.title}</div>
                         <div className="mt-1 text-xs text-slate-400">{product.deliveryLabel}</div>
                       </div>
-                      <div className="text-sm font-black text-sky-200">{formatPriceCents(product.priceCents)}</div>
+                      <div className="text-right">
+                        <div className="text-sm font-black text-sky-200">{formatPriceCents(product.priceCents)}</div>
+                        <div className="mt-1 rounded-full border border-white/10 px-2 py-1 text-[11px] font-bold text-slate-200">
+                          {PRODUCT_TIER_LABELS[product.tier]}
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-3 h-2 rounded-full" style={{ background: product.accentColor }} />
+                    <div className="mt-3 rounded-md border border-white/10 bg-black/20 p-2">
+                      <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                        示例预览
+                      </div>
+                      <div className="flex h-14 overflow-hidden rounded-md border border-white/10">
+                        {product.previewColors.map((color, colorIndex) => (
+                          <div
+                            key={`${product.id}-${color}`}
+                            className="flex-1"
+                            style={{
+                              background:
+                                colorIndex === 1
+                                  ? `repeating-linear-gradient(135deg, ${color}, ${color} 8px, ${product.accentColor} 8px, ${product.accentColor} 12px)`
+                                  : color,
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="mt-2 text-xs text-slate-400">{product.previewLabel}</div>
+                    </div>
                     <p className="mt-3 text-xs leading-relaxed text-slate-400">{product.description}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
                       <span className="rounded-full border border-white/10 px-2 py-1">{product.assetKind}</span>
@@ -805,6 +948,28 @@ const TslSkinApp: React.FC = () => {
               )}
               {selectedLayer && (
                 <>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <span>裁剪模式</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { mode: 'body' as const, label: '贴合车身' },
+                        { mode: 'full' as const, label: '保留完整图案' },
+                      ].map((item) => (
+                        <button
+                          key={item.mode}
+                          type="button"
+                          onClick={() => updateSelectedLayer({ clipMode: item.mode })}
+                          className={`rounded-md border px-3 py-2 text-sm font-bold transition ${
+                            selectedLayer.clipMode === item.mode
+                              ? 'border-sky-300 bg-sky-300/20 text-sky-100'
+                              : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <label className="block space-y-2 text-sm text-slate-300">
                     <span>透明度 {Math.round(selectedLayer.opacity * 100)}%</span>
                     <input
@@ -908,7 +1073,12 @@ const TslSkinApp: React.FC = () => {
                       {selectedPackage.turnaroundLabel} · 含 {selectedPackage.revisionCount} 次修改
                     </div>
                   </div>
-                  <div className="text-sm font-black text-sky-200">{formatPriceCents(selectedPackage.priceCents)}</div>
+                  <div className="text-right">
+                    <div className="text-sm font-black text-sky-200">{formatPriceCents(selectedPackage.priceCents)}</div>
+                    <div className="mt-1 rounded-full border border-white/10 px-2 py-1 text-[11px] font-bold text-slate-200">
+                      {PRODUCT_TIER_LABELS[selectedPackage.tier]}
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {selectedPackage.features.map((feature) => (

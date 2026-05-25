@@ -63,7 +63,10 @@ runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.match(componentSource, /先挑选现成皮肤/);
   assert.match(componentSource, /适配车型/);
   assert.match(componentSource, /马上预览/);
-  assert.match(componentSource, /catalogProducts\.map/);
+  assert.match(componentSource, /officialExamples\.map/);
+  assert.match(componentSource, /getOfficialExampleWrapsForTemplate/);
+  assert.match(componentSource, /特斯拉官方示例/);
+  assert.match(componentSource, /官方免费示例/);
 });
 
 runTest('tsl skin page supports zip package export and per-layer crop modes', () => {

@@ -23,6 +23,7 @@ import {
   DOWNLOAD_PRICE_TIERS,
   formatPriceCents,
   getCatalogProductsForTemplate,
+  getOfficialExampleWrapsForTemplate,
   getTeslaTemplateById,
   SKIN_CATALOG_PRODUCTS,
   TESLA_MODEL_TEMPLATES,
@@ -66,6 +67,15 @@ type DownloadPriceTier = {
   title: string;
   priceCents: number;
   detail: string;
+};
+
+type OfficialWrapExample = {
+  id: string;
+  title: string;
+  fileName: string;
+  imageUrl: string;
+  modelIds: string[];
+  sourceLabel: string;
 };
 
 type WorkspaceMode = 'download' | 'design';
@@ -288,6 +298,16 @@ function createCatalogProductImage(product: SkinCatalogProduct, color: string) {
   });
 }
 
+function loadRemoteWrapImage(url: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('官方示例加载失败。'));
+    image.src = url;
+  });
+}
+
 function getCanvasPngBytes(canvas: HTMLCanvasElement) {
   return new Promise<Uint8Array>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -324,6 +344,10 @@ const TslSkinApp: React.FC = () => {
   const selectedLayer = layers.find((layer) => layer.id === selectedLayerId) || null;
   const catalogProducts = React.useMemo(
     () => getCatalogProductsForTemplate(selectedTemplateId) as SkinCatalogProduct[],
+    [selectedTemplateId],
+  );
+  const officialExamples = React.useMemo(
+    () => getOfficialExampleWrapsForTemplate(selectedTemplateId) as OfficialWrapExample[],
     [selectedTemplateId],
   );
   const priceTiers = DOWNLOAD_PRICE_TIERS as DownloadPriceTier[];
@@ -480,6 +504,23 @@ const TslSkinApp: React.FC = () => {
       setStatus(`${product.title} 已加入画布预览，可继续调整图层。`);
     } catch {
       setStatus('样张生成失败，请稍后重试。');
+    }
+  };
+
+  const addOfficialExampleLayer = async (example: OfficialWrapExample) => {
+    try {
+      const image = await loadRemoteWrapImage(example.imageUrl);
+      const layerId = `official_${example.id}_${Date.now()}`;
+      const layer = {
+        ...(createSkinLayer(layerId, image) as Omit<SkinLayer, 'name'>),
+        clipMode: 'full' as const,
+        name: `${example.title} 官方示例`,
+      };
+      setLayers((currentLayers) => [...currentLayers, layer]);
+      setSelectedLayerId(layerId);
+      setStatus(`${example.title} 已从特斯拉官方示例加入画布。`);
+    } catch {
+      setStatus('官方示例加载失败，请稍后重试。');
     }
   };
 
@@ -918,45 +959,42 @@ const TslSkinApp: React.FC = () => {
                       皮肤画廊
                     </div>
                     <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                      先挑选现成皮肤，加入画布后可以换车型、改车身颜色，再导出交付包。
+                      先挑选现成皮肤，这里展示特斯拉官方示例图库，加入画布后可以换车型、改车身颜色，再导出交付包。
                     </p>
                   </div>
                   <span className="rounded-full border border-sky-300/30 bg-sky-300/10 px-3 py-1 text-xs font-bold text-sky-100">
-                    适配车型：{selectedTemplate.label}
+                    官方免费示例 · 适配车型：{selectedTemplate.label}
                   </span>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {catalogProducts.map((product) => (
-                    <article key={`gallery-${product.id}`} className="overflow-hidden rounded-md border border-white/10 bg-black/25">
-                      <div className="flex h-28">
-                        {product.previewColors.map((color, colorIndex) => (
-                          <div
-                            key={`gallery-${product.id}-${color}`}
-                            className="flex-1"
-                            style={{
-                              background:
-                                colorIndex === 1
-                                  ? `repeating-linear-gradient(135deg, ${color}, ${color} 10px, ${product.accentColor} 10px, ${product.accentColor} 15px)`
-                                  : color,
-                            }}
-                          />
-                        ))}
+                  {officialExamples.map((example) => (
+                    <article key={`gallery-${example.id}`} className="overflow-hidden rounded-md border border-white/10 bg-black/25">
+                      <div className="flex h-32 items-center justify-center bg-white p-2">
+                        <img
+                          src={example.imageUrl}
+                          crossOrigin="anonymous"
+                          alt={example.title}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                        />
                       </div>
                       <div className="space-y-3 p-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <h2 className="truncate text-sm font-black text-white">{product.title}</h2>
-                            <p className="mt-1 text-xs text-slate-400">{product.previewLabel}</p>
+                            <h2 className="truncate text-sm font-black text-white">{example.title}</h2>
+                            <p className="mt-1 text-xs text-slate-400">{example.sourceLabel}</p>
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-black text-sky-200">{formatPriceCents(product.priceCents)}</div>
-                            <div className="text-[11px] font-bold text-slate-400">{product.tier}</div>
+                            <div className="text-lg font-black text-sky-200">免费</div>
+                            <div className="text-[11px] font-bold text-slate-400">示例</div>
                           </div>
                         </div>
-                        <p className="line-clamp-2 text-xs leading-relaxed text-slate-400">{product.description}</p>
+                        <p className="line-clamp-2 text-xs leading-relaxed text-slate-400">
+                          来自特斯拉官方开源仓库，可先展示效果，后续替换成你自己的收费商品。
+                        </p>
                         <button
                           type="button"
-                          onClick={() => addCatalogProductLayer(product)}
+                          onClick={() => addOfficialExampleLayer(example)}
                           className="flex w-full items-center justify-center gap-2 rounded-md bg-sky-300 px-3 py-2 text-sm font-black text-slate-950 transition hover:bg-sky-200"
                         >
                           <Sparkles size={16} />

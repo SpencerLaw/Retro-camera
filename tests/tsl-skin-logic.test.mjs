@@ -42,6 +42,26 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
   );
 });
 
+await runTest('tsl skin exposes official GitHub example wraps for galleries', async () => {
+  const { getOfficialExampleWrapsForTemplate } = await loadLogicModule();
+
+  const examples = getOfficialExampleWrapsForTemplate('modely-2025-premium');
+  assert.equal(examples.length, 20);
+  assert.ok(examples.every((item) => item.sourceLabel === '特斯拉官方示例'));
+  assert.ok(examples.every((item) => item.modelIds.includes('modely-2025-premium')));
+  assert.ok(
+    examples.every((item) =>
+      item.imageUrl.startsWith(
+        'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/modely-2025-premium/example/',
+      ),
+    ),
+  );
+  assert.ok(examples.some((item) => item.fileName === 'Sakura.png' && item.title === '樱花粉绘'));
+
+  const cybertruckExamples = getOfficialExampleWrapsForTemplate('cybertruck');
+  assert.ok(cybertruckExamples.length > examples.length);
+});
+
 await runTest('tsl skin creates centered layers and export filenames', async () => {
   const { buildTslSkinFileName, createSkinLayer } = await loadLogicModule();
 

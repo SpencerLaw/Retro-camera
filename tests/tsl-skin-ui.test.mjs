@@ -73,6 +73,26 @@ runTest('tsl skin page has a clear public landing layout', () => {
   assert.match(componentSource, /scrollToWorkbench/);
 });
 
+runTest('tsl skin page includes a full Chinese usage tutorial', () => {
+  assert.match(componentSource, /tsl-skin-tutorial/);
+  assert.match(componentSource, /scrollToTutorial/);
+  assert.match(componentSource, /特斯拉车机皮肤使用教程/);
+  assert.match(componentSource, /分步指南/);
+  assert.match(componentSource, /下载模板/);
+  assert.match(componentSource, /准备 U 盘/);
+  assert.match(componentSource, /在车机中应用/);
+  assert.match(componentSource, /要求与设置/);
+  assert.match(componentSource, /图片要求/);
+  assert.match(componentSource, /U 盘与车机要求/);
+  assert.match(componentSource, /支持的车型/);
+  assert.match(componentSource, /在车机中应用外观设计/);
+  assert.match(componentSource, /发现车型标注错误/);
+  assert.match(componentSource, /1024x1024/);
+  assert.match(componentSource, /exFAT/);
+  assert.match(componentSource, /Wraps/);
+  assert.doesNotMatch(componentSource, /Network（网络）|抓包|爬虫|Python 脚本|BeautifulSoup|批量下载爬虫/);
+});
+
 runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.match(componentSource, /皮肤画廊/);
   assert.match(componentSource, /先挑选现成皮肤/);

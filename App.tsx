@@ -12,6 +12,7 @@ import KiddiePlanApp from './kiddieplan/KiddiePlanApp';
 import { TugOfWarApp } from './components/TugOfWarApp';
 import JuzimiApp from './components/JuzimiApp';
 import PromptGalleryApp from './components/PromptGalleryApp';
+import TslSkinApp from './components/TslSkinApp';
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
           <Route path="/word-tug-of-war" element={<TugOfWarApp variant="word" />} />
           <Route path="/juzimi" element={<JuzimiApp />} />
           <Route path="/prompts" element={<PromptGalleryApp />} />
+          <Route path="/tsl-skin" element={<TslSkinApp />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

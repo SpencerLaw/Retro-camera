@@ -19,7 +19,7 @@ const TslSkinRoute: React.FC = () => (
   <React.Suspense
     fallback={
       <div className="min-h-screen bg-slate-950 px-6 py-10 text-center text-sm font-bold text-sky-100">
-        Loading TSL Skin...
+        正在加载特斯拉皮肤工作台...
       </div>
     }
   >

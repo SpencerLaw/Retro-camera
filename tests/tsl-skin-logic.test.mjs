@@ -35,7 +35,7 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
   );
 
   const premium = getTeslaTemplateById('modely-2025-premium');
-  assert.equal(premium.label, 'Model Y 2025 Premium');
+  assert.equal(premium.label, 'Y 型车 2025 高级版');
   assert.equal(
     premium.templateUrl,
     'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/modely-2025-premium/template.png',
@@ -56,69 +56,58 @@ await runTest('tsl skin creates centered layers and export filenames', async () 
   assert.equal(layer.clipMode, 'body');
 
   assert.equal(
-    buildTslSkinFileName('Model Y 2025 Premium', 1777777777000),
-    'tsl-skin-model-y-2025-premium-1777777777000.png',
+    buildTslSkinFileName('Y 型车 2025 高级版', 1777777777000),
+    'tsl-skin-y-2025-1777777777000.png',
   );
 });
 
-await runTest('tsl skin exposes a commercial catalog and custom packages', async () => {
+await runTest('tsl skin exposes Chinese catalog products and simple price tiers', async () => {
   const {
-    CUSTOM_WRAP_PACKAGES,
+    DOWNLOAD_PRICE_TIERS,
     SKIN_CATALOG_PRODUCTS,
     formatPriceCents,
     getCatalogProductsForTemplate,
   } = await loadLogicModule();
 
   assert.ok(SKIN_CATALOG_PRODUCTS.length >= 3);
-  assert.ok(CUSTOM_WRAP_PACKAGES.length >= 3);
+  assert.deepEqual(
+    DOWNLOAD_PRICE_TIERS.map((tier) => tier.priceCents),
+    [200, 999, 3000],
+  );
+  assert.deepEqual(
+    DOWNLOAD_PRICE_TIERS.map((tier) => tier.title),
+    ['单张下载', '五张打包', '自定义设计'],
+  );
 
   const modelYProducts = getCatalogProductsForTemplate('modely-2025-premium');
   assert.ok(modelYProducts.length >= 2);
   assert.ok(modelYProducts.every((product) => product.modelIds.includes('modely-2025-premium')));
-  assert.ok(modelYProducts.every((product) => product.assetKind === 'procedural'));
-  assert.ok(modelYProducts.every((product) => ['free', 'premium'].includes(product.tier)));
+  assert.ok(modelYProducts.every((product) => product.assetKind === '原创样张'));
+  assert.ok(modelYProducts.every((product) => ['单张', '五张'].includes(product.tier)));
   assert.ok(modelYProducts.every((product) => product.previewLabel && product.previewColors.length >= 2));
-  assert.ok(CUSTOM_WRAP_PACKAGES.every((item) => item.tier === 'custom'));
-  assert.equal(formatPriceCents(4900), '¥49');
-  assert.equal(formatPriceCents(19900), '¥199');
-});
-
-await runTest('tsl skin calculates custom order quotes from package and rush options', async () => {
-  const { calculateCustomOrderQuote } = await loadLogicModule();
-
-  assert.deepEqual(
-    calculateCustomOrderQuote({
-      packageId: 'full-custom',
-      extraRevisionCount: 2,
-      rush: true,
-    }),
-    {
-      packageId: 'full-custom',
-      basePriceCents: 29900,
-      extraRevisionCents: 6000,
-      rushCents: 8000,
-      totalCents: 43900,
-    },
-  );
+  assert.ok(modelYProducts.every((product) => !/[A-Za-z]/.test(product.title + product.deliveryLabel + product.previewLabel + product.description + product.assetKind + product.tier)));
+  assert.equal(formatPriceCents(200), '¥2');
+  assert.equal(formatPriceCents(999), '¥9.99');
+  assert.equal(formatPriceCents(3000), '¥30');
 });
 
 await runTest('tsl skin builds local zip download names and install guide text', async () => {
   const { buildTslSkinZipFileName, buildWrapInstallGuide } = await loadLogicModule();
 
   assert.equal(
-    buildTslSkinZipFileName('Model Y 2025 Premium', 1777777777000),
-    'tsl-skin-model-y-2025-premium-1777777777000.zip',
+    buildTslSkinZipFileName('Y 型车 2025 高级版', 1777777777000),
+    'tsl-skin-y-2025-1777777777000.zip',
   );
 
   const guide = buildWrapInstallGuide({
-    modelLabel: 'Model Y 2025 Premium',
+    modelLabel: 'Y 型车 2025 高级版',
     fileName: 'wrap.png',
   });
-  assert.match(guide, /Model Y 2025 Premium/);
   assert.match(guide, /wrap\.png/);
   assert.match(guide, /U盘|U 盘/);
-  assert.match(guide, /Wraps/);
+  assert.match(guide, /皮肤文件夹/);
   assert.match(guide, /浏览器本地生成/);
+  assert.doesNotMatch(guide, /Install guide|Privacy|USB drive|server/i);
 });
 
 await runTest('tsl skin creates a stored zip package without server upload', async () => {

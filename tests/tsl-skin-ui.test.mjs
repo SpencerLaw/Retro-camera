@@ -21,7 +21,7 @@ runTest('tsl skin route and homepage entry are wired', () => {
   assert.match(appSource, /<React\.Suspense/);
   assert.match(appSource, /<Route path="\/tsl-skin" element=\{<TslSkinRoute \/>\} \/>/);
   assert.match(homeSource, /to="\/tsl-skin"/);
-  assert.match(homeSource, /TSL Skin/);
+  assert.match(homeSource, /特斯拉皮肤/);
 });
 
 runTest('tsl skin page includes canvas editor controls', () => {
@@ -40,16 +40,15 @@ runTest('tsl skin page includes canvas editor controls', () => {
 
 runTest('tsl skin page includes monetization-ready catalog and custom order UI', () => {
   assert.match(componentSource, /SKIN_CATALOG_PRODUCTS/);
-  assert.match(componentSource, /CUSTOM_WRAP_PACKAGES/);
+  assert.match(componentSource, /DOWNLOAD_PRICE_TIERS/);
   assert.match(componentSource, /getCatalogProductsForTemplate/);
-  assert.match(componentSource, /calculateCustomOrderQuote/);
   assert.match(componentSource, /商品库/);
-  assert.match(componentSource, /定制套餐/);
+  assert.match(componentSource, /价格说明/);
   assert.match(componentSource, /加入画布预览/);
-  assert.match(componentSource, /免费|高级|定制/);
+  assert.match(componentSource, /单张下载|五张打包|自定义设计/);
   assert.match(componentSource, /示例预览/);
-  assert.doesNotMatch(componentSource, /授权码|激活码|待接入支付|后端支付/);
-  assert.match(homeSource, /Tesla 车机皮肤工作台/);
+  assert.doesNotMatch(componentSource, /授权码|激活码|待接入支付|后端支付|定制套餐|CUSTOM_WRAP_PACKAGES|calculateCustomOrderQuote/);
+  assert.match(homeSource, /车机皮肤工作台/);
 });
 
 runTest('tsl skin page separates download and design workflows', () => {
@@ -66,8 +65,25 @@ runTest('tsl skin page supports zip package export and per-layer crop modes', ()
   assert.match(componentSource, /wrap\.png/);
   assert.match(componentSource, /install-guide\.txt/);
   assert.match(componentSource, /model-info\.json/);
-  assert.match(componentSource, /下载 ZIP 包/);
+  assert.match(componentSource, /下载压缩包/);
   assert.match(componentSource, /clipMode/);
   assert.match(componentSource, /贴合车身/);
   assert.match(componentSource, /保留完整图案/);
+});
+
+runTest('tsl skin page is Chinese-first and includes day mode plus help', () => {
+  assert.match(componentSource, /浅色模式/);
+  assert.match(componentSource, /深色模式/);
+  assert.match(componentSource, /使用说明/);
+  assert.match(componentSource, /第一步/);
+  assert.match(componentSource, /第二步/);
+  assert.match(componentSource, /第三步/);
+  assert.match(componentSource, /2 元/);
+  assert.match(componentSource, /9\.99 元/);
+  assert.match(componentSource, /30 元/);
+  assert.doesNotMatch(
+    componentSource,
+    /Tesla Paint Shop|TSL Skin|Body Color|Loading Tesla template|Instant PNG download|Free PNG sample|Race stripe|Tech grid|Satin wave|procedural|Quick Polish|Quote|workspace|Export-ready|Commercial-use|Priority designer|Color match|One uploaded logo|Full Custom|Brand Drop|导出 PNG|下载 ZIP 包/,
+  );
+  assert.doesNotMatch(appSource, /Loading TSL Skin/);
 });

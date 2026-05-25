@@ -485,7 +485,7 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
-          {/* TSL Skin - Tesla Paint Shop Editor */}
+          {/* 特斯拉皮肤工作台 */}
           <Link
             to="/tsl-skin"
             className="group relative bg-gradient-to-br from-[#E0F2FE] via-[#BAE6FD] to-[#FECACA] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(56,189,248,0.35)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(56,189,248,0.5)] hover:rotate-2 block"
@@ -506,16 +506,16 @@ export const HomePage: React.FC = () => {
             </div>
 
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#0F172A] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">TSL Skin</h2>
+              <h2 className="font-bold text-4xl text-[#0F172A] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">特斯拉皮肤</h2>
               <p className="text-base text-[#0369A1] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
-                Tesla 车机皮肤工作台
+                车机皮肤工作台
               </p>
               <p className="text-sm text-[#334155] leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.6)]">
-                选择官方车型模板，上传原创贴图，导出 Paint Shop 可用 PNG。
+                选择官方车型模板，上传原创贴图，导出车机可用图片。
               </p>
               <div className="mt-6 pt-6 border-t-[3px] border-white/70">
                 <div className="inline-block px-6 py-3 bg-white text-[#E82127] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-[0_4px_12px_rgba(56,189,248,0.35)] border-[3px] border-[#7DD3FC] hover:bg-gradient-to-r hover:from-[#E0F2FE] hover:to-white">
-                  Enter → PNG
+                  进入 →
                 </div>
               </div>
             </div>

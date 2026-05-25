@@ -1,15 +1,15 @@
 const GITHUB_TEMPLATE_ROOT = 'https://raw.githubusercontent.com/teslamotors/custom-wraps/master';
 
 export const TESLA_MODEL_TEMPLATES = [
-  { id: 'cybertruck', label: 'Cybertruck', templateUrl: `${GITHUB_TEMPLATE_ROOT}/cybertruck/template.png` },
-  { id: 'model3', label: 'Model 3', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3/template.png` },
-  { id: 'model3-2024-base', label: 'Model 3 2024 Base', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3-2024-base/template.png` },
-  { id: 'model3-2024-performance', label: 'Model 3 2024 Performance', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3-2024-performance/template.png` },
-  { id: 'modely', label: 'Model Y', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely/template.png` },
-  { id: 'modely-2025-base', label: 'Model Y 2025 Base', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-base/template.png` },
-  { id: 'modely-2025-premium', label: 'Model Y 2025 Premium', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-premium/template.png` },
-  { id: 'modely-2025-performance', label: 'Model Y 2025 Performance', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-performance/template.png` },
-  { id: 'modely-l', label: 'Model Y L', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-l/template.png` },
+  { id: 'cybertruck', label: '赛博越野旅行车', templateUrl: `${GITHUB_TEMPLATE_ROOT}/cybertruck/template.png` },
+  { id: 'model3', label: '三型车', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3/template.png` },
+  { id: 'model3-2024-base', label: '三型车 2024 基础版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3-2024-base/template.png` },
+  { id: 'model3-2024-performance', label: '三型车 2024 高性能版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/model3-2024-performance/template.png` },
+  { id: 'modely', label: 'Y 型车', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely/template.png` },
+  { id: 'modely-2025-base', label: 'Y 型车 2025 基础版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-base/template.png` },
+  { id: 'modely-2025-premium', label: 'Y 型车 2025 高级版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-premium/template.png` },
+  { id: 'modely-2025-performance', label: 'Y 型车 2025 高性能版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-2025-performance/template.png` },
+  { id: 'modely-l', label: 'Y 型长轴版', templateUrl: `${GITHUB_TEMPLATE_ROOT}/modely-l/template.png` },
 ];
 
 const ALL_MODEL_IDS = TESLA_MODEL_TEMPLATES.map((template) => template.id);
@@ -18,72 +18,63 @@ const MODEL_Y_2025_IDS = ['modely-2025-base', 'modely-2025-premium', 'modely-202
 export const SKIN_CATALOG_PRODUCTS = [
   {
     id: 'apex-redline',
-    title: 'Apex Redline',
-    priceCents: 0,
+    title: '红线竞速',
+    priceCents: 200,
     modelIds: ALL_MODEL_IDS,
-    assetKind: 'procedural',
-    tier: 'free',
-    deliveryLabel: 'Free PNG sample',
+    assetKind: '原创样张',
+    tier: '单张',
+    deliveryLabel: '单张下载 2 元',
     accentColor: '#e82127',
-    previewLabel: 'Race stripe',
+    previewLabel: '红白赛车线条',
     previewColors: ['#e82127', '#f8fafc', '#0f172a'],
-    description: 'Sharp race stripe layer for quick previews and paid starter packs.',
+    description: '适合小红书展示的红白竞速风格，点击即可加入画布预览。',
   },
   {
     id: 'cyber-grid',
-    title: 'Cyber Grid',
-    priceCents: 4900,
+    title: '赛博网格',
+    priceCents: 200,
     modelIds: ALL_MODEL_IDS,
-    assetKind: 'procedural',
-    tier: 'premium',
-    deliveryLabel: 'Instant PNG download',
+    assetKind: '原创样张',
+    tier: '单张',
+    deliveryLabel: '单张下载 2 元',
     accentColor: '#38bdf8',
-    previewLabel: 'Tech grid',
+    previewLabel: '蓝色科技网格',
     previewColors: ['#38bdf8', '#0f172a', '#f8fafc'],
-    description: 'Technical grid pattern that works well on bright and dark body colors.',
+    description: '科技感网格线条，适合深色和浅色车身预览。',
   },
   {
     id: 'y-satin-wave',
-    title: 'Model Y Satin Wave',
-    priceCents: 6900,
+    title: '丝缎流线',
+    priceCents: 999,
     modelIds: MODEL_Y_2025_IDS,
-    assetKind: 'procedural',
-    tier: 'premium',
-    deliveryLabel: 'Instant PNG download',
+    assetKind: '原创样张',
+    tier: '五张',
+    deliveryLabel: '五张打包 9.99 元',
     accentColor: '#14b8a6',
-    previewLabel: 'Satin wave',
+    previewLabel: '青色流线图案',
     previewColors: ['#14b8a6', '#f8fafc', '#3e6ae1'],
-    description: 'Flowing side graphic tuned for the 2025 Model Y family.',
+    description: '适合新款车型的流线图案，可作为五张打包里的展示款。',
   },
 ];
 
-export const CUSTOM_WRAP_PACKAGES = [
+export const DOWNLOAD_PRICE_TIERS = [
   {
-    id: 'quick-polish',
-    title: 'Quick Polish',
-    priceCents: 9900,
-    tier: 'custom',
-    revisionCount: 1,
-    turnaroundLabel: '24-48h',
-    features: ['Color match', 'One uploaded logo', 'Export-ready PNG'],
+    id: 'single',
+    title: '单张下载',
+    priceCents: 200,
+    detail: '2 元任选一张皮肤，适合小红书单款成交。',
   },
   {
-    id: 'full-custom',
-    title: 'Full Custom',
-    priceCents: 29900,
-    tier: 'custom',
-    revisionCount: 2,
-    turnaroundLabel: '3-5 days',
-    features: ['Full body concept', 'Two revisions', 'Commercial-use delivery file'],
+    id: 'five-pack',
+    title: '五张打包',
+    priceCents: 999,
+    detail: '9.99 元任选五张，适合做合集和促销。',
   },
   {
-    id: 'brand-drop',
-    title: 'Brand Drop',
-    priceCents: 59900,
-    tier: 'custom',
-    revisionCount: 3,
-    turnaroundLabel: '5-7 days',
-    features: ['Campaign mini pack', 'Three model exports', 'Priority designer support'],
+    id: 'custom',
+    title: '自定义设计',
+    priceCents: 3000,
+    detail: '30 元支持用户发图或描述，你再帮他做专属版本。',
   },
 ];
 
@@ -98,23 +89,6 @@ export function getCatalogProductsForTemplate(templateId) {
 export function formatPriceCents(cents) {
   const amount = Number(cents || 0) / 100;
   return `¥${Number.isInteger(amount) ? amount.toFixed(0) : amount.toFixed(2)}`;
-}
-
-export function calculateCustomOrderQuote(options = {}) {
-  const packageItem =
-    CUSTOM_WRAP_PACKAGES.find((item) => item.id === options.packageId) || CUSTOM_WRAP_PACKAGES[0];
-  const extraRevisionCount = Math.max(0, Number(options.extraRevisionCount || 0));
-  const basePriceCents = packageItem.priceCents;
-  const extraRevisionCents = extraRevisionCount * 3000;
-  const rushCents = options.rush ? 8000 : 0;
-
-  return {
-    packageId: packageItem.id,
-    basePriceCents,
-    extraRevisionCents,
-    rushCents,
-    totalCents: basePriceCents + extraRevisionCents + rushCents,
-  };
 }
 
 export function createSkinLayer(id, image) {
@@ -151,18 +125,16 @@ export function buildTslSkinZipFileName(modelLabel, timestamp = Date.now()) {
 
 export function buildWrapInstallGuide({ modelLabel, fileName = 'wrap.png' } = {}) {
   return [
-    'TSL Skin export package',
+    '特斯拉车机皮肤导出包',
     '',
-    `Model: ${modelLabel || 'Tesla'}`,
-    `Wrap file: ${fileName}`,
+    `车型：${modelLabel || '特斯拉'}`,
+    `图片文件：${fileName}`,
     '',
-    'Install guide:',
-    '1. Copy wrap.png to your USB drive Custom Wraps / Wraps folder.',
-    '2. Keep the file name as wrap.png unless your vehicle software asks for another name.',
-    '3. Insert the U盘 / U 盘 into the Tesla and select the custom wrap from Paint Shop.',
+    '使用方法：',
+    '1. 把 wrap.png 复制到 U盘 / U 盘里的特斯拉皮肤文件夹。',
+    '2. 文件名尽量保持为 wrap.png，方便车机识别。',
+    '3. 插入车辆后，在车机皮肤设置里选择自定义皮肤。',
     '',
-    'Privacy:',
-    'This package is generated in your browser locally. Images are not uploaded to a server.',
     '本下载包由浏览器本地生成，不会上传服务器。',
   ].join('\n');
 }

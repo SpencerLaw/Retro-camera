@@ -793,13 +793,133 @@ const TslSkinApp: React.FC = () => {
     }
   };
 
-  const rootClassName = isDayMode ? 'tsl-skin-day min-h-screen bg-sky-50 text-slate-950' : 'min-h-screen bg-[#070b12] text-slate-100';
+  const scrollToWorkbench = (mode?: WorkspaceMode) => {
+    if (mode) {
+      setActiveWorkspace(mode);
+    }
+    requestAnimationFrame(() => {
+      document.getElementById('tsl-skin-workbench')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+  const landingStats = [
+    { icon: Palette, value: `${officialExamples.length}+`, label: '官方示例' },
+    { icon: Download, value: '本地', label: '浏览器导出' },
+    { icon: ShieldCheck, value: '0', label: '服务器存储' },
+    { icon: Sparkles, value: `${TESLA_MODEL_TEMPLATES.length}`, label: '支持车型' },
+  ];
+  const rootClassName = isDayMode ? 'tsl-skin-day min-h-screen bg-slate-50 text-slate-950' : 'min-h-screen bg-slate-50 text-slate-950';
+  const workbenchClassName = isDayMode
+    ? 'relative min-h-screen overflow-hidden bg-sky-50 text-slate-950'
+    : 'relative min-h-screen overflow-hidden bg-[#070b12] text-slate-100';
   const backgroundClassName = isDayMode
-    ? 'pointer-events-none fixed inset-0 bg-[linear-gradient(135deg,rgba(239,246,255,0.96),rgba(255,255,255,0.98))]'
-    : 'pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(232,33,39,0.18),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]';
+    ? 'pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(239,246,255,0.96),rgba(255,255,255,0.98))]'
+    : 'pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(232,33,39,0.18),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]';
 
   return (
     <div className={rootClassName}>
+      <section className="border-b border-slate-200 bg-white">
+        <nav className="mx-auto flex h-16 w-full max-w-[1480px] items-center justify-between px-4 md:px-6">
+          <Link to="/" className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e82127] text-xl font-black text-white shadow-lg shadow-red-200">
+              特
+            </span>
+            <span className="text-2xl font-black tracking-tight text-slate-950">特斯拉皮肤</span>
+          </Link>
+          <div className="hidden items-center gap-8 text-sm font-bold text-slate-500 lg:flex">
+            <button type="button" onClick={() => scrollToWorkbench('download')} className="text-slate-700 transition hover:text-[#e82127]">
+              官方模板 <span className="ml-1 rounded-md bg-[#e82127] px-2 py-1 text-xs text-white">官方</span>
+            </button>
+            <button type="button" onClick={() => scrollToWorkbench('download')} className="transition hover:text-[#e82127]">
+              排行榜
+            </button>
+            <button type="button" onClick={() => scrollToWorkbench('design')} className="transition hover:text-[#e82127]">
+              自己创作
+            </button>
+            <button type="button" onClick={() => scrollToWorkbench('design')} className="transition hover:text-[#e82127]">
+              上传模板
+            </button>
+            <button type="button" onClick={() => scrollToWorkbench('download')} className="transition hover:text-[#e82127]">
+              联盟计划 <span className="ml-1 rounded-md bg-[#e82127] px-2 py-1 text-xs text-white">赚钱</span>
+            </button>
+            <button type="button" onClick={() => scrollToWorkbench()} className="transition hover:text-[#e82127]">
+              使用教程
+            </button>
+            <button type="button" onClick={() => scrollToWorkbench()} className="transition hover:text-[#e82127]">
+              联系我们
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsDayMode((current) => !current)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-[#e82127] hover:text-[#e82127]"
+            aria-label="切换明暗模式"
+          >
+            <Sun size={20} />
+          </button>
+        </nav>
+
+        <div className="mx-auto max-w-[1480px] px-4 pb-16 pt-20 text-center md:px-6">
+          <h1 className="mx-auto max-w-5xl text-5xl font-black leading-tight tracking-tight text-slate-950 md:text-7xl">
+            特斯拉车机皮肤下载与
+            <span className="text-[#e82127]">创作平台</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-4xl text-lg leading-relaxed text-slate-500 md:text-2xl">
+            免费浏览官方示例，支持选择车型、上传图片、本地预览和导出压缩包。图片只在浏览器处理，不占用网站存储额度。
+          </p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => scrollToWorkbench('download')}
+              className="rounded-lg bg-[#e82127] px-8 py-4 text-base font-black text-white shadow-lg shadow-red-100 transition hover:bg-[#c91016]"
+            >
+              浏览官方示例
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToWorkbench('design')}
+              className="rounded-lg border border-slate-200 bg-white px-8 py-4 text-base font-black text-slate-950 transition hover:border-[#e82127] hover:text-[#e82127]"
+            >
+              上传我的设计
+            </button>
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-4">
+            {landingStats.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                  <Icon className="mx-auto text-[#e82127]" size={30} />
+                  <div className="mt-4 text-3xl font-black text-slate-950">{item.value}</div>
+                  <div className="mt-1 text-sm font-semibold text-slate-500">{item.label}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="border-t border-slate-200 bg-slate-50 px-4 py-10 md:px-6">
+          <div className="mx-auto max-w-6xl text-center">
+            <h2 className="text-xl font-black text-slate-950">支持的特斯拉车型</h2>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
+                <button
+                  key={`landing-${template.id}`}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTemplateId(template.id);
+                    scrollToWorkbench('download');
+                  }}
+                  className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 transition hover:border-[#e82127] hover:text-[#e82127]"
+                >
+                  {template.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tsl-skin-workbench" className={workbenchClassName}>
       <style>
         {`
           .tsl-skin-day aside,
@@ -1336,6 +1456,7 @@ const TslSkinApp: React.FC = () => {
           </aside>
         </main>
       </div>
+      </section>
     </div>
   );
 };

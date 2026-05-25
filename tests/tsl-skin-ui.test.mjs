@@ -58,6 +58,21 @@ runTest('tsl skin page separates download and design workflows', () => {
   assert.match(componentSource, /setActiveWorkspace/);
 });
 
+runTest('tsl skin page has a clear public landing layout', () => {
+  assert.match(componentSource, /特斯拉皮肤/);
+  assert.match(componentSource, /官方模板/);
+  assert.match(componentSource, /排行榜/);
+  assert.match(componentSource, /自己创作/);
+  assert.match(componentSource, /上传模板/);
+  assert.match(componentSource, /使用教程/);
+  assert.match(componentSource, /特斯拉车机皮肤下载与[\s\S]*创作平台/);
+  assert.match(componentSource, /浏览官方示例/);
+  assert.match(componentSource, /上传我的设计/);
+  assert.match(componentSource, /支持的特斯拉车型/);
+  assert.match(componentSource, /landingStats/);
+  assert.match(componentSource, /scrollToWorkbench/);
+});
+
 runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.match(componentSource, /皮肤画廊/);
   assert.match(componentSource, /先挑选现成皮肤/);

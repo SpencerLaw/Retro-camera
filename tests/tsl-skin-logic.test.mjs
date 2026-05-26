@@ -77,27 +77,6 @@ await runTest('tsl skin exposes official GitHub example wraps for galleries', as
   assert.ok(cybertruckExamples.length > examples.length);
 });
 
-await runTest('tsl skin exposes safe external free wrap sources without mirroring assets', async () => {
-  const { EXTERNAL_WRAP_SOURCES } = await loadLogicModule();
-
-  assert.equal(EXTERNAL_WRAP_SOURCES.length, 4);
-  assert.deepEqual(
-    EXTERNAL_WRAP_SOURCES.map((source) => source.url),
-    [
-      'https://www.tesla-wrap.com/',
-      'https://github.com/P3BKAC-RSTRT/Tesla-Fun/tree/main/Wraps',
-      'https://teslawrapgallery.com/model-3-highland-wraps/',
-      'https://tesla-wrap.mrproper.dev/',
-    ],
-  );
-  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => source.actionLabel === '去原站下载'));
-  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => source.accessNote));
-  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => source.usageNote));
-  assert.ok(EXTERNAL_WRAP_SOURCES.some((source) => /不可镜像|不在本站镜像/.test(source.usageNote)));
-  assert.ok(EXTERNAL_WRAP_SOURCES.some((source) => /未发现明确授权/.test(source.usageNote)));
-  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => !source.assetUrl && !source.downloadUrl));
-});
-
 await runTest('tsl skin creates centered layers and export filenames', async () => {
   const { buildTslSkinFileName, createSkinLayer } = await loadLogicModule();
 
@@ -117,69 +96,15 @@ await runTest('tsl skin creates centered layers and export filenames', async () 
   );
 });
 
-await runTest('tsl skin exposes Chinese catalog products and simple price tiers', async () => {
-  const {
-    DOWNLOAD_PRICE_TIERS,
-    SKIN_CATALOG_PRODUCTS,
-    formatPriceCents,
-    getCatalogProductsForTemplate,
-  } = await loadLogicModule();
+await runTest('tsl skin logic no longer exposes price, external source, or zip helpers', async () => {
+  const logic = await loadLogicModule();
 
-  assert.ok(SKIN_CATALOG_PRODUCTS.length >= 3);
-  assert.deepEqual(
-    DOWNLOAD_PRICE_TIERS.map((tier) => tier.priceCents),
-    [200, 999, 3000],
-  );
-  assert.deepEqual(
-    DOWNLOAD_PRICE_TIERS.map((tier) => tier.title),
-    ['单张下载', '五张打包', '自定义设计'],
-  );
-
-  const modelYProducts = getCatalogProductsForTemplate('modely-2025-premium');
-  assert.ok(modelYProducts.length >= 2);
-  assert.ok(modelYProducts.every((product) => product.modelIds.includes('modely-2025-premium')));
-  assert.ok(modelYProducts.every((product) => product.assetKind === '原创样张'));
-  assert.ok(modelYProducts.every((product) => ['单张', '五张'].includes(product.tier)));
-  assert.ok(modelYProducts.every((product) => product.previewLabel && product.previewColors.length >= 2));
-  assert.ok(modelYProducts.every((product) => !/[A-Za-z]/.test(product.title + product.deliveryLabel + product.previewLabel + product.description + product.assetKind + product.tier)));
-  assert.equal(formatPriceCents(200), '¥2');
-  assert.equal(formatPriceCents(999), '¥9.99');
-  assert.equal(formatPriceCents(3000), '¥30');
-});
-
-await runTest('tsl skin builds local zip download names and install guide text', async () => {
-  const { buildTslSkinZipFileName, buildWrapInstallGuide } = await loadLogicModule();
-
-  assert.equal(
-    buildTslSkinZipFileName('Y 型车 2025 高级版', 1777777777000),
-    'tsl-skin-y-2025-1777777777000.zip',
-  );
-
-  const guide = buildWrapInstallGuide({
-    modelLabel: 'Y 型车 2025 高级版',
-    fileName: 'wrap.png',
-  });
-  assert.match(guide, /wrap\.png/);
-  assert.match(guide, /U盘|U 盘/);
-  assert.match(guide, /皮肤文件夹/);
-  assert.match(guide, /浏览器本地生成/);
-  assert.doesNotMatch(guide, /Install guide|Privacy|USB drive|server/i);
-});
-
-await runTest('tsl skin creates a stored zip package without server upload', async () => {
-  const { createStoredZip } = await loadLogicModule();
-
-  const zip = createStoredZip([
-    { name: 'wrap.png', data: new Uint8Array([1, 2, 3]) },
-    { name: 'install-guide.txt', data: 'local only' },
-  ]);
-
-  assert.ok(zip instanceof Uint8Array);
-  assert.equal(zip[0], 0x50);
-  assert.equal(zip[1], 0x4b);
-
-  const zipText = new TextDecoder().decode(zip);
-  assert.match(zipText, /wrap\.png/);
-  assert.match(zipText, /install-guide\.txt/);
-  assert.match(zipText, /local only/);
+  assert.equal(logic.DOWNLOAD_PRICE_TIERS, undefined);
+  assert.equal(logic.SKIN_CATALOG_PRODUCTS, undefined);
+  assert.equal(logic.EXTERNAL_WRAP_SOURCES, undefined);
+  assert.equal(logic.buildTslSkinZipFileName, undefined);
+  assert.equal(logic.buildWrapInstallGuide, undefined);
+  assert.equal(logic.createStoredZip, undefined);
+  assert.equal(logic.formatPriceCents, undefined);
+  assert.equal(logic.getCatalogProductsForTemplate, undefined);
 });

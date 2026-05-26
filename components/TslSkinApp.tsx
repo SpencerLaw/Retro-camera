@@ -3,15 +3,12 @@ import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
   Download,
-  ExternalLink,
   FlipHorizontal,
   Layers,
   Palette,
   RefreshCcw,
   Search,
   ShieldCheck,
-  ShoppingBag,
-  Sparkles,
   Sun,
   Trash2,
   Upload,
@@ -19,17 +16,9 @@ import {
 } from 'lucide-react';
 import {
   buildTslSkinFileName,
-  buildTslSkinZipFileName,
-  buildWrapInstallGuide,
   createSkinLayer,
-  createStoredZip,
-  DOWNLOAD_PRICE_TIERS,
-  EXTERNAL_WRAP_SOURCES,
-  formatPriceCents,
-  getCatalogProductsForTemplate,
   getOfficialExampleWrapsForTemplate,
   getTeslaTemplateById,
-  SKIN_CATALOG_PRODUCTS,
   TESLA_MODEL_TEMPLATES,
 } from './tslSkinLogic.js';
 import TslVehicle3DPreview from './TslVehicle3DPreview';
@@ -54,27 +43,6 @@ export type SkinLayer = {
   name: string;
 };
 
-type SkinCatalogProduct = {
-  id: string;
-  title: string;
-  priceCents: number;
-  modelIds: string[];
-  assetKind: string;
-  tier: '单张' | '五张';
-  deliveryLabel: string;
-  accentColor: string;
-  previewLabel: string;
-  previewColors: string[];
-  description: string;
-};
-
-type DownloadPriceTier = {
-  id: string;
-  title: string;
-  priceCents: number;
-  detail: string;
-};
-
 type OfficialWrapExample = {
   id: string;
   title: string;
@@ -82,15 +50,6 @@ type OfficialWrapExample = {
   imageUrl: string;
   modelIds: string[];
   sourceLabel: string;
-};
-
-type ExternalWrapSource = {
-  id: string;
-  title: string;
-  url: string;
-  accessNote: string;
-  usageNote: string;
-  actionLabel: string;
 };
 
 type WorkspaceMode = 'download' | 'design';
@@ -217,118 +176,6 @@ function getCanvasCoords(canvas: HTMLCanvasElement, event: React.PointerEvent<HT
   };
 }
 
-function drawCatalogPattern(context: CanvasRenderingContext2D, product: SkinCatalogProduct, color: string) {
-  const { width, height } = context.canvas;
-  context.clearRect(0, 0, width, height);
-
-  if (product.id === 'apex-redline') {
-    context.strokeStyle = product.accentColor;
-    context.lineWidth = 44;
-    context.globalAlpha = 0.96;
-    context.beginPath();
-    context.moveTo(width * 0.08, height * 0.26);
-    context.lineTo(width * 0.92, height * 0.74);
-    context.stroke();
-    context.strokeStyle = '#f8fafc';
-    context.lineWidth = 14;
-    context.beginPath();
-    context.moveTo(width * 0.16, height * 0.24);
-    context.lineTo(width * 0.98, height * 0.71);
-    context.stroke();
-    context.globalAlpha = 1;
-    return;
-  }
-
-  if (product.id === 'cyber-grid') {
-    context.strokeStyle = product.accentColor;
-    context.lineWidth = 2;
-    context.globalAlpha = 0.32;
-    for (let x = 64; x < width; x += 72) {
-      context.beginPath();
-      context.moveTo(x, 0);
-      context.lineTo(x + 160, height);
-      context.stroke();
-    }
-    for (let y = 80; y < height; y += 86) {
-      context.beginPath();
-      context.moveTo(0, y);
-      context.lineTo(width, y - 110);
-      context.stroke();
-    }
-    context.globalAlpha = 0.9;
-    context.strokeStyle = '#f8fafc';
-    context.lineWidth = 5;
-    context.strokeRect(width * 0.18, height * 0.32, width * 0.64, height * 0.26);
-    context.globalAlpha = 1;
-    return;
-  }
-
-  const gradient = context.createLinearGradient(0, height * 0.3, width, height * 0.7);
-  gradient.addColorStop(0, color);
-  gradient.addColorStop(0.45, product.accentColor);
-  gradient.addColorStop(1, '#f8fafc');
-  context.strokeStyle = gradient;
-  context.lineWidth = 46;
-  context.lineCap = 'round';
-  context.globalAlpha = 0.82;
-  context.beginPath();
-  context.moveTo(width * 0.05, height * 0.64);
-  context.bezierCurveTo(width * 0.28, height * 0.32, width * 0.56, height * 0.85, width * 0.95, height * 0.42);
-  context.stroke();
-  context.globalAlpha = 0.55;
-  context.lineWidth = 18;
-  context.beginPath();
-  context.moveTo(width * 0.08, height * 0.7);
-  context.bezierCurveTo(width * 0.34, height * 0.46, width * 0.64, height * 0.9, width * 0.98, height * 0.52);
-  context.stroke();
-  context.globalAlpha = 1;
-}
-
-function createCatalogProductImage(product: SkinCatalogProduct, color: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 1024;
-    const context = canvas.getContext('2d');
-    if (!context) {
-      reject(new Error('画布不可用。'));
-      return;
-    }
-
-    drawCatalogPattern(context, product, color);
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('图案预览生成失败。'));
-    image.src = canvas.toDataURL('image/png');
-  });
-}
-
-function loadRemoteWrapImage(url: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.crossOrigin = 'anonymous';
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('官方示例加载失败。'));
-    image.src = url;
-  });
-}
-
-function getCanvasPngBytes(canvas: HTMLCanvasElement) {
-  return new Promise<Uint8Array>((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error('画布导出失败。'));
-        return;
-      }
-
-      blob
-        .arrayBuffer()
-        .then((buffer) => resolve(new Uint8Array(buffer)))
-        .catch(reject);
-    }, 'image/png');
-  });
-}
-
 const TslSkinApp: React.FC = () => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -344,7 +191,7 @@ const TslSkinApp: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [activeWorkspace, setActiveWorkspace] = React.useState<WorkspaceMode>('download');
   const [isDayMode, setIsDayMode] = React.useState(true);
-  const [status, setStatus] = React.useState('选择现有皮肤可直接预览下载，也可以上传图片自己设计。');
+  const [status, setStatus] = React.useState('选择皮肤后可直接预览，也可以上传图片自己设计。');
   const [searchWrapQuery, setSearchWrapQuery] = React.useState('');
   const [selectedPreviewWrap, setSelectedPreviewWrap] = React.useState<OfficialWrapExample | null>(null);
   const [customPreviewUrl, setCustomPreviewUrl] = React.useState<string | null>(null);
@@ -356,12 +203,6 @@ const TslSkinApp: React.FC = () => {
     () => getOfficialExampleWrapsForTemplate(selectedTemplateId) as OfficialWrapExample[],
     [selectedTemplateId],
   );
-  const catalogProducts = React.useMemo(
-    () => getCatalogProductsForTemplate(selectedTemplateId) as SkinCatalogProduct[],
-    [selectedTemplateId],
-  );
-  const priceTiers = DOWNLOAD_PRICE_TIERS as DownloadPriceTier[];
-  const externalSources = EXTERNAL_WRAP_SOURCES as ExternalWrapSource[];
   const galleryItems = officialExamples;
   const filteredGalleryItems = React.useMemo(() => {
     const query = searchWrapQuery.trim().toLowerCase();
@@ -377,6 +218,29 @@ const TslSkinApp: React.FC = () => {
   const previewWrapTitle = customRenderUrl || customPreviewUrl
     ? '自定义上传图片'
     : selectedPreviewWrap?.title || galleryItems[0]?.title || '未选择皮肤';
+
+  React.useLayoutEffect(() => {
+    const root = document.documentElement;
+    const previousScale = root.style.getPropertyValue('--app-global-scale');
+    const previousInverse = root.style.getPropertyValue('--app-global-scale-inverse');
+
+    root.style.setProperty('--app-global-scale', '1');
+    root.style.setProperty('--app-global-scale-inverse', '1');
+
+    return () => {
+      if (previousScale) {
+        root.style.setProperty('--app-global-scale', previousScale);
+      } else {
+        root.style.removeProperty('--app-global-scale');
+      }
+
+      if (previousInverse) {
+        root.style.setProperty('--app-global-scale-inverse', previousInverse);
+      } else {
+        root.style.removeProperty('--app-global-scale-inverse');
+      }
+    };
+  }, []);
 
   const drawCanvas = React.useCallback(
     (showSelection = true) => {
@@ -539,7 +403,7 @@ const TslSkinApp: React.FC = () => {
     setActiveWorkspace('design');
     files.forEach((file, index) => {
       if (!file.type.match(/^image\/(png|jpeg|webp)$/)) {
-        setStatus('仅支持 PNG、JPG、WebP 图片。');
+        setStatus('仅支持常见图片格式。');
         return;
       }
 
@@ -569,47 +433,6 @@ const TslSkinApp: React.FC = () => {
     });
 
     event.target.value = '';
-  };
-
-  const addCatalogProductLayer = async (product: SkinCatalogProduct) => {
-    try {
-      const image = await createCatalogProductImage(product, wrapColor);
-      const layerId = `catalog_${product.id}_${Date.now()}`;
-      const layer = {
-        ...(createSkinLayer(layerId, image) as Omit<SkinLayer, 'name'>),
-        opacity: 0.92,
-        clipMode: 'full' as const,
-        name: `${product.title} 样张`,
-      };
-      setLayers((currentLayers) => [...currentLayers, layer]);
-      setSelectedLayerId(layerId);
-      setActiveWorkspace('design');
-      setCustomPreviewUrl(null);
-      setSelectedPreviewWrap(null);
-      setStatus(`${product.title} 已加入自定义画布。`);
-    } catch {
-      setStatus('样张生成失败，请稍后重试。');
-    }
-  };
-
-  const addOfficialExampleLayer = async (example: OfficialWrapExample) => {
-    try {
-      const image = await loadRemoteWrapImage(example.imageUrl);
-      const layerId = `official_${example.id}_${Date.now()}`;
-      const layer = {
-        ...(createSkinLayer(layerId, image) as Omit<SkinLayer, 'name'>),
-        clipMode: 'full' as const,
-        name: `${example.title} 官方示例`,
-      };
-      setLayers((currentLayers) => [...currentLayers, layer]);
-      setSelectedLayerId(layerId);
-      setActiveWorkspace('design');
-      setCustomPreviewUrl(null);
-      setSelectedPreviewWrap(null);
-      setStatus(`${example.title} 已加入自定义画布，可继续调整。`);
-    } catch {
-      setStatus('官方示例加载失败，请稍后重试。');
-    }
   };
 
   const applyOfficialWrapToPreview = (example: OfficialWrapExample) => {
@@ -772,65 +595,6 @@ const TslSkinApp: React.FC = () => {
     }
   };
 
-  const downloadZipPackage = async () => {
-    const canvas = canvasRef.current;
-    const shouldPackageSelectedAsset = !customPreviewUrl && layers.length === 0 && Boolean(selectedPreviewWrap);
-    if (!canvas && !shouldPackageSelectedAsset) {
-      setStatus('画布还没有准备好，请稍后重试。');
-      return;
-    }
-
-    if (!shouldPackageSelectedAsset) {
-      drawCanvas(false);
-    }
-
-    try {
-      const pngBytes =
-        shouldPackageSelectedAsset && selectedPreviewWrap
-          ? await getWrapAssetBytes(selectedPreviewWrap)
-          : await getCanvasPngBytes(canvas as HTMLCanvasElement);
-      const modelInfo = {
-        app: '特斯拉皮肤工坊',
-        modelId: selectedTemplate.id,
-        modelLabel: selectedTemplate.label,
-        exportedAt: new Date().toISOString(),
-        localOnly: true,
-        source: shouldPackageSelectedAsset && selectedPreviewWrap ? selectedPreviewWrap.title : '自定义画布',
-        layers: layers.map((layer, index) => ({
-          index: index + 1,
-          name: layer.name,
-          opacity: layer.opacity,
-          clipMode: layer.clipMode,
-        })),
-      };
-      const zipBytes = createStoredZip([
-        { name: 'wrap.png', data: pngBytes },
-        {
-          name: 'install-guide.txt',
-          data: buildWrapInstallGuide({
-            modelLabel: selectedTemplate.label,
-            fileName: 'wrap.png',
-          }),
-        },
-        { name: 'model-info.json', data: JSON.stringify(modelInfo, null, 2) },
-      ]);
-      const blob = new Blob([zipBytes], { type: 'application/zip' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.download = buildTslSkinZipFileName(selectedTemplate.label);
-      link.href = url;
-      link.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setStatus('压缩包已在浏览器本地生成，包含皮肤图片、车型说明和 U 盘放置教程。');
-    } catch {
-      setStatus('压缩包生成失败，请刷新后重试。');
-    } finally {
-      if (!shouldPackageSelectedAsset) {
-        requestAnimationFrame(() => drawCanvas(true));
-      }
-    }
-  };
-
   const downloadSelectedWrapAsset = () => {
     if (customPreviewUrl || customRenderUrl || layers.length > 0 || !selectedPreviewWrap) {
       downloadCanvas();
@@ -856,9 +620,9 @@ const TslSkinApp: React.FC = () => {
 
   return (
     <div className={rootClassName}>
-      <main className="tsl-skin-studio-workbench grid min-h-screen lg:grid-cols-[400px_minmax(0,1fr)]">
+      <main className="tsl-skin-studio-workbench grid min-h-screen lg:grid-cols-[320px_minmax(0,1fr)]">
         <aside className={`tsl-skin-sidebar flex flex-col border-r lg:max-h-screen ${sidebarClassName}`}>
-          <div className="border-b border-inherit p-4">
+          <div className="border-b border-inherit p-3">
             <div className="flex items-center justify-between gap-3">
               <Link
                 to="/"
@@ -871,7 +635,7 @@ const TslSkinApp: React.FC = () => {
               </Link>
               <div className="min-w-0 flex-1">
                 <div className="text-lg font-black">特斯拉皮肤</div>
-                <div className={`mt-0.5 truncate text-xs font-bold ${mutedTextClassName}`}>现有皮肤下载与自定义设计</div>
+                <div className={`mt-0.5 truncate text-xs font-bold ${mutedTextClassName}`}>现有皮肤与自定义上传</div>
               </div>
               <button
                 type="button"
@@ -887,7 +651,7 @@ const TslSkinApp: React.FC = () => {
               </button>
             </div>
 
-            <label className="mt-4 block text-xs font-black text-slate-500">选择车型</label>
+            <label className="mt-3 block text-xs font-black text-slate-500">选择车型</label>
             <select
               value={selectedTemplateId}
               onChange={(event) => setSelectedTemplateId(event.target.value)}
@@ -903,10 +667,10 @@ const TslSkinApp: React.FC = () => {
               ))}
             </select>
 
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid grid-cols-2 gap-2">
               {[
                 { id: 'download' as const, label: '下载现有皮肤', detail: `${galleryItems.length} 款` },
-                { id: 'design' as const, label: '自定义设计', detail: '本地处理' },
+                { id: 'design' as const, label: '自定义上传', detail: '本地处理' },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -928,13 +692,13 @@ const TslSkinApp: React.FC = () => {
           </div>
 
           <section className={activeWorkspace === 'download' ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}>
-            <div className="border-b border-inherit p-4">
+            <div className="border-b border-inherit p-3">
               <label className="relative block">
                 <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   value={searchWrapQuery}
                   onChange={(event) => setSearchWrapQuery(event.target.value)}
-                  placeholder="搜索现有皮肤"
+                  placeholder="搜索皮肤名称"
                   className={`h-11 w-full rounded-md border pl-10 pr-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
                     isDayMode ? 'border-slate-200 bg-slate-50 text-slate-900' : 'border-white/10 bg-slate-900 text-white'
                   }`}
@@ -942,21 +706,23 @@ const TslSkinApp: React.FC = () => {
               </label>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-3">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <h1 className="text-lg font-black">官方免费皮肤</h1>
-                  <p className={`mt-1 text-xs font-bold ${mutedTextClassName}`}>特斯拉官方示例与本站原创样张，选择后右侧立即渲染，可直接下载。</p>
+                  <h1 className="text-lg font-black">现有皮肤</h1>
+                  <p className={`mt-1 text-xs font-bold ${mutedTextClassName}`}>点击缩略图预览，底部按钮下载当前选中的皮肤。</p>
                 </div>
                 <span className="rounded-full bg-[#3e6ae1]/10 px-3 py-1 text-xs font-black text-[#3e6ae1]">
                   {filteredGalleryItems.length}
                 </span>
               </div>
 
-              <div className="tsl-skin-wrap-grid grid grid-cols-3 gap-3">
+              <div className="tsl-skin-wrap-grid grid grid-cols-3 gap-2">
                 {filteredGalleryItems.map((example) => (
-                  <article
+                  <button
                     key={example.id}
+                    type="button"
+                    onClick={() => applyOfficialWrapToPreview(example)}
                     className={`tsl-skin-wrap-card min-w-0 overflow-hidden rounded-md border transition ${
                       selectedPreviewWrap?.id === example.id && !customPreviewUrl && !customRenderUrl
                         ? 'border-[#3e6ae1] ring-2 ring-[#3e6ae1]/20'
@@ -965,56 +731,19 @@ const TslSkinApp: React.FC = () => {
                           : 'border-white/10 bg-slate-900 hover:border-[#3e6ae1]'
                     }`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => applyOfficialWrapToPreview(example)}
-                      className="block w-full text-left"
-                    >
-                      <div className="relative aspect-square bg-slate-100">
-                        <img
-                          src={example.imageUrl}
-                          crossOrigin="anonymous"
-                          alt={example.title}
-                          className="h-full w-full object-contain p-1.5"
-                          loading="lazy"
-                        />
-                        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-1.5 py-1 text-center text-[10px] font-black text-white">
-                          {example.title}
-                        </span>
-                      </div>
-                    </button>
-                    <div className="space-y-2 p-2 text-[11px]">
-                      <div className="line-clamp-1 font-black">{example.sourceLabel}</div>
-                      <div className={`flex items-center justify-between gap-1 ${mutedTextClassName}`}>
-                        <span>适配车型</span>
-                        <button
-                          type="button"
-                          onClick={() => applyOfficialWrapToPreview(example)}
-                          className="font-black text-[#3e6ae1]"
-                        >
-                          立即预览
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-1">
-                        <button
-                          type="button"
-                          onClick={() => void downloadWrapExample(example)}
-                          className="rounded-md bg-[#e82127] px-2 py-1.5 font-black text-white"
-                        >
-                          下载
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void addOfficialExampleLayer(example)}
-                          className={`rounded-md border px-2 py-1.5 font-black ${
-                            isDayMode ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-white/10 bg-slate-800 text-slate-200'
-                          }`}
-                        >
-                          编辑
-                        </button>
-                      </div>
+                    <div className="relative aspect-square bg-slate-100">
+                      <img
+                        src={example.imageUrl}
+                        crossOrigin="anonymous"
+                        alt={example.title}
+                        className="h-full w-full object-contain p-1"
+                        loading="lazy"
+                      />
+                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-1.5 py-1 text-center text-[10px] font-black text-white">
+                        {example.title}
+                      </span>
                     </div>
-                  </article>
+                  </button>
                 ))}
               </div>
 
@@ -1023,65 +752,10 @@ const TslSkinApp: React.FC = () => {
                   没有找到匹配的皮肤。
                 </div>
               )}
-
-              <section className={`mt-5 rounded-md border p-4 ${subtlePanelClassName}`}>
-                <div className="flex items-center gap-2 text-sm font-black">
-                  <ShoppingBag size={17} className="text-[#e82127]" />
-                  价格说明
-                </div>
-                <p className={`mt-2 text-xs leading-5 ${mutedTextClassName}`}>
-                  单张下载 2 元，五张打包 9.99 元，自定义设计 30 元。后续支付文件建议放 Cloudflare R2，不占 Vercel 存储。
-                </p>
-                <div className="mt-3 space-y-2">
-                  {priceTiers.map((tier) => (
-                    <div key={tier.id} className={`flex items-start justify-between gap-3 rounded-md p-3 text-sm ${panelClassName}`}>
-                      <div>
-                        <div className="font-black">{tier.title}</div>
-                        <div className={`mt-1 text-xs leading-5 ${mutedTextClassName}`}>{tier.detail}</div>
-                      </div>
-                      <div className="font-black text-[#e82127]">{formatPriceCents(tier.priceCents)}</div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className={`mt-4 rounded-md border p-4 ${subtlePanelClassName}`}>
-                <div className="flex items-center gap-2 text-sm font-black">
-                  <ExternalLink size={17} className="text-[#3e6ae1]" />
-                  免费资源站
-                </div>
-                <p className={`mt-2 text-xs leading-5 ${mutedTextClassName}`}>
-                  可参考这些站点的筛选和预览体验。资源只做外链，不在本站镜像素材，确认授权后再入库。
-                </p>
-                <div className="mt-3 space-y-2">
-                  {externalSources.map((source) => (
-                    <a
-                      key={source.id}
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`去原站下载 ${source.title}`}
-                      className={`block rounded-md border p-3 transition ${
-                        isDayMode ? 'border-slate-200 bg-white hover:border-[#e82127]' : 'border-white/10 bg-slate-900 hover:border-[#e82127]'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="font-black">{source.title}</div>
-                          <div className={`mt-1 truncate text-[11px] font-bold ${mutedTextClassName}`}>{source.url}</div>
-                        </div>
-                        <span className="shrink-0 text-xs font-black text-[#e82127]">{source.actionLabel}</span>
-                      </div>
-                      <p className={`mt-2 text-xs leading-5 ${mutedTextClassName}`}>{source.accessNote}</p>
-                      <p className={`mt-1 text-xs leading-5 ${mutedTextClassName}`}>{source.usageNote}</p>
-                    </a>
-                  ))}
-                </div>
-              </section>
             </div>
           </section>
 
-          <section className={activeWorkspace === 'design' ? 'flex min-h-0 flex-1 flex-col overflow-y-auto p-4' : 'hidden'}>
+          <section className={activeWorkspace === 'design' ? 'flex min-h-0 flex-1 flex-col overflow-y-auto p-3' : 'hidden'}>
             <div className={`rounded-md border p-4 ${subtlePanelClassName}`}>
               <div className="mb-3 flex items-center justify-between">
                 <div>
@@ -1125,12 +799,12 @@ const TslSkinApp: React.FC = () => {
                       <Upload size={18} />
                     </span>
                     <span>拖入图片或点击上传</span>
-                    <span className={`text-xs font-bold ${mutedTextClassName}`}>PNG、JPG、WebP · 建议 1024x1024</span>
+                    <span className={`text-xs font-bold ${mutedTextClassName}`}>常见图片格式，建议一比一</span>
                   </button>
                 )}
               </div>
               <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-800">
-                图片仅在你的浏览器本地处理，不会上传服务器，也不会占用 Vercel 免费额度。请仅上传原创或已授权素材。
+                图片仅在你的浏览器本地处理，不会上传服务器，也不会占用网站流量或存储额度。请仅上传原创或已授权素材。
               </p>
             </div>
 
@@ -1166,7 +840,7 @@ const TslSkinApp: React.FC = () => {
             <div className={`mt-4 rounded-md border p-3 ${panelClassName}`}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="text-sm font-black">裁剪画布</div>
-                <span className={`text-xs font-bold ${mutedTextClassName}`}>{selectedTemplate.label} · 1024x1024</span>
+                <span className={`text-xs font-bold ${mutedTextClassName}`}>{selectedTemplate.label} · 一比一</span>
               </div>
               <div className="relative flex items-center justify-center overflow-hidden rounded-md bg-slate-950 p-2">
                 {loading && (
@@ -1329,45 +1003,9 @@ const TslSkinApp: React.FC = () => {
               )}
             </div>
 
-            <div className={`mt-4 rounded-md border p-4 ${subtlePanelClassName}`}>
-              <div className="flex items-center gap-2 text-sm font-black">
-                <Sparkles size={17} className="text-[#3e6ae1]" />
-                原创商品样张
-              </div>
-              <div className="mt-3 space-y-2">
-                {catalogProducts.map((product) => (
-                  <button
-                    key={product.id}
-                    type="button"
-                    onClick={() => void addCatalogProductLayer(product)}
-                    className={`w-full rounded-md border p-3 text-left transition ${
-                      isDayMode ? 'border-slate-200 bg-white hover:border-[#e82127]' : 'border-white/10 bg-slate-900 hover:border-[#e82127]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-black">{product.title}</span>
-                      <span className="font-black text-[#e82127]">{formatPriceCents(product.priceCents)}</span>
-                    </div>
-                    <div className={`mt-1 text-xs ${mutedTextClassName}`}>加入自定义编辑</div>
-                  </button>
-                ))}
-                {SKIN_CATALOG_PRODUCTS.length === 0 && (
-                  <div className={`rounded-md border p-3 text-sm ${panelClassName}`}>暂无原创样张。</div>
-                )}
-              </div>
-            </div>
-
-            <div className={`mt-4 rounded-md border p-4 ${subtlePanelClassName}`}>
-              <div className="flex items-center gap-2 text-sm font-black">
-                <Sparkles size={17} className="text-[#3e6ae1]" />
-                三步完成
-              </div>
-              <div className={`mt-3 space-y-2 text-xs leading-5 ${mutedTextClassName}`}>
-                <p><span className="font-black">选择车型：</span>先选对应车型模板。</p>
-                <p><span className="font-black">预览调整：</span>上传图后拖动、缩放、旋转。</p>
-                <p><span className="font-black">导出交付包：</span>下载 1024x1024 图片，U 盘建议 exFAT，文件放入 Wraps 文件夹。</p>
-              </div>
-            </div>
+            <p className={`mt-4 text-xs leading-5 ${mutedTextClassName}`}>
+              使用顺序：先选车型，再上传图片调整位置，最后点击右下角下载当前皮肤。
+            </p>
           </section>
         </aside>
 
@@ -1384,16 +1022,12 @@ const TslSkinApp: React.FC = () => {
             <div className="mt-1 text-xs font-bold text-slate-500">右侧为三维动态预览，鼠标拖动旋转，滚轮缩放。</div>
           </div>
 
-          <div className="pointer-events-none absolute right-5 top-5 hidden rounded-md border border-white/70 bg-white/90 px-3 py-2 text-xs font-black text-slate-600 shadow-lg backdrop-blur sm:block">
-            模型为本站自建预览
-          </div>
-
           <div className="absolute bottom-5 left-3 right-3 flex flex-col gap-3 rounded-lg border border-white/70 bg-white/90 p-3 shadow-2xl backdrop-blur sm:left-1/2 sm:right-auto sm:w-[min(820px,calc(100%-24px))] sm:-translate-x-1/2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <div className="truncate text-sm font-black text-slate-800">{selectedTemplate.label}</div>
               <div className="mt-1 text-xs font-bold text-slate-500">{status}</div>
             </div>
-            <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={clearPreviewWrap}
@@ -1409,14 +1043,6 @@ const TslSkinApp: React.FC = () => {
               >
                 <Download size={16} />
                 下载当前皮肤
-              </button>
-              <button
-                type="button"
-                onClick={downloadZipPackage}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#e82127] px-3 text-sm font-black text-white transition hover:bg-[#c9151b]"
-              >
-                <Download size={16} />
-                下载压缩包
               </button>
             </div>
           </div>

@@ -42,13 +42,13 @@ runTest('tsl skin page includes monetization-ready catalog and custom order UI',
   assert.match(componentSource, /SKIN_CATALOG_PRODUCTS/);
   assert.match(componentSource, /DOWNLOAD_PRICE_TIERS/);
   assert.match(componentSource, /getCatalogProductsForTemplate/);
-  assert.match(componentSource, /商品库/);
+  assert.match(componentSource, /皮肤库/);
   assert.match(componentSource, /价格说明/);
-  assert.match(componentSource, /加入画布预览/);
+  assert.match(componentSource, /加入自定义编辑/);
   assert.match(componentSource, /单张下载|五张打包|自定义设计/);
-  assert.match(componentSource, /示例预览/);
+  assert.match(componentSource, /官方免费皮肤/);
   assert.doesNotMatch(componentSource, /授权码|激活码|待接入支付|后端支付|定制套餐|CUSTOM_WRAP_PACKAGES|calculateCustomOrderQuote/);
-  assert.match(homeSource, /车机皮肤工作台/);
+  assert.match(homeSource, /特斯拉皮肤/);
 });
 
 runTest('tsl skin page separates download and design workflows', () => {
@@ -60,15 +60,16 @@ runTest('tsl skin page separates download and design workflows', () => {
 
 runTest('tsl skin page is redesigned around two original product entrances', () => {
   assert.match(componentSource, /特斯拉皮肤/);
-  assert.match(componentSource, /双入口工作台/);
+  assert.match(componentSource, /皮肤库/);
   assert.match(componentSource, /下载现有皮肤/);
   assert.match(componentSource, /自定义上传裁剪/);
-  assert.match(componentSource, /先选车型，再挑现成皮肤/);
-  assert.match(componentSource, /上传图片，拖动缩放裁剪/);
+  assert.match(componentSource, /点击皮肤卡片查看渲染图/);
+  assert.match(componentSource, /上传图片自己裁剪/);
   assert.match(componentSource, /本地生成，不上传服务器/);
-  assert.match(componentSource, /tsl-skin-entry-panel/);
-  assert.match(componentSource, /tsl-skin-model-strip/);
-  assert.match(componentSource, /scrollToWorkbench/);
+  assert.match(componentSource, /tsl-skin-gallery-home/);
+  assert.match(componentSource, /tsl-skin-card-grid/);
+  assert.match(componentSource, /skin-detail-dialog/);
+  assert.doesNotMatch(componentSource, /双入口工作台|tsl-skin-entry-panel|tsl-skin-model-strip|scrollToWorkbench|车机皮肤工作台/);
   assert.doesNotMatch(componentSource, /排行榜|联盟计划|联系我们|首页 \/ 使用教程|tsl-skin-brand-tutorial|特斯拉车机皮肤下载与[\s\S]*创作平台|landingStats|scrollToTutorial/);
   assert.doesNotMatch(componentSource, /Network（网络）|抓包|爬虫|Python 脚本|BeautifulSoup|批量下载爬虫/);
 });
@@ -84,14 +85,16 @@ runTest('tsl skin page keeps compact help inside the two workflows', () => {
 });
 
 runTest('tsl skin download mode exposes a visible skin gallery', () => {
-  assert.match(componentSource, /皮肤画廊/);
-  assert.match(componentSource, /先挑选现成皮肤/);
+  assert.match(componentSource, /官方免费皮肤/);
+  assert.match(componentSource, /点击皮肤卡片查看渲染图/);
   assert.match(componentSource, /适配车型/);
-  assert.match(componentSource, /马上预览/);
-  assert.match(componentSource, /officialExamples\.map/);
+  assert.match(componentSource, /查看详情/);
+  assert.match(componentSource, /openSkinDetailDialog/);
+  assert.match(componentSource, /selectedGalleryExample/);
+  assert.match(componentSource, /galleryItems\.map/);
   assert.match(componentSource, /getOfficialExampleWrapsForTemplate/);
   assert.match(componentSource, /特斯拉官方示例/);
-  assert.match(componentSource, /官方免费示例/);
+  assert.doesNotMatch(componentSource, /马上预览|tsl-skin-gallery-strip/);
 });
 
 runTest('tsl skin page supports zip package export and per-layer crop modes', () => {
@@ -109,7 +112,9 @@ runTest('tsl skin page supports zip package export and per-layer crop modes', ()
 
 runTest('tsl skin page shows an approximate in-car render preview', () => {
   assert.match(componentSource, /vehiclePreviewCanvasRef/);
+  assert.match(componentSource, /galleryPreviewCanvasRef/);
   assert.match(componentSource, /drawVehiclePreview/);
+  assert.match(componentSource, /drawGalleryPreview/);
   assert.match(componentSource, /vehicleImageUrl/);
   assert.match(componentSource, /vehicle_image\.png/);
   assert.match(componentSource, /drawSmartContainedImage\(vehicleImage/);
@@ -122,19 +127,15 @@ runTest('tsl skin page shows an approximate in-car render preview', () => {
   assert.doesNotMatch(componentSource, /createPattern|fillPatch/);
 });
 
-runTest('tsl skin workbench layout keeps render preview large and balanced', () => {
-  assert.match(componentSource, /tsl-skin-workbench-grid/);
-  assert.match(componentSource, /tsl-skin-stage-grid/);
-  assert.match(componentSource, /tsl-skin-gallery-strip/);
+runTest('tsl skin layout keeps gallery cards and custom editor clean', () => {
+  assert.match(componentSource, /tsl-skin-shell/);
+  assert.match(componentSource, /tsl-skin-card-grid/);
+  assert.match(componentSource, /tsl-skin-skin-card/);
+  assert.match(componentSource, /tsl-skin-editor-grid/);
   assert.match(componentSource, /vehicle-reference-panel/);
-  assert.match(componentSource, /lg:sticky/);
-  assert.match(componentSource, /overflow-x-auto/);
-  assert.match(componentSource, /min-w-\[220px\]/);
-  assert.match(componentSource, /max-w-\[620px\]/);
-  assert.match(componentSource, /max-h-\[58vh\]/);
-  assert.match(componentSource, /xl:grid-cols-\[minmax\(0,1fr\)_440px\]/);
-  assert.match(componentSource, /max-w-\[440px\]/);
-  assert.match(componentSource, /max-h-\[420px\]/);
+  assert.match(componentSource, /grid-cols-\[repeat\(auto-fill,minmax\(260px,1fr\)\)\]/);
+  assert.match(componentSource, /max-w-\[1480px\]/);
+  assert.match(componentSource, /max-w-\[520px\]/);
   assert.match(componentSource, /drawSmartContainedImage\(vehicleImage, 24, 24, 912, 360, true\)/);
   assert.doesNotMatch(componentSource, /错误覆盖/);
 });

@@ -13,6 +13,7 @@ import {
   Sun,
   Trash2,
   Upload,
+  X,
 } from 'lucide-react';
 import {
   buildTslSkinFileName,
@@ -467,6 +468,7 @@ function getVisibleImageBounds(image: HTMLCanvasElement | HTMLImageElement): Ima
 const TslSkinApp: React.FC = () => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const vehiclePreviewCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const galleryPreviewCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const vehicleImageBoundsRef = React.useRef<ImageCropBounds | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const maskCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -480,7 +482,9 @@ const TslSkinApp: React.FC = () => {
   const [clipToBody, setClipToBody] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [activeWorkspace, setActiveWorkspace] = React.useState<WorkspaceMode>('download');
-  const [isDayMode, setIsDayMode] = React.useState(false);
+  const [isDayMode, setIsDayMode] = React.useState(true);
+  const [selectedGalleryExample, setSelectedGalleryExample] = React.useState<OfficialWrapExample | null>(null);
+  const [galleryPreviewImage, setGalleryPreviewImage] = React.useState<HTMLImageElement | null>(null);
   const [status, setStatus] = React.useState('选择车型或上传原创素材，导出图片即可放入车机皮肤文件夹。');
 
   const selectedTemplate = getTeslaTemplateById(selectedTemplateId) as TeslaModelTemplate;
@@ -661,6 +665,109 @@ const TslSkinApp: React.FC = () => {
     context.fillText('当前皮肤贴图', 66, 424);
   }, [vehicleImage, wrapColor]);
 
+  const drawGalleryPreview = React.useCallback(() => {
+    const previewCanvas = galleryPreviewCanvasRef.current;
+    const context = previewCanvas?.getContext('2d');
+    if (!previewCanvas || !context || !selectedGalleryExample) {
+      return;
+    }
+
+    const width = 960;
+    const height = 620;
+    if (previewCanvas.width !== width || previewCanvas.height !== height) {
+      previewCanvas.width = width;
+      previewCanvas.height = height;
+    }
+
+    const drawImageInBox = (
+      image: HTMLCanvasElement | HTMLImageElement,
+      x: number,
+      y: number,
+      boxWidth: number,
+      boxHeight: number,
+      cropVehicle = false,
+    ) => {
+      const { width: imageWidth, height: imageHeight } = getSourceImageSize(image);
+      if (!imageWidth || !imageHeight) {
+        return;
+      }
+
+      const bounds = cropVehicle ? vehicleImageBoundsRef.current ?? getVisibleImageBounds(image) : null;
+      if (cropVehicle && bounds) {
+        vehicleImageBoundsRef.current = bounds;
+      }
+
+      const sourceX = bounds?.sx ?? 0;
+      const sourceY = bounds?.sy ?? 0;
+      const sourceWidth = bounds?.sw ?? imageWidth;
+      const sourceHeight = bounds?.sh ?? imageHeight;
+      const scale = Math.min(boxWidth / sourceWidth, boxHeight / sourceHeight);
+      const drawWidth = sourceWidth * scale;
+      const drawHeight = sourceHeight * scale;
+      const drawX = x + (boxWidth - drawWidth) / 2;
+      const drawY = y + (boxHeight - drawHeight) / 2;
+      context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
+    };
+
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = '#f8fafc';
+    context.fillRect(0, 0, width, height);
+
+    context.save();
+    context.fillStyle = '#ffffff';
+    context.strokeStyle = '#e2e8f0';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.roundRect(24, 24, 912, 572, 20);
+    context.fill();
+    context.stroke();
+    context.restore();
+
+    context.save();
+    context.fillStyle = '#f1f5f9';
+    context.beginPath();
+    context.roundRect(312, 54, 580, 318, 18);
+    context.fill();
+    context.restore();
+
+    if (vehicleImage) {
+      drawImageInBox(vehicleImage, 330, 68, 544, 286, true);
+    } else {
+      context.fillStyle = '#64748b';
+      context.font = '700 22px sans-serif';
+      context.textAlign = 'center';
+      context.fillText('正在加载车型渲染图...', 602, 220);
+    }
+
+    context.save();
+    context.fillStyle = '#ffffff';
+    context.strokeStyle = '#e2e8f0';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.roundRect(58, 54, 214, 318, 16);
+    context.fill();
+    context.stroke();
+    context.restore();
+
+    if (galleryPreviewImage) {
+      drawImageInBox(galleryPreviewImage, 74, 72, 182, 282);
+    }
+
+    context.fillStyle = '#0f172a';
+    context.font = '900 32px sans-serif';
+    context.textAlign = 'left';
+    context.fillText(selectedGalleryExample.title, 58, 440);
+    context.font = '700 20px sans-serif';
+    context.fillStyle = '#475569';
+    context.fillText(selectedTemplate.label, 58, 476);
+    context.fillStyle = '#e82127';
+    context.font = '900 20px sans-serif';
+    context.fillText('官方免费皮肤', 58, 516);
+    context.fillStyle = '#64748b';
+    context.font = '600 16px sans-serif';
+    context.fillText('渲染图用于购买前核对车型比例和方向，最终车机效果以车辆三维模型为准。', 58, 552);
+  }, [galleryPreviewImage, selectedGalleryExample, selectedTemplate.label, vehicleImage]);
+
   React.useEffect(() => {
     const image = new Image();
     image.crossOrigin = 'anonymous';
@@ -706,6 +813,23 @@ const TslSkinApp: React.FC = () => {
     drawCanvas(true);
     requestAnimationFrame(() => drawVehiclePreview());
   }, [drawCanvas, drawVehiclePreview]);
+
+  React.useEffect(() => {
+    if (!selectedGalleryExample) {
+      setGalleryPreviewImage(null);
+      return;
+    }
+
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => setGalleryPreviewImage(image);
+    image.onerror = () => setGalleryPreviewImage(null);
+    image.src = selectedGalleryExample.imageUrl;
+  }, [selectedGalleryExample]);
+
+  React.useEffect(() => {
+    requestAnimationFrame(() => drawGalleryPreview());
+  }, [drawGalleryPreview]);
 
   const updateSelectedLayer = React.useCallback((changes: Partial<SkinLayer>) => {
     if (!selectedLayerId) {
@@ -783,6 +907,24 @@ const TslSkinApp: React.FC = () => {
     } catch {
       setStatus('官方示例加载失败，请稍后重试。');
     }
+  };
+
+  const openSkinDetailDialog = (example: OfficialWrapExample) => {
+    setSelectedGalleryExample(example);
+    setStatus(`${example.title} 详情已打开，可查看渲染图或加入自定义编辑。`);
+  };
+
+  const addSelectedGalleryExampleToEditor = async () => {
+    if (!selectedGalleryExample) {
+      return;
+    }
+
+    setActiveWorkspace('design');
+    await addOfficialExampleLayer(selectedGalleryExample);
+    setSelectedGalleryExample(null);
+    requestAnimationFrame(() => {
+      document.getElementById('tsl-skin-custom-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
@@ -935,323 +1077,322 @@ const TslSkinApp: React.FC = () => {
     }
   };
 
-  const scrollToWorkbench = (mode?: WorkspaceMode) => {
-    if (mode) {
-      setActiveWorkspace(mode);
-    }
+  const galleryItems = officialExamples;
+
+  const scrollToEditor = (mode: WorkspaceMode = 'design') => {
+    setActiveWorkspace(mode);
     requestAnimationFrame(() => {
-      document.getElementById('tsl-skin-workbench')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('tsl-skin-custom-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   };
-  const rootClassName = isDayMode ? 'tsl-skin-day min-h-screen bg-slate-50 text-slate-950' : 'min-h-screen bg-slate-50 text-slate-950';
-  const workbenchClassName = isDayMode
-    ? 'relative min-h-screen overflow-hidden bg-sky-50 text-slate-950'
-    : 'relative min-h-screen overflow-hidden bg-[#070b12] text-slate-100';
-  const backgroundClassName = isDayMode
-    ? 'pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(239,246,255,0.96),rgba(255,255,255,0.98))]'
-    : 'pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(232,33,39,0.18),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]';
+
+  const rootClassName = isDayMode
+    ? 'tsl-skin-shell min-h-screen bg-[#f5f6f8] text-slate-950'
+    : 'tsl-skin-shell min-h-screen bg-[#0b0f16] text-slate-100';
+  const surfaceClassName = isDayMode
+    ? 'border-slate-200 bg-white text-slate-950 shadow-sm'
+    : 'border-white/10 bg-slate-900 text-slate-100 shadow-2xl shadow-black/30';
+  const softSurfaceClassName = isDayMode
+    ? 'border-slate-200 bg-slate-50 text-slate-700'
+    : 'border-white/10 bg-slate-950 text-slate-300';
+  const mutedTextClassName = isDayMode ? 'text-slate-500' : 'text-slate-400';
+  const strongTextClassName = isDayMode ? 'text-slate-950' : 'text-white';
 
   return (
     <div className={rootClassName}>
-      <section className="bg-[#f5f7fb] px-4 py-5 md:px-6">
-        <div className="mx-auto max-w-[1440px]">
-          <header className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <Link to="/" className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e82127] text-xl font-black text-white shadow-lg shadow-red-200">
-                特
-              </span>
-              <span className="text-xl font-black tracking-tight text-slate-950">特斯拉皮肤</span>
-            </Link>
+      <header className={`sticky top-0 z-40 border-b ${isDayMode ? 'border-slate-200 bg-white/95' : 'border-white/10 bg-slate-950/95'} backdrop-blur`}>
+        <div className="mx-auto flex max-w-[1480px] flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-6">
+          <Link to="/" className="inline-flex items-center gap-3">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#e82127] text-lg font-black text-white">
+              特
+            </span>
+            <span className={`text-lg font-black ${strongTextClassName}`}>特斯拉皮肤</span>
+          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={selectedTemplateId}
+              onChange={(event) => setSelectedTemplateId(event.target.value)}
+              className={`h-10 rounded-md border px-3 text-sm font-bold outline-none ${
+                isDayMode ? 'border-slate-200 bg-white text-slate-800' : 'border-white/10 bg-slate-900 text-white'
+              }`}
+              aria-label="选择车型"
+            >
+              {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
+                <option key={template.id} value={template.id}>
+                  {template.label}
+                </option>
+              ))}
+            </select>
             <button
               type="button"
               onClick={() => setIsDayMode((current) => !current)}
-              className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:border-[#e82127] hover:text-[#e82127]"
+              className={`inline-flex h-10 items-center gap-2 rounded-md border px-3 text-sm font-bold transition ${
+                isDayMode
+                  ? 'border-slate-200 bg-white text-slate-700 hover:border-[#e82127] hover:text-[#e82127]'
+                  : 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
+              }`}
             >
-              <Sun size={18} />
+              <Sun size={17} />
               {isDayMode ? '深色模式' : '浅色模式'}
             </button>
-          </header>
-
-          <div className="grid gap-6 py-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-              <p className="text-sm font-black text-[#e82127]">双入口工作台</p>
-              <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight tracking-tight text-slate-950 md:text-6xl">
-                下载现有皮肤，或上传图片自己裁剪
-              </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-500 md:text-lg">
-                页面只做两件事：先选车型，再挑现成皮肤；或者上传图片，拖动缩放裁剪。所有图片本地生成，不上传服务器。
-              </p>
-              <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                {[
-                  { title: '选择车型', body: `${TESLA_MODEL_TEMPLATES.length} 个官方模板` },
-                  { title: '预览调整', body: '颜色、贴图、裁剪模式' },
-                  { title: '导出交付包', body: '1024x1024 PNG 与 U 盘说明' },
-                ].map((item) => (
-                  <div key={item.title} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-sm font-black text-slate-950">{item.title}</div>
-                    <div className="mt-1 text-xs font-semibold leading-5 text-slate-500">{item.body}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold leading-6 text-emerald-800">
-                图片仅在你的浏览器本地处理，不会上传服务器，也不会占用 Vercel 免费额度。U 盘建议 exFAT，文件放进 Wraps 文件夹。
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {[
-                {
-                  id: 'download' as WorkspaceMode,
-                  title: '下载现有皮肤',
-                  subtitle: '先选车型，再挑现成皮肤',
-                  body: '浏览官方免费示例和后续商品库，加入画布预览后导出图片或压缩包。',
-                  action: '进入下载区',
-                  icon: Download,
-                  accent: 'bg-[#e82127] text-white shadow-red-200',
-                },
-                {
-                  id: 'design' as WorkspaceMode,
-                  title: '自定义上传裁剪',
-                  subtitle: '上传图片，拖动缩放裁剪',
-                  body: '上传 PNG、JPG 或 WebP，选择贴合车身或保留完整图案，再本地导出。',
-                  action: '开始自定义',
-                  icon: Upload,
-                  accent: 'bg-slate-950 text-white shadow-slate-200',
-                },
-              ].map((entry) => {
-                const Icon = entry.icon;
-                return (
-                  <button
-                    key={entry.id}
-                    type="button"
-                    onClick={() => scrollToWorkbench(entry.id)}
-                    className="tsl-skin-entry-panel group flex min-h-[300px] flex-col justify-between rounded-lg border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-[#e82127] hover:shadow-xl"
-                  >
-                    <span className={`inline-flex h-12 w-12 items-center justify-center rounded-lg shadow-lg ${entry.accent}`}>
-                      <Icon size={24} />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-black text-[#e82127]">{entry.subtitle}</span>
-                      <span className="mt-3 block text-3xl font-black leading-tight text-slate-950">{entry.title}</span>
-                      <span className="mt-4 block text-sm leading-6 text-slate-500">{entry.body}</span>
-                    </span>
-                    <span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-slate-950 transition group-hover:text-[#e82127]">
-                      {entry.action}
-                      <Sparkles size={18} />
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="tsl-skin-model-strip rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-base font-black text-slate-950">车型模板</h2>
-                <p className="mt-1 text-xs font-semibold text-slate-500">选择车型后，下载区和自定义区会共用同一个官方模板。</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
-                  <button
-                    key={`landing-${template.id}`}
-                    type="button"
-                    onClick={() => {
-                      setSelectedTemplateId(template.id);
-                      scrollToWorkbench('download');
-                    }}
-                    className={`rounded-full border px-4 py-2 text-xs font-bold transition ${
-                      selectedTemplateId === template.id
-                        ? 'border-[#e82127] bg-[#e82127] text-white'
-                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#e82127] hover:text-[#e82127]'
-                    }`}
-                  >
-                    {template.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => scrollToEditor('design')}
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-slate-950 px-3 text-sm font-black text-white transition hover:bg-slate-800"
+            >
+              <Upload size={17} />
+              自定义上传裁剪
+            </button>
           </div>
         </div>
-      </section>
+      </header>
 
-      <section id="tsl-skin-workbench" className={workbenchClassName}>
-      <style>
-        {`
-          .tsl-skin-day aside,
-          .tsl-skin-day section,
-          .tsl-skin-day header + div {
-            background: rgba(255, 255, 255, 0.82) !important;
-            border-color: rgba(15, 23, 42, 0.12) !important;
-            box-shadow: 0 18px 44px rgba(14, 116, 144, 0.12) !important;
-          }
-          .tsl-skin-day [class*="text-slate-"],
-          .tsl-skin-day [class*="text-white"] {
-            color: #334155 !important;
-          }
-          .tsl-skin-day [class*="bg-slate-950"],
-          .tsl-skin-day [class*="bg-black"] {
-            background-color: rgba(248, 250, 252, 0.92) !important;
-          }
-          .tsl-skin-day canvas {
-            background-color: #020617 !important;
-          }
-        `}
-      </style>
-      <div className={backgroundClassName} />
-
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 py-4 md:px-6">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/8 text-slate-100 transition hover:bg-white/15"
-              aria-label="返回首页"
-            >
-              <ArrowLeft size={20} />
-            </Link>
+      <main className="mx-auto max-w-[1480px] px-4 py-6 md:px-6">
+        <section className={`tsl-skin-gallery-home rounded-lg border p-4 md:p-5 ${surfaceClassName}`}>
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold tracking-[0.22em] text-sky-300">特斯拉皮肤工坊</p>
-              <h1 className="text-2xl font-black tracking-tight md:text-3xl">车机皮肤工作台</h1>
+              <p className="text-sm font-black text-[#e82127]">下载现有皮肤</p>
+              <h1 className={`mt-1 text-3xl font-black tracking-tight md:text-4xl ${strongTextClassName}`}>皮肤库</h1>
+              <p className={`mt-2 max-w-2xl text-sm leading-6 ${mutedTextClassName}`}>
+                首页先显示已经有的皮肤，点击皮肤卡片查看渲染图。图片本地生成，不上传服务器。
+              </p>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsDayMode((current) => !current)}
-              className="inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/15"
-            >
-              <Sun size={18} />
-              {isDayMode ? '深色模式' : '浅色模式'}
-            </button>
-            <button
-              type="button"
-              onClick={downloadCanvas}
-              className="inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/15"
-            >
-              <Download size={18} />
-              导出图片
-            </button>
-            <button
-              type="button"
-              onClick={downloadZipPackage}
-              className="inline-flex items-center gap-2 rounded-md bg-[#e82127] px-4 py-2 text-sm font-bold text-white shadow-lg shadow-red-950/40 transition hover:bg-[#ff3b40]"
-            >
-              <Download size={18} />
-              下载压缩包
-            </button>
-          </div>
-        </header>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.06] p-2 shadow-2xl shadow-black/20 backdrop-blur-xl">
-          <div className="grid w-full grid-cols-2 gap-2 sm:w-auto">
-            {[
-              { id: 'download' as WorkspaceMode, label: '下载现有皮肤', hint: '选车型、挑皮肤、导出包' },
-              { id: 'design' as WorkspaceMode, label: '自定义上传裁剪', hint: '上传图片、本地裁剪' },
-            ].map((item) => (
+            <div className="flex flex-wrap gap-2">
               <button
-                key={item.id}
                 type="button"
-                onClick={() => setActiveWorkspace(item.id)}
-                className={`rounded-md px-4 py-3 text-left transition ${
-                  activeWorkspace === item.id
-                    ? 'bg-sky-300 text-slate-950 shadow-lg shadow-sky-950/30'
-                    : 'bg-slate-950/70 text-slate-200 hover:bg-white/10'
+                onClick={() => setActiveWorkspace('download')}
+                className={`rounded-md border px-4 py-2 text-sm font-black transition ${
+                  activeWorkspace === 'download'
+                    ? 'border-[#e82127] bg-[#e82127] text-white'
+                    : isDayMode
+                      ? 'border-slate-200 bg-white text-slate-700 hover:border-[#e82127]'
+                      : 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
                 }`}
               >
-                <span className="block text-sm font-black">{item.label}</span>
-                <span className="mt-1 block text-xs opacity-75">{item.hint}</span>
+                下载现有皮肤
               </button>
-            ))}
-          </div>
-          <p className="max-w-xl px-2 text-xs leading-relaxed text-slate-300">
-            图片仅在你的浏览器本地处理，不会上传服务器。导出图片或压缩包都由当前设备生成，不占用网站存储额度。
-          </p>
-        </div>
-
-        <main className="tsl-skin-workbench-grid grid flex-1 items-start gap-4 py-4 xl:grid-cols-[280px_minmax(0,1fr)_280px]">
-          <aside className="space-y-4 rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
-            <section className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                <Palette size={18} className="text-sky-300" />
-                车型与车漆
-              </div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                车型
-              </label>
-              <select
-                value={selectedTemplateId}
-                onChange={(event) => setSelectedTemplateId(event.target.value)}
-                className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none transition focus:border-sky-400"
-              >
-                {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
-                  <option key={template.id} value={template.id}>
-                    {template.label}
-                  </option>
-                ))}
-              </select>
-
-              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                车身颜色
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={wrapColor}
-                  onChange={(event) => setWrapColor(event.target.value)}
-                  className="h-11 w-14 cursor-pointer rounded-md border border-white/15 bg-slate-950"
-                  aria-label="选择车身颜色"
-                />
-                <span className="rounded-md border border-white/10 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200">
-                  当前颜色
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {PRESET_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setWrapColor(color)}
-                    className="h-10 rounded-md border border-white/15 transition hover:scale-105"
-                    style={{ background: color }}
-                    aria-label="套用预设颜色"
-                  />
-                ))}
-              </div>
-            </section>
-
-            {activeWorkspace === 'design' && (
-            <section className="space-y-3 border-t border-white/10 pt-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                <Upload size={18} className="text-sky-300" />
-                贴图
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                multiple
-                onChange={handleUpload}
-                className="hidden"
-              />
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-sky-300/50 bg-sky-400/10 px-4 py-4 text-sm font-bold text-sky-100 transition hover:bg-sky-400/20"
+                onClick={() => scrollToEditor('design')}
+                className={`rounded-md border px-4 py-2 text-sm font-black transition ${
+                  activeWorkspace === 'design'
+                    ? 'border-[#e82127] bg-[#e82127] text-white'
+                    : isDayMode
+                      ? 'border-slate-200 bg-white text-slate-700 hover:border-[#e82127]'
+                      : 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
+                }`}
               >
-                <Upload size={18} />
-                上传原创贴图
+                上传图片自己裁剪
               </button>
-              <label className="flex items-start gap-3 rounded-md border border-white/10 bg-slate-950/70 p-3 text-sm text-slate-300">
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="tsl-skin-card-grid grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+              {galleryItems.map((example) => (
+                <article
+                  key={`skin-card-${example.id}`}
+                  className={`tsl-skin-skin-card overflow-hidden rounded-lg border transition hover:-translate-y-0.5 hover:shadow-lg ${surfaceClassName}`}
+                >
+                  <button type="button" onClick={() => openSkinDetailDialog(example)} className="block w-full text-left">
+                    <div className="relative flex aspect-[4/3] items-center justify-center bg-white p-3">
+                      <img
+                        src={example.imageUrl}
+                        crossOrigin="anonymous"
+                        alt={example.title}
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                      />
+                      <span className="absolute right-3 top-3 rounded-full bg-[#e82127] px-3 py-1 text-xs font-black text-white">
+                        {example.sourceLabel === '原创可商用样张' ? '原创' : '免费'}
+                      </span>
+                    </div>
+                    <div className="space-y-3 p-4">
+                      <div>
+                        <h2 className={`line-clamp-1 text-lg font-black ${strongTextClassName}`}>{example.title}</h2>
+                        <p className={`mt-1 text-sm ${mutedTextClassName}`}>{selectedTemplate.label}</p>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <span className="inline-flex h-8 items-center rounded-full bg-slate-100 px-3 font-bold text-slate-600">
+                          {example.sourceLabel === '原创可商用样张' ? '原' : '官'}
+                        </span>
+                        <span className="font-bold text-[#e82127]">{example.sourceLabel}</span>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-sm font-bold text-slate-500">
+                        <span>适配车型</span>
+                        <span className="text-[#e82127]">查看详情</span>
+                      </div>
+                    </div>
+                  </button>
+                </article>
+              ))}
+            </div>
+
+            <aside className="space-y-4">
+              <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="flex items-center gap-2 text-sm font-black">
+                  <ShieldCheck size={18} className="text-emerald-500" />
+                  本地处理
+                </div>
+                <p className="mt-2 text-xs leading-6">
+                  图片仅在你的浏览器本地处理，不会上传服务器。用户购买后下载文件，不占用 Vercel 免费额度。
+                </p>
+              </section>
+
+              <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="flex items-center gap-2 text-sm font-black">
+                  <ShoppingBag size={18} className="text-[#e82127]" />
+                  价格说明
+                </div>
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  单张下载 2 元，五张打包 9.99 元，自定义设计 30 元。
+                </p>
+                <div className="mt-3 space-y-2">
+                  {priceTiers.map((tier) => (
+                    <div key={tier.id} className="flex items-start justify-between gap-3 rounded-md bg-white/70 p-3 text-sm">
+                      <div>
+                        <div className="font-black text-slate-950">{tier.title}</div>
+                        <div className="mt-1 text-xs leading-5 text-slate-500">{tier.detail}</div>
+                      </div>
+                      <div className="font-black text-[#e82127]">{formatPriceCents(tier.priceCents)}</div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="flex items-center gap-2 text-sm font-black">
+                  <Sparkles size={18} className="text-sky-500" />
+                  原创商品样张
+                </div>
+                <div className="mt-3 space-y-2">
+                  {catalogProducts.map((product) => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveWorkspace('design');
+                        addCatalogProductLayer(product);
+                        scrollToEditor('design');
+                      }}
+                      className="w-full rounded-md border border-slate-200 bg-white p-3 text-left transition hover:border-[#e82127]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-black text-slate-950">{product.title}</span>
+                        <span className="font-black text-[#e82127]">{formatPriceCents(product.priceCents)}</span>
+                      </div>
+                      <div className="mt-1 text-xs text-slate-500">加入自定义编辑</div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section id="tsl-skin-custom-editor" className={`mt-5 rounded-lg border p-4 md:p-5 ${surfaceClassName}`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-black text-[#e82127]">自定义上传裁剪</p>
+              <h2 className={`mt-1 text-2xl font-black ${strongTextClassName}`}>上传图片自己裁剪</h2>
+              <p className={`mt-1 text-sm ${mutedTextClassName}`}>上传 PNG、JPG 或 WebP，拖动、缩放、旋转后导出交付包。</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={downloadCanvas}
+                className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-black text-slate-800 transition hover:border-[#e82127]"
+              >
+                <Download size={17} />
+                导出图片
+              </button>
+              <button
+                type="button"
+                onClick={downloadZipPackage}
+                className="inline-flex h-10 items-center gap-2 rounded-md bg-[#e82127] px-4 text-sm font-black text-white transition hover:bg-[#c9151b]"
+              >
+                <Download size={17} />
+                下载压缩包
+              </button>
+            </div>
+          </div>
+
+          <div className="tsl-skin-editor-grid mt-4 grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)_360px]">
+            <aside className={`space-y-4 rounded-lg border p-4 ${softSurfaceClassName}`}>
+              <section className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-black">
+                  <Palette size={18} className="text-sky-500" />
+                  车型与颜色
+                </div>
+                <label className="block text-xs font-bold text-slate-500">车型</label>
+                <select
+                  value={selectedTemplateId}
+                  onChange={(event) => setSelectedTemplateId(event.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 outline-none focus:border-[#e82127]"
+                >
+                  {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
+                    <option key={template.id} value={template.id}>
+                      {template.label}
+                    </option>
+                  ))}
+                </select>
+                <label className="block text-xs font-bold text-slate-500">车身颜色</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={wrapColor}
+                    onChange={(event) => setWrapColor(event.target.value)}
+                    className="h-11 w-14 cursor-pointer rounded-md border border-slate-200 bg-white"
+                    aria-label="选择车身颜色"
+                  />
+                  <span className="rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm font-bold text-slate-700">
+                    当前颜色
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {PRESET_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setWrapColor(color)}
+                      className="h-10 rounded-md border border-slate-200 transition hover:scale-105"
+                      style={{ background: color }}
+                      aria-label="套用预设颜色"
+                    />
+                  ))}
+                </div>
+              </section>
+
+              <section className="space-y-3 border-t border-slate-200 pt-4">
+                <div className="flex items-center gap-2 text-sm font-black">
+                  <Upload size={18} className="text-sky-500" />
+                  贴图
+                </div>
                 <input
-                  type="checkbox"
-                  checked={clipToBody}
-                  onChange={(event) => setClipToBody(event.target.checked)}
-                  className="mt-1"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  multiple
+                  onChange={handleUpload}
+                  className="hidden"
                 />
-                <span>新上传贴图默认贴合车身区域</span>
-              </label>
-              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-[#e82127]/40 bg-[#e82127]/5 px-4 py-4 text-sm font-black text-[#e82127] transition hover:bg-[#e82127]/10"
+                >
+                  <Upload size={18} />
+                  上传原创或已授权素材
+                </button>
+                <label className="flex items-start gap-3 rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={clipToBody}
+                    onChange={(event) => setClipToBody(event.target.checked)}
+                    className="mt-1"
+                  />
+                  <span>新上传贴图默认贴合车身区域</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => {
@@ -1259,155 +1400,25 @@ const TslSkinApp: React.FC = () => {
                     setSelectedLayerId(null);
                     setStatus('画布贴图已清空。');
                   }}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-[#e82127]"
                 >
                   <RefreshCcw size={16} />
                   清空
                 </button>
-              </div>
-              <p className="rounded-md border border-emerald-400/20 bg-emerald-400/10 p-3 text-xs leading-relaxed text-emerald-100">
-                <ShieldCheck size={16} className="mb-2 inline text-emerald-300" />
-                {' '}图片仅在你的浏览器本地处理，不会上传服务器。请仅上传原创或已授权素材。
-              </p>
-            </section>
-            )}
+                <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs leading-relaxed text-emerald-800">
+                  图片仅在你的浏览器本地处理，不会上传服务器。请仅上传原创或已授权素材。
+                </p>
+              </section>
+            </aside>
 
-            {activeWorkspace === 'download' && (
-            <section className="space-y-3 border-t border-white/10 pt-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                  <ShoppingBag size={18} className="text-sky-300" />
-                  商品库
-                </div>
-                <span className="rounded-full border border-sky-300/30 bg-sky-300/10 px-2 py-1 text-[11px] font-bold text-sky-100">
-                  样张预览
-                </span>
+            <section className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                <span>{status}</span>
+                <span>{selectedTemplate.label} · 1024x1024 画布</span>
               </div>
-              <p className="text-xs leading-relaxed text-slate-400">
-                当前先用 {SKIN_CATALOG_PRODUCTS.length} 个原创程序化样张验证商品展示，后续可替换为设计师正式商品。
-              </p>
-              <div className="space-y-2">
-                {catalogProducts.map((product) => (
-                  <div key={product.id} className="rounded-md border border-white/10 bg-slate-950/70 p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-bold text-white">{product.title}</div>
-                        <div className="mt-1 text-xs text-slate-400">{product.deliveryLabel}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-black text-sky-200">{formatPriceCents(product.priceCents)}</div>
-                        <div className="mt-1 rounded-full border border-white/10 px-2 py-1 text-[11px] font-bold text-slate-200">
-                          {product.tier}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-3 rounded-md border border-white/10 bg-black/20 p-2">
-                      <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
-                        示例预览
-                      </div>
-                      <div className="flex h-14 overflow-hidden rounded-md border border-white/10">
-                        {product.previewColors.map((color, colorIndex) => (
-                          <div
-                            key={`${product.id}-${color}`}
-                            className="flex-1"
-                            style={{
-                              background:
-                                colorIndex === 1
-                                  ? `repeating-linear-gradient(135deg, ${color}, ${color} 8px, ${product.accentColor} 8px, ${product.accentColor} 12px)`
-                                  : color,
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <div className="mt-2 text-xs text-slate-400">{product.previewLabel}</div>
-                    </div>
-                    <p className="mt-3 text-xs leading-relaxed text-slate-400">{product.description}</p>
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
-                      <span className="rounded-full border border-white/10 px-2 py-1">{product.assetKind}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => addCatalogProductLayer(product)}
-                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-sky-300/30 bg-sky-400/10 px-3 py-2 text-sm font-bold text-sky-100 transition hover:bg-sky-400/20"
-                    >
-                      <Sparkles size={16} />
-                      加入画布预览
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-            )}
-          </aside>
-
-          <section className="tsl-skin-main-stage rounded-lg border border-white/10 bg-black/30 p-3 shadow-2xl shadow-black/40 backdrop-blur-xl">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-slate-400">
-              <span>{status}</span>
-              <span>{selectedTemplate.label} · 1024 画布</span>
-            </div>
-            {activeWorkspace === 'download' && (
-              <div className="mb-3 rounded-md border border-white/10 bg-slate-950/55 p-3">
-                <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 text-base font-black text-white">
-                      <ShoppingBag size={18} className="text-sky-300" />
-                      皮肤画廊
-                    </div>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                      先挑选现成皮肤，这里展示特斯拉官方示例图库，加入画布后可以换车型、改车身颜色，再导出交付包。
-                    </p>
-                  </div>
-                  <span className="rounded-full border border-sky-300/30 bg-sky-300/10 px-3 py-1 text-xs font-bold text-sky-100">
-                    官方免费示例 · 适配车型：{selectedTemplate.label}
-                  </span>
-                </div>
-                <div className="tsl-skin-gallery-strip flex gap-3 overflow-x-auto pb-2">
-                  {officialExamples.map((example) => (
-                    <article
-                      key={`gallery-${example.id}`}
-                      className="min-w-[220px] max-w-[220px] overflow-hidden rounded-md border border-white/10 bg-black/25"
-                    >
-                      <div className="flex h-24 items-center justify-center bg-white p-2">
-                        <img
-                          src={example.imageUrl}
-                          crossOrigin="anonymous"
-                          alt={example.title}
-                          className="h-full w-full object-contain"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="space-y-3 p-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <h2 className="truncate text-sm font-black text-white">{example.title}</h2>
-                            <p className="mt-1 text-xs text-slate-400">{example.sourceLabel}</p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-black text-sky-200">免费</div>
-                            <div className="text-[11px] font-bold text-slate-400">示例</div>
-                          </div>
-                        </div>
-                        <p className="line-clamp-2 text-xs leading-relaxed text-slate-400">
-                          来自特斯拉官方开源仓库，可先展示效果，后续替换成你自己的收费商品。
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => addOfficialExampleLayer(example)}
-                          className="flex w-full items-center justify-center gap-2 rounded-md bg-sky-300 px-3 py-2 text-sm font-black text-slate-950 transition hover:bg-sky-200"
-                        >
-                          <Sparkles size={16} />
-                          马上预览
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div className="tsl-skin-stage-grid grid gap-3 xl:grid-cols-[minmax(0,1fr)_440px]">
-              <div className="relative flex min-h-[360px] items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(circle_at_center,rgba(30,41,59,0.9),rgba(2,6,23,0.95))] p-3">
+              <div className="relative flex min-h-[420px] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-950 p-3">
                 {loading && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/70 text-sm font-bold text-sky-200">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/70 text-sm font-bold text-white">
                     加载官方模板中...
                   </div>
                 )}
@@ -1419,18 +1430,19 @@ const TslSkinApp: React.FC = () => {
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
                   onPointerCancel={handlePointerUp}
-                  className="aspect-square h-auto max-h-[58vh] w-full max-w-[620px] touch-none rounded-md border border-white/10 bg-slate-950 shadow-2xl shadow-black/60"
+                  className="aspect-square h-auto max-h-[66vh] w-full max-w-[680px] touch-none rounded-md border border-white/10 bg-slate-950"
                 />
               </div>
-              <div className="vehicle-reference-panel rounded-md border border-white/10 bg-slate-950/60 p-3">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            </section>
+
+            <aside className="space-y-4">
+              <section className={`vehicle-reference-panel rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="mb-3 flex items-center justify-between gap-2">
                   <div>
-                    <div className="text-sm font-black text-white">车型渲染参考</div>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                      当前皮肤贴图会显示在渲染图旁边，方便核对配色和图案方向。
-                    </p>
+                    <div className="text-sm font-black">车型渲染参考</div>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">用于核对配色和图案方向。</p>
                   </div>
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-slate-300">
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600">
                     官方渲染底图
                   </span>
                 </div>
@@ -1438,189 +1450,230 @@ const TslSkinApp: React.FC = () => {
                   ref={vehiclePreviewCanvasRef}
                   width={960}
                   height={620}
-                  className="mx-auto h-auto max-h-[420px] w-full max-w-[440px] rounded-md border border-white/10 bg-slate-950"
+                  className="mx-auto h-auto w-full max-w-[520px] rounded-md border border-slate-200 bg-slate-950"
                 />
-                <div className="mt-3 rounded-md border border-white/10 bg-black/25 p-3 text-xs leading-relaxed text-slate-400">
-                  当前皮肤贴图用于检查配色和图案方向；最终车机显示仍以特斯拉三维模型为准。
-                </div>
-              </div>
-            </div>
-          </section>
+              </section>
 
-          <aside className="space-y-4 rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                  <Layers size={18} className="text-sky-300" />
-                  图层
-                </div>
-                <span className="text-xs text-slate-400">{layers.length}</span>
-              </div>
-              <div className="space-y-2">
-                {layers.length === 0 && (
-                  <div className="rounded-md border border-white/10 bg-slate-950/70 p-4 text-center text-sm text-slate-400">
-                    上传贴图后会出现在这里。
+              <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-black">
+                    <Layers size={18} className="text-sky-500" />
+                    图层
                   </div>
-                )}
-                {layers.map((layer, index) => (
-                  <button
-                    key={layer.id}
-                    type="button"
-                    onClick={() => setSelectedLayerId(layer.id)}
-                    className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition ${
-                      selectedLayerId === layer.id
-                        ? 'border-sky-300 bg-sky-300/15 text-white'
-                        : 'border-white/10 bg-slate-950/70 text-slate-300 hover:bg-white/10'
-                    }`}
-                  >
-                    <span className="truncate">{layer.name}</span>
-                    <span className="ml-2 text-xs text-slate-500">#{index + 1}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
+                  <span className="text-xs text-slate-500">{layers.length}</span>
+                </div>
+                <div className="mt-3 space-y-2">
+                  {layers.length === 0 && (
+                    <div className="rounded-md border border-slate-200 bg-white p-4 text-center text-sm text-slate-500">
+                      上传贴图后会出现在这里。
+                    </div>
+                  )}
+                  {layers.map((layer, index) => (
+                    <button
+                      key={layer.id}
+                      type="button"
+                      onClick={() => setSelectedLayerId(layer.id)}
+                      className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition ${
+                        selectedLayerId === layer.id
+                          ? 'border-[#e82127] bg-[#e82127]/10 text-[#e82127]'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-[#e82127]'
+                      }`}
+                    >
+                      <span className="truncate">{layer.name}</span>
+                      <span className="ml-2 text-xs text-slate-400">#{index + 1}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
 
-            <section className="space-y-4 border-t border-white/10 pt-4">
-              <div className="text-sm font-bold text-slate-200">选中贴图</div>
-              {!selectedLayer && (
-                <p className="rounded-md border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-400">
-                  在画布或图层列表中选择一个贴图。
-                </p>
-              )}
-              {selectedLayer && (
-                <>
-                  <div className="space-y-2 text-sm text-slate-300">
-                    <span>裁剪模式</span>
+              <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="text-sm font-black">选中贴图</div>
+                {!selectedLayer && (
+                  <p className="mt-3 rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-500">
+                    在画布或图层列表中选择一个贴图。
+                  </p>
+                )}
+                {selectedLayer && (
+                  <div className="mt-3 space-y-4">
+                    <div className="space-y-2 text-sm text-slate-600">
+                      <span>裁剪模式</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { mode: 'body' as const, label: '贴合车身' },
+                          { mode: 'full' as const, label: '保留完整图案' },
+                        ].map((item) => (
+                          <button
+                            key={item.mode}
+                            type="button"
+                            onClick={() => updateSelectedLayer({ clipMode: item.mode })}
+                            className={`rounded-md border px-3 py-2 text-sm font-bold transition ${
+                              selectedLayer.clipMode === item.mode
+                                ? 'border-[#e82127] bg-[#e82127]/10 text-[#e82127]'
+                                : 'border-slate-200 bg-white text-slate-600 hover:border-[#e82127]'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <label className="block space-y-2 text-sm text-slate-600">
+                      <span>透明度 {Math.round(selectedLayer.opacity * 100)}%</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={Math.round(selectedLayer.opacity * 100)}
+                        onChange={(event) => updateSelectedLayer({ opacity: Number(event.target.value) / 100 })}
+                        className="w-full"
+                      />
+                    </label>
+                    <label className="block space-y-2 text-sm text-slate-600">
+                      <span>缩放 {Math.round(selectedLayer.scale * 100)}%</span>
+                      <input
+                        type="range"
+                        min="5"
+                        max="250"
+                        value={Math.round(selectedLayer.scale * 100)}
+                        onChange={(event) => updateSelectedLayer({ scale: Number(event.target.value) / 100 })}
+                        className="w-full"
+                      />
+                    </label>
+                    <label className="block space-y-2 text-sm text-slate-600">
+                      <span>旋转 {Math.round((selectedLayer.rotation * 180) / Math.PI)}°</span>
+                      <input
+                        type="range"
+                        min="-180"
+                        max="180"
+                        value={Math.round((selectedLayer.rotation * 180) / Math.PI)}
+                        onChange={(event) =>
+                          updateSelectedLayer({ rotation: (Number(event.target.value) * Math.PI) / 180 })
+                        }
+                        className="w-full"
+                      />
+                    </label>
                     <div className="grid grid-cols-2 gap-2">
-                      {[
-                        { mode: 'body' as const, label: '贴合车身' },
-                        { mode: 'full' as const, label: '保留完整图案' },
-                      ].map((item) => (
-                        <button
-                          key={item.mode}
-                          type="button"
-                          onClick={() => updateSelectedLayer({ clipMode: item.mode })}
-                          className={`rounded-md border px-3 py-2 text-sm font-bold transition ${
-                            selectedLayer.clipMode === item.mode
-                              ? 'border-sky-300 bg-sky-300/20 text-sky-100'
-                              : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
+                      <button
+                        type="button"
+                        onClick={() => updateSelectedLayer({ flipX: !selectedLayer.flipX })}
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-[#e82127]"
+                      >
+                        <FlipHorizontal size={16} />
+                        翻转
+                      </button>
+                      <button
+                        type="button"
+                        onClick={deleteLayer}
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100"
+                      >
+                        <Trash2 size={16} />
+                        删除
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveLayer(-1)}
+                        className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-[#e82127]"
+                      >
+                        后移
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveLayer(1)}
+                        className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-[#e82127]"
+                      >
+                        前移
+                      </button>
                     </div>
                   </div>
-                  <label className="block space-y-2 text-sm text-slate-300">
-                    <span>透明度 {Math.round(selectedLayer.opacity * 100)}%</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={Math.round(selectedLayer.opacity * 100)}
-                      onChange={(event) => updateSelectedLayer({ opacity: Number(event.target.value) / 100 })}
-                      className="w-full"
-                    />
-                  </label>
-                  <label className="block space-y-2 text-sm text-slate-300">
-                    <span>缩放 {Math.round(selectedLayer.scale * 100)}%</span>
-                    <input
-                      type="range"
-                      min="5"
-                      max="250"
-                      value={Math.round(selectedLayer.scale * 100)}
-                      onChange={(event) => updateSelectedLayer({ scale: Number(event.target.value) / 100 })}
-                      className="w-full"
-                    />
-                  </label>
-                  <label className="block space-y-2 text-sm text-slate-300">
-                    <span>旋转 {Math.round((selectedLayer.rotation * 180) / Math.PI)}°</span>
-                    <input
-                      type="range"
-                      min="-180"
-                      max="180"
-                      value={Math.round((selectedLayer.rotation * 180) / Math.PI)}
-                      onChange={(event) =>
-                        updateSelectedLayer({ rotation: (Number(event.target.value) * Math.PI) / 180 })
-                      }
-                      className="w-full"
-                    />
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => updateSelectedLayer({ flipX: !selectedLayer.flipX })}
-                      className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold transition hover:bg-white/10"
-                    >
-                      <FlipHorizontal size={16} />
-                      翻转
-                    </button>
-                    <button
-                      type="button"
-                      onClick={deleteLayer}
-                      className="inline-flex items-center justify-center gap-2 rounded-md border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-100 transition hover:bg-red-500/20"
-                    >
-                      <Trash2 size={16} />
-                      删除
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveLayer(-1)}
-                      className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold transition hover:bg-white/10"
-                    >
-                      后移
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveLayer(1)}
-                      className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold transition hover:bg-white/10"
-                    >
-                      前移
-                    </button>
-                  </div>
-                </>
-              )}
-            </section>
+                )}
+              </section>
 
-            <section className="space-y-4 border-t border-white/10 pt-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                <Sparkles size={18} className="text-sky-300" />
-                三步完成
-              </div>
-              {[
-                { title: '选择车型', body: '先选对应车型模板，下载和自定义都会跟随这个车型。' },
-                { title: '预览调整', body: '下载区可加入现成皮肤，自定义区可上传图片并拖动、缩放、旋转。' },
-                { title: '导出交付包', body: '点“下载压缩包”，里面会包含皮肤图片和 U 盘放置说明。' },
-              ].map((item) => (
-                <div key={item.title} className="rounded-md border border-white/10 bg-slate-950/70 p-3">
-                  <div className="text-sm font-black text-white">{item.title}</div>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-400">{item.body}</p>
+              <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="flex items-center gap-2 text-sm font-black">
+                  <Sparkles size={18} className="text-sky-500" />
+                  三步完成
                 </div>
-              ))}
-            </section>
+                <div className="mt-3 space-y-2 text-xs leading-5 text-slate-500">
+                  <p><span className="font-black text-slate-700">选择车型：</span>先选对应车型模板。</p>
+                  <p><span className="font-black text-slate-700">预览调整：</span>上传图后拖动、缩放、旋转。</p>
+                  <p><span className="font-black text-slate-700">导出交付包：</span>下载 1024x1024 图片，U 盘建议 exFAT，文件放入 Wraps 文件夹。</p>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+      </main>
 
-            <section className="space-y-4 border-t border-white/10 pt-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                <ShoppingBag size={18} className="text-sky-300" />
-                价格说明
+      {selectedGalleryExample && (
+        <div className="skin-detail-dialog fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            aria-label="关闭详情"
+            onClick={() => setSelectedGalleryExample(null)}
+          />
+          <section className="relative z-10 grid max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-lg bg-white text-slate-950 shadow-2xl md:grid-cols-[minmax(0,1.25fr)_360px]">
+            <div className="bg-slate-100 p-4">
+              <canvas
+                ref={galleryPreviewCanvasRef}
+                width={960}
+                height={620}
+                className="h-auto w-full rounded-md border border-slate-200 bg-white"
+              />
+            </div>
+            <aside className="flex flex-col gap-4 overflow-y-auto p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-black text-[#e82127]">皮肤详情</p>
+                  <h2 className="mt-1 text-2xl font-black">{selectedGalleryExample.title}</h2>
+                  <p className="mt-2 text-sm text-slate-500">{selectedTemplate.label}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedGalleryExample(null)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:border-[#e82127] hover:text-[#e82127]"
+                  aria-label="关闭详情"
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <p className="text-xs leading-relaxed text-slate-400">
-                发小红书时可以直接写：2 元单张下载，9.99 元五张打包，30 元自定义设计。
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <img
+                  src={selectedGalleryExample.imageUrl}
+                  crossOrigin="anonymous"
+                  alt={selectedGalleryExample.title}
+                  className="mx-auto h-52 w-full object-contain"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-md border border-slate-200 p-3">
+                  <div className="text-xs font-bold text-slate-500">来源</div>
+                  <div className="mt-1 font-black">{selectedGalleryExample.sourceLabel}</div>
+                </div>
+                <div className="rounded-md border border-slate-200 p-3">
+                  <div className="text-xs font-bold text-slate-500">下载</div>
+                  <div className="mt-1 font-black text-[#e82127]">免费预览</div>
+                </div>
+              </div>
+
+              <p className="text-sm leading-6 text-slate-500">
+                渲染图用于购买或下载前核对大致效果。最终车机显示仍以特斯拉三维模型为准。
               </p>
-              {priceTiers.map((tier) => (
-                <div key={tier.id} className="rounded-md border border-white/10 bg-slate-950/70 p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-black text-white">{tier.title}</div>
-                    <div className="text-lg font-black text-sky-200">{formatPriceCents(tier.priceCents)}</div>
-                  </div>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-400">{tier.detail}</p>
-                </div>
-              ))}
-            </section>
-          </aside>
-        </main>
-      </div>
-      </section>
+
+              <button
+                type="button"
+                onClick={addSelectedGalleryExampleToEditor}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#e82127] px-4 text-sm font-black text-white transition hover:bg-[#c9151b]"
+              >
+                <Sparkles size={18} />
+                加入自定义编辑
+              </button>
+            </aside>
+          </section>
+        </div>
+      )}
     </div>
   );
 };

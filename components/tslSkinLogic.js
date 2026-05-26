@@ -23,6 +23,16 @@ export const TESLA_MODEL_TEMPLATES = [
 
 const ALL_MODEL_IDS = TESLA_MODEL_TEMPLATES.map((template) => template.id);
 const MODEL_Y_2025_IDS = ['modely-2025-base', 'modely-2025-premium', 'modely-2025-performance'];
+const LOCAL_ORIGINAL_EXAMPLE_WRAPS = [
+  {
+    id: 'animal-city-patrol-modely-2025',
+    title: '动物城市巡游',
+    fileName: 'animal-city-patrol-modely-2025.png',
+    imageUrl: '/tsl-skins/animal-city-patrol-modely-2025.png',
+    modelIds: MODEL_Y_2025_IDS,
+    sourceLabel: '原创可商用样张',
+  },
+];
 const COMMON_OFFICIAL_EXAMPLE_FILES = [
   'Acid_Drip.png',
   'Ani.png',
@@ -219,7 +229,8 @@ function getOfficialExampleTitle(fileName) {
 
 export function getOfficialExampleWrapsForTemplate(templateId) {
   const template = getTeslaTemplateById(templateId);
-  return getOfficialExampleFilesForTemplate(template.id).map((fileName) => ({
+  const localExamples = LOCAL_ORIGINAL_EXAMPLE_WRAPS.filter((example) => example.modelIds.includes(template.id));
+  const officialExamples = getOfficialExampleFilesForTemplate(template.id).map((fileName) => ({
     id: `${template.id}-${fileName.replace(/\.png$/i, '').toLowerCase().replace(/_/g, '-')}`,
     title: getOfficialExampleTitle(fileName),
     fileName,
@@ -227,6 +238,8 @@ export function getOfficialExampleWrapsForTemplate(templateId) {
     modelIds: [template.id],
     sourceLabel: '特斯拉官方示例',
   }));
+
+  return [...localExamples, ...officialExamples];
 }
 
 export function formatPriceCents(cents) {

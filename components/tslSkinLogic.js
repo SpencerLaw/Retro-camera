@@ -210,6 +210,41 @@ export const DOWNLOAD_PRICE_TIERS = [
   },
 ];
 
+export const EXTERNAL_WRAP_SOURCES = [
+  {
+    id: 'tesla-wrap-gallery',
+    title: '特斯拉皮肤图库',
+    url: 'https://www.tesla-wrap.com/',
+    accessNote: '原站可免费下载，适合用户自己去挑选成品。',
+    usageNote: '原站条款限制复制、商用公开展示与镜像，不在本站镜像素材。',
+    actionLabel: '去原站下载',
+  },
+  {
+    id: 'community-github-wraps',
+    title: '社区公开皮肤仓库',
+    url: 'https://github.com/P3BKAC-RSTRT/Tesla-Fun/tree/main/Wraps',
+    accessNote: '公开仓库里有玩家整理的皮肤文件，可作为选品参考。',
+    usageNote: '未发现明确授权文件，确认授权后再入库。',
+    actionLabel: '去原站下载',
+  },
+  {
+    id: 'highland-wrap-gallery',
+    title: '三型焕新版图库',
+    url: 'https://teslawrapgallery.com/model-3-highland-wraps/',
+    accessNote: '页面主打三维预览和免费皮肤下载，适合参考筛选体验。',
+    usageNote: '先作为外链入口，不在本站镜像素材。',
+    actionLabel: '去原站下载',
+  },
+  {
+    id: 'browser-wrap-studio',
+    title: '浏览器三维编辑器',
+    url: 'https://tesla-wrap.mrproper.dev/',
+    accessNote: '可参考三维编辑、预览、导出这一类产品路径。',
+    usageNote: '工具和素材分开处理，确认授权后再入库。',
+    actionLabel: '去原站下载',
+  },
+];
+
 export function getTeslaTemplateById(id) {
   return TESLA_MODEL_TEMPLATES.find((template) => template.id === id) || TESLA_MODEL_TEMPLATES[0];
 }

@@ -97,6 +97,18 @@ runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.doesNotMatch(componentSource, /马上预览|tsl-skin-gallery-strip/);
 });
 
+runTest('tsl skin page exposes external free sources as safe original-site links', () => {
+  assert.match(componentSource, /EXTERNAL_WRAP_SOURCES/);
+  assert.match(componentSource, /免费资源站/);
+  assert.match(componentSource, /去原站下载/);
+  assert.match(componentSource, /不在本站镜像素材/);
+  assert.match(componentSource, /确认授权后再入库/);
+  assert.match(componentSource, /target="_blank"/);
+  assert.match(componentSource, /rel="noopener noreferrer"/);
+  assert.match(componentSource, /externalSources\.map/);
+  assert.doesNotMatch(componentSource, /axios|get\(|fetch\(.+tesla-wrap|beautifulsoup|scrapy|playwright.*tesla-wrap/i);
+});
+
 runTest('tsl skin page supports zip package export and per-layer crop modes', () => {
   assert.match(componentSource, /buildTslSkinZipFileName/);
   assert.match(componentSource, /buildWrapInstallGuide/);

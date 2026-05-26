@@ -77,6 +77,27 @@ await runTest('tsl skin exposes official GitHub example wraps for galleries', as
   assert.ok(cybertruckExamples.length > examples.length);
 });
 
+await runTest('tsl skin exposes safe external free wrap sources without mirroring assets', async () => {
+  const { EXTERNAL_WRAP_SOURCES } = await loadLogicModule();
+
+  assert.equal(EXTERNAL_WRAP_SOURCES.length, 4);
+  assert.deepEqual(
+    EXTERNAL_WRAP_SOURCES.map((source) => source.url),
+    [
+      'https://www.tesla-wrap.com/',
+      'https://github.com/P3BKAC-RSTRT/Tesla-Fun/tree/main/Wraps',
+      'https://teslawrapgallery.com/model-3-highland-wraps/',
+      'https://tesla-wrap.mrproper.dev/',
+    ],
+  );
+  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => source.actionLabel === '去原站下载'));
+  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => source.accessNote));
+  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => source.usageNote));
+  assert.ok(EXTERNAL_WRAP_SOURCES.some((source) => /不可镜像|不在本站镜像/.test(source.usageNote)));
+  assert.ok(EXTERNAL_WRAP_SOURCES.some((source) => /未发现明确授权/.test(source.usageNote)));
+  assert.ok(EXTERNAL_WRAP_SOURCES.every((source) => !source.assetUrl && !source.downloadUrl));
+});
+
 await runTest('tsl skin creates centered layers and export filenames', async () => {
   const { buildTslSkinFileName, createSkinLayer } = await loadLogicModule();
 

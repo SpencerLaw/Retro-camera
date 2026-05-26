@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
   Download,
+  ExternalLink,
   FlipHorizontal,
   Layers,
   Palette,
@@ -22,6 +23,7 @@ import {
   createStoredZip,
   createSkinLayer,
   DOWNLOAD_PRICE_TIERS,
+  EXTERNAL_WRAP_SOURCES,
   formatPriceCents,
   getCatalogProductsForTemplate,
   getOfficialExampleWrapsForTemplate,
@@ -78,6 +80,15 @@ type OfficialWrapExample = {
   imageUrl: string;
   modelIds: string[];
   sourceLabel: string;
+};
+
+type ExternalWrapSource = {
+  id: string;
+  title: string;
+  url: string;
+  accessNote: string;
+  usageNote: string;
+  actionLabel: string;
 };
 
 type WorkspaceMode = 'download' | 'design';
@@ -499,6 +510,7 @@ const TslSkinApp: React.FC = () => {
     [selectedTemplateId],
   );
   const priceTiers = DOWNLOAD_PRICE_TIERS as DownloadPriceTier[];
+  const externalSources = EXTERNAL_WRAP_SOURCES as ExternalWrapSource[];
 
   const drawCanvas = React.useCallback(
     (showSelection = true) => {
@@ -1237,6 +1249,43 @@ const TslSkinApp: React.FC = () => {
                 <p className="mt-2 text-xs leading-6">
                   图片仅在你的浏览器本地处理，不会上传服务器。用户购买后下载文件，不占用 Vercel 免费额度。
                 </p>
+              </section>
+
+              <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-sm font-black">
+                    <ExternalLink size={18} className="text-sky-500" />
+                    免费资源站
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-500">
+                    外链
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  可参考这些站点的筛选和预览体验。资源只做外链，不在本站镜像素材，确认授权后再入库。
+                </p>
+                <div className="mt-3 space-y-2">
+                  {externalSources.map((source) => (
+                    <a
+                      key={source.id}
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`去原站下载 ${source.title}`}
+                      className="block rounded-md border border-slate-200 bg-white p-3 transition hover:border-[#e82127]"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="font-black text-slate-950">{source.title}</div>
+                          <div className="mt-1 break-all text-[11px] font-bold text-slate-400">{source.url}</div>
+                        </div>
+                        <span className="shrink-0 text-xs font-black text-[#e82127]">{source.actionLabel}</span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-slate-500">{source.accessNote}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-400">{source.usageNote}</p>
+                    </a>
+                  ))}
+                </div>
               </section>
 
               <section className={`rounded-lg border p-4 ${softSurfaceClassName}`}>

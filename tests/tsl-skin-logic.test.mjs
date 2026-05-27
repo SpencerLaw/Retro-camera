@@ -18,7 +18,7 @@ async function loadLogicModule() {
 await runTest('tsl skin exposes official Tesla template catalog', async () => {
   const { TESLA_MODEL_TEMPLATES, getTeslaTemplateById } = await loadLogicModule();
 
-  assert.equal(TESLA_MODEL_TEMPLATES.length, 9);
+  assert.equal(TESLA_MODEL_TEMPLATES.length, 12);
   assert.deepEqual(
     TESLA_MODEL_TEMPLATES.map((template) => template.id),
     [
@@ -26,6 +26,9 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
       'model3',
       'model3-2024-base',
       'model3-2024-performance',
+      'models-2021',
+      'models-2025-plaid',
+      'modelx-2021',
       'modely',
       'modely-2025-base',
       'modely-2025-premium',
@@ -44,6 +47,25 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
     premium.vehicleImageUrl,
     'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/modely-2025-premium/vehicle_image.png',
   );
+  assert.equal(premium.previewModelUrl, 'https://teslawrapgallery.com/tesla_3d_models/Bayberry.gltf');
+  assert.equal(
+    premium.previewObjUrl,
+    'https://raw.githubusercontent.com/GewoonJaap/custom-tesla-wraps/master/modely-2025-premium/vehicle.obj',
+  );
+  assert.equal(
+    premium.previewMtlUrl,
+    'https://raw.githubusercontent.com/GewoonJaap/custom-tesla-wraps/master/modely-2025-premium/vehicle.mtl',
+  );
+
+  const modelS = getTeslaTemplateById('models-2021');
+  assert.equal(modelS.label, 'S 型车 2021 以后');
+  assert.equal(
+    modelS.templateUrl,
+    'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/models-2021/template.png',
+  );
+  assert.equal(modelS.previewModelUrl, 'https://teslawrapgallery.com/tesla_3d_models/ModelS_2021.glb');
+  assert.equal(modelS.previewObjUrl, null);
+  assert.equal(modelS.previewMtlUrl, null);
 });
 
 await runTest('tsl skin exposes official GitHub example wraps for galleries', async () => {
@@ -72,6 +94,8 @@ await runTest('tsl skin exposes official GitHub example wraps for galleries', as
     ),
   );
   assert.ok(examples.some((item) => item.fileName === 'Sakura.png' && item.title === '樱花粉绘'));
+  assert.equal(examples[0].sourceLabel, '特斯拉官方示例');
+  assert.equal(examples[0].fileName, 'Cosmic_Burst.png');
 
   const cybertruckExamples = getOfficialExampleWrapsForTemplate('cybertruck');
   assert.ok(cybertruckExamples.length > examples.length);

@@ -1,22 +1,31 @@
 const GITHUB_TEMPLATE_ROOT = 'https://raw.githubusercontent.com/teslamotors/custom-wraps/master';
+const EXTERNAL_PREVIEW_MODEL_ROOT = 'https://teslawrapgallery.com/tesla_3d_models';
+const OBJ_PREVIEW_MODEL_ROOT = 'https://raw.githubusercontent.com/GewoonJaap/custom-tesla-wraps/master';
 
-function createTeslaTemplate(id, label) {
+function createTeslaTemplate(id, label, previewModelFile = null, previewObjFolder = id) {
   return {
     id,
     label,
     templateUrl: `${GITHUB_TEMPLATE_ROOT}/${id}/template.png`,
     vehicleImageUrl: `${GITHUB_TEMPLATE_ROOT}/${id}/vehicle_image.png`,
+    previewModelUrl: previewModelFile ? `${EXTERNAL_PREVIEW_MODEL_ROOT}/${previewModelFile}` : null,
+    previewModelFile,
+    previewObjUrl: previewObjFolder ? `${OBJ_PREVIEW_MODEL_ROOT}/${previewObjFolder}/vehicle.obj` : null,
+    previewMtlUrl: previewObjFolder ? `${OBJ_PREVIEW_MODEL_ROOT}/${previewObjFolder}/vehicle.mtl` : null,
   };
 }
 
 export const TESLA_MODEL_TEMPLATES = [
-  createTeslaTemplate('cybertruck', '赛博越野旅行车'),
-  createTeslaTemplate('model3', '三型车'),
-  createTeslaTemplate('model3-2024-base', '三型车 2024 基础版'),
+  createTeslaTemplate('cybertruck', '赛博越野旅行车', 'Cybertruck.gltf'),
+  createTeslaTemplate('model3', '三型车', 'Model3_High.gltf'),
+  createTeslaTemplate('model3-2024-base', '三型车 2024 基础版', 'Poppyseed.gltf'),
   createTeslaTemplate('model3-2024-performance', '三型车 2024 高性能版'),
-  createTeslaTemplate('modely', 'Y 型车'),
-  createTeslaTemplate('modely-2025-base', 'Y 型车 2025 基础版'),
-  createTeslaTemplate('modely-2025-premium', 'Y 型车 2025 高级版'),
+  createTeslaTemplate('models-2021', 'S 型车 2021 以后', 'ModelS_2021.glb', null),
+  createTeslaTemplate('models-2025-plaid', 'S 型 Plaid 2025 以后', 'ModelS_Plaid_2025.glb', null),
+  createTeslaTemplate('modelx-2021', 'X 型车 2021 以后', 'ModelX_2021.glb', null),
+  createTeslaTemplate('modely', 'Y 型车', 'ModelY_High.gltf'),
+  createTeslaTemplate('modely-2025-base', 'Y 型车 2025 基础版', 'BayberryE41.gltf'),
+  createTeslaTemplate('modely-2025-premium', 'Y 型车 2025 高级版', 'Bayberry.gltf'),
   createTeslaTemplate('modely-2025-performance', 'Y 型车 2025 高性能版'),
   createTeslaTemplate('modely-l', 'Y 型长轴版'),
 ];
@@ -33,12 +42,12 @@ const LOCAL_ORIGINAL_EXAMPLE_WRAPS = [
   },
 ];
 const COMMON_OFFICIAL_EXAMPLE_FILES = [
+  'Cosmic_Burst.png',
   'Acid_Drip.png',
   'Ani.png',
   'Apocalypse.png',
   'Avocado_Green.png',
   'Camo.png',
-  'Cosmic_Burst.png',
   'Divide.png',
   'Doge.png',
   'Dot_Matrix.png',
@@ -55,6 +64,7 @@ const COMMON_OFFICIAL_EXAMPLE_FILES = [
   'Vintage_Stripes.png',
 ];
 const CYBERTRUCK_OFFICIAL_EXAMPLE_FILES = [
+  'Cosmic_Burst.png',
   'Ani.png',
   'Camo_Blue.png',
   'Camo_Brown.png',
@@ -64,7 +74,6 @@ const CYBERTRUCK_OFFICIAL_EXAMPLE_FILES = [
   'Camo_Snow.png',
   'Camo_Stealth.png',
   'Clay.png',
-  'Cosmic_Burst.png',
   'Digital_Camo_Green.png',
   'Digital_Camo_Snow.png',
   'Digital_Camo_Stealth.png',
@@ -171,7 +180,7 @@ export function getOfficialExampleWrapsForTemplate(templateId) {
     sourceLabel: '特斯拉官方示例',
   }));
 
-  return [...localExamples, ...officialExamples];
+  return [...officialExamples, ...localExamples];
 }
 
 export function createSkinLayer(id, image) {

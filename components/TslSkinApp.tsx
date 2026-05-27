@@ -28,6 +28,10 @@ export type TeslaModelTemplate = {
   label: string;
   templateUrl: string;
   vehicleImageUrl: string;
+  previewModelUrl?: string | null;
+  previewModelFile?: string | null;
+  previewObjUrl?: string | null;
+  previewMtlUrl?: string | null;
 };
 
 export type SkinLayer = {
@@ -1013,6 +1017,10 @@ const TslSkinApp: React.FC = () => {
           <TslVehicle3DPreview
             wrapColor={wrapColor}
             wrapImageUrl={previewWrapUrl}
+            modelUrl={selectedTemplate.previewModelUrl}
+            objModelUrl={selectedTemplate.previewObjUrl}
+            mtlModelUrl={selectedTemplate.previewMtlUrl}
+            vehicleImageUrl={selectedTemplate.vehicleImageUrl}
             modelLabel={selectedTemplate.label}
             isDayMode={isDayMode}
           />

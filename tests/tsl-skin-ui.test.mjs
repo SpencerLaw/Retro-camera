@@ -65,16 +65,36 @@ runTest('tsl skin page uses a gallery-first 3d workbench layout', () => {
 runTest('tsl skin 3d preview uses threejs orbit controls without copying remote model assets', () => {
   assert.match(vehicle3DSource, /from 'three'/);
   assert.match(vehicle3DSource, /OrbitControls/);
+  assert.match(vehicle3DSource, /OBJLoader/);
+  assert.match(vehicle3DSource, /MTLLoader/);
+  assert.match(vehicle3DSource, /GLTFLoader/);
+  assert.match(vehicle3DSource, /DRACOLoader/);
+  assert.match(vehicle3DSource, /setDecoderPath\('\/draco\/'\)/);
   assert.match(vehicle3DSource, /WebGLRenderer/);
   assert.match(vehicle3DSource, /requestAnimationFrame/);
   assert.match(vehicle3DSource, /autoRotate/);
   assert.match(vehicle3DSource, /TextureLoader/);
-  assert.match(vehicle3DSource, /createVehicleBody/);
-  assert.match(vehicle3DSource, /模型为本站自建预览/);
-  assert.match(vehicle3DSource, /ExtrudeGeometry/);
-  assert.match(vehicle3DSource, /ShadowMaterial/);
-  assert.doesNotMatch(vehicle3DSource, /Bayberry|tesla_3d_models|GLTFLoader|DRACOLoader|wrap_templates/);
-  assert.doesNotMatch(vehicle3DSource, /function createWheel\(|CylinderGeometry|sideSkirt|frontBumper|rearBumper/);
+  assert.match(vehicle3DSource, /prepareVehicleModel/);
+  assert.match(vehicle3DSource, /uv1/);
+  assert.match(vehicle3DSource, /PAINT_MATERIAL_HINTS/);
+  assert.match(vehicle3DSource, /官方静态预览/);
+  assert.doesNotMatch(vehicle3DSource, /function createWheel\(|CylinderGeometry|ExtrudeGeometry|createBodyShellGeometry|sideSkirt|frontBumper|rearBumper/);
+});
+
+runTest('tsl skin 3d preview updates only paint material slots', () => {
+  assert.match(vehicle3DSource, /type MaterialTarget/);
+  assert.match(vehicle3DSource, /materialIndex/);
+  assert.match(vehicle3DSource, /getMeshMaterialSlots/);
+  assert.match(vehicle3DSource, /assignTargetMaterial/);
+  assert.match(vehicle3DSource, /hasUsableWrapUv\(target\.mesh/);
+  assert.doesNotMatch(vehicle3DSource, /mesh\.material = makeWrapMaterial\(texture\);/);
+  assert.doesNotMatch(vehicle3DSource, /mesh\.material = makePaintMaterial\(wrapColor\);/);
+});
+
+runTest('tsl skin 3d preview uses clear non-mirrored paint materials', () => {
+  assert.match(vehicle3DSource, /metalness: 0\.08/);
+  assert.match(vehicle3DSource, /roughness: 0\.5/);
+  assert.match(vehicle3DSource, /HemisphereLight/);
 });
 
 runTest('tsl skin page keeps the download workflow uncluttered', () => {
@@ -162,11 +182,15 @@ runTest('tsl skin page shows an approximate in-car render preview', () => {
   assert.match(componentSource, /previewWrapUrl/);
   assert.match(componentSource, /customRenderUrl/);
   assert.match(componentSource, /wrapImageUrl=\{previewWrapUrl\}/);
+  assert.match(componentSource, /modelUrl=\{selectedTemplate\.previewModelUrl\}/);
+  assert.match(componentSource, /vehicleImageUrl=\{selectedTemplate\.vehicleImageUrl\}/);
   assert.match(componentSource, /三维动态预览/);
   assert.match(componentSource, /鼠标拖动旋转/);
   assert.match(componentSource, /滚轮缩放/);
-  assert.match(vehicle3DSource, /模型为本站自建预览/);
-  assert.match(vehicle3DSource, /createVehicleBody/);
+  assert.match(vehicle3DSource, /真实车型模型/);
+  assert.match(vehicle3DSource, /prepareVehicleModel/);
+  assert.match(vehicle3DSource, /prepareObjVehicleModel/);
+  assert.match(vehicle3DSource, /CarPaint/);
   assert.match(vehicle3DSource, /OrbitControls/);
   assert.doesNotMatch(componentSource, /vehiclePreviewCanvasRef|drawVehiclePreview|drawSmartContainedImage|vehicle-reference-panel/);
 });

@@ -16,21 +16,14 @@ function createTeslaTemplate(id, label, previewModelFile = null, previewObjFolde
 }
 
 export const TESLA_MODEL_TEMPLATES = [
-  createTeslaTemplate('cybertruck', 'Cybertruck', 'Cybertruck.gltf'),
   createTeslaTemplate('model3', 'Model 3（2024前）', 'Model3_High.gltf'),
   createTeslaTemplate('model3-2024-base', 'Model 3（2024+）标准/长续航', 'Poppyseed.gltf'),
-  createTeslaTemplate('model3-2024-performance', 'Model 3（2024+）性能版'),
-  createTeslaTemplate('models-2021', 'Model S（2021以后）', 'ModelS_2021.glb', null),
-  createTeslaTemplate('models-2025-plaid', 'Model S Plaid（2025以后）', 'ModelS_Plaid_2025.glb', null),
-  createTeslaTemplate('modelx-2021', 'Model X（2021以后）', 'ModelX_2021.glb', null),
   createTeslaTemplate('modely', 'Model Y（2025前）', 'ModelY_High.gltf'),
   createTeslaTemplate('modely-2025-base', 'Model Y（2025+）标准版', 'BayberryE41.gltf'),
   createTeslaTemplate('modely-2025-premium', 'Model Y（2025+）长续航', 'Bayberry.gltf'),
-  createTeslaTemplate('modely-2025-performance', 'Model Y（2025+）性能版'),
-  createTeslaTemplate('modely-l', 'Model Y L（中国）'),
 ];
 
-const MODEL_Y_2025_IDS = ['modely-2025-base', 'modely-2025-premium', 'modely-2025-performance'];
+const MODEL_Y_2025_IDS = ['modely-2025-base', 'modely-2025-premium'];
 const LOCAL_ORIGINAL_EXAMPLE_WRAPS = [
   {
     id: 'animal-city-patrol-modely-2025',
@@ -41,13 +34,13 @@ const LOCAL_ORIGINAL_EXAMPLE_WRAPS = [
     sourceLabel: '原创可商用样张',
   },
 ];
-const COMMON_OFFICIAL_EXAMPLE_FILES = [
-  'Cosmic_Burst.png',
+const MODEL_3_Y_OFFICIAL_EXAMPLE_FILES = [
   'Acid_Drip.png',
   'Ani.png',
   'Apocalypse.png',
   'Avocado_Green.png',
   'Camo.png',
+  'Cosmic_Burst.png',
   'Divide.png',
   'Doge.png',
   'Dot_Matrix.png',
@@ -63,96 +56,35 @@ const COMMON_OFFICIAL_EXAMPLE_FILES = [
   'Vintage_Gradient.png',
   'Vintage_Stripes.png',
 ];
-const CYBERTRUCK_OFFICIAL_EXAMPLE_FILES = [
-  'Cosmic_Burst.png',
-  'Ani.png',
-  'Camo_Blue.png',
-  'Camo_Brown.png',
-  'Camo_Green.png',
-  'Camo_Pink.png',
-  'Camo_Sand.png',
-  'Camo_Snow.png',
-  'Camo_Stealth.png',
-  'Clay.png',
-  'Digital_Camo_Green.png',
-  'Digital_Camo_Snow.png',
-  'Digital_Camo_Stealth.png',
-  'Doge_Camo.png',
-  'Gradient_Black.png',
-  'Gradient_Burn.png',
-  'Gradient_Cotton_Candy.png',
-  'Gradient_Green.png',
-  'Gradient_Purple_Burn.png',
-  'Gradient_Sunburst.png',
-  'Graffiti_back.png',
-  'Graffiti_green.png',
-  'Graffiti_orange.png',
-  'Grandmas_Sofa.png',
-  'Houndstooth.png',
-  'Leopard.png',
-  'Mika.png',
-  'Rc_prototype.png',
-  'Retro.png',
-  'Rudi.png',
-  'Rust.png',
-  'Valentine.png',
-  'Woody.png',
-  'Xmas_Camo.png',
-  'Xmas_Lights.png',
-  'Xray.png',
-];
+
+const OFFICIAL_EXAMPLE_FILES_BY_TEMPLATE = {
+  model3: MODEL_3_Y_OFFICIAL_EXAMPLE_FILES,
+  'model3-2024-base': MODEL_3_Y_OFFICIAL_EXAMPLE_FILES,
+  modely: MODEL_3_Y_OFFICIAL_EXAMPLE_FILES,
+  'modely-2025-base': MODEL_3_Y_OFFICIAL_EXAMPLE_FILES,
+  'modely-2025-premium': MODEL_3_Y_OFFICIAL_EXAMPLE_FILES,
+};
 const OFFICIAL_EXAMPLE_TITLE_MAP = {
   Acid_Drip: '酸液流光',
   Ani: '动漫拼贴',
   Apocalypse: '废土风暴',
   Avocado_Green: '牛油果绿',
   Camo: '迷彩图案',
-  Camo_Blue: '蓝色迷彩',
-  Camo_Brown: '棕色迷彩',
-  Camo_Green: '绿色迷彩',
-  Camo_Pink: '粉色迷彩',
-  Camo_Sand: '沙色迷彩',
-  Camo_Snow: '雪地迷彩',
-  Camo_Stealth: '隐形迷彩',
-  Clay: '陶土质感',
   Cosmic_Burst: '宇宙爆发',
-  Digital_Camo_Green: '数码绿迷彩',
-  Digital_Camo_Snow: '数码雪地迷彩',
-  Digital_Camo_Stealth: '数码隐形迷彩',
   Divide: '双色分割',
   Doge: '趣味狗狗',
-  Doge_Camo: '狗狗迷彩',
   Dot_Matrix: '点阵黑白',
-  Gradient_Black: '黑色渐变',
-  Gradient_Burn: '火焰渐变',
-  Gradient_Cotton_Candy: '糖果渐变',
-  Gradient_Green: '绿色渐变',
-  Gradient_Purple_Burn: '紫焰渐变',
-  Gradient_Sunburst: '日落渐变',
-  Graffiti_back: '涂鸦背板',
-  Graffiti_green: '绿色涂鸦',
-  Graffiti_orange: '橙色涂鸦',
-  Grandmas_Sofa: '复古沙发',
-  Houndstooth: '千鸟格',
   Ice_Cream: '冰淇淋色',
   Leopard: '豹纹',
-  Mika: '米卡涂装',
   Pixel_Art: '像素艺术',
-  Rc_prototype: '原型遥控',
   Reindeer: '驯鹿节日',
-  Retro: '复古条纹',
   Rudi: '鲁迪节日',
-  Rust: '锈蚀金属',
   Sakura: '樱花粉绘',
   Sketch: '手绘线稿',
   String_Lights: '节日灯串',
   Valentine: '情人节',
   Vintage_Gradient: '复古渐变',
   Vintage_Stripes: '复古彩条',
-  Woody: '木纹旅行',
-  Xmas_Camo: '圣诞迷彩',
-  Xmas_Lights: '圣诞灯光',
-  Xray: '透视蓝图',
 };
 
 export function getTeslaTemplateById(id) {
@@ -160,7 +92,7 @@ export function getTeslaTemplateById(id) {
 }
 
 function getOfficialExampleFilesForTemplate(templateId) {
-  return templateId === 'cybertruck' ? CYBERTRUCK_OFFICIAL_EXAMPLE_FILES : COMMON_OFFICIAL_EXAMPLE_FILES;
+  return OFFICIAL_EXAMPLE_FILES_BY_TEMPLATE[templateId] || [];
 }
 
 function getOfficialExampleTitle(fileName) {

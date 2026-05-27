@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 async function runTest(name, fn) {
@@ -18,41 +19,29 @@ async function loadLogicModule() {
 await runTest('tsl skin exposes official Tesla template catalog', async () => {
   const { TESLA_MODEL_TEMPLATES, getTeslaTemplateById } = await loadLogicModule();
 
-  assert.equal(TESLA_MODEL_TEMPLATES.length, 12);
+  assert.equal(TESLA_MODEL_TEMPLATES.length, 5);
   assert.deepEqual(
     TESLA_MODEL_TEMPLATES.map((template) => template.id),
     [
-      'cybertruck',
       'model3',
       'model3-2024-base',
-      'model3-2024-performance',
-      'models-2021',
-      'models-2025-plaid',
-      'modelx-2021',
       'modely',
       'modely-2025-base',
       'modely-2025-premium',
-      'modely-2025-performance',
-      'modely-l',
     ],
   );
   assert.deepEqual(
     TESLA_MODEL_TEMPLATES.map((template) => template.label),
     [
-      'Cybertruck',
       'Model 3（2024前）',
       'Model 3（2024+）标准/长续航',
-      'Model 3（2024+）性能版',
-      'Model S（2021以后）',
-      'Model S Plaid（2025以后）',
-      'Model X（2021以后）',
       'Model Y（2025前）',
       'Model Y（2025+）标准版',
       'Model Y（2025+）长续航',
-      'Model Y（2025+）性能版',
-      'Model Y L（中国）',
     ],
   );
+  assert.ok(TESLA_MODEL_TEMPLATES.every((template) => /^model[3y]/.test(template.id)));
+  assert.ok(!TESLA_MODEL_TEMPLATES.some((template) => /cybertruck|models|modelx/i.test(template.id)));
 
   const premium = getTeslaTemplateById('modely-2025-premium');
   assert.equal(premium.label, 'Model Y（2025+）长续航');
@@ -74,15 +63,13 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
     'https://raw.githubusercontent.com/GewoonJaap/custom-tesla-wraps/master/modely-2025-premium/vehicle.mtl',
   );
 
-  const modelS = getTeslaTemplateById('models-2021');
-  assert.equal(modelS.label, 'Model S（2021以后）');
+  const oldModel3 = getTeslaTemplateById('model3');
+  assert.equal(oldModel3.label, 'Model 3（2024前）');
   assert.equal(
-    modelS.templateUrl,
-    'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/models-2021/template.png',
+    oldModel3.templateUrl,
+    'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/model3/template.png',
   );
-  assert.equal(modelS.previewModelUrl, 'https://teslawrapgallery.com/tesla_3d_models/ModelS_2021.glb');
-  assert.equal(modelS.previewObjUrl, null);
-  assert.equal(modelS.previewMtlUrl, null);
+  assert.equal(oldModel3.previewModelUrl, 'https://teslawrapgallery.com/tesla_3d_models/Model3_High.gltf');
 });
 
 await runTest('tsl skin exposes official GitHub example wraps for galleries', async () => {
@@ -112,10 +99,27 @@ await runTest('tsl skin exposes official GitHub example wraps for galleries', as
   );
   assert.ok(examples.some((item) => item.fileName === 'Sakura.png' && item.title === '樱花粉绘'));
   assert.equal(examples[0].sourceLabel, '特斯拉官方示例');
-  assert.equal(examples[0].fileName, 'Cosmic_Burst.png');
+  assert.equal(examples[0].fileName, 'Acid_Drip.png');
 
-  const cybertruckExamples = getOfficialExampleWrapsForTemplate('cybertruck');
-  assert.ok(cybertruckExamples.length > examples.length);
+  const model3Examples = getOfficialExampleWrapsForTemplate('model3');
+  assert.equal(model3Examples.length, 20);
+  assert.ok(model3Examples.every((item) => item.modelIds.length === 1 && item.modelIds[0] === 'model3'));
+  assert.ok(
+    model3Examples.every((item) =>
+      item.imageUrl.startsWith('https://raw.githubusercontent.com/teslamotors/custom-wraps/master/model3/example/'),
+    ),
+  );
+
+  const legacyUnsupportedExamples = getOfficialExampleWrapsForTemplate('cybertruck');
+  assert.ok(legacyUnsupportedExamples.every((item) => item.modelIds.includes('model3')));
+});
+
+await runTest('tsl skin logic keeps examples mapped per supported model only', async () => {
+  const logicSource = fs.readFileSync('components/tslSkinLogic.js', 'utf8');
+
+  assert.match(logicSource, /OFFICIAL_EXAMPLE_FILES_BY_TEMPLATE/);
+  assert.doesNotMatch(logicSource, /COMMON_OFFICIAL_EXAMPLE_FILES|CYBERTRUCK_OFFICIAL_EXAMPLE_FILES/);
+  assert.doesNotMatch(logicSource, /Cybertruck|models-2021|models-2025-plaid|modelx-2021|ModelS_|ModelX_/);
 });
 
 await runTest('tsl skin creates centered layers and export filenames', async () => {

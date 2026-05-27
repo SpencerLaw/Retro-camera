@@ -99,97 +99,6 @@ const BASE_PAINT_COLOR = new THREE.Color(0xc4c4c4);
 const OBJ_PAINT_MATERIAL_NAMES = ['CarPaint', 'CarPaint.001'];
 const MODEL_LOAD_TIMEOUT_MS = 12000;
 
-const MODEL_OPENING_ROTATION = new Map<string, number>([
-  ['ModelS_2021.glb', 0],
-  ['ModelS_Plaid_2025.glb', 0],
-  ['ModelX_2021.glb', 0],
-]);
-
-const MODEL_OFFSETS = new Map<string, THREE.Vector3>([
-  ['ModelS_2021.glb', new THREE.Vector3(-1.8, -0.3, 0)],
-  ['ModelS_Plaid_2025.glb', new THREE.Vector3(-1.8, -0.3, 0)],
-  ['ModelX_2021.glb', new THREE.Vector3(-1.35, -1.2, 0)],
-]);
-
-const SX_UV0_ALLOWLIST = new Map<string, Set<string>>([
-  ['ModelS_2021.glb', new Set(['mesh_9_1', 'Hood_Hinge_1', 'Hood_Hinge_2'])],
-  ['ModelS_Plaid_2025.glb', new Set(['mesh_9_1', 'Hood_Hinge_1', 'Hood_Hinge_2'])],
-  ['ModelX_2021.glb', new Set(['mesh_7_1', 'mesh_8_1', 'Hood_Hinge_1', 'Hood_Hinge_2'])],
-]);
-
-const FORCE_BLACK_TRIM = new Map<string, Set<string>>([
-  [
-    'ModelS_2021.glb',
-    new Set([
-      'mesh_0',
-      'mesh_0_2',
-      'mesh_0_3',
-      'mesh_24_3',
-      'mesh_30_1',
-      'mesh_35_3',
-      'mesh_41_1',
-      'mesh_46',
-      'mesh_47',
-      'mesh_48',
-      'mesh_49_1',
-      'mesh_125_2',
-      'mesh_125_3',
-      'mesh_128_2',
-      'mesh_128_3',
-      'mesh_128_4',
-    ]),
-  ],
-  [
-    'ModelS_Plaid_2025.glb',
-    new Set([
-      'mesh_0',
-      'mesh_0_2',
-      'mesh_0_3',
-      'mesh_24_3',
-      'mesh_30_1',
-      'mesh_35_3',
-      'mesh_41_1',
-      'mesh_46',
-      'mesh_47',
-      'mesh_48',
-      'mesh_49_1',
-      'mesh_125_2',
-      'mesh_125_3',
-      'mesh_128_2',
-      'mesh_128_3',
-      'mesh_128_4',
-    ]),
-  ],
-  [
-    'ModelX_2021.glb',
-    new Set([
-      'mesh_0_2',
-      'mesh_0_5',
-      'mesh_23_1',
-      'mesh_30_1',
-      'mesh_37_1',
-      'mesh_45_1',
-      'mesh_126',
-      'mesh_126_1',
-      'mesh_126_2',
-      'mesh_129_1',
-      'mesh_129_2',
-    ]),
-  ],
-]);
-
-function getModelFileName(modelUrl?: string | null) {
-  if (!modelUrl) {
-    return '';
-  }
-
-  try {
-    return decodeURIComponent(new URL(modelUrl).pathname.split('/').pop() || '');
-  } catch {
-    return modelUrl.split('/').pop() || '';
-  }
-}
-
 function materialName(mesh: THREE.Mesh) {
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   return materials.map((material) => material?.name || '').join(' ').toLowerCase();
@@ -280,28 +189,8 @@ function makeGlassMaterial() {
   });
 }
 
-function copyUvToUv1(mesh: THREE.Mesh) {
-  if (!mesh.geometry?.attributes?.uv) {
-    return false;
-  }
-
-  const geometry = mesh.geometry.clone();
-  const uv = geometry.attributes.uv;
-  geometry.setAttribute('uv1', new THREE.BufferAttribute(uv.array.slice(0), uv.itemSize, uv.normalized));
-  mesh.geometry = geometry;
-  return true;
-}
-
-function hasUsableWrapUv(mesh: THREE.Mesh, modelFile: string) {
-  if (mesh.geometry?.attributes?.uv1) {
-    return hasTemplateUvRange(mesh);
-  }
-
-  if (SX_UV0_ALLOWLIST.get(modelFile)?.has(mesh.name)) {
-    return copyUvToUv1(mesh) && hasTemplateUvRange(mesh);
-  }
-
-  return false;
+function hasUsableWrapUv(mesh: THREE.Mesh) {
+  return Boolean(mesh.geometry?.attributes?.uv1) && hasTemplateUvRange(mesh);
 }
 
 function hasTemplateUvRange(mesh: THREE.Mesh) {
@@ -334,16 +223,9 @@ function shouldHideMesh(mesh: THREE.Mesh) {
   return includesAny(value, HIDDEN_HELPER_HINTS);
 }
 
-function shouldUsePlaidFascia(modelFile: string) {
-  return modelFile === 'ModelS_Plaid_2025.glb' || modelFile === 'ModelX_2021.glb';
-}
-
-function isInactiveFascia(mesh: THREE.Mesh, modelFile: string) {
+function isInactiveFascia(mesh: THREE.Mesh) {
   const parent = parentName(mesh);
-  const plaid = shouldUsePlaidFascia(modelFile);
-  return plaid
-    ? parent === 'fascia_front' || parent === 'fascia_rear'
-    : parent === 'fascia_front_p3' || parent === 'fascia_rear_p3';
+  return parent === 'fascia_front_p3' || parent === 'fascia_rear_p3';
 }
 
 function shouldKeepAsChrome(mesh: THREE.Mesh) {
@@ -432,7 +314,7 @@ function fitVehicleGroup(
   return finalBox;
 }
 
-function prepareVehicleModel(source: THREE.Group, modelFile: string): PreparedModel {
+function prepareVehicleModel(source: THREE.Group): PreparedModel {
   const group = source;
   const paintMeshes: THREE.Mesh[] = [];
   const paintTargets: MaterialTarget[] = [];
@@ -448,7 +330,7 @@ function prepareVehicleModel(source: THREE.Group, modelFile: string): PreparedMo
     mesh.castShadow = true;
     mesh.receiveShadow = true;
 
-    if (isInactiveFascia(mesh, modelFile) || shouldHideMesh(mesh)) {
+    if (isInactiveFascia(mesh) || shouldHideMesh(mesh)) {
       mesh.visible = false;
       return;
     }
@@ -475,17 +357,11 @@ function prepareVehicleModel(source: THREE.Group, modelFile: string): PreparedMo
       }
 
       if (isPaintMaterialSlot(slot, mesh)) {
-        if (FORCE_BLACK_TRIM.get(modelFile)?.has(mesh.name)) {
-          assignTargetMaterial(target, makeBlackTrimMaterial());
-          trimTargets.push(target);
-          return;
-        }
-
         assignTargetMaterial(target, makePaintMaterial(BASE_PAINT_COLOR));
         paintTargets.push(target);
         pushUniqueMesh(paintMeshes, mesh);
 
-        if (hasUsableWrapUv(target.mesh, modelFile)) {
+        if (hasUsableWrapUv(target.mesh)) {
           wrapTargets.push(target);
         }
         return;
@@ -500,8 +376,7 @@ function prepareVehicleModel(source: THREE.Group, modelFile: string): PreparedMo
   const finalBox = fitVehicleGroup(
     group,
     paintMeshes,
-    MODEL_OPENING_ROTATION.get(modelFile) ?? Math.PI,
-    MODEL_OFFSETS.get(modelFile),
+    Math.PI,
   );
 
   return { group, paintMeshes, paintTargets, wrapTargets, trimTargets, box: finalBox, mode: 'gltf' };
@@ -834,8 +709,7 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
             return;
           }
 
-          const modelFile = getModelFileName(modelUrl);
-          activatePreparedModel(prepareVehicleModel(gltf.scene, modelFile));
+          activatePreparedModel(prepareVehicleModel(gltf.scene));
         },
         undefined,
         () => {

@@ -5,6 +5,7 @@ const appSource = fs.readFileSync('App.tsx', 'utf8');
 const homeSource = fs.readFileSync('components/HomePage.tsx', 'utf8');
 const componentFileExists = fs.existsSync('components/TslSkinApp.tsx');
 const componentSource = componentFileExists ? fs.readFileSync('components/TslSkinApp.tsx', 'utf8') : '';
+const logicSource = fs.readFileSync('components/tslSkinLogic.js', 'utf8');
 const packageSource = fs.readFileSync('package.json', 'utf8');
 const vehicle3DFileExists = fs.existsSync('components/TslVehicle3DPreview.tsx');
 const vehicle3DSource = vehicle3DFileExists ? fs.readFileSync('components/TslVehicle3DPreview.tsx', 'utf8') : '';
@@ -38,6 +39,17 @@ runTest('tsl skin page includes canvas editor controls', () => {
   assert.match(componentSource, /deleteLayer/);
   assert.match(componentSource, /原创或已授权素材/);
   assert.match(componentSource, /图片仅在你的浏览器本地处理，不会上传服务器/);
+});
+
+runTest('tsl skin page only offers stable Model 3 and Model Y variants', () => {
+  assert.match(logicSource, /modely-2025-premium/);
+  assert.match(logicSource, /Model 3（2024前）/);
+  assert.match(logicSource, /Model 3（2024\+）标准\/长续航/);
+  assert.match(logicSource, /Model Y（2025前）/);
+  assert.match(logicSource, /Model Y（2025\+）标准版/);
+  assert.match(logicSource, /Model Y（2025\+）长续航/);
+  assert.doesNotMatch(logicSource, /Cybertruck|Model S|Model X|性能版|Model Y L/);
+  assert.doesNotMatch(vehicle3DSource, /ModelS_|ModelX_|Cybertruck|SX_UV0_ALLOWLIST|FORCE_BLACK_TRIM/);
 });
 
 runTest('tsl skin page uses a gallery-first 3d workbench layout', () => {

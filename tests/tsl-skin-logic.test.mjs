@@ -36,9 +36,26 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
       'modely-l',
     ],
   );
+  assert.deepEqual(
+    TESLA_MODEL_TEMPLATES.map((template) => template.label),
+    [
+      'Cybertruck',
+      'Model 3（2024前）',
+      'Model 3（2024+）标准/长续航',
+      'Model 3（2024+）性能版',
+      'Model S（2021以后）',
+      'Model S Plaid（2025以后）',
+      'Model X（2021以后）',
+      'Model Y（2025前）',
+      'Model Y（2025+）标准版',
+      'Model Y（2025+）长续航',
+      'Model Y（2025+）性能版',
+      'Model Y L（中国）',
+    ],
+  );
 
   const premium = getTeslaTemplateById('modely-2025-premium');
-  assert.equal(premium.label, 'Y 型车 2025 高级版');
+  assert.equal(premium.label, 'Model Y（2025+）长续航');
   assert.equal(
     premium.templateUrl,
     'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/modely-2025-premium/template.png',
@@ -58,7 +75,7 @@ await runTest('tsl skin exposes official Tesla template catalog', async () => {
   );
 
   const modelS = getTeslaTemplateById('models-2021');
-  assert.equal(modelS.label, 'S 型车 2021 以后');
+  assert.equal(modelS.label, 'Model S（2021以后）');
   assert.equal(
     modelS.templateUrl,
     'https://raw.githubusercontent.com/teslamotors/custom-wraps/master/models-2021/template.png',
@@ -115,8 +132,8 @@ await runTest('tsl skin creates centered layers and export filenames', async () 
   assert.equal(layer.clipMode, 'body');
 
   assert.equal(
-    buildTslSkinFileName('Y 型车 2025 高级版', 1777777777000),
-    'tsl-skin-y-2025-1777777777000.png',
+    buildTslSkinFileName('Model Y（2025+）长续航', 1777777777000),
+    'tsl-skin-model-y-2025-1777777777000.png',
   );
 });
 

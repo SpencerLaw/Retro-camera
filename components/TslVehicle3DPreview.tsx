@@ -97,6 +97,7 @@ const HIDDEN_HELPER_HINTS = [
 ];
 const BASE_PAINT_COLOR = new THREE.Color(0xc4c4c4);
 const OBJ_PAINT_MATERIAL_NAMES = ['CarPaint', 'CarPaint.001'];
+const MODEL_LOAD_TIMEOUT_MS = 12000;
 
 const MODEL_OPENING_ROTATION = new Map<string, number>([
   ['ModelS_2021.glb', 0],
@@ -240,8 +241,9 @@ function includesAny(value: string, hints: string[]) {
 function makePaintMaterial(color: THREE.Color | string) {
   return new THREE.MeshStandardMaterial({
     color,
-    metalness: 0.08,
-    roughness: 0.5,
+    metalness: 0.12,
+    roughness: 0.38,
+    envMapIntensity: 1.2,
   });
 }
 
@@ -250,8 +252,8 @@ function makeObjPaintMaterial(color: THREE.Color | string, texture?: THREE.Textu
     color: texture ? 0xffffff : color,
     map: texture || null,
     metalness: 0.12,
-    roughness: 0.38,
-    envMapIntensity: 1,
+    roughness: 0.34,
+    envMapIntensity: 1.35,
     side: THREE.DoubleSide,
   });
 }
@@ -570,8 +572,9 @@ function fitCameraToModel(camera: THREE.PerspectiveCamera, controls: OrbitContro
 
 function makeWrapMaterial(texture: THREE.Texture) {
   const material = new THREE.MeshStandardMaterial({
-    metalness: 0.08,
-    roughness: 0.5,
+    metalness: 0.1,
+    roughness: 0.4,
+    envMapIntensity: 1.25,
   });
 
   material.onBeforeCompile = (shader) => {
@@ -656,6 +659,8 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
 
     let cancelled = false;
     let frameId = 0;
+    let activeLoadToken = 0;
+    let loadTimeoutId: number | null = null;
     let preparedModel: PreparedModel | null = null;
     let dracoLoader: DRACOLoader | null = null;
     setLoadState('loading');
@@ -664,11 +669,15 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
     scene.background = new THREE.Color(isDayMode ? '#e5e7eb' : '#101827');
 
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance',
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.5;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.domElement.style.display = 'block';
@@ -721,6 +730,10 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
     resizeObserver.observe(mount);
 
     const activatePreparedModel = (nextPreparedModel: PreparedModel) => {
+      if (loadTimeoutId !== null) {
+        window.clearTimeout(loadTimeoutId);
+        loadTimeoutId = null;
+      }
       preparedModel = nextPreparedModel;
       scene.add(preparedModel.group);
       wrapTargetsRef.current = preparedModel.wrapTargets;
@@ -732,47 +745,49 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
       setLoadState('ready');
     };
 
-    const loadGltfPreview = () => {
-      if (!modelUrl) {
-        if (!cancelled) {
-          setLoadState('fallback');
+    const beginTimedLoad = (onTimeout: () => void) => {
+      activeLoadToken += 1;
+      const token = activeLoadToken;
+      if (loadTimeoutId !== null) {
+        window.clearTimeout(loadTimeoutId);
+      }
+      loadTimeoutId = window.setTimeout(() => {
+        if (!cancelled && !preparedModel && token === activeLoadToken) {
+          onTimeout();
         }
+      }, MODEL_LOAD_TIMEOUT_MS);
+      return token;
+    };
+
+    const finishWithFallback = () => {
+      if (!cancelled && !preparedModel) {
+        activeLoadToken += 1;
+        if (loadTimeoutId !== null) {
+          window.clearTimeout(loadTimeoutId);
+          loadTimeoutId = null;
+        }
+        setLoadState('fallback');
+      }
+    };
+
+    const loadObjPreview = (onFail: () => void) => {
+      if (!hasObjPreview || !objModelUrl || !mtlModelUrl) {
+        onFail();
         return;
       }
 
-      const loader = new GLTFLoader();
-      loader.setCrossOrigin('anonymous');
-      dracoLoader = new DRACOLoader();
-      dracoLoader.setDecoderPath('/draco/');
-      loader.setDRACOLoader(dracoLoader);
-
-      loader.load(
-        modelUrl,
-        (gltf) => {
-          if (cancelled) {
-            disposeObject(gltf.scene);
-            return;
-          }
-
-          const modelFile = getModelFileName(modelUrl);
-          activatePreparedModel(prepareVehicleModel(gltf.scene, modelFile));
-        },
-        undefined,
-        () => {
-          if (!cancelled) {
-            setLoadState('fallback');
-          }
-        },
-      );
-    };
-
-    if (hasObjPreview && objModelUrl && mtlModelUrl) {
+      const token = beginTimedLoad(onFail);
+      const fail = () => {
+        if (!cancelled && token === activeLoadToken) {
+          onFail();
+        }
+      };
       const mtlLoader = new MTLLoader();
       mtlLoader.setCrossOrigin('anonymous');
       mtlLoader.load(
         mtlModelUrl,
         (materials) => {
-          if (cancelled) {
+          if (cancelled || token !== activeLoadToken) {
             return;
           }
 
@@ -782,7 +797,7 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
           objLoader.load(
             objModelUrl,
             (obj) => {
-              if (cancelled) {
+              if (cancelled || token !== activeLoadToken) {
                 disposeObject(obj);
                 return;
               }
@@ -790,14 +805,60 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
               activatePreparedModel(prepareObjVehicleModel(obj));
             },
             undefined,
-            loadGltfPreview,
+            fail,
           );
         },
         undefined,
-        loadGltfPreview,
+        fail,
       );
+    };
+
+    const loadGltfPreview = (onFail: () => void) => {
+      if (!modelUrl) {
+        onFail();
+        return;
+      }
+
+      const token = beginTimedLoad(onFail);
+      const loader = new GLTFLoader();
+      loader.setCrossOrigin('anonymous');
+      dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('/draco/');
+      loader.setDRACOLoader(dracoLoader);
+
+      loader.load(
+        modelUrl,
+        (gltf) => {
+          if (cancelled || token !== activeLoadToken) {
+            disposeObject(gltf.scene);
+            return;
+          }
+
+          const modelFile = getModelFileName(modelUrl);
+          activatePreparedModel(prepareVehicleModel(gltf.scene, modelFile));
+        },
+        undefined,
+        () => {
+          if (!cancelled && token === activeLoadToken) {
+            onFail();
+          }
+        },
+      );
+    };
+
+    if (modelUrl) {
+      loadGltfPreview(() => {
+        if (hasObjPreview) {
+          loadObjPreview(finishWithFallback);
+          return;
+        }
+
+        finishWithFallback();
+      });
+    } else if (hasObjPreview) {
+      loadObjPreview(finishWithFallback);
     } else {
-      loadGltfPreview();
+      finishWithFallback();
     }
 
     const render = () => {
@@ -809,6 +870,9 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
 
     return () => {
       cancelled = true;
+      if (loadTimeoutId !== null) {
+        window.clearTimeout(loadTimeoutId);
+      }
       cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
       controls.dispose();

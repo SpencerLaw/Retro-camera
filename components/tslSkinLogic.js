@@ -16,18 +16,18 @@ function createTeslaTemplate(id, label, previewModelFile = null, previewObjFolde
 }
 
 export const TESLA_MODEL_TEMPLATES = [
-  createTeslaTemplate('cybertruck', '赛博越野旅行车', 'Cybertruck.gltf'),
-  createTeslaTemplate('model3', '三型车', 'Model3_High.gltf'),
-  createTeslaTemplate('model3-2024-base', '三型车 2024 基础版', 'Poppyseed.gltf'),
-  createTeslaTemplate('model3-2024-performance', '三型车 2024 高性能版'),
-  createTeslaTemplate('models-2021', 'S 型车 2021 以后', 'ModelS_2021.glb', null),
-  createTeslaTemplate('models-2025-plaid', 'S 型 Plaid 2025 以后', 'ModelS_Plaid_2025.glb', null),
-  createTeslaTemplate('modelx-2021', 'X 型车 2021 以后', 'ModelX_2021.glb', null),
-  createTeslaTemplate('modely', 'Y 型车', 'ModelY_High.gltf'),
-  createTeslaTemplate('modely-2025-base', 'Y 型车 2025 基础版', 'BayberryE41.gltf'),
-  createTeslaTemplate('modely-2025-premium', 'Y 型车 2025 高级版', 'Bayberry.gltf'),
-  createTeslaTemplate('modely-2025-performance', 'Y 型车 2025 高性能版'),
-  createTeslaTemplate('modely-l', 'Y 型长轴版'),
+  createTeslaTemplate('cybertruck', 'Cybertruck', 'Cybertruck.gltf'),
+  createTeslaTemplate('model3', 'Model 3（2024前）', 'Model3_High.gltf'),
+  createTeslaTemplate('model3-2024-base', 'Model 3（2024+）标准/长续航', 'Poppyseed.gltf'),
+  createTeslaTemplate('model3-2024-performance', 'Model 3（2024+）性能版'),
+  createTeslaTemplate('models-2021', 'Model S（2021以后）', 'ModelS_2021.glb', null),
+  createTeslaTemplate('models-2025-plaid', 'Model S Plaid（2025以后）', 'ModelS_Plaid_2025.glb', null),
+  createTeslaTemplate('modelx-2021', 'Model X（2021以后）', 'ModelX_2021.glb', null),
+  createTeslaTemplate('modely', 'Model Y（2025前）', 'ModelY_High.gltf'),
+  createTeslaTemplate('modely-2025-base', 'Model Y（2025+）标准版', 'BayberryE41.gltf'),
+  createTeslaTemplate('modely-2025-premium', 'Model Y（2025+）长续航', 'Bayberry.gltf'),
+  createTeslaTemplate('modely-2025-performance', 'Model Y（2025+）性能版'),
+  createTeslaTemplate('modely-l', 'Model Y L（中国）'),
 ];
 
 const MODEL_Y_2025_IDS = ['modely-2025-base', 'modely-2025-premium', 'modely-2025-performance'];

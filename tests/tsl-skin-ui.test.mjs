@@ -92,9 +92,19 @@ runTest('tsl skin 3d preview updates only paint material slots', () => {
 });
 
 runTest('tsl skin 3d preview uses clear non-mirrored paint materials', () => {
-  assert.match(vehicle3DSource, /metalness: 0\.08/);
-  assert.match(vehicle3DSource, /roughness: 0\.5/);
+  assert.match(vehicle3DSource, /metalness: 0\.12/);
+  assert.match(vehicle3DSource, /roughness: 0\.38/);
+  assert.match(vehicle3DSource, /envMapIntensity: 1\.2/);
   assert.match(vehicle3DSource, /HemisphereLight/);
+});
+
+runTest('tsl skin 3d preview prioritizes reference-quality gltf models and has a stable fallback path', () => {
+  assert.match(vehicle3DSource, /MODEL_LOAD_TIMEOUT_MS/);
+  assert.match(vehicle3DSource, /PCFShadowMap/);
+  assert.match(vehicle3DSource, /loadGltfPreview\(\(\) =>/);
+  assert.match(vehicle3DSource, /loadObjPreview\(finishWithFallback\)/);
+  assert.match(vehicle3DSource, /if \(modelUrl\)/);
+  assert.doesNotMatch(vehicle3DSource, /if \(hasObjPreview && objModelUrl && mtlModelUrl\) \{/);
 });
 
 runTest('tsl skin page keeps the download workflow uncluttered', () => {

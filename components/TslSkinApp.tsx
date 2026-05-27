@@ -609,8 +609,8 @@ const TslSkinApp: React.FC = () => {
   };
 
   const rootClassName = isDayMode
-    ? 'tsl-skin-shell min-h-screen overflow-x-hidden bg-[#f4f4f4] text-slate-950'
-    : 'tsl-skin-shell min-h-screen overflow-x-hidden bg-[#0b0f16] text-slate-100';
+    ? 'tsl-skin-shell min-h-screen w-full max-w-full overflow-x-hidden bg-[#f4f4f4] text-slate-950'
+    : 'tsl-skin-shell min-h-screen w-full max-w-full overflow-x-hidden bg-[#0b0f16] text-slate-100';
   const sidebarClassName = isDayMode
     ? 'border-slate-200 bg-white text-slate-950'
     : 'border-white/10 bg-slate-950 text-slate-100';
@@ -624,8 +624,8 @@ const TslSkinApp: React.FC = () => {
 
   return (
     <div className={rootClassName}>
-      <main className="tsl-skin-studio-workbench grid min-h-screen lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className={`tsl-skin-sidebar flex flex-col border-r lg:max-h-screen ${sidebarClassName}`}>
+      <main className="tsl-skin-studio-workbench grid min-h-screen w-full max-w-full overflow-x-hidden lg:h-screen lg:overflow-hidden lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className={`tsl-skin-sidebar min-w-0 flex flex-col border-r lg:h-screen lg:max-h-screen ${sidebarClassName}`}>
           <div className="border-b border-inherit p-3">
             <div className="flex items-center justify-between gap-3">
               <Link
@@ -1013,7 +1013,7 @@ const TslSkinApp: React.FC = () => {
           </section>
         </aside>
 
-        <section className={`tsl-skin-render-stage relative min-h-[580px] overflow-hidden lg:min-h-screen ${isDayMode ? 'bg-[#e5e7eb]' : 'bg-slate-900'}`}>
+        <section className={`tsl-skin-render-stage relative min-h-[580px] min-w-0 overflow-hidden lg:min-h-screen ${isDayMode ? 'bg-[#e5e7eb]' : 'bg-slate-900'}`}>
           <TslVehicle3DPreview
             wrapColor={wrapColor}
             wrapImageUrl={previewWrapUrl}

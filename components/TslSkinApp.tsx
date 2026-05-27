@@ -52,8 +52,16 @@ type OfficialWrapExample = {
   title: string;
   fileName: string;
   imageUrl: string;
+  downloadUrl?: string;
   modelIds: string[];
   sourceLabel: string;
+  sourceName?: string;
+  sourcePageUrl?: string;
+  isRemote?: boolean;
+  riskTags?: string[];
+  tags?: string[];
+  downloads?: number;
+  author?: string;
 };
 
 type WorkspaceMode = 'download' | 'design';
@@ -68,6 +76,10 @@ type DragState = {
 
 const PRESET_COLORS = ['#ffffff', '#111827', '#e82127', '#3e6ae1', '#14b8a6', '#fbbf24', '#f5d0fe', '#cbd5e1'];
 const HANDLE_SIZE = 12;
+
+function formatRiskTags(riskTags?: string[]) {
+  return riskTags?.length ? riskTags.join('、') : '疑似风险素材';
+}
 
 function generateBodyMask(image: HTMLImageElement) {
   const width = image.naturalWidth || image.width || 1024;
@@ -197,6 +209,9 @@ const TslSkinApp: React.FC = () => {
   const [isDayMode, setIsDayMode] = React.useState(true);
   const [status, setStatus] = React.useState('选择皮肤后可直接预览，也可以上传图片自己设计。');
   const [searchWrapQuery, setSearchWrapQuery] = React.useState('');
+  const [remoteFreeWraps, setRemoteFreeWraps] = React.useState<OfficialWrapExample[]>([]);
+  const [remoteIndexStatus, setRemoteIndexStatus] = React.useState('正在加载远程免费索引...');
+  const [showRiskWraps, setShowRiskWraps] = React.useState(false);
   const [selectedPreviewWrap, setSelectedPreviewWrap] = React.useState<OfficialWrapExample | null>(null);
   const [customPreviewUrl, setCustomPreviewUrl] = React.useState<string | null>(null);
   const [customRenderUrl, setCustomRenderUrl] = React.useState<string | null>(null);
@@ -207,7 +222,24 @@ const TslSkinApp: React.FC = () => {
     () => getOfficialExampleWrapsForTemplate(selectedTemplateId) as OfficialWrapExample[],
     [selectedTemplateId],
   );
-  const galleryItems = officialExamples;
+  const remoteExamples = React.useMemo(
+    () =>
+      remoteFreeWraps.filter((item) => {
+        const belongsToSelectedModel = item.modelIds.includes(selectedTemplateId);
+        const hasRisk = Boolean(item.riskTags?.length);
+        return belongsToSelectedModel && (showRiskWraps || !hasRisk);
+      }),
+    [remoteFreeWraps, selectedTemplateId, showRiskWraps],
+  );
+  const hiddenRiskCount = React.useMemo(
+    () =>
+      remoteFreeWraps.filter((item) => item.modelIds.includes(selectedTemplateId) && item.riskTags?.length).length,
+    [remoteFreeWraps, selectedTemplateId],
+  );
+  const galleryItems = React.useMemo(
+    () => [...officialExamples, ...remoteExamples],
+    [officialExamples, remoteExamples],
+  );
   const filteredGalleryItems = React.useMemo(() => {
     const query = searchWrapQuery.trim().toLowerCase();
     if (!query) {
@@ -215,7 +247,9 @@ const TslSkinApp: React.FC = () => {
     }
 
     return galleryItems.filter((item) =>
-      `${item.title} ${item.fileName} ${item.sourceLabel}`.toLowerCase().includes(query),
+      `${item.title} ${item.fileName} ${item.sourceLabel} ${item.author || ''} ${(item.tags || []).join(' ')} ${(item.riskTags || []).join(' ')}`
+        .toLowerCase()
+        .includes(query),
     );
   }, [galleryItems, searchWrapQuery]);
   const previewWrapUrl = customRenderUrl || customPreviewUrl || selectedPreviewWrap?.imageUrl || galleryItems[0]?.imageUrl || null;
@@ -243,6 +277,63 @@ const TslSkinApp: React.FC = () => {
       } else {
         root.style.removeProperty('--app-global-scale-inverse');
       }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const loadRemoteFreeIndex = async () => {
+      try {
+        const response = await fetch('/tsl-skins/free-wrap-index.json', { cache: 'no-cache' });
+        if (!response.ok) {
+          throw new Error('远程免费索引不存在');
+        }
+
+        const payload = await response.json();
+        const supportedModelIds = new Set(TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => template.id));
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        const nextRemoteWraps = items
+          .filter((item) =>
+            item?.isRemote === true &&
+            typeof item.imageUrl === 'string' &&
+            item.imageUrl.startsWith('https://') &&
+            Array.isArray(item.modelIds) &&
+            item.modelIds.some((modelId: string) => supportedModelIds.has(modelId)),
+          )
+          .map((item) => ({
+            id: String(item.id),
+            title: String(item.title || '远程免费皮肤'),
+            fileName: String(item.fileName || `${item.id || 'remote-wrap'}.png`),
+            imageUrl: String(item.imageUrl),
+            downloadUrl: String(item.downloadUrl || item.imageUrl),
+            modelIds: item.modelIds.filter((modelId: string) => supportedModelIds.has(modelId)),
+            sourceLabel: String(item.sourceLabel || '远程免费'),
+            sourceName: item.sourceName ? String(item.sourceName) : undefined,
+            sourcePageUrl: item.sourcePageUrl ? String(item.sourcePageUrl) : undefined,
+            isRemote: true,
+            riskTags: Array.isArray(item.riskTags) ? item.riskTags.map(String) : [],
+            tags: Array.isArray(item.tags) ? item.tags.map(String) : [],
+            downloads: Number(item.downloads || 0),
+            author: item.author ? String(item.author) : undefined,
+          }));
+
+        if (!cancelled) {
+          setRemoteFreeWraps(nextRemoteWraps);
+          setRemoteIndexStatus(`远程免费索引已加载 ${nextRemoteWraps.length} 款。`);
+        }
+      } catch {
+        if (!cancelled) {
+          setRemoteFreeWraps([]);
+          setRemoteIndexStatus('远程免费索引暂时不可用，可先使用官方示例。');
+        }
+      }
+    };
+
+    void loadRemoteFreeIndex();
+
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -467,7 +558,7 @@ const TslSkinApp: React.FC = () => {
   };
 
   const getWrapAssetBytes = async (example: OfficialWrapExample) => {
-    const response = await fetch(example.imageUrl);
+    const response = await fetch(example.downloadUrl || example.imageUrl);
     if (!response.ok) {
       throw new Error('皮肤文件下载失败。');
     }
@@ -488,7 +579,7 @@ const TslSkinApp: React.FC = () => {
       setStatus(`${example.title} 下载已开始。`);
     } catch {
       const link = document.createElement('a');
-      link.href = example.imageUrl;
+      link.href = example.downloadUrl || example.imageUrl;
       link.download = example.fileName || buildTslSkinFileName(selectedTemplate.label);
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
@@ -708,6 +799,29 @@ const TslSkinApp: React.FC = () => {
                   }`}
                 />
               </label>
+              <div className={`mt-3 rounded-md border p-3 text-xs leading-5 ${subtlePanelClassName}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-black">远程免费索引</div>
+                    <div className={`mt-1 font-bold ${mutedTextClassName}`}>
+                      {remoteIndexStatus} 只保存来源链接，图片不会占用本站存储。
+                    </div>
+                  </div>
+                  <label className="flex shrink-0 cursor-pointer items-center gap-2 font-black">
+                    <input
+                      type="checkbox"
+                      checked={showRiskWraps}
+                      onChange={(event) => setShowRiskWraps(event.target.checked)}
+                    />
+                    显示风险素材
+                  </label>
+                </div>
+                {!showRiskWraps && hiddenRiskCount > 0 && (
+                  <div className="mt-2 font-bold text-amber-600">
+                    已隐藏 {hiddenRiskCount} 款疑似角色/IP或品牌素材。
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-3">
@@ -743,6 +857,14 @@ const TslSkinApp: React.FC = () => {
                         className="h-full w-full object-contain p-1"
                         loading="lazy"
                       />
+                      <span className="absolute left-1.5 top-1.5 max-w-[calc(100%-12px)] truncate rounded-full bg-white/90 px-1.5 py-0.5 text-[9px] font-black text-slate-700 shadow-sm">
+                        {example.sourceLabel}
+                      </span>
+                      {Boolean(example.riskTags?.length) && (
+                        <span className="absolute right-1.5 top-7 max-w-[calc(100%-12px)] truncate rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-black text-amber-700 shadow-sm">
+                          {formatRiskTags(example.riskTags)}
+                        </span>
+                      )}
                       <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-1.5 py-1 text-center text-[10px] font-black text-white">
                         {example.title}
                       </span>

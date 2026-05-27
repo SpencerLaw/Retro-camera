@@ -174,6 +174,18 @@ runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.doesNotMatch(componentSource, /适配车型|立即预览|addOfficialExampleLayer/);
 });
 
+runTest('tsl skin download mode reads a local remote-free index without live third-party calls', () => {
+  assert.match(componentSource, /\/tsl-skins\/free-wrap-index\.json/);
+  assert.match(componentSource, /remoteFreeWraps/);
+  assert.match(componentSource, /showRiskWraps/);
+  assert.match(componentSource, /远程免费/);
+  assert.match(componentSource, /显示风险素材/);
+  assert.match(componentSource, /已隐藏/);
+  assert.match(componentSource, /疑似角色\/IP/);
+  assert.match(componentSource, /formatRiskTags/);
+  assert.doesNotMatch(componentSource, /tesla\.timor419\.com|tesla-wrap\.mrproper\.dev|gwhjdgbjcqbhhdwzrijk|\/api\/wrap/);
+});
+
 runTest('tsl skin page removes external source clutter from the UI', () => {
   assert.doesNotMatch(componentSource, /EXTERNAL_WRAP_SOURCES/);
   assert.doesNotMatch(componentSource, /免费资源站/);

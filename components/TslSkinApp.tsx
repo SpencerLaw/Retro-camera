@@ -2,8 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
+  Car,
   Download,
   FlipHorizontal,
+  Folder,
   Layers,
   Palette,
   RefreshCcw,
@@ -58,13 +60,19 @@ type OfficialWrapExample = {
   sourceName?: string;
   sourcePageUrl?: string;
   isRemote?: boolean;
+  isLocal?: boolean;
+  originalImageUrl?: string;
+  originalDownloadUrl?: string;
   riskTags?: string[];
   tags?: string[];
   downloads?: number;
+  likes?: number;
   author?: string;
+  createdAt?: string;
 };
 
 type WorkspaceMode = 'download' | 'design';
+type GallerySortMode = 'newest' | 'popular';
 
 type DragState = {
   layerId: string;
@@ -76,9 +84,23 @@ type DragState = {
 
 const PRESET_COLORS = ['#ffffff', '#111827', '#e82127', '#3e6ae1', '#14b8a6', '#fbbf24', '#f5d0fe', '#cbd5e1'];
 const HANDLE_SIZE = 12;
+const FLOW_STEPS = [
+  { id: 'download', title: '下载贴纸', detail: '选择车型与喜欢的图案', icon: Download },
+  { id: 'folder', title: '复制到 U 盘', detail: '放入根目录 Wraps 文件夹', icon: Folder },
+  { id: 'setup', title: '车机设置', detail: 'Toybox 里打开 Paint Shop', icon: Car },
+];
 
 function formatRiskTags(riskTags?: string[]) {
   return riskTags?.length ? riskTags.join('、') : '疑似风险素材';
+}
+
+function getGalleryTimestamp(item: OfficialWrapExample) {
+  const time = new Date(item.createdAt || '').getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
+function getGalleryPopularity(item: OfficialWrapExample) {
+  return Number(item.downloads || 0) + Number(item.likes || 0) * 3;
 }
 
 function generateBodyMask(image: HTMLImageElement) {
@@ -209,10 +231,13 @@ const TslSkinApp: React.FC = () => {
   const [isDayMode, setIsDayMode] = React.useState(true);
   const [status, setStatus] = React.useState('选择皮肤后可直接预览，也可以上传图片自己设计。');
   const [searchWrapQuery, setSearchWrapQuery] = React.useState('');
+  const [selectedWrapTag, setSelectedWrapTag] = React.useState('');
+  const [gallerySort, setGallerySort] = React.useState<GallerySortMode>('popular');
   const [remoteFreeWraps, setRemoteFreeWraps] = React.useState<OfficialWrapExample[]>([]);
-  const [remoteIndexStatus, setRemoteIndexStatus] = React.useState('正在加载远程免费索引...');
-  const [showRiskWraps, setShowRiskWraps] = React.useState(false);
+  const [remoteIndexStatus, setRemoteIndexStatus] = React.useState('正在加载本地皮肤库...');
+  const [showRiskWraps, setShowRiskWraps] = React.useState(true);
   const [selectedPreviewWrap, setSelectedPreviewWrap] = React.useState<OfficialWrapExample | null>(null);
+  const [previewPinned, setPreviewPinned] = React.useState(false);
   const [customPreviewUrl, setCustomPreviewUrl] = React.useState<string | null>(null);
   const [customRenderUrl, setCustomRenderUrl] = React.useState<string | null>(null);
 
@@ -240,22 +265,45 @@ const TslSkinApp: React.FC = () => {
     () => [...officialExamples, ...remoteExamples],
     [officialExamples, remoteExamples],
   );
+  const galleryTags = React.useMemo(
+    () =>
+      [...new Set(galleryItems.flatMap((item) => item.tags || []))]
+        .map((tag) => String(tag).trim())
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN')),
+    [galleryItems],
+  );
+  const galleryStats = React.useMemo(
+    () => ({
+      total: galleryItems.length,
+      downloads: galleryItems.reduce((total, item) => total + Number(item.downloads || 0), 0),
+    }),
+    [galleryItems],
+  );
   const filteredGalleryItems = React.useMemo(() => {
     const query = searchWrapQuery.trim().toLowerCase();
-    if (!query) {
-      return galleryItems;
-    }
+    const tag = selectedWrapTag.trim().toLowerCase();
+    const filtered = galleryItems.filter((item) => {
+      const searchText =
+        `${item.title} ${item.fileName} ${item.sourceLabel} ${item.author || ''} ${(item.tags || []).join(' ')} ${(item.riskTags || []).join(' ')}`
+          .toLowerCase();
+      const matchesQuery = !query || searchText.includes(query);
+      const matchesTag = !tag || (item.tags || []).some((itemTag) => String(itemTag).toLowerCase() === tag);
+      return matchesQuery && matchesTag;
+    });
 
-    return galleryItems.filter((item) =>
-      `${item.title} ${item.fileName} ${item.sourceLabel} ${item.author || ''} ${(item.tags || []).join(' ')} ${(item.riskTags || []).join(' ')}`
-        .toLowerCase()
-        .includes(query),
-    );
-  }, [galleryItems, searchWrapQuery]);
-  const previewWrapUrl = customRenderUrl || customPreviewUrl || selectedPreviewWrap?.imageUrl || galleryItems[0]?.imageUrl || null;
+    return filtered.sort((a, b) => {
+      if (gallerySort === 'newest') {
+        return getGalleryTimestamp(b) - getGalleryTimestamp(a);
+      }
+
+      return getGalleryPopularity(b) - getGalleryPopularity(a);
+    });
+  }, [galleryItems, gallerySort, searchWrapQuery, selectedWrapTag]);
+  const previewWrapUrl = customRenderUrl || customPreviewUrl || selectedPreviewWrap?.imageUrl || filteredGalleryItems[0]?.imageUrl || null;
   const previewWrapTitle = customRenderUrl || customPreviewUrl
     ? '自定义上传图片'
-    : selectedPreviewWrap?.title || galleryItems[0]?.title || '未选择皮肤';
+    : selectedPreviewWrap?.title || filteredGalleryItems[0]?.title || '未选择皮肤';
 
   React.useLayoutEffect(() => {
     const root = document.documentElement;
@@ -287,45 +335,59 @@ const TslSkinApp: React.FC = () => {
       try {
         const response = await fetch('/tsl-skins/free-wrap-index.json', { cache: 'no-cache' });
         if (!response.ok) {
-          throw new Error('远程免费索引不存在');
+          throw new Error('本地皮肤库索引不存在');
         }
 
         const payload = await response.json();
         const supportedModelIds = new Set(TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => template.id));
         const items = Array.isArray(payload.items) ? payload.items : [];
         const nextRemoteWraps = items
-          .filter((item) =>
-            item?.isRemote === true &&
-            typeof item.imageUrl === 'string' &&
-            item.imageUrl.startsWith('https://') &&
-            Array.isArray(item.modelIds) &&
-            item.modelIds.some((modelId: string) => supportedModelIds.has(modelId)),
-          )
-          .map((item) => ({
-            id: String(item.id),
-            title: String(item.title || '远程免费皮肤'),
-            fileName: String(item.fileName || `${item.id || 'remote-wrap'}.png`),
-            imageUrl: String(item.imageUrl),
-            downloadUrl: String(item.downloadUrl || item.imageUrl),
-            modelIds: item.modelIds.filter((modelId: string) => supportedModelIds.has(modelId)),
-            sourceLabel: String(item.sourceLabel || '远程免费'),
-            sourceName: item.sourceName ? String(item.sourceName) : undefined,
-            sourcePageUrl: item.sourcePageUrl ? String(item.sourcePageUrl) : undefined,
-            isRemote: true,
-            riskTags: Array.isArray(item.riskTags) ? item.riskTags.map(String) : [],
-            tags: Array.isArray(item.tags) ? item.tags.map(String) : [],
-            downloads: Number(item.downloads || 0),
-            author: item.author ? String(item.author) : undefined,
-          }));
+          .filter((item) => {
+            const imageUrl = typeof item?.imageUrl === 'string' ? item.imageUrl : '';
+            const isLocalAsset = imageUrl.startsWith('/tsl-skins/local-wraps/');
+            const isHttpsAsset = imageUrl.startsWith('https://');
+
+            return (
+              (item?.isLocal === true || item?.isRemote === true) &&
+              (isLocalAsset || isHttpsAsset) &&
+              Array.isArray(item.modelIds) &&
+              item.modelIds.some((modelId: string) => supportedModelIds.has(modelId))
+            );
+          })
+          .map((item) => {
+            const imageUrl = String(item.imageUrl);
+
+            return {
+              id: String(item.id),
+              title: String(item.title || '本地皮肤'),
+              fileName: String(item.fileName || `${item.id || 'local-wrap'}.png`),
+              imageUrl,
+              downloadUrl: String(item.downloadUrl || imageUrl),
+              modelIds: item.modelIds.filter((modelId: string) => supportedModelIds.has(modelId)),
+              sourceLabel: String(item.sourceLabel || '本地皮肤库'),
+              sourceName: item.sourceName ? String(item.sourceName) : undefined,
+              sourcePageUrl: item.sourcePageUrl ? String(item.sourcePageUrl) : undefined,
+              isRemote: item.isRemote === true,
+              isLocal: item.isLocal === true,
+              originalImageUrl: item.originalImageUrl ? String(item.originalImageUrl) : undefined,
+              originalDownloadUrl: item.originalDownloadUrl ? String(item.originalDownloadUrl) : undefined,
+              riskTags: Array.isArray(item.riskTags) ? item.riskTags.map(String) : [],
+              tags: Array.isArray(item.tags) ? item.tags.map(String) : [],
+              downloads: Number(item.downloads || 0),
+              likes: Number(item.likes || 0),
+              author: item.author ? String(item.author) : undefined,
+              createdAt: item.createdAt ? String(item.createdAt) : undefined,
+            };
+          });
 
         if (!cancelled) {
           setRemoteFreeWraps(nextRemoteWraps);
-          setRemoteIndexStatus(`远程免费索引已加载 ${nextRemoteWraps.length} 款。`);
+          setRemoteIndexStatus(`本地皮肤库已加载 ${nextRemoteWraps.length} 款。`);
         }
       } catch {
         if (!cancelled) {
           setRemoteFreeWraps([]);
-          setRemoteIndexStatus('远程免费索引暂时不可用，可先使用官方示例。');
+          setRemoteIndexStatus('本地皮肤库暂时不可用，可先使用官方示例。');
         }
       }
     };
@@ -471,13 +533,13 @@ const TslSkinApp: React.FC = () => {
     }
 
     setSelectedPreviewWrap((currentWrap) => {
-      if (currentWrap && galleryItems.some((item) => item.id === currentWrap.id)) {
+      if (previewPinned && currentWrap && filteredGalleryItems.some((item) => item.id === currentWrap.id)) {
         return currentWrap;
       }
 
-      return galleryItems[0] || null;
+      return filteredGalleryItems[0] || null;
     });
-  }, [customPreviewUrl, galleryItems]);
+  }, [customPreviewUrl, filteredGalleryItems, previewPinned]);
 
   const updateSelectedLayer = React.useCallback((changes: Partial<SkinLayer>) => {
     if (!selectedLayerId) {
@@ -536,6 +598,7 @@ const TslSkinApp: React.FC = () => {
     setLayers([]);
     setSelectedLayerId(null);
     setSelectedPreviewWrap(example);
+    setPreviewPinned(true);
     setStatus(`${example.title} 已显示在右侧三维渲染区。`);
   };
 
@@ -545,6 +608,7 @@ const TslSkinApp: React.FC = () => {
     setLayers([]);
     setSelectedLayerId(null);
     setSelectedPreviewWrap(galleryItems[0] || null);
+    setPreviewPinned(false);
     setStatus('自定义图片已删除，已恢复现有皮肤预览。');
   };
 
@@ -552,6 +616,7 @@ const TslSkinApp: React.FC = () => {
     setCustomPreviewUrl(null);
     setCustomRenderUrl(null);
     setSelectedPreviewWrap(null);
+    setPreviewPinned(false);
     setLayers([]);
     setSelectedLayerId(null);
     setStatus('右侧预览已清除，可选择现有皮肤或上传自定义图片。');
@@ -715,8 +780,8 @@ const TslSkinApp: React.FC = () => {
 
   return (
     <div className={rootClassName}>
-      <main className="tsl-skin-studio-workbench grid min-h-screen w-full max-w-full overflow-x-hidden lg:h-screen lg:overflow-hidden lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className={`tsl-skin-sidebar min-w-0 flex flex-col border-r lg:h-screen lg:max-h-screen ${sidebarClassName}`}>
+      <main className="tsl-skin-studio-workbench mx-auto grid min-h-screen w-full max-w-[1440px] gap-4 overflow-x-hidden px-3 py-3 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-5 lg:py-5">
+        <section className={`tsl-skin-gallery-board min-w-0 overflow-hidden rounded-xl border shadow-sm ${sidebarClassName}`}>
           <div className="border-b border-inherit p-3">
             <div className="flex items-center justify-between gap-3">
               <Link
@@ -746,21 +811,23 @@ const TslSkinApp: React.FC = () => {
               </button>
             </div>
 
-            <label className="mt-3 block text-xs font-black text-slate-500">选择车型</label>
-            <select
-              value={selectedTemplateId}
-              onChange={(event) => setSelectedTemplateId(event.target.value)}
-              className={`mt-2 h-11 w-full rounded-md border px-3 text-sm font-bold outline-none ${
-                isDayMode ? 'border-slate-200 bg-slate-50 text-slate-900' : 'border-white/10 bg-slate-900 text-white'
-              }`}
-              aria-label="选择车型"
-            >
-              {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
-                <option key={template.id} value={template.id}>
-                  {template.label}
-                </option>
-              ))}
-            </select>
+            <div className="tsl-skin-flow-steps mt-4 grid gap-2 md:grid-cols-3">
+              {FLOW_STEPS.map((step, index) => {
+                const StepIcon = step.icon;
+                return (
+                  <div
+                    key={step.id}
+                    className={`rounded-lg border p-3 ${index === 0 ? 'border-[#3e6ae1] bg-[#3e6ae1] text-white shadow-md' : subtlePanelClassName}`}
+                  >
+                    <div className="flex items-center gap-2 text-sm font-black">
+                      <StepIcon size={17} />
+                      {index + 1}. {step.title}
+                    </div>
+                    <div className={`mt-1 text-xs font-bold ${index === 0 ? 'text-white/80' : mutedTextClassName}`}>{step.detail}</div>
+                  </div>
+                );
+              })}
+            </div>
 
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
@@ -788,36 +855,88 @@ const TslSkinApp: React.FC = () => {
 
           <section className={activeWorkspace === 'download' ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}>
             <div className="border-b border-inherit p-3">
-              <label className="relative block">
-                <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={searchWrapQuery}
-                  onChange={(event) => setSearchWrapQuery(event.target.value)}
-                  placeholder="搜索皮肤名称"
-                  className={`h-11 w-full rounded-md border pl-10 pr-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
-                    isDayMode ? 'border-slate-200 bg-slate-50 text-slate-900' : 'border-white/10 bg-slate-900 text-white'
+              <div className="tsl-skin-filter-bar grid gap-2 lg:grid-cols-[220px_150px_minmax(220px,1fr)_auto_auto] lg:items-center">
+                <select
+                  value={selectedTemplateId}
+                  onChange={(event) => {
+                    setPreviewPinned(false);
+                    setSelectedTemplateId(event.target.value);
+                  }}
+                  className={`h-11 rounded-md border px-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
+                    isDayMode ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-900 text-white'
                   }`}
-                />
-              </label>
-              <div className={`mt-3 rounded-md border p-3 text-xs leading-5 ${subtlePanelClassName}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="font-black">远程免费索引</div>
-                    <div className={`mt-1 font-bold ${mutedTextClassName}`}>
-                      {remoteIndexStatus} 只保存来源链接，图片不会占用本站存储。
-                    </div>
-                  </div>
-                  <label className="flex shrink-0 cursor-pointer items-center gap-2 font-black">
-                    <input
-                      type="checkbox"
-                      checked={showRiskWraps}
-                      onChange={(event) => setShowRiskWraps(event.target.checked)}
-                    />
-                    显示风险素材
-                  </label>
+                  aria-label="选择车型"
+                >
+                  {TESLA_MODEL_TEMPLATES.map((template: TeslaModelTemplate) => (
+                    <option key={template.id} value={template.id}>
+                      {template.label}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={selectedWrapTag}
+                  onChange={(event) => setSelectedWrapTag(event.target.value)}
+                  className={`h-11 rounded-md border px-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
+                    isDayMode ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-900 text-white'
+                  }`}
+                  aria-label="选择标签"
+                >
+                  <option value="">全部标签</option>
+                  {galleryTags.map((tag) => (
+                    <option key={tag} value={tag}>
+                      {tag}
+                    </option>
+                  ))}
+                </select>
+
+                <label className="relative block">
+                  <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={searchWrapQuery}
+                    onChange={(event) => setSearchWrapQuery(event.target.value)}
+                    placeholder="搜索贴纸名称、标签或来源"
+                    className={`h-11 w-full rounded-md border pl-10 pr-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
+                      isDayMode ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-900 text-white'
+                    }`}
+                  />
+                </label>
+
+                <div className={`grid h-11 grid-cols-2 rounded-md border p-1 ${isDayMode ? 'border-slate-200 bg-white' : 'border-white/10 bg-slate-900'}`}>
+                  {[
+                    { id: 'newest' as const, label: '最新' },
+                    { id: 'popular' as const, label: '最热' },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setGallerySort(item.id)}
+                      className={`rounded px-3 text-sm font-black transition ${
+                        gallerySort === item.id ? 'bg-[#3e6ae1] text-white' : isDayMode ? 'text-slate-500 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
                 </div>
+
+                <div className={`flex h-11 items-center justify-end whitespace-nowrap text-xs font-black ${mutedTextClassName}`}>
+                  {galleryStats.total} 款 · {galleryStats.downloads.toLocaleString('zh-CN')} 次下载
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
+                <span className={mutedTextClassName}>{remoteIndexStatus}</span>
+                <label className="flex cursor-pointer items-center gap-2 font-black">
+                  <input
+                    type="checkbox"
+                    checked={showRiskWraps}
+                    onChange={(event) => setShowRiskWraps(event.target.checked)}
+                  />
+                  显示风险素材
+                </label>
                 {!showRiskWraps && hiddenRiskCount > 0 && (
-                  <div className="mt-2 font-bold text-amber-600">
+                  <div className="w-full font-bold text-amber-600">
                     已隐藏 {hiddenRiskCount} 款疑似角色/IP或品牌素材。
                   </div>
                 )}
@@ -835,7 +954,7 @@ const TslSkinApp: React.FC = () => {
                 </span>
               </div>
 
-              <div className="tsl-skin-wrap-grid grid grid-cols-3 gap-2">
+              <div className="tsl-skin-wrap-grid grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {filteredGalleryItems.map((example) => (
                   <button
                     key={example.id}
@@ -1133,9 +1252,9 @@ const TslSkinApp: React.FC = () => {
               使用顺序：先选车型，再上传图片调整位置，最后点击右下角下载当前皮肤。
             </p>
           </section>
-        </aside>
+        </section>
 
-        <section className={`tsl-skin-render-stage relative min-h-[580px] min-w-0 overflow-hidden lg:min-h-screen ${isDayMode ? 'bg-[#e5e7eb]' : 'bg-slate-900'}`}>
+        <section className={`tsl-skin-render-stage relative lg:sticky top-24 min-h-[580px] min-w-0 overflow-hidden rounded-xl border lg:h-[calc(100vh-7rem)] ${isDayMode ? 'border-slate-200 bg-[#e5e7eb]' : 'border-white/10 bg-slate-900'}`}>
           <TslVehicle3DPreview
             wrapColor={wrapColor}
             wrapImageUrl={previewWrapUrl}

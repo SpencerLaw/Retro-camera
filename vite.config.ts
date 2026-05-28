@@ -85,6 +85,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          globIgnores: ['**/tsl-skins/local-wraps/**/*'],
           navigateFallbackDenylist: [/^\/roll-call/, /^\/homework/, /^\/tree/, /^\/morning-energy-tree/, /^\/api/],
           runtimeCaching: [
             {

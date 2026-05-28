@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "sync:tsl-free-wraps": "node scripts/sync-tsl-free-wraps.mjs"
+    "sync:tsl-free-wraps": "node scripts/sync-tsl-free-wraps.mjs",
+    "mirror:tsl-wraps": "node scripts/sync-tsl-free-wraps.mjs --mirror"
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.9.0",

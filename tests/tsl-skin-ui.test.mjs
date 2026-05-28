@@ -57,12 +57,17 @@ runTest('tsl skin page uses a gallery-first 3d workbench layout', () => {
   assert.match(packageSource, /"three"/);
   assert.match(componentSource, /TslVehicle3DPreview/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
-  assert.match(componentSource, /tsl-skin-sidebar/);
+  assert.match(componentSource, /tsl-skin-flow-steps/);
+  assert.match(componentSource, /tsl-skin-filter-bar/);
+  assert.match(componentSource, /tsl-skin-gallery-board/);
   assert.match(componentSource, /tsl-skin-render-stage/);
   assert.match(componentSource, /tsl-skin-wrap-grid/);
   assert.match(componentSource, /activeWorkspace/);
   assert.match(componentSource, /searchWrapQuery/);
+  assert.match(componentSource, /selectedWrapTag/);
+  assert.match(componentSource, /gallerySort/);
   assert.match(componentSource, /filteredGalleryItems/);
+  assert.match(componentSource, /filteredGalleryItems\[0\]/);
   assert.match(componentSource, /applyOfficialWrapToPreview/);
   assert.match(componentSource, /downloadSelectedWrapAsset/);
   assert.match(componentSource, /removeCustomWrap/);
@@ -177,13 +182,15 @@ runTest('tsl skin download mode exposes a visible skin gallery', () => {
 runTest('tsl skin download mode reads a local remote-free index without live third-party calls', () => {
   assert.match(componentSource, /\/tsl-skins\/free-wrap-index\.json/);
   assert.match(componentSource, /remoteFreeWraps/);
+  assert.match(componentSource, /\/tsl-skins\/local-wraps\//);
+  assert.match(componentSource, /本地皮肤库/);
   assert.match(componentSource, /showRiskWraps/);
-  assert.match(componentSource, /远程免费/);
   assert.match(componentSource, /显示风险素材/);
   assert.match(componentSource, /已隐藏/);
   assert.match(componentSource, /疑似角色\/IP/);
   assert.match(componentSource, /formatRiskTags/);
   assert.doesNotMatch(componentSource, /tesla\.timor419\.com|tesla-wrap\.mrproper\.dev|gwhjdgbjcqbhhdwzrijk|\/api\/wrap/);
+  assert.doesNotMatch(componentSource, /远程免费索引|远程免费皮肤|远程免费：/);
 });
 
 runTest('tsl skin page removes external source clutter from the UI', () => {
@@ -234,13 +241,18 @@ runTest('tsl skin layout keeps gallery cards and custom editor clean', () => {
   assert.match(componentSource, /tsl-skin-wrap-grid/);
   assert.match(componentSource, /tsl-skin-wrap-card/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
-  assert.match(componentSource, /lg:grid-cols-\[320px_minmax\(0,1fr\)\]/);
-  assert.match(componentSource, /grid-cols-3/);
+  assert.match(componentSource, /tsl-skin-filter-bar/);
+  assert.match(componentSource, /lg:grid-cols-\[minmax\(0,1fr\)_420px\]/);
+  assert.match(componentSource, /xl:grid-cols-5/);
   assert.match(componentSource, /min-h-screen/);
-  assert.match(componentSource, /lg:min-h-screen/);
+  assert.match(componentSource, /sticky top-24/);
   assert.match(componentSource, /--app-global-scale/);
   assert.match(componentSource, /裁剪画布/);
   assert.match(componentSource, /下载当前皮肤/);
+  assert.match(componentSource, /最新/);
+  assert.match(componentSource, /最热/);
+  assert.match(componentSource, /全部标签/);
+  assert.doesNotMatch(componentSource, /tsl-skin-sidebar/);
   assert.doesNotMatch(componentSource, /错误覆盖|skin-detail-panel|vehicle-reference-panel|drawSmartContainedImage/);
 });
 

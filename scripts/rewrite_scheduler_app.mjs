@@ -110,8 +110,8 @@ export default function App() {
       setLoading(true);
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      const savedData = localStorage.getItem('course_scheduler_data');
-      if (savedData && JSON.parse(savedData).teachers?.length >= 100 && JSON.parse(savedData).schedules?.length > 2000) {
+      const savedData = localStorage.getItem('course_scheduler_real_data');
+      if (savedData && JSON.parse(savedData).teachers?.length >= 100 && JSON.parse(savedData).schedules?.length >= 400) {
         const parsed = JSON.parse(savedData);
         setTeachers(parsed.teachers || []);
         setClassrooms(parsed.classrooms || []);
@@ -172,7 +172,7 @@ export default function App() {
         students,
         schedules
       };
-      localStorage.setItem('course_scheduler_data', JSON.stringify(dataToSave));
+      localStorage.setItem('course_scheduler_real_data', JSON.stringify(dataToSave));
     }
   }, [teachers, classrooms, teachingClasses, students, schedules, loading]);
 
@@ -198,7 +198,7 @@ export default function App() {
     if (window.confirm("确定要重置排课底座数据吗？所有手动做出的代课、偏好修改都将被还原。")) {
       try {
         setLoading(true);
-        localStorage.removeItem('course_scheduler_data');
+        localStorage.removeItem('course_scheduler_real_data');
         const initialTeachers = JSON.parse(JSON.stringify(INITIAL_TEACHERS));
         const initialClassrooms = JSON.parse(JSON.stringify(INITIAL_CLASSROOMS));
         const initialTeachingClasses = JSON.parse(JSON.stringify(INITIAL_TEACHING_CLASSES));

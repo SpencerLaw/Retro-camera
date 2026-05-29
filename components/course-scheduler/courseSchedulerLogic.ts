@@ -57,6 +57,12 @@ export const detectConflicts = (
       if (colliding.length > 1) {
         const classroom = currentClassrooms.find(r => r.id === classroomId);
         const name = classroom ? classroom.name : "未知教室";
+        
+        // 体育场/操场等户外大型活动空间可以同时容纳多个班级进行体育课，不属于校舍冲突
+        if (classroomId === 'R_SPEC_1' || name.includes('体育场') || name.includes('操场')) {
+          continue;
+        }
+
         conflicts.push({
           id: `conflict_${conflictCounter++}`,
           type: 'classroom',

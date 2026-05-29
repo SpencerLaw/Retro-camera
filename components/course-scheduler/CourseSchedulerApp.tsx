@@ -739,7 +739,7 @@ export default function App() {
               </div>
 
               {/* Rows (Schedule slots, Break items & Lunch Spacers) */}
-              <div className="flex-1 overflow-y-auto grid grid-cols-1 auto-rows-[minmax(82px,_1fr)] divide-y divide-slate-100">
+              <div className="flex-1 overflow-y-auto grid grid-cols-1 auto-rows-[minmax(82px,_auto)] divide-y divide-slate-100">
                 {PERIODS_METADATA.map((periodMeta, pIdx) => {
                   
                   if (periodMeta.type === 'break') {

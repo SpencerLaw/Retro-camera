@@ -43,12 +43,15 @@ runTest('course scheduler management tables fill the available viewport instead 
   assert.doesNotMatch(schedulerSource, /calc\(100vh - 4rem\)|calc\(100vh-4rem\)/);
 });
 
-runTest('course scheduler management overview scrolls away to give the teacher table more room', () => {
+runTest('course scheduler management overview stays available as a floating sticky header', () => {
   assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto/);
   assert.match(schedulerSource, /management-content-area [^"]*overflow-visible/);
   assert.doesNotMatch(schedulerSource, /management-content-area [^"]*overflow-hidden/);
   assert.doesNotMatch(schedulerSource, /management-table-shell[^']*flex-1/);
   assert.match(schedulerStyles, /#data_management\s*\{[\s\S]*overflow-y:\s*auto/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*top:\s*0/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*backdrop-filter:\s*blur/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*height:\s*auto/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*overflow:\s*visible/);
   assert.match(schedulerStyles, /\.management-table-scroll\s*\{[\s\S]*max-height:\s*none/);

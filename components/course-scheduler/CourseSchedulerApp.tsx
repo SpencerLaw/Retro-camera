@@ -681,10 +681,10 @@ export default function App() {
         <div className="flex flex-1 overflow-hidden min-h-0">
           
           {/* MIDDLE SECTION: MAIN VIEW TIMETABLE GRID */}
-          <main id="main_grid" className="flex-1 p-6 flex flex-col min-w-0 overflow-y-auto">
+          <main id="main_grid" className="scheduler-board-scroll flex-1 p-6 flex flex-col min-w-0 overflow-y-auto">
             
             {/* VIEW TITLE AND ACTIVE FILTERS HEADBOARD */}
-            <div className="flex justify-between items-end mb-4 shrink-0">
+            <div className="scheduler-floating-headboard scheduler-board-headboard flex justify-between items-end mb-4 shrink-0">
               <div className="text-left">
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{getActiveFilterLabel()}</h2>

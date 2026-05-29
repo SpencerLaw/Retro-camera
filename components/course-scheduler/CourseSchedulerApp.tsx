@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   BookOpen, 
@@ -118,7 +118,7 @@ export default function App() {
   const [shiftWeek, setShiftWeek] = useState(10);
   const [shiftReason, setShiftReason] = useState('完成选考学业水平测试，停课释放余下多媒体机房资源');
 
-  const updateConflicts = useCallback((
+  const updateConflicts = (
     currentSchedules: ScheduleItem[],
     currentTeachers: Teacher[],
     currentClassrooms: Classroom[],
@@ -135,7 +135,7 @@ export default function App() {
       currentConfig
     );
     setConflicts(newConflicts);
-  }, []);
+  };
 
   // Fetch initial system states from localStorage or defaults
   const fetchData = async () => {

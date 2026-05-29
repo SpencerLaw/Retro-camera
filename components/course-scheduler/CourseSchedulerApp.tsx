@@ -614,6 +614,80 @@ export default function App() {
     );
   };
 
+  const renderBoardFilters = (variant: 'head' | 'pinned') => {
+    return (
+      <div className={`scheduler-board-filters scheduler-board-filters--${variant}`}>
+        <select
+          value={subjectFilter}
+          onChange={(e) => setSubjectFilter(e.target.value)}
+          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+        >
+          <option value="all">所有科目</option>
+          <option value="语文">语文</option>
+          <option value="数学">数学</option>
+          <option value="英语">英语</option>
+          <option value="物理">物理</option>
+          <option value="化学">化学</option>
+          <option value="生物">生物</option>
+          <option value="历史">历史</option>
+          <option value="地理">地理</option>
+          <option value="通用">通用/劳动</option>
+          <option value="音乐">音乐</option>
+          <option value="美术">美术</option>
+          <option value="信息技术">信息技术</option>
+        </select>
+
+        <select
+          value={combinationFilter}
+          onChange={(e) => setCombinationFilter(e.target.value)}
+          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+        >
+          <option value="all">所有选修组合/类型</option>
+          <option value="物化生">物化生 组 (高二复合)</option>
+          <option value="物化地">物化地 组</option>
+          <option value="历政地">历政地 组</option>
+          <option value="普通班">普通班</option>
+        </select>
+
+        <select
+          value={teacherFilter}
+          onChange={(e) => setTeacherFilter(e.target.value)}
+          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+        >
+          <option value="all">所有任课教师</option>
+          {getGradeTeachers().map(t => (
+            <option key={t.id} value={t.id}>{t.name} ({t.subjects.join('/')})</option>
+          ))}
+        </select>
+
+        <select
+          value={classroomFilter}
+          onChange={(e) => setClassroomFilter(e.target.value)}
+          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+        >
+          <option value="all">所有备课/走班教室</option>
+          {getGradeClassrooms().map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+
+        {(subjectFilter !== 'all' || combinationFilter !== 'all' || teacherFilter !== 'all' || classroomFilter !== 'all') && (
+          <button
+            onClick={() => {
+              setSubjectFilter('all');
+              setCombinationFilter('all');
+              setTeacherFilter('all');
+              setClassroomFilter('all');
+            }}
+            className="scheduler-board-filter-clear p-1 text-xs text-rose-600 hover:bg-rose-50 border border-rose-200 rounded font-bold"
+          >
+            清除筛选
+          </button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="course-scheduler-root flex flex-col h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-600">
       
@@ -696,6 +770,16 @@ export default function App() {
         </div>
       </header>
 
+      {activeTab === 'board' && (
+        <div className={`scheduler-pinned-filter-bar ${isTabLayoutPinned ? 'is-visible' : ''}`} aria-hidden={!isTabLayoutPinned}>
+          {isTabLayoutPinned && (
+            <div className="scheduler-pinned-filter-inner">
+              {renderBoardFilters('pinned')}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* THREE SECTION WORKFLOW LAYOUT */}
       {activeTab === 'board' && (
         <div className="flex flex-1 overflow-hidden min-h-0">
@@ -728,81 +812,7 @@ export default function App() {
 
               {/* GRID INTERACTIVE FILTERS */}
               <div className="flex items-center gap-2">
-                <div className="bg-white rounded-lg border border-slate-200 p-1 flex items-center space-x-1 shadow-xs">
-                  
-                  {/* Subject filter selector */}
-                  <select 
-                    value={subjectFilter}
-                    onChange={(e) => setSubjectFilter(e.target.value)}
-                    className="text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
-                  >
-                    <option value="all">所有科目</option>
-                    <option value="语文">语文</option>
-                    <option value="数学">数学</option>
-                    <option value="英语">英语</option>
-                    <option value="物理">物理</option>
-                    <option value="化学">化学</option>
-                    <option value="生物">生物</option>
-                    <option value="历史">历史</option>
-                    <option value="地理">地理</option>
-                    <option value="通用">通用/劳动</option>
-                    <option value="音乐">音乐</option>
-                    <option value="美术">美术</option>
-                    <option value="信息技术">信息技术</option>
-                  </select>
-
-                  {/* Combination filter */}
-                  <select 
-                    value={combinationFilter}
-                    onChange={(e) => setCombinationFilter(e.target.value)}
-                    className="text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
-                  >
-                    <option value="all">所有选修组合/类型</option>
-                    <option value="物化生">物化生 组 (高二复合)</option>
-                    <option value="物化地">物化地 组</option>
-                    <option value="历政地">历政地 组</option>
-                    <option value="普通班">普通班</option>
-                  </select>
-
-                  {/* Teacher focus filter */}
-                  <select 
-                    value={teacherFilter}
-                    onChange={(e) => setTeacherFilter(e.target.value)}
-                    className="text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
-                  >
-                    <option value="all">所有任课教师</option>
-                    {getGradeTeachers().map(t => (
-                      <option key={t.id} value={t.id}>{t.name} ({t.subjects.join('/')})</option>
-                    ))}
-                  </select>
-
-                  {/* Classroom lock focus */}
-                  <select 
-                    value={classroomFilter}
-                    onChange={(e) => setClassroomFilter(e.target.value)}
-                    className="text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
-                  >
-                    <option value="all">所有备课/走班教室</option>
-                    {getGradeClassrooms().map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-
-                  {/* Reset dropdown filters */}
-                  {(subjectFilter !== 'all' || combinationFilter !== 'all' || teacherFilter !== 'all' || classroomFilter !== 'all') && (
-                    <button 
-                      onClick={() => {
-                        setSubjectFilter('all');
-                        setCombinationFilter('all');
-                        setTeacherFilter('all');
-                        setClassroomFilter('all');
-                      }}
-                      className="p-1 text-xs text-rose-600 hover:bg-rose-50 border border-rose-200 rounded font-bold"
-                    >
-                      清除筛选
-                    </button>
-                  )}
-                </div>
+                {renderBoardFilters('head')}
               </div>
             </div>
 

@@ -42,6 +42,23 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.doesNotMatch(schedulerStyles, /\.scheduler-view-tabs--expanded/);
 });
 
+runTest('board pinned state exposes schedule filters below the top bar', () => {
+  assert.match(schedulerSource, /renderBoardFilters/);
+  assert.match(schedulerSource, /scheduler-pinned-filter-bar/);
+  assert.match(schedulerSource, /activeTab === 'board' &&/);
+  assert.match(schedulerSource, /isTabLayoutPinned \? 'is-visible' : ''/);
+  assert.match(schedulerSource, /renderBoardFilters\('pinned'\)/);
+  assert.match(schedulerSource, /renderBoardFilters\('head'\)/);
+  assert.match(schedulerSource, /所有科目/);
+  assert.match(schedulerSource, /所有选修组合\/类型/);
+  assert.match(schedulerSource, /所有任课教师/);
+  assert.match(schedulerSource, /所有备课\/走班教室/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-filter-bar\s*\{[\s\S]*max-height:\s*0/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-filter-bar\.is-visible\s*\{[\s\S]*max-height:\s*4\.5rem/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-filter-inner\s*\{[\s\S]*backdrop-filter:\s*blur\(14px\)/);
+  assert.match(schedulerStyles, /\.scheduler-board-filters--pinned\s+select\s*\{[\s\S]*min-width:\s*10rem/);
+});
+
 runTest('management scroll uses the same collapsible tab layout', () => {
   assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto[^"]*" onScroll=\{handleSchedulerScroll\}/);
   assert.match(schedulerSource, /scheduler-page-head management-header/);

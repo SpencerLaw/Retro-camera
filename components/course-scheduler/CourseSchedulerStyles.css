@@ -213,6 +213,78 @@
   box-shadow: 0 7px 16px rgba(37, 99, 235, 0.28);
 }
 
+.scheduler-pinned-filter-bar {
+  position: relative;
+  z-index: 24;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(248, 250, 252, 0.72);
+  transition: max-height 220ms ease, opacity 160ms ease;
+}
+
+.scheduler-pinned-filter-bar.is-visible {
+  max-height: 4.5rem;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scheduler-pinned-filter-inner {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.55rem 1.5rem 0.65rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(248, 250, 252, 0.76);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.scheduler-board-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.scheduler-board-filters--head {
+  padding: 0.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.scheduler-board-filters--pinned {
+  width: 100%;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.scheduler-board-filters select {
+  min-width: 8.75rem;
+  height: 2rem;
+  color: #334155;
+  outline: none;
+}
+
+.scheduler-board-filters--pinned select {
+  min-width: 10rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.07);
+}
+
+.scheduler-board-filters--pinned .scheduler-board-filter-clear {
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 10px;
+  background: rgba(255, 241, 242, 0.9);
+}
+
 .scheduler-page-head {
   position: relative;
   z-index: 1;

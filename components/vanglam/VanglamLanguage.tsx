@@ -50,6 +50,7 @@ interface VanglamCopy {
   brandTagline: string;
   navAria: string;
   nav: VanglamNavItem[];
+  navAction: string;
   requestSample: string;
   languageToggleAria: string;
   home: VanglamHomeCopy;
@@ -197,6 +198,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       { key: 'artcard-lab', label: 'Artcard Lab', to: '/vanglam/artcard-lab' },
       { key: 'atelier', label: 'Atelier', to: '/vanglam/atelier' },
     ],
+    navAction: 'Library and Tools',
     requestSample: 'REQUEST SAMPLE KIT',
     languageToggleAria: 'Switch to Chinese',
     home: {
@@ -458,6 +460,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       { key: 'artcard-lab', label: '艺术卡实验室', to: '/vanglam/artcard-lab' },
       { key: 'atelier', label: '纸艺工坊', to: '/vanglam/atelier' },
     ],
+    navAction: '资料与工具',
     requestSample: '索取样品套装',
     languageToggleAria: '切换到英文',
     home: {

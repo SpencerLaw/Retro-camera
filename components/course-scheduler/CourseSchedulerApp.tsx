@@ -578,8 +578,8 @@ export default function App() {
       className: hasCriticalConflicts ? 'border-rose-100 bg-rose-50/70 text-rose-900' : 'border-amber-100 bg-amber-50/70 text-amber-900'
     }
   ];
-  const managementTableShellClass = 'management-table-shell bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col flex-1 min-h-0';
-  const managementTableScrollClass = 'management-table-scroll flex-1 min-h-0 overflow-auto';
+  const managementTableShellClass = 'management-table-shell bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col min-h-0';
+  const managementTableScrollClass = 'management-table-scroll min-h-0 overflow-x-auto overflow-y-visible';
 
   return (
     <div className="course-scheduler-root flex flex-col h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-600">
@@ -1054,8 +1054,8 @@ export default function App() {
 
       {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}
       {activeTab === 'management' && (
-        <main id="data_management" className="flex-1 min-h-0 overflow-hidden flex flex-col bg-slate-50 text-left w-full">
-          {/* Fixed header area */}
+        <main id="data_management" className="flex-1 min-h-0 overflow-y-auto flex flex-col bg-slate-50 text-left w-full">
+          {/* Scrollable overview area */}
           <div className="management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80 bg-slate-50">
             <div className="mb-2 flex flex-wrap justify-between items-start gap-3">
               <div className="min-w-0">
@@ -1126,10 +1126,10 @@ export default function App() {
               学生走班花名册 ({gradeStudents.length} 人)
             </button>
           </div>
-          </div>{/* end fixed header shrink-0 */}
+          </div>{/* end scrollable overview area */}
 
           {/* Scrollable table content area */}
-          <div className="management-content-area flex-1 overflow-hidden px-6 py-3 min-h-0 flex flex-col">
+          <div className="management-content-area px-6 py-3 pb-6 min-h-0 flex flex-col overflow-visible">
 
           {/* 1. TEACHERS TABLE */}
           {mgmtSubTab === 'teachers' && (

@@ -133,6 +133,8 @@
   flex: 1 1 0;
   min-height: 0;
   height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .management-header {
@@ -140,26 +142,30 @@
 }
 
 .management-content-area {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
-  height: 100%;
+  min-height: calc(100vh - 7.5rem);
+  height: auto;
+  overflow: visible;
 }
 
 .management-table-shell {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
-  height: 100%;
+  height: auto;
 }
 
 .management-table-scroll {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
-  height: 100%;
-  overflow: auto;
+  height: auto;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
 .management-table-scroll table {
-  min-height: 100%;
+  min-height: 0;
 }
 
 @media (max-height: 760px) {

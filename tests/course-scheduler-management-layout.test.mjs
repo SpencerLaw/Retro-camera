@@ -31,7 +31,8 @@ runTest('course scheduler management tables fill the available viewport instead 
   assert.match(schedulerSource, /management-table-shell/);
   assert.match(schedulerSource, /management-table-scroll/);
   assert.match(schedulerSource, /flex-1 min-h-0/);
-  assert.match(schedulerSource, /overflow-auto/);
+  assert.match(schedulerSource, /overflow-y-auto/);
+  assert.match(schedulerSource, /overflow-x-auto/);
   assert.match(schedulerSource, /sticky top-0 z-10/);
   assert.match(schedulerStyles, /\.management-content-area/);
   assert.match(schedulerStyles, /\.management-table-shell/);
@@ -40,4 +41,16 @@ runTest('course scheduler management tables fill the available viewport instead 
   assert.match(schedulerStyles, /min-height:\s*0/);
   assert.doesNotMatch(schedulerSource, /<div className="overflow-x-auto">/);
   assert.doesNotMatch(schedulerSource, /calc\(100vh - 4rem\)|calc\(100vh-4rem\)/);
+});
+
+runTest('course scheduler management overview scrolls away to give the teacher table more room', () => {
+  assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto/);
+  assert.match(schedulerSource, /management-content-area [^"]*overflow-visible/);
+  assert.doesNotMatch(schedulerSource, /management-content-area [^"]*overflow-hidden/);
+  assert.doesNotMatch(schedulerSource, /management-table-shell[^']*flex-1/);
+  assert.match(schedulerStyles, /#data_management\s*\{[\s\S]*overflow-y:\s*auto/);
+  assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*height:\s*auto/);
+  assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*overflow:\s*visible/);
+  assert.match(schedulerStyles, /\.management-table-scroll\s*\{[\s\S]*max-height:\s*none/);
+  assert.match(schedulerStyles, /\.management-table-scroll\s*\{[\s\S]*overflow-y:\s*visible/);
 });

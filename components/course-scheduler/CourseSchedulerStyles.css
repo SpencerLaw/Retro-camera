@@ -1,25 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-@import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", "Microsoft YaHei", -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", SFMono-Regular, monospace;
-}
-
-/* ─── Timetable Period-Gradient Scrollbar ─────────────────────────── */
-/* Main scrollbar: matches period time-of-day palette                   */
-::-webkit-scrollbar {
+/* Timetable scrollbars */
+.course-scheduler-root ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
-::-webkit-scrollbar-track {
+.course-scheduler-root ::-webkit-scrollbar-track {
   background: transparent;
   border-radius: 9999px;
 }
 
 /* Vertical: amber (morning) → teal → indigo → violet (afternoon) */
-::-webkit-scrollbar-thumb {
+.course-scheduler-root ::-webkit-scrollbar-thumb {
   background: linear-gradient(
     to bottom,
     #f59e0b 0%,    /* amber-400  – 第1-2节 上午 */
@@ -31,7 +24,7 @@
   transition: opacity 0.2s ease;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.course-scheduler-root ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(
     to bottom,
     #d97706 0%,    /* amber-600  */
@@ -42,7 +35,7 @@
 }
 
 /* Horizontal scrollbar: same palette, left→right */
-::-webkit-scrollbar-thumb:horizontal {
+.course-scheduler-root ::-webkit-scrollbar-thumb:horizontal {
   background: linear-gradient(
     to right,
     #f59e0b 0%,
@@ -52,7 +45,7 @@
   );
 }
 
-::-webkit-scrollbar-thumb:horizontal:hover {
+.course-scheduler-root ::-webkit-scrollbar-thumb:horizontal:hover {
   background: linear-gradient(
     to right,
     #d97706 0%,
@@ -62,8 +55,117 @@
   );
 }
 
-::-webkit-scrollbar-corner {
+.course-scheduler-root ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+.period-scrollbar-morning-early,
+.period-scrollbar-morning-late,
+.period-scrollbar-afternoon-early,
+.period-scrollbar-afternoon-late {
+  scrollbar-width: thin;
+}
+
+.period-scrollbar-morning-early {
+  scrollbar-color: #f59e0b transparent;
+}
+
+.period-scrollbar-morning-late {
+  scrollbar-color: #14b8a6 transparent;
+}
+
+.period-scrollbar-afternoon-early {
+  scrollbar-color: #3b82f6 transparent;
+}
+
+.period-scrollbar-afternoon-late {
+  scrollbar-color: #8b5cf6 transparent;
+}
+
+.period-scrollbar-morning-early::-webkit-scrollbar,
+.period-scrollbar-morning-late::-webkit-scrollbar,
+.period-scrollbar-afternoon-early::-webkit-scrollbar,
+.period-scrollbar-afternoon-late::-webkit-scrollbar {
+  width: 7px;
+}
+
+.period-scrollbar-morning-early::-webkit-scrollbar-track,
+.period-scrollbar-morning-late::-webkit-scrollbar-track,
+.period-scrollbar-afternoon-early::-webkit-scrollbar-track,
+.period-scrollbar-afternoon-late::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.period-scrollbar-morning-early::-webkit-scrollbar-thumb {
+  background: #f59e0b;
+}
+
+.period-scrollbar-morning-late::-webkit-scrollbar-thumb {
+  background: #14b8a6;
+}
+
+.period-scrollbar-afternoon-early::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+}
+
+.period-scrollbar-afternoon-late::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+}
+
+.period-scrollbar-morning-early::-webkit-scrollbar-thumb:hover {
+  background: #d97706;
+}
+
+.period-scrollbar-morning-late::-webkit-scrollbar-thumb:hover {
+  background: #0d9488;
+}
+
+.period-scrollbar-afternoon-early::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+.period-scrollbar-afternoon-late::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+/* Management page vertical space usage */
+#data_management {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.management-header {
+  flex: 0 0 auto;
+}
+
+.management-content-area {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.management-table-shell {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.management-table-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+.management-table-scroll table {
+  min-height: 100%;
+}
+
+@media (max-height: 760px) {
+  .management-stats-rail {
+    display: none;
+  }
 }
 
 /* Timetable-specific styles */

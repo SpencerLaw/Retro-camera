@@ -30,6 +30,9 @@ export interface TeachingClass {
   classroomId: string;
   studentCount: number;
   combination: string; // Elective combination tag e.g., "物化生", "物化地"
+  classNumber?: number;
+  grade?: string;
+  periods?: number;
 }
 
 export interface Student {
@@ -82,6 +85,8 @@ export interface SubstituteRecommendation {
   suitabilityScore: number; // 0-100 rating based on load, overlap, subject matching
   reasons: string[];
   hasConflictOnChosenSlot: boolean;
+  hasLoadConflict?: boolean;
+  hasAvailabilityConflict?: boolean;
   currentWeeklyLoad: number;
 }
 

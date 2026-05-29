@@ -31,6 +31,7 @@ import {
   INITIAL_STUDENTS, 
   generatePrepopulatedSchedules 
 } from './mockData';
+import './CourseSchedulerStyles.css';
 
 // Days mapping
 const DAYS = [
@@ -55,6 +56,13 @@ const PERIODS_METADATA = [
   { type: 'period', num: 8, name: "第八节", time: "16:30 - 17:10" },
 ];
 
+const getPeriodScrollbarClass = (periodNum: number) => {
+  if (periodNum <= 2) return 'period-scrollbar-morning-early';
+  if (periodNum <= 4) return 'period-scrollbar-morning-late';
+  if (periodNum <= 6) return 'period-scrollbar-afternoon-early';
+  return 'period-scrollbar-afternoon-late';
+};
+
 export default function App() {
   // Application Data States
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -69,7 +77,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'board' | 'management'>('board');
   const [selectedGrade, setSelectedGrade] = useState<string>('高二');
   const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students'>('teachers');
-  const [showRightSidebar, setShowRightSidebar] = useState<boolean>(false);
 
   // Base Data Edit States
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
@@ -89,6 +96,7 @@ export default function App() {
   // Modals
   const [showAddTeacherModal, setShowAddTeacherModal] = useState<boolean>(false);
   const [showAddClassroomModal, setShowAddClassroomModal] = useState<boolean>(false);
+  const [showSubstituteDialog, setShowSubstituteDialog] = useState<boolean>(false);
   const [showJSONModal, setShowJSONModal] = useState<boolean>(false);
   const [showConflictsModal, setShowConflictsModal] = useState<boolean>(false);
   const [jsonRawText, setJsonRawText] = useState<string>('');
@@ -214,6 +222,7 @@ export default function App() {
         setSchedules(initialSchedules);
         setSelectedCell(null);
         setSubstituteData(null);
+        setShowSubstituteDialog(false);
         
         updateConflicts(initialSchedules, initialTeachers, initialClassrooms, initialTeachingClasses, initialStudents);
       } catch (err) {
@@ -329,7 +338,8 @@ export default function App() {
   // Substitute Recommend Trigger
   const handleSelectCell = async (item: ScheduleItem) => {
     setSelectedCell(item);
-    setShowRightSidebar(true);
+    setSubstituteData(null);
+    setShowSubstituteDialog(true);
     setSubstituteLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -340,6 +350,13 @@ export default function App() {
     } finally {
       setSubstituteLoading(false);
     }
+  };
+
+  const closeSubstituteDialog = () => {
+    setShowSubstituteDialog(false);
+    setSelectedCell(null);
+    setSubstituteData(null);
+    setSubstituteLoading(false);
   };
 
   // Confirm Substitute Substitute Action
@@ -364,6 +381,7 @@ export default function App() {
       setSchedules(newSchedules);
       setSelectedCell(null);
       setSubstituteData(null);
+      setShowSubstituteDialog(false);
       updateConflicts(newSchedules, teachers, classrooms, teachingClasses, students);
       alert('代课调优成功应用，课表排期已热更新！');
     }
@@ -517,8 +535,54 @@ export default function App() {
     }
   };
 
+  const gradeTeachers = getGradeTeachers();
+  const gradeTeachingClasses = getGradeTeachingClasses();
+  const gradeStudents = getGradeStudents();
+  const gradeScheduleCount = schedules.filter(s => s.teachingClassName.startsWith(selectedGrade)).length;
+  const criticalConflicts = conflicts.filter(c => c.severity === 'critical');
+  const warningConflicts = conflicts.filter(c => c.severity === 'warning');
+  const hasCriticalConflicts = criticalConflicts.length > 0;
+  const hasDiagnosticWarnings = warningConflicts.length > 0;
+  const diagnosticSummary = `${criticalConflicts.length} 处硬冲突 / ${warningConflicts.length} 条提醒`;
+  const managementStats = [
+    {
+      label: '当前教师',
+      value: gradeTeachers.length,
+      suffix: '人',
+      detail: '参与本年级排课',
+      icon: <Users className="w-4 h-4 text-blue-600" />,
+      className: 'border-blue-100 bg-blue-50/60 text-blue-900'
+    },
+    {
+      label: '授课分工',
+      value: gradeTeachingClasses.length,
+      suffix: '项',
+      detail: '行政班与学科绑定',
+      icon: <Sliders className="w-4 h-4 text-indigo-600" />,
+      className: 'border-indigo-100 bg-indigo-50/60 text-indigo-900'
+    },
+    {
+      label: '走班学生',
+      value: gradeStudents.length,
+      suffix: '人',
+      detail: '已绑定选科组合',
+      icon: <User className="w-4 h-4 text-emerald-600" />,
+      className: 'border-emerald-100 bg-emerald-50/60 text-emerald-900'
+    },
+    {
+      label: '硬冲突',
+      value: criticalConflicts.length,
+      suffix: '处',
+      detail: `${warningConflicts.length} 条提醒 · ${selectedGrade}课表 ${gradeScheduleCount} 节`,
+      icon: <AlertTriangle className="w-4 h-4 text-amber-600" />,
+      className: hasCriticalConflicts ? 'border-rose-100 bg-rose-50/70 text-rose-900' : 'border-amber-100 bg-amber-50/70 text-amber-900'
+    }
+  ];
+  const managementTableShellClass = 'management-table-shell bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col flex-1 min-h-0';
+  const managementTableScrollClass = 'management-table-scroll flex-1 min-h-0 overflow-auto';
+
   return (
-    <div className="flex flex-col h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-600">
+    <div className="course-scheduler-root flex flex-col h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-600">
       
       {/* LOADING SCREEN OVERLAY */}
       {loading && (
@@ -568,23 +632,32 @@ export default function App() {
             <Database className="w-3.5 h-3.5 text-indigo-600" />
             <span>💾 导入/导出 JSON</span>
           </button>
-          {conflicts.length > 0 ? (
+          {hasCriticalConflicts ? (
             <button
               onClick={() => setShowConflictsModal(true)}
-              title="查看排课冲突详情"
+              title="查看排课硬冲突详情"
               className="px-3 py-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors animate-pulse hover:animate-none"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-              <span>⚠️ {conflicts.length} 处排课冲突</span>
+              <span>{criticalConflicts.length} 处硬冲突 · {warningConflicts.length} 条提醒</span>
+            </button>
+          ) : hasDiagnosticWarnings ? (
+            <button
+              onClick={() => setShowConflictsModal(true)}
+              title="查看排课诊断提醒"
+              className="px-3 py-1.5 border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+              <span>0 处硬冲突 · {warningConflicts.length} 条提醒</span>
             </button>
           ) : (
             <button
               onClick={() => setShowConflictsModal(true)}
-              title="查看排课无冲突详情"
+              title="查看排课诊断详情"
               className="px-3 py-1.5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
             >
               <Activity className="w-3.5 h-3.5 text-emerald-600" />
-              <span>🛡️ 排课无冲突</span>
+              <span>硬冲突与提醒均为 0</span>
             </button>
           )}
 
@@ -795,6 +868,7 @@ export default function App() {
                         const cellItems = getFilteredSchedules(day.num, periodMeta.num);
                         const cellConflicts = getCellConflicts(day.num, periodMeta.num);
                         const hasMany = cellItems.length > 3;
+                        const periodScrollbarClass = getPeriodScrollbarClass(periodMeta.num);
 
                         return (
                           <div 
@@ -802,7 +876,7 @@ export default function App() {
                             className={`border-r last:border-r-0 border-slate-200 ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
                           >
                             {cellItems.length > 0 ? (
-                              <div className={`p-1 flex flex-col gap-1 ${hasMany ? 'max-h-[320px] overflow-y-auto' : ''}`}>
+                              <div className={`p-1 flex flex-col gap-1 ${periodScrollbarClass} ${hasMany ? 'max-h-[320px] overflow-y-auto' : ''}`}>
                                 {cellItems.map((item) => {
                                   const isSelected = selectedCell && selectedCell.id === item.id;
                                   return (
@@ -836,148 +910,166 @@ export default function App() {
             </div>
           </main>
 
-        {/* RIGHT SIDEBAR: INTELLIGENT DIAGNOSTICS &代课 */}
-        {showRightSidebar && (
-          <aside id="right_sidebar" className="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0">
-            <div className="p-4 border-b border-slate-100 bg-slate-50/50 shrink-0 flex items-center justify-between select-none">
-              <h3 className="text-sm font-bold flex items-center gap-2">
+        </div>
+      )}
+
+      {/* FLOATING DIALOG: INTELLIGENT DIAGNOSTICS & TEMPORARY SUBSTITUTE */}
+      {showSubstituteDialog && (
+        <div
+          data-ui-surface="substitute-dialog"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 backdrop-blur-sm p-4"
+          style={{ position: 'fixed', inset: 0 }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="数据诊断及临时代课调配"
+        >
+          <button
+            type="button"
+            aria-label="关闭调配弹窗"
+            onClick={closeSubstituteDialog}
+            className="absolute inset-0 cursor-default"
+          />
+
+          <section className="relative z-10 flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl text-left">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-4 select-none">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-pulse"></span>
                 数据诊断及临时代课调配
               </h3>
-              <button 
-                onClick={() => setShowRightSidebar(false)}
-                className="text-slate-400 hover:text-slate-600 p-0.5 hover:bg-slate-200 rounded"
+              <button
+                type="button"
+                aria-label="关闭调配弹窗"
+                onClick={closeSubstituteDialog}
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {selectedCell ? (
-                <div className="p-3.5 rounded-xl border border-blue-200 bg-blue-50/40 text-left">
-                  <div className="flex items-center justify-between mb-2">
+            <div className="overflow-y-auto p-5 space-y-4">
+              {selectedCell && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4">
+                  <div className="mb-3 flex items-center justify-between">
                     <span className="text-[11px] font-extrabold text-blue-800 tracking-tight">【检查授课时段单元】</span>
-                    <button 
-                      onClick={() => { setSelectedCell(null); setSubstituteData(null); }}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-1.5 mb-3 bg-white p-2.5 rounded border border-blue-100 text-xs">
-                    <div className="flex justify-between"><span className="text-slate-400">任教班次</span><span className="font-bold text-slate-800">{selectedCell.teachingClassName}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-400">学科/教室</span><span className="font-semibold text-slate-700">{selectedCell.subject} | {selectedCell.classroomName}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-400">原定老师</span><span className="font-bold text-slate-700">{selectedCell.teacherName} (周{selectedCell.day}第{selectedCell.period}节)</span></div>
-                    {selectedCell.isTemp && <div className="text-[10px] text-orange-600 font-bold">ℹ️ 该课程经历过手动微调。</div>}
+                    <span className="text-[10px] font-bold text-blue-700 bg-white/70 border border-blue-100 rounded-full px-2 py-0.5">
+                      周{selectedCell.day} 第{selectedCell.period}节
+                    </span>
                   </div>
 
-                  {substituteLoading ? (
-                    <div className="flex flex-col items-center justify-center p-4 bg-white rounded border border-blue-100">
-                      <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full mb-1"></div>
-                      <span className="text-[10px] text-slate-500">正在精密校算同组教师课时负荷...</span>
+                  <div className="grid gap-2 rounded-lg border border-blue-100 bg-white p-3 text-xs sm:grid-cols-3">
+                    <div>
+                      <span className="block text-[10px] font-bold text-slate-400">任教班次</span>
+                      <span className="font-bold text-slate-800">{selectedCell.teachingClassName}</span>
                     </div>
-                  ) : (
-                    substituteData && (
-                      <div className="space-y-2">
-                        <span className="text-[10.5px] font-bold text-blue-900 block">推荐代/顶替本学课老师方案：</span>
-                        
-                        <div className="space-y-1.5">
-                          {substituteData.recommendations.map((rec) => {
-                            const disabled = rec.hasConflictOnChosenSlot || rec.suitabilityScore === 0;
-                            return (
-                              <div 
-                                key={rec.teacher.id} 
-                                className={`bg-white p-2.5 rounded border border-slate-200 text-[10.5px] ${disabled ? 'opacity-50' : ''}`}
-                              >
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="font-bold text-slate-800">
-                                    {rec.teacher.name}老师 ({rec.teacher.subjects[0]})
-                                  </span>
-                                  <span className="font-mono text-[9.5px] text-blue-700 bg-blue-50 px-1 font-bold">
-                                    评分 {rec.suitabilityScore}
-                                  </span>
-                                </div>
-                                
-                                <ul className="text-[9.5px] text-slate-500 list-disc list-inside space-y-0.5">
-                                  {rec.reasons.map((r, i) => <li key={i}>{r}</li>)}
-                                </ul>
-
-                                {!disabled ? (
-                                  <button
-                                    onClick={() => handleApplySubstitute(rec.teacher.id)}
-                                    className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 rounded text-[9.5px]"
-                                  >
-                                    选择将其调整为此代课教师
-                                  </button>
-                                ) : (
-                                  <span className="block mt-1 text-[8.5px] text-rose-500 font-medium text-center">
-                                    有冲突！无法安排代课
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ) : (
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-left">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Activity className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span className="text-xs font-bold text-slate-800">代课诊断助手已就绪</span>
+                    <div>
+                      <span className="block text-[10px] font-bold text-slate-400">学科/教室</span>
+                      <span className="font-semibold text-slate-700">{selectedCell.subject} | {selectedCell.classroomName}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[10px] font-bold text-slate-400">原定老师</span>
+                      <span className="font-bold text-slate-700">{selectedCell.teacherName}</span>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-normal">
-                    系统已动态解析全校所有教师的课时负荷及周排期冲突状况。
-                  </p>
-                  <div className="mt-3 p-2 bg-white rounded border border-slate-100 text-[10px] text-slate-400">
-                    💡 提示：点击排课面板中的任何一节课，即可自动加载同教研组无冲突教师，为您一键提供完美的代课、代教优化调配建议。
+                  {selectedCell.isTemp && (
+                    <div className="mt-2 text-[10px] text-orange-600 font-bold">ℹ️ 该课程经历过手动微调。</div>
+                  )}
+
+                  <div className="mt-4">
+                    {substituteLoading ? (
+                      <div className="flex flex-col items-center justify-center rounded-lg border border-blue-100 bg-white p-5">
+                        <div className="mb-2 h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                        <span className="text-[10px] text-slate-500">正在精密校算同组教师课时负荷...</span>
+                      </div>
+                    ) : (
+                      substituteData && (
+                        <div className="space-y-3">
+                          <span className="block text-[11px] font-bold text-blue-900">推荐代/顶替本学课老师方案：</span>
+
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {substituteData.recommendations.map((rec) => {
+                              const disabled = rec.hasConflictOnChosenSlot || rec.hasLoadConflict || rec.hasAvailabilityConflict || rec.suitabilityScore === 0;
+                              return (
+                                <div
+                                  key={rec.teacher.id}
+                                  className={`rounded-lg border border-slate-200 bg-white p-3 text-[10.5px] ${disabled ? 'opacity-50' : ''}`}
+                                >
+                                  <div className="mb-1 flex items-center justify-between gap-2">
+                                    <span className="font-bold text-slate-800">
+                                      {rec.teacher.name}老师 ({rec.teacher.subjects[0]})
+                                    </span>
+                                    <span className="font-mono text-[9.5px] text-blue-700 bg-blue-50 px-1.5 py-0.5 font-bold">
+                                      评分 {rec.suitabilityScore}
+                                    </span>
+                                  </div>
+
+                                  <ul className="text-[9.5px] text-slate-500 list-disc list-inside space-y-0.5">
+                                    {rec.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                                  </ul>
+
+                                  {!disabled ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleApplySubstitute(rec.teacher.id)}
+                                      className="mt-2 w-full rounded bg-blue-600 py-1.5 text-[9.5px] font-bold text-white transition-colors hover:bg-blue-700"
+                                    >
+                                      选择将其调整为此代课教师
+                                    </button>
+                                  ) : (
+                                    <span className="mt-2 block text-center text-[8.5px] font-medium text-rose-500">
+                                      有冲突！无法安排代课
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               )}
 
-              <div 
+              <button
+                type="button"
                 onClick={() => setShowConflictsModal(true)}
-                className="bg-indigo-50/50 hover:bg-indigo-50 p-3.5 rounded-xl border border-indigo-100 text-left cursor-pointer transition-colors"
+                className="w-full rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 text-left transition-colors hover:bg-indigo-50"
               >
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="mb-1.5 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                    <span className="text-xs font-bold text-slate-800">当前排课冲突诊断反馈</span>
+                    <span className="text-xs font-bold text-slate-800">当前排课诊断反馈</span>
                   </div>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none ${
-                    conflicts.length > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                    hasCriticalConflicts ? 'bg-rose-100 text-rose-800' : hasDiagnosticWarnings ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                   }`}>
-                    {conflicts.length > 0 ? conflicts.length + ' 处' : '零冲突'}
+                    {diagnosticSummary}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 leading-normal">
-                  点击此处可打开极简的可滑动 Dialog 诊断详情，全面释放您的屏幕侧边栏空间。
+                  点击此处可打开可滑动诊断详情，分开查看硬冲突、资源负载与数据完整性提醒。
                 </p>
-              </div>
+              </button>
             </div>
-          </aside>
-        )}
+          </section>
         </div>
       )}
 
       {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}
       {activeTab === 'management' && (
-        <main id="data_management" style={{height: 'calc(100vh - 4rem)', overflow: 'hidden', display: 'flex', flexDirection: 'column'}} className="bg-slate-50 text-left w-full">
+        <main id="data_management" className="flex-1 min-h-0 overflow-hidden flex flex-col bg-slate-50 text-left w-full">
           {/* Fixed header area */}
-          <div className="px-6 pt-6 shrink-0">
-            <div className="mb-4 flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">学校教学分工与基础数据</h2>
-                <p className="text-xs text-slate-500 mt-1">
+          <div className="management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80 bg-slate-50">
+            <div className="mb-2 flex flex-wrap justify-between items-start gap-3">
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold text-slate-950 tracking-tight">学校教学分工与基础数据</h2>
+                <p className="text-[11px] text-slate-500 mt-0.5 max-w-4xl leading-relaxed">
                   点击表格中的记录，可直接修改学生的请假信息、走班分配，以及教师的课表偏好和紧急任务状态。数据将热同步至排课底座。
                 </p>
               </div>
               
               {/* Grade Selector on Management Page */}
-              <div className="bg-white rounded-lg border border-slate-200 p-1 flex items-center shadow-sm">
+              <div className="bg-white rounded-lg border border-slate-200 p-1 flex items-center shadow-sm shrink-0">
                 <span className="text-xs text-slate-400 font-bold px-2">当前所选年级:</span>
                 <select 
                   value={selectedGrade}
@@ -994,36 +1086,58 @@ export default function App() {
               </div>
             </div>
 
+            <div className="management-stats-rail grid grid-cols-2 xl:grid-cols-4 gap-2 mb-2">
+              {managementStats.map(stat => (
+                <div key={stat.label} className={`rounded-lg border px-2.5 py-1.5 ${stat.className}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-7 h-7 rounded-lg bg-white/70 border border-white/80 flex items-center justify-center shrink-0">
+                        {stat.icon}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-bold text-slate-500">{stat.label}</div>
+                        <div className="text-[10px] text-slate-400 truncate">{stat.detail}</div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-lg font-black tabular-nums">{stat.value}</span>
+                      <span className="ml-1 text-[10px] font-bold text-slate-500">{stat.suffix}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             {/* Sub-tab selection menu */}
-          <div className="flex border-b border-slate-200 mb-6 space-x-4">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setMgmtSubTab('teachers')}
-              className={`pb-2.5 font-bold text-sm border-b-2 transition-colors ${mgmtSubTab === 'teachers' ? 'text-blue-600 border-blue-600' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
+              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'teachers' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
             >
-              教师排课大表 ({getGradeTeachers().length} 人)
+              教师排课大表 ({gradeTeachers.length} 人)
             </button>
             <button
               onClick={() => setMgmtSubTab('assignments')}
-              className={`pb-2.5 font-bold text-sm border-b-2 transition-colors ${mgmtSubTab === 'assignments' ? 'text-indigo-600 border-indigo-600' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
+              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'assignments' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
             >
               行政班授课分工表 (Excel视图)
             </button>
             <button
               onClick={() => setMgmtSubTab('students')}
-              className={`pb-2.5 font-bold text-sm border-b-2 transition-colors ${mgmtSubTab === 'students' ? 'text-emerald-600 border-emerald-600' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
+              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'students' ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
             >
-              学生走班花名册 ({getGradeStudents().length} 人)
+              学生走班花名册 ({gradeStudents.length} 人)
             </button>
           </div>
           </div>{/* end fixed header shrink-0 */}
 
           {/* Scrollable table content area */}
-          <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0 flex flex-col">
+          <div className="management-content-area flex-1 overflow-hidden px-6 py-3 min-h-0 flex flex-col">
 
           {/* 1. TEACHERS TABLE */}
           {mgmtSubTab === 'teachers' && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
-              <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <div className={managementTableShellClass}>
+              <div className="px-4 py-3 border-b border-slate-100 bg-white flex justify-between items-center shrink-0">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-blue-600" />
                   {selectedGrade}年级教师聘任偏好与排课量限制表
@@ -1036,9 +1150,9 @@ export default function App() {
                   添加教师
                 </button>
               </div>
-              <div className="overflow-x-auto">
+              <div className={managementTableScrollClass}>
                 <table className="w-full text-left border-collapse text-xs">
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200">
                       <th className="p-3 border-r border-slate-200">工号</th>
                       <th className="p-3 border-r border-slate-200">教师姓名</th>
@@ -1102,17 +1216,17 @@ export default function App() {
 
           {/* 2. CLASS ASSIGNMENTS EXCEL-STYLE TABLE */}
           {mgmtSubTab === 'assignments' && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
-              <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <div className={managementTableShellClass}>
+              <div className="px-4 py-3 border-b border-slate-100 bg-white flex justify-between items-center shrink-0">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                   <Sliders className="w-4 h-4 text-indigo-600" />
                   {selectedGrade}年级教师教学岗位聘任与授课分工大表
                 </h3>
                 <span className="text-xs text-slate-400 font-semibold">还原 Excel 经典数据视图</span>
               </div>
-              <div className="overflow-x-auto">
+              <div className={managementTableScrollClass}>
                 <table className="w-full text-left border-collapse text-xs text-center">
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200 text-center">
                       <th className="p-3 border-r border-slate-200 text-left">班级</th>
                       <th className="p-3 border-r border-slate-200 text-left">班型/分层</th>
@@ -1197,17 +1311,17 @@ export default function App() {
 
             {/* 3. STUDENTS TABLE */}
             {mgmtSubTab === 'students' && (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
-                <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <div className={managementTableShellClass}>
+                <div className="px-4 py-3 border-b border-slate-100 bg-white flex justify-between items-center shrink-0">
                   <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                     <User className="w-4 h-4 text-emerald-600" />
                     {selectedGrade}年级学生走班绑定与考勤异常登记表
                   </h3>
                   <span className="text-xs text-slate-400 font-semibold">记录考勤请假与动态走班代码</span>
                 </div>
-                <div className="overflow-x-auto">
+                <div className={managementTableScrollClass}>
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead>
+                    <thead className="sticky top-0 z-10">
                       <tr className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200">
                         <th className="p-3 border-r border-slate-200">学号</th>
                         <th className="p-3 border-r border-slate-200">学生姓名</th>
@@ -1265,7 +1379,7 @@ export default function App() {
                                 <User className="w-7 h-7 text-emerald-300" />
                               </div>
                               <p className="text-sm font-bold text-slate-400">当前年级暂无学生走班数据</p>
-                              <p className="text-xs text-slate-300 mt-1">高二年级走班数据将在学生绑定选科组合后自动加载</p>
+                              <p className="text-xs text-slate-300 mt-1">{selectedGrade}年级走班数据将在学生绑定选科组合后自动加载</p>
                             </div>
                           </td>
                         </tr>
@@ -1683,10 +1797,10 @@ export default function App() {
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-2xl">
               <div className="flex items-center gap-2 text-left">
-                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                <AlertTriangle className={`w-5 h-5 shrink-0 ${hasCriticalConflicts ? 'text-rose-500' : hasDiagnosticWarnings ? 'text-amber-500' : 'text-emerald-500'}`} />
                 <div>
-                  <h3 className="text-sm font-extrabold text-slate-900">智能排课冲突诊断反馈</h3>
-                  <p className="text-[10px] text-slate-400 font-medium">全校教师课时负荷、教室占用及班级时段防重检测</p>
+                  <h3 className="text-sm font-extrabold text-slate-900">智能排课诊断反馈</h3>
+                  <p className="text-[10px] text-slate-400 font-medium">硬冲突、资源负载、课时口径与数据完整性分层检测</p>
                 </div>
               </div>
               <button
@@ -1701,22 +1815,26 @@ export default function App() {
             <div className="p-6 overflow-y-auto space-y-4 text-left flex-1">
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${conflicts.length > 0 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${hasCriticalConflicts ? 'bg-rose-50 text-rose-600' : hasDiagnosticWarnings ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
                     <Activity className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-800">当前校验诊断状态</h4>
-                    <p className="text-[10px] text-slate-500">检测底座真实排课记录与同科目教师周负荷均衡性</p>
+                    <p className="text-[10px] text-slate-500">硬冲突不再与 warning 混算，避免误判排课状态</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  {conflicts.length > 0 ? (
+                  {hasCriticalConflicts ? (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
+                      {criticalConflicts.length} 处硬冲突 / {warningConflicts.length} 条提醒
+                    </span>
+                  ) : hasDiagnosticWarnings ? (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                      ⚠️ {conflicts.length} 处排课冲突
+                      0 处硬冲突 / {warningConflicts.length} 条提醒
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                      ✅ 全校冲突零报错
+                      硬冲突与提醒均为 0
                     </span>
                   )}
                 </div>
@@ -1749,7 +1867,7 @@ export default function App() {
                           <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-sm uppercase ${
                             c.severity === 'critical' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white'
                           }`}>
-                            {c.severity === 'critical' ? '严峻碰撞' : '轻微警告'}
+                            {c.severity === 'critical' ? '硬冲突' : '诊断提醒'}
                           </span>
                         </div>
                         <p className="text-[11px] font-bold text-slate-800 mt-1.5 leading-relaxed">{c.message}</p>
@@ -1764,8 +1882,8 @@ export default function App() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <h4 className="text-xs font-bold text-slate-800">全校排课冲突零碰撞</h4>
-                  <p className="text-[11px] text-slate-400 mt-1">目前各个行政班、教学班 and 教室教师时段完全无重叠，通道通畅！</p>
+                  <h4 className="text-xs font-bold text-slate-800">硬冲突与诊断提醒均为 0</h4>
+                  <p className="text-[11px] text-slate-400 mt-1">当前教师、教室、课时口径与学生走班基础数据未发现异常。</p>
                 </div>
               )}
             </div>

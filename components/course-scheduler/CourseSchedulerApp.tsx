@@ -997,9 +997,6 @@ export default function App() {
                                     <span className="font-bold text-slate-800">
                                       {rec.teacher.name}老师 ({rec.teacher.subjects[0]})
                                     </span>
-                                    <span className="font-mono text-[9.5px] text-blue-700 bg-blue-50 px-1.5 py-0.5 font-bold">
-                                      评分 {rec.suitabilityScore}
-                                    </span>
                                   </div>
 
                                   <ul className="text-[9.5px] text-slate-500 list-disc list-inside space-y-0.5">

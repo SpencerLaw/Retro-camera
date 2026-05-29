@@ -31,3 +31,7 @@ runTest('course scheduler no longer reserves a right sidebar for substitute reco
   assert.doesNotMatch(schedulerSource, /<aside\b[^>]*right_sidebar/);
   assert.doesNotMatch(schedulerSource, /w-80[^"'`]*border-l[^"'`]*border-slate-200/);
 });
+
+runTest('substitute recommendation cards do not display suitability scores', () => {
+  assert.doesNotMatch(schedulerSource, /评分\s*\{rec\.suitabilityScore\}/);
+});

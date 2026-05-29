@@ -278,7 +278,7 @@ export const COLLECTION_DETAILS: VanglamDetailCard[] = [
 ];
 
 export const SURFACE_DETAILS: VanglamDetailCard[] = [
-  { id: "texture", eyebrow: "Texture", title: "Material grain and paper memory", body: "Real paper texture gives packaging a calm physical presence before print or finishing begins.", image: "/vanglam/surface-tile.png" },
+  { id: "texture", eyebrow: "Texture · 200+ patterns", title: "Material grain and paper memory", body: "Real paper texture gives packaging a calm physical presence before print or finishing begins.", image: "/vanglam/surface-tile.png" },
   { id: "tactility", eyebrow: "Tactility", title: "Touch-led surface systems", body: "Soft, skin-like or dry-touch finishes make the material memorable without becoming decorative noise." },
   { id: "pearlescent", eyebrow: "Pearlescent", title: "Controlled mineral glow", body: "A restrained light response for beauty, fragrance, invitations and high-end paper objects." },
   { id: "embossing", eyebrow: "Embossing", title: "Pressure, relief and shadow", body: "Embossed and debossed details add structure, hierarchy and a tangible premium signal." },

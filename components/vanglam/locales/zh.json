@@ -9,6 +9,10 @@
     "label": "资料与工具",
     "to": "/vanglam/library-tools"
   },
+  "surfaceTexture": {
+    "term": "纹理（200+纹路）",
+    "eyebrow": "纹理 · 200+纹路"
+  },
   "libraryTools": {
     "eyebrow": "资料与工具",
     "title": "用于快速选材与确认的材料资料库。",

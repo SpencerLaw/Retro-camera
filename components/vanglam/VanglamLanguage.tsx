@@ -77,6 +77,10 @@ interface VanglamJsonCopy {
     label: string;
     to: string;
   };
+  surfaceTexture: {
+    term: string;
+    eyebrow: string;
+  };
   libraryTools: VanglamLibraryToolsCopy;
 }
 
@@ -313,7 +317,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       { id: 'label', name: 'Label', summary: 'Fine & Functional', aria: 'Explore Label collection' },
       { id: 'bespoke', name: 'Bespoke', summary: 'By Your Vision', aria: 'Explore Bespoke collection' },
     ],
-    surfaceTerms: ['Texture', 'Tactility', 'Pearlescent', 'Embossing', 'Coating', 'Foil & Stamping', 'UV & Special'],
+    surfaceTerms: [localizedJsonCopy.en.surfaceTexture.term, 'Tactility', 'Pearlescent', 'Embossing', 'Coating', 'Foil & Stamping', 'UV & Special'],
     applications: [
       { id: 'wine', label: 'Wine & Spirits Labels' },
       { id: 'beauty', label: 'Beauty & Fragrance' },
@@ -343,7 +347,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       surfaces: {
         eyebrow: 'Surfaces',
         title: 'Texture and finishes that bring ideas to life.',
-        body: 'Texture / Tactility / Pearlescent / Embossing / Coating / Foil & Stamping / UV & Special',
+        body: `${localizedJsonCopy.en.surfaceTexture.term} / Tactility / Pearlescent / Embossing / Coating / Foil & Stamping / UV & Special`,
         asideAlt: 'embossed paper texture',
       },
       applications: {
@@ -403,7 +407,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
         { id: 'bespoke', eyebrow: 'Bespoke', title: 'By Your Vision', body: 'Custom color, paper and surface systems developed with brand teams and packaging designers.' },
       ],
       surfaces: [
-        { id: 'texture', eyebrow: 'Texture', title: 'Material grain and paper memory', body: 'Real paper texture gives packaging a calm physical presence before print or finishing begins.', image: '/vanglam/surface-tile.png' },
+        { id: 'texture', eyebrow: localizedJsonCopy.en.surfaceTexture.eyebrow, title: 'Material grain and paper memory', body: 'Real paper texture gives packaging a calm physical presence before print or finishing begins.', image: '/vanglam/surface-tile.png' },
         { id: 'tactility', eyebrow: 'Tactility', title: 'Touch-led surface systems', body: 'Soft, skin-like or dry-touch finishes make the material memorable without becoming decorative noise.' },
         { id: 'pearlescent', eyebrow: 'Pearlescent', title: 'Controlled mineral glow', body: 'A restrained light response for beauty, fragrance, invitations and high-end paper objects.' },
         { id: 'embossing', eyebrow: 'Embossing', title: 'Pressure, relief and shadow', body: 'Embossed and debossed details add structure, hierarchy and a tangible premium signal.' },
@@ -552,7 +556,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       { id: 'label', name: '标签纸', summary: '精细实用', aria: '探索标签纸系列' },
       { id: 'bespoke', name: '定制系统', summary: '因品牌而生', aria: '探索定制系统' },
     ],
-    surfaceTerms: ['纹理', '触感', '珠光', '压纹', '涂布', '烫印', 'UV 与特殊工艺'],
+    surfaceTerms: [localizedJsonCopy.zh.surfaceTexture.term, '触感', '珠光', '压纹', '涂布', '烫印', 'UV 与特殊工艺'],
     applications: [
       { id: 'wine', label: '酒类与烈酒标签' },
       { id: 'beauty', label: '美妆香氛' },
@@ -582,7 +586,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       surfaces: {
         eyebrow: '表面工艺',
         title: '以纹理与工艺让创意成形。',
-        body: '纹理 / 触感 / 珠光 / 压纹 / 涂布 / 烫印 / UV 与特殊工艺',
+        body: `${localizedJsonCopy.zh.surfaceTexture.term} / 触感 / 珠光 / 压纹 / 涂布 / 烫印 / UV 与特殊工艺`,
         asideAlt: '压纹纸张纹理',
       },
       applications: {
@@ -626,7 +630,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
         { id: 'bespoke', eyebrow: '定制系统', title: '因品牌而生', body: '与品牌团队和包装设计师共同开发定制色彩、纸张与表面系统。' },
       ],
       surfaces: [
-        { id: 'texture', eyebrow: '纹理', title: '材料肌理与纸张记忆', body: '真实纸张纹理让包装在印刷与后道之前就拥有安静的物理存在感。', image: '/vanglam/surface-tile.png' },
+        { id: 'texture', eyebrow: localizedJsonCopy.zh.surfaceTexture.eyebrow, title: '材料肌理与纸张记忆', body: '真实纸张纹理让包装在印刷与后道之前就拥有安静的物理存在感。', image: '/vanglam/surface-tile.png' },
         { id: 'tactility', eyebrow: '触感', title: '以手感主导的表面系统', body: '柔触、肤感或干爽触感让材料被记住，而不成为多余装饰。' },
         { id: 'pearlescent', eyebrow: '珠光', title: '克制的矿物光泽', body: '为美妆、香氛、邀请函与高端纸艺物件提供含蓄的光线回应。' },
         { id: 'embossing', eyebrow: '压纹', title: '压力、浮雕与阴影', body: '压纹与凹凸细节增加结构、层级与可触摸的高级信号。' },

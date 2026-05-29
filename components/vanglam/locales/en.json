@@ -9,6 +9,10 @@
     "label": "Library and Tools",
     "to": "/vanglam/library-tools"
   },
+  "surfaceTexture": {
+    "term": "Texture (200+ patterns)",
+    "eyebrow": "Texture · 200+ patterns"
+  },
   "libraryTools": {
     "eyebrow": "Library and Tools",
     "title": "Material libraries for faster specification.",

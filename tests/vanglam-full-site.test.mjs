@@ -5,6 +5,8 @@ const appSource = fs.readFileSync('App.tsx', 'utf8');
 const navbarSource = fs.readFileSync('components/vanglam/VanglamNavbar.tsx', 'utf8');
 const dataSource = fs.readFileSync('components/vanglam/vanglamData.ts', 'utf8');
 const languageSource = fs.readFileSync('components/vanglam/VanglamLanguage.tsx', 'utf8');
+const englishCopy = JSON.parse(fs.readFileSync('components/vanglam/locales/en.json', 'utf8'));
+const chineseCopy = JSON.parse(fs.readFileSync('components/vanglam/locales/zh.json', 'utf8'));
 const pagesFileExists = fs.existsSync('components/vanglam/VanglamPages.tsx');
 const pagesSource = pagesFileExists ? fs.readFileSync('components/vanglam/VanglamPages.tsx', 'utf8') : '';
 const cssSource = fs.readFileSync('components/vanglam/vanglam.css', 'utf8');
@@ -101,6 +103,17 @@ runTest('site data includes the PDF V1 secondary page datasets', () => {
   ]) {
     assert.match(dataSource, new RegExp(sampleField));
   }
+});
+
+runTest('surfaces copy calls out the 200-plus texture library in both languages', () => {
+  assert.equal(englishCopy.surfaceTexture.term, 'Texture (200+ patterns)');
+  assert.equal(englishCopy.surfaceTexture.eyebrow, 'Texture · 200+ patterns');
+  assert.equal(chineseCopy.surfaceTexture.term, '纹理（200+纹路）');
+  assert.equal(chineseCopy.surfaceTexture.eyebrow, '纹理 · 200+纹路');
+  assert.match(languageSource, /localizedJsonCopy\.en\.surfaceTexture\.term/);
+  assert.match(languageSource, /localizedJsonCopy\.en\.surfaceTexture\.eyebrow/);
+  assert.match(languageSource, /localizedJsonCopy\.zh\.surfaceTexture\.term/);
+  assert.match(languageSource, /localizedJsonCopy\.zh\.surfaceTexture\.eyebrow/);
 });
 
 runTest('secondary pages use the VANGLAM editorial page styling system', () => {

@@ -89,6 +89,9 @@ export default function App() {
   // Modals
   const [showAddTeacherModal, setShowAddTeacherModal] = useState<boolean>(false);
   const [showAddClassroomModal, setShowAddClassroomModal] = useState<boolean>(false);
+  const [showJSONModal, setShowJSONModal] = useState<boolean>(false);
+  const [jsonRawText, setJsonRawText] = useState<string>('');
+  const [jsonError, setJsonError] = useState<string>('');
   
   // Modals Form Data
   const [newTeacherName, setNewTeacherName] = useState('');
@@ -217,6 +220,49 @@ export default function App() {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const handleOpenJSONModal = () => {
+    setJsonError('');
+    const exportData = {
+      teachers,
+      classrooms,
+      teachingClasses,
+      students,
+      schedules
+    };
+    setJsonRawText(JSON.stringify(exportData, null, 2));
+    setShowJSONModal(true);
+  };
+
+  const handleJSONImportSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setJsonError('');
+    try {
+      const parsed = JSON.parse(jsonRawText);
+      if (!parsed.teachers || !parsed.classrooms || !parsed.teachingClasses || !parsed.schedules) {
+        throw new Error("JSON数据结构不规范！缺少必要的 'teachers', 'classrooms', 'teachingClasses' 或 'schedules' 字段。");
+      }
+      
+      setTeachers(parsed.teachers);
+      setClassrooms(parsed.classrooms);
+      setTeachingClasses(parsed.teachingClasses);
+      setStudents(parsed.students || []);
+      setSchedules(parsed.schedules);
+      
+      updateConflicts(
+        parsed.schedules,
+        parsed.teachers,
+        parsed.classrooms,
+        parsed.teachingClasses,
+        parsed.students || []
+      );
+      
+      setShowJSONModal(false);
+      alert("🎉 JSON 备份数据覆盖导入成功！课表网格与冲突诊断已实时调度热更新。");
+    } catch (err: any) {
+      setJsonError(`解析/导入出现错误: ${err.message}`);
     }
   };
 
@@ -505,6 +551,14 @@ export default function App() {
         {/* SYSTEM ACTIONS & HEADER CONTROLS */}
         <div className="flex items-center gap-4">
           <button
+            onClick={handleOpenJSONModal}
+            title="JSON 数据导入与导出备份"
+            className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+          >
+            <Database className="w-3.5 h-3.5 text-indigo-600" />
+            <span>💾 导入/导出 JSON</span>
+          </button>
+          <button
             onClick={() => setShowRightSidebar(!showRightSidebar)}
             title="数据诊断与临时代课调配面板"
             className={`px-3 py-1.5 border rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors ${showRightSidebar ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
@@ -671,28 +725,11 @@ export default function App() {
                     return (
                       <div key={`spacer-${pIdx}`} className="grid grid-cols-6 min-h-[40px] bg-slate-50/50 hover:bg-slate-50 text-slate-400">
                         <div className="p-2 border-r border-slate-200 flex flex-col justify-center items-center">
-                          <span className="text-[10px] font-bold tracking-tight">课间操安排</span>
+                          <span className="text-[10px] font-bold tracking-tight">大课间休息</span>
                           <span className="text-[8px] text-slate-400 leading-none">09:30-10:10</span>
                         </div>
-                        <div className="col-span-1 border-r border-slate-200 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1"></div>
-                          <span className="text-[10.5px] font-bold text-slate-500">周一广播晨操</span>
-                        </div>
-                        <div className="col-span-1 border-r border-slate-200 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1"></div>
-                          <span className="text-[10.5px] font-bold text-slate-500">周二武术形武</span>
-                        </div>
-                        <div className="col-span-1 border-r border-slate-100 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1"></div>
-                          <span className="text-[10.5px] font-bold text-slate-500">周三户外跑操</span>
-                        </div>
-                        <div className="col-span-1 border-r border-slate-100 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 bg-violet-500 rounded-full mr-1"></div>
-                          <span className="text-[10.5px] font-bold text-slate-500">周四教研研讨</span>
-                        </div>
-                        <div className="col-span-1 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mr-1"></div>
-                          <span className="text-[10.5px] font-bold text-slate-500">周五自由晨跑</span>
+                        <div className="col-span-5 flex items-center justify-center text-xs font-semibold text-slate-500 space-x-1">
+                          <span>大课间体育操与自主活动时段</span>
                         </div>
                       </div>
                     );
@@ -1477,6 +1514,100 @@ export default function App() {
                 <div className="pt-2 flex justify-end gap-2">
                   <button type="button" onClick={() => setShowAddClassroomModal(false)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors font-bold">取消</button>
                   <button type="submit" className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded shadow-md transition-colors font-bold">确认增设</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. JSON IMPORT/EXPORT MODAL */}
+      {showJSONModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <Database className="w-5 h-5 text-indigo-600" />
+                教学排课数据 JSON 导入与本地备份
+              </h3>
+              <button 
+                onClick={() => setShowJSONModal(false)} 
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                系统采用 100% 本地运行。您可以在此处将当前的全部教师、教室、授课分工及课表网格数据打包导出，复制为 JSON 字符串保存备份，或粘贴之前导出的 JSON 数据流来批量重置初始化排课底座。
+              </p>
+              
+              {jsonError && (
+                <div className="p-3 bg-rose-50 border border-rose-100 text-rose-700 rounded-lg text-xs font-semibold mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{jsonError}</span>
+                </div>
+              )}
+              
+              <form onSubmit={handleJSONImportSubmit} className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-bold text-slate-700">JSON 数据流编辑与贴入区 (可自由复制或粘贴覆盖)</label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(jsonRawText);
+                          alert("📋 已成功将当前 JSON 数据复制到您的系统剪贴板。");
+                        }}
+                        className="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded transition-colors"
+                      >
+                        📋 复制 JSON
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const blob = new Blob([jsonRawText], { type: 'application/json' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `智能排课系统_数据备份_${new Date().toISOString().slice(0, 10)}.json`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        }}
+                        className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded transition-colors"
+                      >
+                        ⬇️ 下载 JSON 备份文件
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    required
+                    value={jsonRawText}
+                    onChange={e => setJsonRawText(e.target.value)}
+                    rows={12}
+                    className="w-full font-mono text-[10px] bg-slate-900 text-slate-100 p-4 rounded-xl border border-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    placeholder="在此处贴入干净的 JSON 备份数据..."
+                  />
+                </div>
+                
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowJSONModal(false)} 
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-bold text-xs"
+                  >
+                    取消
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition-colors font-bold text-xs"
+                  >
+                    确认覆盖导入
+                  </button>
                 </div>
               </form>
             </div>

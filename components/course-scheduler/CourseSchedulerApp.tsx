@@ -51,8 +51,12 @@ export default function App() {
   // Loading & View Controls
   const [loading, setLoading] = useState<boolean>(true);
   const [generating, setGenerating] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'board' | 'resources' | 'analysis'>('board');
-  
+  const [activeTab, setActiveTab] = useState<'board' | 'resources' | 'analysis' | 'management'>('board');
+
+  // Base Data Edit States
+  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+
   // Filter states for Schedule Grid
   const [gradeFilter, setGradeFilter] = useState<string>('all');
   const [combinationFilter, setCombinationFilter] = useState<string>('all');
@@ -868,6 +872,23 @@ export default function App() {
     }
   };
 
+  // Data Management Handlers
+  const handleSaveTeacher = () => {
+    if (!editingTeacher) return;
+    const newTeachers = teachers.map(t => t.id === editingTeacher.id ? editingTeacher : t);
+    setTeachers(newTeachers);
+    updateConflicts(schedules, newTeachers, classrooms, teachingClasses, students, configSettings);
+    setEditingTeacher(null);
+  };
+
+  const handleSaveStudent = () => {
+    if (!editingStudent) return;
+    const newStudents = students.map(s => s.id === editingStudent.id ? editingStudent : s);
+    setStudents(newStudents);
+    updateConflicts(schedules, teachers, classrooms, teachingClasses, newStudents, configSettings);
+    setEditingStudent(null);
+  };
+
   return (
     <div id="app_root" className="w-full h-screen bg-slate-100 flex flex-col font-sans text-slate-800 overflow-hidden leading-relaxed">
       
@@ -894,25 +915,31 @@ export default function App() {
             </div>
 
             <nav className="flex gap-4">
-            <button 
+            <button
               onClick={() => setActiveTab('board')}
               className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'board' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
             >
               动态排课看板
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('resources')}
               className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'resources' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
             >
               教师与教室资源
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('analysis')}
               className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'analysis' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
             >
               数理利用审计
             </button>
-          </nav>
+            <button
+              onClick={() => setActiveTab('management')}
+              className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'management' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
+            >
+              基础数据管理
+            </button>
+            </nav>
         </div>
 
         {/* SYSTEM ACTIONS & ROLE SELECTION FOR MULTI-ROLE */}
@@ -1863,7 +1890,230 @@ export default function App() {
         </aside>
       </div>
 
+      {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}
+      {activeTab === 'management' && (
+          <main id="data_management" className="flex-1 p-6 flex flex-col min-w-0 overflow-y-auto bg-slate-50 text-left">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">基础数据源管理</h2>
+              <p className="text-xs text-slate-500 mt-1">
+                点击表格中的记录，可直接修改学生的请假信息、走班分配，以及教师的课表偏好和紧急任务状态。数据将热同步至排课底座。
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Teacher Management Section */}
+              <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col max-h-[600px]">
+                <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    授课教师名单与请假偏好设定
+                  </h3>
+                  <span className="text-xs text-slate-500">{teachers.length} 名教师</span>
+                </div>
+                <div className="overflow-y-auto p-2">
+                  <div className="space-y-2">
+                    {teachers.map(t => (
+                      <div key={t.id} className="p-3 bg-white border border-slate-100 rounded-lg hover:border-blue-200 hover:shadow-sm transition-all flex justify-between items-start group">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-slate-800">{t.name}</span>
+                            <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-bold">{t.subjects.join(',')}</span>
+                            <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[9px]">{t.department}</span>
+                          </div>
+                          {t.preferences && t.preferences !== '无' && t.preferences !== '暂无偏好' ? (
+                            <p className="text-xs text-orange-600 mt-1 flex items-start gap-1">
+                              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                              <span>请假/偏好备注：{t.preferences}</span>
+                            </p>
+                          ) : (
+                            <p className="text-xs text-slate-400 mt-1">目前正常出勤，无特殊偏好备注。</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setEditingTeacher(t)}
+                          className="px-2.5 py-1 text-xs bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 rounded border border-slate-200 hover:border-blue-200 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                        >
+                          编辑
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Student Management Section */}
+              <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col max-h-[600px]">
+                <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                    <User className="w-4 h-4 text-emerald-600" />
+                    学生档案、走班绑定与考勤异常
+                  </h3>
+                  <span className="text-xs text-slate-500">{students.length} 名学生</span>
+                </div>
+                <div className="overflow-y-auto p-2">
+                  <div className="space-y-2">
+                    {students.map(s => (
+                      <div key={s.id} className="p-3 bg-white border border-slate-100 rounded-lg hover:border-emerald-200 hover:shadow-sm transition-all flex justify-between items-start group">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-slate-800">{s.name}</span>
+                            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[9px] font-bold">{s.electiveCombo}</span>
+                          </div>
+                          
+                          <div className="text-xs text-slate-500 mt-1 line-clamp-1">
+                            绑定的走班代码：{s.classes.length > 0 ? s.classes.join(', ') : '未选课'}
+                          </div>
+
+                          {s.note && (
+                            <p className="text-xs text-rose-600 mt-1 flex items-start gap-1">
+                              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                              <span>请假/特殊备注：{s.note}</span>
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setEditingStudent(s)}
+                          className="px-2.5 py-1 text-xs bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 rounded border border-slate-200 hover:border-emerald-200 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                        >
+                          编辑
+                        </button>
+                      </div>
+                    ))}
+                    {students.length === 0 && (
+                      <div className="p-8 text-center text-slate-400 text-xs">
+                        当前暂无学生记录，请在侧边栏使用 JSON 导入功能添加完整数据。
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </main>
+        )}
+
       {/* --- ALL POPUP MODAL OVERLAYS IN THE GEOMETRIC MOOD STYLE --- */}
+
+      {/* EDIT TEACHER MODAL */}
+      {editingTeacher && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden text-left animate-in fade-in zoom-in-95 duration-200">
+            <div className="h-2 bg-blue-600"></div>
+            <div className="p-5">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-base text-slate-900 flex items-center gap-1">
+                  <User className="w-5 h-5 text-blue-600" />
+                  编辑教师与偏好设置
+                </h3>
+                <button onClick={() => setEditingTeacher(null)} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-xs font-medium">
+                <div>
+                  <label className="block text-slate-600 mb-1">教师姓名</label>
+                  <input
+                    type="text"
+                    value={editingTeacher.name}
+                    onChange={e => setEditingTeacher({ ...editingTeacher, name: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded p-2 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 mb-1">休假/排课偏好 (紧急任务、出差、请假等)</label>
+                  <textarea
+                    rows={3}
+                    value={editingTeacher.preferences}
+                    onChange={e => setEditingTeacher({ ...editingTeacher, preferences: e.target.value })}
+                    placeholder="例如：因病假本周三停课，或市级教研任务需回避周五..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded p-2 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div className="pt-2 flex justify-end gap-2">
+                  <button onClick={() => setEditingTeacher(null)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors font-bold">取消</button>
+                  <button onClick={handleSaveTeacher} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow-md shadow-blue-200 transition-colors font-bold">保存并同步</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT STUDENT MODAL */}
+      {editingStudent && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden text-left animate-in fade-in zoom-in-95 duration-200">
+            <div className="h-2 bg-emerald-600"></div>
+            <div className="p-5">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-base text-slate-900 flex items-center gap-1">
+                  <User className="w-5 h-5 text-emerald-600" />
+                  编辑学生与走班关联
+                </h3>
+                <button onClick={() => setEditingStudent(null)} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-xs font-medium">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-600 mb-1">学生姓名</label>
+                    <input
+                      type="text"
+                      value={editingStudent.name}
+                      onChange={e => setEditingStudent({ ...editingStudent, name: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-2 focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-600 mb-1">选考组合</label>
+                    <input
+                      type="text"
+                      value={editingStudent.electiveCombo}
+                      onChange={e => setEditingStudent({ ...editingStudent, electiveCombo: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-2 focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-slate-600 mb-1">请假/特殊备注</label>
+                  <input
+                    type="text"
+                    value={editingStudent.note || ''}
+                    onChange={e => setEditingStudent({ ...editingStudent, note: e.target.value })}
+                    placeholder="例如：因病请假三天，或隔离观察..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded p-2 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 mb-1">参与走班班级 (用逗号分隔多个班级代码)</label>
+                  <input
+                    type="text"
+                    value={editingStudent.classes.join(', ')}
+                    onChange={e => {
+                      const str = e.target.value;
+                      const arr = str.split(',').map(s => s.trim()).filter(Boolean);
+                      setEditingStudent({ ...editingStudent, classes: arr });
+                    }}
+                    placeholder="例如：TC001, TC002"
+                    className="w-full bg-slate-50 border border-slate-200 rounded p-2 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+                
+                <div className="pt-2 flex justify-end gap-2">
+                  <button onClick={() => setEditingStudent(null)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors font-bold">取消</button>
+                  <button onClick={handleSaveStudent} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded shadow-md shadow-emerald-200 transition-colors font-bold">保存并同步</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 1. ADD TEACHER MODAL */}
       {showAddTeacherModal && (

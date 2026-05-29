@@ -48,9 +48,9 @@ runTest('VANGLAM pages render copy through the language dictionary', () => {
   assert.match(languageSource, /Soul of Color\. Signature in Every Surface\./);
   assert.match(languageSource, /灵魂之色，落于每一寸纸面/);
   assert.match(languageSource, /REQUEST SAMPLE KIT/);
-  assert.match(languageSource, /Library and Tools/);
+  assert.match(languageSource, /localizedJsonCopy\.en\.navAction\.label/);
   assert.match(languageSource, /索取样品套装/);
-  assert.match(languageSource, /资料与工具/);
+  assert.match(languageSource, /localizedJsonCopy\.zh\.navAction\.label/);
   assert.match(languageSource, /Color System/);
   assert.match(languageSource, /色彩系统/);
 });

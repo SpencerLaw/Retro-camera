@@ -26,8 +26,11 @@ const vanglamRoutes = [
   '/vanglam/applications',
   '/vanglam/artcard-lab',
   '/vanglam/atelier',
+  '/vanglam/library-tools',
   '/vanglam/request-sample-kit',
 ];
+
+const primaryNavRoutes = vanglamRoutes.slice(0, 6);
 
 runTest('App wires every PDF V1 secondary page under the VANGLAM site namespace', () => {
   for (const route of vanglamRoutes) {
@@ -40,6 +43,7 @@ runTest('App wires every PDF V1 secondary page under the VANGLAM site namespace'
     'VanglamApplicationsPage',
     'VanglamArtcardLabPage',
     'VanglamAtelierPage',
+    'VanglamLibraryToolsPage',
     'VanglamRequestSampleKitPage',
   ]) {
     assert.match(appSource, new RegExp(component));
@@ -47,10 +51,10 @@ runTest('App wires every PDF V1 secondary page under the VANGLAM site namespace'
 });
 
 runTest('VANGLAM navigation links to real pages, not only homepage anchors', () => {
-  for (const route of vanglamRoutes.slice(0, -1)) {
+  for (const route of primaryNavRoutes) {
     assert.match(languageSource, new RegExp(`to: '${route}'`));
   }
-  assert.match(navbarSource, /to="\/vanglam\/request-sample-kit"/);
+  assert.match(navbarSource, /to=\{copy\.navActionTo\}/);
   assert.doesNotMatch(navbarSource, /href: '#color-system'/);
   assert.doesNotMatch(navbarSource, /scrollToSection/);
 });

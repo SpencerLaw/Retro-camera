@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { RequestSampleField, VanglamDetailCard } from './vanglamData';
+import englishCopy from './locales/en.json';
+import chineseCopy from './locales/zh.json';
 
 export type VanglamLanguage = 'en' | 'zh';
 
@@ -45,12 +47,40 @@ interface VanglamFooterColumn {
   links: Array<{ label: string; to: string }>;
 }
 
+interface VanglamLibraryTool {
+  id: string;
+  kicker: string;
+  title: string;
+  body: string;
+  items: string[];
+}
+
+interface VanglamLibraryToolsCopy {
+  eyebrow: string;
+  title: string;
+  body: string;
+  asideTitle: string;
+  asideBody: string;
+  ctaLabel: string;
+  ctaTo: string;
+  libraries: VanglamLibraryTool[];
+}
+
+interface VanglamJsonCopy {
+  navAction: {
+    label: string;
+    to: string;
+  };
+  libraryTools: VanglamLibraryToolsCopy;
+}
+
 interface VanglamCopy {
   brandHomeAria: string;
   brandTagline: string;
   navAria: string;
   nav: VanglamNavItem[];
   navAction: string;
+  navActionTo: string;
   requestSample: string;
   languageToggleAria: string;
   home: VanglamHomeCopy;
@@ -82,6 +112,7 @@ interface VanglamCopy {
     familyDescriptions: Record<string, string>;
   };
   processIconLabel: string;
+  libraryTools: VanglamLibraryToolsCopy;
   requestAside: string;
   projectIntake: string;
   projectIntakeTitle: string;
@@ -185,6 +216,11 @@ const chineseRequestFields: RequestSampleField[] = [
   { id: requestFieldIds[11], label: '项目说明', type: 'textarea' },
 ];
 
+const localizedJsonCopy: Record<VanglamLanguage, VanglamJsonCopy> = {
+  en: englishCopy as VanglamJsonCopy,
+  zh: chineseCopy as VanglamJsonCopy,
+};
+
 const copies: Record<VanglamLanguage, VanglamCopy> = {
   en: {
     brandHomeAria: 'QiLi Paper VANGLAM homepage',
@@ -198,7 +234,8 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       { key: 'artcard-lab', label: 'Artcard Lab', to: '/vanglam/artcard-lab' },
       { key: 'atelier', label: 'Atelier', to: '/vanglam/atelier' },
     ],
-    navAction: 'Library and Tools',
+    navAction: localizedJsonCopy.en.navAction.label,
+    navActionTo: localizedJsonCopy.en.navAction.to,
     requestSample: 'REQUEST SAMPLE KIT',
     languageToggleAria: 'Switch to Chinese',
     home: {
@@ -401,6 +438,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       },
     },
     processIconLabel: 'Atelier process',
+    libraryTools: localizedJsonCopy.en.libraryTools,
     requestAside: 'Sample requests are routed by project, application and finishing needs.',
     projectIntake: 'Project Intake',
     projectIntakeTitle: 'Tell us what your material needs to do.',
@@ -460,7 +498,8 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       { key: 'artcard-lab', label: '艺术卡实验室', to: '/vanglam/artcard-lab' },
       { key: 'atelier', label: '纸艺工坊', to: '/vanglam/atelier' },
     ],
-    navAction: '资料与工具',
+    navAction: localizedJsonCopy.zh.navAction.label,
+    navActionTo: localizedJsonCopy.zh.navAction.to,
     requestSample: '索取样品套装',
     languageToggleAria: '切换到英文',
     home: {
@@ -620,6 +659,7 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
       },
     },
     processIconLabel: '工坊流程',
+    libraryTools: localizedJsonCopy.zh.libraryTools,
     requestAside: '样品请求会根据项目、应用场景与后道工艺需求进行分配。',
     projectIntake: '项目需求',
     projectIntakeTitle: '告诉我们材料需要完成什么任务。',

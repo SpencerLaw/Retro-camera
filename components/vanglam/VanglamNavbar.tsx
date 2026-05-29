@@ -30,7 +30,7 @@ export const VanglamNavbar: React.FC = () => {
         </nav>
 
         <div className="vanglam-nav-actions">
-          <Link className="vanglam-nav-cta" to="/vanglam/request-sample-kit">
+          <Link className="vanglam-nav-cta" to={copy.navActionTo}>
             {copy.navAction}
           </Link>
           <button

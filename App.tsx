@@ -21,6 +21,7 @@ import {
   VanglamAtelierPage,
   VanglamCollectionsPage,
   VanglamColorSystemPage,
+  VanglamLibraryToolsPage,
   VanglamRequestSampleKitPage,
   VanglamSurfacesPage,
 } from './components/vanglam/VanglamPages';
@@ -70,6 +71,7 @@ const App: React.FC = () => {
           <Route path="/vanglam/applications" element={withVanglamLanguage(<VanglamApplicationsPage />)} />
           <Route path="/vanglam/artcard-lab" element={withVanglamLanguage(<VanglamArtcardLabPage />)} />
           <Route path="/vanglam/atelier" element={withVanglamLanguage(<VanglamAtelierPage />)} />
+          <Route path="/vanglam/library-tools" element={withVanglamLanguage(<VanglamLibraryToolsPage />)} />
           <Route path="/vanglam/request-sample-kit" element={withVanglamLanguage(<VanglamRequestSampleKitPage />)} />
           <Route path="/vanglam-42" element={<VanglamColorDeck />} />
 

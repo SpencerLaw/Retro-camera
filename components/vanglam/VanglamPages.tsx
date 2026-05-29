@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Layers, Send } from 'lucide-react';
+import {
+  ArrowRight,
+  Boxes,
+  Check,
+  FingerprintPattern,
+  Layers,
+  Palette,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  SwatchBook,
+  WandSparkles,
+} from 'lucide-react';
 import { VanglamNavbar } from './VanglamNavbar';
 import { VanglamFooter } from './VanglamFooter';
 import { useVanglamCopy, useVanglamLanguage } from './VanglamLanguage';
@@ -11,6 +23,15 @@ import {
 } from './vanglamData';
 import type { RequestSampleField, VanglamDetailCard } from './vanglamData';
 import './vanglam.css';
+
+const libraryToolIcons: Record<string, React.ElementType> = {
+  'color-matching': Palette,
+  'paper-texture': SwatchBook,
+  'paper-sample-craft': Boxes,
+  customization: WandSparkles,
+  'anti-counterfeiting': ShieldCheck,
+  'special-process': Sparkles,
+};
 
 interface PageFrameProps {
   eyebrow: string;
@@ -228,6 +249,53 @@ export const VanglamAtelierPage: React.FC = () => {
         })}
       </section>
       <DetailGrid items={copy.details.atelierStory} />
+    </PageFrame>
+  );
+};
+
+export const VanglamLibraryToolsPage: React.FC = () => {
+  const copy = useVanglamCopy();
+
+  return (
+    <PageFrame
+      eyebrow={copy.libraryTools.eyebrow}
+      title={copy.libraryTools.title}
+      body={copy.libraryTools.body}
+      aside={
+        <div className="vanglam-library-tool-aside">
+          <FingerprintPattern size={28} strokeWidth={1.1} />
+          <h2>{copy.libraryTools.asideTitle}</h2>
+          <p>{copy.libraryTools.asideBody}</p>
+        </div>
+      }
+    >
+      <section className="vanglam-library-tool-grid" aria-label={copy.libraryTools.title}>
+        {copy.libraryTools.libraries.map((library, index) => {
+          const Icon = libraryToolIcons[library.id] || Layers;
+
+          return (
+            <article key={library.id} className="vanglam-library-tool-card">
+              <div className="vanglam-library-tool-card-icon">
+                <Icon size={25} strokeWidth={1.25} aria-hidden="true" />
+              </div>
+              <span>{String(index + 1).padStart(2, '0')} / {library.kicker}</span>
+              <h2>{library.title}</h2>
+              <p>{library.body}</p>
+              <ul>
+                {library.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </article>
+          );
+        })}
+      </section>
+
+      <section className="vanglam-library-tool-cta">
+        <Link to={copy.libraryTools.ctaTo}>
+          {copy.libraryTools.ctaLabel} <ArrowRight size={14} strokeWidth={1.6} />
+        </Link>
+      </section>
     </PageFrame>
   );
 };

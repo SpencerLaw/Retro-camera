@@ -73,7 +73,7 @@ runTest('navigation labels mirror the V1 primary navigation', () => {
   for (const label of ['Color System', 'Collections', 'Surfaces', 'Applications', 'Artcard Lab', 'Atelier']) {
     assert.match(languageSource, new RegExp(label));
   }
-  assert.match(languageSource, /Library and Tools/);
+  assert.match(languageSource, /localizedJsonCopy\.en\.navAction\.label/);
   assert.match(languageSource, /REQUEST SAMPLE KIT/);
   assert.doesNotMatch(navbarSource, /VANGLAM 42/);
 });

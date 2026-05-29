@@ -75,6 +75,7 @@ export default function App() {
   // Loading & View Controls
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'board' | 'management'>('board');
+  const [isTabLayoutPinned, setIsTabLayoutPinned] = useState<boolean>(false);
   const [selectedGrade, setSelectedGrade] = useState<string>('高二');
   const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students'>('teachers');
 
@@ -231,6 +232,16 @@ export default function App() {
         setLoading(false);
       }
     }
+  };
+
+  const handleSchedulerScroll = (event: React.UIEvent<HTMLElement>) => {
+    const nextPinned = event.currentTarget.scrollTop > 24;
+    setIsTabLayoutPinned(current => current === nextPinned ? current : nextPinned);
+  };
+
+  const handleViewTabChange = (tab: 'board' | 'management') => {
+    setActiveTab(tab);
+    setIsTabLayoutPinned(false);
   };
 
   const handleOpenJSONModal = () => {
@@ -593,7 +604,7 @@ export default function App() {
       )}
 
       {/* TOP HEADER NAVIGATION AREA */}
-      <header id="main_header" className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-30 shadow-xs">
+      <header id="main_header" className={`scheduler-main-header h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-30 shadow-xs ${isTabLayoutPinned ? 'scheduler-main-header--tabs' : ''}`}>
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 bg-blue-600 rounded flex items-center justify-center shadow-md shadow-blue-200">
@@ -606,16 +617,16 @@ export default function App() {
             </div>
           </div>
 
-          <nav className="flex gap-4">
+          <nav className={`scheduler-view-tabs ${isTabLayoutPinned ? 'scheduler-view-tabs--pinned' : ''}`} aria-label="排班视图切换">
             <button
-              onClick={() => setActiveTab('board')}
-              className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'board' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
+              onClick={() => handleViewTabChange('board')}
+              className={activeTab === 'board' ? 'scheduler-view-tab is-active' : 'scheduler-view-tab'}
             >
               动态排课主看板
             </button>
             <button
-              onClick={() => setActiveTab('management')}
-              className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'management' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
+              onClick={() => handleViewTabChange('management')}
+              className={activeTab === 'management' ? 'scheduler-view-tab is-active' : 'scheduler-view-tab'}
             >
               学校教学分工与基础数据
             </button>
@@ -681,10 +692,10 @@ export default function App() {
         <div className="flex flex-1 overflow-hidden min-h-0">
           
           {/* MIDDLE SECTION: MAIN VIEW TIMETABLE GRID */}
-          <main id="main_grid" className="scheduler-board-scroll flex-1 p-6 flex flex-col min-w-0 overflow-y-auto">
+          <main id="main_grid" className="scheduler-board-scroll flex-1 p-6 flex flex-col min-w-0 overflow-y-auto" onScroll={handleSchedulerScroll}>
             
             {/* VIEW TITLE AND ACTIVE FILTERS HEADBOARD */}
-            <div className="scheduler-app-topbar scheduler-board-appbar flex justify-between items-end shrink-0">
+            <div className="scheduler-page-head scheduler-board-head flex justify-between items-end mb-4 shrink-0">
               <div className="text-left">
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{getActiveFilterLabel()}</h2>
@@ -1054,9 +1065,9 @@ export default function App() {
 
       {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}
       {activeTab === 'management' && (
-        <main id="data_management" className="flex-1 min-h-0 overflow-y-auto flex flex-col bg-slate-50 text-left w-full">
+        <main id="data_management" className="flex-1 min-h-0 overflow-y-auto flex flex-col bg-slate-50 text-left w-full" onScroll={handleSchedulerScroll}>
           {/* Scrollable overview area */}
-          <div className="scheduler-app-topbar management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80">
+          <div className="scheduler-page-head management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80">
             <div className="mb-2 flex flex-wrap justify-between items-start gap-3">
               <div className="min-w-0">
                 <h2 className="text-xl font-bold text-slate-950 tracking-tight">学校教学分工与基础数据</h2>

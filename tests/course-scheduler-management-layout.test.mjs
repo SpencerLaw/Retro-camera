@@ -43,15 +43,15 @@ runTest('course scheduler management tables fill the available viewport instead 
   assert.doesNotMatch(schedulerSource, /calc\(100vh - 4rem\)|calc\(100vh-4rem\)/);
 });
 
-runTest('course scheduler management overview stays available as a sticky app top bar', () => {
-  assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto/);
+runTest('course scheduler management overview scrolls under the collapsible tab layout', () => {
+  assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto[^"]*" onScroll=\{handleSchedulerScroll\}/);
   assert.match(schedulerSource, /management-content-area [^"]*overflow-visible/);
   assert.doesNotMatch(schedulerSource, /management-content-area [^"]*overflow-hidden/);
   assert.doesNotMatch(schedulerSource, /management-table-shell[^']*flex-1/);
   assert.match(schedulerStyles, /#data_management\s*\{[\s\S]*overflow-y:\s*auto/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*top:\s*0/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*background:\s*#f8fafc/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*relative/);
+  assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
+  assert.match(schedulerStyles, /\.scheduler-view-tabs--pinned\s*\{[\s\S]*border-radius:\s*999px/);
   assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*backdrop-filter/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*height:\s*auto/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*overflow:\s*visible/);

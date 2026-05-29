@@ -1,36 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Linkedin, MessageCircle } from 'lucide-react';
-
-const footerColumns = [
-  {
-    title: 'COMPANY',
-    links: [
-      { label: 'About QiLi Paper', to: '/vanglam/atelier' },
-      { label: 'Sustainability', to: '/vanglam/atelier' },
-      { label: 'News & Insights', to: '/vanglam/atelier' },
-      { label: 'Careers', to: '/vanglam/atelier' },
-    ],
-  },
-  {
-    title: 'SUPPORT',
-    links: [
-      { label: 'Sample Kit', to: '/vanglam/request-sample-kit' },
-      { label: 'Technical Information', to: '/vanglam/surfaces' },
-      { label: 'FAQs', to: '/vanglam/color-system' },
-      { label: 'Contact Us', to: '/vanglam/request-sample-kit' },
-    ],
-  },
-  {
-    title: 'POLICIES',
-    links: [
-      { label: 'Privacy Policy', to: '/vanglam/atelier' },
-      { label: 'Terms of Use', to: '/vanglam/atelier' },
-    ],
-  },
-];
+import { useVanglamCopy } from './VanglamLanguage';
 
 export const VanglamFooter: React.FC = () => {
+  const copy = useVanglamCopy();
+
   return (
     <footer className="vanglam-footer">
       <div className="vanglam-footer-inner">
@@ -39,12 +14,12 @@ export const VanglamFooter: React.FC = () => {
           <span className="vanglam-brand-divider" aria-hidden="true" />
           <span className="vanglam-brand-vanglam">
             VANGLAM
-            <small>COLOR · PAPER · SURFACE</small>
+            <small>{copy.brandTagline}</small>
           </span>
         </div>
 
         <div className="vanglam-footer-columns">
-          {footerColumns.map((column) => (
+          {copy.footer.columns.map((column) => (
             <section key={column.title} aria-label={column.title}>
               <h2>{column.title}</h2>
               {column.links.map((link) => (
@@ -54,18 +29,22 @@ export const VanglamFooter: React.FC = () => {
               ))}
             </section>
           ))}
-          <section aria-label="CONNECT">
-            <h2>CONNECT</h2>
-            <a href="mailto:info@qilipaper.com">info@qilipaper.com</a>
-            <a href="tel:+862112345678">+86 21 1234 5678</a>
-            <div className="vanglam-socials" aria-label="Social links">
-              <Link to="/vanglam/request-sample-kit" aria-label="Instagram">
+          <section className="vanglam-footer-contact-card" aria-label={copy.footer.connectTitle}>
+            <h2>{copy.footer.connectTitle}</h2>
+            <a className="vanglam-footer-contact-link" href="mailto:info@qilipaper.com">
+              info@qilipaper.com
+            </a>
+            <a className="vanglam-footer-contact-link" href="tel:+862112345678">
+              +86 21 1234 5678
+            </a>
+            <div className="vanglam-socials" aria-label={copy.footer.socialsAria}>
+              <Link className="vanglam-footer-social-link" to="/vanglam/request-sample-kit" aria-label={copy.footer.instagramAria}>
                 <Instagram size={16} strokeWidth={1.4} />
               </Link>
-              <Link to="/vanglam/request-sample-kit" aria-label="LinkedIn">
+              <Link className="vanglam-footer-social-link" to="/vanglam/request-sample-kit" aria-label={copy.footer.linkedinAria}>
                 <Linkedin size={16} strokeWidth={1.4} />
               </Link>
-              <Link to="/vanglam/request-sample-kit" aria-label="Contact VANGLAM">
+              <Link className="vanglam-footer-social-link" to="/vanglam/request-sample-kit" aria-label={copy.footer.contactAria}>
                 <MessageCircle size={16} strokeWidth={1.4} />
               </Link>
             </div>
@@ -74,8 +53,8 @@ export const VanglamFooter: React.FC = () => {
       </div>
 
       <div className="vanglam-footer-base">
-        <span>© 2024 QiLi Paper. All rights reserved.</span>
-        <span>Crafted in paper. Made for beauty.</span>
+        <span>{copy.footer.rights}</span>
+        <span>{copy.footer.line}</span>
       </div>
     </footer>
   );

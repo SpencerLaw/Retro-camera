@@ -24,6 +24,7 @@ import {
   VanglamRequestSampleKitPage,
   VanglamSurfacesPage,
 } from './components/vanglam/VanglamPages';
+import { VanglamLanguageProvider } from './components/vanglam/VanglamLanguage';
 
 const TslSkinApp = React.lazy(() => import('./components/TslSkinApp'));
 
@@ -37,6 +38,10 @@ const TslSkinRoute: React.FC = () => (
   >
     <TslSkinApp />
   </React.Suspense>
+);
+
+const withVanglamLanguage = (element: React.ReactElement) => (
+  <VanglamLanguageProvider>{element}</VanglamLanguageProvider>
 );
 
 const App: React.FC = () => {
@@ -58,14 +63,14 @@ const App: React.FC = () => {
           <Route path="/prompts" element={<PromptGalleryApp />} />
           <Route path="/tsl-skin" element={<TslSkinRoute />} />
           <Route path="/course-scheduler" element={<CourseSchedulerApp />} />
-          <Route path="/vanglam" element={<VanglamHome />} />
-          <Route path="/vanglam/color-system" element={<VanglamColorSystemPage />} />
-          <Route path="/vanglam/collections" element={<VanglamCollectionsPage />} />
-          <Route path="/vanglam/surfaces" element={<VanglamSurfacesPage />} />
-          <Route path="/vanglam/applications" element={<VanglamApplicationsPage />} />
-          <Route path="/vanglam/artcard-lab" element={<VanglamArtcardLabPage />} />
-          <Route path="/vanglam/atelier" element={<VanglamAtelierPage />} />
-          <Route path="/vanglam/request-sample-kit" element={<VanglamRequestSampleKitPage />} />
+          <Route path="/vanglam" element={withVanglamLanguage(<VanglamHome />)} />
+          <Route path="/vanglam/color-system" element={withVanglamLanguage(<VanglamColorSystemPage />)} />
+          <Route path="/vanglam/collections" element={withVanglamLanguage(<VanglamCollectionsPage />)} />
+          <Route path="/vanglam/surfaces" element={withVanglamLanguage(<VanglamSurfacesPage />)} />
+          <Route path="/vanglam/applications" element={withVanglamLanguage(<VanglamApplicationsPage />)} />
+          <Route path="/vanglam/artcard-lab" element={withVanglamLanguage(<VanglamArtcardLabPage />)} />
+          <Route path="/vanglam/atelier" element={withVanglamLanguage(<VanglamAtelierPage />)} />
+          <Route path="/vanglam/request-sample-kit" element={withVanglamLanguage(<VanglamRequestSampleKitPage />)} />
           <Route path="/vanglam-42" element={<VanglamColorDeck />} />
 
         </Routes>

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const homeSource = fs.readFileSync('components/vanglam/VanglamHome.tsx', 'utf8');
 const footerSource = fs.readFileSync('components/vanglam/VanglamFooter.tsx', 'utf8');
 const pagesSource = fs.readFileSync('components/vanglam/VanglamPages.tsx', 'utf8');
+const languageSource = fs.readFileSync('components/vanglam/VanglamLanguage.tsx', 'utf8');
 
 function runTest(name, fn) {
   try {
@@ -30,7 +31,7 @@ runTest('homepage visual cards expose click targets for their Explore affordance
 
 runTest('footer links are routed or real contact links, never inert hash placeholders', () => {
   assert.match(footerSource, /to="\/vanglam\/request-sample-kit"/);
-  assert.match(footerSource, /['"]\/vanglam\/color-system['"]/);
+  assert.match(languageSource, /['"]\/vanglam\/color-system['"]/);
   assert.match(footerSource, /href="mailto:info@qilipaper\.com"/);
   assert.match(footerSource, /href="tel:\+862112345678"/);
   assert.doesNotMatch(footerSource, /href="#request-sample-kit"/);
@@ -40,5 +41,5 @@ runTest('sample form submit has a visible success state for the click action', (
   assert.match(pagesSource, /useState/);
   assert.match(pagesSource, /sampleFormSubmitted/);
   assert.match(pagesSource, /setSampleFormSubmitted\(true\)/);
-  assert.match(pagesSource, /Sample kit request received/);
+  assert.match(languageSource, /Sample kit request received/);
 });

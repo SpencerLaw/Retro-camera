@@ -5,7 +5,9 @@ const homeSource = fs.readFileSync('components/vanglam/VanglamHome.tsx', 'utf8')
 const navbarSource = fs.readFileSync('components/vanglam/VanglamNavbar.tsx', 'utf8');
 const footerSource = fs.readFileSync('components/vanglam/VanglamFooter.tsx', 'utf8');
 const dataSource = fs.readFileSync('components/vanglam/vanglamData.ts', 'utf8');
+const languageSource = fs.readFileSync('components/vanglam/VanglamLanguage.tsx', 'utf8');
 const cssSource = fs.readFileSync('components/vanglam/vanglam.css', 'utf8');
+const homeCopySource = `${homeSource}\n${languageSource}`;
 
 function runTest(name, fn) {
   try {
@@ -18,9 +20,9 @@ function runTest(name, fn) {
 }
 
 runTest('VANGLAM homepage uses the V1 editorial hero instead of the old packaging hero', () => {
-  assert.match(homeSource, /Soul of Color\. Signature in Every Surface\./);
-  assert.match(homeSource, /QiLi Paper is a material atelier/);
-  assert.match(homeSource, /DISCOVER VANGLAM COLOR SYSTEM/);
+  assert.match(homeCopySource, /Soul of Color\. Signature in Every Surface\./);
+  assert.match(homeCopySource, /QiLi Paper is a material atelier/);
+  assert.match(homeCopySource, /DISCOVER VANGLAM COLOR SYSTEM/);
   assert.match(homeSource, /hero-paper\.png/);
   assert.doesNotMatch(homeSource, /Color, Paper & Surface for Premium Packaging/);
   assert.doesNotMatch(homeSource, /selectedFinish/);
@@ -40,7 +42,7 @@ runTest('VANGLAM homepage follows the PDF V1 section order', () => {
 
   let lastIndex = -1;
   for (const label of requiredInOrder) {
-    const nextIndex = homeSource.indexOf(label, lastIndex + 1);
+    const nextIndex = homeCopySource.indexOf(label, lastIndex + 1);
     assert.notEqual(nextIndex, -1, `${label} should be present`);
     assert.ok(nextIndex > lastIndex, `${label} should appear after the previous section`);
     lastIndex = nextIndex;
@@ -64,9 +66,9 @@ runTest('signature colors and visual assets match the PDF V1 mockup', () => {
 
 runTest('navigation labels mirror the V1 primary navigation', () => {
   for (const label of ['Color System', 'Collections', 'Surfaces', 'Applications', 'Artcard Lab', 'Atelier']) {
-    assert.match(navbarSource, new RegExp(label));
+    assert.match(languageSource, new RegExp(label));
   }
-  assert.match(navbarSource, /REQUEST SAMPLE KIT/);
+  assert.match(languageSource, /REQUEST SAMPLE KIT/);
   assert.doesNotMatch(navbarSource, /VANGLAM 42/);
 });
 
@@ -78,10 +80,19 @@ runTest('collections data uses the eight V1 collection families', () => {
 });
 
 runTest('footer uses the V1 multi-column editorial footer', () => {
-  assert.match(footerSource, /About QiLi Paper/);
-  assert.match(footerSource, /Technical Information/);
+  const footerCopySource = `${footerSource}\n${languageSource}`;
+  assert.match(footerCopySource, /About QiLi Paper/);
+  assert.match(footerCopySource, /Technical Information/);
   assert.match(footerSource, /info@qilipaper\.com/);
-  assert.match(footerSource, /Crafted in paper\. Made for beauty\./);
+  assert.match(footerCopySource, /Crafted in paper\. Made for beauty\./);
+});
+
+runTest('footer restores the PDF contact snippet UI', () => {
+  assert.match(footerSource, /vanglam-footer-contact-card/);
+  assert.match(footerSource, /vanglam-footer-contact-link/);
+  assert.match(footerSource, /vanglam-footer-social-link/);
+  assert.match(cssSource, /\.vanglam-footer-contact-card\s*\{[\s\S]*border:/);
+  assert.match(cssSource, /\.vanglam-footer-social-link\s*\{[\s\S]*border-radius:\s*50%/);
 });
 
 runTest('V1 stylesheet defines the mockup-aligned page system', () => {

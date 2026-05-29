@@ -63,14 +63,57 @@
 }
 
 .vanglam-navbar-inner {
+  position: relative;
   width: min(100%, var(--vanglam-max));
   height: 100%;
   margin: 0 auto;
-  padding: 0 50px;
+  padding: 0 118px 0 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 34px;
+}
+
+.vanglam-language-toggle {
+  position: absolute;
+  top: 8px;
+  right: 50px;
+  min-width: 58px;
+  height: 25px;
+  border: 1px solid rgba(40, 40, 40, 0.18);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--vanglam-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+
+.vanglam-language-toggle span {
+  min-width: 22px;
+  padding: 4px 5px;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.vanglam-language-toggle span.is-active {
+  background: var(--vanglam-green);
+  color: #f8f4eb;
+}
+
+.vanglam-language-toggle:hover,
+.vanglam-language-toggle:focus-visible {
+  border-color: var(--vanglam-gold);
+  color: var(--vanglam-gold);
+  background: #fff;
+  outline: none;
 }
 
 .vanglam-brand,
@@ -594,15 +637,20 @@
 }
 
 .vanglam-footer {
-  padding: 46px 90px 32px;
+  padding: 34px 90px 24px;
   background: #f8f5ef;
+  border-top: 1px solid rgba(40, 40, 40, 0.12);
 }
 
 .vanglam-footer-inner {
+  min-height: 138px;
+  padding: 27px 32px;
   display: grid;
-  grid-template-columns: 270px 1fr;
-  gap: 48px;
+  grid-template-columns: 260px 1fr;
+  gap: 42px;
   align-items: start;
+  border: 1px solid rgba(40, 40, 40, 0.13);
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .vanglam-footer .vanglam-brand-qili {
@@ -615,8 +663,8 @@
 
 .vanglam-footer-columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 38px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(160px, 210px);
+  gap: 28px;
 }
 
 .vanglam-footer-columns section {
@@ -643,23 +691,47 @@
   color: var(--vanglam-gold);
 }
 
-.vanglam-socials {
-  margin-top: 9px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.vanglam-footer-contact-card {
+  min-height: 110px;
+  padding: 18px 18px 15px;
+  border: 1px solid rgba(40, 40, 40, 0.14);
+  background: rgba(250, 248, 244, 0.72);
 }
 
-.vanglam-socials a {
-  width: 20px;
-  height: 20px;
+.vanglam-footer-contact-link {
+  display: inline-flex;
+  width: max-content;
+}
+
+.vanglam-socials {
+  margin-top: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vanglam-footer-social-link {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  flex: 0 0 32px;
   display: grid;
   place-items: center;
-  color: #8a837a;
+  border: 1px solid rgba(40, 40, 40, 0.18);
+  border-radius: 50%;
+  color: #777067;
+  background: rgba(255, 255, 255, 0.44);
+  transition: color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.vanglam-footer-social-link:hover {
+  color: var(--vanglam-gold);
+  border-color: var(--vanglam-gold);
+  transform: translateY(-1px);
 }
 
 .vanglam-footer-base {
-  padding: 18px 90px 16px;
+  padding: 16px 32px 0;
   display: flex;
   justify-content: space-between;
   gap: 20px;
@@ -1127,6 +1199,14 @@
     padding-right: 34px;
   }
 
+  .vanglam-navbar-inner {
+    padding-right: 104px;
+  }
+
+  .vanglam-language-toggle {
+    right: 34px;
+  }
+
   .vanglam-nav-links {
     gap: 18px;
   }
@@ -1184,6 +1264,7 @@
     gap: 12px;
     padding-top: 12px;
     padding-bottom: 12px;
+    padding-right: 104px;
   }
 
   .vanglam-nav-links {
@@ -1280,6 +1361,14 @@
   .vanglam-footer-base {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .vanglam-navbar-inner {
+    padding-right: 88px;
+  }
+
+  .vanglam-language-toggle {
+    right: 20px;
   }
 
   .vanglam-hero-copy h1 {

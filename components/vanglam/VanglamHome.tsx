@@ -15,16 +15,13 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { VanglamNavbar } from './VanglamNavbar';
 import { VanglamFooter } from './VanglamFooter';
+import { useVanglamCopy } from './VanglamLanguage';
 import {
   ATELIER_FEATURES,
   COLLECTIONS,
   SIGNATURE_COLORS,
-  SURFACE_TERMS,
-  VANGLAM_APPLICATIONS,
 } from './vanglamData';
 import './vanglam.css';
-
-const heroTitle = 'Soul of Color. Signature in Every Surface.';
 
 const collectionIcons: Record<string, LucideIcon> = {
   flower: Sparkles,
@@ -46,6 +43,10 @@ const atelierIcons: Record<string, LucideIcon> = {
 
 export const VanglamHome: React.FC = () => {
   const navigate = useNavigate();
+  const copy = useVanglamCopy();
+  const signatureCopyById = new Map(copy.signatureColors.map((color) => [color.id, color]));
+  const collectionCopyById = new Map(copy.collections.map((collection) => [collection.id, collection]));
+  const atelierCopyById = new Map(copy.atelierFeatures.map((feature) => [feature.id, feature]));
 
   return (
     <div className="vanglam-v1-page">
@@ -54,23 +55,22 @@ export const VanglamHome: React.FC = () => {
       <main>
         <section className="vanglam-hero" aria-labelledby="vanglam-hero-title">
           <div className="vanglam-hero-copy">
-            <h1 id="vanglam-hero-title" aria-label={heroTitle}>
-              <span>Soul of Color.</span>
-              <span>Signature in</span>
-              <span>Every Surface.</span>
+            <h1 id="vanglam-hero-title" aria-label={copy.home.heroTitle}>
+              {copy.home.heroLines.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
             </h1>
             <div className="vanglam-gold-rule" />
             <p>
-              QiLi Paper is a material atelier.
-              <br />
-              We create the color, paper and surface systems
-              <br />
-              that define the world's most premium packaging,
-              <br />
-              print and creative experiences.
+              {copy.home.heroBodyLines.map((line, index) => (
+                <React.Fragment key={line}>
+                  {line}
+                  {index < copy.home.heroBodyLines.length - 1 && <br />}
+                </React.Fragment>
+              ))}
             </p>
             <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam/color-system')}>
-              DISCOVER VANGLAM COLOR SYSTEM <ArrowRight size={13} strokeWidth={1.7} />
+              {copy.home.discoverColorSystem} <ArrowRight size={13} strokeWidth={1.7} />
             </button>
           </div>
           <div className="vanglam-hero-image" aria-label="VANGLAM embossed paper surface">
@@ -79,41 +79,46 @@ export const VanglamHome: React.FC = () => {
         </section>
 
         <section id="signature-colors" className="vanglam-signature-section" aria-labelledby="signature-heading">
-          <h2 id="signature-heading">THREE SIGNATURE COLORS</h2>
+          <h2 id="signature-heading">{copy.home.signatureHeading}</h2>
           <div className="vanglam-signature-grid">
-            {SIGNATURE_COLORS.map((color) => (
-              <Link
-                key={color.id}
-                to="/vanglam/color-system"
-                className="vanglam-signature-card"
-                aria-label={`Explore ${color.name} in the VANGLAM color system`}
-              >
-                <img src={color.asset} alt={`${color.name} textured VANGLAM color card`} />
-                <div className="vanglam-visually-hidden">
-                  <h3>{color.name}</h3>
-                  <p>{color.phrase}</p>
-                  <span>
-                    Explore <ArrowRight size={12} strokeWidth={1.7} />
-                  </span>
-                </div>
-              </Link>
-            ))}
+            {SIGNATURE_COLORS.map((color) => {
+              const localizedColor = signatureCopyById.get(color.id);
+
+              return (
+                <Link
+                  key={color.id}
+                  to="/vanglam/color-system"
+                  className="vanglam-signature-card"
+                  aria-label={localizedColor?.aria || color.name}
+                >
+                  <img src={color.asset} alt={localizedColor?.alt || color.name} />
+                  <div className="vanglam-visually-hidden">
+                    <h3>{localizedColor?.name || color.name}</h3>
+                    <p>{localizedColor?.phrase || color.phrase}</p>
+                    <span>
+                      {copy.home.explore} <ArrowRight size={12} strokeWidth={1.7} />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
 
         <section id="color-system" className="vanglam-color-system" aria-labelledby="color-system-heading">
           <div className="vanglam-section-copy">
-            <span>VANGLAM COLOR SYSTEM</span>
-            <h2 id="color-system-heading">A language of color, crafted in paper.</h2>
+            <span>{copy.home.colorSystemEyebrow}</span>
+            <h2 id="color-system-heading">{copy.home.colorSystemTitle}</h2>
             <p>
-              A 42-color material system for premium packaging,
-              <br />
-              labels and print. Created for consistency.
-              <br />
-              Confirmed by spectrophotometer.
+              {copy.home.colorSystemBodyLines.map((line, index) => (
+                <React.Fragment key={line}>
+                  {line}
+                  {index < copy.home.colorSystemBodyLines.length - 1 && <br />}
+                </React.Fragment>
+              ))}
             </p>
             <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam/color-system')}>
-              EXPLORE THE SYSTEM <ArrowRight size={13} strokeWidth={1.7} />
+              {copy.home.exploreSystem} <ArrowRight size={13} strokeWidth={1.7} />
             </button>
           </div>
           <div className="vanglam-deck-visual">
@@ -122,33 +127,35 @@ export const VanglamHome: React.FC = () => {
         </section>
 
         <section id="collections" className="vanglam-collections" aria-labelledby="collections-heading">
-          <h2 id="collections-heading">COLLECTIONS</h2>
+          <h2 id="collections-heading">{copy.home.collectionsHeading}</h2>
           <div className="vanglam-collection-row">
             {COLLECTIONS.map((collection) => {
               const Icon = collectionIcons[collection.icon] || Package;
+              const localizedCollection = collectionCopyById.get(collection.id);
+
               return (
                 <Link
                   key={collection.id}
                   to="/vanglam/collections"
                   className="vanglam-collection-item"
-                  aria-label={`Explore ${collection.name} collection`}
+                  aria-label={localizedCollection?.aria || collection.name}
                 >
                   <Icon size={25} strokeWidth={1.15} />
-                  <h3>{collection.name}</h3>
-                  <p>{collection.summary}</p>
+                  <h3>{localizedCollection?.name || collection.name}</h3>
+                  <p>{localizedCollection?.summary || collection.summary}</p>
                 </Link>
               );
             })}
           </div>
         </section>
 
-        <section className="vanglam-feature-grid" aria-label="Surfaces, applications and Artcard Lab">
+        <section className="vanglam-feature-grid" aria-label={copy.home.featureGridAria}>
           <article id="surfaces" className="vanglam-surface-panel">
             <div className="vanglam-panel-copy">
-              <h2>SURFACES</h2>
+              <h2>{copy.home.surfacesTitle}</h2>
               <div className="vanglam-gold-rule" />
               <ul>
-                {SURFACE_TERMS.map((surface) => (
+                {copy.surfaceTerms.map((surface) => (
                   <li key={surface}>{surface}</li>
                 ))}
               </ul>
@@ -158,9 +165,9 @@ export const VanglamHome: React.FC = () => {
 
           <article id="applications" className="vanglam-applications-panel">
             <div className="vanglam-panel-copy">
-              <h2>APPLICATIONS</h2>
+              <h2>{copy.home.applicationsTitle}</h2>
               <ul>
-                {VANGLAM_APPLICATIONS.map((application) => (
+                {copy.applications.map((application) => (
                   <li key={application.id}>
                     <span aria-hidden="true">□</span>
                     {application.label}
@@ -173,17 +180,18 @@ export const VanglamHome: React.FC = () => {
 
           <article id="artcard-lab" className="vanglam-artcard-panel">
             <div className="vanglam-panel-copy">
-              <h2>ARTCARD LAB</h2>
+              <h2>{copy.home.artcardTitle}</h2>
               <div className="vanglam-gold-rule" />
               <p>
-                Paper for emotion.
-                <br />
-                Invitation cards, greeting cards,
-                <br />
-                postcards and paper objects.
+                {copy.home.artcardBodyLines.map((line, index) => (
+                  <React.Fragment key={line}>
+                    {line}
+                    {index < copy.home.artcardBodyLines.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
               </p>
               <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam/artcard-lab')}>
-                EXPLORE ARTCARD LAB <ArrowRight size={13} strokeWidth={1.7} />
+                {copy.home.exploreArtcard} <ArrowRight size={13} strokeWidth={1.7} />
               </button>
             </div>
             <img src="/vanglam/artcard-thanks.png" alt="white embossed thank you artcard" />
@@ -192,18 +200,20 @@ export const VanglamHome: React.FC = () => {
 
         <section id="atelier" className="vanglam-atelier" aria-labelledby="atelier-heading">
           <div className="vanglam-atelier-heading">
-            <h2 id="atelier-heading">ATELIER</h2>
+            <h2 id="atelier-heading">{copy.home.atelierTitle}</h2>
             <div className="vanglam-gold-rule" />
           </div>
           <div className="vanglam-atelier-grid">
             {ATELIER_FEATURES.map((feature) => {
               const Icon = atelierIcons[feature.icon] || Factory;
+              const localizedFeature = atelierCopyById.get(feature.id);
+
               return (
                 <article key={feature.id} className="vanglam-atelier-item">
                   <Icon size={32} strokeWidth={1.05} />
                   <div>
-                    <h3>{feature.title}</h3>
-                    <p>{feature.body}</p>
+                    <h3>{localizedFeature?.title || feature.title}</h3>
+                    <p>{localizedFeature?.body || feature.body}</p>
                   </div>
                 </article>
               );
@@ -213,10 +223,10 @@ export const VanglamHome: React.FC = () => {
         </section>
 
         <section id="request-sample-kit" className="vanglam-sample-cta" aria-labelledby="sample-kit-heading">
-          <h2 id="sample-kit-heading">Request Your Sample Kit</h2>
-          <p>Touch the difference. Start your story with VANGLAM.</p>
+          <h2 id="sample-kit-heading">{copy.home.sampleTitle}</h2>
+          <p>{copy.home.sampleBody}</p>
           <Link to="/vanglam/request-sample-kit" className="vanglam-primary-button">
-            REQUEST SAMPLE KIT <ArrowRight size={14} strokeWidth={1.7} />
+            {copy.home.sampleButton} <ArrowRight size={14} strokeWidth={1.7} />
           </Link>
         </section>
       </main>

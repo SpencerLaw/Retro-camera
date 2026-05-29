@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const appSource = fs.readFileSync('App.tsx', 'utf8');
 const navbarSource = fs.readFileSync('components/vanglam/VanglamNavbar.tsx', 'utf8');
 const dataSource = fs.readFileSync('components/vanglam/vanglamData.ts', 'utf8');
+const languageSource = fs.readFileSync('components/vanglam/VanglamLanguage.tsx', 'utf8');
 const pagesFileExists = fs.existsSync('components/vanglam/VanglamPages.tsx');
 const pagesSource = pagesFileExists ? fs.readFileSync('components/vanglam/VanglamPages.tsx', 'utf8') : '';
 const cssSource = fs.readFileSync('components/vanglam/vanglam.css', 'utf8');
@@ -47,7 +48,7 @@ runTest('App wires every PDF V1 secondary page under the VANGLAM site namespace'
 
 runTest('VANGLAM navigation links to real pages, not only homepage anchors', () => {
   for (const route of vanglamRoutes.slice(0, -1)) {
-    assert.match(navbarSource, new RegExp(`to: '${route}'`));
+    assert.match(languageSource, new RegExp(`to: '${route}'`));
   }
   assert.match(navbarSource, /to="\/vanglam\/request-sample-kit"/);
   assert.doesNotMatch(navbarSource, /href: '#color-system'/);
@@ -56,6 +57,7 @@ runTest('VANGLAM navigation links to real pages, not only homepage anchors', () 
 
 runTest('secondary page components cover all PDF V1 content groups', () => {
   assert.equal(pagesFileExists, true);
+  const pageCopySource = `${pagesSource}\n${languageSource}`;
   for (const text of [
     'Overview / Signature Colors / Six Families / Full Color Index / Color Guidance / Color Deck',
     'Curated families for every expression.',
@@ -65,7 +67,7 @@ runTest('secondary page components cover all PDF V1 content groups', () => {
     'Real manufacturing. Thoughtful process. Lasting quality.',
     'Experience the difference. Request Your Sample Kit.',
   ]) {
-    assert.match(pagesSource, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(pageCopySource, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 });
 

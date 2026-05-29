@@ -1,32 +1,36 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-
-const primaryNav = [
-  { label: 'Color System', to: '/vanglam/color-system' },
-  { label: 'Collections', to: '/vanglam/collections' },
-  { label: 'Surfaces', to: '/vanglam/surfaces' },
-  { label: 'Applications', to: '/vanglam/applications' },
-  { label: 'Artcard Lab', to: '/vanglam/artcard-lab' },
-  { label: 'Atelier', to: '/vanglam/atelier' },
-];
+import { useVanglamLanguage } from './VanglamLanguage';
 
 export const VanglamNavbar: React.FC = () => {
+  const { copy, language, toggleLanguage } = useVanglamLanguage();
+
   return (
     <header className="vanglam-navbar">
       <div className="vanglam-navbar-inner">
-        <Link to="/vanglam" className="vanglam-brand" aria-label="QiLi Paper VANGLAM homepage">
+        <button
+          className="vanglam-language-toggle"
+          type="button"
+          aria-label={copy.languageToggleAria}
+          onClick={toggleLanguage}
+        >
+          <span className={language === 'en' ? 'is-active' : undefined}>EN</span>
+          <span className={language === 'zh' ? 'is-active' : undefined}>中</span>
+        </button>
+
+        <Link to="/vanglam" className="vanglam-brand" aria-label={copy.brandHomeAria}>
           <span className="vanglam-brand-qili">QiLi Paper</span>
           <span className="vanglam-brand-divider" aria-hidden="true" />
           <span className="vanglam-brand-vanglam">
             VANGLAM
-            <small>COLOR · PAPER · SURFACE</small>
+            <small>{copy.brandTagline}</small>
           </span>
         </Link>
 
-        <nav className="vanglam-nav-links" aria-label="Primary navigation">
-          {primaryNav.map((item) => (
+        <nav className="vanglam-nav-links" aria-label={copy.navAria}>
+          {copy.nav.map((item) => (
             <NavLink
-              key={item.label}
+              key={item.key}
               to={item.to}
               className={({ isActive }) => (isActive ? 'is-active' : undefined)}
             >
@@ -36,7 +40,7 @@ export const VanglamNavbar: React.FC = () => {
         </nav>
 
         <Link className="vanglam-nav-cta" to="/vanglam/request-sample-kit">
-          REQUEST SAMPLE KIT
+          {copy.requestSample}
         </Link>
       </div>
     </header>

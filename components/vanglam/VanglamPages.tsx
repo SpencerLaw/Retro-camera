@@ -3,17 +3,11 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Layers, Send } from 'lucide-react';
 import { VanglamNavbar } from './VanglamNavbar';
 import { VanglamFooter } from './VanglamFooter';
+import { useVanglamCopy, useVanglamLanguage } from './VanglamLanguage';
 import {
-  APPLICATION_DETAILS,
-  ARTCARD_ITEMS,
   ATELIER_FEATURES,
-  ATELIER_STORY_POINTS,
-  COLLECTION_DETAILS,
   COLOR_FAMILIES,
-  COLOR_GUIDANCE,
-  REQUEST_SAMPLE_FIELDS,
   SIGNATURE_COLORS,
-  SURFACE_DETAILS,
 } from './vanglamData';
 import type { RequestSampleField, VanglamDetailCard } from './vanglamData';
 import './vanglam.css';
@@ -95,134 +89,169 @@ const FieldControl: React.FC<{ field: RequestSampleField }> = ({ field }) => {
   );
 };
 
-export const VanglamColorSystemPage: React.FC = () => (
-  <PageFrame
-    eyebrow="Color System"
-    title="A language of color, crafted in paper."
-    body="Overview / Signature Colors / Six Families / Full Color Index / Color Guidance / Color Deck"
-    aside={
-      <div className="vanglam-page-color-stack">
-        {SIGNATURE_COLORS.map((color) => (
-          <div key={color.id} style={{ backgroundColor: color.tone }}>
-            <span>{color.name}</span>
-          </div>
-        ))}
-      </div>
-    }
-  >
-    <DetailGrid items={COLOR_GUIDANCE} imageMode />
-
-    <section className="vanglam-color-index">
-      <div className="vanglam-page-section-heading">
-        <span>Full Color Index</span>
-        <h2>42 Core Colors - 6 Families - 3 Signature Colors.</h2>
-      </div>
-      {COLOR_FAMILIES.map((family) => (
-        <article key={family.id} className="vanglam-color-family-block">
-          <header>
-            <span>{family.nameZh}</span>
-            <h3>{family.nameEn}</h3>
-            <p>{family.description}</p>
-          </header>
-          <div className="vanglam-color-chip-grid">
-            {family.chips.map((chip) => (
-              <div key={chip.id} className="vanglam-color-chip">
-                <div style={{ backgroundColor: chip.hex }} />
-                <span>{chip.id}</span>
-                <strong>{chip.nameZh}</strong>
-                <em>{chip.nameEn}</em>
-              </div>
-            ))}
-          </div>
-        </article>
-      ))}
-    </section>
-  </PageFrame>
-);
-
-export const VanglamCollectionsPage: React.FC = () => (
-  <PageFrame
-    eyebrow="Collections"
-    title="Curated families for every expression."
-    body="Color Print / Touch / Pearl / Coated / Digital Coated / Bag / Label / Bespoke"
-    aside={<img className="vanglam-page-aside-image" src="/vanglam/color-deck-fan.png" alt="VANGLAM color deck" />}
-  >
-    <DetailGrid items={COLLECTION_DETAILS} />
-  </PageFrame>
-);
-
-export const VanglamSurfacesPage: React.FC = () => (
-  <PageFrame
-    eyebrow="Surfaces"
-    title="Texture and finishes that bring ideas to life."
-    body="Texture / Tactility / Pearlescent / Embossing / Coating / Foil & Stamping / UV & Special"
-    aside={<img className="vanglam-page-aside-image" src="/vanglam/surface-tile.png" alt="embossed paper texture" />}
-  >
-    <DetailGrid items={SURFACE_DETAILS} imageMode />
-  </PageFrame>
-);
-
-export const VanglamApplicationsPage: React.FC = () => (
-  <PageFrame
-    eyebrow="Applications"
-    title="Find the right paper for each brand project."
-    body="Wine & Spirits Labels / Beauty & Fragrance / Luxury Packaging / Premium Shopping Bags / Invitation & Cards / Hotel & Lifestyle"
-    aside={<img className="vanglam-page-aside-image" src="/vanglam/application-bags.png" alt="VANGLAM bags and box" />}
-  >
-    <DetailGrid items={APPLICATION_DETAILS} imageMode />
-  </PageFrame>
-);
-
-export const VanglamArtcardLabPage: React.FC = () => (
-  <PageFrame
-    eyebrow="Artcard Lab"
-    title="Paper for emotion."
-    body="Invitation cards, greeting cards, postcards and paper objects."
-    aside={<img className="vanglam-page-aside-image" src="/vanglam/artcard-thanks.png" alt="embossed thank you card" />}
-  >
-    <DetailGrid items={ARTCARD_ITEMS} imageMode />
-  </PageFrame>
-);
-
-export const VanglamAtelierPage: React.FC = () => (
-  <PageFrame
-    eyebrow="Atelier"
-    title="Real manufacturing. Thoughtful process. Lasting quality."
-    body="Manufacturing / Sample Making / Quality Control / Material Philosophy / Founder Story"
-    aside={<img className="vanglam-page-aside-image" src="/vanglam/atelier-roll.png" alt="paper roll in production" />}
-  >
-    <section className="vanglam-process-strip">
-      {ATELIER_FEATURES.map((feature) => (
-        <article key={feature.id}>
-          <Layers size={28} strokeWidth={1.2} />
-          <h2>{feature.title}</h2>
-          <p>{feature.body}</p>
-        </article>
-      ))}
-    </section>
-    <DetailGrid items={ATELIER_STORY_POINTS} />
-  </PageFrame>
-);
-
-export const VanglamRequestSampleKitPage: React.FC = () => {
-  const [sampleFormSubmitted, setSampleFormSubmitted] = useState(false);
+export const VanglamColorSystemPage: React.FC = () => {
+  const { copy, language } = useVanglamLanguage();
+  const signatureCopyById = new Map(copy.signatureColors.map((color) => [color.id, color]));
 
   return (
     <PageFrame
-      eyebrow="Request Sample Kit"
-      title="Experience the difference. Request Your Sample Kit."
-      body="Touch the difference. Start your story with VANGLAM."
+      eyebrow={copy.pages.colorSystem.eyebrow}
+      title={copy.pages.colorSystem.title}
+      body={copy.pages.colorSystem.body}
+      aside={
+        <div className="vanglam-page-color-stack">
+          {SIGNATURE_COLORS.map((color) => {
+            const localizedColor = signatureCopyById.get(color.id);
+
+            return (
+              <div key={color.id} style={{ backgroundColor: color.tone }}>
+                <span>{localizedColor?.name || color.name}</span>
+              </div>
+            );
+          })}
+        </div>
+      }
+    >
+      <DetailGrid items={copy.details.colorGuidance} imageMode />
+
+      <section className="vanglam-color-index">
+        <div className="vanglam-page-section-heading">
+          <span>{copy.colorIndex.eyebrow}</span>
+          <h2>{copy.colorIndex.title}</h2>
+        </div>
+        {COLOR_FAMILIES.map((family) => (
+          <article key={family.id} className="vanglam-color-family-block">
+            <header>
+              <span>{language === 'zh' ? family.nameEn : family.nameZh}</span>
+              <h3>{language === 'zh' ? family.nameZh : family.nameEn}</h3>
+              <p>{copy.colorIndex.familyDescriptions[family.id]}</p>
+            </header>
+            <div className="vanglam-color-chip-grid">
+              {family.chips.map((chip) => (
+                <div key={chip.id} className="vanglam-color-chip">
+                  <div style={{ backgroundColor: chip.hex }} />
+                  <span>{chip.id}</span>
+                  <strong>{language === 'zh' ? chip.nameZh : chip.nameEn}</strong>
+                  <em>{language === 'zh' ? chip.nameEn : chip.nameZh}</em>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </section>
+    </PageFrame>
+  );
+};
+
+export const VanglamCollectionsPage: React.FC = () => {
+  const copy = useVanglamCopy();
+
+  return (
+    <PageFrame
+      eyebrow={copy.pages.collections.eyebrow}
+      title={copy.pages.collections.title}
+      body={copy.pages.collections.body}
+      aside={<img className="vanglam-page-aside-image" src="/vanglam/color-deck-fan.png" alt={copy.pages.collections.asideAlt} />}
+    >
+      <DetailGrid items={copy.details.collections} />
+    </PageFrame>
+  );
+};
+
+export const VanglamSurfacesPage: React.FC = () => {
+  const copy = useVanglamCopy();
+
+  return (
+    <PageFrame
+      eyebrow={copy.pages.surfaces.eyebrow}
+      title={copy.pages.surfaces.title}
+      body={copy.pages.surfaces.body}
+      aside={<img className="vanglam-page-aside-image" src="/vanglam/surface-tile.png" alt={copy.pages.surfaces.asideAlt} />}
+    >
+      <DetailGrid items={copy.details.surfaces} imageMode />
+    </PageFrame>
+  );
+};
+
+export const VanglamApplicationsPage: React.FC = () => {
+  const copy = useVanglamCopy();
+
+  return (
+    <PageFrame
+      eyebrow={copy.pages.applications.eyebrow}
+      title={copy.pages.applications.title}
+      body={copy.pages.applications.body}
+      aside={<img className="vanglam-page-aside-image" src="/vanglam/application-bags.png" alt={copy.pages.applications.asideAlt} />}
+    >
+      <DetailGrid items={copy.details.applications} imageMode />
+    </PageFrame>
+  );
+};
+
+export const VanglamArtcardLabPage: React.FC = () => {
+  const copy = useVanglamCopy();
+
+  return (
+    <PageFrame
+      eyebrow={copy.pages.artcardLab.eyebrow}
+      title={copy.pages.artcardLab.title}
+      body={copy.pages.artcardLab.body}
+      aside={<img className="vanglam-page-aside-image" src="/vanglam/artcard-thanks.png" alt={copy.pages.artcardLab.asideAlt} />}
+    >
+      <DetailGrid items={copy.details.artcard} imageMode />
+    </PageFrame>
+  );
+};
+
+export const VanglamAtelierPage: React.FC = () => {
+  const copy = useVanglamCopy();
+  const atelierCopyById = new Map(copy.atelierFeatures.map((feature) => [feature.id, feature]));
+
+  return (
+    <PageFrame
+      eyebrow={copy.pages.atelier.eyebrow}
+      title={copy.pages.atelier.title}
+      body={copy.pages.atelier.body}
+      aside={<img className="vanglam-page-aside-image" src="/vanglam/atelier-roll.png" alt={copy.pages.atelier.asideAlt} />}
+    >
+      <section className="vanglam-process-strip">
+        {ATELIER_FEATURES.map((feature) => {
+          const localizedFeature = atelierCopyById.get(feature.id);
+
+          return (
+            <article key={feature.id}>
+              <Layers size={28} strokeWidth={1.2} aria-label={copy.processIconLabel} />
+              <h2>{localizedFeature?.title || feature.title}</h2>
+              <p>{localizedFeature?.body || feature.body}</p>
+            </article>
+          );
+        })}
+      </section>
+      <DetailGrid items={copy.details.atelierStory} />
+    </PageFrame>
+  );
+};
+
+export const VanglamRequestSampleKitPage: React.FC = () => {
+  const [sampleFormSubmitted, setSampleFormSubmitted] = useState(false);
+  const copy = useVanglamCopy();
+
+  return (
+    <PageFrame
+      eyebrow={copy.pages.requestSample.eyebrow}
+      title={copy.pages.requestSample.title}
+      body={copy.pages.requestSample.body}
       aside={
         <div className="vanglam-request-aside">
           <Check size={22} strokeWidth={1.3} />
-          <p>Sample requests are routed by project, application and finishing needs.</p>
+          <p>{copy.requestAside}</p>
         </div>
       }
     >
       <section className="vanglam-sample-form-section">
         <div className="vanglam-page-section-heading">
-          <span>Project Intake</span>
-          <h2>Tell us what your material needs to do.</h2>
+          <span>{copy.projectIntake}</span>
+          <h2>{copy.projectIntakeTitle}</h2>
         </div>
         <form
           className="vanglam-sample-form"
@@ -231,28 +260,28 @@ export const VanglamRequestSampleKitPage: React.FC = () => {
             setSampleFormSubmitted(true);
           }}
         >
-          {REQUEST_SAMPLE_FIELDS.map((field) => (
+          {copy.requestFields.map((field) => (
             <FieldControl key={field.id} field={field} />
           ))}
           <button type="submit" className="vanglam-form-submit">
-            REQUEST SAMPLE KIT <Send size={15} strokeWidth={1.8} />
+            {copy.requestSample} <Send size={15} strokeWidth={1.8} />
           </button>
           {sampleFormSubmitted && (
             <p className="vanglam-form-success" role="status">
-              Sample kit request received
+              {copy.requestSuccess}
             </p>
           )}
         </form>
       </section>
       <section className="vanglam-request-links">
         <Link to="/vanglam/color-system">
-          Explore Color System <ArrowRight size={14} strokeWidth={1.6} />
+          {copy.requestLinks.colorSystem} <ArrowRight size={14} strokeWidth={1.6} />
         </Link>
         <Link to="/vanglam/collections">
-          Browse Collections <ArrowRight size={14} strokeWidth={1.6} />
+          {copy.requestLinks.collections} <ArrowRight size={14} strokeWidth={1.6} />
         </Link>
         <Link to="/vanglam/surfaces">
-          Study Surfaces <ArrowRight size={14} strokeWidth={1.6} />
+          {copy.requestLinks.surfaces} <ArrowRight size={14} strokeWidth={1.6} />
         </Link>
       </section>
     </PageFrame>

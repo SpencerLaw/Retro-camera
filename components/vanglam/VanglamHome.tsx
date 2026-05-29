@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   Box,
@@ -69,7 +69,7 @@ export const VanglamHome: React.FC = () => {
               <br />
               print and creative experiences.
             </p>
-            <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam-42')}>
+            <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam/color-system')}>
               DISCOVER VANGLAM COLOR SYSTEM <ArrowRight size={13} strokeWidth={1.7} />
             </button>
           </div>
@@ -82,7 +82,12 @@ export const VanglamHome: React.FC = () => {
           <h2 id="signature-heading">THREE SIGNATURE COLORS</h2>
           <div className="vanglam-signature-grid">
             {SIGNATURE_COLORS.map((color) => (
-              <article key={color.id} className="vanglam-signature-card">
+              <Link
+                key={color.id}
+                to="/vanglam/color-system"
+                className="vanglam-signature-card"
+                aria-label={`Explore ${color.name} in the VANGLAM color system`}
+              >
                 <img src={color.asset} alt={`${color.name} textured VANGLAM color card`} />
                 <div className="vanglam-visually-hidden">
                   <h3>{color.name}</h3>
@@ -91,7 +96,7 @@ export const VanglamHome: React.FC = () => {
                     Explore <ArrowRight size={12} strokeWidth={1.7} />
                   </span>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </section>
@@ -107,7 +112,7 @@ export const VanglamHome: React.FC = () => {
               <br />
               Confirmed by spectrophotometer.
             </p>
-            <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam-42')}>
+            <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam/color-system')}>
               EXPLORE THE SYSTEM <ArrowRight size={13} strokeWidth={1.7} />
             </button>
           </div>
@@ -122,11 +127,16 @@ export const VanglamHome: React.FC = () => {
             {COLLECTIONS.map((collection) => {
               const Icon = collectionIcons[collection.icon] || Package;
               return (
-                <article key={collection.id} className="vanglam-collection-item">
+                <Link
+                  key={collection.id}
+                  to="/vanglam/collections"
+                  className="vanglam-collection-item"
+                  aria-label={`Explore ${collection.name} collection`}
+                >
                   <Icon size={25} strokeWidth={1.15} />
                   <h3>{collection.name}</h3>
                   <p>{collection.summary}</p>
-                </article>
+                </Link>
               );
             })}
           </div>
@@ -172,7 +182,7 @@ export const VanglamHome: React.FC = () => {
                 <br />
                 postcards and paper objects.
               </p>
-              <button className="vanglam-text-link" type="button">
+              <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam/artcard-lab')}>
                 EXPLORE ARTCARD LAB <ArrowRight size={13} strokeWidth={1.7} />
               </button>
             </div>
@@ -205,9 +215,9 @@ export const VanglamHome: React.FC = () => {
         <section id="request-sample-kit" className="vanglam-sample-cta" aria-labelledby="sample-kit-heading">
           <h2 id="sample-kit-heading">Request Your Sample Kit</h2>
           <p>Touch the difference. Start your story with VANGLAM.</p>
-          <a href="mailto:info@qilipaper.com?subject=VANGLAM%20Sample%20Kit" className="vanglam-primary-button">
+          <Link to="/vanglam/request-sample-kit" className="vanglam-primary-button">
             REQUEST SAMPLE KIT <ArrowRight size={14} strokeWidth={1.7} />
-          </a>
+          </Link>
         </section>
       </main>
 

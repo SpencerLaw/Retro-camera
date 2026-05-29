@@ -58,6 +58,21 @@ export interface AtelierFeature {
   icon: string;
 }
 
+export interface VanglamDetailCard {
+  id: string;
+  title: string;
+  eyebrow: string;
+  body: string;
+  image?: string;
+}
+
+export interface RequestSampleField {
+  id: string;
+  label: string;
+  type: "text" | "email" | "url" | "select" | "textarea";
+  options?: string[];
+}
+
 export const COLOR_FAMILIES: ColorFamily[] = [
   {
     id: "cloud-ink",
@@ -227,6 +242,90 @@ export const ATELIER_FEATURES: AtelierFeature[] = [
   { id: "sample-making", title: "Sample Making", body: "Rapid & accurate. Material made real.", icon: "swatch" },
   { id: "quality-control", title: "Quality Control", body: "Instrumented testing. Batch to batch.", icon: "cube" },
   { id: "material-philosophy", title: "Material Philosophy", body: "Respect paper. Respect the future.", icon: "molecule" }
+];
+
+export const COLOR_GUIDANCE: VanglamDetailCard[] = [
+  {
+    id: "overview",
+    eyebrow: "Overview",
+    title: "Overview / Signature Colors / Six Families / Full Color Index / Color Guidance / Color Deck",
+    body: "VANGLAM Color System begins with three brand memories and expands into six calibrated families for premium packaging, labels and print."
+  },
+  {
+    id: "signature",
+    eyebrow: "Signature Colors",
+    title: "Stone Green / Aged Citron / Cobalt Glaze",
+    body: "Three restrained anchor colors create a quiet brand system: natural depth, heritage luster and global clarity."
+  },
+  {
+    id: "index",
+    eyebrow: "Full Color Index",
+    title: "42 Core Colors - 6 Families - 3 Signature Colors",
+    body: "Every color value is a digital reference for conversation, sampling and spectrophotometer confirmation rather than a final production standard.",
+    image: "/vanglam/color-deck-fan.png"
+  }
+];
+
+export const COLLECTION_DETAILS: VanglamDetailCard[] = [
+  { id: "color-print", eyebrow: "Color Print", title: "Rich & Expressive", body: "Color-led papers for expressive packaging, print collateral and brand systems that need stable color language." },
+  { id: "touch", eyebrow: "Touch", title: "Tactile & Natural", body: "Soft-touch and natural-feel papers designed for close hand contact, refined unboxing and sensory print experiences." },
+  { id: "pearl", eyebrow: "Pearl", title: "Lustre & Elegance", body: "Pearlescent surfaces for beauty, fragrance and ceremonial packaging where light needs to move gently." },
+  { id: "coated", eyebrow: "Coated", title: "Smooth & Refined", body: "Coated papers for sharp printing, smooth finishing and polished commercial presentation." },
+  { id: "digital-coated", eyebrow: "Digital Coated", title: "Vivid & Precise", body: "Digital-print friendly coated papers for short-run packaging, rapid sampling and precise proofing." },
+  { id: "bag", eyebrow: "Bag", title: "Strong & Beautiful", body: "High-strength papers for premium shopping bags that need structure, color and a refined touch." },
+  { id: "label", eyebrow: "Label", title: "Fine & Functional", body: "Label papers for wine, spirits, beauty and specialty goods requiring fine print and finishing control." },
+  { id: "bespoke", eyebrow: "Bespoke", title: "By Your Vision", body: "Custom color, paper and surface systems developed with brand teams and packaging designers." }
+];
+
+export const SURFACE_DETAILS: VanglamDetailCard[] = [
+  { id: "texture", eyebrow: "Texture", title: "Material grain and paper memory", body: "Real paper texture gives packaging a calm physical presence before print or finishing begins.", image: "/vanglam/surface-tile.png" },
+  { id: "tactility", eyebrow: "Tactility", title: "Touch-led surface systems", body: "Soft, skin-like or dry-touch finishes make the material memorable without becoming decorative noise." },
+  { id: "pearlescent", eyebrow: "Pearlescent", title: "Controlled mineral glow", body: "A restrained light response for beauty, fragrance, invitations and high-end paper objects." },
+  { id: "embossing", eyebrow: "Embossing", title: "Pressure, relief and shadow", body: "Embossed and debossed details add structure, hierarchy and a tangible premium signal." },
+  { id: "coating", eyebrow: "Coating", title: "Print-ready surface refinement", body: "Coating controls ink behavior, smoothness and consistency across packaging and print work." },
+  { id: "foil", eyebrow: "Foil & Stamping", title: "Metallic accents with restraint", body: "Foil and stamping should amplify color and identity rather than cover the material itself." },
+  { id: "uv", eyebrow: "UV & Special", title: "Gloss contrast and special finishes", body: "Local UV, screen printing and special treatments create deliberate contrast on quiet material bases." }
+];
+
+export const APPLICATION_DETAILS: VanglamDetailCard[] = [
+  { id: "wine", eyebrow: "Wine & Spirits Labels", title: "Labels with depth and wet-strength logic", body: "Material recommendations for wine labels, spirit boxes and premium cellar-ready presentation." },
+  { id: "beauty", eyebrow: "Beauty & Fragrance", title: "Soft surfaces for close personal objects", body: "Pearl, touch and refined color systems for fragrance, skincare and cosmetic packaging." },
+  { id: "luxury", eyebrow: "Luxury Packaging", title: "Quiet structure for high-value gifts", body: "Paper, color and surface combinations for rigid boxes, sleeves and brand presentation kits." },
+  { id: "bags", eyebrow: "Premium Shopping Bags", title: "Strength with brand tactility", body: "Bag papers selected for load, fold behavior, color memory and premium handle presentation.", image: "/vanglam/application-bags.png" },
+  { id: "cards", eyebrow: "Invitation & Cards", title: "Paper for emotion and ceremony", body: "Invitation, greeting and postcard materials that support embossing, foil and soft tactile response." },
+  { id: "hotel", eyebrow: "Hotel & Lifestyle", title: "Material systems for hospitality", body: "Menu, envelope, room collateral and lifestyle packaging papers with calm, durable refinement." }
+];
+
+export const ARTCARD_ITEMS: VanglamDetailCard[] = [
+  { id: "overview", eyebrow: "Overview", title: "Paper for emotion.", body: "Artcard Lab is VANGLAM's high-end paper object studio, not an e-commerce catalog.", image: "/vanglam/artcard-thanks.png" },
+  { id: "invitation", eyebrow: "Invitation Cards", title: "Ceremonial color and finish", body: "Invitation papers balancing print clarity, embossing depth and refined hand feel." },
+  { id: "greeting", eyebrow: "Greeting Cards", title: "Small objects with lasting touch", body: "Greeting cards, thank-you cards and seasonal paper objects with emotional material presence." },
+  { id: "postcards", eyebrow: "Postcards", title: "Compact paper stories", body: "Postcard systems that carry image, type and surface in a memorable tactile format." },
+  { id: "objects", eyebrow: "Paper Objects", title: "Folded, pressed and crafted forms", body: "Material-led exploration for paper sculptures, keepsakes and refined presentation pieces." },
+  { id: "stationery", eyebrow: "Brand Stationery", title: "Identity in paper form", body: "Stationery systems for brands that need envelopes, cards and documents with one material voice." }
+];
+
+export const ATELIER_STORY_POINTS: VanglamDetailCard[] = [
+  { id: "manufacturing", eyebrow: "Manufacturing", title: "Real manufacturing.", body: "QiLi Paper grounds the VANGLAM experience in actual paper production, surface control and repeatable delivery." },
+  { id: "sample-making", eyebrow: "Sample Making", title: "Thoughtful process.", body: "Sample making turns color, paper and surface intent into physical decisions designers can judge by hand." },
+  { id: "quality-control", eyebrow: "Quality Control", title: "Lasting quality.", body: "Batch-to-batch testing, print trials and finishing checks keep the material system credible." },
+  { id: "philosophy", eyebrow: "Material Philosophy", title: "Quiet, material-led, editorial, useful.", body: "The website should feel like a high-end material showroom: useful, restrained and grounded in craft." },
+  { id: "founder-story", eyebrow: "Founder Story", title: "From paper making to material language", body: "The founder story is presented through capability, standards and material judgment rather than sales claims." }
+];
+
+export const REQUEST_SAMPLE_FIELDS: RequestSampleField[] = [
+  { id: "name", label: "Name", type: "text" },
+  { id: "company", label: "Company", type: "text" },
+  { id: "country", label: "Country", type: "text" },
+  { id: "email", label: "Email", type: "email" },
+  { id: "website", label: "Website", type: "url" },
+  { id: "industry", label: "Industry", type: "select", options: ["Wine & Spirits", "Beauty & Fragrance", "Luxury Packaging", "Hospitality", "Design Studio", "Printing & Converting"] },
+  { id: "application", label: "Application", type: "select", options: ["Wine & Spirits Labels", "Beauty & Fragrance", "Luxury Packaging", "Premium Shopping Bags", "Invitation & Cards", "Hotel & Lifestyle"] },
+  { id: "interested-products", label: "Interested Products", type: "text" },
+  { id: "printing-method", label: "Printing Method", type: "text" },
+  { id: "finishing-process", label: "Finishing Process", type: "text" },
+  { id: "expected-quantity", label: "Expected Quantity", type: "text" },
+  { id: "message", label: "Message", type: "textarea" }
 ];
 
 export const APPLICATIONS: ApplicationCategory[] = [

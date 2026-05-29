@@ -1,18 +1,32 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Instagram, Linkedin, MessageCircle } from 'lucide-react';
 
 const footerColumns = [
   {
     title: 'COMPANY',
-    links: ['About QiLi Paper', 'Sustainability', 'News & Insights', 'Careers'],
+    links: [
+      { label: 'About QiLi Paper', to: '/vanglam/atelier' },
+      { label: 'Sustainability', to: '/vanglam/atelier' },
+      { label: 'News & Insights', to: '/vanglam/atelier' },
+      { label: 'Careers', to: '/vanglam/atelier' },
+    ],
   },
   {
     title: 'SUPPORT',
-    links: ['Sample Kit', 'Technical Information', 'FAQs', 'Contact Us'],
+    links: [
+      { label: 'Sample Kit', to: '/vanglam/request-sample-kit' },
+      { label: 'Technical Information', to: '/vanglam/surfaces' },
+      { label: 'FAQs', to: '/vanglam/color-system' },
+      { label: 'Contact Us', to: '/vanglam/request-sample-kit' },
+    ],
   },
   {
     title: 'POLICIES',
-    links: ['Privacy Policy', 'Terms of Use'],
+    links: [
+      { label: 'Privacy Policy', to: '/vanglam/atelier' },
+      { label: 'Terms of Use', to: '/vanglam/atelier' },
+    ],
   },
 ];
 
@@ -34,9 +48,9 @@ export const VanglamFooter: React.FC = () => {
             <section key={column.title} aria-label={column.title}>
               <h2>{column.title}</h2>
               {column.links.map((link) => (
-                <a key={link} href="#request-sample-kit">
-                  {link}
-                </a>
+                <Link key={link.label} to={link.to}>
+                  {link.label}
+                </Link>
               ))}
             </section>
           ))}
@@ -45,15 +59,15 @@ export const VanglamFooter: React.FC = () => {
             <a href="mailto:info@qilipaper.com">info@qilipaper.com</a>
             <a href="tel:+862112345678">+86 21 1234 5678</a>
             <div className="vanglam-socials" aria-label="Social links">
-              <a href="#request-sample-kit" aria-label="Instagram">
+              <Link to="/vanglam/request-sample-kit" aria-label="Instagram">
                 <Instagram size={16} strokeWidth={1.4} />
-              </a>
-              <a href="#request-sample-kit" aria-label="LinkedIn">
+              </Link>
+              <Link to="/vanglam/request-sample-kit" aria-label="LinkedIn">
                 <Linkedin size={16} strokeWidth={1.4} />
-              </a>
-              <a href="#request-sample-kit" aria-label="Contact VANGLAM">
+              </Link>
+              <Link to="/vanglam/request-sample-kit" aria-label="Contact VANGLAM">
                 <MessageCircle size={16} strokeWidth={1.4} />
-              </a>
+              </Link>
             </div>
           </section>
         </div>

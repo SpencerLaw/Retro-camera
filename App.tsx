@@ -15,6 +15,15 @@ import PromptGalleryApp from './components/PromptGalleryApp';
 import CourseSchedulerApp from './components/course-scheduler/CourseSchedulerApp';
 import { VanglamHome } from './components/vanglam/VanglamHome';
 import { VanglamColorDeck } from './components/vanglam/VanglamColorDeck';
+import {
+  VanglamApplicationsPage,
+  VanglamArtcardLabPage,
+  VanglamAtelierPage,
+  VanglamCollectionsPage,
+  VanglamColorSystemPage,
+  VanglamRequestSampleKitPage,
+  VanglamSurfacesPage,
+} from './components/vanglam/VanglamPages';
 
 const TslSkinApp = React.lazy(() => import('./components/TslSkinApp'));
 
@@ -50,6 +59,13 @@ const App: React.FC = () => {
           <Route path="/tsl-skin" element={<TslSkinRoute />} />
           <Route path="/course-scheduler" element={<CourseSchedulerApp />} />
           <Route path="/vanglam" element={<VanglamHome />} />
+          <Route path="/vanglam/color-system" element={<VanglamColorSystemPage />} />
+          <Route path="/vanglam/collections" element={<VanglamCollectionsPage />} />
+          <Route path="/vanglam/surfaces" element={<VanglamSurfacesPage />} />
+          <Route path="/vanglam/applications" element={<VanglamApplicationsPage />} />
+          <Route path="/vanglam/artcard-lab" element={<VanglamArtcardLabPage />} />
+          <Route path="/vanglam/atelier" element={<VanglamAtelierPage />} />
+          <Route path="/vanglam/request-sample-kit" element={<VanglamRequestSampleKitPage />} />
           <Route path="/vanglam-42" element={<VanglamColorDeck />} />
 
         </Routes>

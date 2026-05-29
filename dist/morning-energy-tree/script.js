@@ -70,6 +70,50 @@ const FX_LIMITS = {
     trunkTransfers: 16,
     soilTransfers: 18
 };
+const READING_THRESHOLD = 70;
+const QUIET_ENERGY_DECAY_RATE = 0.05;
+const SAPLING_TREE_SIZE = 38;
+const MATURE_TREE_SIZE = 240;
+const SENSITIVITY_MIN = 35;
+const SENSITIVITY_MAX = 85;
+const SENSITIVITY_DEFAULT = 50;
+
+function clampEnergy(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(100, value));
+}
+
+function getNextEnergy(currentEnergy, currentDB, baseGrowthRate) {
+    if (currentDB >= READING_THRESHOLD) {
+        const volumeBonus = Math.min((currentDB - READING_THRESHOLD) / 20, 1);
+        const rate = baseGrowthRate * (1 + volumeBonus);
+        return clampEnergy(currentEnergy + rate);
+    }
+
+    return clampEnergy(currentEnergy - QUIET_ENERGY_DECAY_RATE);
+}
+
+function getTreeSizeForEnergy(energy) {
+    const normalizedEnergy = clampEnergy(energy) / 100;
+    return SAPLING_TREE_SIZE + ((MATURE_TREE_SIZE - SAPLING_TREE_SIZE) * normalizedEnergy);
+}
+
+function clampSensitivity(value) {
+    const numericValue = Number.parseInt(value, 10);
+    if (!Number.isFinite(numericValue)) return SENSITIVITY_DEFAULT;
+    return Math.max(SENSITIVITY_MIN, Math.min(SENSITIVITY_MAX, numericValue));
+}
+
+function getSensitivityDbOffset(sensitivity) {
+    const safeSensitivity = clampSensitivity(sensitivity);
+    const delta = safeSensitivity - 50;
+    return delta < 0 ? delta * 0.18 : delta * 0.35;
+}
+
+function applySensitivityToDb(rawDb, sensitivity) {
+    const safeDb = Number.isFinite(rawDb) ? rawDb : 30;
+    return Math.max(30, Math.min(120, safeDb + getSensitivityDbOffset(sensitivity)));
+}
 
 /* --- DOM Elements --- */
 const $ = (id) => document.getElementById(id);
@@ -120,6 +164,8 @@ const helpTrigger = $('help-trigger');
 const helpTooltip = $('help-tooltip');
 const dbStatus = $('db-status');
 const ringBar = $('ring-bar');
+const sensitivitySlider = $('sensitivity-slider');
+const sensitivityValue = $('sensitivity-value');
 let taskSaveFeedbackTimer = null;
 let taskStripResetTimer = null;
 let taskStripClockTimer = null;
@@ -1430,12 +1476,7 @@ function calculateDB() {
     let db = 30;
     if (rms > 0) db = (Math.log10(rms) * 20) + 100;
 
-    const adj = (STATE.sensitivity - 50) * 0.5;
-    db += adj;
-    if (db < 30) db = 30;
-    if (db > 120) db = 120;
-
-    return db;
+    return applySensitivityToDb(db, STATE.sensitivity);
 }
 
 /* --- 4. Game Logic --- */
@@ -1466,26 +1507,11 @@ function updateState() {
         if (dbStatus) { dbStatus.textContent = '等待中'; dbStatus.style.color = 'rgba(255,255,255,0.5)'; }
     }
 
-    if (STATE.hasManifested) {
-        STATE.energy = 100;
-        energyFill.style.width = '100%';
-        return;
-    }
+    const isReadingLoudly = STATE.currentDB >= READING_THRESHOLD;
+    STATE.energy = getNextEnergy(STATE.energy, STATE.currentDB, STATE.baseGrowthRate);
 
-    const READING_THRESHOLD = 70;
-    if (STATE.currentDB >= READING_THRESHOLD) {
-        const volumeBonus = Math.min((STATE.currentDB - READING_THRESHOLD) / 20, 1);
-        const rate = STATE.baseGrowthRate * (1 + volumeBonus);
-        STATE.energy += rate;
-
-        // FIX: Reduced shake threshold and diverted to canvas only
-        if (STATE.currentDB > 100) shakeCanvas(2);
-    } else {
-        STATE.energy -= 0.05;
-    }
-
-    if (STATE.energy < 0) STATE.energy = 0;
-    if (STATE.energy > 100) STATE.energy = 100;
+    // FIX: Reduced shake threshold and diverted to canvas only
+    if (isReadingLoudly && STATE.currentDB > 100) shakeCanvas(2);
 
     energyFill.style.width = STATE.energy + '%';
 
@@ -1505,8 +1531,7 @@ function triggerSuperMode() {
 
     STATE.superModeTimer = setTimeout(() => {
         STATE.isSuperMode = false;
-        STATE.energy = 100;
-        STATE.treeColor = '#ffd700';
+        STATE.treeColor = '#4caf50';
         STATE.superModeTimer = null;
     }, 5000);
 }
@@ -2325,7 +2350,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
             const leafPulse = renderMode.lowPower ? 1 : 1.5;
             const size = baseSize + Math.sin(frameTime + depth) * leafPulse;
 
-            const colorSet = (STATE.isSuperMode || STATE.hasManifested) ? GOLDEN_COLORS : FOLIAGE_COLORS;
+            const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
             const color = colorSet[colorIndex];
 
@@ -2425,7 +2450,7 @@ function loop() {
         bird.draw();
     });
 
-    const treeSize = 80 + (STATE.energy * 1.6);
+    const treeSize = getTreeSizeForEnergy(STATE.energy);
     const renderMode = getRenderMode(treeSize);
 
     ctx.beginPath();
@@ -2520,11 +2545,27 @@ function translateUI() {
     if (taskModal?.classList.contains('open')) renderTaskBoard();
 }
 
+function updateSensitivityControl(value = STATE.sensitivity) {
+    const nextSensitivity = clampSensitivity(value);
+    STATE.sensitivity = nextSensitivity;
+
+    if (sensitivitySlider) {
+        sensitivitySlider.value = String(nextSensitivity);
+        const progress = ((nextSensitivity - SENSITIVITY_MIN) / (SENSITIVITY_MAX - SENSITIVITY_MIN)) * 100;
+        sensitivitySlider.style.setProperty('--sens-progress', `${progress}%`);
+    }
+
+    if (sensitivityValue) {
+        sensitivityValue.textContent = `${nextSensitivity}%`;
+    }
+}
+
 // Init
 initLocalization().then(() => {
     initGatekeeper();
     initTaskUI();
     initReportUI();
+    updateSensitivityControl();
 });
 micBtn.onclick = toggleMic;
 if ($('reset-btn')) $('reset-btn').onclick = resetGame;
@@ -2534,14 +2575,6 @@ window.addEventListener('pagehide', () => {
     if (STATE.isListening) stopMic();
 });
 
-// 3-level sensitivity buttons
-document.querySelectorAll('.sens-btn').forEach(btn => {
-    btn.onclick = () => {
-        document.querySelectorAll('.sens-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        STATE.sensitivity = parseInt(btn.dataset.sens);
-    };
-});
-
-// Fallback: keep slider support if it exists
-if ($('sensitivity-slider')) $('sensitivity-slider').oninput = (e) => { STATE.sensitivity = parseInt(e.target.value); };
+if (sensitivitySlider) {
+    sensitivitySlider.oninput = (event) => updateSensitivityControl(event.target.value);
+}

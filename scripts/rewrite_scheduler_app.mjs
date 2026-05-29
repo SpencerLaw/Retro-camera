@@ -531,10 +531,10 @@ export default function App() {
       </header>
 
       {/* THREE SECTION WORKFLOW LAYOUT */}
-      <div className="flex flex-1 overflow-hidden min-h-0">
-        
-        {/* MIDDLE SECTION: MAIN VIEW TIMETABLE GRID */}
-        {activeTab === 'board' && (
+      {activeTab === 'board' && (
+        <div className="flex flex-1 overflow-hidden min-h-0">
+          
+          {/* MIDDLE SECTION: MAIN VIEW TIMETABLE GRID */}
           <main id="main_grid" className="flex-1 p-6 flex flex-col min-w-0 overflow-y-auto">
             
             {/* VIEW TITLE AND ACTIVE FILTERS HEADBOARD */}
@@ -666,7 +666,7 @@ export default function App() {
               </div>
 
               {/* Rows (Schedule slots, Break items & Lunch Spacers) */}
-              <div className="flex-1 overflow-y-auto grid grid-cols-1 auto-rows-[minmax(65px,_1fr)] divide-y divide-slate-100">
+              <div className="flex-1 overflow-y-auto grid grid-cols-1 auto-rows-[minmax(82px,_1fr)] divide-y divide-slate-100">
                 {PERIODS_METADATA.map((periodMeta, pIdx) => {
                   
                   if (periodMeta.type === 'break') {
@@ -766,7 +766,6 @@ export default function App() {
               </div>
             </div>
           </main>
-        )}
 
         {/* RIGHT SIDEBAR: INTELLIGENT DIAGNOSTICS &代课 */}
         {showRightSidebar && (
@@ -897,7 +896,8 @@ export default function App() {
             </div>
           </aside>
         )}
-      </div>
+        </div>
+      )}
 
       {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}
       {activeTab === 'management' && (

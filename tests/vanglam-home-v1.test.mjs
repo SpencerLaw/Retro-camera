@@ -112,7 +112,8 @@ runTest('footer restores the PDF contact snippet UI', () => {
   assert.doesNotMatch(footerSource, /\+8651088231801[,，]/);
   assert.doesNotMatch(footerSource, /\+86 21 1234 5678/);
   assert.match(cssSource, /\.vanglam-footer-phone-links\s*\{[\s\S]*display:\s*grid/);
-  assert.match(cssSource, /\.vanglam-footer-contact-card\s*\{[\s\S]*border:/);
+  assert.match(cssSource, /\.vanglam-footer-columns \.vanglam-footer-contact-card\s*\{[\s\S]*display:\s*flex/);
+  assert.match(cssSource, /\.vanglam-footer-contact-link\s*\{[\s\S]*font-variant-numeric:\s*tabular-nums/);
   assert.match(cssSource, /\.vanglam-footer-social-link\s*\{[\s\S]*border-radius:\s*50%/);
 });
 

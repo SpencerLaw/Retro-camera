@@ -234,8 +234,8 @@ export default function App() {
     }
   };
 
-  const loadLocalMinimalTemplate = () => {
-    const quickMinimumTemplate = {
+  const loadComprehensiveTemplate = () => {
+    const comprehensiveTemplate = {
       "teachers": [
         {
           "id": "T001",
@@ -244,11 +244,11 @@ export default function App() {
           "maxWeeklyHours": 16,
           "maxDailyHours": 4,
           "maxConsecutiveLessons": 2,
-          "unavailablePeriods": [],
-          "preferences": "无",
+          "unavailablePeriods": [{ "day": 1, "period": 1 }, { "day": 1, "period": 2 }],
+          "preferences": "因市级紧急教研任务，周一上午前两节请假不排课",
           "phone": "13800000001",
           "email": "lihua@school.edu.cn",
-          "department": "语文组"
+          "department": "高二语文组"
         },
         {
           "id": "T002",
@@ -258,77 +258,150 @@ export default function App() {
           "maxDailyHours": 4,
           "maxConsecutiveLessons": 2,
           "unavailablePeriods": [],
-          "preferences": "无",
+          "preferences": "希望尽量排上午的课",
           "phone": "13800000002",
           "email": "wangqiang@school.edu.cn",
-          "department": "数学组"
+          "department": "高二数学组"
+        },
+        {
+          "id": "T003",
+          "name": "赵刚老师",
+          "subjects": ["物理"],
+          "maxWeeklyHours": 14,
+          "maxDailyHours": 3,
+          "maxConsecutiveLessons": 2,
+          "unavailablePeriods": [{ "day": 5, "period": 7 }, { "day": 5, "period": 8 }],
+          "preferences": "周五下午有校本选修指导，不可排走班课",
+          "phone": "13800000003",
+          "email": "zhaogang@school.edu.cn",
+          "department": "高二理综组"
         }
       ],
       "classrooms": [
         {
           "id": "R001",
-          "name": "实验楼物理实训室",
-          "type": "lab",
+          "name": "高二(1)班行政教室",
+          "type": "ordinary",
           "capacity": 50,
-          "assignedSubjects": ["物理"]
+          "assignedSubjects": ["语文", "数学", "外语"]
         },
         {
           "id": "R002",
-          "name": "高一走班合设教室A",
-          "type": "ordinary",
+          "name": "实验楼物理实训室A",
+          "type": "lab",
           "capacity": 45,
-          "assignedSubjects": ["普通"]
+          "assignedSubjects": ["物理"]
+        },
+        {
+          "id": "R003",
+          "name": "多媒体网络机房C",
+          "type": "media",
+          "capacity": 60,
+          "assignedSubjects": ["信息技术"]
         }
       ],
       "teachingClasses": [
         {
           "id": "TC001",
-          "name": "高一语文选考1班",
+          "name": "高二语文必修1班",
           "subject": "语文",
           "teacherId": "T001",
-          "classroomId": "R002",
-          "studentCount": 42,
+          "classroomId": "R001",
+          "studentCount": 48,
           "combination": "通用"
         },
         {
           "id": "TC002",
-          "name": "高一数学选考1班",
+          "name": "高二数学必修1班",
           "subject": "数学",
           "teacherId": "T002",
-          "classroomId": "R002",
-          "studentCount": 42,
+          "classroomId": "R001",
+          "studentCount": 48,
           "combination": "通用"
+        },
+        {
+          "id": "TC003",
+          "name": "高二物理选考1班(物化生)",
+          "subject": "物理",
+          "teacherId": "T003",
+          "classroomId": "R002",
+          "studentCount": 40,
+          "combination": "物化生"
         }
       ],
-      "students": [],
+      "students": [
+        {
+          "id": "S001",
+          "name": "林子涵",
+          "electiveCombo": "物化生",
+          "classes": ["TC001", "TC002", "TC003"]
+        },
+        {
+          "id": "S002",
+          "name": "陈宇轩(请假)",
+          "electiveCombo": "物化生",
+          "classes": ["TC001", "TC002", "TC003"],
+          "note": "因病请假一周"
+        },
+        {
+          "id": "S003",
+          "name": "刘心语",
+          "electiveCombo": "物化地",
+          "classes": ["TC001", "TC002"]
+        }
+      ],
       "schedules": [
         {
           "id": "S001",
           "teachingClassId": "TC001",
-          "teachingClassName": "高一语文选考1班",
+          "teachingClassName": "高二语文必修1班",
           "subject": "语文",
           "teacherId": "T001",
           "teacherName": "李华老师",
-          "classroomId": "R002",
-          "classroomName": "高一走班合设教室A",
-          "day": 1,
+          "classroomId": "R001",
+          "classroomName": "高二(1)班行政教室",
+          "day": 2,
           "period": 1
         },
         {
           "id": "S002",
           "teachingClassId": "TC002",
-          "teachingClassName": "高一数学选考1班",
+          "teachingClassName": "高二数学必修1班",
           "subject": "数学",
           "teacherId": "T002",
           "teacherName": "王强老师",
-          "classroomId": "R002",
-          "classroomName": "高一走班合设教室A",
-          "day": 1,
+          "classroomId": "R001",
+          "classroomName": "高二(1)班行政教室",
+          "day": 2,
           "period": 2
+        },
+        {
+          "id": "S003",
+          "teachingClassId": "TC003",
+          "teachingClassName": "高二物理选考1班(物化生)",
+          "subject": "物理",
+          "teacherId": "T003",
+          "teacherName": "赵刚老师",
+          "classroomId": "R002",
+          "classroomName": "实验楼物理实训室A",
+          "day": 1,
+          "period": 5
+        },
+        {
+          "id": "S004",
+          "teachingClassId": "TC003",
+          "teachingClassName": "高二物理选考1班(物化生)",
+          "subject": "物理",
+          "teacherId": "T003",
+          "teacherName": "赵刚老师",
+          "classroomId": "R002",
+          "classroomName": "实验楼物理实训室A",
+          "day": 1,
+          "period": 6
         }
       ]
     };
-    setJsonRawText(JSON.stringify(quickMinimumTemplate, null, 2));
+    setJsonRawText(JSON.stringify(comprehensiveTemplate, null, 2));
   };
 
   // Substitute Recommend Trigger
@@ -2206,12 +2279,12 @@ export default function App() {
                     >
                       📋 复制当前 JSON
                     </button>
-                    <button 
-                      type="button" 
-                      onClick={loadLocalMinimalTemplate}
+                    <button
+                      type="button"
+                      onClick={loadComprehensiveTemplate}
                       className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 rounded text-[11px] font-bold text-slate-700 shadow-xs flex items-center gap-1"
                     >
-                      🧪 载入极简初始示范 JSON
+                      🧪 载入详尽综合数据模板 (含请假/任务)
                     </button>
                   </div>
 

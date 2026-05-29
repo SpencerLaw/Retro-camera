@@ -568,15 +568,6 @@ export default function App() {
             <Database className="w-3.5 h-3.5 text-indigo-600" />
             <span>💾 导入/导出 JSON</span>
           </button>
-          <button
-            onClick={() => setShowRightSidebar(!showRightSidebar)}
-            title="数据诊断与临时代课调配面板"
-            className={`px-3 py-1.5 border rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors ${showRightSidebar ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-          >
-            <Activity className="w-3.5 h-3.5" />
-            <span>🔍 诊断与代课</span>
-          </button>
-
           {conflicts.length > 0 ? (
             <button
               onClick={() => setShowConflictsModal(true)}
@@ -584,7 +575,7 @@ export default function App() {
               className="px-3 py-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors animate-pulse hover:animate-none"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-              <span>⚠️ ${conflicts.length} 处排课冲突</span>
+              <span>⚠️ {conflicts.length} 处排课冲突</span>
             </button>
           ) : (
             <button
@@ -810,9 +801,9 @@ export default function App() {
                                         {item.subject} · {item.teacherName}
                                       </span>
                                     </div>
-                                    <div className="text-[9px] text-slate-500 mt-1 font-semibold flex justify-between leading-none">
-                                      <span className="line-clamp-1">{item.teachingClassName}</span>
-                                      <span className="line-clamp-1">{item.classroomName.replace('普通教室', '')}</span>
+                                    <div className="text-[9px] mt-1 space-y-0.5 leading-tight text-left">
+                                      <div className="font-semibold text-slate-700 truncate">班级: {item.teachingClassName}</div>
+                                      <div className="text-slate-400 truncate">教室: {item.classroomName.replace('普通教室', '')}</div>
                                     </div>
                                   </div>
                                 );
@@ -961,7 +952,7 @@ export default function App() {
 
       {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}
       {activeTab === 'management' && (
-        <main id="data_management" className="flex-1 p-6 flex flex-col min-w-0 overflow-y-auto bg-slate-50 text-left">
+        <main id="data_management" className="flex-1 p-6 overflow-y-auto bg-slate-50 text-left h-[calc(100vh-4rem)] min-h-0 flex flex-col min-w-0">
           <div className="mb-6 flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-slate-900 tracking-tight">学校教学分工与基础数据</h2>
@@ -1685,7 +1676,7 @@ export default function App() {
                 <div className="text-right">
                   {conflicts.length > 0 ? (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                      ⚠️ ${conflicts.length} 处排课冲突
+                      ⚠️ {conflicts.length} 处排课冲突
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
@@ -1723,9 +1714,6 @@ export default function App() {
                             c.severity === 'critical' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white'
                           }`}>
                             {c.severity === 'critical' ? '严峻碰撞' : '轻微警告'}
-                          </span>
-                          <span className="text-[9px] text-slate-400 font-semibold font-mono">
-                            ID: {c.id}
                           </span>
                         </div>
                         <p className="text-[11px] font-bold text-slate-800 mt-1.5 leading-relaxed">{c.message}</p>

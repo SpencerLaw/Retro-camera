@@ -1,0 +1,42 @@
+/* components/vanglam/vanglam.css */
+
+/* Paper fibers noise overlay simulation */
+.paper-texture {
+  position: relative;
+}
+.paper-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: radial-gradient(#000 1px, transparent 1px);
+  background-size: 3px 3px;
+  z-index: 10;
+}
+
+/* Diagonal slash shapes for color system cards */
+.slash-cut-cloud-ink {
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, #AEB3B5 0%, #5F6F72 50%, #1C1E21 100%);
+}
+.slash-cut-gilded-earth {
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, #E8D4A2 0%, #D1A153 35%, #9C8A3B 70%, #5C4033 100%);
+}
+.slash-cut-cask-reserve {
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, #DDA5B2 0%, #8B2635 45%, #990011 75%, #2B0C10 100%);
+}
+.slash-cut-celadon-jade {
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, #A2D2C8 0%, #5F9E8F 35%, #1E5A44 70%, #113626 100%);
+}
+.slash-cut-mineral-sea {
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, #4A7C9D 0%, #2B5F8C 45%, #3F5D7D 75%, #0F1E36 100%);
+}
+.slash-cut-lacquer-bloom {
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, #F0AD4E 0%, #D9534F 35%, #B83B5E 70%, #53354A 100%);
+}

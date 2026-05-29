@@ -13,6 +13,8 @@ import { TugOfWarApp } from './components/TugOfWarApp';
 import JuzimiApp from './components/JuzimiApp';
 import PromptGalleryApp from './components/PromptGalleryApp';
 import CourseSchedulerApp from './components/course-scheduler/CourseSchedulerApp';
+import { VanglamHome } from './components/vanglam/VanglamHome';
+import { VanglamColorDeck } from './components/vanglam/VanglamColorDeck';
 
 const TslSkinApp = React.lazy(() => import('./components/TslSkinApp'));
 
@@ -47,6 +49,9 @@ const App: React.FC = () => {
           <Route path="/prompts" element={<PromptGalleryApp />} />
           <Route path="/tsl-skin" element={<TslSkinRoute />} />
           <Route path="/course-scheduler" element={<CourseSchedulerApp />} />
+          <Route path="/vanglam" element={<VanglamHome />} />
+          <Route path="/vanglam-42" element={<VanglamColorDeck />} />
+
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

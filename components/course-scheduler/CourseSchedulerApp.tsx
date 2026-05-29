@@ -54,6 +54,8 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [generating, setGenerating] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'board' | 'resources' | 'analysis' | 'management'>('board');
+  const [showLeftSidebar, setShowLeftSidebar] = useState<boolean>(false);
+  const [showRightSidebar, setShowRightSidebar] = useState<boolean>(false);
 
   // Base Data Edit States
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
@@ -464,6 +466,7 @@ export default function App() {
   // Substitute Recommend Trigger
   const handleSelectCell = async (item: ScheduleItem) => {
     setSelectedCell(item);
+    setShowRightSidebar(true);
     setSubstituteLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -946,6 +949,24 @@ export default function App() {
 
         {/* SYSTEM ACTIONS & ROLE SELECTION FOR MULTI-ROLE */}
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowLeftSidebar(!showLeftSidebar)}
+            title="约束放宽与走班统计面板"
+            className={`px-3 py-1.5 border rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors ${showLeftSidebar ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>⚙️ 约束放宽与统计</span>
+          </button>
+
+          <button
+            onClick={() => setShowRightSidebar(!showRightSidebar)}
+            title="数据诊断与临时代课调配面板"
+            className={`px-3 py-1.5 border rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors ${showRightSidebar ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>🔍 诊断与代课</span>
+          </button>
+
           <div className="bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-blue-600" />
             2026学期 · 第15周
@@ -974,16 +995,26 @@ export default function App() {
       <div className="flex flex-1 overflow-hidden min-h-0">
         
         {/* LEFT SIDEBAR: CONTROL & INTERACTIVE STATS */}
-        <aside id="left_sidebar" className="w-64 bg-white border-r border-slate-200 flex flex-col p-4 shrink-0 overflow-y-auto">
-          
-          {/* Action Blocks */}
-          <div className="mb-6 space-y-3">
-            {/* NP-hard Walk-Class Constraint Calibration & Rule Relaxation Panel */}
-            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-left shadow-xs">
-              <div className="flex items-center gap-1.5 mb-2.5">
-                <Sliders className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-bold text-slate-800 tracking-tight">排课非确定性(NP-hard)约束放宽</span>
-              </div>
+        {showLeftSidebar && (
+          <aside id="left_sidebar" className="w-64 bg-white border-r border-slate-200 flex flex-col p-4 shrink-0 overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">控制与统计面板</span>
+              <button 
+                onClick={() => setShowLeftSidebar(false)}
+                className="text-slate-400 hover:text-slate-600 p-0.5 hover:bg-slate-100 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            {/* Action Blocks */}
+            <div className="mb-6 space-y-3">
+              {/* NP-hard Walk-Class Constraint Calibration & Rule Relaxation Panel */}
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-left shadow-xs">
+                <div className="flex items-center gap-1.5 mb-2.5">
+                  <Sliders className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-bold text-slate-800 tracking-tight">排课非确定性(NP-hard)约束放宽</span>
+                </div>
               
               <div className="space-y-2.5">
                 <label className="flex items-start gap-2 cursor-pointer select-none">
@@ -1158,6 +1189,7 @@ export default function App() {
 
           </div>
         </aside>
+        )}
 
         {/* MIDDLE SECTION: MAIN VIEW TIMETABLE GRID WITH VISUAL RICHNESS */}
         {activeTab === 'board' && (
@@ -1699,15 +1731,22 @@ export default function App() {
         )}
 
         {/* RIGHT SIDEBAR: INTELLIGENT HELPERS, SUBSTITUTION WIDGET AND GEMINI AUDITING */}
-        <aside id="right_sidebar" className="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0">
-          
-          {/* HEADER SECTIONS: COLLATERAL ADVICE & DIAGNOSTICS */}
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 shrink-0 select-none">
-            <h3 className="text-sm font-bold flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-pulse"></span>
-              数据诊断及临时代课调配
-            </h3>
-          </div>
+        {showRightSidebar && (
+          <aside id="right_sidebar" className="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0">
+            
+            {/* HEADER SECTIONS: COLLATERAL ADVICE & DIAGNOSTICS */}
+            <div className="p-4 border-b border-slate-100 bg-slate-50/50 shrink-0 flex items-center justify-between select-none">
+              <h3 className="text-sm font-bold flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-pulse"></span>
+                数据诊断及临时代课调配
+              </h3>
+              <button 
+                onClick={() => setShowRightSidebar(false)}
+                className="text-slate-400 hover:text-slate-600 p-0.5 hover:bg-slate-200 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             
@@ -1890,6 +1929,7 @@ export default function App() {
           </div>
 
         </aside>
+        )}
       </div>
 
       {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}

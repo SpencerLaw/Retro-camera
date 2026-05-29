@@ -51,10 +51,11 @@ runTest('course scheduler management overview scrolls under the collapsible tab 
   assert.match(schedulerStyles, /#data_management\s*\{[\s\S]*overflow-y:\s*auto/);
   assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*relative/);
   assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
-  assert.match(schedulerSource, /renderSchedulerViewTabs\('expanded'\)/);
-  assert.match(schedulerStyles, /\.scheduler-pinned-tabs-host\s*\{[\s\S]*opacity:\s*0/);
-  assert.match(schedulerStyles, /\.scheduler-pinned-tabs-host\.is-visible\s*\{[\s\S]*opacity:\s*1/);
-  assert.match(schedulerStyles, /\.scheduler-view-tabs--pinned\s*\{[\s\S]*border-radius:\s*999px/);
+  assert.match(schedulerSource, /scheduler-header-tabs/);
+  assert.doesNotMatch(schedulerSource, /renderSchedulerViewTabs\('expanded'\)/);
+  assert.doesNotMatch(schedulerStyles, /\.scheduler-pinned-tabs-host/);
+  assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*display:\s*inline-flex/);
+  assert.match(schedulerStyles, /\.scheduler-header-tabs--pinned\s*\{[\s\S]*border-radius:\s*999px/);
   assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*backdrop-filter/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*height:\s*auto/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*overflow:\s*visible/);

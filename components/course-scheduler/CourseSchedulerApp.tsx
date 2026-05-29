@@ -592,13 +592,12 @@ export default function App() {
   const managementTableShellClass = 'management-table-shell bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col min-h-0';
   const managementTableScrollClass = 'management-table-scroll min-h-0 overflow-x-auto overflow-y-visible';
 
-  const renderSchedulerViewTabs = (variant: 'expanded' | 'pinned') => {
-    const viewTabsClassName = variant === 'pinned'
-      ? `scheduler-view-tabs scheduler-view-tabs--pinned ${isTabLayoutPinned ? 'is-visible' : ''}`
-      : 'scheduler-view-tabs scheduler-view-tabs--expanded';
-
+  const renderSchedulerViewTabs = () => {
     return (
-      <nav className={viewTabsClassName} aria-label="排班视图切换">
+      <nav
+        className={`scheduler-view-tabs scheduler-header-tabs ${isTabLayoutPinned ? 'scheduler-header-tabs--pinned' : ''}`}
+        aria-label="排班视图切换"
+      >
         <button
           onClick={() => handleViewTabChange('board')}
           className={activeTab === 'board' ? 'scheduler-view-tab is-active' : 'scheduler-view-tab'}
@@ -640,9 +639,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className={`scheduler-pinned-tabs-host ${isTabLayoutPinned ? 'is-visible' : ''}`}>
-            {renderSchedulerViewTabs('pinned')}
-          </div>
+          {renderSchedulerViewTabs()}
         </div>
 
         {/* SYSTEM ACTIONS & HEADER CONTROLS */}
@@ -709,7 +706,6 @@ export default function App() {
             {/* VIEW TITLE AND ACTIVE FILTERS HEADBOARD */}
             <div className={`scheduler-page-head scheduler-board-head flex justify-between items-end mb-4 shrink-0 ${isTabLayoutPinned ? 'scheduler-page-head--collapsed' : ''}`}>
               <div className="text-left">
-                {renderSchedulerViewTabs('expanded')}
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{getActiveFilterLabel()}</h2>
                   <select 
@@ -1083,7 +1079,6 @@ export default function App() {
           <div className={`scheduler-page-head management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80 ${isTabLayoutPinned ? 'scheduler-page-head--collapsed' : ''}`}>
             <div className="mb-2 flex flex-wrap justify-between items-start gap-3">
               <div className="min-w-0">
-                {renderSchedulerViewTabs('expanded')}
                 <h2 className="text-xl font-bold text-slate-950 tracking-tight">学校教学分工与基础数据</h2>
                 <p className="text-[11px] text-slate-500 mt-0.5 max-w-4xl leading-relaxed">
                   点击表格中的记录，可直接修改学生的请假信息、走班分配，以及教师的课表偏好和紧急任务状态。数据将热同步至排课底座。

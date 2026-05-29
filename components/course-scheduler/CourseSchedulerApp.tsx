@@ -592,6 +592,29 @@ export default function App() {
   const managementTableShellClass = 'management-table-shell bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col min-h-0';
   const managementTableScrollClass = 'management-table-scroll min-h-0 overflow-x-auto overflow-y-visible';
 
+  const renderSchedulerViewTabs = (variant: 'expanded' | 'pinned') => {
+    const viewTabsClassName = variant === 'pinned'
+      ? `scheduler-view-tabs scheduler-view-tabs--pinned ${isTabLayoutPinned ? 'is-visible' : ''}`
+      : 'scheduler-view-tabs scheduler-view-tabs--expanded';
+
+    return (
+      <nav className={viewTabsClassName} aria-label="排班视图切换">
+        <button
+          onClick={() => handleViewTabChange('board')}
+          className={activeTab === 'board' ? 'scheduler-view-tab is-active' : 'scheduler-view-tab'}
+        >
+          动态排课主看板
+        </button>
+        <button
+          onClick={() => handleViewTabChange('management')}
+          className={activeTab === 'management' ? 'scheduler-view-tab is-active' : 'scheduler-view-tab'}
+        >
+          学校教学分工与基础数据
+        </button>
+      </nav>
+    );
+  };
+
   return (
     <div className="course-scheduler-root flex flex-col h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-600">
       
@@ -605,7 +628,7 @@ export default function App() {
 
       {/* TOP HEADER NAVIGATION AREA */}
       <header id="main_header" className={`scheduler-main-header h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-30 shadow-xs ${isTabLayoutPinned ? 'scheduler-main-header--tabs' : ''}`}>
-        <div className="flex items-center gap-8">
+        <div className="scheduler-brand-strip flex items-center">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 bg-blue-600 rounded flex items-center justify-center shadow-md shadow-blue-200">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -617,20 +640,9 @@ export default function App() {
             </div>
           </div>
 
-          <nav className={`scheduler-view-tabs ${isTabLayoutPinned ? 'scheduler-view-tabs--pinned' : ''}`} aria-label="排班视图切换">
-            <button
-              onClick={() => handleViewTabChange('board')}
-              className={activeTab === 'board' ? 'scheduler-view-tab is-active' : 'scheduler-view-tab'}
-            >
-              动态排课主看板
-            </button>
-            <button
-              onClick={() => handleViewTabChange('management')}
-              className={activeTab === 'management' ? 'scheduler-view-tab is-active' : 'scheduler-view-tab'}
-            >
-              学校教学分工与基础数据
-            </button>
-          </nav>
+          <div className={`scheduler-pinned-tabs-host ${isTabLayoutPinned ? 'is-visible' : ''}`}>
+            {renderSchedulerViewTabs('pinned')}
+          </div>
         </div>
 
         {/* SYSTEM ACTIONS & HEADER CONTROLS */}
@@ -695,8 +707,9 @@ export default function App() {
           <main id="main_grid" className="scheduler-board-scroll flex-1 p-6 flex flex-col min-w-0 overflow-y-auto" onScroll={handleSchedulerScroll}>
             
             {/* VIEW TITLE AND ACTIVE FILTERS HEADBOARD */}
-            <div className="scheduler-page-head scheduler-board-head flex justify-between items-end mb-4 shrink-0">
+            <div className={`scheduler-page-head scheduler-board-head flex justify-between items-end mb-4 shrink-0 ${isTabLayoutPinned ? 'scheduler-page-head--collapsed' : ''}`}>
               <div className="text-left">
+                {renderSchedulerViewTabs('expanded')}
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{getActiveFilterLabel()}</h2>
                   <select 
@@ -1067,9 +1080,10 @@ export default function App() {
       {activeTab === 'management' && (
         <main id="data_management" className="flex-1 min-h-0 overflow-y-auto flex flex-col bg-slate-50 text-left w-full" onScroll={handleSchedulerScroll}>
           {/* Scrollable overview area */}
-          <div className="scheduler-page-head management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80">
+          <div className={`scheduler-page-head management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80 ${isTabLayoutPinned ? 'scheduler-page-head--collapsed' : ''}`}>
             <div className="mb-2 flex flex-wrap justify-between items-start gap-3">
               <div className="min-w-0">
+                {renderSchedulerViewTabs('expanded')}
                 <h2 className="text-xl font-bold text-slate-950 tracking-tight">学校教学分工与基础数据</h2>
                 <p className="text-[11px] text-slate-500 mt-0.5 max-w-4xl leading-relaxed">
                   点击表格中的记录，可直接修改学生的请假信息、走班分配，以及教师的课表偏好和紧急任务状态。数据将热同步至排课底座。

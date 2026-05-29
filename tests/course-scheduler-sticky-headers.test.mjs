@@ -17,10 +17,14 @@ function runTest(name, fn) {
 runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(schedulerSource, /const \[isTabLayoutPinned, setIsTabLayoutPinned\]/);
   assert.match(schedulerSource, /handleSchedulerScroll/);
+  assert.match(schedulerSource, /renderSchedulerViewTabs/);
+  assert.match(schedulerSource, /scheduler-pinned-tabs-host \$\{isTabLayoutPinned \? 'is-visible' : ''\}/);
   assert.match(schedulerSource, /id="main_grid" className="[^"]*scheduler-board-scroll[^"]*" onScroll=\{handleSchedulerScroll\}/);
   assert.match(schedulerSource, /scheduler-main-header/);
   assert.match(schedulerSource, /scheduler-view-tabs/);
   assert.match(schedulerSource, /scheduler-view-tabs--pinned/);
+  assert.match(schedulerSource, /renderSchedulerViewTabs\('pinned'\)/);
+  assert.match(schedulerSource, /renderSchedulerViewTabs\('expanded'\)/);
   assert.match(schedulerSource, /scheduler-view-tab/);
   assert.match(schedulerSource, /scheduler-view-tab is-active/);
   assert.match(schedulerSource, /scheduler-timetable-shell/);
@@ -28,14 +32,21 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-rows[^"]*overflow-y-auto/);
   assert.doesNotMatch(schedulerSource, /<div className="flex-1 overflow-y-auto divide-y divide-slate-100">/);
   assert.match(schedulerStyles, /\.scheduler-main-header--tabs\s*\{[\s\S]*box-shadow/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-tabs-host\s*\{[\s\S]*opacity:\s*0/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-tabs-host\s*\{[\s\S]*max-width:\s*0/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-tabs-host\.is-visible\s*\{[\s\S]*opacity:\s*1/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-tabs-host\.is-visible\s*\{[\s\S]*max-width:\s*520px/);
   assert.match(schedulerStyles, /\.scheduler-view-tabs--pinned\s*\{[\s\S]*border-radius:\s*999px/);
   assert.match(schedulerStyles, /\.scheduler-view-tabs--pinned\s+\.scheduler-view-tab\.is-active\s*\{[\s\S]*background:\s*#2563eb/);
+  assert.match(schedulerStyles, /\.scheduler-view-tabs--expanded\s*\{[\s\S]*position:\s*relative/);
+  assert.match(schedulerStyles, /\.scheduler-page-head--collapsed\s+\.scheduler-view-tabs--expanded\s*\{[\s\S]*opacity:\s*0/);
   assert.match(schedulerStyles, /\.scheduler-timetable-rows\s*\{[\s\S]*overflow:\s*visible/);
 });
 
 runTest('management scroll uses the same collapsible tab layout', () => {
   assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto[^"]*" onScroll=\{handleSchedulerScroll\}/);
   assert.match(schedulerSource, /scheduler-page-head management-header/);
+  assert.match(schedulerSource, /scheduler-page-head--collapsed/);
   assert.doesNotMatch(schedulerSource, /scheduler-app-topbar management-header/);
   assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*relative/);
   assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);

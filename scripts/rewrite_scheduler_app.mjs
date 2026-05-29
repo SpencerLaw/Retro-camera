@@ -787,7 +787,7 @@ export default function App() {
                         return (
                           <div 
                             key={\`\${day.num}-\${periodMeta.num}\`} 
-                            className={\`p-1 border-r last:border-r-0 border-slate-200 flex flex-col gap-1 overflow-hidden relative group/cell transition-colors min-h-[55px] \${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}\`}
+                            className={\`p-1.5 border-r last:border-r-0 border-slate-200 flex flex-col gap-1.5 relative group/cell transition-colors min-h-[82px] \${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}\`}
                           >
                             {cellItems.length > 0 ? (
                               cellItems.map((item) => {

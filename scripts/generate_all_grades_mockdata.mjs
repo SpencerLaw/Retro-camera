@@ -322,119 +322,15 @@ rawTimetableItems.forEach(item => {
   }
 });
 
-// FOR ALL OTHER GRADES: run greedy conflict-free scheduling algorithm!
-const busyTeachers = new Set(); // "teacherId-day-period"
-const busyClassrooms = new Set(); // "classroomId-day-period"
-const busyClassSlots = new Set(); // "grade-classNumber-day-period"
-
-// Pre-fill busy states for 高二 based on real schedules
-globalSchedules.forEach(s => {
-  const tc = globalTeachingClasses.find(x => x.id === s.teachingClassId);
-  if (tc) {
-    busyTeachers.add(`${s.teacherId}-${s.day}-${s.period}`);
-    busyClassrooms.add(`${s.classroomId}-${s.day}-${s.period}`);
-    busyClassSlots.add(`高二-${tc.classNumber}-${s.day}-${s.period}`);
-  }
-});
-
-// Run greedy scheduling for grades OTHER than 高二
-grades.forEach(gradeName => {
-  if (gradeName === '高二') return;
-  
-  const gTeachingClasses = globalTeachingClasses.filter(c => c.grade === gradeName);
-  const classesList = parsedGradesData[gradeName]?.classes || [];
-  
-  // Try to schedule slots greedily
-  gTeachingClasses.forEach(tc => {
-    const periodsToSchedule = tc.periods || 4;
-    const teacher = globalTeachers.find(t => t.id === tc.teacherId);
-    const classroom = globalClassrooms.find(r => r.id === tc.classroomId);
-    
-    let scheduledCount = 0;
-    
-    // We try to place them day-by-day
-    for (let day = 1; day <= 5; day++) {
-      if (scheduledCount >= periodsToSchedule) break;
-      
-      for (let period = 1; period <= 8; period++) {
-        if (scheduledCount >= periodsToSchedule) break;
-        
-        const teacherKey = `${tc.teacherId}-${day}-${period}`;
-        const classroomKey = `${tc.classroomId}-${day}-${period}`;
-        const classKey = `${gradeName}-${tc.classNumber}-${day}-${period}`;
-        
-        // Check if free
-        if (
-          !busyClassSlots.has(classKey) &&
-          !busyTeachers.has(teacherKey) &&
-          (tc.classroomId.startsWith('R_SPEC_') || !busyClassrooms.has(classroomKey))
-        ) {
-          // Schedule it!
-          globalSchedules.push({
-            id: `S_ITEM_${sIdCounter}`,
-            teachingClassId: tc.id,
-            teachingClassName: tc.name,
-            subject: tc.subject,
-            teacherId: tc.teacherId,
-            teacherName: teacher ? teacher.name : '未知教师',
-            classroomId: tc.classroomId,
-            classroomName: classroom ? classroom.name : '未知教室',
-            day: day,
-            period: period
-          });
-          sIdCounter++;
-          scheduledCount++;
-          
-          // Mark as busy
-          busyClassSlots.add(classKey);
-          busyTeachers.add(teacherKey);
-          busyClassrooms.add(classroomKey);
-        }
-      }
-    }
-  });
-});
-
+// We only load real schedules for 高二, other grades do not have timetable files, so they remain unscheduled to keep data 100% real.
 console.log(`Parsed ${globalTeachers.length} unique teachers in total.`);
 console.log(`Generated ${globalClassrooms.length} classrooms.`);
 console.log(`Generated ${globalTeachingClasses.length} teaching classes.`);
 console.log(`Generated ${globalSchedules.length} schedule items.`);
 
-// 5. Generate Students
-const studentNames = [
-  '林子涵', '欧阳雨欣', '陈子豪', '邓文博', '许诗蕾', '张明轩', '李雨婷', '王晨阳', '赵雪涵', '刘建国',
-  '孙雅琪', '杨智勇', '吴佩慈', '郭旭东', '马嘉祺', '朱晓萌', '胡若飞', '高睿捷', '梁爽', '徐铭泽'
-];
-
+// 5. Students (Excel sheets do not have student rosters, so this must remain empty to keep data 100% real and authentic)
 const globalStudents = [];
-let studentIdCounter = 1;
-
-// Distribute students across all grades and classes
-grades.forEach(gradeName => {
-  const gClasses = parsedGradesData[gradeName]?.classes || [];
-  gClasses.forEach(cls => {
-    // Generate 3-5 students per class
-    const studentCount = 3 + (studentIdCounter % 3);
-    for (let s = 0; s < studentCount; s++) {
-      const name = studentNames[(studentIdCounter + s) % studentNames.length] + (studentIdCounter);
-      const studentId = `S${studentIdCounter.toString().padStart(3, '0')}`;
-      studentIdCounter++;
-      
-      const tcIds = globalTeachingClasses
-        .filter(c => c.grade === gradeName && c.classNumber === cls.classNumber)
-        .map(c => c.id);
-        
-      globalStudents.push({
-        id: studentId,
-        name: name,
-        electiveCombo: cls.type || '通用',
-        classes: tcIds
-      });
-    }
-  });
-});
-
-console.log(`Generated ${globalStudents.length} students across all classes.`);
+console.log('No students generated to ensure 100% real data.');
 
 // 6. Write to mockData.ts
 const code = `import { Teacher, Classroom, TeachingClass, Student, ScheduleItem } from './types';

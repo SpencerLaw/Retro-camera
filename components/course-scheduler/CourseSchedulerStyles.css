@@ -128,38 +128,26 @@
   background: #7c3aed;
 }
 
-/* Floating page headboards */
+/* App-style sticky top bars */
 .scheduler-board-scroll {
   scroll-padding-top: 0.75rem;
 }
 
-.scheduler-floating-headboard {
+.scheduler-app-topbar {
   position: sticky;
   top: 0;
-  z-index: 30;
-  isolation: isolate;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(239, 246, 255, 0.66) 48%, rgba(248, 250, 252, 0.8));
-  border: 1px solid rgba(148, 163, 184, 0.46);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 18px 44px rgba(15, 23, 42, 0.18);
-  backdrop-filter: blur(22px) saturate(1.35);
-  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  z-index: 40;
+  border-radius: 0;
+  background: rgba(248, 250, 252, 0.94);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.32);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
 }
 
-.scheduler-board-headboard {
-  margin: -0.35rem -0.35rem 1rem;
-  padding: 0.75rem;
-  border-radius: 16px;
-}
-
-.scheduler-floating-headboard::before,
-.management-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 52%);
+.scheduler-board-appbar {
+  margin: -1.5rem -1.5rem 1rem;
+  padding: 0.9rem 1.5rem;
 }
 
 .scheduler-timetable-shell {
@@ -183,13 +171,12 @@
   flex: 0 0 auto;
   position: sticky;
   top: 0;
-  z-index: 30;
-  isolation: isolate;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(240, 253, 250, 0.62) 42%, rgba(248, 250, 252, 0.82));
-  border-bottom: 1px solid rgba(148, 163, 184, 0.38);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 18px 42px rgba(15, 23, 42, 0.16);
-  backdrop-filter: blur(22px) saturate(1.35);
-  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  z-index: 40;
+  background: rgba(248, 250, 252, 0.94);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.32);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
 }
 
 .management-content-area {

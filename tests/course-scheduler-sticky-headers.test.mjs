@@ -14,30 +14,32 @@ function runTest(name, fn) {
   }
 }
 
-runTest('board page has a floating sticky headboard above the timetable', () => {
+runTest('board page has an app top bar that sticks to the top while the timetable scrolls', () => {
   assert.match(schedulerSource, /id="main_grid" className="[^"]*scheduler-board-scroll/);
-  assert.match(schedulerSource, /scheduler-floating-headboard scheduler-board-headboard/);
+  assert.match(schedulerSource, /scheduler-app-topbar scheduler-board-appbar/);
   assert.match(schedulerSource, /scheduler-timetable-shell/);
   assert.match(schedulerSource, /scheduler-timetable-rows/);
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-rows[^"]*overflow-y-auto/);
   assert.doesNotMatch(schedulerSource, /<div className="flex-1 overflow-y-auto divide-y divide-slate-100">/);
-  assert.match(schedulerStyles, /\.scheduler-floating-headboard\s*\{[\s\S]*position:\s*sticky/);
-  assert.match(schedulerStyles, /\.scheduler-floating-headboard\s*\{[\s\S]*top:\s*0/);
-  assert.match(schedulerStyles, /\.scheduler-floating-headboard\s*\{[\s\S]*z-index:\s*30/);
-  assert.match(schedulerStyles, /\.scheduler-floating-headboard\s*\{[\s\S]*backdrop-filter:\s*blur/);
+  assert.match(schedulerStyles, /\.scheduler-app-topbar\s*\{[\s\S]*position:\s*sticky/);
+  assert.match(schedulerStyles, /\.scheduler-app-topbar\s*\{[\s\S]*top:\s*0/);
+  assert.match(schedulerStyles, /\.scheduler-app-topbar\s*\{[\s\S]*z-index:\s*40/);
+  assert.match(schedulerStyles, /\.scheduler-app-topbar\s*\{[\s\S]*border-bottom/);
+  assert.match(schedulerStyles, /\.scheduler-app-topbar\s*\{[\s\S]*box-shadow/);
   assert.match(schedulerStyles, /\.scheduler-timetable-rows\s*\{[\s\S]*overflow:\s*visible/);
 });
 
-runTest('management page uses the same floating sticky visual language', () => {
-  assert.match(schedulerSource, /management-header/);
+runTest('management page uses the same app top bar sticky behavior', () => {
+  assert.match(schedulerSource, /scheduler-app-topbar management-header/);
   assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*z-index:\s*30/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*z-index:\s*40/);
   assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*box-shadow/);
 });
 
-runTest('floating headers have an obvious glass surface instead of a flat background', () => {
-  assert.match(schedulerStyles, /\.scheduler-floating-headboard\s*\{[\s\S]*background:\s*linear-gradient/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*background:\s*linear-gradient/);
-  assert.match(schedulerStyles, /\.scheduler-floating-headboard\s*\{[\s\S]*inset 0 1px 0/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*inset 0 1px 0/);
+runTest('app top bars are full-width bars rather than rounded floating cards', () => {
+  assert.match(schedulerStyles, /\.scheduler-board-appbar\s*\{[\s\S]*margin:\s*-1\.5rem -1\.5rem 1rem/);
+  assert.match(schedulerStyles, /\.scheduler-app-topbar\s*\{[\s\S]*border-radius:\s*0/);
+  assert.doesNotMatch(schedulerStyles, /\.scheduler-board-headboard/);
+  assert.doesNotMatch(schedulerStyles, /\.scheduler-floating-headboard/);
+  assert.doesNotMatch(schedulerSource, /scheduler-floating-headboard/);
 });

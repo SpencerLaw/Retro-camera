@@ -43,7 +43,7 @@ runTest('course scheduler management tables fill the available viewport instead 
   assert.doesNotMatch(schedulerSource, /calc\(100vh - 4rem\)|calc\(100vh-4rem\)/);
 });
 
-runTest('course scheduler management overview stays available as a floating sticky header', () => {
+runTest('course scheduler management overview stays available as a sticky app top bar', () => {
   assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto/);
   assert.match(schedulerSource, /management-content-area [^"]*overflow-visible/);
   assert.doesNotMatch(schedulerSource, /management-content-area [^"]*overflow-hidden/);

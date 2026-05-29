@@ -684,7 +684,7 @@ export default function App() {
           <main id="main_grid" className="scheduler-board-scroll flex-1 p-6 flex flex-col min-w-0 overflow-y-auto">
             
             {/* VIEW TITLE AND ACTIVE FILTERS HEADBOARD */}
-            <div className="scheduler-floating-headboard scheduler-board-headboard flex justify-between items-end mb-4 shrink-0">
+            <div className="scheduler-app-topbar scheduler-board-appbar flex justify-between items-end shrink-0">
               <div className="text-left">
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{getActiveFilterLabel()}</h2>
@@ -1056,7 +1056,7 @@ export default function App() {
       {activeTab === 'management' && (
         <main id="data_management" className="flex-1 min-h-0 overflow-y-auto flex flex-col bg-slate-50 text-left w-full">
           {/* Scrollable overview area */}
-          <div className="management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80 bg-slate-50">
+          <div className="scheduler-app-topbar management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80 bg-slate-50">
             <div className="mb-2 flex flex-wrap justify-between items-start gap-3">
               <div className="min-w-0">
                 <h2 className="text-xl font-bold text-slate-950 tracking-tight">学校教学分工与基础数据</h2>

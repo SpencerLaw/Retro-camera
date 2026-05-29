@@ -12,7 +12,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13843013613",
+    "phone": "13831111413",
     "email": "张蓓蕾@school.edu.cn",
     "department": "语文组"
   },
@@ -27,7 +27,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13812983164",
+    "phone": "13890990621",
     "email": "李依涵@school.edu.cn",
     "department": "数学组"
   },
@@ -42,7 +42,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13884006154",
+    "phone": "13881001206",
     "email": "刘静@school.edu.cn",
     "department": "英语组"
   },
@@ -57,7 +57,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13857137134",
+    "phone": "13813440009",
     "email": "高会敏@school.edu.cn",
     "department": "政治组"
   },
@@ -72,7 +72,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13815125082",
+    "phone": "13820265381",
     "email": "安冰华@school.edu.cn",
     "department": "历史组"
   },
@@ -87,7 +87,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13837057435",
+    "phone": "13821571502",
     "email": "王勇@school.edu.cn",
     "department": "地理组"
   },
@@ -102,7 +102,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13836944313",
+    "phone": "13867774005",
     "email": "杨茹@school.edu.cn",
     "department": "生物组"
   },
@@ -117,7 +117,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13883150661",
+    "phone": "13869901958",
     "email": "郑乃武@school.edu.cn",
     "department": "体育组"
   },
@@ -132,7 +132,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13878524768",
+    "phone": "13817836503",
     "email": "汪洋@school.edu.cn",
     "department": "通用组"
   },
@@ -147,7 +147,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13897406056",
+    "phone": "13844022714",
     "email": "陈聪敏@school.edu.cn",
     "department": "音乐组"
   },
@@ -162,7 +162,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13877126566",
+    "phone": "13854401095",
     "email": "胡宝峰@school.edu.cn",
     "department": "信息技术组"
   },
@@ -177,7 +177,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13841855964",
+    "phone": "13858183252",
     "email": "牛静@school.edu.cn",
     "department": "语文组"
   },
@@ -192,7 +192,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13877762235",
+    "phone": "13835981493",
     "email": "陈瑞雪@school.edu.cn",
     "department": "数学组"
   },
@@ -207,7 +207,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13814976791",
+    "phone": "13826665668",
     "email": "王丽@school.edu.cn",
     "department": "英语组"
   },
@@ -222,7 +222,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13835678884",
+    "phone": "13867535580",
     "email": "李广@school.edu.cn",
     "department": "政治组"
   },
@@ -237,7 +237,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13896791709",
+    "phone": "13818068767",
     "email": "王文远@school.edu.cn",
     "department": "生物组"
   },
@@ -252,7 +252,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13843583422",
+    "phone": "13824456297",
     "email": "陈玲歌@school.edu.cn",
     "department": "地理组"
   },
@@ -267,7 +267,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13878312037",
+    "phone": "13886183028",
     "email": "颜丹@school.edu.cn",
     "department": "语文组"
   },
@@ -283,7 +283,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13861806224",
+    "phone": "13824864511",
     "email": "杜娟@school.edu.cn",
     "department": "英语组"
   },
@@ -298,7 +298,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13845588377",
+    "phone": "13851780893",
     "email": "闫瑞雪@school.edu.cn",
     "department": "数学组"
   },
@@ -313,7 +313,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13899383092",
+    "phone": "13894996292",
     "email": "罗丹@school.edu.cn",
     "department": "英语组"
   },
@@ -328,7 +328,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13896883760",
+    "phone": "13885338759",
     "email": "李亚振@school.edu.cn",
     "department": "体育组"
   },
@@ -343,7 +343,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13840632086",
+    "phone": "13834197155",
     "email": "仝锦霞@school.edu.cn",
     "department": "语文组"
   },
@@ -358,7 +358,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13883327983",
+    "phone": "13886138368",
     "email": "毛曙静@school.edu.cn",
     "department": "数学组"
   },
@@ -373,7 +373,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13862078028",
+    "phone": "13881416887",
     "email": "施媛@school.edu.cn",
     "department": "英语组"
   },
@@ -388,7 +388,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13891150862",
+    "phone": "13829021079",
     "email": "林华峰@school.edu.cn",
     "department": "政治组"
   },
@@ -403,7 +403,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13849184896",
+    "phone": "13829178822",
     "email": "张璐歌@school.edu.cn",
     "department": "历史组"
   },
@@ -418,7 +418,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13818989644",
+    "phone": "13880844122",
     "email": "李俏@school.edu.cn",
     "department": "地理组"
   },
@@ -433,7 +433,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13826188519",
+    "phone": "13810181843",
     "email": "屈欣瑶@school.edu.cn",
     "department": "物理组"
   },
@@ -448,7 +448,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13851148586",
+    "phone": "13883316285",
     "email": "张凤琴@school.edu.cn",
     "department": "生物组"
   },
@@ -463,7 +463,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13810973688",
+    "phone": "13828557430",
     "email": "陈涛@school.edu.cn",
     "department": "体育组"
   },
@@ -478,7 +478,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13818244438",
+    "phone": "13815871505",
     "email": "王少飞@school.edu.cn",
     "department": "通用组"
   },
@@ -493,7 +493,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13847019124",
+    "phone": "13899220419",
     "email": "王建录@school.edu.cn",
     "department": "数学组"
   },
@@ -508,7 +508,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13892682457",
+    "phone": "13853578467",
     "email": "李碧亭@school.edu.cn",
     "department": "语文组"
   },
@@ -523,7 +523,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13869889512",
+    "phone": "13835322561",
     "email": "魏敏@school.edu.cn",
     "department": "数学组"
   },
@@ -538,7 +538,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13888442121",
+    "phone": "13813125870",
     "email": "王伊宁@school.edu.cn",
     "department": "英语组"
   },
@@ -553,7 +553,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13845608288",
+    "phone": "13822824965",
     "email": "汪梦琦@school.edu.cn",
     "department": "英语组"
   },
@@ -568,7 +568,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13838455114",
+    "phone": "13893356219",
     "email": "王浩@school.edu.cn",
     "department": "物理组"
   },
@@ -583,7 +583,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13820935013",
+    "phone": "13833454003",
     "email": "雷聪霖@school.edu.cn",
     "department": "语文组"
   },
@@ -598,7 +598,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13837330583",
+    "phone": "13848422201",
     "email": "方雨婷@school.edu.cn",
     "department": "数学组"
   },
@@ -613,7 +613,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13817469890",
+    "phone": "13844606990",
     "email": "王永香@school.edu.cn",
     "department": "英语组"
   },
@@ -628,7 +628,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13873874317",
+    "phone": "13819866002",
     "email": "党菲@school.edu.cn",
     "department": "语文组"
   },
@@ -643,7 +643,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13882755117",
+    "phone": "13818674300",
     "email": "纪文利@school.edu.cn",
     "department": "数学组"
   },
@@ -658,7 +658,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13874452235",
+    "phone": "13828842059",
     "email": "线展叶@school.edu.cn",
     "department": "英语组"
   },
@@ -673,7 +673,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13847021061",
+    "phone": "13813098199",
     "email": "祁维辉@school.edu.cn",
     "department": "历史组"
   },
@@ -688,7 +688,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13857773429",
+    "phone": "13854089864",
     "email": "焦广利@school.edu.cn",
     "department": "物理组"
   },
@@ -703,7 +703,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13859999373",
+    "phone": "13847602404",
     "email": "刘仙妹@school.edu.cn",
     "department": "化学组"
   },
@@ -718,7 +718,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13873107000",
+    "phone": "13829122810",
     "email": "姚琦@school.edu.cn",
     "department": "体育组"
   },
@@ -733,7 +733,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13857504686",
+    "phone": "13824359125",
     "email": "李荣@school.edu.cn",
     "department": "通用组"
   },
@@ -748,7 +748,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13866953388",
+    "phone": "13892322144",
     "email": "杨洲琴@school.edu.cn",
     "department": "语文组"
   },
@@ -763,7 +763,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13815852764",
+    "phone": "13850476333",
     "email": "燕蕾@school.edu.cn",
     "department": "数学组"
   },
@@ -778,7 +778,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13888914809",
+    "phone": "13831346013",
     "email": "田红玲@school.edu.cn",
     "department": "英语组"
   },
@@ -793,7 +793,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13857140386",
+    "phone": "13813391420",
     "email": "仝梅娜@school.edu.cn",
     "department": "语文组"
   },
@@ -808,7 +808,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13829951712",
+    "phone": "13892717468",
     "email": "王晨光@school.edu.cn",
     "department": "数学组"
   },
@@ -823,7 +823,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13816064599",
+    "phone": "13877834794",
     "email": "王露@school.edu.cn",
     "department": "英语组"
   },
@@ -838,7 +838,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13813258241",
+    "phone": "13841778935",
     "email": "赵颖维@school.edu.cn",
     "department": "政治组"
   },
@@ -853,7 +853,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13856163677",
+    "phone": "13831998090",
     "email": "葛亚东@school.edu.cn",
     "department": "历史组"
   },
@@ -868,7 +868,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13863018744",
+    "phone": "13821236604",
     "email": "闫忠道@school.edu.cn",
     "department": "物理组"
   },
@@ -883,7 +883,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13873096699",
+    "phone": "13895247585",
     "email": "杨亲霞@school.edu.cn",
     "department": "化学组"
   },
@@ -898,7 +898,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13825345883",
+    "phone": "13890968348",
     "email": "关梦迪@school.edu.cn",
     "department": "语文组"
   },
@@ -913,7 +913,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13859868703",
+    "phone": "13872598742",
     "email": "田佳欣@school.edu.cn",
     "department": "数学组"
   },
@@ -928,7 +928,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13867402470",
+    "phone": "13861951296",
     "email": "高婉莎@school.edu.cn",
     "department": "英语组"
   },
@@ -943,7 +943,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13821922451",
+    "phone": "13812642460",
     "email": "张爱茸@school.edu.cn",
     "department": "语文组"
   },
@@ -958,7 +958,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13881432926",
+    "phone": "13865562754",
     "email": "姚玲玲@school.edu.cn",
     "department": "数学组"
   },
@@ -973,7 +973,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13867142922",
+    "phone": "13828712557",
     "email": "折阿倩@school.edu.cn",
     "department": "英语组"
   },
@@ -988,7 +988,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13849691072",
+    "phone": "13835697665",
     "email": "米智静@school.edu.cn",
     "department": "历史组"
   },
@@ -1003,7 +1003,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13874387204",
+    "phone": "13874764487",
     "email": "邓婉莹@school.edu.cn",
     "department": "地理组"
   },
@@ -1018,7 +1018,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13852473302",
+    "phone": "13885634991",
     "email": "张静@school.edu.cn",
     "department": "物理组"
   },
@@ -1033,7 +1033,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13863585958",
+    "phone": "13890003509",
     "email": "郭妮@school.edu.cn",
     "department": "化学组"
   },
@@ -1048,7 +1048,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13890077157",
+    "phone": "13839377789",
     "email": "王玮颖@school.edu.cn",
     "department": "生物组"
   },
@@ -1063,7 +1063,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13850674434",
+    "phone": "13847257072",
     "email": "王俊驰@school.edu.cn",
     "department": "体育组"
   },
@@ -1079,7 +1079,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13849416175",
+    "phone": "13893327584",
     "email": "谢怡@school.edu.cn",
     "department": "信息技术组"
   },
@@ -1094,7 +1094,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13855308556",
+    "phone": "13885039338",
     "email": "刘颖@school.edu.cn",
     "department": "语文组"
   },
@@ -1109,7 +1109,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13823441867",
+    "phone": "13880801004",
     "email": "张文刚@school.edu.cn",
     "department": "数学组"
   },
@@ -1124,7 +1124,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13884052384",
+    "phone": "13864601745",
     "email": "燕润旭@school.edu.cn",
     "department": "地理组"
   },
@@ -1139,7 +1139,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13845596889",
+    "phone": "13814128159",
     "email": "高春燕@school.edu.cn",
     "department": "英语组"
   },
@@ -1154,7 +1154,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13862867596",
+    "phone": "13856317169",
     "email": "张霜@school.edu.cn",
     "department": "物理组"
   },
@@ -1169,7 +1169,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13831539048",
+    "phone": "13814053027",
     "email": "陈春霞@school.edu.cn",
     "department": "化学组"
   },
@@ -1184,7 +1184,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13834448881",
+    "phone": "13889919061",
     "email": "李美玉@school.edu.cn",
     "department": "生物组"
   },
@@ -1199,7 +1199,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13899604690",
+    "phone": "13893934721",
     "email": "万学瑞@school.edu.cn",
     "department": "数学组"
   },
@@ -1214,7 +1214,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13851753913",
+    "phone": "13867197857",
     "email": "李红叶@school.edu.cn",
     "department": "英语组"
   },
@@ -1229,7 +1229,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13850808973",
+    "phone": "13836432719",
     "email": "杨冬梅@school.edu.cn",
     "department": "生物组"
   },
@@ -1244,7 +1244,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13846476308",
+    "phone": "13825228067",
     "email": "殷佳怡@school.edu.cn",
     "department": "语文组"
   },
@@ -1259,7 +1259,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13879760188",
+    "phone": "13813126666",
     "email": "全悦@school.edu.cn",
     "department": "数学组"
   },
@@ -1274,7 +1274,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13894968576",
+    "phone": "13815467963",
     "email": "倪梦哲@school.edu.cn",
     "department": "英语组"
   },
@@ -1289,7 +1289,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13893275754",
+    "phone": "13889692623",
     "email": "高晓静@school.edu.cn",
     "department": "化学组"
   },
@@ -1304,7 +1304,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13851138417",
+    "phone": "13848641989",
     "email": "程燕@school.edu.cn",
     "department": "语文组"
   },
@@ -1319,7 +1319,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13878219104",
+    "phone": "13893210152",
     "email": "赵彭丽@school.edu.cn",
     "department": "数学组"
   },
@@ -1334,7 +1334,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13833178705",
+    "phone": "13861875060",
     "email": "骆苏芮@school.edu.cn",
     "department": "政治组"
   },
@@ -1349,7 +1349,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13827267167",
+    "phone": "13831892707",
     "email": "王静怡@school.edu.cn",
     "department": "化学组"
   },
@@ -1364,7 +1364,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13843558492",
+    "phone": "13894494104",
     "email": "肖翔鸽@school.edu.cn",
     "department": "体育组"
   },
@@ -1379,7 +1379,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13826272353",
+    "phone": "13899780758",
     "email": "成谊@school.edu.cn",
     "department": "语文组"
   },
@@ -1394,7 +1394,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13867646270",
+    "phone": "13851161120",
     "email": "商叶明@school.edu.cn",
     "department": "数学组"
   },
@@ -1409,7 +1409,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13887959760",
+    "phone": "13886966141",
     "email": "马国胜@school.edu.cn",
     "department": "历史组"
   },
@@ -1424,7 +1424,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13893039727",
+    "phone": "13833558409",
     "email": "李洁@school.edu.cn",
     "department": "物理组"
   },
@@ -1439,7 +1439,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13861434551",
+    "phone": "13843434816",
     "email": "麻伊迪@school.edu.cn",
     "department": "英语组"
   },
@@ -1454,7 +1454,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13867002551",
+    "phone": "13831958066",
     "email": "高雪@school.edu.cn",
     "department": "英语组"
   },
@@ -1469,7 +1469,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13898272869",
+    "phone": "13896642599",
     "email": "崔奥迎@school.edu.cn",
     "department": "政治组"
   },
@@ -1484,7 +1484,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13897080648",
+    "phone": "13874035513",
     "email": "高春社@school.edu.cn",
     "department": "语文组"
   },
@@ -1499,7 +1499,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13866239985",
+    "phone": "13810751429",
     "email": "李春萍@school.edu.cn",
     "department": "语文组"
   },
@@ -1514,7 +1514,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13815052481",
+    "phone": "13843003926",
     "email": "李锦@school.edu.cn",
     "department": "语文组"
   },
@@ -1529,7 +1529,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13845544493",
+    "phone": "13888067050",
     "email": "李健@school.edu.cn",
     "department": "英语组"
   },
@@ -1544,7 +1544,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13861556884",
+    "phone": "13810306775",
     "email": "董艳@school.edu.cn",
     "department": "语文组"
   },
@@ -1559,7 +1559,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13888983009",
+    "phone": "13821381385",
     "email": "王静波@school.edu.cn",
     "department": "数学组"
   },
@@ -1574,7 +1574,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13886229599",
+    "phone": "13890559297",
     "email": "杨蓓蕾@school.edu.cn",
     "department": "英语组"
   },
@@ -1589,7 +1589,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13893408276",
+    "phone": "13897283396",
     "email": "高瑜@school.edu.cn",
     "department": "政治组"
   },
@@ -1604,7 +1604,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13857430882",
+    "phone": "13884419710",
     "email": "王锐静@school.edu.cn",
     "department": "物理组"
   },
@@ -1619,7 +1619,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13898787207",
+    "phone": "13868111276",
     "email": "王串串@school.edu.cn",
     "department": "化学组"
   },
@@ -1634,7 +1634,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13812941883",
+    "phone": "13848462481",
     "email": "吴航利@school.edu.cn",
     "department": "生物组"
   },
@@ -1649,7 +1649,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13876484186",
+    "phone": "13876012644",
     "email": "李洋@school.edu.cn",
     "department": "体育组"
   },
@@ -1664,7 +1664,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13843353128",
+    "phone": "13892980768",
     "email": "牟晗@school.edu.cn",
     "department": "语文组"
   },
@@ -1679,7 +1679,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13897237347",
+    "phone": "13814037522",
     "email": "钱赛@school.edu.cn",
     "department": "数学组"
   },
@@ -1694,7 +1694,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13860452557",
+    "phone": "13840265496",
     "email": "葛胜旗@school.edu.cn",
     "department": "英语组"
   },
@@ -1709,7 +1709,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13885953225",
+    "phone": "13892435255",
     "email": "李磊@school.edu.cn",
     "department": "物理组"
   },
@@ -1724,7 +1724,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13890974717",
+    "phone": "13895538320",
     "email": "张梦婷@school.edu.cn",
     "department": "化学组"
   },
@@ -1739,7 +1739,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13894935332",
+    "phone": "13855652351",
     "email": "贾立红@school.edu.cn",
     "department": "语文组"
   },
@@ -1754,7 +1754,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13898803723",
+    "phone": "13866357511",
     "email": "李萍@school.edu.cn",
     "department": "英语组"
   },
@@ -1769,7 +1769,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13880231162",
+    "phone": "13886633693",
     "email": "马珍珍@school.edu.cn",
     "department": "政治组"
   },
@@ -1784,7 +1784,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13887400611",
+    "phone": "13833905855",
     "email": "王肖迪@school.edu.cn",
     "department": "生物组"
   },
@@ -1799,7 +1799,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13834379846",
+    "phone": "13885193898",
     "email": "王一@school.edu.cn",
     "department": "语文组"
   },
@@ -1814,7 +1814,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13844101497",
+    "phone": "13845936117",
     "email": "朱思佳@school.edu.cn",
     "department": "数学组"
   },
@@ -1829,7 +1829,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13890844384",
+    "phone": "13845898801",
     "email": "张红旗@school.edu.cn",
     "department": "英语组"
   },
@@ -1844,7 +1844,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13843053879",
+    "phone": "13815596172",
     "email": "原璐瑶@school.edu.cn",
     "department": "化学组"
   },
@@ -1859,7 +1859,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13838197880",
+    "phone": "13884784522",
     "email": "冯阿凡@school.edu.cn",
     "department": "语文组"
   },
@@ -1874,7 +1874,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13871147216",
+    "phone": "13849834072",
     "email": "陈越亚@school.edu.cn",
     "department": "数学组"
   },
@@ -1889,7 +1889,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13871664482",
+    "phone": "13866418099",
     "email": "张庆林@school.edu.cn",
     "department": "英语组"
   },
@@ -1904,7 +1904,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13881197068",
+    "phone": "13873191872",
     "email": "吕姝彤@school.edu.cn",
     "department": "物理组"
   },
@@ -1919,7 +1919,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13832907986",
+    "phone": "13888138089",
     "email": "李琳@school.edu.cn",
     "department": "数学组"
   },
@@ -1934,7 +1934,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13880103050",
+    "phone": "13828377315",
     "email": "李元@school.edu.cn",
     "department": "英语组"
   },
@@ -1949,7 +1949,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13851940347",
+    "phone": "13880332615",
     "email": "谭叶@school.edu.cn",
     "department": "化学组"
   },
@@ -1964,7 +1964,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13871984627",
+    "phone": "13867828869",
     "email": "马建萍@school.edu.cn",
     "department": "语文组"
   },
@@ -1979,7 +1979,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13831055909",
+    "phone": "13845776698",
     "email": "宋怡娜@school.edu.cn",
     "department": "数学组"
   },
@@ -1994,7 +1994,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13810661706",
+    "phone": "13848550045",
     "email": "邵继东@school.edu.cn",
     "department": "地理组"
   },
@@ -2009,7 +2009,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13834813034",
+    "phone": "13838054332",
     "email": "李煜@school.edu.cn",
     "department": "地理组"
   },
@@ -2024,7 +2024,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13844614659",
+    "phone": "13873648107",
     "email": "杨思瑞@school.edu.cn",
     "department": "历史组"
   },
@@ -2039,7 +2039,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13869353396",
+    "phone": "13833147772",
     "email": "万恒菲@school.edu.cn",
     "department": "体育组"
   },
@@ -2054,7 +2054,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13844465931",
+    "phone": "13815454733",
     "email": "唐显@school.edu.cn",
     "department": "语文组"
   },
@@ -2069,7 +2069,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13867822637",
+    "phone": "13885795628",
     "email": "郑毅@school.edu.cn",
     "department": "数学组"
   },
@@ -2084,7 +2084,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13892099555",
+    "phone": "13879287639",
     "email": "桂妙妙@school.edu.cn",
     "department": "英语组"
   },
@@ -2099,7 +2099,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13822165517",
+    "phone": "13835661545",
     "email": "高艳@school.edu.cn",
     "department": "物理组"
   },
@@ -2114,7 +2114,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13811925298",
+    "phone": "13827265054",
     "email": "马展迎@school.edu.cn",
     "department": "化学组"
   },
@@ -2129,7 +2129,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13852544913",
+    "phone": "13850657847",
     "email": "孟婵娟@school.edu.cn",
     "department": "生物组"
   },
@@ -2144,7 +2144,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13870934508",
+    "phone": "13865677572",
     "email": "杨勇@school.edu.cn",
     "department": "通用组"
   },
@@ -2159,7 +2159,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13866127512",
+    "phone": "13852448238",
     "email": "任磊@school.edu.cn",
     "department": "语文组"
   },
@@ -2174,7 +2174,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13849212762",
+    "phone": "13870245657",
     "email": "周良军@school.edu.cn",
     "department": "数学组"
   },
@@ -2189,7 +2189,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13871802841",
+    "phone": "13885080899",
     "email": "寇立英@school.edu.cn",
     "department": "英语组"
   },
@@ -2204,7 +2204,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13843336764",
+    "phone": "13853514034",
     "email": "陈倩@school.edu.cn",
     "department": "政治组"
   },
@@ -2219,7 +2219,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13895159138",
+    "phone": "13898077825",
     "email": "王燕谋@school.edu.cn",
     "department": "地理组"
   },
@@ -2234,7 +2234,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13856825137",
+    "phone": "13878878207",
     "email": "薛柳@school.edu.cn",
     "department": "语文组"
   },
@@ -2249,7 +2249,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13888207224",
+    "phone": "13813207301",
     "email": "张玲@school.edu.cn",
     "department": "英语组"
   },
@@ -2264,7 +2264,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13844157419",
+    "phone": "13837204643",
     "email": "张慢@school.edu.cn",
     "department": "物理组"
   },
@@ -2279,7 +2279,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13821022405",
+    "phone": "13867367675",
     "email": "杨文娟@school.edu.cn",
     "department": "化学组"
   },
@@ -2294,7 +2294,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13898058751",
+    "phone": "13828875529",
     "email": "唐娟丽@school.edu.cn",
     "department": "数学组"
   },
@@ -2309,7 +2309,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13897968388",
+    "phone": "13899503420",
     "email": "王建军@school.edu.cn",
     "department": "物理组"
   },
@@ -2324,7 +2324,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13833621391",
+    "phone": "13846575950",
     "email": "陈蓉@school.edu.cn",
     "department": "化学组"
   },
@@ -2339,7 +2339,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13875181294",
+    "phone": "13812800607",
     "email": "刘旭@school.edu.cn",
     "department": "语文组"
   },
@@ -2354,7 +2354,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13866895858",
+    "phone": "13867002411",
     "email": "孟田田@school.edu.cn",
     "department": "数学组"
   },
@@ -2369,7 +2369,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13884657461",
+    "phone": "13822605765",
     "email": "肖照@school.edu.cn",
     "department": "英语组"
   },
@@ -2384,7 +2384,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13851729668",
+    "phone": "13874738925",
     "email": "赵露@school.edu.cn",
     "department": "语文组"
   },
@@ -2399,7 +2399,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13869550340",
+    "phone": "13859761801",
     "email": "李亚飞@school.edu.cn",
     "department": "政治组"
   },
@@ -2414,7 +2414,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13815867759",
+    "phone": "13836884934",
     "email": "李媛擎@school.edu.cn",
     "department": "语文组"
   },
@@ -2429,7 +2429,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13855512197",
+    "phone": "13828099760",
     "email": "李艳玲@school.edu.cn",
     "department": "英语组"
   },
@@ -2444,7 +2444,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13861148846",
+    "phone": "13892420684",
     "email": "姚满彦@school.edu.cn",
     "department": "生物组"
   },
@@ -2459,7 +2459,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13849562297",
+    "phone": "13842097357",
     "email": "张珍@school.edu.cn",
     "department": "数学组"
   },
@@ -2474,7 +2474,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13887365746",
+    "phone": "13811980089",
     "email": "程俊轲@school.edu.cn",
     "department": "英语组"
   },
@@ -2489,7 +2489,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13885639522",
+    "phone": "13851209568",
     "email": "乔启迪@school.edu.cn",
     "department": "数学组"
   }
@@ -15118,6 +15118,342 @@ export function generatePrepopulatedSchedules(
   const baseSchedules: ScheduleItem[] = [
   {
     "id": "S_ITEM_1",
+    "teachingClassId": "C_高二_C1_物理",
+    "teachingClassName": "高二1班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_2",
+    "teachingClassId": "C_高二_C2_化学",
+    "teachingClassName": "高二2班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_3",
+    "teachingClassId": "C_高二_C3_化学",
+    "teachingClassName": "高二3班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_4",
+    "teachingClassId": "C_高二_C4_物理",
+    "teachingClassName": "高二4班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_5",
+    "teachingClassId": "C_高二_C5_语文",
+    "teachingClassName": "高二5班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_6",
+    "teachingClassId": "C_高二_C6_物理",
+    "teachingClassName": "高二6班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_7",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_8",
+    "teachingClassId": "C_高二_C8_语文",
+    "teachingClassName": "高二8班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_9",
+    "teachingClassId": "C_高二_C9_数学",
+    "teachingClassName": "高二9班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_10",
+    "teachingClassId": "C_高二_C10_语文",
+    "teachingClassName": "高二10班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_11",
+    "teachingClassId": "C_高二_C11_历史",
+    "teachingClassName": "高二11班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_12",
+    "teachingClassId": "C_高二_C12_英语",
+    "teachingClassName": "高二12班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 1,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_13",
+    "teachingClassId": "C_高二_C1_化学",
+    "teachingClassName": "高二1班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_14",
+    "teachingClassId": "C_高二_C2_物理",
+    "teachingClassName": "高二2班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_15",
+    "teachingClassId": "C_高二_C3_物理",
+    "teachingClassName": "高二3班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_16",
+    "teachingClassId": "C_高二_C4_体育",
+    "teachingClassName": "高二4班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_17",
+    "teachingClassId": "C_高二_C5_语文",
+    "teachingClassName": "高二5班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_18",
+    "teachingClassId": "C_高二_C6_语文",
+    "teachingClassName": "高二6班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_19",
+    "teachingClassId": "C_高二_C7_英语",
+    "teachingClassName": "高二7班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_20",
+    "teachingClassId": "C_高二_C8_体育",
+    "teachingClassName": "高二8班体育班",
+    "subject": "体育",
+    "teacherId": "T071",
+    "teacherName": "王俊驰",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_21",
+    "teachingClassId": "C_高二_C9_语文",
+    "teachingClassName": "高二9班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_22",
+    "teachingClassId": "C_高二_C10_化学",
+    "teachingClassName": "高二10班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_23",
+    "teachingClassId": "C_高二_C11_语文",
+    "teachingClassName": "高二11班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_24",
+    "teachingClassId": "C_高二_C12_历史",
+    "teachingClassName": "高二12班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 1,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_25",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_26",
+    "teachingClassId": "C_高二_C2_语文",
+    "teachingClassName": "高二2班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_27",
+    "teachingClassId": "C_高二_C3_语文",
+    "teachingClassName": "高二3班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_28",
+    "teachingClassId": "C_高二_C4_英语",
+    "teachingClassName": "高二4班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_29",
     "teachingClassId": "C_高二_C5_英语",
     "teachingClassName": "高二5班英语班",
     "subject": "英语",
@@ -15129,7 +15465,331 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_2",
+    "id": "S_ITEM_30",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_31",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_32",
+    "teachingClassId": "C_高二_C8_政治",
+    "teachingClassName": "高二8班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_33",
+    "teachingClassId": "C_高二_C9_化学",
+    "teachingClassName": "高二9班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_34",
+    "teachingClassId": "C_高二_C10_物理",
+    "teachingClassName": "高二10班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_35",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_36",
+    "teachingClassId": "C_高二_C12_数学",
+    "teachingClassName": "高二12班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 1,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_37",
+    "teachingClassId": "C_高二_C1_英语",
+    "teachingClassName": "高二1班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_38",
+    "teachingClassId": "C_高二_C2_语文",
+    "teachingClassName": "高二2班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_39",
+    "teachingClassId": "C_高二_C3_英语",
+    "teachingClassName": "高二3班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_40",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_41",
+    "teachingClassId": "C_高二_C5_物理",
+    "teachingClassName": "高二5班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_42",
+    "teachingClassId": "C_高二_C6_英语",
+    "teachingClassName": "高二6班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_43",
+    "teachingClassId": "C_高二_C7_物理",
+    "teachingClassName": "高二7班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_44",
+    "teachingClassId": "C_高二_C8_物理",
+    "teachingClassName": "高二8班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_45",
+    "teachingClassId": "C_高二_C9_数学",
+    "teachingClassName": "高二9班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_46",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_47",
+    "teachingClassId": "C_高二_C11_英语",
+    "teachingClassName": "高二11班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_48",
+    "teachingClassId": "C_高二_C12_政治",
+    "teachingClassName": "高二12班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 1,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_49",
+    "teachingClassId": "C_高二_C1_体育",
+    "teachingClassName": "高二1班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_50",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_51",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_52",
+    "teachingClassId": "C_高二_C4_生物",
+    "teachingClassName": "高二4班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_53",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_54",
+    "teachingClassId": "C_高二_C6_英语",
+    "teachingClassName": "高二6班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_55",
+    "teachingClassId": "C_高二_C7_政治",
+    "teachingClassName": "高二7班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_56",
+    "teachingClassId": "C_高二_C8_数学",
+    "teachingClassName": "高二8班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_57",
     "teachingClassId": "C_高二_C9_英语",
     "teachingClassName": "高二9班英语班",
     "subject": "英语",
@@ -15141,7 +15801,91 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_3",
+    "id": "S_ITEM_58",
+    "teachingClassId": "C_高二_C10_体育",
+    "teachingClassName": "高二10班体育班",
+    "subject": "体育",
+    "teacherId": "T071",
+    "teacherName": "王俊驰",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_59",
+    "teachingClassId": "C_高二_C11_地理",
+    "teachingClassName": "高二11班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_60",
+    "teachingClassId": "C_高二_C12_语文",
+    "teachingClassName": "高二12班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 1,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_61",
+    "teachingClassId": "C_高二_C1_物理",
+    "teachingClassName": "高二1班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_62",
+    "teachingClassId": "C_高二_C2_英语",
+    "teachingClassName": "高二2班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_63",
+    "teachingClassId": "C_高二_C3_体育",
+    "teachingClassName": "高二3班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_64",
+    "teachingClassId": "C_高二_C4_英语",
+    "teachingClassName": "高二4班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_65",
     "teachingClassId": "C_高二_C5_英语",
     "teachingClassName": "高二5班英语班",
     "subject": "英语",
@@ -15153,7 +15897,679 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_4",
+    "id": "S_ITEM_66",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_67",
+    "teachingClassId": "C_高二_C7_化学",
+    "teachingClassName": "高二7班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_68",
+    "teachingClassId": "C_高二_C8_化学",
+    "teachingClassName": "高二8班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_69",
+    "teachingClassId": "C_高二_C9_体育",
+    "teachingClassName": "高二9班体育班",
+    "subject": "体育",
+    "teacherId": "T071",
+    "teacherName": "王俊驰",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_70",
+    "teachingClassId": "C_高二_C10_英语",
+    "teachingClassName": "高二10班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_71",
+    "teachingClassId": "C_高二_C11_政治",
+    "teachingClassName": "高二11班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_72",
+    "teachingClassId": "C_高二_C12_语文",
+    "teachingClassName": "高二12班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 1,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_73",
+    "teachingClassId": "C_高二_C1_语文",
+    "teachingClassName": "高二1班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_74",
+    "teachingClassId": "C_高二_C2_体育",
+    "teachingClassName": "高二2班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_75",
+    "teachingClassId": "C_高二_C3_英语",
+    "teachingClassName": "高二3班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_76",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_77",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_78",
+    "teachingClassId": "C_高二_C6_化学",
+    "teachingClassName": "高二6班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_79",
+    "teachingClassId": "C_高二_C7_语文",
+    "teachingClassName": "高二7班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_80",
+    "teachingClassId": "C_高二_C8_英语",
+    "teachingClassName": "高二8班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_81",
+    "teachingClassId": "C_高二_C9_物理",
+    "teachingClassName": "高二9班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_82",
+    "teachingClassId": "C_高二_C10_政治",
+    "teachingClassName": "高二10班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_83",
+    "teachingClassId": "C_高二_C11_英语",
+    "teachingClassName": "高二11班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_84",
+    "teachingClassId": "C_高二_C12_体育",
+    "teachingClassName": "高二12班体育班",
+    "subject": "体育",
+    "teacherId": "T136",
+    "teacherName": "万恒菲",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 1,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_85",
+    "teachingClassId": "C_高二_C1_语文",
+    "teachingClassName": "高二1班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_86",
+    "teachingClassId": "C_高二_C2_英语",
+    "teachingClassName": "高二2班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_87",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_88",
+    "teachingClassId": "C_高二_C4_语文",
+    "teachingClassName": "高二4班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_89",
+    "teachingClassId": "C_高二_C5_化学",
+    "teachingClassName": "高二5班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_90",
+    "teachingClassId": "C_高二_C6_语文",
+    "teachingClassName": "高二6班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_91",
+    "teachingClassId": "C_高二_C7_英语",
+    "teachingClassName": "高二7班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_92",
+    "teachingClassId": "C_高二_C10_物理",
+    "teachingClassName": "高二10班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_93",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 1,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_94",
+    "teachingClassId": "C_高二_C1_生物",
+    "teachingClassName": "高二1班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_95",
+    "teachingClassId": "C_高二_C2_语文",
+    "teachingClassName": "高二2班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_96",
+    "teachingClassId": "C_高二_C3_物理",
+    "teachingClassName": "高二3班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_97",
+    "teachingClassId": "C_高二_C4_英语",
+    "teachingClassName": "高二4班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_98",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_99",
+    "teachingClassId": "C_高二_C6_语文",
+    "teachingClassName": "高二6班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_100",
+    "teachingClassId": "C_高二_C7_政治",
+    "teachingClassName": "高二7班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_101",
+    "teachingClassId": "C_高二_C8_化学",
+    "teachingClassName": "高二8班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_102",
+    "teachingClassId": "C_高二_C9_语文",
+    "teachingClassName": "高二9班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_103",
+    "teachingClassId": "C_高二_C10_地理",
+    "teachingClassName": "高二10班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_104",
+    "teachingClassId": "C_高二_C11_语文",
+    "teachingClassName": "高二11班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_105",
+    "teachingClassId": "C_高二_C12_历史",
+    "teachingClassName": "高二12班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 2,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_106",
+    "teachingClassId": "C_高二_C1_英语",
+    "teachingClassName": "高二1班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_107",
+    "teachingClassId": "C_高二_C2_生物",
+    "teachingClassName": "高二2班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_108",
+    "teachingClassId": "C_高二_C3_语文",
+    "teachingClassName": "高二3班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_109",
+    "teachingClassId": "C_高二_C4_物理",
+    "teachingClassName": "高二4班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_110",
+    "teachingClassId": "C_高二_C5_体育",
+    "teachingClassName": "高二5班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_111",
+    "teachingClassId": "C_高二_C6_化学",
+    "teachingClassName": "高二6班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_112",
+    "teachingClassId": "C_高二_C7_语文",
+    "teachingClassName": "高二7班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_113",
+    "teachingClassId": "C_高二_C8_语文",
+    "teachingClassName": "高二8班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_114",
+    "teachingClassId": "C_高二_C9_化学",
+    "teachingClassName": "高二9班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_115",
+    "teachingClassId": "C_高二_C10_物理",
+    "teachingClassName": "高二10班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_116",
+    "teachingClassId": "C_高二_C11_历史",
+    "teachingClassName": "高二11班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_117",
+    "teachingClassId": "C_高二_C12_语文",
+    "teachingClassName": "高二12班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 2,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_118",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_119",
+    "teachingClassId": "C_高二_C2_物理",
+    "teachingClassName": "高二2班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_120",
+    "teachingClassId": "C_高二_C3_生物",
+    "teachingClassName": "高二3班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_121",
+    "teachingClassId": "C_高二_C4_语文",
+    "teachingClassName": "高二4班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_122",
     "teachingClassId": "C_高二_C5_英语",
     "teachingClassName": "高二5班英语班",
     "subject": "英语",
@@ -15165,7 +16581,187 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_5",
+    "id": "S_ITEM_123",
+    "teachingClassId": "C_高二_C6_生物",
+    "teachingClassName": "高二6班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_124",
+    "teachingClassId": "C_高二_C7_英语",
+    "teachingClassName": "高二7班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_125",
+    "teachingClassId": "C_高二_C8_英语",
+    "teachingClassName": "高二8班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_126",
+    "teachingClassId": "C_高二_C9_数学",
+    "teachingClassName": "高二9班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_127",
+    "teachingClassId": "C_高二_C10_语文",
+    "teachingClassName": "高二10班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_128",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_129",
+    "teachingClassId": "C_高二_C12_地理",
+    "teachingClassName": "高二12班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 2,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_130",
+    "teachingClassId": "C_高二_C1_语文",
+    "teachingClassName": "高二1班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_131",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_132",
+    "teachingClassId": "C_高二_C3_英语",
+    "teachingClassName": "高二3班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_133",
+    "teachingClassId": "C_高二_C4_生物",
+    "teachingClassName": "高二4班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_134",
+    "teachingClassId": "C_高二_C5_化学",
+    "teachingClassName": "高二5班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_135",
+    "teachingClassId": "C_高二_C6_英语",
+    "teachingClassName": "高二6班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_136",
+    "teachingClassId": "C_高二_C7_化学",
+    "teachingClassName": "高二7班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_137",
+    "teachingClassId": "C_高二_C8_数学",
+    "teachingClassName": "高二8班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_138",
     "teachingClassId": "C_高二_C9_英语",
     "teachingClassName": "高二9班英语班",
     "subject": "英语",
@@ -15177,7 +16773,427 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_6",
+    "id": "S_ITEM_139",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_140",
+    "teachingClassId": "C_高二_C11_地理",
+    "teachingClassName": "高二11班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_141",
+    "teachingClassId": "C_高二_C12_数学",
+    "teachingClassName": "高二12班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 2,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_142",
+    "teachingClassId": "C_高二_C1_英语",
+    "teachingClassName": "高二1班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_143",
+    "teachingClassId": "C_高二_C2_物理",
+    "teachingClassName": "高二2班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_144",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_145",
+    "teachingClassId": "C_高二_C4_化学",
+    "teachingClassName": "高二4班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_146",
+    "teachingClassId": "C_高二_C5_语文",
+    "teachingClassName": "高二5班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_147",
+    "teachingClassId": "C_高二_C6_物理",
+    "teachingClassName": "高二6班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_148",
+    "teachingClassId": "C_高二_C7_体育",
+    "teachingClassName": "高二7班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_149",
+    "teachingClassId": "C_高二_C8_数学",
+    "teachingClassName": "高二8班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_150",
+    "teachingClassId": "C_高二_C9_物理",
+    "teachingClassName": "高二9班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_151",
+    "teachingClassId": "C_高二_C10_英语",
+    "teachingClassName": "高二10班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_152",
+    "teachingClassId": "C_高二_C11_英语",
+    "teachingClassName": "高二11班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_153",
+    "teachingClassId": "C_高二_C12_英语",
+    "teachingClassName": "高二12班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 2,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_154",
+    "teachingClassId": "C_高二_C1_物理",
+    "teachingClassName": "高二1班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_155",
+    "teachingClassId": "C_高二_C2_英语",
+    "teachingClassName": "高二2班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_156",
+    "teachingClassId": "C_高二_C3_英语",
+    "teachingClassName": "高二3班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_157",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_158",
+    "teachingClassId": "C_高二_C5_物理",
+    "teachingClassName": "高二5班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_159",
+    "teachingClassId": "C_高二_C6_英语",
+    "teachingClassName": "高二6班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_160",
+    "teachingClassId": "C_高二_C7_语文",
+    "teachingClassName": "高二7班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_161",
+    "teachingClassId": "C_高二_C8_政治",
+    "teachingClassName": "高二8班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_162",
+    "teachingClassId": "C_高二_C9_地理",
+    "teachingClassName": "高二9班地理班",
+    "subject": "地理",
+    "teacherId": "T133",
+    "teacherName": "邵继东",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_163",
+    "teachingClassId": "C_高二_C10_化学",
+    "teachingClassName": "高二10班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_164",
+    "teachingClassId": "C_高二_C11_体育",
+    "teachingClassName": "高二11班体育班",
+    "subject": "体育",
+    "teacherId": "T136",
+    "teacherName": "万恒菲",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_165",
+    "teachingClassId": "C_高二_C12_数学",
+    "teachingClassName": "高二12班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 2,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_166",
+    "teachingClassId": "C_高二_C1_化学",
+    "teachingClassName": "高二1班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_167",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_168",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_169",
+    "teachingClassId": "C_高二_C4_语文",
+    "teachingClassName": "高二4班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_170",
+    "teachingClassId": "C_高二_C5_生物",
+    "teachingClassName": "高二5班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_171",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_172",
+    "teachingClassId": "C_高二_C7_物理",
+    "teachingClassName": "高二7班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_173",
+    "teachingClassId": "C_高二_C8_物理",
+    "teachingClassName": "高二8班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_174",
     "teachingClassId": "C_高二_C9_英语",
     "teachingClassName": "高二9班英语班",
     "subject": "英语",
@@ -15189,7 +17205,247 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_7",
+    "id": "S_ITEM_175",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_176",
+    "teachingClassId": "C_高二_C11_政治",
+    "teachingClassName": "高二11班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_177",
+    "teachingClassId": "C_高二_C12_政治",
+    "teachingClassName": "高二12班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 2,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_178",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_179",
+    "teachingClassId": "C_高二_C2_化学",
+    "teachingClassName": "高二2班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_180",
+    "teachingClassId": "C_高二_C3_化学",
+    "teachingClassName": "高二3班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_181",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_182",
+    "teachingClassId": "C_高二_C5_语文",
+    "teachingClassName": "高二5班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_183",
+    "teachingClassId": "C_高二_C6_体育",
+    "teachingClassName": "高二6班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_184",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_185",
+    "teachingClassId": "C_高二_C10_英语",
+    "teachingClassName": "高二10班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_186",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 2,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_187",
+    "teachingClassId": "C_高二_C1_英语",
+    "teachingClassName": "高二1班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_188",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_189",
+    "teachingClassId": "C_高二_C3_英语",
+    "teachingClassName": "高二3班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_190",
+    "teachingClassId": "C_高二_C4_语文",
+    "teachingClassName": "高二4班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_191",
+    "teachingClassId": "C_高二_C5_语文",
+    "teachingClassName": "高二5班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_192",
+    "teachingClassId": "C_高二_C6_化学",
+    "teachingClassName": "高二6班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_193",
+    "teachingClassId": "C_高二_C7_化学",
+    "teachingClassName": "高二7班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_194",
+    "teachingClassId": "C_高二_C8_语文",
+    "teachingClassName": "高二8班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_195",
     "teachingClassId": "C_高二_C9_通用",
     "teachingClassName": "高二9班通用班",
     "subject": "通用",
@@ -15201,7 +17457,151 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_8",
+    "id": "S_ITEM_196",
+    "teachingClassId": "C_高二_C10_地理",
+    "teachingClassName": "高二10班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_197",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_198",
+    "teachingClassId": "C_高二_C12_数学",
+    "teachingClassName": "高二12班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 3,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_199",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_200",
+    "teachingClassId": "C_高二_C2_英语",
+    "teachingClassName": "高二2班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_201",
+    "teachingClassId": "C_高二_C3_语文",
+    "teachingClassName": "高二3班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_202",
+    "teachingClassId": "C_高二_C4_语文",
+    "teachingClassName": "高二4班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_203",
+    "teachingClassId": "C_高二_C5_生物",
+    "teachingClassName": "高二5班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_204",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_205",
+    "teachingClassId": "C_高二_C7_英语",
+    "teachingClassName": "高二7班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_206",
+    "teachingClassId": "C_高二_C8_语文",
+    "teachingClassName": "高二8班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_207",
+    "teachingClassId": "C_高二_C9_物理",
+    "teachingClassName": "高二9班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_208",
     "teachingClassId": "C_高二_C10_通用",
     "teachingClassName": "高二10班通用班",
     "subject": "通用",
@@ -15213,7 +17613,511 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_9",
+    "id": "S_ITEM_209",
+    "teachingClassId": "C_高二_C11_政治",
+    "teachingClassName": "高二11班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_210",
+    "teachingClassId": "C_高二_C12_英语",
+    "teachingClassName": "高二12班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 3,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_211",
+    "teachingClassId": "C_高二_C1_英语",
+    "teachingClassName": "高二1班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_212",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_213",
+    "teachingClassId": "C_高二_C3_物理",
+    "teachingClassName": "高二3班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_214",
+    "teachingClassId": "C_高二_C4_英语",
+    "teachingClassName": "高二4班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_215",
+    "teachingClassId": "C_高二_C5_化学",
+    "teachingClassName": "高二5班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_216",
+    "teachingClassId": "C_高二_C6_英语",
+    "teachingClassName": "高二6班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_217",
+    "teachingClassId": "C_高二_C7_物理",
+    "teachingClassName": "高二7班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_218",
+    "teachingClassId": "C_高二_C8_政治",
+    "teachingClassName": "高二8班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_219",
+    "teachingClassId": "C_高二_C9_地理",
+    "teachingClassName": "高二9班地理班",
+    "subject": "地理",
+    "teacherId": "T133",
+    "teacherName": "邵继东",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_220",
+    "teachingClassId": "C_高二_C10_物理",
+    "teachingClassName": "高二10班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_221",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_222",
+    "teachingClassId": "C_高二_C12_语文",
+    "teachingClassName": "高二12班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 3,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_223",
+    "teachingClassId": "C_高二_C1_生物",
+    "teachingClassName": "高二1班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_224",
+    "teachingClassId": "C_高二_C2_英语",
+    "teachingClassName": "高二2班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_225",
+    "teachingClassId": "C_高二_C3_体育",
+    "teachingClassName": "高二3班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_226",
+    "teachingClassId": "C_高二_C4_化学",
+    "teachingClassName": "高二4班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_227",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_228",
+    "teachingClassId": "C_高二_C6_生物",
+    "teachingClassName": "高二6班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_229",
+    "teachingClassId": "C_高二_C7_政治",
+    "teachingClassName": "高二7班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_230",
+    "teachingClassId": "C_高二_C8_化学",
+    "teachingClassName": "高二8班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_231",
+    "teachingClassId": "C_高二_C9_化学",
+    "teachingClassName": "高二9班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_232",
+    "teachingClassId": "C_高二_C10_语文",
+    "teachingClassName": "高二10班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_233",
+    "teachingClassId": "C_高二_C11_英语",
+    "teachingClassName": "高二11班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_234",
+    "teachingClassId": "C_高二_C12_政治",
+    "teachingClassName": "高二12班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 3,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_235",
+    "teachingClassId": "C_高二_C1_化学",
+    "teachingClassName": "高二1班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_236",
+    "teachingClassId": "C_高二_C2_语文",
+    "teachingClassName": "高二2班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_237",
+    "teachingClassId": "C_高二_C3_物理",
+    "teachingClassName": "高二3班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_238",
+    "teachingClassId": "C_高二_C4_政治",
+    "teachingClassName": "高二4班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_239",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_240",
+    "teachingClassId": "C_高二_C6_物理",
+    "teachingClassName": "高二6班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_241",
+    "teachingClassId": "C_高二_C7_物理",
+    "teachingClassName": "高二7班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_242",
+    "teachingClassId": "C_高二_C8_数学",
+    "teachingClassName": "高二8班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_243",
+    "teachingClassId": "C_高二_C9_数学",
+    "teachingClassName": "高二9班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_244",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_245",
+    "teachingClassId": "C_高二_C11_语文",
+    "teachingClassName": "高二11班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_246",
+    "teachingClassId": "C_高二_C12_历史",
+    "teachingClassName": "高二12班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 3,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_247",
+    "teachingClassId": "C_高二_C1_政治",
+    "teachingClassName": "高二1班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_248",
+    "teachingClassId": "C_高二_C2_生物",
+    "teachingClassName": "高二2班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_249",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_250",
+    "teachingClassId": "C_高二_C4_物理",
+    "teachingClassName": "高二4班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_251",
     "teachingClassId": "C_高二_C5_英语",
     "teachingClassName": "高二5班英语班",
     "subject": "英语",
@@ -15225,7 +18129,187 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_10",
+    "id": "S_ITEM_252",
+    "teachingClassId": "C_高二_C6_语文",
+    "teachingClassName": "高二6班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_253",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_254",
+    "teachingClassId": "C_高二_C8_物理",
+    "teachingClassName": "高二8班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_255",
+    "teachingClassId": "C_高二_C9_语文",
+    "teachingClassName": "高二9班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_256",
+    "teachingClassId": "C_高二_C10_化学",
+    "teachingClassName": "高二10班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_257",
+    "teachingClassId": "C_高二_C11_历史",
+    "teachingClassName": "高二11班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_258",
+    "teachingClassId": "C_高二_C12_地理",
+    "teachingClassName": "高二12班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 3,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_259",
+    "teachingClassId": "C_高二_C1_语文",
+    "teachingClassName": "高二1班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_260",
+    "teachingClassId": "C_高二_C2_物理",
+    "teachingClassName": "高二2班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_261",
+    "teachingClassId": "C_高二_C3_生物",
+    "teachingClassName": "高二3班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_262",
+    "teachingClassId": "C_高二_C4_生物",
+    "teachingClassName": "高二4班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_263",
+    "teachingClassId": "C_高二_C5_物理",
+    "teachingClassName": "高二5班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_264",
+    "teachingClassId": "C_高二_C6_语文",
+    "teachingClassName": "高二6班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_265",
+    "teachingClassId": "C_高二_C7_语文",
+    "teachingClassName": "高二7班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_266",
+    "teachingClassId": "C_高二_C8_英语",
+    "teachingClassName": "高二8班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_267",
     "teachingClassId": "C_高二_C9_英语",
     "teachingClassName": "高二9班英语班",
     "subject": "英语",
@@ -15237,7 +18321,91 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_11",
+    "id": "S_ITEM_268",
+    "teachingClassId": "C_高二_C10_英语",
+    "teachingClassName": "高二10班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_269",
+    "teachingClassId": "C_高二_C11_地理",
+    "teachingClassName": "高二11班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_270",
+    "teachingClassId": "C_高二_C12_英语",
+    "teachingClassName": "高二12班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 3,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_271",
+    "teachingClassId": "C_高二_C1_物理",
+    "teachingClassName": "高二1班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_272",
+    "teachingClassId": "C_高二_C2_化学",
+    "teachingClassName": "高二2班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_273",
+    "teachingClassId": "C_高二_C3_化学",
+    "teachingClassName": "高二3班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_274",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_275",
     "teachingClassId": "C_高二_C5_英语",
     "teachingClassName": "高二5班英语班",
     "subject": "英语",
@@ -15249,7 +18417,139 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_12",
+    "id": "S_ITEM_276",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_277",
+    "teachingClassId": "C_高二_C7_语文",
+    "teachingClassName": "高二7班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_278",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_279",
+    "teachingClassId": "C_高二_C11_英语",
+    "teachingClassName": "高二11班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 3,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_280",
+    "teachingClassId": "C_高二_C1_化学",
+    "teachingClassName": "高二1班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_281",
+    "teachingClassId": "C_高二_C2_物理",
+    "teachingClassName": "高二2班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_282",
+    "teachingClassId": "C_高二_C3_生物",
+    "teachingClassName": "高二3班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_283",
+    "teachingClassId": "C_高二_C4_物理",
+    "teachingClassName": "高二4班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_284",
+    "teachingClassId": "C_高二_C5_生物",
+    "teachingClassName": "高二5班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_285",
+    "teachingClassId": "C_高二_C6_英语",
+    "teachingClassName": "高二6班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_286",
+    "teachingClassId": "C_高二_C7_化学",
+    "teachingClassName": "高二7班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_287",
     "teachingClassId": "C_高二_C8_通用",
     "teachingClassName": "高二8班通用班",
     "subject": "通用",
@@ -15261,7 +18561,127 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_13",
+    "id": "S_ITEM_288",
+    "teachingClassId": "C_高二_C9_语文",
+    "teachingClassName": "高二9班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_289",
+    "teachingClassId": "C_高二_C10_物理",
+    "teachingClassName": "高二10班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_290",
+    "teachingClassId": "C_高二_C11_政治",
+    "teachingClassName": "高二11班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_291",
+    "teachingClassId": "C_高二_C12_英语",
+    "teachingClassName": "高二12班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 4,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_292",
+    "teachingClassId": "C_高二_C1_物理",
+    "teachingClassName": "高二1班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_293",
+    "teachingClassId": "C_高二_C2_生物",
+    "teachingClassName": "高二2班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_294",
+    "teachingClassId": "C_高二_C3_物理",
+    "teachingClassName": "高二3班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_295",
+    "teachingClassId": "C_高二_C4_英语",
+    "teachingClassName": "高二4班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_296",
+    "teachingClassId": "C_高二_C5_化学",
+    "teachingClassName": "高二5班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_297",
+    "teachingClassId": "C_高二_C6_生物",
+    "teachingClassName": "高二6班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_298",
     "teachingClassId": "C_高二_C7_通用",
     "teachingClassName": "高二7班通用班",
     "subject": "通用",
@@ -15273,7 +18693,127 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_14",
+    "id": "S_ITEM_299",
+    "teachingClassId": "C_高二_C8_语文",
+    "teachingClassName": "高二8班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_300",
+    "teachingClassId": "C_高二_C9_语文",
+    "teachingClassName": "高二9班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_301",
+    "teachingClassId": "C_高二_C10_英语",
+    "teachingClassName": "高二10班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_302",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_303",
+    "teachingClassId": "C_高二_C12_数学",
+    "teachingClassName": "高二12班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 4,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_304",
+    "teachingClassId": "C_高二_C1_生物",
+    "teachingClassName": "高二1班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_305",
+    "teachingClassId": "C_高二_C2_化学",
+    "teachingClassName": "高二2班化学班",
+    "subject": "化学",
+    "teacherId": "T108",
+    "teacherName": "王串串",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_306",
+    "teachingClassId": "C_高二_C3_语文",
+    "teachingClassName": "高二3班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_307",
+    "teachingClassId": "C_高二_C4_化学",
+    "teachingClassName": "高二4班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_308",
+    "teachingClassId": "C_高二_C5_物理",
+    "teachingClassName": "高二5班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_309",
     "teachingClassId": "C_高二_C6_通用",
     "teachingClassName": "高二6班通用班",
     "subject": "通用",
@@ -15285,7 +18825,31 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_15",
+    "id": "S_ITEM_310",
+    "teachingClassId": "C_高二_C7_政治",
+    "teachingClassName": "高二7班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_311",
+    "teachingClassId": "C_高二_C8_物理",
+    "teachingClassName": "高二8班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_312",
     "teachingClassId": "C_高二_C9_英语",
     "teachingClassName": "高二9班英语班",
     "subject": "英语",
@@ -15297,7 +18861,91 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_16",
+    "id": "S_ITEM_313",
+    "teachingClassId": "C_高二_C10_体育",
+    "teachingClassName": "高二10班体育班",
+    "subject": "体育",
+    "teacherId": "T071",
+    "teacherName": "王俊驰",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_314",
+    "teachingClassId": "C_高二_C11_英语",
+    "teachingClassName": "高二11班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_315",
+    "teachingClassId": "C_高二_C12_政治",
+    "teachingClassName": "高二12班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 4,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_316",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_317",
+    "teachingClassId": "C_高二_C2_政治",
+    "teachingClassName": "高二2班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_318",
+    "teachingClassId": "C_高二_C3_语文",
+    "teachingClassName": "高二3班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_319",
+    "teachingClassId": "C_高二_C4_体育",
+    "teachingClassName": "高二4班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_320",
     "teachingClassId": "C_高二_C5_通用",
     "teachingClassName": "高二5班通用班",
     "subject": "通用",
@@ -15309,7 +18957,427 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_17",
+    "id": "S_ITEM_321",
+    "teachingClassId": "C_高二_C6_物理",
+    "teachingClassName": "高二6班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_322",
+    "teachingClassId": "C_高二_C7_物理",
+    "teachingClassName": "高二7班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_323",
+    "teachingClassId": "C_高二_C8_数学",
+    "teachingClassName": "高二8班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_324",
+    "teachingClassId": "C_高二_C9_物理",
+    "teachingClassName": "高二9班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_325",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_326",
+    "teachingClassId": "C_高二_C11_历史",
+    "teachingClassName": "高二11班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_327",
+    "teachingClassId": "C_高二_C12_数学",
+    "teachingClassName": "高二12班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_328",
+    "teachingClassId": "C_高二_C1_体育",
+    "teachingClassName": "高二1班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_329",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_330",
+    "teachingClassId": "C_高二_C3_政治",
+    "teachingClassName": "高二3班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_331",
+    "teachingClassId": "C_高二_C4_物理",
+    "teachingClassName": "高二4班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_332",
+    "teachingClassId": "C_高二_C5_语文",
+    "teachingClassName": "高二5班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_333",
+    "teachingClassId": "C_高二_C6_语文",
+    "teachingClassName": "高二6班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_334",
+    "teachingClassId": "C_高二_C7_语文",
+    "teachingClassName": "高二7班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_335",
+    "teachingClassId": "C_高二_C8_政治",
+    "teachingClassName": "高二8班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_336",
+    "teachingClassId": "C_高二_C9_地理",
+    "teachingClassName": "高二9班地理班",
+    "subject": "地理",
+    "teacherId": "T133",
+    "teacherName": "邵继东",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_337",
+    "teachingClassId": "C_高二_C10_语文",
+    "teachingClassName": "高二10班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_338",
+    "teachingClassId": "C_高二_C11_体育",
+    "teachingClassName": "高二11班体育班",
+    "subject": "体育",
+    "teacherId": "T136",
+    "teacherName": "万恒菲",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_339",
+    "teachingClassId": "C_高二_C12_地理",
+    "teachingClassName": "高二12班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 4,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_340",
+    "teachingClassId": "C_高二_C1_语文",
+    "teachingClassName": "高二1班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_341",
+    "teachingClassId": "C_高二_C2_体育",
+    "teachingClassName": "高二2班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_342",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_343",
+    "teachingClassId": "C_高二_C4_英语",
+    "teachingClassName": "高二4班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_344",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_345",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_346",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_347",
+    "teachingClassId": "C_高二_C8_化学",
+    "teachingClassName": "高二8班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_348",
+    "teachingClassId": "C_高二_C9_化学",
+    "teachingClassName": "高二9班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_349",
+    "teachingClassId": "C_高二_C10_语文",
+    "teachingClassName": "高二10班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_350",
+    "teachingClassId": "C_高二_C11_语文",
+    "teachingClassName": "高二11班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_351",
+    "teachingClassId": "C_高二_C12_语文",
+    "teachingClassName": "高二12班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 4,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_352",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_353",
+    "teachingClassId": "C_高二_C2_英语",
+    "teachingClassName": "高二2班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_354",
+    "teachingClassId": "C_高二_C3_英语",
+    "teachingClassName": "高二3班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_355",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_356",
     "teachingClassId": "C_高二_C5_英语",
     "teachingClassName": "高二5班英语班",
     "subject": "英语",
@@ -15321,7 +19389,187 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_18",
+    "id": "S_ITEM_357",
+    "teachingClassId": "C_高二_C6_化学",
+    "teachingClassName": "高二6班化学班",
+    "subject": "化学",
+    "teacherId": "T123",
+    "teacherName": "原璐瑶",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_358",
+    "teachingClassId": "C_高二_C7_英语",
+    "teachingClassName": "高二7班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_359",
+    "teachingClassId": "C_高二_C8_英语",
+    "teachingClassName": "高二8班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_360",
+    "teachingClassId": "C_高二_C9_数学",
+    "teachingClassName": "高二9班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_361",
+    "teachingClassId": "C_高二_C10_地理",
+    "teachingClassName": "高二10班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_362",
+    "teachingClassId": "C_高二_C11_语文",
+    "teachingClassName": "高二11班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_363",
+    "teachingClassId": "C_高二_C12_体育",
+    "teachingClassName": "高二12班体育班",
+    "subject": "体育",
+    "teacherId": "T136",
+    "teacherName": "万恒菲",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 4,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_364",
+    "teachingClassId": "C_高二_C1_英语",
+    "teachingClassName": "高二1班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_365",
+    "teachingClassId": "C_高二_C2_语文",
+    "teachingClassName": "高二2班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_366",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_367",
+    "teachingClassId": "C_高二_C4_语文",
+    "teachingClassName": "高二4班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_368",
+    "teachingClassId": "C_高二_C5_物理",
+    "teachingClassName": "高二5班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_369",
+    "teachingClassId": "C_高二_C6_物理",
+    "teachingClassName": "高二6班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_370",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_371",
+    "teachingClassId": "C_高二_C10_化学",
+    "teachingClassName": "高二10班化学班",
+    "subject": "化学",
+    "teacherId": "T130",
+    "teacherName": "谭叶",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 4,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_372",
     "teachingClassId": "C_高二_C11_通用",
     "teachingClassName": "高二11班通用班",
     "subject": "通用",
@@ -15333,7 +19581,199 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_19",
+    "id": "S_ITEM_373",
+    "teachingClassId": "C_高二_C1_语文",
+    "teachingClassName": "高二1班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_374",
+    "teachingClassId": "C_高二_C2_英语",
+    "teachingClassName": "高二2班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_375",
+    "teachingClassId": "C_高二_C3_语文",
+    "teachingClassName": "高二3班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_376",
+    "teachingClassId": "C_高二_C4_语文",
+    "teachingClassName": "高二4班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_377",
+    "teachingClassId": "C_高二_C5_语文",
+    "teachingClassName": "高二5班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_378",
+    "teachingClassId": "C_高二_C6_生物",
+    "teachingClassName": "高二6班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_379",
+    "teachingClassId": "C_高二_C7_英语",
+    "teachingClassName": "高二7班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_380",
+    "teachingClassId": "C_高二_C8_政治",
+    "teachingClassName": "高二8班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_381",
+    "teachingClassId": "C_高二_C9_地理",
+    "teachingClassName": "高二9班地理班",
+    "subject": "地理",
+    "teacherId": "T133",
+    "teacherName": "邵继东",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_382",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_383",
+    "teachingClassId": "C_高二_C11_物理",
+    "teachingClassName": "高二11班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_384",
+    "teachingClassId": "C_高二_C12_地理",
+    "teachingClassName": "高二12班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_385",
+    "teachingClassId": "C_高二_C1_生物",
+    "teachingClassName": "高二1班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_386",
+    "teachingClassId": "C_高二_C2_语文",
+    "teachingClassName": "高二2班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_387",
+    "teachingClassId": "C_高二_C3_物理",
+    "teachingClassName": "高二3班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_388",
+    "teachingClassId": "C_高二_C4_英语",
+    "teachingClassName": "高二4班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_389",
     "teachingClassId": "C_高二_C5_英语",
     "teachingClassName": "高二5班英语班",
     "subject": "英语",
@@ -15345,7 +19785,367 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_20",
+    "id": "S_ITEM_390",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_391",
+    "teachingClassId": "C_高二_C7_政治",
+    "teachingClassName": "高二7班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_392",
+    "teachingClassId": "C_高二_C8_体育",
+    "teachingClassName": "高二8班体育班",
+    "subject": "体育",
+    "teacherId": "T071",
+    "teacherName": "王俊驰",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_393",
+    "teachingClassId": "C_高二_C9_数学",
+    "teachingClassName": "高二9班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_394",
+    "teachingClassId": "C_高二_C10_语文",
+    "teachingClassName": "高二10班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_395",
+    "teachingClassId": "C_高二_C11_历史",
+    "teachingClassName": "高二11班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_396",
+    "teachingClassId": "C_高二_C12_物理",
+    "teachingClassName": "高二12班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 5,
+    "period": 2
+  },
+  {
+    "id": "S_ITEM_397",
+    "teachingClassId": "C_高二_C1_英语",
+    "teachingClassName": "高二1班英语班",
+    "subject": "英语",
+    "teacherId": "T105",
+    "teacherName": "杨蓓蕾",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_398",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_399",
+    "teachingClassId": "C_高二_C3_语文",
+    "teachingClassName": "高二3班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_400",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_401",
+    "teachingClassId": "C_高二_C5_政治",
+    "teachingClassName": "高二5班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_402",
+    "teachingClassId": "C_高二_C6_英语",
+    "teachingClassName": "高二6班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_403",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_404",
+    "teachingClassId": "C_高二_C8_数学",
+    "teachingClassName": "高二8班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_405",
+    "teachingClassId": "C_高二_C9_体育",
+    "teachingClassName": "高二9班体育班",
+    "subject": "体育",
+    "teacherId": "T071",
+    "teacherName": "王俊驰",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_406",
+    "teachingClassId": "C_高二_C10_地理",
+    "teachingClassName": "高二10班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_407",
+    "teachingClassId": "C_高二_C11_数学",
+    "teachingClassName": "高二11班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_408",
+    "teachingClassId": "C_高二_C12_历史",
+    "teachingClassName": "高二12班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 5,
+    "period": 3
+  },
+  {
+    "id": "S_ITEM_409",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_410",
+    "teachingClassId": "C_高二_C2_生物",
+    "teachingClassName": "高二2班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_411",
+    "teachingClassId": "C_高二_C3_数学",
+    "teachingClassName": "高二3班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_412",
+    "teachingClassId": "C_高二_C4_生物",
+    "teachingClassName": "高二4班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_413",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_414",
+    "teachingClassId": "C_高二_C6_政治",
+    "teachingClassName": "高二6班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_415",
+    "teachingClassId": "C_高二_C7_语文",
+    "teachingClassName": "高二7班语文班",
+    "subject": "语文",
+    "teacherId": "T116",
+    "teacherName": "贾立红",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_416",
+    "teachingClassId": "C_高二_C8_英语",
+    "teachingClassName": "高二8班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_417",
+    "teachingClassId": "C_高二_C9_语文",
+    "teachingClassName": "高二9班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_418",
+    "teachingClassId": "C_高二_C10_物理",
+    "teachingClassName": "高二10班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_419",
+    "teachingClassId": "C_高二_C11_地理",
+    "teachingClassName": "高二11班地理班",
+    "subject": "地理",
+    "teacherId": "T134",
+    "teacherName": "李煜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_420",
     "teachingClassId": "C_高二_C12_通用",
     "teachingClassName": "高二12班通用班",
     "subject": "通用",
@@ -15357,7 +20157,43 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_21",
+    "id": "S_ITEM_421",
+    "teachingClassId": "C_高二_C1_物理",
+    "teachingClassName": "高二1班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_422",
+    "teachingClassId": "C_高二_C2_语文",
+    "teachingClassName": "高二2班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_423",
+    "teachingClassId": "C_高二_C3_生物",
+    "teachingClassName": "高二3班生物班",
+    "subject": "生物",
+    "teacherId": "T109",
+    "teacherName": "吴航利",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_424",
     "teachingClassId": "C_高二_C4_通用",
     "teachingClassName": "高二4班通用班",
     "subject": "通用",
@@ -15369,7 +20205,127 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_22",
+    "id": "S_ITEM_425",
+    "teachingClassId": "C_高二_C5_生物",
+    "teachingClassName": "高二5班生物班",
+    "subject": "生物",
+    "teacherId": "T119",
+    "teacherName": "王肖迪",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_426",
+    "teachingClassId": "C_高二_C6_数学",
+    "teachingClassName": "高二6班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_427",
+    "teachingClassId": "C_高二_C7_体育",
+    "teachingClassName": "高二7班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_428",
+    "teachingClassId": "C_高二_C8_语文",
+    "teachingClassName": "高二8班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_429",
+    "teachingClassId": "C_高二_C9_政治",
+    "teachingClassName": "高二9班政治班",
+    "subject": "政治",
+    "teacherId": "T118",
+    "teacherName": "马珍珍",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_430",
+    "teachingClassId": "C_高二_C10_英语",
+    "teachingClassName": "高二10班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_431",
+    "teachingClassId": "C_高二_C11_政治",
+    "teachingClassName": "高二11班政治班",
+    "subject": "政治",
+    "teacherId": "T106",
+    "teacherName": "高瑜",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_432",
+    "teachingClassId": "C_高二_C12_数学",
+    "teachingClassName": "高二12班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 5,
+    "period": 5
+  },
+  {
+    "id": "S_ITEM_433",
+    "teachingClassId": "C_高二_C1_数学",
+    "teachingClassName": "高二1班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_434",
+    "teachingClassId": "C_高二_C2_物理",
+    "teachingClassName": "高二2班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_435",
     "teachingClassId": "C_高二_C3_通用",
     "teachingClassName": "高二3班通用班",
     "subject": "通用",
@@ -15381,7 +20337,67 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_23",
+    "id": "S_ITEM_436",
+    "teachingClassId": "C_高二_C4_物理",
+    "teachingClassName": "高二4班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_437",
+    "teachingClassId": "C_高二_C5_数学",
+    "teachingClassName": "高二5班数学班",
+    "subject": "数学",
+    "teacherId": "T121",
+    "teacherName": "朱思佳",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_438",
+    "teachingClassId": "C_高二_C6_体育",
+    "teachingClassName": "高二6班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_439",
+    "teachingClassId": "C_高二_C7_英语",
+    "teachingClassName": "高二7班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_440",
+    "teachingClassId": "C_高二_C8_英语",
+    "teachingClassName": "高二8班英语班",
+    "subject": "英语",
+    "teacherId": "T117",
+    "teacherName": "李萍",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_441",
     "teachingClassId": "C_高二_C9_英语",
     "teachingClassName": "高二9班英语班",
     "subject": "英语",
@@ -15393,7 +20409,55 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_24",
+    "id": "S_ITEM_442",
+    "teachingClassId": "C_高二_C10_数学",
+    "teachingClassName": "高二10班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_443",
+    "teachingClassId": "C_高二_C11_语文",
+    "teachingClassName": "高二11班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_444",
+    "teachingClassId": "C_高二_C12_语文",
+    "teachingClassName": "高二12班语文班",
+    "subject": "语文",
+    "teacherId": "T120",
+    "teacherName": "王一",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 5,
+    "period": 6
+  },
+  {
+    "id": "S_ITEM_445",
+    "teachingClassId": "C_高二_C1_语文",
+    "teachingClassName": "高二1班语文班",
+    "subject": "语文",
+    "teacherId": "T103",
+    "teacherName": "董艳",
+    "classroomId": "R_高二_1",
+    "classroomName": "高二1班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_446",
     "teachingClassId": "C_高二_C2_通用",
     "teachingClassName": "高二2班通用班",
     "subject": "通用",
@@ -15405,7 +20469,127 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_25",
+    "id": "S_ITEM_447",
+    "teachingClassId": "C_高二_C3_化学",
+    "teachingClassName": "高二3班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_448",
+    "teachingClassId": "C_高二_C4_数学",
+    "teachingClassName": "高二4班数学班",
+    "subject": "数学",
+    "teacherId": "T112",
+    "teacherName": "钱赛",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_449",
+    "teachingClassId": "C_高二_C5_体育",
+    "teachingClassName": "高二5班体育班",
+    "subject": "体育",
+    "teacherId": "T110",
+    "teacherName": "李洋",
+    "classroomId": "R_SPEC_1",
+    "classroomName": "体育场",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_450",
+    "teachingClassId": "C_高二_C6_语文",
+    "teachingClassName": "高二6班语文班",
+    "subject": "语文",
+    "teacherId": "T124",
+    "teacherName": "冯阿凡",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_451",
+    "teachingClassId": "C_高二_C7_物理",
+    "teachingClassName": "高二7班物理班",
+    "subject": "物理",
+    "teacherId": "T107",
+    "teacherName": "王锐静",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_452",
+    "teachingClassId": "C_高二_C8_数学",
+    "teachingClassName": "高二8班数学班",
+    "subject": "数学",
+    "teacherId": "T125",
+    "teacherName": "陈越亚",
+    "classroomId": "R_高二_8",
+    "classroomName": "高二8班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_453",
+    "teachingClassId": "C_高二_C9_数学",
+    "teachingClassName": "高二9班数学班",
+    "subject": "数学",
+    "teacherId": "T132",
+    "teacherName": "宋怡娜",
+    "classroomId": "R_高二_9",
+    "classroomName": "高二9班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_454",
+    "teachingClassId": "C_高二_C10_英语",
+    "teachingClassName": "高二10班英语班",
+    "subject": "英语",
+    "teacherId": "T126",
+    "teacherName": "张庆林",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_455",
+    "teachingClassId": "C_高二_C11_英语",
+    "teachingClassName": "高二11班英语班",
+    "subject": "英语",
+    "teacherId": "T129",
+    "teacherName": "李元",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_456",
+    "teachingClassId": "C_高二_C12_英语",
+    "teachingClassName": "高二12班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_12",
+    "classroomName": "高二12班普通教室",
+    "day": 5,
+    "period": 7
+  },
+  {
+    "id": "S_ITEM_457",
     "teachingClassId": "C_高二_C1_通用",
     "teachingClassName": "高二1班通用班",
     "subject": "通用",
@@ -15417,7 +20601,103 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_26",
+    "id": "S_ITEM_458",
+    "teachingClassId": "C_高二_C2_数学",
+    "teachingClassName": "高二2班数学班",
+    "subject": "数学",
+    "teacherId": "T104",
+    "teacherName": "王静波",
+    "classroomId": "R_高二_2",
+    "classroomName": "高二2班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_459",
+    "teachingClassId": "C_高二_C3_英语",
+    "teachingClassName": "高二3班英语班",
+    "subject": "英语",
+    "teacherId": "T113",
+    "teacherName": "葛胜旗",
+    "classroomId": "R_高二_3",
+    "classroomName": "高二3班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_460",
+    "teachingClassId": "C_高二_C4_化学",
+    "teachingClassName": "高二4班化学班",
+    "subject": "化学",
+    "teacherId": "T115",
+    "teacherName": "张梦婷",
+    "classroomId": "R_高二_4",
+    "classroomName": "高二4班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_461",
+    "teachingClassId": "C_高二_C5_物理",
+    "teachingClassName": "高二5班物理班",
+    "subject": "物理",
+    "teacherId": "T114",
+    "teacherName": "李磊",
+    "classroomId": "R_高二_5",
+    "classroomName": "高二5班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_462",
+    "teachingClassId": "C_高二_C6_物理",
+    "teachingClassName": "高二6班物理班",
+    "subject": "物理",
+    "teacherId": "T127",
+    "teacherName": "吕姝彤",
+    "classroomId": "R_高二_6",
+    "classroomName": "高二6班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_463",
+    "teachingClassId": "C_高二_C7_数学",
+    "teachingClassName": "高二7班数学班",
+    "subject": "数学",
+    "teacherId": "T128",
+    "teacherName": "李琳",
+    "classroomId": "R_高二_7",
+    "classroomName": "高二7班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_464",
+    "teachingClassId": "C_高二_C10_语文",
+    "teachingClassName": "高二10班语文班",
+    "subject": "语文",
+    "teacherId": "T131",
+    "teacherName": "马建萍",
+    "classroomId": "R_高二_10",
+    "classroomName": "高二10班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_465",
+    "teachingClassId": "C_高二_C11_语文",
+    "teachingClassName": "高二11班语文班",
+    "subject": "语文",
+    "teacherId": "T111",
+    "teacherName": "牟晗",
+    "classroomId": "R_高二_11",
+    "classroomName": "高二11班普通教室",
+    "day": 5,
+    "period": 8
+  },
+  {
+    "id": "S_ITEM_466",
     "teachingClassId": "C_初一_C1_语文",
     "teachingClassName": "初一1班语文班",
     "subject": "语文",
@@ -15429,7 +20709,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_27",
+    "id": "S_ITEM_467",
     "teachingClassId": "C_初一_C1_语文",
     "teachingClassName": "初一1班语文班",
     "subject": "语文",
@@ -15441,7 +20721,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_28",
+    "id": "S_ITEM_468",
     "teachingClassId": "C_初一_C1_语文",
     "teachingClassName": "初一1班语文班",
     "subject": "语文",
@@ -15453,7 +20733,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_29",
+    "id": "S_ITEM_469",
     "teachingClassId": "C_初一_C1_语文",
     "teachingClassName": "初一1班语文班",
     "subject": "语文",
@@ -15465,7 +20745,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_30",
+    "id": "S_ITEM_470",
     "teachingClassId": "C_初一_C1_语文",
     "teachingClassName": "初一1班语文班",
     "subject": "语文",
@@ -15477,7 +20757,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_31",
+    "id": "S_ITEM_471",
     "teachingClassId": "C_初一_C1_语文",
     "teachingClassName": "初一1班语文班",
     "subject": "语文",
@@ -15489,7 +20769,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_32",
+    "id": "S_ITEM_472",
     "teachingClassId": "C_初一_C1_语文",
     "teachingClassName": "初一1班语文班",
     "subject": "语文",
@@ -15501,7 +20781,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_33",
+    "id": "S_ITEM_473",
     "teachingClassId": "C_初一_C1_数学",
     "teachingClassName": "初一1班数学班",
     "subject": "数学",
@@ -15513,7 +20793,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_34",
+    "id": "S_ITEM_474",
     "teachingClassId": "C_初一_C1_数学",
     "teachingClassName": "初一1班数学班",
     "subject": "数学",
@@ -15525,7 +20805,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_35",
+    "id": "S_ITEM_475",
     "teachingClassId": "C_初一_C1_数学",
     "teachingClassName": "初一1班数学班",
     "subject": "数学",
@@ -15537,7 +20817,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_36",
+    "id": "S_ITEM_476",
     "teachingClassId": "C_初一_C1_数学",
     "teachingClassName": "初一1班数学班",
     "subject": "数学",
@@ -15549,7 +20829,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_37",
+    "id": "S_ITEM_477",
     "teachingClassId": "C_初一_C1_数学",
     "teachingClassName": "初一1班数学班",
     "subject": "数学",
@@ -15561,7 +20841,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_38",
+    "id": "S_ITEM_478",
     "teachingClassId": "C_初一_C1_数学",
     "teachingClassName": "初一1班数学班",
     "subject": "数学",
@@ -15573,7 +20853,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_39",
+    "id": "S_ITEM_479",
     "teachingClassId": "C_初一_C1_数学",
     "teachingClassName": "初一1班数学班",
     "subject": "数学",
@@ -15585,7 +20865,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_40",
+    "id": "S_ITEM_480",
     "teachingClassId": "C_初一_C1_英语",
     "teachingClassName": "初一1班英语班",
     "subject": "英语",
@@ -15597,7 +20877,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_41",
+    "id": "S_ITEM_481",
     "teachingClassId": "C_初一_C1_英语",
     "teachingClassName": "初一1班英语班",
     "subject": "英语",
@@ -15609,7 +20889,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_42",
+    "id": "S_ITEM_482",
     "teachingClassId": "C_初一_C1_英语",
     "teachingClassName": "初一1班英语班",
     "subject": "英语",
@@ -15621,7 +20901,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_43",
+    "id": "S_ITEM_483",
     "teachingClassId": "C_初一_C1_英语",
     "teachingClassName": "初一1班英语班",
     "subject": "英语",
@@ -15633,7 +20913,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_44",
+    "id": "S_ITEM_484",
     "teachingClassId": "C_初一_C1_英语",
     "teachingClassName": "初一1班英语班",
     "subject": "英语",
@@ -15645,7 +20925,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_45",
+    "id": "S_ITEM_485",
     "teachingClassId": "C_初一_C1_英语",
     "teachingClassName": "初一1班英语班",
     "subject": "英语",
@@ -15657,7 +20937,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_46",
+    "id": "S_ITEM_486",
     "teachingClassId": "C_初一_C1_英语",
     "teachingClassName": "初一1班英语班",
     "subject": "英语",
@@ -15669,7 +20949,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_47",
+    "id": "S_ITEM_487",
     "teachingClassId": "C_初一_C1_政治",
     "teachingClassName": "初一1班政治班",
     "subject": "政治",
@@ -15681,7 +20961,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_48",
+    "id": "S_ITEM_488",
     "teachingClassId": "C_初一_C1_政治",
     "teachingClassName": "初一1班政治班",
     "subject": "政治",
@@ -15693,7 +20973,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_49",
+    "id": "S_ITEM_489",
     "teachingClassId": "C_初一_C1_历史",
     "teachingClassName": "初一1班历史班",
     "subject": "历史",
@@ -15705,7 +20985,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_50",
+    "id": "S_ITEM_490",
     "teachingClassId": "C_初一_C1_历史",
     "teachingClassName": "初一1班历史班",
     "subject": "历史",
@@ -15717,7 +20997,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_51",
+    "id": "S_ITEM_491",
     "teachingClassId": "C_初一_C1_地理",
     "teachingClassName": "初一1班地理班",
     "subject": "地理",
@@ -15729,7 +21009,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_52",
+    "id": "S_ITEM_492",
     "teachingClassId": "C_初一_C1_地理",
     "teachingClassName": "初一1班地理班",
     "subject": "地理",
@@ -15741,7 +21021,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_53",
+    "id": "S_ITEM_493",
     "teachingClassId": "C_初一_C1_生物",
     "teachingClassName": "初一1班生物班",
     "subject": "生物",
@@ -15753,7 +21033,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_54",
+    "id": "S_ITEM_494",
     "teachingClassId": "C_初一_C1_生物",
     "teachingClassName": "初一1班生物班",
     "subject": "生物",
@@ -15765,7 +21045,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_55",
+    "id": "S_ITEM_495",
     "teachingClassId": "C_初一_C1_体育",
     "teachingClassName": "初一1班体育班",
     "subject": "体育",
@@ -15777,7 +21057,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_56",
+    "id": "S_ITEM_496",
     "teachingClassId": "C_初一_C1_体育",
     "teachingClassName": "初一1班体育班",
     "subject": "体育",
@@ -15789,7 +21069,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_57",
+    "id": "S_ITEM_497",
     "teachingClassId": "C_初一_C1_通用",
     "teachingClassName": "初一1班通用班",
     "subject": "通用",
@@ -15801,7 +21081,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_58",
+    "id": "S_ITEM_498",
     "teachingClassId": "C_初一_C1_音乐",
     "teachingClassName": "初一1班音乐班",
     "subject": "音乐",
@@ -15813,7 +21093,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_59",
+    "id": "S_ITEM_499",
     "teachingClassId": "C_初一_C1_信息技术",
     "teachingClassName": "初一1班信息技术班",
     "subject": "信息技术",
@@ -15825,7 +21105,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_60",
+    "id": "S_ITEM_500",
     "teachingClassId": "C_初一_C2_语文",
     "teachingClassName": "初一2班语文班",
     "subject": "语文",
@@ -15837,7 +21117,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_61",
+    "id": "S_ITEM_501",
     "teachingClassId": "C_初一_C2_语文",
     "teachingClassName": "初一2班语文班",
     "subject": "语文",
@@ -15849,7 +21129,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_62",
+    "id": "S_ITEM_502",
     "teachingClassId": "C_初一_C2_语文",
     "teachingClassName": "初一2班语文班",
     "subject": "语文",
@@ -15861,7 +21141,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_63",
+    "id": "S_ITEM_503",
     "teachingClassId": "C_初一_C2_语文",
     "teachingClassName": "初一2班语文班",
     "subject": "语文",
@@ -15873,7 +21153,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_64",
+    "id": "S_ITEM_504",
     "teachingClassId": "C_初一_C2_语文",
     "teachingClassName": "初一2班语文班",
     "subject": "语文",
@@ -15885,7 +21165,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_65",
+    "id": "S_ITEM_505",
     "teachingClassId": "C_初一_C2_语文",
     "teachingClassName": "初一2班语文班",
     "subject": "语文",
@@ -15897,7 +21177,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_66",
+    "id": "S_ITEM_506",
     "teachingClassId": "C_初一_C2_语文",
     "teachingClassName": "初一2班语文班",
     "subject": "语文",
@@ -15909,7 +21189,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_67",
+    "id": "S_ITEM_507",
     "teachingClassId": "C_初一_C2_数学",
     "teachingClassName": "初一2班数学班",
     "subject": "数学",
@@ -15921,7 +21201,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_68",
+    "id": "S_ITEM_508",
     "teachingClassId": "C_初一_C2_数学",
     "teachingClassName": "初一2班数学班",
     "subject": "数学",
@@ -15933,7 +21213,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_69",
+    "id": "S_ITEM_509",
     "teachingClassId": "C_初一_C2_数学",
     "teachingClassName": "初一2班数学班",
     "subject": "数学",
@@ -15945,7 +21225,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_70",
+    "id": "S_ITEM_510",
     "teachingClassId": "C_初一_C2_数学",
     "teachingClassName": "初一2班数学班",
     "subject": "数学",
@@ -15957,7 +21237,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_71",
+    "id": "S_ITEM_511",
     "teachingClassId": "C_初一_C2_数学",
     "teachingClassName": "初一2班数学班",
     "subject": "数学",
@@ -15969,7 +21249,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_72",
+    "id": "S_ITEM_512",
     "teachingClassId": "C_初一_C2_数学",
     "teachingClassName": "初一2班数学班",
     "subject": "数学",
@@ -15981,7 +21261,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_73",
+    "id": "S_ITEM_513",
     "teachingClassId": "C_初一_C2_数学",
     "teachingClassName": "初一2班数学班",
     "subject": "数学",
@@ -15993,7 +21273,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_74",
+    "id": "S_ITEM_514",
     "teachingClassId": "C_初一_C2_英语",
     "teachingClassName": "初一2班英语班",
     "subject": "英语",
@@ -16005,7 +21285,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_75",
+    "id": "S_ITEM_515",
     "teachingClassId": "C_初一_C2_英语",
     "teachingClassName": "初一2班英语班",
     "subject": "英语",
@@ -16017,7 +21297,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_76",
+    "id": "S_ITEM_516",
     "teachingClassId": "C_初一_C2_英语",
     "teachingClassName": "初一2班英语班",
     "subject": "英语",
@@ -16029,7 +21309,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_77",
+    "id": "S_ITEM_517",
     "teachingClassId": "C_初一_C2_英语",
     "teachingClassName": "初一2班英语班",
     "subject": "英语",
@@ -16041,7 +21321,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_78",
+    "id": "S_ITEM_518",
     "teachingClassId": "C_初一_C2_英语",
     "teachingClassName": "初一2班英语班",
     "subject": "英语",
@@ -16053,7 +21333,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_79",
+    "id": "S_ITEM_519",
     "teachingClassId": "C_初一_C2_英语",
     "teachingClassName": "初一2班英语班",
     "subject": "英语",
@@ -16065,7 +21345,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_80",
+    "id": "S_ITEM_520",
     "teachingClassId": "C_初一_C2_英语",
     "teachingClassName": "初一2班英语班",
     "subject": "英语",
@@ -16077,7 +21357,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_81",
+    "id": "S_ITEM_521",
     "teachingClassId": "C_初一_C2_政治",
     "teachingClassName": "初一2班政治班",
     "subject": "政治",
@@ -16089,7 +21369,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_82",
+    "id": "S_ITEM_522",
     "teachingClassId": "C_初一_C2_政治",
     "teachingClassName": "初一2班政治班",
     "subject": "政治",
@@ -16101,7 +21381,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_83",
+    "id": "S_ITEM_523",
     "teachingClassId": "C_初一_C2_历史",
     "teachingClassName": "初一2班历史班",
     "subject": "历史",
@@ -16113,7 +21393,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_84",
+    "id": "S_ITEM_524",
     "teachingClassId": "C_初一_C2_历史",
     "teachingClassName": "初一2班历史班",
     "subject": "历史",
@@ -16125,7 +21405,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_85",
+    "id": "S_ITEM_525",
     "teachingClassId": "C_初一_C2_地理",
     "teachingClassName": "初一2班地理班",
     "subject": "地理",
@@ -16137,7 +21417,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_86",
+    "id": "S_ITEM_526",
     "teachingClassId": "C_初一_C2_地理",
     "teachingClassName": "初一2班地理班",
     "subject": "地理",
@@ -16149,7 +21429,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_87",
+    "id": "S_ITEM_527",
     "teachingClassId": "C_初一_C2_生物",
     "teachingClassName": "初一2班生物班",
     "subject": "生物",
@@ -16161,7 +21441,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_88",
+    "id": "S_ITEM_528",
     "teachingClassId": "C_初一_C2_生物",
     "teachingClassName": "初一2班生物班",
     "subject": "生物",
@@ -16173,7 +21453,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_89",
+    "id": "S_ITEM_529",
     "teachingClassId": "C_初一_C2_体育",
     "teachingClassName": "初一2班体育班",
     "subject": "体育",
@@ -16185,7 +21465,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_90",
+    "id": "S_ITEM_530",
     "teachingClassId": "C_初一_C2_体育",
     "teachingClassName": "初一2班体育班",
     "subject": "体育",
@@ -16197,7 +21477,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_91",
+    "id": "S_ITEM_531",
     "teachingClassId": "C_初一_C2_通用",
     "teachingClassName": "初一2班通用班",
     "subject": "通用",
@@ -16209,7 +21489,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_92",
+    "id": "S_ITEM_532",
     "teachingClassId": "C_初一_C2_音乐",
     "teachingClassName": "初一2班音乐班",
     "subject": "音乐",
@@ -16221,7 +21501,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_93",
+    "id": "S_ITEM_533",
     "teachingClassId": "C_初一_C2_信息技术",
     "teachingClassName": "初一2班信息技术班",
     "subject": "信息技术",
@@ -16233,7 +21513,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_94",
+    "id": "S_ITEM_534",
     "teachingClassId": "C_初一_C3_语文",
     "teachingClassName": "初一3班语文班",
     "subject": "语文",
@@ -16245,7 +21525,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_95",
+    "id": "S_ITEM_535",
     "teachingClassId": "C_初一_C3_语文",
     "teachingClassName": "初一3班语文班",
     "subject": "语文",
@@ -16257,7 +21537,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_96",
+    "id": "S_ITEM_536",
     "teachingClassId": "C_初一_C3_语文",
     "teachingClassName": "初一3班语文班",
     "subject": "语文",
@@ -16269,7 +21549,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_97",
+    "id": "S_ITEM_537",
     "teachingClassId": "C_初一_C3_语文",
     "teachingClassName": "初一3班语文班",
     "subject": "语文",
@@ -16281,7 +21561,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_98",
+    "id": "S_ITEM_538",
     "teachingClassId": "C_初一_C3_语文",
     "teachingClassName": "初一3班语文班",
     "subject": "语文",
@@ -16293,7 +21573,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_99",
+    "id": "S_ITEM_539",
     "teachingClassId": "C_初一_C3_语文",
     "teachingClassName": "初一3班语文班",
     "subject": "语文",
@@ -16305,7 +21585,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_100",
+    "id": "S_ITEM_540",
     "teachingClassId": "C_初一_C3_语文",
     "teachingClassName": "初一3班语文班",
     "subject": "语文",
@@ -16317,7 +21597,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_101",
+    "id": "S_ITEM_541",
     "teachingClassId": "C_初一_C3_数学",
     "teachingClassName": "初一3班数学班",
     "subject": "数学",
@@ -16329,7 +21609,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_102",
+    "id": "S_ITEM_542",
     "teachingClassId": "C_初一_C3_数学",
     "teachingClassName": "初一3班数学班",
     "subject": "数学",
@@ -16341,7 +21621,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_103",
+    "id": "S_ITEM_543",
     "teachingClassId": "C_初一_C3_数学",
     "teachingClassName": "初一3班数学班",
     "subject": "数学",
@@ -16353,7 +21633,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_104",
+    "id": "S_ITEM_544",
     "teachingClassId": "C_初一_C3_数学",
     "teachingClassName": "初一3班数学班",
     "subject": "数学",
@@ -16365,7 +21645,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_105",
+    "id": "S_ITEM_545",
     "teachingClassId": "C_初一_C3_数学",
     "teachingClassName": "初一3班数学班",
     "subject": "数学",
@@ -16377,7 +21657,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_106",
+    "id": "S_ITEM_546",
     "teachingClassId": "C_初一_C3_数学",
     "teachingClassName": "初一3班数学班",
     "subject": "数学",
@@ -16389,7 +21669,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_107",
+    "id": "S_ITEM_547",
     "teachingClassId": "C_初一_C3_数学",
     "teachingClassName": "初一3班数学班",
     "subject": "数学",
@@ -16401,7 +21681,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_108",
+    "id": "S_ITEM_548",
     "teachingClassId": "C_初一_C3_英语",
     "teachingClassName": "初一3班英语班",
     "subject": "英语",
@@ -16413,7 +21693,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_109",
+    "id": "S_ITEM_549",
     "teachingClassId": "C_初一_C3_英语",
     "teachingClassName": "初一3班英语班",
     "subject": "英语",
@@ -16425,7 +21705,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_110",
+    "id": "S_ITEM_550",
     "teachingClassId": "C_初一_C3_英语",
     "teachingClassName": "初一3班英语班",
     "subject": "英语",
@@ -16437,7 +21717,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_111",
+    "id": "S_ITEM_551",
     "teachingClassId": "C_初一_C3_英语",
     "teachingClassName": "初一3班英语班",
     "subject": "英语",
@@ -16449,7 +21729,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_112",
+    "id": "S_ITEM_552",
     "teachingClassId": "C_初一_C3_英语",
     "teachingClassName": "初一3班英语班",
     "subject": "英语",
@@ -16461,7 +21741,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_113",
+    "id": "S_ITEM_553",
     "teachingClassId": "C_初一_C3_英语",
     "teachingClassName": "初一3班英语班",
     "subject": "英语",
@@ -16473,7 +21753,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_114",
+    "id": "S_ITEM_554",
     "teachingClassId": "C_初一_C3_英语",
     "teachingClassName": "初一3班英语班",
     "subject": "英语",
@@ -16485,7 +21765,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_115",
+    "id": "S_ITEM_555",
     "teachingClassId": "C_初一_C3_政治",
     "teachingClassName": "初一3班政治班",
     "subject": "政治",
@@ -16497,7 +21777,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_116",
+    "id": "S_ITEM_556",
     "teachingClassId": "C_初一_C3_政治",
     "teachingClassName": "初一3班政治班",
     "subject": "政治",
@@ -16509,7 +21789,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_117",
+    "id": "S_ITEM_557",
     "teachingClassId": "C_初一_C3_历史",
     "teachingClassName": "初一3班历史班",
     "subject": "历史",
@@ -16521,7 +21801,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_118",
+    "id": "S_ITEM_558",
     "teachingClassId": "C_初一_C3_历史",
     "teachingClassName": "初一3班历史班",
     "subject": "历史",
@@ -16533,7 +21813,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_119",
+    "id": "S_ITEM_559",
     "teachingClassId": "C_初一_C3_地理",
     "teachingClassName": "初一3班地理班",
     "subject": "地理",
@@ -16545,7 +21825,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_120",
+    "id": "S_ITEM_560",
     "teachingClassId": "C_初一_C3_地理",
     "teachingClassName": "初一3班地理班",
     "subject": "地理",
@@ -16557,7 +21837,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_121",
+    "id": "S_ITEM_561",
     "teachingClassId": "C_初一_C3_生物",
     "teachingClassName": "初一3班生物班",
     "subject": "生物",
@@ -16569,7 +21849,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_122",
+    "id": "S_ITEM_562",
     "teachingClassId": "C_初一_C3_生物",
     "teachingClassName": "初一3班生物班",
     "subject": "生物",
@@ -16581,7 +21861,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_123",
+    "id": "S_ITEM_563",
     "teachingClassId": "C_初一_C3_体育",
     "teachingClassName": "初一3班体育班",
     "subject": "体育",
@@ -16593,7 +21873,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_124",
+    "id": "S_ITEM_564",
     "teachingClassId": "C_初一_C3_体育",
     "teachingClassName": "初一3班体育班",
     "subject": "体育",
@@ -16605,7 +21885,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_125",
+    "id": "S_ITEM_565",
     "teachingClassId": "C_初一_C3_通用",
     "teachingClassName": "初一3班通用班",
     "subject": "通用",
@@ -16617,7 +21897,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_126",
+    "id": "S_ITEM_566",
     "teachingClassId": "C_初一_C3_音乐",
     "teachingClassName": "初一3班音乐班",
     "subject": "音乐",
@@ -16629,7 +21909,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_127",
+    "id": "S_ITEM_567",
     "teachingClassId": "C_初一_C3_信息技术",
     "teachingClassName": "初一3班信息技术班",
     "subject": "信息技术",
@@ -16641,7 +21921,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_128",
+    "id": "S_ITEM_568",
     "teachingClassId": "C_初一_C4_语文",
     "teachingClassName": "初一4班语文班",
     "subject": "语文",
@@ -16653,7 +21933,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_129",
+    "id": "S_ITEM_569",
     "teachingClassId": "C_初一_C4_语文",
     "teachingClassName": "初一4班语文班",
     "subject": "语文",
@@ -16665,7 +21945,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_130",
+    "id": "S_ITEM_570",
     "teachingClassId": "C_初一_C4_语文",
     "teachingClassName": "初一4班语文班",
     "subject": "语文",
@@ -16677,7 +21957,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_131",
+    "id": "S_ITEM_571",
     "teachingClassId": "C_初一_C4_语文",
     "teachingClassName": "初一4班语文班",
     "subject": "语文",
@@ -16689,7 +21969,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_132",
+    "id": "S_ITEM_572",
     "teachingClassId": "C_初一_C4_语文",
     "teachingClassName": "初一4班语文班",
     "subject": "语文",
@@ -16701,7 +21981,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_133",
+    "id": "S_ITEM_573",
     "teachingClassId": "C_初一_C4_语文",
     "teachingClassName": "初一4班语文班",
     "subject": "语文",
@@ -16713,7 +21993,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_134",
+    "id": "S_ITEM_574",
     "teachingClassId": "C_初一_C4_语文",
     "teachingClassName": "初一4班语文班",
     "subject": "语文",
@@ -16725,7 +22005,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_135",
+    "id": "S_ITEM_575",
     "teachingClassId": "C_初一_C4_数学",
     "teachingClassName": "初一4班数学班",
     "subject": "数学",
@@ -16737,7 +22017,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_136",
+    "id": "S_ITEM_576",
     "teachingClassId": "C_初一_C4_数学",
     "teachingClassName": "初一4班数学班",
     "subject": "数学",
@@ -16749,7 +22029,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_137",
+    "id": "S_ITEM_577",
     "teachingClassId": "C_初一_C4_数学",
     "teachingClassName": "初一4班数学班",
     "subject": "数学",
@@ -16761,7 +22041,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_138",
+    "id": "S_ITEM_578",
     "teachingClassId": "C_初一_C4_数学",
     "teachingClassName": "初一4班数学班",
     "subject": "数学",
@@ -16773,7 +22053,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_139",
+    "id": "S_ITEM_579",
     "teachingClassId": "C_初一_C4_数学",
     "teachingClassName": "初一4班数学班",
     "subject": "数学",
@@ -16785,7 +22065,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_140",
+    "id": "S_ITEM_580",
     "teachingClassId": "C_初一_C4_数学",
     "teachingClassName": "初一4班数学班",
     "subject": "数学",
@@ -16797,7 +22077,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_141",
+    "id": "S_ITEM_581",
     "teachingClassId": "C_初一_C4_数学",
     "teachingClassName": "初一4班数学班",
     "subject": "数学",
@@ -16809,7 +22089,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_142",
+    "id": "S_ITEM_582",
     "teachingClassId": "C_初一_C4_英语",
     "teachingClassName": "初一4班英语班",
     "subject": "英语",
@@ -16821,7 +22101,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_143",
+    "id": "S_ITEM_583",
     "teachingClassId": "C_初一_C4_英语",
     "teachingClassName": "初一4班英语班",
     "subject": "英语",
@@ -16833,7 +22113,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_144",
+    "id": "S_ITEM_584",
     "teachingClassId": "C_初一_C4_英语",
     "teachingClassName": "初一4班英语班",
     "subject": "英语",
@@ -16845,7 +22125,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_145",
+    "id": "S_ITEM_585",
     "teachingClassId": "C_初一_C4_英语",
     "teachingClassName": "初一4班英语班",
     "subject": "英语",
@@ -16857,7 +22137,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_146",
+    "id": "S_ITEM_586",
     "teachingClassId": "C_初一_C4_英语",
     "teachingClassName": "初一4班英语班",
     "subject": "英语",
@@ -16869,7 +22149,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_147",
+    "id": "S_ITEM_587",
     "teachingClassId": "C_初一_C4_英语",
     "teachingClassName": "初一4班英语班",
     "subject": "英语",
@@ -16881,7 +22161,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_148",
+    "id": "S_ITEM_588",
     "teachingClassId": "C_初一_C4_英语",
     "teachingClassName": "初一4班英语班",
     "subject": "英语",
@@ -16893,7 +22173,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_149",
+    "id": "S_ITEM_589",
     "teachingClassId": "C_初一_C4_政治",
     "teachingClassName": "初一4班政治班",
     "subject": "政治",
@@ -16905,7 +22185,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_150",
+    "id": "S_ITEM_590",
     "teachingClassId": "C_初一_C4_政治",
     "teachingClassName": "初一4班政治班",
     "subject": "政治",
@@ -16917,7 +22197,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_151",
+    "id": "S_ITEM_591",
     "teachingClassId": "C_初一_C4_历史",
     "teachingClassName": "初一4班历史班",
     "subject": "历史",
@@ -16929,7 +22209,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_152",
+    "id": "S_ITEM_592",
     "teachingClassId": "C_初一_C4_历史",
     "teachingClassName": "初一4班历史班",
     "subject": "历史",
@@ -16941,7 +22221,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_153",
+    "id": "S_ITEM_593",
     "teachingClassId": "C_初一_C4_地理",
     "teachingClassName": "初一4班地理班",
     "subject": "地理",
@@ -16953,7 +22233,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_154",
+    "id": "S_ITEM_594",
     "teachingClassId": "C_初一_C4_地理",
     "teachingClassName": "初一4班地理班",
     "subject": "地理",
@@ -16965,7 +22245,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_155",
+    "id": "S_ITEM_595",
     "teachingClassId": "C_初一_C4_生物",
     "teachingClassName": "初一4班生物班",
     "subject": "生物",
@@ -16977,7 +22257,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_156",
+    "id": "S_ITEM_596",
     "teachingClassId": "C_初一_C4_生物",
     "teachingClassName": "初一4班生物班",
     "subject": "生物",
@@ -16989,7 +22269,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_157",
+    "id": "S_ITEM_597",
     "teachingClassId": "C_初一_C4_体育",
     "teachingClassName": "初一4班体育班",
     "subject": "体育",
@@ -17001,7 +22281,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_158",
+    "id": "S_ITEM_598",
     "teachingClassId": "C_初一_C4_体育",
     "teachingClassName": "初一4班体育班",
     "subject": "体育",
@@ -17013,7 +22293,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_159",
+    "id": "S_ITEM_599",
     "teachingClassId": "C_初一_C4_通用",
     "teachingClassName": "初一4班通用班",
     "subject": "通用",
@@ -17025,7 +22305,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_160",
+    "id": "S_ITEM_600",
     "teachingClassId": "C_初一_C4_音乐",
     "teachingClassName": "初一4班音乐班",
     "subject": "音乐",
@@ -17037,7 +22317,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_161",
+    "id": "S_ITEM_601",
     "teachingClassId": "C_初一_C4_信息技术",
     "teachingClassName": "初一4班信息技术班",
     "subject": "信息技术",
@@ -17049,7 +22329,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_162",
+    "id": "S_ITEM_602",
     "teachingClassId": "C_初一_C5_语文",
     "teachingClassName": "初一5班语文班",
     "subject": "语文",
@@ -17061,7 +22341,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_163",
+    "id": "S_ITEM_603",
     "teachingClassId": "C_初一_C5_语文",
     "teachingClassName": "初一5班语文班",
     "subject": "语文",
@@ -17073,7 +22353,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_164",
+    "id": "S_ITEM_604",
     "teachingClassId": "C_初一_C5_语文",
     "teachingClassName": "初一5班语文班",
     "subject": "语文",
@@ -17085,7 +22365,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_165",
+    "id": "S_ITEM_605",
     "teachingClassId": "C_初一_C5_语文",
     "teachingClassName": "初一5班语文班",
     "subject": "语文",
@@ -17097,7 +22377,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_166",
+    "id": "S_ITEM_606",
     "teachingClassId": "C_初一_C5_语文",
     "teachingClassName": "初一5班语文班",
     "subject": "语文",
@@ -17109,7 +22389,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_167",
+    "id": "S_ITEM_607",
     "teachingClassId": "C_初一_C5_语文",
     "teachingClassName": "初一5班语文班",
     "subject": "语文",
@@ -17121,7 +22401,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_168",
+    "id": "S_ITEM_608",
     "teachingClassId": "C_初一_C5_语文",
     "teachingClassName": "初一5班语文班",
     "subject": "语文",
@@ -17133,7 +22413,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_169",
+    "id": "S_ITEM_609",
     "teachingClassId": "C_初一_C5_数学",
     "teachingClassName": "初一5班数学班",
     "subject": "数学",
@@ -17145,7 +22425,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_170",
+    "id": "S_ITEM_610",
     "teachingClassId": "C_初一_C5_数学",
     "teachingClassName": "初一5班数学班",
     "subject": "数学",
@@ -17157,7 +22437,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_171",
+    "id": "S_ITEM_611",
     "teachingClassId": "C_初一_C5_数学",
     "teachingClassName": "初一5班数学班",
     "subject": "数学",
@@ -17169,7 +22449,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_172",
+    "id": "S_ITEM_612",
     "teachingClassId": "C_初一_C5_数学",
     "teachingClassName": "初一5班数学班",
     "subject": "数学",
@@ -17181,7 +22461,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_173",
+    "id": "S_ITEM_613",
     "teachingClassId": "C_初一_C5_数学",
     "teachingClassName": "初一5班数学班",
     "subject": "数学",
@@ -17193,7 +22473,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_174",
+    "id": "S_ITEM_614",
     "teachingClassId": "C_初一_C5_数学",
     "teachingClassName": "初一5班数学班",
     "subject": "数学",
@@ -17205,7 +22485,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_175",
+    "id": "S_ITEM_615",
     "teachingClassId": "C_初一_C5_数学",
     "teachingClassName": "初一5班数学班",
     "subject": "数学",
@@ -17217,7 +22497,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_176",
+    "id": "S_ITEM_616",
     "teachingClassId": "C_初一_C5_英语",
     "teachingClassName": "初一5班英语班",
     "subject": "英语",
@@ -17229,7 +22509,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_177",
+    "id": "S_ITEM_617",
     "teachingClassId": "C_初一_C5_英语",
     "teachingClassName": "初一5班英语班",
     "subject": "英语",
@@ -17241,7 +22521,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_178",
+    "id": "S_ITEM_618",
     "teachingClassId": "C_初一_C5_英语",
     "teachingClassName": "初一5班英语班",
     "subject": "英语",
@@ -17253,7 +22533,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_179",
+    "id": "S_ITEM_619",
     "teachingClassId": "C_初一_C5_英语",
     "teachingClassName": "初一5班英语班",
     "subject": "英语",
@@ -17265,7 +22545,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_180",
+    "id": "S_ITEM_620",
     "teachingClassId": "C_初一_C5_英语",
     "teachingClassName": "初一5班英语班",
     "subject": "英语",
@@ -17277,7 +22557,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_181",
+    "id": "S_ITEM_621",
     "teachingClassId": "C_初一_C5_英语",
     "teachingClassName": "初一5班英语班",
     "subject": "英语",
@@ -17289,7 +22569,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_182",
+    "id": "S_ITEM_622",
     "teachingClassId": "C_初一_C5_英语",
     "teachingClassName": "初一5班英语班",
     "subject": "英语",
@@ -17301,7 +22581,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_183",
+    "id": "S_ITEM_623",
     "teachingClassId": "C_初一_C5_政治",
     "teachingClassName": "初一5班政治班",
     "subject": "政治",
@@ -17313,7 +22593,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_184",
+    "id": "S_ITEM_624",
     "teachingClassId": "C_初一_C5_政治",
     "teachingClassName": "初一5班政治班",
     "subject": "政治",
@@ -17325,7 +22605,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_185",
+    "id": "S_ITEM_625",
     "teachingClassId": "C_初一_C5_历史",
     "teachingClassName": "初一5班历史班",
     "subject": "历史",
@@ -17337,7 +22617,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_186",
+    "id": "S_ITEM_626",
     "teachingClassId": "C_初一_C5_历史",
     "teachingClassName": "初一5班历史班",
     "subject": "历史",
@@ -17349,7 +22629,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_187",
+    "id": "S_ITEM_627",
     "teachingClassId": "C_初一_C5_地理",
     "teachingClassName": "初一5班地理班",
     "subject": "地理",
@@ -17361,7 +22641,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_188",
+    "id": "S_ITEM_628",
     "teachingClassId": "C_初一_C5_地理",
     "teachingClassName": "初一5班地理班",
     "subject": "地理",
@@ -17373,7 +22653,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_189",
+    "id": "S_ITEM_629",
     "teachingClassId": "C_初一_C5_生物",
     "teachingClassName": "初一5班生物班",
     "subject": "生物",
@@ -17385,7 +22665,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_190",
+    "id": "S_ITEM_630",
     "teachingClassId": "C_初一_C5_生物",
     "teachingClassName": "初一5班生物班",
     "subject": "生物",
@@ -17397,7 +22677,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_191",
+    "id": "S_ITEM_631",
     "teachingClassId": "C_初一_C5_体育",
     "teachingClassName": "初一5班体育班",
     "subject": "体育",
@@ -17409,7 +22689,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_192",
+    "id": "S_ITEM_632",
     "teachingClassId": "C_初一_C5_体育",
     "teachingClassName": "初一5班体育班",
     "subject": "体育",
@@ -17421,7 +22701,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_193",
+    "id": "S_ITEM_633",
     "teachingClassId": "C_初一_C5_通用",
     "teachingClassName": "初一5班通用班",
     "subject": "通用",
@@ -17433,7 +22713,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_194",
+    "id": "S_ITEM_634",
     "teachingClassId": "C_初一_C5_音乐",
     "teachingClassName": "初一5班音乐班",
     "subject": "音乐",
@@ -17445,7 +22725,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_195",
+    "id": "S_ITEM_635",
     "teachingClassId": "C_初一_C5_信息技术",
     "teachingClassName": "初一5班信息技术班",
     "subject": "信息技术",
@@ -17457,7 +22737,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_196",
+    "id": "S_ITEM_636",
     "teachingClassId": "C_初一_C6_语文",
     "teachingClassName": "初一6班语文班",
     "subject": "语文",
@@ -17469,7 +22749,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_197",
+    "id": "S_ITEM_637",
     "teachingClassId": "C_初一_C6_语文",
     "teachingClassName": "初一6班语文班",
     "subject": "语文",
@@ -17481,7 +22761,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_198",
+    "id": "S_ITEM_638",
     "teachingClassId": "C_初一_C6_语文",
     "teachingClassName": "初一6班语文班",
     "subject": "语文",
@@ -17493,7 +22773,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_199",
+    "id": "S_ITEM_639",
     "teachingClassId": "C_初一_C6_语文",
     "teachingClassName": "初一6班语文班",
     "subject": "语文",
@@ -17505,7 +22785,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_200",
+    "id": "S_ITEM_640",
     "teachingClassId": "C_初一_C6_语文",
     "teachingClassName": "初一6班语文班",
     "subject": "语文",
@@ -17517,7 +22797,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_201",
+    "id": "S_ITEM_641",
     "teachingClassId": "C_初一_C6_语文",
     "teachingClassName": "初一6班语文班",
     "subject": "语文",
@@ -17529,7 +22809,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_202",
+    "id": "S_ITEM_642",
     "teachingClassId": "C_初一_C6_语文",
     "teachingClassName": "初一6班语文班",
     "subject": "语文",
@@ -17541,7 +22821,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_203",
+    "id": "S_ITEM_643",
     "teachingClassId": "C_初一_C6_数学",
     "teachingClassName": "初一6班数学班",
     "subject": "数学",
@@ -17553,7 +22833,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_204",
+    "id": "S_ITEM_644",
     "teachingClassId": "C_初一_C6_数学",
     "teachingClassName": "初一6班数学班",
     "subject": "数学",
@@ -17565,7 +22845,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_205",
+    "id": "S_ITEM_645",
     "teachingClassId": "C_初一_C6_数学",
     "teachingClassName": "初一6班数学班",
     "subject": "数学",
@@ -17577,7 +22857,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_206",
+    "id": "S_ITEM_646",
     "teachingClassId": "C_初一_C6_数学",
     "teachingClassName": "初一6班数学班",
     "subject": "数学",
@@ -17589,7 +22869,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_207",
+    "id": "S_ITEM_647",
     "teachingClassId": "C_初一_C6_数学",
     "teachingClassName": "初一6班数学班",
     "subject": "数学",
@@ -17601,7 +22881,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_208",
+    "id": "S_ITEM_648",
     "teachingClassId": "C_初一_C6_数学",
     "teachingClassName": "初一6班数学班",
     "subject": "数学",
@@ -17613,7 +22893,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_209",
+    "id": "S_ITEM_649",
     "teachingClassId": "C_初一_C6_数学",
     "teachingClassName": "初一6班数学班",
     "subject": "数学",
@@ -17625,7 +22905,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_210",
+    "id": "S_ITEM_650",
     "teachingClassId": "C_初一_C6_英语",
     "teachingClassName": "初一6班英语班",
     "subject": "英语",
@@ -17637,7 +22917,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_211",
+    "id": "S_ITEM_651",
     "teachingClassId": "C_初一_C6_英语",
     "teachingClassName": "初一6班英语班",
     "subject": "英语",
@@ -17649,7 +22929,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_212",
+    "id": "S_ITEM_652",
     "teachingClassId": "C_初一_C6_英语",
     "teachingClassName": "初一6班英语班",
     "subject": "英语",
@@ -17661,7 +22941,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_213",
+    "id": "S_ITEM_653",
     "teachingClassId": "C_初一_C6_英语",
     "teachingClassName": "初一6班英语班",
     "subject": "英语",
@@ -17673,7 +22953,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_214",
+    "id": "S_ITEM_654",
     "teachingClassId": "C_初一_C6_英语",
     "teachingClassName": "初一6班英语班",
     "subject": "英语",
@@ -17685,7 +22965,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_215",
+    "id": "S_ITEM_655",
     "teachingClassId": "C_初一_C6_英语",
     "teachingClassName": "初一6班英语班",
     "subject": "英语",
@@ -17697,7 +22977,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_216",
+    "id": "S_ITEM_656",
     "teachingClassId": "C_初一_C6_英语",
     "teachingClassName": "初一6班英语班",
     "subject": "英语",
@@ -17709,7 +22989,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_217",
+    "id": "S_ITEM_657",
     "teachingClassId": "C_初一_C6_政治",
     "teachingClassName": "初一6班政治班",
     "subject": "政治",
@@ -17721,7 +23001,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_218",
+    "id": "S_ITEM_658",
     "teachingClassId": "C_初一_C6_政治",
     "teachingClassName": "初一6班政治班",
     "subject": "政治",
@@ -17733,7 +23013,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_219",
+    "id": "S_ITEM_659",
     "teachingClassId": "C_初一_C6_历史",
     "teachingClassName": "初一6班历史班",
     "subject": "历史",
@@ -17745,7 +23025,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_220",
+    "id": "S_ITEM_660",
     "teachingClassId": "C_初一_C6_历史",
     "teachingClassName": "初一6班历史班",
     "subject": "历史",
@@ -17757,7 +23037,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_221",
+    "id": "S_ITEM_661",
     "teachingClassId": "C_初一_C6_地理",
     "teachingClassName": "初一6班地理班",
     "subject": "地理",
@@ -17769,7 +23049,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_222",
+    "id": "S_ITEM_662",
     "teachingClassId": "C_初一_C6_地理",
     "teachingClassName": "初一6班地理班",
     "subject": "地理",
@@ -17781,7 +23061,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_223",
+    "id": "S_ITEM_663",
     "teachingClassId": "C_初一_C6_生物",
     "teachingClassName": "初一6班生物班",
     "subject": "生物",
@@ -17793,7 +23073,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_224",
+    "id": "S_ITEM_664",
     "teachingClassId": "C_初一_C6_生物",
     "teachingClassName": "初一6班生物班",
     "subject": "生物",
@@ -17805,7 +23085,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_225",
+    "id": "S_ITEM_665",
     "teachingClassId": "C_初一_C6_体育",
     "teachingClassName": "初一6班体育班",
     "subject": "体育",
@@ -17817,7 +23097,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_226",
+    "id": "S_ITEM_666",
     "teachingClassId": "C_初一_C6_体育",
     "teachingClassName": "初一6班体育班",
     "subject": "体育",
@@ -17829,7 +23109,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_227",
+    "id": "S_ITEM_667",
     "teachingClassId": "C_初一_C6_通用",
     "teachingClassName": "初一6班通用班",
     "subject": "通用",
@@ -17841,7 +23121,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_228",
+    "id": "S_ITEM_668",
     "teachingClassId": "C_初一_C6_音乐",
     "teachingClassName": "初一6班音乐班",
     "subject": "音乐",
@@ -17853,7 +23133,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_229",
+    "id": "S_ITEM_669",
     "teachingClassId": "C_初一_C6_信息技术",
     "teachingClassName": "初一6班信息技术班",
     "subject": "信息技术",
@@ -17865,7 +23145,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_230",
+    "id": "S_ITEM_670",
     "teachingClassId": "C_初一_C7_语文",
     "teachingClassName": "初一7班语文班",
     "subject": "语文",
@@ -17877,7 +23157,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_231",
+    "id": "S_ITEM_671",
     "teachingClassId": "C_初一_C7_语文",
     "teachingClassName": "初一7班语文班",
     "subject": "语文",
@@ -17889,7 +23169,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_232",
+    "id": "S_ITEM_672",
     "teachingClassId": "C_初一_C7_语文",
     "teachingClassName": "初一7班语文班",
     "subject": "语文",
@@ -17901,7 +23181,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_233",
+    "id": "S_ITEM_673",
     "teachingClassId": "C_初一_C7_语文",
     "teachingClassName": "初一7班语文班",
     "subject": "语文",
@@ -17913,7 +23193,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_234",
+    "id": "S_ITEM_674",
     "teachingClassId": "C_初一_C7_语文",
     "teachingClassName": "初一7班语文班",
     "subject": "语文",
@@ -17925,7 +23205,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_235",
+    "id": "S_ITEM_675",
     "teachingClassId": "C_初一_C7_语文",
     "teachingClassName": "初一7班语文班",
     "subject": "语文",
@@ -17937,7 +23217,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_236",
+    "id": "S_ITEM_676",
     "teachingClassId": "C_初一_C7_语文",
     "teachingClassName": "初一7班语文班",
     "subject": "语文",
@@ -17949,7 +23229,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_237",
+    "id": "S_ITEM_677",
     "teachingClassId": "C_初一_C7_数学",
     "teachingClassName": "初一7班数学班",
     "subject": "数学",
@@ -17961,7 +23241,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_238",
+    "id": "S_ITEM_678",
     "teachingClassId": "C_初一_C7_数学",
     "teachingClassName": "初一7班数学班",
     "subject": "数学",
@@ -17973,7 +23253,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_239",
+    "id": "S_ITEM_679",
     "teachingClassId": "C_初一_C7_数学",
     "teachingClassName": "初一7班数学班",
     "subject": "数学",
@@ -17985,7 +23265,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_240",
+    "id": "S_ITEM_680",
     "teachingClassId": "C_初一_C7_数学",
     "teachingClassName": "初一7班数学班",
     "subject": "数学",
@@ -17997,7 +23277,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_241",
+    "id": "S_ITEM_681",
     "teachingClassId": "C_初一_C7_数学",
     "teachingClassName": "初一7班数学班",
     "subject": "数学",
@@ -18009,7 +23289,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_242",
+    "id": "S_ITEM_682",
     "teachingClassId": "C_初一_C7_数学",
     "teachingClassName": "初一7班数学班",
     "subject": "数学",
@@ -18021,7 +23301,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_243",
+    "id": "S_ITEM_683",
     "teachingClassId": "C_初一_C7_数学",
     "teachingClassName": "初一7班数学班",
     "subject": "数学",
@@ -18033,7 +23313,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_244",
+    "id": "S_ITEM_684",
     "teachingClassId": "C_初一_C7_英语",
     "teachingClassName": "初一7班英语班",
     "subject": "英语",
@@ -18045,7 +23325,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_245",
+    "id": "S_ITEM_685",
     "teachingClassId": "C_初一_C7_英语",
     "teachingClassName": "初一7班英语班",
     "subject": "英语",
@@ -18057,7 +23337,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_246",
+    "id": "S_ITEM_686",
     "teachingClassId": "C_初一_C7_英语",
     "teachingClassName": "初一7班英语班",
     "subject": "英语",
@@ -18069,7 +23349,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_247",
+    "id": "S_ITEM_687",
     "teachingClassId": "C_初一_C7_英语",
     "teachingClassName": "初一7班英语班",
     "subject": "英语",
@@ -18081,7 +23361,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_248",
+    "id": "S_ITEM_688",
     "teachingClassId": "C_初一_C7_英语",
     "teachingClassName": "初一7班英语班",
     "subject": "英语",
@@ -18093,7 +23373,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_249",
+    "id": "S_ITEM_689",
     "teachingClassId": "C_初一_C7_英语",
     "teachingClassName": "初一7班英语班",
     "subject": "英语",
@@ -18105,7 +23385,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_250",
+    "id": "S_ITEM_690",
     "teachingClassId": "C_初一_C7_英语",
     "teachingClassName": "初一7班英语班",
     "subject": "英语",
@@ -18117,7 +23397,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_251",
+    "id": "S_ITEM_691",
     "teachingClassId": "C_初一_C7_政治",
     "teachingClassName": "初一7班政治班",
     "subject": "政治",
@@ -18129,7 +23409,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_252",
+    "id": "S_ITEM_692",
     "teachingClassId": "C_初一_C7_政治",
     "teachingClassName": "初一7班政治班",
     "subject": "政治",
@@ -18141,7 +23421,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_253",
+    "id": "S_ITEM_693",
     "teachingClassId": "C_初一_C7_历史",
     "teachingClassName": "初一7班历史班",
     "subject": "历史",
@@ -18153,7 +23433,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_254",
+    "id": "S_ITEM_694",
     "teachingClassId": "C_初一_C7_历史",
     "teachingClassName": "初一7班历史班",
     "subject": "历史",
@@ -18165,7 +23445,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_255",
+    "id": "S_ITEM_695",
     "teachingClassId": "C_初一_C7_地理",
     "teachingClassName": "初一7班地理班",
     "subject": "地理",
@@ -18177,7 +23457,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_256",
+    "id": "S_ITEM_696",
     "teachingClassId": "C_初一_C7_地理",
     "teachingClassName": "初一7班地理班",
     "subject": "地理",
@@ -18189,7 +23469,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_257",
+    "id": "S_ITEM_697",
     "teachingClassId": "C_初一_C7_生物",
     "teachingClassName": "初一7班生物班",
     "subject": "生物",
@@ -18201,7 +23481,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_258",
+    "id": "S_ITEM_698",
     "teachingClassId": "C_初一_C7_生物",
     "teachingClassName": "初一7班生物班",
     "subject": "生物",
@@ -18213,7 +23493,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_259",
+    "id": "S_ITEM_699",
     "teachingClassId": "C_初一_C7_体育",
     "teachingClassName": "初一7班体育班",
     "subject": "体育",
@@ -18225,7 +23505,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_260",
+    "id": "S_ITEM_700",
     "teachingClassId": "C_初一_C7_体育",
     "teachingClassName": "初一7班体育班",
     "subject": "体育",
@@ -18237,7 +23517,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_261",
+    "id": "S_ITEM_701",
     "teachingClassId": "C_初一_C7_通用",
     "teachingClassName": "初一7班通用班",
     "subject": "通用",
@@ -18249,7 +23529,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_262",
+    "id": "S_ITEM_702",
     "teachingClassId": "C_初一_C7_音乐",
     "teachingClassName": "初一7班音乐班",
     "subject": "音乐",
@@ -18261,7 +23541,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_263",
+    "id": "S_ITEM_703",
     "teachingClassId": "C_初一_C7_信息技术",
     "teachingClassName": "初一7班信息技术班",
     "subject": "信息技术",
@@ -18273,7 +23553,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_264",
+    "id": "S_ITEM_704",
     "teachingClassId": "C_初一_C8_语文",
     "teachingClassName": "初一8班语文班",
     "subject": "语文",
@@ -18285,7 +23565,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_265",
+    "id": "S_ITEM_705",
     "teachingClassId": "C_初一_C8_语文",
     "teachingClassName": "初一8班语文班",
     "subject": "语文",
@@ -18297,7 +23577,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_266",
+    "id": "S_ITEM_706",
     "teachingClassId": "C_初一_C8_语文",
     "teachingClassName": "初一8班语文班",
     "subject": "语文",
@@ -18309,7 +23589,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_267",
+    "id": "S_ITEM_707",
     "teachingClassId": "C_初一_C8_语文",
     "teachingClassName": "初一8班语文班",
     "subject": "语文",
@@ -18321,7 +23601,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_268",
+    "id": "S_ITEM_708",
     "teachingClassId": "C_初一_C8_语文",
     "teachingClassName": "初一8班语文班",
     "subject": "语文",
@@ -18333,7 +23613,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_269",
+    "id": "S_ITEM_709",
     "teachingClassId": "C_初一_C8_语文",
     "teachingClassName": "初一8班语文班",
     "subject": "语文",
@@ -18345,7 +23625,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_270",
+    "id": "S_ITEM_710",
     "teachingClassId": "C_初一_C8_语文",
     "teachingClassName": "初一8班语文班",
     "subject": "语文",
@@ -18357,7 +23637,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_271",
+    "id": "S_ITEM_711",
     "teachingClassId": "C_初一_C8_数学",
     "teachingClassName": "初一8班数学班",
     "subject": "数学",
@@ -18369,7 +23649,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_272",
+    "id": "S_ITEM_712",
     "teachingClassId": "C_初一_C8_数学",
     "teachingClassName": "初一8班数学班",
     "subject": "数学",
@@ -18381,7 +23661,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_273",
+    "id": "S_ITEM_713",
     "teachingClassId": "C_初一_C8_数学",
     "teachingClassName": "初一8班数学班",
     "subject": "数学",
@@ -18393,7 +23673,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_274",
+    "id": "S_ITEM_714",
     "teachingClassId": "C_初一_C8_数学",
     "teachingClassName": "初一8班数学班",
     "subject": "数学",
@@ -18405,7 +23685,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_275",
+    "id": "S_ITEM_715",
     "teachingClassId": "C_初一_C8_数学",
     "teachingClassName": "初一8班数学班",
     "subject": "数学",
@@ -18417,7 +23697,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_276",
+    "id": "S_ITEM_716",
     "teachingClassId": "C_初一_C8_数学",
     "teachingClassName": "初一8班数学班",
     "subject": "数学",
@@ -18429,7 +23709,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_277",
+    "id": "S_ITEM_717",
     "teachingClassId": "C_初一_C8_数学",
     "teachingClassName": "初一8班数学班",
     "subject": "数学",
@@ -18441,7 +23721,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_278",
+    "id": "S_ITEM_718",
     "teachingClassId": "C_初一_C8_英语",
     "teachingClassName": "初一8班英语班",
     "subject": "英语",
@@ -18453,7 +23733,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_279",
+    "id": "S_ITEM_719",
     "teachingClassId": "C_初一_C8_英语",
     "teachingClassName": "初一8班英语班",
     "subject": "英语",
@@ -18465,7 +23745,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_280",
+    "id": "S_ITEM_720",
     "teachingClassId": "C_初一_C8_英语",
     "teachingClassName": "初一8班英语班",
     "subject": "英语",
@@ -18477,7 +23757,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_281",
+    "id": "S_ITEM_721",
     "teachingClassId": "C_初一_C8_英语",
     "teachingClassName": "初一8班英语班",
     "subject": "英语",
@@ -18489,7 +23769,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_282",
+    "id": "S_ITEM_722",
     "teachingClassId": "C_初一_C8_英语",
     "teachingClassName": "初一8班英语班",
     "subject": "英语",
@@ -18501,7 +23781,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_283",
+    "id": "S_ITEM_723",
     "teachingClassId": "C_初一_C8_英语",
     "teachingClassName": "初一8班英语班",
     "subject": "英语",
@@ -18513,7 +23793,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_284",
+    "id": "S_ITEM_724",
     "teachingClassId": "C_初一_C8_英语",
     "teachingClassName": "初一8班英语班",
     "subject": "英语",
@@ -18525,7 +23805,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_285",
+    "id": "S_ITEM_725",
     "teachingClassId": "C_初一_C8_政治",
     "teachingClassName": "初一8班政治班",
     "subject": "政治",
@@ -18537,7 +23817,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_286",
+    "id": "S_ITEM_726",
     "teachingClassId": "C_初一_C8_政治",
     "teachingClassName": "初一8班政治班",
     "subject": "政治",
@@ -18549,7 +23829,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_287",
+    "id": "S_ITEM_727",
     "teachingClassId": "C_初一_C8_历史",
     "teachingClassName": "初一8班历史班",
     "subject": "历史",
@@ -18561,7 +23841,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_288",
+    "id": "S_ITEM_728",
     "teachingClassId": "C_初一_C8_历史",
     "teachingClassName": "初一8班历史班",
     "subject": "历史",
@@ -18573,7 +23853,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_289",
+    "id": "S_ITEM_729",
     "teachingClassId": "C_初一_C8_地理",
     "teachingClassName": "初一8班地理班",
     "subject": "地理",
@@ -18585,7 +23865,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_290",
+    "id": "S_ITEM_730",
     "teachingClassId": "C_初一_C8_地理",
     "teachingClassName": "初一8班地理班",
     "subject": "地理",
@@ -18597,7 +23877,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_291",
+    "id": "S_ITEM_731",
     "teachingClassId": "C_初一_C8_生物",
     "teachingClassName": "初一8班生物班",
     "subject": "生物",
@@ -18609,7 +23889,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_292",
+    "id": "S_ITEM_732",
     "teachingClassId": "C_初一_C8_生物",
     "teachingClassName": "初一8班生物班",
     "subject": "生物",
@@ -18621,7 +23901,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_293",
+    "id": "S_ITEM_733",
     "teachingClassId": "C_初一_C8_体育",
     "teachingClassName": "初一8班体育班",
     "subject": "体育",
@@ -18633,7 +23913,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_294",
+    "id": "S_ITEM_734",
     "teachingClassId": "C_初一_C8_体育",
     "teachingClassName": "初一8班体育班",
     "subject": "体育",
@@ -18645,7 +23925,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_295",
+    "id": "S_ITEM_735",
     "teachingClassId": "C_初一_C8_通用",
     "teachingClassName": "初一8班通用班",
     "subject": "通用",
@@ -18657,7 +23937,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_296",
+    "id": "S_ITEM_736",
     "teachingClassId": "C_初一_C8_音乐",
     "teachingClassName": "初一8班音乐班",
     "subject": "音乐",
@@ -18669,7 +23949,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_297",
+    "id": "S_ITEM_737",
     "teachingClassId": "C_初一_C8_信息技术",
     "teachingClassName": "初一8班信息技术班",
     "subject": "信息技术",
@@ -18681,7 +23961,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_298",
+    "id": "S_ITEM_738",
     "teachingClassId": "C_初二_C1_语文",
     "teachingClassName": "初二1班语文班",
     "subject": "语文",
@@ -18693,7 +23973,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_299",
+    "id": "S_ITEM_739",
     "teachingClassId": "C_初二_C1_语文",
     "teachingClassName": "初二1班语文班",
     "subject": "语文",
@@ -18705,7 +23985,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_300",
+    "id": "S_ITEM_740",
     "teachingClassId": "C_初二_C1_语文",
     "teachingClassName": "初二1班语文班",
     "subject": "语文",
@@ -18717,7 +23997,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_301",
+    "id": "S_ITEM_741",
     "teachingClassId": "C_初二_C1_语文",
     "teachingClassName": "初二1班语文班",
     "subject": "语文",
@@ -18729,7 +24009,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_302",
+    "id": "S_ITEM_742",
     "teachingClassId": "C_初二_C1_语文",
     "teachingClassName": "初二1班语文班",
     "subject": "语文",
@@ -18741,7 +24021,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_303",
+    "id": "S_ITEM_743",
     "teachingClassId": "C_初二_C1_语文",
     "teachingClassName": "初二1班语文班",
     "subject": "语文",
@@ -18753,7 +24033,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_304",
+    "id": "S_ITEM_744",
     "teachingClassId": "C_初二_C1_数学",
     "teachingClassName": "初二1班数学班",
     "subject": "数学",
@@ -18765,7 +24045,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_305",
+    "id": "S_ITEM_745",
     "teachingClassId": "C_初二_C1_数学",
     "teachingClassName": "初二1班数学班",
     "subject": "数学",
@@ -18777,7 +24057,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_306",
+    "id": "S_ITEM_746",
     "teachingClassId": "C_初二_C1_数学",
     "teachingClassName": "初二1班数学班",
     "subject": "数学",
@@ -18789,7 +24069,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_307",
+    "id": "S_ITEM_747",
     "teachingClassId": "C_初二_C1_数学",
     "teachingClassName": "初二1班数学班",
     "subject": "数学",
@@ -18801,7 +24081,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_308",
+    "id": "S_ITEM_748",
     "teachingClassId": "C_初二_C1_数学",
     "teachingClassName": "初二1班数学班",
     "subject": "数学",
@@ -18813,7 +24093,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_309",
+    "id": "S_ITEM_749",
     "teachingClassId": "C_初二_C1_数学",
     "teachingClassName": "初二1班数学班",
     "subject": "数学",
@@ -18825,7 +24105,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_310",
+    "id": "S_ITEM_750",
     "teachingClassId": "C_初二_C1_数学",
     "teachingClassName": "初二1班数学班",
     "subject": "数学",
@@ -18837,7 +24117,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_311",
+    "id": "S_ITEM_751",
     "teachingClassId": "C_初二_C1_英语",
     "teachingClassName": "初二1班英语班",
     "subject": "英语",
@@ -18849,7 +24129,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_312",
+    "id": "S_ITEM_752",
     "teachingClassId": "C_初二_C1_英语",
     "teachingClassName": "初二1班英语班",
     "subject": "英语",
@@ -18861,7 +24141,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_313",
+    "id": "S_ITEM_753",
     "teachingClassId": "C_初二_C1_英语",
     "teachingClassName": "初二1班英语班",
     "subject": "英语",
@@ -18873,7 +24153,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_314",
+    "id": "S_ITEM_754",
     "teachingClassId": "C_初二_C1_英语",
     "teachingClassName": "初二1班英语班",
     "subject": "英语",
@@ -18885,7 +24165,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_315",
+    "id": "S_ITEM_755",
     "teachingClassId": "C_初二_C1_英语",
     "teachingClassName": "初二1班英语班",
     "subject": "英语",
@@ -18897,7 +24177,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_316",
+    "id": "S_ITEM_756",
     "teachingClassId": "C_初二_C1_英语",
     "teachingClassName": "初二1班英语班",
     "subject": "英语",
@@ -18909,7 +24189,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_317",
+    "id": "S_ITEM_757",
     "teachingClassId": "C_初二_C1_政治",
     "teachingClassName": "初二1班政治班",
     "subject": "政治",
@@ -18921,7 +24201,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_318",
+    "id": "S_ITEM_758",
     "teachingClassId": "C_初二_C1_政治",
     "teachingClassName": "初二1班政治班",
     "subject": "政治",
@@ -18933,7 +24213,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_319",
+    "id": "S_ITEM_759",
     "teachingClassId": "C_初二_C1_历史",
     "teachingClassName": "初二1班历史班",
     "subject": "历史",
@@ -18945,7 +24225,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_320",
+    "id": "S_ITEM_760",
     "teachingClassId": "C_初二_C1_历史",
     "teachingClassName": "初二1班历史班",
     "subject": "历史",
@@ -18957,7 +24237,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_321",
+    "id": "S_ITEM_761",
     "teachingClassId": "C_初二_C1_地理",
     "teachingClassName": "初二1班地理班",
     "subject": "地理",
@@ -18969,7 +24249,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_322",
+    "id": "S_ITEM_762",
     "teachingClassId": "C_初二_C1_地理",
     "teachingClassName": "初二1班地理班",
     "subject": "地理",
@@ -18981,7 +24261,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_323",
+    "id": "S_ITEM_763",
     "teachingClassId": "C_初二_C1_物理",
     "teachingClassName": "初二1班物理班",
     "subject": "物理",
@@ -18993,7 +24273,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_324",
+    "id": "S_ITEM_764",
     "teachingClassId": "C_初二_C1_物理",
     "teachingClassName": "初二1班物理班",
     "subject": "物理",
@@ -19005,7 +24285,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_325",
+    "id": "S_ITEM_765",
     "teachingClassId": "C_初二_C1_物理",
     "teachingClassName": "初二1班物理班",
     "subject": "物理",
@@ -19017,7 +24297,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_326",
+    "id": "S_ITEM_766",
     "teachingClassId": "C_初二_C1_生物",
     "teachingClassName": "初二1班生物班",
     "subject": "生物",
@@ -19029,7 +24309,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_327",
+    "id": "S_ITEM_767",
     "teachingClassId": "C_初二_C1_生物",
     "teachingClassName": "初二1班生物班",
     "subject": "生物",
@@ -19041,7 +24321,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_328",
+    "id": "S_ITEM_768",
     "teachingClassId": "C_初二_C1_体育",
     "teachingClassName": "初二1班体育班",
     "subject": "体育",
@@ -19053,7 +24333,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_329",
+    "id": "S_ITEM_769",
     "teachingClassId": "C_初二_C1_体育",
     "teachingClassName": "初二1班体育班",
     "subject": "体育",
@@ -19065,7 +24345,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_330",
+    "id": "S_ITEM_770",
     "teachingClassId": "C_初二_C1_通用",
     "teachingClassName": "初二1班通用班",
     "subject": "通用",
@@ -19077,7 +24357,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_331",
+    "id": "S_ITEM_771",
     "teachingClassId": "C_初二_C2_语文",
     "teachingClassName": "初二2班语文班",
     "subject": "语文",
@@ -19089,7 +24369,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_332",
+    "id": "S_ITEM_772",
     "teachingClassId": "C_初二_C2_语文",
     "teachingClassName": "初二2班语文班",
     "subject": "语文",
@@ -19101,7 +24381,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_333",
+    "id": "S_ITEM_773",
     "teachingClassId": "C_初二_C2_语文",
     "teachingClassName": "初二2班语文班",
     "subject": "语文",
@@ -19113,7 +24393,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_334",
+    "id": "S_ITEM_774",
     "teachingClassId": "C_初二_C2_语文",
     "teachingClassName": "初二2班语文班",
     "subject": "语文",
@@ -19125,7 +24405,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_335",
+    "id": "S_ITEM_775",
     "teachingClassId": "C_初二_C2_语文",
     "teachingClassName": "初二2班语文班",
     "subject": "语文",
@@ -19137,7 +24417,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_336",
+    "id": "S_ITEM_776",
     "teachingClassId": "C_初二_C2_语文",
     "teachingClassName": "初二2班语文班",
     "subject": "语文",
@@ -19149,7 +24429,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_337",
+    "id": "S_ITEM_777",
     "teachingClassId": "C_初二_C2_数学",
     "teachingClassName": "初二2班数学班",
     "subject": "数学",
@@ -19161,7 +24441,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_338",
+    "id": "S_ITEM_778",
     "teachingClassId": "C_初二_C2_数学",
     "teachingClassName": "初二2班数学班",
     "subject": "数学",
@@ -19173,7 +24453,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_339",
+    "id": "S_ITEM_779",
     "teachingClassId": "C_初二_C2_数学",
     "teachingClassName": "初二2班数学班",
     "subject": "数学",
@@ -19185,7 +24465,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_340",
+    "id": "S_ITEM_780",
     "teachingClassId": "C_初二_C2_数学",
     "teachingClassName": "初二2班数学班",
     "subject": "数学",
@@ -19197,7 +24477,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_341",
+    "id": "S_ITEM_781",
     "teachingClassId": "C_初二_C2_数学",
     "teachingClassName": "初二2班数学班",
     "subject": "数学",
@@ -19209,7 +24489,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_342",
+    "id": "S_ITEM_782",
     "teachingClassId": "C_初二_C2_数学",
     "teachingClassName": "初二2班数学班",
     "subject": "数学",
@@ -19221,7 +24501,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_343",
+    "id": "S_ITEM_783",
     "teachingClassId": "C_初二_C2_数学",
     "teachingClassName": "初二2班数学班",
     "subject": "数学",
@@ -19233,7 +24513,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_344",
+    "id": "S_ITEM_784",
     "teachingClassId": "C_初二_C2_英语",
     "teachingClassName": "初二2班英语班",
     "subject": "英语",
@@ -19245,7 +24525,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_345",
+    "id": "S_ITEM_785",
     "teachingClassId": "C_初二_C2_英语",
     "teachingClassName": "初二2班英语班",
     "subject": "英语",
@@ -19257,7 +24537,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_346",
+    "id": "S_ITEM_786",
     "teachingClassId": "C_初二_C2_英语",
     "teachingClassName": "初二2班英语班",
     "subject": "英语",
@@ -19269,7 +24549,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_347",
+    "id": "S_ITEM_787",
     "teachingClassId": "C_初二_C2_英语",
     "teachingClassName": "初二2班英语班",
     "subject": "英语",
@@ -19281,7 +24561,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_348",
+    "id": "S_ITEM_788",
     "teachingClassId": "C_初二_C2_英语",
     "teachingClassName": "初二2班英语班",
     "subject": "英语",
@@ -19293,7 +24573,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_349",
+    "id": "S_ITEM_789",
     "teachingClassId": "C_初二_C2_英语",
     "teachingClassName": "初二2班英语班",
     "subject": "英语",
@@ -19305,7 +24585,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_350",
+    "id": "S_ITEM_790",
     "teachingClassId": "C_初二_C2_政治",
     "teachingClassName": "初二2班政治班",
     "subject": "政治",
@@ -19317,7 +24597,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_351",
+    "id": "S_ITEM_791",
     "teachingClassId": "C_初二_C2_政治",
     "teachingClassName": "初二2班政治班",
     "subject": "政治",
@@ -19329,7 +24609,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_352",
+    "id": "S_ITEM_792",
     "teachingClassId": "C_初二_C2_历史",
     "teachingClassName": "初二2班历史班",
     "subject": "历史",
@@ -19341,7 +24621,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_353",
+    "id": "S_ITEM_793",
     "teachingClassId": "C_初二_C2_历史",
     "teachingClassName": "初二2班历史班",
     "subject": "历史",
@@ -19353,7 +24633,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_354",
+    "id": "S_ITEM_794",
     "teachingClassId": "C_初二_C2_地理",
     "teachingClassName": "初二2班地理班",
     "subject": "地理",
@@ -19365,7 +24645,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_355",
+    "id": "S_ITEM_795",
     "teachingClassId": "C_初二_C2_地理",
     "teachingClassName": "初二2班地理班",
     "subject": "地理",
@@ -19377,7 +24657,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_356",
+    "id": "S_ITEM_796",
     "teachingClassId": "C_初二_C2_物理",
     "teachingClassName": "初二2班物理班",
     "subject": "物理",
@@ -19389,7 +24669,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_357",
+    "id": "S_ITEM_797",
     "teachingClassId": "C_初二_C2_物理",
     "teachingClassName": "初二2班物理班",
     "subject": "物理",
@@ -19401,7 +24681,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_358",
+    "id": "S_ITEM_798",
     "teachingClassId": "C_初二_C2_物理",
     "teachingClassName": "初二2班物理班",
     "subject": "物理",
@@ -19413,7 +24693,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_359",
+    "id": "S_ITEM_799",
     "teachingClassId": "C_初二_C2_生物",
     "teachingClassName": "初二2班生物班",
     "subject": "生物",
@@ -19425,7 +24705,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_360",
+    "id": "S_ITEM_800",
     "teachingClassId": "C_初二_C2_生物",
     "teachingClassName": "初二2班生物班",
     "subject": "生物",
@@ -19437,7 +24717,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_361",
+    "id": "S_ITEM_801",
     "teachingClassId": "C_初二_C2_体育",
     "teachingClassName": "初二2班体育班",
     "subject": "体育",
@@ -19449,7 +24729,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_362",
+    "id": "S_ITEM_802",
     "teachingClassId": "C_初二_C2_体育",
     "teachingClassName": "初二2班体育班",
     "subject": "体育",
@@ -19461,7 +24741,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_363",
+    "id": "S_ITEM_803",
     "teachingClassId": "C_初二_C2_通用",
     "teachingClassName": "初二2班通用班",
     "subject": "通用",
@@ -19473,7 +24753,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_364",
+    "id": "S_ITEM_804",
     "teachingClassId": "C_初二_C3_语文",
     "teachingClassName": "初二3班语文班",
     "subject": "语文",
@@ -19485,7 +24765,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_365",
+    "id": "S_ITEM_805",
     "teachingClassId": "C_初二_C3_语文",
     "teachingClassName": "初二3班语文班",
     "subject": "语文",
@@ -19497,7 +24777,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_366",
+    "id": "S_ITEM_806",
     "teachingClassId": "C_初二_C3_语文",
     "teachingClassName": "初二3班语文班",
     "subject": "语文",
@@ -19509,7 +24789,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_367",
+    "id": "S_ITEM_807",
     "teachingClassId": "C_初二_C3_语文",
     "teachingClassName": "初二3班语文班",
     "subject": "语文",
@@ -19521,7 +24801,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_368",
+    "id": "S_ITEM_808",
     "teachingClassId": "C_初二_C3_语文",
     "teachingClassName": "初二3班语文班",
     "subject": "语文",
@@ -19533,7 +24813,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_369",
+    "id": "S_ITEM_809",
     "teachingClassId": "C_初二_C3_语文",
     "teachingClassName": "初二3班语文班",
     "subject": "语文",
@@ -19545,7 +24825,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_370",
+    "id": "S_ITEM_810",
     "teachingClassId": "C_初二_C3_数学",
     "teachingClassName": "初二3班数学班",
     "subject": "数学",
@@ -19557,7 +24837,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_371",
+    "id": "S_ITEM_811",
     "teachingClassId": "C_初二_C3_数学",
     "teachingClassName": "初二3班数学班",
     "subject": "数学",
@@ -19569,7 +24849,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_372",
+    "id": "S_ITEM_812",
     "teachingClassId": "C_初二_C3_数学",
     "teachingClassName": "初二3班数学班",
     "subject": "数学",
@@ -19581,7 +24861,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_373",
+    "id": "S_ITEM_813",
     "teachingClassId": "C_初二_C3_数学",
     "teachingClassName": "初二3班数学班",
     "subject": "数学",
@@ -19593,7 +24873,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_374",
+    "id": "S_ITEM_814",
     "teachingClassId": "C_初二_C3_数学",
     "teachingClassName": "初二3班数学班",
     "subject": "数学",
@@ -19605,7 +24885,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_375",
+    "id": "S_ITEM_815",
     "teachingClassId": "C_初二_C3_数学",
     "teachingClassName": "初二3班数学班",
     "subject": "数学",
@@ -19617,7 +24897,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_376",
+    "id": "S_ITEM_816",
     "teachingClassId": "C_初二_C3_数学",
     "teachingClassName": "初二3班数学班",
     "subject": "数学",
@@ -19629,7 +24909,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_377",
+    "id": "S_ITEM_817",
     "teachingClassId": "C_初二_C3_英语",
     "teachingClassName": "初二3班英语班",
     "subject": "英语",
@@ -19641,7 +24921,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_378",
+    "id": "S_ITEM_818",
     "teachingClassId": "C_初二_C3_英语",
     "teachingClassName": "初二3班英语班",
     "subject": "英语",
@@ -19653,7 +24933,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_379",
+    "id": "S_ITEM_819",
     "teachingClassId": "C_初二_C3_英语",
     "teachingClassName": "初二3班英语班",
     "subject": "英语",
@@ -19665,7 +24945,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_380",
+    "id": "S_ITEM_820",
     "teachingClassId": "C_初二_C3_英语",
     "teachingClassName": "初二3班英语班",
     "subject": "英语",
@@ -19677,7 +24957,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_381",
+    "id": "S_ITEM_821",
     "teachingClassId": "C_初二_C3_英语",
     "teachingClassName": "初二3班英语班",
     "subject": "英语",
@@ -19689,7 +24969,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_382",
+    "id": "S_ITEM_822",
     "teachingClassId": "C_初二_C3_英语",
     "teachingClassName": "初二3班英语班",
     "subject": "英语",
@@ -19701,7 +24981,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_383",
+    "id": "S_ITEM_823",
     "teachingClassId": "C_初二_C3_政治",
     "teachingClassName": "初二3班政治班",
     "subject": "政治",
@@ -19713,7 +24993,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_384",
+    "id": "S_ITEM_824",
     "teachingClassId": "C_初二_C3_政治",
     "teachingClassName": "初二3班政治班",
     "subject": "政治",
@@ -19725,7 +25005,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_385",
+    "id": "S_ITEM_825",
     "teachingClassId": "C_初二_C3_历史",
     "teachingClassName": "初二3班历史班",
     "subject": "历史",
@@ -19737,7 +25017,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_386",
+    "id": "S_ITEM_826",
     "teachingClassId": "C_初二_C3_历史",
     "teachingClassName": "初二3班历史班",
     "subject": "历史",
@@ -19749,7 +25029,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_387",
+    "id": "S_ITEM_827",
     "teachingClassId": "C_初二_C3_地理",
     "teachingClassName": "初二3班地理班",
     "subject": "地理",
@@ -19761,7 +25041,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_388",
+    "id": "S_ITEM_828",
     "teachingClassId": "C_初二_C3_地理",
     "teachingClassName": "初二3班地理班",
     "subject": "地理",
@@ -19773,7 +25053,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_389",
+    "id": "S_ITEM_829",
     "teachingClassId": "C_初二_C3_物理",
     "teachingClassName": "初二3班物理班",
     "subject": "物理",
@@ -19785,7 +25065,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_390",
+    "id": "S_ITEM_830",
     "teachingClassId": "C_初二_C3_物理",
     "teachingClassName": "初二3班物理班",
     "subject": "物理",
@@ -19797,7 +25077,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_391",
+    "id": "S_ITEM_831",
     "teachingClassId": "C_初二_C3_物理",
     "teachingClassName": "初二3班物理班",
     "subject": "物理",
@@ -19809,7 +25089,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_392",
+    "id": "S_ITEM_832",
     "teachingClassId": "C_初二_C3_生物",
     "teachingClassName": "初二3班生物班",
     "subject": "生物",
@@ -19821,7 +25101,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_393",
+    "id": "S_ITEM_833",
     "teachingClassId": "C_初二_C3_生物",
     "teachingClassName": "初二3班生物班",
     "subject": "生物",
@@ -19833,7 +25113,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_394",
+    "id": "S_ITEM_834",
     "teachingClassId": "C_初二_C3_体育",
     "teachingClassName": "初二3班体育班",
     "subject": "体育",
@@ -19845,7 +25125,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_395",
+    "id": "S_ITEM_835",
     "teachingClassId": "C_初二_C3_体育",
     "teachingClassName": "初二3班体育班",
     "subject": "体育",
@@ -19857,7 +25137,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_396",
+    "id": "S_ITEM_836",
     "teachingClassId": "C_初二_C3_通用",
     "teachingClassName": "初二3班通用班",
     "subject": "通用",
@@ -19869,7 +25149,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_397",
+    "id": "S_ITEM_837",
     "teachingClassId": "C_初二_C4_语文",
     "teachingClassName": "初二4班语文班",
     "subject": "语文",
@@ -19881,7 +25161,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_398",
+    "id": "S_ITEM_838",
     "teachingClassId": "C_初二_C4_语文",
     "teachingClassName": "初二4班语文班",
     "subject": "语文",
@@ -19893,7 +25173,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_399",
+    "id": "S_ITEM_839",
     "teachingClassId": "C_初二_C4_语文",
     "teachingClassName": "初二4班语文班",
     "subject": "语文",
@@ -19905,7 +25185,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_400",
+    "id": "S_ITEM_840",
     "teachingClassId": "C_初二_C4_语文",
     "teachingClassName": "初二4班语文班",
     "subject": "语文",
@@ -19917,7 +25197,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_401",
+    "id": "S_ITEM_841",
     "teachingClassId": "C_初二_C4_语文",
     "teachingClassName": "初二4班语文班",
     "subject": "语文",
@@ -19929,7 +25209,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_402",
+    "id": "S_ITEM_842",
     "teachingClassId": "C_初二_C4_语文",
     "teachingClassName": "初二4班语文班",
     "subject": "语文",
@@ -19941,7 +25221,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_403",
+    "id": "S_ITEM_843",
     "teachingClassId": "C_初二_C4_数学",
     "teachingClassName": "初二4班数学班",
     "subject": "数学",
@@ -19953,7 +25233,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_404",
+    "id": "S_ITEM_844",
     "teachingClassId": "C_初二_C4_数学",
     "teachingClassName": "初二4班数学班",
     "subject": "数学",
@@ -19965,7 +25245,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_405",
+    "id": "S_ITEM_845",
     "teachingClassId": "C_初二_C4_数学",
     "teachingClassName": "初二4班数学班",
     "subject": "数学",
@@ -19977,7 +25257,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_406",
+    "id": "S_ITEM_846",
     "teachingClassId": "C_初二_C4_数学",
     "teachingClassName": "初二4班数学班",
     "subject": "数学",
@@ -19989,7 +25269,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_407",
+    "id": "S_ITEM_847",
     "teachingClassId": "C_初二_C4_数学",
     "teachingClassName": "初二4班数学班",
     "subject": "数学",
@@ -20001,7 +25281,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_408",
+    "id": "S_ITEM_848",
     "teachingClassId": "C_初二_C4_数学",
     "teachingClassName": "初二4班数学班",
     "subject": "数学",
@@ -20013,7 +25293,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_409",
+    "id": "S_ITEM_849",
     "teachingClassId": "C_初二_C4_数学",
     "teachingClassName": "初二4班数学班",
     "subject": "数学",
@@ -20025,7 +25305,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_410",
+    "id": "S_ITEM_850",
     "teachingClassId": "C_初二_C4_英语",
     "teachingClassName": "初二4班英语班",
     "subject": "英语",
@@ -20037,7 +25317,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_411",
+    "id": "S_ITEM_851",
     "teachingClassId": "C_初二_C4_英语",
     "teachingClassName": "初二4班英语班",
     "subject": "英语",
@@ -20049,7 +25329,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_412",
+    "id": "S_ITEM_852",
     "teachingClassId": "C_初二_C4_英语",
     "teachingClassName": "初二4班英语班",
     "subject": "英语",
@@ -20061,7 +25341,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_413",
+    "id": "S_ITEM_853",
     "teachingClassId": "C_初二_C4_英语",
     "teachingClassName": "初二4班英语班",
     "subject": "英语",
@@ -20073,7 +25353,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_414",
+    "id": "S_ITEM_854",
     "teachingClassId": "C_初二_C4_英语",
     "teachingClassName": "初二4班英语班",
     "subject": "英语",
@@ -20085,7 +25365,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_415",
+    "id": "S_ITEM_855",
     "teachingClassId": "C_初二_C4_英语",
     "teachingClassName": "初二4班英语班",
     "subject": "英语",
@@ -20097,7 +25377,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_416",
+    "id": "S_ITEM_856",
     "teachingClassId": "C_初二_C4_政治",
     "teachingClassName": "初二4班政治班",
     "subject": "政治",
@@ -20109,7 +25389,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_417",
+    "id": "S_ITEM_857",
     "teachingClassId": "C_初二_C4_政治",
     "teachingClassName": "初二4班政治班",
     "subject": "政治",
@@ -20121,7 +25401,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_418",
+    "id": "S_ITEM_858",
     "teachingClassId": "C_初二_C4_历史",
     "teachingClassName": "初二4班历史班",
     "subject": "历史",
@@ -20133,7 +25413,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_419",
+    "id": "S_ITEM_859",
     "teachingClassId": "C_初二_C4_历史",
     "teachingClassName": "初二4班历史班",
     "subject": "历史",
@@ -20145,7 +25425,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_420",
+    "id": "S_ITEM_860",
     "teachingClassId": "C_初二_C4_地理",
     "teachingClassName": "初二4班地理班",
     "subject": "地理",
@@ -20157,7 +25437,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_421",
+    "id": "S_ITEM_861",
     "teachingClassId": "C_初二_C4_地理",
     "teachingClassName": "初二4班地理班",
     "subject": "地理",
@@ -20169,7 +25449,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_422",
+    "id": "S_ITEM_862",
     "teachingClassId": "C_初二_C4_物理",
     "teachingClassName": "初二4班物理班",
     "subject": "物理",
@@ -20181,7 +25461,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_423",
+    "id": "S_ITEM_863",
     "teachingClassId": "C_初二_C4_物理",
     "teachingClassName": "初二4班物理班",
     "subject": "物理",
@@ -20193,7 +25473,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_424",
+    "id": "S_ITEM_864",
     "teachingClassId": "C_初二_C4_物理",
     "teachingClassName": "初二4班物理班",
     "subject": "物理",
@@ -20205,7 +25485,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_425",
+    "id": "S_ITEM_865",
     "teachingClassId": "C_初二_C4_生物",
     "teachingClassName": "初二4班生物班",
     "subject": "生物",
@@ -20217,7 +25497,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_426",
+    "id": "S_ITEM_866",
     "teachingClassId": "C_初二_C4_生物",
     "teachingClassName": "初二4班生物班",
     "subject": "生物",
@@ -20229,7 +25509,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_427",
+    "id": "S_ITEM_867",
     "teachingClassId": "C_初二_C4_体育",
     "teachingClassName": "初二4班体育班",
     "subject": "体育",
@@ -20241,7 +25521,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_428",
+    "id": "S_ITEM_868",
     "teachingClassId": "C_初二_C4_体育",
     "teachingClassName": "初二4班体育班",
     "subject": "体育",
@@ -20253,7 +25533,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_429",
+    "id": "S_ITEM_869",
     "teachingClassId": "C_初二_C4_通用",
     "teachingClassName": "初二4班通用班",
     "subject": "通用",
@@ -20265,7 +25545,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_430",
+    "id": "S_ITEM_870",
     "teachingClassId": "C_初二_C5_语文",
     "teachingClassName": "初二5班语文班",
     "subject": "语文",
@@ -20277,7 +25557,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_431",
+    "id": "S_ITEM_871",
     "teachingClassId": "C_初二_C5_语文",
     "teachingClassName": "初二5班语文班",
     "subject": "语文",
@@ -20289,7 +25569,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_432",
+    "id": "S_ITEM_872",
     "teachingClassId": "C_初二_C5_语文",
     "teachingClassName": "初二5班语文班",
     "subject": "语文",
@@ -20301,7 +25581,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_433",
+    "id": "S_ITEM_873",
     "teachingClassId": "C_初二_C5_语文",
     "teachingClassName": "初二5班语文班",
     "subject": "语文",
@@ -20313,7 +25593,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_434",
+    "id": "S_ITEM_874",
     "teachingClassId": "C_初二_C5_语文",
     "teachingClassName": "初二5班语文班",
     "subject": "语文",
@@ -20325,7 +25605,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_435",
+    "id": "S_ITEM_875",
     "teachingClassId": "C_初二_C5_语文",
     "teachingClassName": "初二5班语文班",
     "subject": "语文",
@@ -20337,7 +25617,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_436",
+    "id": "S_ITEM_876",
     "teachingClassId": "C_初二_C5_数学",
     "teachingClassName": "初二5班数学班",
     "subject": "数学",
@@ -20349,7 +25629,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_437",
+    "id": "S_ITEM_877",
     "teachingClassId": "C_初二_C5_数学",
     "teachingClassName": "初二5班数学班",
     "subject": "数学",
@@ -20361,7 +25641,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_438",
+    "id": "S_ITEM_878",
     "teachingClassId": "C_初二_C5_数学",
     "teachingClassName": "初二5班数学班",
     "subject": "数学",
@@ -20373,7 +25653,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_439",
+    "id": "S_ITEM_879",
     "teachingClassId": "C_初二_C5_数学",
     "teachingClassName": "初二5班数学班",
     "subject": "数学",
@@ -20385,7 +25665,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_440",
+    "id": "S_ITEM_880",
     "teachingClassId": "C_初二_C5_数学",
     "teachingClassName": "初二5班数学班",
     "subject": "数学",
@@ -20397,7 +25677,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_441",
+    "id": "S_ITEM_881",
     "teachingClassId": "C_初二_C5_数学",
     "teachingClassName": "初二5班数学班",
     "subject": "数学",
@@ -20409,7 +25689,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_442",
+    "id": "S_ITEM_882",
     "teachingClassId": "C_初二_C5_数学",
     "teachingClassName": "初二5班数学班",
     "subject": "数学",
@@ -20421,7 +25701,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_443",
+    "id": "S_ITEM_883",
     "teachingClassId": "C_初二_C5_英语",
     "teachingClassName": "初二5班英语班",
     "subject": "英语",
@@ -20433,7 +25713,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_444",
+    "id": "S_ITEM_884",
     "teachingClassId": "C_初二_C5_英语",
     "teachingClassName": "初二5班英语班",
     "subject": "英语",
@@ -20445,7 +25725,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_445",
+    "id": "S_ITEM_885",
     "teachingClassId": "C_初二_C5_英语",
     "teachingClassName": "初二5班英语班",
     "subject": "英语",
@@ -20457,7 +25737,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_446",
+    "id": "S_ITEM_886",
     "teachingClassId": "C_初二_C5_英语",
     "teachingClassName": "初二5班英语班",
     "subject": "英语",
@@ -20469,7 +25749,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_447",
+    "id": "S_ITEM_887",
     "teachingClassId": "C_初二_C5_英语",
     "teachingClassName": "初二5班英语班",
     "subject": "英语",
@@ -20481,7 +25761,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_448",
+    "id": "S_ITEM_888",
     "teachingClassId": "C_初二_C5_英语",
     "teachingClassName": "初二5班英语班",
     "subject": "英语",
@@ -20493,7 +25773,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_449",
+    "id": "S_ITEM_889",
     "teachingClassId": "C_初二_C5_政治",
     "teachingClassName": "初二5班政治班",
     "subject": "政治",
@@ -20505,7 +25785,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_450",
+    "id": "S_ITEM_890",
     "teachingClassId": "C_初二_C5_政治",
     "teachingClassName": "初二5班政治班",
     "subject": "政治",
@@ -20517,7 +25797,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_451",
+    "id": "S_ITEM_891",
     "teachingClassId": "C_初二_C5_历史",
     "teachingClassName": "初二5班历史班",
     "subject": "历史",
@@ -20529,7 +25809,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_452",
+    "id": "S_ITEM_892",
     "teachingClassId": "C_初二_C5_历史",
     "teachingClassName": "初二5班历史班",
     "subject": "历史",
@@ -20541,7 +25821,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_453",
+    "id": "S_ITEM_893",
     "teachingClassId": "C_初二_C5_地理",
     "teachingClassName": "初二5班地理班",
     "subject": "地理",
@@ -20553,7 +25833,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_454",
+    "id": "S_ITEM_894",
     "teachingClassId": "C_初二_C5_地理",
     "teachingClassName": "初二5班地理班",
     "subject": "地理",
@@ -20565,7 +25845,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_455",
+    "id": "S_ITEM_895",
     "teachingClassId": "C_初二_C5_物理",
     "teachingClassName": "初二5班物理班",
     "subject": "物理",
@@ -20577,7 +25857,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_456",
+    "id": "S_ITEM_896",
     "teachingClassId": "C_初二_C5_物理",
     "teachingClassName": "初二5班物理班",
     "subject": "物理",
@@ -20589,7 +25869,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_457",
+    "id": "S_ITEM_897",
     "teachingClassId": "C_初二_C5_物理",
     "teachingClassName": "初二5班物理班",
     "subject": "物理",
@@ -20601,7 +25881,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_458",
+    "id": "S_ITEM_898",
     "teachingClassId": "C_初二_C5_生物",
     "teachingClassName": "初二5班生物班",
     "subject": "生物",
@@ -20613,7 +25893,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_459",
+    "id": "S_ITEM_899",
     "teachingClassId": "C_初二_C5_生物",
     "teachingClassName": "初二5班生物班",
     "subject": "生物",
@@ -20625,7 +25905,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_460",
+    "id": "S_ITEM_900",
     "teachingClassId": "C_初二_C5_体育",
     "teachingClassName": "初二5班体育班",
     "subject": "体育",
@@ -20637,7 +25917,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_461",
+    "id": "S_ITEM_901",
     "teachingClassId": "C_初二_C5_体育",
     "teachingClassName": "初二5班体育班",
     "subject": "体育",
@@ -20649,7 +25929,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_462",
+    "id": "S_ITEM_902",
     "teachingClassId": "C_初二_C5_通用",
     "teachingClassName": "初二5班通用班",
     "subject": "通用",
@@ -20661,7 +25941,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_463",
+    "id": "S_ITEM_903",
     "teachingClassId": "C_初二_C6_语文",
     "teachingClassName": "初二6班语文班",
     "subject": "语文",
@@ -20673,7 +25953,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_464",
+    "id": "S_ITEM_904",
     "teachingClassId": "C_初二_C6_语文",
     "teachingClassName": "初二6班语文班",
     "subject": "语文",
@@ -20685,7 +25965,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_465",
+    "id": "S_ITEM_905",
     "teachingClassId": "C_初二_C6_语文",
     "teachingClassName": "初二6班语文班",
     "subject": "语文",
@@ -20697,7 +25977,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_466",
+    "id": "S_ITEM_906",
     "teachingClassId": "C_初二_C6_语文",
     "teachingClassName": "初二6班语文班",
     "subject": "语文",
@@ -20709,7 +25989,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_467",
+    "id": "S_ITEM_907",
     "teachingClassId": "C_初二_C6_语文",
     "teachingClassName": "初二6班语文班",
     "subject": "语文",
@@ -20721,7 +26001,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_468",
+    "id": "S_ITEM_908",
     "teachingClassId": "C_初二_C6_语文",
     "teachingClassName": "初二6班语文班",
     "subject": "语文",
@@ -20733,7 +26013,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_469",
+    "id": "S_ITEM_909",
     "teachingClassId": "C_初二_C6_数学",
     "teachingClassName": "初二6班数学班",
     "subject": "数学",
@@ -20745,7 +26025,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_470",
+    "id": "S_ITEM_910",
     "teachingClassId": "C_初二_C6_数学",
     "teachingClassName": "初二6班数学班",
     "subject": "数学",
@@ -20757,7 +26037,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_471",
+    "id": "S_ITEM_911",
     "teachingClassId": "C_初二_C6_数学",
     "teachingClassName": "初二6班数学班",
     "subject": "数学",
@@ -20769,7 +26049,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_472",
+    "id": "S_ITEM_912",
     "teachingClassId": "C_初二_C6_数学",
     "teachingClassName": "初二6班数学班",
     "subject": "数学",
@@ -20781,7 +26061,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_473",
+    "id": "S_ITEM_913",
     "teachingClassId": "C_初二_C6_数学",
     "teachingClassName": "初二6班数学班",
     "subject": "数学",
@@ -20793,7 +26073,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_474",
+    "id": "S_ITEM_914",
     "teachingClassId": "C_初二_C6_数学",
     "teachingClassName": "初二6班数学班",
     "subject": "数学",
@@ -20805,7 +26085,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_475",
+    "id": "S_ITEM_915",
     "teachingClassId": "C_初二_C6_数学",
     "teachingClassName": "初二6班数学班",
     "subject": "数学",
@@ -20817,7 +26097,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_476",
+    "id": "S_ITEM_916",
     "teachingClassId": "C_初二_C6_英语",
     "teachingClassName": "初二6班英语班",
     "subject": "英语",
@@ -20829,7 +26109,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_477",
+    "id": "S_ITEM_917",
     "teachingClassId": "C_初二_C6_英语",
     "teachingClassName": "初二6班英语班",
     "subject": "英语",
@@ -20841,7 +26121,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_478",
+    "id": "S_ITEM_918",
     "teachingClassId": "C_初二_C6_英语",
     "teachingClassName": "初二6班英语班",
     "subject": "英语",
@@ -20853,7 +26133,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_479",
+    "id": "S_ITEM_919",
     "teachingClassId": "C_初二_C6_英语",
     "teachingClassName": "初二6班英语班",
     "subject": "英语",
@@ -20865,7 +26145,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_480",
+    "id": "S_ITEM_920",
     "teachingClassId": "C_初二_C6_英语",
     "teachingClassName": "初二6班英语班",
     "subject": "英语",
@@ -20877,7 +26157,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_481",
+    "id": "S_ITEM_921",
     "teachingClassId": "C_初二_C6_英语",
     "teachingClassName": "初二6班英语班",
     "subject": "英语",
@@ -20889,7 +26169,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_482",
+    "id": "S_ITEM_922",
     "teachingClassId": "C_初二_C6_政治",
     "teachingClassName": "初二6班政治班",
     "subject": "政治",
@@ -20901,7 +26181,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_483",
+    "id": "S_ITEM_923",
     "teachingClassId": "C_初二_C6_政治",
     "teachingClassName": "初二6班政治班",
     "subject": "政治",
@@ -20913,7 +26193,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_484",
+    "id": "S_ITEM_924",
     "teachingClassId": "C_初二_C6_历史",
     "teachingClassName": "初二6班历史班",
     "subject": "历史",
@@ -20925,7 +26205,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_485",
+    "id": "S_ITEM_925",
     "teachingClassId": "C_初二_C6_历史",
     "teachingClassName": "初二6班历史班",
     "subject": "历史",
@@ -20937,7 +26217,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_486",
+    "id": "S_ITEM_926",
     "teachingClassId": "C_初二_C6_地理",
     "teachingClassName": "初二6班地理班",
     "subject": "地理",
@@ -20949,7 +26229,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_487",
+    "id": "S_ITEM_927",
     "teachingClassId": "C_初二_C6_地理",
     "teachingClassName": "初二6班地理班",
     "subject": "地理",
@@ -20961,7 +26241,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_488",
+    "id": "S_ITEM_928",
     "teachingClassId": "C_初二_C6_物理",
     "teachingClassName": "初二6班物理班",
     "subject": "物理",
@@ -20973,7 +26253,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_489",
+    "id": "S_ITEM_929",
     "teachingClassId": "C_初二_C6_物理",
     "teachingClassName": "初二6班物理班",
     "subject": "物理",
@@ -20985,7 +26265,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_490",
+    "id": "S_ITEM_930",
     "teachingClassId": "C_初二_C6_物理",
     "teachingClassName": "初二6班物理班",
     "subject": "物理",
@@ -20997,7 +26277,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_491",
+    "id": "S_ITEM_931",
     "teachingClassId": "C_初二_C6_生物",
     "teachingClassName": "初二6班生物班",
     "subject": "生物",
@@ -21009,7 +26289,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_492",
+    "id": "S_ITEM_932",
     "teachingClassId": "C_初二_C6_生物",
     "teachingClassName": "初二6班生物班",
     "subject": "生物",
@@ -21021,7 +26301,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_493",
+    "id": "S_ITEM_933",
     "teachingClassId": "C_初二_C6_体育",
     "teachingClassName": "初二6班体育班",
     "subject": "体育",
@@ -21033,7 +26313,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_494",
+    "id": "S_ITEM_934",
     "teachingClassId": "C_初二_C6_体育",
     "teachingClassName": "初二6班体育班",
     "subject": "体育",
@@ -21045,7 +26325,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_495",
+    "id": "S_ITEM_935",
     "teachingClassId": "C_初二_C6_通用",
     "teachingClassName": "初二6班通用班",
     "subject": "通用",
@@ -21057,7 +26337,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_496",
+    "id": "S_ITEM_936",
     "teachingClassId": "C_初二_C7_语文",
     "teachingClassName": "初二7班语文班",
     "subject": "语文",
@@ -21069,7 +26349,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_497",
+    "id": "S_ITEM_937",
     "teachingClassId": "C_初二_C7_语文",
     "teachingClassName": "初二7班语文班",
     "subject": "语文",
@@ -21081,7 +26361,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_498",
+    "id": "S_ITEM_938",
     "teachingClassId": "C_初二_C7_语文",
     "teachingClassName": "初二7班语文班",
     "subject": "语文",
@@ -21093,7 +26373,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_499",
+    "id": "S_ITEM_939",
     "teachingClassId": "C_初二_C7_语文",
     "teachingClassName": "初二7班语文班",
     "subject": "语文",
@@ -21105,7 +26385,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_500",
+    "id": "S_ITEM_940",
     "teachingClassId": "C_初二_C7_语文",
     "teachingClassName": "初二7班语文班",
     "subject": "语文",
@@ -21117,7 +26397,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_501",
+    "id": "S_ITEM_941",
     "teachingClassId": "C_初二_C7_语文",
     "teachingClassName": "初二7班语文班",
     "subject": "语文",
@@ -21129,7 +26409,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_502",
+    "id": "S_ITEM_942",
     "teachingClassId": "C_初二_C7_数学",
     "teachingClassName": "初二7班数学班",
     "subject": "数学",
@@ -21141,7 +26421,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_503",
+    "id": "S_ITEM_943",
     "teachingClassId": "C_初二_C7_数学",
     "teachingClassName": "初二7班数学班",
     "subject": "数学",
@@ -21153,7 +26433,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_504",
+    "id": "S_ITEM_944",
     "teachingClassId": "C_初二_C7_数学",
     "teachingClassName": "初二7班数学班",
     "subject": "数学",
@@ -21165,7 +26445,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_505",
+    "id": "S_ITEM_945",
     "teachingClassId": "C_初二_C7_数学",
     "teachingClassName": "初二7班数学班",
     "subject": "数学",
@@ -21177,7 +26457,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_506",
+    "id": "S_ITEM_946",
     "teachingClassId": "C_初二_C7_数学",
     "teachingClassName": "初二7班数学班",
     "subject": "数学",
@@ -21189,7 +26469,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_507",
+    "id": "S_ITEM_947",
     "teachingClassId": "C_初二_C7_数学",
     "teachingClassName": "初二7班数学班",
     "subject": "数学",
@@ -21201,7 +26481,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_508",
+    "id": "S_ITEM_948",
     "teachingClassId": "C_初二_C7_数学",
     "teachingClassName": "初二7班数学班",
     "subject": "数学",
@@ -21213,7 +26493,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_509",
+    "id": "S_ITEM_949",
     "teachingClassId": "C_初二_C7_英语",
     "teachingClassName": "初二7班英语班",
     "subject": "英语",
@@ -21225,7 +26505,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_510",
+    "id": "S_ITEM_950",
     "teachingClassId": "C_初二_C7_英语",
     "teachingClassName": "初二7班英语班",
     "subject": "英语",
@@ -21237,7 +26517,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_511",
+    "id": "S_ITEM_951",
     "teachingClassId": "C_初二_C7_英语",
     "teachingClassName": "初二7班英语班",
     "subject": "英语",
@@ -21249,7 +26529,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_512",
+    "id": "S_ITEM_952",
     "teachingClassId": "C_初二_C7_英语",
     "teachingClassName": "初二7班英语班",
     "subject": "英语",
@@ -21261,7 +26541,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_513",
+    "id": "S_ITEM_953",
     "teachingClassId": "C_初二_C7_英语",
     "teachingClassName": "初二7班英语班",
     "subject": "英语",
@@ -21273,7 +26553,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_514",
+    "id": "S_ITEM_954",
     "teachingClassId": "C_初二_C7_英语",
     "teachingClassName": "初二7班英语班",
     "subject": "英语",
@@ -21285,7 +26565,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_515",
+    "id": "S_ITEM_955",
     "teachingClassId": "C_初二_C7_政治",
     "teachingClassName": "初二7班政治班",
     "subject": "政治",
@@ -21297,7 +26577,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_516",
+    "id": "S_ITEM_956",
     "teachingClassId": "C_初二_C7_政治",
     "teachingClassName": "初二7班政治班",
     "subject": "政治",
@@ -21309,7 +26589,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_517",
+    "id": "S_ITEM_957",
     "teachingClassId": "C_初二_C7_历史",
     "teachingClassName": "初二7班历史班",
     "subject": "历史",
@@ -21321,7 +26601,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_518",
+    "id": "S_ITEM_958",
     "teachingClassId": "C_初二_C7_历史",
     "teachingClassName": "初二7班历史班",
     "subject": "历史",
@@ -21333,7 +26613,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_519",
+    "id": "S_ITEM_959",
     "teachingClassId": "C_初二_C7_地理",
     "teachingClassName": "初二7班地理班",
     "subject": "地理",
@@ -21345,7 +26625,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_520",
+    "id": "S_ITEM_960",
     "teachingClassId": "C_初二_C7_地理",
     "teachingClassName": "初二7班地理班",
     "subject": "地理",
@@ -21357,7 +26637,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_521",
+    "id": "S_ITEM_961",
     "teachingClassId": "C_初二_C7_物理",
     "teachingClassName": "初二7班物理班",
     "subject": "物理",
@@ -21369,7 +26649,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_522",
+    "id": "S_ITEM_962",
     "teachingClassId": "C_初二_C7_物理",
     "teachingClassName": "初二7班物理班",
     "subject": "物理",
@@ -21381,7 +26661,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_523",
+    "id": "S_ITEM_963",
     "teachingClassId": "C_初二_C7_物理",
     "teachingClassName": "初二7班物理班",
     "subject": "物理",
@@ -21393,7 +26673,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_524",
+    "id": "S_ITEM_964",
     "teachingClassId": "C_初二_C7_生物",
     "teachingClassName": "初二7班生物班",
     "subject": "生物",
@@ -21405,7 +26685,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_525",
+    "id": "S_ITEM_965",
     "teachingClassId": "C_初二_C7_生物",
     "teachingClassName": "初二7班生物班",
     "subject": "生物",
@@ -21417,7 +26697,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_526",
+    "id": "S_ITEM_966",
     "teachingClassId": "C_初二_C7_体育",
     "teachingClassName": "初二7班体育班",
     "subject": "体育",
@@ -21429,7 +26709,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_527",
+    "id": "S_ITEM_967",
     "teachingClassId": "C_初二_C7_通用",
     "teachingClassName": "初二7班通用班",
     "subject": "通用",
@@ -21441,7 +26721,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_528",
+    "id": "S_ITEM_968",
     "teachingClassId": "C_初二_C8_语文",
     "teachingClassName": "初二8班语文班",
     "subject": "语文",
@@ -21453,7 +26733,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_529",
+    "id": "S_ITEM_969",
     "teachingClassId": "C_初二_C8_语文",
     "teachingClassName": "初二8班语文班",
     "subject": "语文",
@@ -21465,7 +26745,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_530",
+    "id": "S_ITEM_970",
     "teachingClassId": "C_初二_C8_语文",
     "teachingClassName": "初二8班语文班",
     "subject": "语文",
@@ -21477,7 +26757,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_531",
+    "id": "S_ITEM_971",
     "teachingClassId": "C_初二_C8_语文",
     "teachingClassName": "初二8班语文班",
     "subject": "语文",
@@ -21489,7 +26769,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_532",
+    "id": "S_ITEM_972",
     "teachingClassId": "C_初二_C8_语文",
     "teachingClassName": "初二8班语文班",
     "subject": "语文",
@@ -21501,7 +26781,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_533",
+    "id": "S_ITEM_973",
     "teachingClassId": "C_初二_C8_语文",
     "teachingClassName": "初二8班语文班",
     "subject": "语文",
@@ -21513,7 +26793,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_534",
+    "id": "S_ITEM_974",
     "teachingClassId": "C_初二_C8_数学",
     "teachingClassName": "初二8班数学班",
     "subject": "数学",
@@ -21525,7 +26805,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_535",
+    "id": "S_ITEM_975",
     "teachingClassId": "C_初二_C8_数学",
     "teachingClassName": "初二8班数学班",
     "subject": "数学",
@@ -21537,7 +26817,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_536",
+    "id": "S_ITEM_976",
     "teachingClassId": "C_初二_C8_数学",
     "teachingClassName": "初二8班数学班",
     "subject": "数学",
@@ -21549,7 +26829,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_537",
+    "id": "S_ITEM_977",
     "teachingClassId": "C_初二_C8_数学",
     "teachingClassName": "初二8班数学班",
     "subject": "数学",
@@ -21561,7 +26841,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_538",
+    "id": "S_ITEM_978",
     "teachingClassId": "C_初二_C8_数学",
     "teachingClassName": "初二8班数学班",
     "subject": "数学",
@@ -21573,7 +26853,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_539",
+    "id": "S_ITEM_979",
     "teachingClassId": "C_初二_C8_数学",
     "teachingClassName": "初二8班数学班",
     "subject": "数学",
@@ -21585,7 +26865,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_540",
+    "id": "S_ITEM_980",
     "teachingClassId": "C_初二_C8_数学",
     "teachingClassName": "初二8班数学班",
     "subject": "数学",
@@ -21597,7 +26877,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_541",
+    "id": "S_ITEM_981",
     "teachingClassId": "C_初二_C8_英语",
     "teachingClassName": "初二8班英语班",
     "subject": "英语",
@@ -21609,7 +26889,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_542",
+    "id": "S_ITEM_982",
     "teachingClassId": "C_初二_C8_英语",
     "teachingClassName": "初二8班英语班",
     "subject": "英语",
@@ -21621,7 +26901,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_543",
+    "id": "S_ITEM_983",
     "teachingClassId": "C_初二_C8_英语",
     "teachingClassName": "初二8班英语班",
     "subject": "英语",
@@ -21633,7 +26913,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_544",
+    "id": "S_ITEM_984",
     "teachingClassId": "C_初二_C8_英语",
     "teachingClassName": "初二8班英语班",
     "subject": "英语",
@@ -21645,7 +26925,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_545",
+    "id": "S_ITEM_985",
     "teachingClassId": "C_初二_C8_英语",
     "teachingClassName": "初二8班英语班",
     "subject": "英语",
@@ -21657,7 +26937,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_546",
+    "id": "S_ITEM_986",
     "teachingClassId": "C_初二_C8_英语",
     "teachingClassName": "初二8班英语班",
     "subject": "英语",
@@ -21669,7 +26949,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_547",
+    "id": "S_ITEM_987",
     "teachingClassId": "C_初二_C8_政治",
     "teachingClassName": "初二8班政治班",
     "subject": "政治",
@@ -21681,7 +26961,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_548",
+    "id": "S_ITEM_988",
     "teachingClassId": "C_初二_C8_政治",
     "teachingClassName": "初二8班政治班",
     "subject": "政治",
@@ -21693,7 +26973,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_549",
+    "id": "S_ITEM_989",
     "teachingClassId": "C_初二_C8_历史",
     "teachingClassName": "初二8班历史班",
     "subject": "历史",
@@ -21705,7 +26985,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_550",
+    "id": "S_ITEM_990",
     "teachingClassId": "C_初二_C8_历史",
     "teachingClassName": "初二8班历史班",
     "subject": "历史",
@@ -21717,7 +26997,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_551",
+    "id": "S_ITEM_991",
     "teachingClassId": "C_初二_C8_地理",
     "teachingClassName": "初二8班地理班",
     "subject": "地理",
@@ -21729,7 +27009,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_552",
+    "id": "S_ITEM_992",
     "teachingClassId": "C_初二_C8_地理",
     "teachingClassName": "初二8班地理班",
     "subject": "地理",
@@ -21741,7 +27021,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_553",
+    "id": "S_ITEM_993",
     "teachingClassId": "C_初二_C8_物理",
     "teachingClassName": "初二8班物理班",
     "subject": "物理",
@@ -21753,7 +27033,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_554",
+    "id": "S_ITEM_994",
     "teachingClassId": "C_初二_C8_物理",
     "teachingClassName": "初二8班物理班",
     "subject": "物理",
@@ -21765,7 +27045,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_555",
+    "id": "S_ITEM_995",
     "teachingClassId": "C_初二_C8_物理",
     "teachingClassName": "初二8班物理班",
     "subject": "物理",
@@ -21777,7 +27057,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_556",
+    "id": "S_ITEM_996",
     "teachingClassId": "C_初二_C8_生物",
     "teachingClassName": "初二8班生物班",
     "subject": "生物",
@@ -21789,7 +27069,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_557",
+    "id": "S_ITEM_997",
     "teachingClassId": "C_初二_C8_生物",
     "teachingClassName": "初二8班生物班",
     "subject": "生物",
@@ -21801,7 +27081,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_558",
+    "id": "S_ITEM_998",
     "teachingClassId": "C_初二_C8_体育",
     "teachingClassName": "初二8班体育班",
     "subject": "体育",
@@ -21813,7 +27093,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_559",
+    "id": "S_ITEM_999",
     "teachingClassId": "C_初二_C8_体育",
     "teachingClassName": "初二8班体育班",
     "subject": "体育",
@@ -21825,7 +27105,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_560",
+    "id": "S_ITEM_1000",
     "teachingClassId": "C_初二_C8_通用",
     "teachingClassName": "初二8班通用班",
     "subject": "通用",
@@ -21837,7 +27117,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_561",
+    "id": "S_ITEM_1001",
     "teachingClassId": "C_初三_C1_语文",
     "teachingClassName": "初三1班语文班",
     "subject": "语文",
@@ -21849,7 +27129,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_562",
+    "id": "S_ITEM_1002",
     "teachingClassId": "C_初三_C1_语文",
     "teachingClassName": "初三1班语文班",
     "subject": "语文",
@@ -21861,7 +27141,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_563",
+    "id": "S_ITEM_1003",
     "teachingClassId": "C_初三_C1_语文",
     "teachingClassName": "初三1班语文班",
     "subject": "语文",
@@ -21873,7 +27153,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_564",
+    "id": "S_ITEM_1004",
     "teachingClassId": "C_初三_C1_语文",
     "teachingClassName": "初三1班语文班",
     "subject": "语文",
@@ -21885,7 +27165,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_565",
+    "id": "S_ITEM_1005",
     "teachingClassId": "C_初三_C1_语文",
     "teachingClassName": "初三1班语文班",
     "subject": "语文",
@@ -21897,7 +27177,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_566",
+    "id": "S_ITEM_1006",
     "teachingClassId": "C_初三_C1_语文",
     "teachingClassName": "初三1班语文班",
     "subject": "语文",
@@ -21909,7 +27189,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_567",
+    "id": "S_ITEM_1007",
     "teachingClassId": "C_初三_C1_数学",
     "teachingClassName": "初三1班数学班",
     "subject": "数学",
@@ -21921,7 +27201,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_568",
+    "id": "S_ITEM_1008",
     "teachingClassId": "C_初三_C1_数学",
     "teachingClassName": "初三1班数学班",
     "subject": "数学",
@@ -21933,7 +27213,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_569",
+    "id": "S_ITEM_1009",
     "teachingClassId": "C_初三_C1_数学",
     "teachingClassName": "初三1班数学班",
     "subject": "数学",
@@ -21945,7 +27225,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_570",
+    "id": "S_ITEM_1010",
     "teachingClassId": "C_初三_C1_数学",
     "teachingClassName": "初三1班数学班",
     "subject": "数学",
@@ -21957,7 +27237,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_571",
+    "id": "S_ITEM_1011",
     "teachingClassId": "C_初三_C1_数学",
     "teachingClassName": "初三1班数学班",
     "subject": "数学",
@@ -21969,7 +27249,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_572",
+    "id": "S_ITEM_1012",
     "teachingClassId": "C_初三_C1_数学",
     "teachingClassName": "初三1班数学班",
     "subject": "数学",
@@ -21981,7 +27261,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_573",
+    "id": "S_ITEM_1013",
     "teachingClassId": "C_初三_C1_数学",
     "teachingClassName": "初三1班数学班",
     "subject": "数学",
@@ -21993,7 +27273,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_574",
+    "id": "S_ITEM_1014",
     "teachingClassId": "C_初三_C1_英语",
     "teachingClassName": "初三1班英语班",
     "subject": "英语",
@@ -22005,7 +27285,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_575",
+    "id": "S_ITEM_1015",
     "teachingClassId": "C_初三_C1_英语",
     "teachingClassName": "初三1班英语班",
     "subject": "英语",
@@ -22017,7 +27297,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_576",
+    "id": "S_ITEM_1016",
     "teachingClassId": "C_初三_C1_英语",
     "teachingClassName": "初三1班英语班",
     "subject": "英语",
@@ -22029,7 +27309,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_577",
+    "id": "S_ITEM_1017",
     "teachingClassId": "C_初三_C1_英语",
     "teachingClassName": "初三1班英语班",
     "subject": "英语",
@@ -22041,7 +27321,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_578",
+    "id": "S_ITEM_1018",
     "teachingClassId": "C_初三_C1_英语",
     "teachingClassName": "初三1班英语班",
     "subject": "英语",
@@ -22053,7 +27333,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_579",
+    "id": "S_ITEM_1019",
     "teachingClassId": "C_初三_C1_英语",
     "teachingClassName": "初三1班英语班",
     "subject": "英语",
@@ -22065,7 +27345,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_580",
+    "id": "S_ITEM_1020",
     "teachingClassId": "C_初三_C1_政治",
     "teachingClassName": "初三1班政治班",
     "subject": "政治",
@@ -22077,7 +27357,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_581",
+    "id": "S_ITEM_1021",
     "teachingClassId": "C_初三_C1_政治",
     "teachingClassName": "初三1班政治班",
     "subject": "政治",
@@ -22089,7 +27369,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_582",
+    "id": "S_ITEM_1022",
     "teachingClassId": "C_初三_C1_政治",
     "teachingClassName": "初三1班政治班",
     "subject": "政治",
@@ -22101,7 +27381,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_583",
+    "id": "S_ITEM_1023",
     "teachingClassId": "C_初三_C1_历史",
     "teachingClassName": "初三1班历史班",
     "subject": "历史",
@@ -22113,7 +27393,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_584",
+    "id": "S_ITEM_1024",
     "teachingClassId": "C_初三_C1_历史",
     "teachingClassName": "初三1班历史班",
     "subject": "历史",
@@ -22125,7 +27405,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_585",
+    "id": "S_ITEM_1025",
     "teachingClassId": "C_初三_C1_历史",
     "teachingClassName": "初三1班历史班",
     "subject": "历史",
@@ -22137,7 +27417,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_586",
+    "id": "S_ITEM_1026",
     "teachingClassId": "C_初三_C1_物理",
     "teachingClassName": "初三1班物理班",
     "subject": "物理",
@@ -22149,7 +27429,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_587",
+    "id": "S_ITEM_1027",
     "teachingClassId": "C_初三_C1_物理",
     "teachingClassName": "初三1班物理班",
     "subject": "物理",
@@ -22161,7 +27441,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_588",
+    "id": "S_ITEM_1028",
     "teachingClassId": "C_初三_C1_物理",
     "teachingClassName": "初三1班物理班",
     "subject": "物理",
@@ -22173,7 +27453,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_589",
+    "id": "S_ITEM_1029",
     "teachingClassId": "C_初三_C1_物理",
     "teachingClassName": "初三1班物理班",
     "subject": "物理",
@@ -22185,7 +27465,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_590",
+    "id": "S_ITEM_1030",
     "teachingClassId": "C_初三_C1_化学",
     "teachingClassName": "初三1班化学班",
     "subject": "化学",
@@ -22197,7 +27477,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_591",
+    "id": "S_ITEM_1031",
     "teachingClassId": "C_初三_C1_化学",
     "teachingClassName": "初三1班化学班",
     "subject": "化学",
@@ -22209,7 +27489,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_592",
+    "id": "S_ITEM_1032",
     "teachingClassId": "C_初三_C1_化学",
     "teachingClassName": "初三1班化学班",
     "subject": "化学",
@@ -22221,7 +27501,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_593",
+    "id": "S_ITEM_1033",
     "teachingClassId": "C_初三_C1_体育",
     "teachingClassName": "初三1班体育班",
     "subject": "体育",
@@ -22233,7 +27513,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_594",
+    "id": "S_ITEM_1034",
     "teachingClassId": "C_初三_C1_体育",
     "teachingClassName": "初三1班体育班",
     "subject": "体育",
@@ -22245,7 +27525,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_595",
+    "id": "S_ITEM_1035",
     "teachingClassId": "C_初三_C1_通用",
     "teachingClassName": "初三1班通用班",
     "subject": "通用",
@@ -22257,7 +27537,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_596",
+    "id": "S_ITEM_1036",
     "teachingClassId": "C_初三_C2_语文",
     "teachingClassName": "初三2班语文班",
     "subject": "语文",
@@ -22269,7 +27549,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_597",
+    "id": "S_ITEM_1037",
     "teachingClassId": "C_初三_C2_语文",
     "teachingClassName": "初三2班语文班",
     "subject": "语文",
@@ -22281,7 +27561,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_598",
+    "id": "S_ITEM_1038",
     "teachingClassId": "C_初三_C2_语文",
     "teachingClassName": "初三2班语文班",
     "subject": "语文",
@@ -22293,7 +27573,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_599",
+    "id": "S_ITEM_1039",
     "teachingClassId": "C_初三_C2_语文",
     "teachingClassName": "初三2班语文班",
     "subject": "语文",
@@ -22305,7 +27585,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_600",
+    "id": "S_ITEM_1040",
     "teachingClassId": "C_初三_C2_语文",
     "teachingClassName": "初三2班语文班",
     "subject": "语文",
@@ -22317,7 +27597,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_601",
+    "id": "S_ITEM_1041",
     "teachingClassId": "C_初三_C2_语文",
     "teachingClassName": "初三2班语文班",
     "subject": "语文",
@@ -22329,7 +27609,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_602",
+    "id": "S_ITEM_1042",
     "teachingClassId": "C_初三_C2_数学",
     "teachingClassName": "初三2班数学班",
     "subject": "数学",
@@ -22341,7 +27621,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_603",
+    "id": "S_ITEM_1043",
     "teachingClassId": "C_初三_C2_数学",
     "teachingClassName": "初三2班数学班",
     "subject": "数学",
@@ -22353,7 +27633,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_604",
+    "id": "S_ITEM_1044",
     "teachingClassId": "C_初三_C2_数学",
     "teachingClassName": "初三2班数学班",
     "subject": "数学",
@@ -22365,7 +27645,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_605",
+    "id": "S_ITEM_1045",
     "teachingClassId": "C_初三_C2_数学",
     "teachingClassName": "初三2班数学班",
     "subject": "数学",
@@ -22377,7 +27657,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_606",
+    "id": "S_ITEM_1046",
     "teachingClassId": "C_初三_C2_数学",
     "teachingClassName": "初三2班数学班",
     "subject": "数学",
@@ -22389,7 +27669,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_607",
+    "id": "S_ITEM_1047",
     "teachingClassId": "C_初三_C2_数学",
     "teachingClassName": "初三2班数学班",
     "subject": "数学",
@@ -22401,7 +27681,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_608",
+    "id": "S_ITEM_1048",
     "teachingClassId": "C_初三_C2_数学",
     "teachingClassName": "初三2班数学班",
     "subject": "数学",
@@ -22413,7 +27693,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_609",
+    "id": "S_ITEM_1049",
     "teachingClassId": "C_初三_C2_英语",
     "teachingClassName": "初三2班英语班",
     "subject": "英语",
@@ -22425,7 +27705,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_610",
+    "id": "S_ITEM_1050",
     "teachingClassId": "C_初三_C2_英语",
     "teachingClassName": "初三2班英语班",
     "subject": "英语",
@@ -22437,7 +27717,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_611",
+    "id": "S_ITEM_1051",
     "teachingClassId": "C_初三_C2_英语",
     "teachingClassName": "初三2班英语班",
     "subject": "英语",
@@ -22449,7 +27729,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_612",
+    "id": "S_ITEM_1052",
     "teachingClassId": "C_初三_C2_英语",
     "teachingClassName": "初三2班英语班",
     "subject": "英语",
@@ -22461,7 +27741,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_613",
+    "id": "S_ITEM_1053",
     "teachingClassId": "C_初三_C2_英语",
     "teachingClassName": "初三2班英语班",
     "subject": "英语",
@@ -22473,7 +27753,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_614",
+    "id": "S_ITEM_1054",
     "teachingClassId": "C_初三_C2_英语",
     "teachingClassName": "初三2班英语班",
     "subject": "英语",
@@ -22485,7 +27765,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_615",
+    "id": "S_ITEM_1055",
     "teachingClassId": "C_初三_C2_政治",
     "teachingClassName": "初三2班政治班",
     "subject": "政治",
@@ -22497,7 +27777,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_616",
+    "id": "S_ITEM_1056",
     "teachingClassId": "C_初三_C2_政治",
     "teachingClassName": "初三2班政治班",
     "subject": "政治",
@@ -22509,7 +27789,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_617",
+    "id": "S_ITEM_1057",
     "teachingClassId": "C_初三_C2_政治",
     "teachingClassName": "初三2班政治班",
     "subject": "政治",
@@ -22521,7 +27801,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_618",
+    "id": "S_ITEM_1058",
     "teachingClassId": "C_初三_C2_历史",
     "teachingClassName": "初三2班历史班",
     "subject": "历史",
@@ -22533,7 +27813,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_619",
+    "id": "S_ITEM_1059",
     "teachingClassId": "C_初三_C2_历史",
     "teachingClassName": "初三2班历史班",
     "subject": "历史",
@@ -22545,7 +27825,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_620",
+    "id": "S_ITEM_1060",
     "teachingClassId": "C_初三_C2_历史",
     "teachingClassName": "初三2班历史班",
     "subject": "历史",
@@ -22557,7 +27837,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_621",
+    "id": "S_ITEM_1061",
     "teachingClassId": "C_初三_C2_物理",
     "teachingClassName": "初三2班物理班",
     "subject": "物理",
@@ -22569,7 +27849,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_622",
+    "id": "S_ITEM_1062",
     "teachingClassId": "C_初三_C2_物理",
     "teachingClassName": "初三2班物理班",
     "subject": "物理",
@@ -22581,7 +27861,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_623",
+    "id": "S_ITEM_1063",
     "teachingClassId": "C_初三_C2_物理",
     "teachingClassName": "初三2班物理班",
     "subject": "物理",
@@ -22593,7 +27873,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_624",
+    "id": "S_ITEM_1064",
     "teachingClassId": "C_初三_C2_物理",
     "teachingClassName": "初三2班物理班",
     "subject": "物理",
@@ -22605,7 +27885,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_625",
+    "id": "S_ITEM_1065",
     "teachingClassId": "C_初三_C2_化学",
     "teachingClassName": "初三2班化学班",
     "subject": "化学",
@@ -22617,7 +27897,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_626",
+    "id": "S_ITEM_1066",
     "teachingClassId": "C_初三_C2_化学",
     "teachingClassName": "初三2班化学班",
     "subject": "化学",
@@ -22629,7 +27909,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_627",
+    "id": "S_ITEM_1067",
     "teachingClassId": "C_初三_C2_化学",
     "teachingClassName": "初三2班化学班",
     "subject": "化学",
@@ -22641,7 +27921,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_628",
+    "id": "S_ITEM_1068",
     "teachingClassId": "C_初三_C2_体育",
     "teachingClassName": "初三2班体育班",
     "subject": "体育",
@@ -22653,7 +27933,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_629",
+    "id": "S_ITEM_1069",
     "teachingClassId": "C_初三_C2_体育",
     "teachingClassName": "初三2班体育班",
     "subject": "体育",
@@ -22665,7 +27945,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_630",
+    "id": "S_ITEM_1070",
     "teachingClassId": "C_初三_C2_通用",
     "teachingClassName": "初三2班通用班",
     "subject": "通用",
@@ -22677,7 +27957,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_631",
+    "id": "S_ITEM_1071",
     "teachingClassId": "C_初三_C3_语文",
     "teachingClassName": "初三3班语文班",
     "subject": "语文",
@@ -22689,7 +27969,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_632",
+    "id": "S_ITEM_1072",
     "teachingClassId": "C_初三_C3_语文",
     "teachingClassName": "初三3班语文班",
     "subject": "语文",
@@ -22701,7 +27981,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_633",
+    "id": "S_ITEM_1073",
     "teachingClassId": "C_初三_C3_语文",
     "teachingClassName": "初三3班语文班",
     "subject": "语文",
@@ -22713,7 +27993,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_634",
+    "id": "S_ITEM_1074",
     "teachingClassId": "C_初三_C3_语文",
     "teachingClassName": "初三3班语文班",
     "subject": "语文",
@@ -22725,7 +28005,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_635",
+    "id": "S_ITEM_1075",
     "teachingClassId": "C_初三_C3_语文",
     "teachingClassName": "初三3班语文班",
     "subject": "语文",
@@ -22737,7 +28017,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_636",
+    "id": "S_ITEM_1076",
     "teachingClassId": "C_初三_C3_语文",
     "teachingClassName": "初三3班语文班",
     "subject": "语文",
@@ -22749,7 +28029,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_637",
+    "id": "S_ITEM_1077",
     "teachingClassId": "C_初三_C3_数学",
     "teachingClassName": "初三3班数学班",
     "subject": "数学",
@@ -22761,7 +28041,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_638",
+    "id": "S_ITEM_1078",
     "teachingClassId": "C_初三_C3_数学",
     "teachingClassName": "初三3班数学班",
     "subject": "数学",
@@ -22773,7 +28053,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_639",
+    "id": "S_ITEM_1079",
     "teachingClassId": "C_初三_C3_数学",
     "teachingClassName": "初三3班数学班",
     "subject": "数学",
@@ -22785,7 +28065,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_640",
+    "id": "S_ITEM_1080",
     "teachingClassId": "C_初三_C3_数学",
     "teachingClassName": "初三3班数学班",
     "subject": "数学",
@@ -22797,7 +28077,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_641",
+    "id": "S_ITEM_1081",
     "teachingClassId": "C_初三_C3_数学",
     "teachingClassName": "初三3班数学班",
     "subject": "数学",
@@ -22809,7 +28089,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_642",
+    "id": "S_ITEM_1082",
     "teachingClassId": "C_初三_C3_数学",
     "teachingClassName": "初三3班数学班",
     "subject": "数学",
@@ -22821,7 +28101,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_643",
+    "id": "S_ITEM_1083",
     "teachingClassId": "C_初三_C3_数学",
     "teachingClassName": "初三3班数学班",
     "subject": "数学",
@@ -22833,7 +28113,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_644",
+    "id": "S_ITEM_1084",
     "teachingClassId": "C_初三_C3_英语",
     "teachingClassName": "初三3班英语班",
     "subject": "英语",
@@ -22845,7 +28125,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_645",
+    "id": "S_ITEM_1085",
     "teachingClassId": "C_初三_C3_英语",
     "teachingClassName": "初三3班英语班",
     "subject": "英语",
@@ -22857,7 +28137,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_646",
+    "id": "S_ITEM_1086",
     "teachingClassId": "C_初三_C3_英语",
     "teachingClassName": "初三3班英语班",
     "subject": "英语",
@@ -22869,7 +28149,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_647",
+    "id": "S_ITEM_1087",
     "teachingClassId": "C_初三_C3_英语",
     "teachingClassName": "初三3班英语班",
     "subject": "英语",
@@ -22881,7 +28161,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_648",
+    "id": "S_ITEM_1088",
     "teachingClassId": "C_初三_C3_英语",
     "teachingClassName": "初三3班英语班",
     "subject": "英语",
@@ -22893,7 +28173,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_649",
+    "id": "S_ITEM_1089",
     "teachingClassId": "C_初三_C3_英语",
     "teachingClassName": "初三3班英语班",
     "subject": "英语",
@@ -22905,7 +28185,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_650",
+    "id": "S_ITEM_1090",
     "teachingClassId": "C_初三_C3_政治",
     "teachingClassName": "初三3班政治班",
     "subject": "政治",
@@ -22917,7 +28197,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_651",
+    "id": "S_ITEM_1091",
     "teachingClassId": "C_初三_C3_政治",
     "teachingClassName": "初三3班政治班",
     "subject": "政治",
@@ -22929,7 +28209,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_652",
+    "id": "S_ITEM_1092",
     "teachingClassId": "C_初三_C3_政治",
     "teachingClassName": "初三3班政治班",
     "subject": "政治",
@@ -22941,7 +28221,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_653",
+    "id": "S_ITEM_1093",
     "teachingClassId": "C_初三_C3_历史",
     "teachingClassName": "初三3班历史班",
     "subject": "历史",
@@ -22953,7 +28233,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_654",
+    "id": "S_ITEM_1094",
     "teachingClassId": "C_初三_C3_历史",
     "teachingClassName": "初三3班历史班",
     "subject": "历史",
@@ -22965,7 +28245,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_655",
+    "id": "S_ITEM_1095",
     "teachingClassId": "C_初三_C3_历史",
     "teachingClassName": "初三3班历史班",
     "subject": "历史",
@@ -22977,7 +28257,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_656",
+    "id": "S_ITEM_1096",
     "teachingClassId": "C_初三_C3_物理",
     "teachingClassName": "初三3班物理班",
     "subject": "物理",
@@ -22989,7 +28269,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_657",
+    "id": "S_ITEM_1097",
     "teachingClassId": "C_初三_C3_物理",
     "teachingClassName": "初三3班物理班",
     "subject": "物理",
@@ -23001,7 +28281,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_658",
+    "id": "S_ITEM_1098",
     "teachingClassId": "C_初三_C3_物理",
     "teachingClassName": "初三3班物理班",
     "subject": "物理",
@@ -23013,7 +28293,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_659",
+    "id": "S_ITEM_1099",
     "teachingClassId": "C_初三_C3_物理",
     "teachingClassName": "初三3班物理班",
     "subject": "物理",
@@ -23025,7 +28305,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_660",
+    "id": "S_ITEM_1100",
     "teachingClassId": "C_初三_C3_化学",
     "teachingClassName": "初三3班化学班",
     "subject": "化学",
@@ -23037,7 +28317,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_661",
+    "id": "S_ITEM_1101",
     "teachingClassId": "C_初三_C3_化学",
     "teachingClassName": "初三3班化学班",
     "subject": "化学",
@@ -23049,7 +28329,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_662",
+    "id": "S_ITEM_1102",
     "teachingClassId": "C_初三_C3_化学",
     "teachingClassName": "初三3班化学班",
     "subject": "化学",
@@ -23061,7 +28341,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_663",
+    "id": "S_ITEM_1103",
     "teachingClassId": "C_初三_C3_体育",
     "teachingClassName": "初三3班体育班",
     "subject": "体育",
@@ -23073,7 +28353,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_664",
+    "id": "S_ITEM_1104",
     "teachingClassId": "C_初三_C3_体育",
     "teachingClassName": "初三3班体育班",
     "subject": "体育",
@@ -23085,7 +28365,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_665",
+    "id": "S_ITEM_1105",
     "teachingClassId": "C_初三_C3_通用",
     "teachingClassName": "初三3班通用班",
     "subject": "通用",
@@ -23097,7 +28377,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_666",
+    "id": "S_ITEM_1106",
     "teachingClassId": "C_初三_C4_语文",
     "teachingClassName": "初三4班语文班",
     "subject": "语文",
@@ -23109,7 +28389,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_667",
+    "id": "S_ITEM_1107",
     "teachingClassId": "C_初三_C4_语文",
     "teachingClassName": "初三4班语文班",
     "subject": "语文",
@@ -23121,7 +28401,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_668",
+    "id": "S_ITEM_1108",
     "teachingClassId": "C_初三_C4_语文",
     "teachingClassName": "初三4班语文班",
     "subject": "语文",
@@ -23133,7 +28413,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_669",
+    "id": "S_ITEM_1109",
     "teachingClassId": "C_初三_C4_语文",
     "teachingClassName": "初三4班语文班",
     "subject": "语文",
@@ -23145,7 +28425,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_670",
+    "id": "S_ITEM_1110",
     "teachingClassId": "C_初三_C4_语文",
     "teachingClassName": "初三4班语文班",
     "subject": "语文",
@@ -23157,7 +28437,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_671",
+    "id": "S_ITEM_1111",
     "teachingClassId": "C_初三_C4_语文",
     "teachingClassName": "初三4班语文班",
     "subject": "语文",
@@ -23169,7 +28449,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_672",
+    "id": "S_ITEM_1112",
     "teachingClassId": "C_初三_C4_数学",
     "teachingClassName": "初三4班数学班",
     "subject": "数学",
@@ -23181,7 +28461,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_673",
+    "id": "S_ITEM_1113",
     "teachingClassId": "C_初三_C4_数学",
     "teachingClassName": "初三4班数学班",
     "subject": "数学",
@@ -23193,7 +28473,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_674",
+    "id": "S_ITEM_1114",
     "teachingClassId": "C_初三_C4_数学",
     "teachingClassName": "初三4班数学班",
     "subject": "数学",
@@ -23205,7 +28485,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_675",
+    "id": "S_ITEM_1115",
     "teachingClassId": "C_初三_C4_数学",
     "teachingClassName": "初三4班数学班",
     "subject": "数学",
@@ -23217,7 +28497,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_676",
+    "id": "S_ITEM_1116",
     "teachingClassId": "C_初三_C4_数学",
     "teachingClassName": "初三4班数学班",
     "subject": "数学",
@@ -23229,7 +28509,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_677",
+    "id": "S_ITEM_1117",
     "teachingClassId": "C_初三_C4_数学",
     "teachingClassName": "初三4班数学班",
     "subject": "数学",
@@ -23241,7 +28521,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_678",
+    "id": "S_ITEM_1118",
     "teachingClassId": "C_初三_C4_数学",
     "teachingClassName": "初三4班数学班",
     "subject": "数学",
@@ -23253,7 +28533,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_679",
+    "id": "S_ITEM_1119",
     "teachingClassId": "C_初三_C4_英语",
     "teachingClassName": "初三4班英语班",
     "subject": "英语",
@@ -23265,7 +28545,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_680",
+    "id": "S_ITEM_1120",
     "teachingClassId": "C_初三_C4_英语",
     "teachingClassName": "初三4班英语班",
     "subject": "英语",
@@ -23277,7 +28557,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_681",
+    "id": "S_ITEM_1121",
     "teachingClassId": "C_初三_C4_英语",
     "teachingClassName": "初三4班英语班",
     "subject": "英语",
@@ -23289,7 +28569,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_682",
+    "id": "S_ITEM_1122",
     "teachingClassId": "C_初三_C4_英语",
     "teachingClassName": "初三4班英语班",
     "subject": "英语",
@@ -23301,7 +28581,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_683",
+    "id": "S_ITEM_1123",
     "teachingClassId": "C_初三_C4_英语",
     "teachingClassName": "初三4班英语班",
     "subject": "英语",
@@ -23313,7 +28593,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_684",
+    "id": "S_ITEM_1124",
     "teachingClassId": "C_初三_C4_英语",
     "teachingClassName": "初三4班英语班",
     "subject": "英语",
@@ -23325,7 +28605,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_685",
+    "id": "S_ITEM_1125",
     "teachingClassId": "C_初三_C4_政治",
     "teachingClassName": "初三4班政治班",
     "subject": "政治",
@@ -23337,7 +28617,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_686",
+    "id": "S_ITEM_1126",
     "teachingClassId": "C_初三_C4_政治",
     "teachingClassName": "初三4班政治班",
     "subject": "政治",
@@ -23349,7 +28629,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_687",
+    "id": "S_ITEM_1127",
     "teachingClassId": "C_初三_C4_政治",
     "teachingClassName": "初三4班政治班",
     "subject": "政治",
@@ -23361,7 +28641,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_688",
+    "id": "S_ITEM_1128",
     "teachingClassId": "C_初三_C4_历史",
     "teachingClassName": "初三4班历史班",
     "subject": "历史",
@@ -23373,7 +28653,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_689",
+    "id": "S_ITEM_1129",
     "teachingClassId": "C_初三_C4_历史",
     "teachingClassName": "初三4班历史班",
     "subject": "历史",
@@ -23385,7 +28665,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_690",
+    "id": "S_ITEM_1130",
     "teachingClassId": "C_初三_C4_历史",
     "teachingClassName": "初三4班历史班",
     "subject": "历史",
@@ -23397,7 +28677,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_691",
+    "id": "S_ITEM_1131",
     "teachingClassId": "C_初三_C4_物理",
     "teachingClassName": "初三4班物理班",
     "subject": "物理",
@@ -23409,7 +28689,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_692",
+    "id": "S_ITEM_1132",
     "teachingClassId": "C_初三_C4_物理",
     "teachingClassName": "初三4班物理班",
     "subject": "物理",
@@ -23421,7 +28701,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_693",
+    "id": "S_ITEM_1133",
     "teachingClassId": "C_初三_C4_物理",
     "teachingClassName": "初三4班物理班",
     "subject": "物理",
@@ -23433,7 +28713,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_694",
+    "id": "S_ITEM_1134",
     "teachingClassId": "C_初三_C4_物理",
     "teachingClassName": "初三4班物理班",
     "subject": "物理",
@@ -23445,7 +28725,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_695",
+    "id": "S_ITEM_1135",
     "teachingClassId": "C_初三_C4_化学",
     "teachingClassName": "初三4班化学班",
     "subject": "化学",
@@ -23457,7 +28737,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_696",
+    "id": "S_ITEM_1136",
     "teachingClassId": "C_初三_C4_化学",
     "teachingClassName": "初三4班化学班",
     "subject": "化学",
@@ -23469,7 +28749,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_697",
+    "id": "S_ITEM_1137",
     "teachingClassId": "C_初三_C4_化学",
     "teachingClassName": "初三4班化学班",
     "subject": "化学",
@@ -23481,7 +28761,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_698",
+    "id": "S_ITEM_1138",
     "teachingClassId": "C_初三_C4_体育",
     "teachingClassName": "初三4班体育班",
     "subject": "体育",
@@ -23493,7 +28773,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_699",
+    "id": "S_ITEM_1139",
     "teachingClassId": "C_初三_C4_体育",
     "teachingClassName": "初三4班体育班",
     "subject": "体育",
@@ -23505,7 +28785,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_700",
+    "id": "S_ITEM_1140",
     "teachingClassId": "C_初三_C4_通用",
     "teachingClassName": "初三4班通用班",
     "subject": "通用",
@@ -23517,7 +28797,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_701",
+    "id": "S_ITEM_1141",
     "teachingClassId": "C_初三_C5_语文",
     "teachingClassName": "初三5班语文班",
     "subject": "语文",
@@ -23529,7 +28809,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_702",
+    "id": "S_ITEM_1142",
     "teachingClassId": "C_初三_C5_语文",
     "teachingClassName": "初三5班语文班",
     "subject": "语文",
@@ -23541,7 +28821,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_703",
+    "id": "S_ITEM_1143",
     "teachingClassId": "C_初三_C5_语文",
     "teachingClassName": "初三5班语文班",
     "subject": "语文",
@@ -23553,7 +28833,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_704",
+    "id": "S_ITEM_1144",
     "teachingClassId": "C_初三_C5_语文",
     "teachingClassName": "初三5班语文班",
     "subject": "语文",
@@ -23565,7 +28845,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_705",
+    "id": "S_ITEM_1145",
     "teachingClassId": "C_初三_C5_语文",
     "teachingClassName": "初三5班语文班",
     "subject": "语文",
@@ -23577,7 +28857,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_706",
+    "id": "S_ITEM_1146",
     "teachingClassId": "C_初三_C5_语文",
     "teachingClassName": "初三5班语文班",
     "subject": "语文",
@@ -23589,7 +28869,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_707",
+    "id": "S_ITEM_1147",
     "teachingClassId": "C_初三_C5_数学",
     "teachingClassName": "初三5班数学班",
     "subject": "数学",
@@ -23601,7 +28881,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_708",
+    "id": "S_ITEM_1148",
     "teachingClassId": "C_初三_C5_数学",
     "teachingClassName": "初三5班数学班",
     "subject": "数学",
@@ -23613,7 +28893,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_709",
+    "id": "S_ITEM_1149",
     "teachingClassId": "C_初三_C5_数学",
     "teachingClassName": "初三5班数学班",
     "subject": "数学",
@@ -23625,7 +28905,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_710",
+    "id": "S_ITEM_1150",
     "teachingClassId": "C_初三_C5_数学",
     "teachingClassName": "初三5班数学班",
     "subject": "数学",
@@ -23637,7 +28917,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_711",
+    "id": "S_ITEM_1151",
     "teachingClassId": "C_初三_C5_数学",
     "teachingClassName": "初三5班数学班",
     "subject": "数学",
@@ -23649,7 +28929,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_712",
+    "id": "S_ITEM_1152",
     "teachingClassId": "C_初三_C5_数学",
     "teachingClassName": "初三5班数学班",
     "subject": "数学",
@@ -23661,7 +28941,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_713",
+    "id": "S_ITEM_1153",
     "teachingClassId": "C_初三_C5_数学",
     "teachingClassName": "初三5班数学班",
     "subject": "数学",
@@ -23673,7 +28953,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_714",
+    "id": "S_ITEM_1154",
     "teachingClassId": "C_初三_C5_英语",
     "teachingClassName": "初三5班英语班",
     "subject": "英语",
@@ -23685,7 +28965,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_715",
+    "id": "S_ITEM_1155",
     "teachingClassId": "C_初三_C5_英语",
     "teachingClassName": "初三5班英语班",
     "subject": "英语",
@@ -23697,7 +28977,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_716",
+    "id": "S_ITEM_1156",
     "teachingClassId": "C_初三_C5_英语",
     "teachingClassName": "初三5班英语班",
     "subject": "英语",
@@ -23709,7 +28989,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_717",
+    "id": "S_ITEM_1157",
     "teachingClassId": "C_初三_C5_英语",
     "teachingClassName": "初三5班英语班",
     "subject": "英语",
@@ -23721,7 +29001,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_718",
+    "id": "S_ITEM_1158",
     "teachingClassId": "C_初三_C5_英语",
     "teachingClassName": "初三5班英语班",
     "subject": "英语",
@@ -23733,7 +29013,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_719",
+    "id": "S_ITEM_1159",
     "teachingClassId": "C_初三_C5_英语",
     "teachingClassName": "初三5班英语班",
     "subject": "英语",
@@ -23745,7 +29025,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_720",
+    "id": "S_ITEM_1160",
     "teachingClassId": "C_初三_C5_政治",
     "teachingClassName": "初三5班政治班",
     "subject": "政治",
@@ -23757,7 +29037,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_721",
+    "id": "S_ITEM_1161",
     "teachingClassId": "C_初三_C5_政治",
     "teachingClassName": "初三5班政治班",
     "subject": "政治",
@@ -23769,7 +29049,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_722",
+    "id": "S_ITEM_1162",
     "teachingClassId": "C_初三_C5_政治",
     "teachingClassName": "初三5班政治班",
     "subject": "政治",
@@ -23781,7 +29061,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_723",
+    "id": "S_ITEM_1163",
     "teachingClassId": "C_初三_C5_历史",
     "teachingClassName": "初三5班历史班",
     "subject": "历史",
@@ -23793,7 +29073,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_724",
+    "id": "S_ITEM_1164",
     "teachingClassId": "C_初三_C5_历史",
     "teachingClassName": "初三5班历史班",
     "subject": "历史",
@@ -23805,7 +29085,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_725",
+    "id": "S_ITEM_1165",
     "teachingClassId": "C_初三_C5_历史",
     "teachingClassName": "初三5班历史班",
     "subject": "历史",
@@ -23817,7 +29097,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_726",
+    "id": "S_ITEM_1166",
     "teachingClassId": "C_初三_C5_物理",
     "teachingClassName": "初三5班物理班",
     "subject": "物理",
@@ -23829,7 +29109,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_727",
+    "id": "S_ITEM_1167",
     "teachingClassId": "C_初三_C5_物理",
     "teachingClassName": "初三5班物理班",
     "subject": "物理",
@@ -23841,7 +29121,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_728",
+    "id": "S_ITEM_1168",
     "teachingClassId": "C_初三_C5_物理",
     "teachingClassName": "初三5班物理班",
     "subject": "物理",
@@ -23853,7 +29133,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_729",
+    "id": "S_ITEM_1169",
     "teachingClassId": "C_初三_C5_物理",
     "teachingClassName": "初三5班物理班",
     "subject": "物理",
@@ -23865,7 +29145,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_730",
+    "id": "S_ITEM_1170",
     "teachingClassId": "C_初三_C5_化学",
     "teachingClassName": "初三5班化学班",
     "subject": "化学",
@@ -23877,7 +29157,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_731",
+    "id": "S_ITEM_1171",
     "teachingClassId": "C_初三_C5_化学",
     "teachingClassName": "初三5班化学班",
     "subject": "化学",
@@ -23889,7 +29169,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_732",
+    "id": "S_ITEM_1172",
     "teachingClassId": "C_初三_C5_化学",
     "teachingClassName": "初三5班化学班",
     "subject": "化学",
@@ -23901,7 +29181,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_733",
+    "id": "S_ITEM_1173",
     "teachingClassId": "C_初三_C5_体育",
     "teachingClassName": "初三5班体育班",
     "subject": "体育",
@@ -23913,7 +29193,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_734",
+    "id": "S_ITEM_1174",
     "teachingClassId": "C_初三_C5_体育",
     "teachingClassName": "初三5班体育班",
     "subject": "体育",
@@ -23925,7 +29205,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_735",
+    "id": "S_ITEM_1175",
     "teachingClassId": "C_初三_C5_通用",
     "teachingClassName": "初三5班通用班",
     "subject": "通用",
@@ -23937,7 +29217,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_736",
+    "id": "S_ITEM_1176",
     "teachingClassId": "C_初三_C6_语文",
     "teachingClassName": "初三6班语文班",
     "subject": "语文",
@@ -23949,7 +29229,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_737",
+    "id": "S_ITEM_1177",
     "teachingClassId": "C_初三_C6_语文",
     "teachingClassName": "初三6班语文班",
     "subject": "语文",
@@ -23961,7 +29241,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_738",
+    "id": "S_ITEM_1178",
     "teachingClassId": "C_初三_C6_语文",
     "teachingClassName": "初三6班语文班",
     "subject": "语文",
@@ -23973,7 +29253,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_739",
+    "id": "S_ITEM_1179",
     "teachingClassId": "C_初三_C6_语文",
     "teachingClassName": "初三6班语文班",
     "subject": "语文",
@@ -23985,7 +29265,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_740",
+    "id": "S_ITEM_1180",
     "teachingClassId": "C_初三_C6_语文",
     "teachingClassName": "初三6班语文班",
     "subject": "语文",
@@ -23997,7 +29277,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_741",
+    "id": "S_ITEM_1181",
     "teachingClassId": "C_初三_C6_语文",
     "teachingClassName": "初三6班语文班",
     "subject": "语文",
@@ -24009,7 +29289,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_742",
+    "id": "S_ITEM_1182",
     "teachingClassId": "C_初三_C6_数学",
     "teachingClassName": "初三6班数学班",
     "subject": "数学",
@@ -24021,7 +29301,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_743",
+    "id": "S_ITEM_1183",
     "teachingClassId": "C_初三_C6_数学",
     "teachingClassName": "初三6班数学班",
     "subject": "数学",
@@ -24033,7 +29313,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_744",
+    "id": "S_ITEM_1184",
     "teachingClassId": "C_初三_C6_数学",
     "teachingClassName": "初三6班数学班",
     "subject": "数学",
@@ -24045,7 +29325,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_745",
+    "id": "S_ITEM_1185",
     "teachingClassId": "C_初三_C6_数学",
     "teachingClassName": "初三6班数学班",
     "subject": "数学",
@@ -24057,7 +29337,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_746",
+    "id": "S_ITEM_1186",
     "teachingClassId": "C_初三_C6_数学",
     "teachingClassName": "初三6班数学班",
     "subject": "数学",
@@ -24069,7 +29349,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_747",
+    "id": "S_ITEM_1187",
     "teachingClassId": "C_初三_C6_数学",
     "teachingClassName": "初三6班数学班",
     "subject": "数学",
@@ -24081,7 +29361,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_748",
+    "id": "S_ITEM_1188",
     "teachingClassId": "C_初三_C6_数学",
     "teachingClassName": "初三6班数学班",
     "subject": "数学",
@@ -24093,7 +29373,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_749",
+    "id": "S_ITEM_1189",
     "teachingClassId": "C_初三_C6_英语",
     "teachingClassName": "初三6班英语班",
     "subject": "英语",
@@ -24105,7 +29385,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_750",
+    "id": "S_ITEM_1190",
     "teachingClassId": "C_初三_C6_英语",
     "teachingClassName": "初三6班英语班",
     "subject": "英语",
@@ -24117,7 +29397,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_751",
+    "id": "S_ITEM_1191",
     "teachingClassId": "C_初三_C6_英语",
     "teachingClassName": "初三6班英语班",
     "subject": "英语",
@@ -24129,7 +29409,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_752",
+    "id": "S_ITEM_1192",
     "teachingClassId": "C_初三_C6_英语",
     "teachingClassName": "初三6班英语班",
     "subject": "英语",
@@ -24141,7 +29421,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_753",
+    "id": "S_ITEM_1193",
     "teachingClassId": "C_初三_C6_英语",
     "teachingClassName": "初三6班英语班",
     "subject": "英语",
@@ -24153,7 +29433,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_754",
+    "id": "S_ITEM_1194",
     "teachingClassId": "C_初三_C6_英语",
     "teachingClassName": "初三6班英语班",
     "subject": "英语",
@@ -24165,7 +29445,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_755",
+    "id": "S_ITEM_1195",
     "teachingClassId": "C_初三_C6_政治",
     "teachingClassName": "初三6班政治班",
     "subject": "政治",
@@ -24177,7 +29457,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_756",
+    "id": "S_ITEM_1196",
     "teachingClassId": "C_初三_C6_政治",
     "teachingClassName": "初三6班政治班",
     "subject": "政治",
@@ -24189,7 +29469,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_757",
+    "id": "S_ITEM_1197",
     "teachingClassId": "C_初三_C6_政治",
     "teachingClassName": "初三6班政治班",
     "subject": "政治",
@@ -24201,7 +29481,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_758",
+    "id": "S_ITEM_1198",
     "teachingClassId": "C_初三_C6_历史",
     "teachingClassName": "初三6班历史班",
     "subject": "历史",
@@ -24213,7 +29493,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_759",
+    "id": "S_ITEM_1199",
     "teachingClassId": "C_初三_C6_历史",
     "teachingClassName": "初三6班历史班",
     "subject": "历史",
@@ -24225,7 +29505,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_760",
+    "id": "S_ITEM_1200",
     "teachingClassId": "C_初三_C6_历史",
     "teachingClassName": "初三6班历史班",
     "subject": "历史",
@@ -24237,7 +29517,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_761",
+    "id": "S_ITEM_1201",
     "teachingClassId": "C_初三_C6_物理",
     "teachingClassName": "初三6班物理班",
     "subject": "物理",
@@ -24249,7 +29529,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_762",
+    "id": "S_ITEM_1202",
     "teachingClassId": "C_初三_C6_物理",
     "teachingClassName": "初三6班物理班",
     "subject": "物理",
@@ -24261,7 +29541,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_763",
+    "id": "S_ITEM_1203",
     "teachingClassId": "C_初三_C6_物理",
     "teachingClassName": "初三6班物理班",
     "subject": "物理",
@@ -24273,7 +29553,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_764",
+    "id": "S_ITEM_1204",
     "teachingClassId": "C_初三_C6_物理",
     "teachingClassName": "初三6班物理班",
     "subject": "物理",
@@ -24285,7 +29565,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_765",
+    "id": "S_ITEM_1205",
     "teachingClassId": "C_初三_C6_化学",
     "teachingClassName": "初三6班化学班",
     "subject": "化学",
@@ -24297,7 +29577,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_766",
+    "id": "S_ITEM_1206",
     "teachingClassId": "C_初三_C6_化学",
     "teachingClassName": "初三6班化学班",
     "subject": "化学",
@@ -24309,7 +29589,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_767",
+    "id": "S_ITEM_1207",
     "teachingClassId": "C_初三_C6_化学",
     "teachingClassName": "初三6班化学班",
     "subject": "化学",
@@ -24321,7 +29601,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_768",
+    "id": "S_ITEM_1208",
     "teachingClassId": "C_初三_C6_体育",
     "teachingClassName": "初三6班体育班",
     "subject": "体育",
@@ -24333,7 +29613,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_769",
+    "id": "S_ITEM_1209",
     "teachingClassId": "C_初三_C6_体育",
     "teachingClassName": "初三6班体育班",
     "subject": "体育",
@@ -24345,7 +29625,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_770",
+    "id": "S_ITEM_1210",
     "teachingClassId": "C_初三_C6_通用",
     "teachingClassName": "初三6班通用班",
     "subject": "通用",
@@ -24357,7 +29637,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_771",
+    "id": "S_ITEM_1211",
     "teachingClassId": "C_初三_C7_语文",
     "teachingClassName": "初三7班语文班",
     "subject": "语文",
@@ -24369,7 +29649,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_772",
+    "id": "S_ITEM_1212",
     "teachingClassId": "C_初三_C7_语文",
     "teachingClassName": "初三7班语文班",
     "subject": "语文",
@@ -24381,7 +29661,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_773",
+    "id": "S_ITEM_1213",
     "teachingClassId": "C_初三_C7_语文",
     "teachingClassName": "初三7班语文班",
     "subject": "语文",
@@ -24393,7 +29673,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_774",
+    "id": "S_ITEM_1214",
     "teachingClassId": "C_初三_C7_语文",
     "teachingClassName": "初三7班语文班",
     "subject": "语文",
@@ -24405,7 +29685,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_775",
+    "id": "S_ITEM_1215",
     "teachingClassId": "C_初三_C7_语文",
     "teachingClassName": "初三7班语文班",
     "subject": "语文",
@@ -24417,7 +29697,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_776",
+    "id": "S_ITEM_1216",
     "teachingClassId": "C_初三_C7_语文",
     "teachingClassName": "初三7班语文班",
     "subject": "语文",
@@ -24429,7 +29709,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_777",
+    "id": "S_ITEM_1217",
     "teachingClassId": "C_初三_C7_数学",
     "teachingClassName": "初三7班数学班",
     "subject": "数学",
@@ -24441,7 +29721,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_778",
+    "id": "S_ITEM_1218",
     "teachingClassId": "C_初三_C7_数学",
     "teachingClassName": "初三7班数学班",
     "subject": "数学",
@@ -24453,7 +29733,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_779",
+    "id": "S_ITEM_1219",
     "teachingClassId": "C_初三_C7_数学",
     "teachingClassName": "初三7班数学班",
     "subject": "数学",
@@ -24465,7 +29745,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_780",
+    "id": "S_ITEM_1220",
     "teachingClassId": "C_初三_C7_数学",
     "teachingClassName": "初三7班数学班",
     "subject": "数学",
@@ -24477,7 +29757,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_781",
+    "id": "S_ITEM_1221",
     "teachingClassId": "C_初三_C7_数学",
     "teachingClassName": "初三7班数学班",
     "subject": "数学",
@@ -24489,7 +29769,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_782",
+    "id": "S_ITEM_1222",
     "teachingClassId": "C_初三_C7_数学",
     "teachingClassName": "初三7班数学班",
     "subject": "数学",
@@ -24501,7 +29781,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_783",
+    "id": "S_ITEM_1223",
     "teachingClassId": "C_初三_C7_数学",
     "teachingClassName": "初三7班数学班",
     "subject": "数学",
@@ -24513,7 +29793,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_784",
+    "id": "S_ITEM_1224",
     "teachingClassId": "C_初三_C7_英语",
     "teachingClassName": "初三7班英语班",
     "subject": "英语",
@@ -24525,7 +29805,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_785",
+    "id": "S_ITEM_1225",
     "teachingClassId": "C_初三_C7_英语",
     "teachingClassName": "初三7班英语班",
     "subject": "英语",
@@ -24537,7 +29817,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_786",
+    "id": "S_ITEM_1226",
     "teachingClassId": "C_初三_C7_英语",
     "teachingClassName": "初三7班英语班",
     "subject": "英语",
@@ -24549,7 +29829,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_787",
+    "id": "S_ITEM_1227",
     "teachingClassId": "C_初三_C7_英语",
     "teachingClassName": "初三7班英语班",
     "subject": "英语",
@@ -24561,7 +29841,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_788",
+    "id": "S_ITEM_1228",
     "teachingClassId": "C_初三_C7_英语",
     "teachingClassName": "初三7班英语班",
     "subject": "英语",
@@ -24573,7 +29853,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_789",
+    "id": "S_ITEM_1229",
     "teachingClassId": "C_初三_C7_英语",
     "teachingClassName": "初三7班英语班",
     "subject": "英语",
@@ -24585,7 +29865,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_790",
+    "id": "S_ITEM_1230",
     "teachingClassId": "C_初三_C7_政治",
     "teachingClassName": "初三7班政治班",
     "subject": "政治",
@@ -24597,7 +29877,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_791",
+    "id": "S_ITEM_1231",
     "teachingClassId": "C_初三_C7_政治",
     "teachingClassName": "初三7班政治班",
     "subject": "政治",
@@ -24609,7 +29889,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_792",
+    "id": "S_ITEM_1232",
     "teachingClassId": "C_初三_C7_政治",
     "teachingClassName": "初三7班政治班",
     "subject": "政治",
@@ -24621,7 +29901,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_793",
+    "id": "S_ITEM_1233",
     "teachingClassId": "C_初三_C7_历史",
     "teachingClassName": "初三7班历史班",
     "subject": "历史",
@@ -24633,7 +29913,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_794",
+    "id": "S_ITEM_1234",
     "teachingClassId": "C_初三_C7_历史",
     "teachingClassName": "初三7班历史班",
     "subject": "历史",
@@ -24645,7 +29925,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_795",
+    "id": "S_ITEM_1235",
     "teachingClassId": "C_初三_C7_历史",
     "teachingClassName": "初三7班历史班",
     "subject": "历史",
@@ -24657,7 +29937,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_796",
+    "id": "S_ITEM_1236",
     "teachingClassId": "C_初三_C7_物理",
     "teachingClassName": "初三7班物理班",
     "subject": "物理",
@@ -24669,7 +29949,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_797",
+    "id": "S_ITEM_1237",
     "teachingClassId": "C_初三_C7_物理",
     "teachingClassName": "初三7班物理班",
     "subject": "物理",
@@ -24681,7 +29961,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_798",
+    "id": "S_ITEM_1238",
     "teachingClassId": "C_初三_C7_物理",
     "teachingClassName": "初三7班物理班",
     "subject": "物理",
@@ -24693,7 +29973,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_799",
+    "id": "S_ITEM_1239",
     "teachingClassId": "C_初三_C7_物理",
     "teachingClassName": "初三7班物理班",
     "subject": "物理",
@@ -24705,7 +29985,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_800",
+    "id": "S_ITEM_1240",
     "teachingClassId": "C_初三_C7_化学",
     "teachingClassName": "初三7班化学班",
     "subject": "化学",
@@ -24717,7 +29997,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_801",
+    "id": "S_ITEM_1241",
     "teachingClassId": "C_初三_C7_化学",
     "teachingClassName": "初三7班化学班",
     "subject": "化学",
@@ -24729,7 +30009,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_802",
+    "id": "S_ITEM_1242",
     "teachingClassId": "C_初三_C7_化学",
     "teachingClassName": "初三7班化学班",
     "subject": "化学",
@@ -24741,7 +30021,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_803",
+    "id": "S_ITEM_1243",
     "teachingClassId": "C_初三_C7_体育",
     "teachingClassName": "初三7班体育班",
     "subject": "体育",
@@ -24753,7 +30033,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_804",
+    "id": "S_ITEM_1244",
     "teachingClassId": "C_初三_C7_通用",
     "teachingClassName": "初三7班通用班",
     "subject": "通用",
@@ -24765,7 +30045,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_805",
+    "id": "S_ITEM_1245",
     "teachingClassId": "C_初三_C8_语文",
     "teachingClassName": "初三8班语文班",
     "subject": "语文",
@@ -24777,7 +30057,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_806",
+    "id": "S_ITEM_1246",
     "teachingClassId": "C_初三_C8_语文",
     "teachingClassName": "初三8班语文班",
     "subject": "语文",
@@ -24789,7 +30069,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_807",
+    "id": "S_ITEM_1247",
     "teachingClassId": "C_初三_C8_语文",
     "teachingClassName": "初三8班语文班",
     "subject": "语文",
@@ -24801,7 +30081,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_808",
+    "id": "S_ITEM_1248",
     "teachingClassId": "C_初三_C8_语文",
     "teachingClassName": "初三8班语文班",
     "subject": "语文",
@@ -24813,7 +30093,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_809",
+    "id": "S_ITEM_1249",
     "teachingClassId": "C_初三_C8_语文",
     "teachingClassName": "初三8班语文班",
     "subject": "语文",
@@ -24825,7 +30105,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_810",
+    "id": "S_ITEM_1250",
     "teachingClassId": "C_初三_C8_语文",
     "teachingClassName": "初三8班语文班",
     "subject": "语文",
@@ -24837,7 +30117,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_811",
+    "id": "S_ITEM_1251",
     "teachingClassId": "C_初三_C8_数学",
     "teachingClassName": "初三8班数学班",
     "subject": "数学",
@@ -24849,7 +30129,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_812",
+    "id": "S_ITEM_1252",
     "teachingClassId": "C_初三_C8_数学",
     "teachingClassName": "初三8班数学班",
     "subject": "数学",
@@ -24861,7 +30141,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_813",
+    "id": "S_ITEM_1253",
     "teachingClassId": "C_初三_C8_数学",
     "teachingClassName": "初三8班数学班",
     "subject": "数学",
@@ -24873,7 +30153,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_814",
+    "id": "S_ITEM_1254",
     "teachingClassId": "C_初三_C8_数学",
     "teachingClassName": "初三8班数学班",
     "subject": "数学",
@@ -24885,7 +30165,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_815",
+    "id": "S_ITEM_1255",
     "teachingClassId": "C_初三_C8_数学",
     "teachingClassName": "初三8班数学班",
     "subject": "数学",
@@ -24897,7 +30177,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_816",
+    "id": "S_ITEM_1256",
     "teachingClassId": "C_初三_C8_数学",
     "teachingClassName": "初三8班数学班",
     "subject": "数学",
@@ -24909,7 +30189,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_817",
+    "id": "S_ITEM_1257",
     "teachingClassId": "C_初三_C8_数学",
     "teachingClassName": "初三8班数学班",
     "subject": "数学",
@@ -24921,7 +30201,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_818",
+    "id": "S_ITEM_1258",
     "teachingClassId": "C_初三_C8_英语",
     "teachingClassName": "初三8班英语班",
     "subject": "英语",
@@ -24933,7 +30213,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_819",
+    "id": "S_ITEM_1259",
     "teachingClassId": "C_初三_C8_英语",
     "teachingClassName": "初三8班英语班",
     "subject": "英语",
@@ -24945,7 +30225,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_820",
+    "id": "S_ITEM_1260",
     "teachingClassId": "C_初三_C8_英语",
     "teachingClassName": "初三8班英语班",
     "subject": "英语",
@@ -24957,7 +30237,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_821",
+    "id": "S_ITEM_1261",
     "teachingClassId": "C_初三_C8_英语",
     "teachingClassName": "初三8班英语班",
     "subject": "英语",
@@ -24969,7 +30249,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_822",
+    "id": "S_ITEM_1262",
     "teachingClassId": "C_初三_C8_英语",
     "teachingClassName": "初三8班英语班",
     "subject": "英语",
@@ -24981,7 +30261,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_823",
+    "id": "S_ITEM_1263",
     "teachingClassId": "C_初三_C8_英语",
     "teachingClassName": "初三8班英语班",
     "subject": "英语",
@@ -24993,7 +30273,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_824",
+    "id": "S_ITEM_1264",
     "teachingClassId": "C_初三_C8_政治",
     "teachingClassName": "初三8班政治班",
     "subject": "政治",
@@ -25005,7 +30285,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_825",
+    "id": "S_ITEM_1265",
     "teachingClassId": "C_初三_C8_政治",
     "teachingClassName": "初三8班政治班",
     "subject": "政治",
@@ -25017,7 +30297,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_826",
+    "id": "S_ITEM_1266",
     "teachingClassId": "C_初三_C8_政治",
     "teachingClassName": "初三8班政治班",
     "subject": "政治",
@@ -25029,7 +30309,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_827",
+    "id": "S_ITEM_1267",
     "teachingClassId": "C_初三_C8_历史",
     "teachingClassName": "初三8班历史班",
     "subject": "历史",
@@ -25041,7 +30321,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_828",
+    "id": "S_ITEM_1268",
     "teachingClassId": "C_初三_C8_历史",
     "teachingClassName": "初三8班历史班",
     "subject": "历史",
@@ -25053,7 +30333,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_829",
+    "id": "S_ITEM_1269",
     "teachingClassId": "C_初三_C8_历史",
     "teachingClassName": "初三8班历史班",
     "subject": "历史",
@@ -25065,7 +30345,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_830",
+    "id": "S_ITEM_1270",
     "teachingClassId": "C_初三_C8_物理",
     "teachingClassName": "初三8班物理班",
     "subject": "物理",
@@ -25077,7 +30357,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_831",
+    "id": "S_ITEM_1271",
     "teachingClassId": "C_初三_C8_物理",
     "teachingClassName": "初三8班物理班",
     "subject": "物理",
@@ -25089,7 +30369,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_832",
+    "id": "S_ITEM_1272",
     "teachingClassId": "C_初三_C8_物理",
     "teachingClassName": "初三8班物理班",
     "subject": "物理",
@@ -25101,7 +30381,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_833",
+    "id": "S_ITEM_1273",
     "teachingClassId": "C_初三_C8_物理",
     "teachingClassName": "初三8班物理班",
     "subject": "物理",
@@ -25113,7 +30393,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_834",
+    "id": "S_ITEM_1274",
     "teachingClassId": "C_初三_C8_化学",
     "teachingClassName": "初三8班化学班",
     "subject": "化学",
@@ -25125,7 +30405,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_835",
+    "id": "S_ITEM_1275",
     "teachingClassId": "C_初三_C8_化学",
     "teachingClassName": "初三8班化学班",
     "subject": "化学",
@@ -25137,7 +30417,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_836",
+    "id": "S_ITEM_1276",
     "teachingClassId": "C_初三_C8_化学",
     "teachingClassName": "初三8班化学班",
     "subject": "化学",
@@ -25149,7 +30429,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_837",
+    "id": "S_ITEM_1277",
     "teachingClassId": "C_初三_C8_体育",
     "teachingClassName": "初三8班体育班",
     "subject": "体育",
@@ -25161,7 +30441,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_838",
+    "id": "S_ITEM_1278",
     "teachingClassId": "C_初三_C8_体育",
     "teachingClassName": "初三8班体育班",
     "subject": "体育",
@@ -25173,7 +30453,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_839",
+    "id": "S_ITEM_1279",
     "teachingClassId": "C_初三_C8_通用",
     "teachingClassName": "初三8班通用班",
     "subject": "通用",
@@ -25185,7 +30465,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_840",
+    "id": "S_ITEM_1280",
     "teachingClassId": "C_高一_C1_语文",
     "teachingClassName": "高一1班语文班",
     "subject": "语文",
@@ -25197,7 +30477,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_841",
+    "id": "S_ITEM_1281",
     "teachingClassId": "C_高一_C1_语文",
     "teachingClassName": "高一1班语文班",
     "subject": "语文",
@@ -25209,7 +30489,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_842",
+    "id": "S_ITEM_1282",
     "teachingClassId": "C_高一_C1_语文",
     "teachingClassName": "高一1班语文班",
     "subject": "语文",
@@ -25221,7 +30501,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_843",
+    "id": "S_ITEM_1283",
     "teachingClassId": "C_高一_C1_语文",
     "teachingClassName": "高一1班语文班",
     "subject": "语文",
@@ -25233,7 +30513,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_844",
+    "id": "S_ITEM_1284",
     "teachingClassId": "C_高一_C1_语文",
     "teachingClassName": "高一1班语文班",
     "subject": "语文",
@@ -25245,7 +30525,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_845",
+    "id": "S_ITEM_1285",
     "teachingClassId": "C_高一_C1_语文",
     "teachingClassName": "高一1班语文班",
     "subject": "语文",
@@ -25257,7 +30537,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_846",
+    "id": "S_ITEM_1286",
     "teachingClassId": "C_高一_C1_数学",
     "teachingClassName": "高一1班数学班",
     "subject": "数学",
@@ -25269,7 +30549,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_847",
+    "id": "S_ITEM_1287",
     "teachingClassId": "C_高一_C1_数学",
     "teachingClassName": "高一1班数学班",
     "subject": "数学",
@@ -25281,7 +30561,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_848",
+    "id": "S_ITEM_1288",
     "teachingClassId": "C_高一_C1_数学",
     "teachingClassName": "高一1班数学班",
     "subject": "数学",
@@ -25293,7 +30573,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_849",
+    "id": "S_ITEM_1289",
     "teachingClassId": "C_高一_C1_数学",
     "teachingClassName": "高一1班数学班",
     "subject": "数学",
@@ -25305,7 +30585,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_850",
+    "id": "S_ITEM_1290",
     "teachingClassId": "C_高一_C1_数学",
     "teachingClassName": "高一1班数学班",
     "subject": "数学",
@@ -25317,7 +30597,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_851",
+    "id": "S_ITEM_1291",
     "teachingClassId": "C_高一_C1_数学",
     "teachingClassName": "高一1班数学班",
     "subject": "数学",
@@ -25329,7 +30609,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_852",
+    "id": "S_ITEM_1292",
     "teachingClassId": "C_高一_C1_数学",
     "teachingClassName": "高一1班数学班",
     "subject": "数学",
@@ -25341,7 +30621,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_853",
+    "id": "S_ITEM_1293",
     "teachingClassId": "C_高一_C1_英语",
     "teachingClassName": "高一1班英语班",
     "subject": "英语",
@@ -25353,7 +30633,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_854",
+    "id": "S_ITEM_1294",
     "teachingClassId": "C_高一_C1_英语",
     "teachingClassName": "高一1班英语班",
     "subject": "英语",
@@ -25365,7 +30645,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_855",
+    "id": "S_ITEM_1295",
     "teachingClassId": "C_高一_C1_英语",
     "teachingClassName": "高一1班英语班",
     "subject": "英语",
@@ -25377,7 +30657,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_856",
+    "id": "S_ITEM_1296",
     "teachingClassId": "C_高一_C1_英语",
     "teachingClassName": "高一1班英语班",
     "subject": "英语",
@@ -25389,7 +30669,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_857",
+    "id": "S_ITEM_1297",
     "teachingClassId": "C_高一_C1_英语",
     "teachingClassName": "高一1班英语班",
     "subject": "英语",
@@ -25401,7 +30681,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_858",
+    "id": "S_ITEM_1298",
     "teachingClassId": "C_高一_C1_英语",
     "teachingClassName": "高一1班英语班",
     "subject": "英语",
@@ -25413,7 +30693,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_859",
+    "id": "S_ITEM_1299",
     "teachingClassId": "C_高一_C1_英语",
     "teachingClassName": "高一1班英语班",
     "subject": "英语",
@@ -25425,7 +30705,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_860",
+    "id": "S_ITEM_1300",
     "teachingClassId": "C_高一_C1_历史",
     "teachingClassName": "高一1班历史班",
     "subject": "历史",
@@ -25437,7 +30717,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_861",
+    "id": "S_ITEM_1301",
     "teachingClassId": "C_高一_C1_地理",
     "teachingClassName": "高一1班地理班",
     "subject": "地理",
@@ -25449,7 +30729,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_862",
+    "id": "S_ITEM_1302",
     "teachingClassId": "C_高一_C1_物理",
     "teachingClassName": "高一1班物理班",
     "subject": "物理",
@@ -25461,7 +30741,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_863",
+    "id": "S_ITEM_1303",
     "teachingClassId": "C_高一_C1_物理",
     "teachingClassName": "高一1班物理班",
     "subject": "物理",
@@ -25473,7 +30753,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_864",
+    "id": "S_ITEM_1304",
     "teachingClassId": "C_高一_C1_物理",
     "teachingClassName": "高一1班物理班",
     "subject": "物理",
@@ -25485,7 +30765,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_865",
+    "id": "S_ITEM_1305",
     "teachingClassId": "C_高一_C1_物理",
     "teachingClassName": "高一1班物理班",
     "subject": "物理",
@@ -25497,7 +30777,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_866",
+    "id": "S_ITEM_1306",
     "teachingClassId": "C_高一_C1_物理",
     "teachingClassName": "高一1班物理班",
     "subject": "物理",
@@ -25509,7 +30789,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_867",
+    "id": "S_ITEM_1307",
     "teachingClassId": "C_高一_C1_物理",
     "teachingClassName": "高一1班物理班",
     "subject": "物理",
@@ -25521,7 +30801,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_868",
+    "id": "S_ITEM_1308",
     "teachingClassId": "C_高一_C1_化学",
     "teachingClassName": "高一1班化学班",
     "subject": "化学",
@@ -25533,7 +30813,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_869",
+    "id": "S_ITEM_1309",
     "teachingClassId": "C_高一_C1_化学",
     "teachingClassName": "高一1班化学班",
     "subject": "化学",
@@ -25545,7 +30825,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_870",
+    "id": "S_ITEM_1310",
     "teachingClassId": "C_高一_C1_化学",
     "teachingClassName": "高一1班化学班",
     "subject": "化学",
@@ -25557,7 +30837,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_871",
+    "id": "S_ITEM_1311",
     "teachingClassId": "C_高一_C1_化学",
     "teachingClassName": "高一1班化学班",
     "subject": "化学",
@@ -25569,7 +30849,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_872",
+    "id": "S_ITEM_1312",
     "teachingClassId": "C_高一_C1_生物",
     "teachingClassName": "高一1班生物班",
     "subject": "生物",
@@ -25581,7 +30861,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_873",
+    "id": "S_ITEM_1313",
     "teachingClassId": "C_高一_C1_生物",
     "teachingClassName": "高一1班生物班",
     "subject": "生物",
@@ -25593,7 +30873,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_874",
+    "id": "S_ITEM_1314",
     "teachingClassId": "C_高一_C1_生物",
     "teachingClassName": "高一1班生物班",
     "subject": "生物",
@@ -25605,7 +30885,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_875",
+    "id": "S_ITEM_1315",
     "teachingClassId": "C_高一_C1_生物",
     "teachingClassName": "高一1班生物班",
     "subject": "生物",
@@ -25617,7 +30897,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_876",
+    "id": "S_ITEM_1316",
     "teachingClassId": "C_高一_C1_体育",
     "teachingClassName": "高一1班体育班",
     "subject": "体育",
@@ -25629,7 +30909,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_877",
+    "id": "S_ITEM_1317",
     "teachingClassId": "C_高一_C1_体育",
     "teachingClassName": "高一1班体育班",
     "subject": "体育",
@@ -25641,7 +30921,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_878",
+    "id": "S_ITEM_1318",
     "teachingClassId": "C_高一_C2_语文",
     "teachingClassName": "高一2班语文班",
     "subject": "语文",
@@ -25653,7 +30933,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_879",
+    "id": "S_ITEM_1319",
     "teachingClassId": "C_高一_C2_语文",
     "teachingClassName": "高一2班语文班",
     "subject": "语文",
@@ -25665,7 +30945,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_880",
+    "id": "S_ITEM_1320",
     "teachingClassId": "C_高一_C2_语文",
     "teachingClassName": "高一2班语文班",
     "subject": "语文",
@@ -25677,7 +30957,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_881",
+    "id": "S_ITEM_1321",
     "teachingClassId": "C_高一_C2_语文",
     "teachingClassName": "高一2班语文班",
     "subject": "语文",
@@ -25689,7 +30969,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_882",
+    "id": "S_ITEM_1322",
     "teachingClassId": "C_高一_C2_语文",
     "teachingClassName": "高一2班语文班",
     "subject": "语文",
@@ -25701,7 +30981,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_883",
+    "id": "S_ITEM_1323",
     "teachingClassId": "C_高一_C2_语文",
     "teachingClassName": "高一2班语文班",
     "subject": "语文",
@@ -25713,7 +30993,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_884",
+    "id": "S_ITEM_1324",
     "teachingClassId": "C_高一_C2_数学",
     "teachingClassName": "高一2班数学班",
     "subject": "数学",
@@ -25725,7 +31005,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_885",
+    "id": "S_ITEM_1325",
     "teachingClassId": "C_高一_C2_数学",
     "teachingClassName": "高一2班数学班",
     "subject": "数学",
@@ -25737,7 +31017,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_886",
+    "id": "S_ITEM_1326",
     "teachingClassId": "C_高一_C2_数学",
     "teachingClassName": "高一2班数学班",
     "subject": "数学",
@@ -25749,7 +31029,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_887",
+    "id": "S_ITEM_1327",
     "teachingClassId": "C_高一_C2_数学",
     "teachingClassName": "高一2班数学班",
     "subject": "数学",
@@ -25761,7 +31041,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_888",
+    "id": "S_ITEM_1328",
     "teachingClassId": "C_高一_C2_数学",
     "teachingClassName": "高一2班数学班",
     "subject": "数学",
@@ -25773,7 +31053,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_889",
+    "id": "S_ITEM_1329",
     "teachingClassId": "C_高一_C2_数学",
     "teachingClassName": "高一2班数学班",
     "subject": "数学",
@@ -25785,7 +31065,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_890",
+    "id": "S_ITEM_1330",
     "teachingClassId": "C_高一_C2_数学",
     "teachingClassName": "高一2班数学班",
     "subject": "数学",
@@ -25797,7 +31077,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_891",
+    "id": "S_ITEM_1331",
     "teachingClassId": "C_高一_C2_英语",
     "teachingClassName": "高一2班英语班",
     "subject": "英语",
@@ -25809,7 +31089,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_892",
+    "id": "S_ITEM_1332",
     "teachingClassId": "C_高一_C2_英语",
     "teachingClassName": "高一2班英语班",
     "subject": "英语",
@@ -25821,7 +31101,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_893",
+    "id": "S_ITEM_1333",
     "teachingClassId": "C_高一_C2_英语",
     "teachingClassName": "高一2班英语班",
     "subject": "英语",
@@ -25833,7 +31113,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_894",
+    "id": "S_ITEM_1334",
     "teachingClassId": "C_高一_C2_英语",
     "teachingClassName": "高一2班英语班",
     "subject": "英语",
@@ -25845,7 +31125,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_895",
+    "id": "S_ITEM_1335",
     "teachingClassId": "C_高一_C2_英语",
     "teachingClassName": "高一2班英语班",
     "subject": "英语",
@@ -25857,7 +31137,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_896",
+    "id": "S_ITEM_1336",
     "teachingClassId": "C_高一_C2_英语",
     "teachingClassName": "高一2班英语班",
     "subject": "英语",
@@ -25869,7 +31149,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_897",
+    "id": "S_ITEM_1337",
     "teachingClassId": "C_高一_C2_英语",
     "teachingClassName": "高一2班英语班",
     "subject": "英语",
@@ -25881,7 +31161,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_898",
+    "id": "S_ITEM_1338",
     "teachingClassId": "C_高一_C2_历史",
     "teachingClassName": "高一2班历史班",
     "subject": "历史",
@@ -25893,7 +31173,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_899",
+    "id": "S_ITEM_1339",
     "teachingClassId": "C_高一_C2_地理",
     "teachingClassName": "高一2班地理班",
     "subject": "地理",
@@ -25905,7 +31185,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_900",
+    "id": "S_ITEM_1340",
     "teachingClassId": "C_高一_C2_物理",
     "teachingClassName": "高一2班物理班",
     "subject": "物理",
@@ -25917,7 +31197,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_901",
+    "id": "S_ITEM_1341",
     "teachingClassId": "C_高一_C2_物理",
     "teachingClassName": "高一2班物理班",
     "subject": "物理",
@@ -25929,7 +31209,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_902",
+    "id": "S_ITEM_1342",
     "teachingClassId": "C_高一_C2_物理",
     "teachingClassName": "高一2班物理班",
     "subject": "物理",
@@ -25941,7 +31221,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_903",
+    "id": "S_ITEM_1343",
     "teachingClassId": "C_高一_C2_物理",
     "teachingClassName": "高一2班物理班",
     "subject": "物理",
@@ -25953,7 +31233,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_904",
+    "id": "S_ITEM_1344",
     "teachingClassId": "C_高一_C2_物理",
     "teachingClassName": "高一2班物理班",
     "subject": "物理",
@@ -25965,7 +31245,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_905",
+    "id": "S_ITEM_1345",
     "teachingClassId": "C_高一_C2_物理",
     "teachingClassName": "高一2班物理班",
     "subject": "物理",
@@ -25977,7 +31257,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_906",
+    "id": "S_ITEM_1346",
     "teachingClassId": "C_高一_C2_化学",
     "teachingClassName": "高一2班化学班",
     "subject": "化学",
@@ -25989,7 +31269,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_907",
+    "id": "S_ITEM_1347",
     "teachingClassId": "C_高一_C2_化学",
     "teachingClassName": "高一2班化学班",
     "subject": "化学",
@@ -26001,7 +31281,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_908",
+    "id": "S_ITEM_1348",
     "teachingClassId": "C_高一_C2_化学",
     "teachingClassName": "高一2班化学班",
     "subject": "化学",
@@ -26013,7 +31293,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_909",
+    "id": "S_ITEM_1349",
     "teachingClassId": "C_高一_C2_化学",
     "teachingClassName": "高一2班化学班",
     "subject": "化学",
@@ -26025,7 +31305,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_910",
+    "id": "S_ITEM_1350",
     "teachingClassId": "C_高一_C2_生物",
     "teachingClassName": "高一2班生物班",
     "subject": "生物",
@@ -26037,7 +31317,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_911",
+    "id": "S_ITEM_1351",
     "teachingClassId": "C_高一_C2_生物",
     "teachingClassName": "高一2班生物班",
     "subject": "生物",
@@ -26049,7 +31329,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_912",
+    "id": "S_ITEM_1352",
     "teachingClassId": "C_高一_C2_生物",
     "teachingClassName": "高一2班生物班",
     "subject": "生物",
@@ -26061,7 +31341,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_913",
+    "id": "S_ITEM_1353",
     "teachingClassId": "C_高一_C2_生物",
     "teachingClassName": "高一2班生物班",
     "subject": "生物",
@@ -26073,7 +31353,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_914",
+    "id": "S_ITEM_1354",
     "teachingClassId": "C_高一_C2_体育",
     "teachingClassName": "高一2班体育班",
     "subject": "体育",
@@ -26085,7 +31365,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_915",
+    "id": "S_ITEM_1355",
     "teachingClassId": "C_高一_C2_体育",
     "teachingClassName": "高一2班体育班",
     "subject": "体育",
@@ -26097,7 +31377,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_916",
+    "id": "S_ITEM_1356",
     "teachingClassId": "C_高一_C3_语文",
     "teachingClassName": "高一3班语文班",
     "subject": "语文",
@@ -26109,7 +31389,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_917",
+    "id": "S_ITEM_1357",
     "teachingClassId": "C_高一_C3_语文",
     "teachingClassName": "高一3班语文班",
     "subject": "语文",
@@ -26121,7 +31401,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_918",
+    "id": "S_ITEM_1358",
     "teachingClassId": "C_高一_C3_语文",
     "teachingClassName": "高一3班语文班",
     "subject": "语文",
@@ -26133,7 +31413,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_919",
+    "id": "S_ITEM_1359",
     "teachingClassId": "C_高一_C3_语文",
     "teachingClassName": "高一3班语文班",
     "subject": "语文",
@@ -26145,7 +31425,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_920",
+    "id": "S_ITEM_1360",
     "teachingClassId": "C_高一_C3_语文",
     "teachingClassName": "高一3班语文班",
     "subject": "语文",
@@ -26157,7 +31437,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_921",
+    "id": "S_ITEM_1361",
     "teachingClassId": "C_高一_C3_语文",
     "teachingClassName": "高一3班语文班",
     "subject": "语文",
@@ -26169,7 +31449,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_922",
+    "id": "S_ITEM_1362",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26181,7 +31461,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_923",
+    "id": "S_ITEM_1363",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26193,7 +31473,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_924",
+    "id": "S_ITEM_1364",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26205,7 +31485,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_925",
+    "id": "S_ITEM_1365",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26217,7 +31497,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_926",
+    "id": "S_ITEM_1366",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26229,7 +31509,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_927",
+    "id": "S_ITEM_1367",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26241,7 +31521,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_928",
+    "id": "S_ITEM_1368",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26253,7 +31533,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_929",
+    "id": "S_ITEM_1369",
     "teachingClassId": "C_高一_C3_数学",
     "teachingClassName": "高一3班数学班",
     "subject": "数学",
@@ -26265,7 +31545,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_930",
+    "id": "S_ITEM_1370",
     "teachingClassId": "C_高一_C3_英语",
     "teachingClassName": "高一3班英语班",
     "subject": "英语",
@@ -26277,7 +31557,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_931",
+    "id": "S_ITEM_1371",
     "teachingClassId": "C_高一_C3_英语",
     "teachingClassName": "高一3班英语班",
     "subject": "英语",
@@ -26289,7 +31569,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_932",
+    "id": "S_ITEM_1372",
     "teachingClassId": "C_高一_C3_英语",
     "teachingClassName": "高一3班英语班",
     "subject": "英语",
@@ -26301,7 +31581,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_933",
+    "id": "S_ITEM_1373",
     "teachingClassId": "C_高一_C3_英语",
     "teachingClassName": "高一3班英语班",
     "subject": "英语",
@@ -26313,7 +31593,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_934",
+    "id": "S_ITEM_1374",
     "teachingClassId": "C_高一_C3_英语",
     "teachingClassName": "高一3班英语班",
     "subject": "英语",
@@ -26325,7 +31605,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_935",
+    "id": "S_ITEM_1375",
     "teachingClassId": "C_高一_C3_英语",
     "teachingClassName": "高一3班英语班",
     "subject": "英语",
@@ -26337,7 +31617,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_936",
+    "id": "S_ITEM_1376",
     "teachingClassId": "C_高一_C3_英语",
     "teachingClassName": "高一3班英语班",
     "subject": "英语",
@@ -26349,7 +31629,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_937",
+    "id": "S_ITEM_1377",
     "teachingClassId": "C_高一_C3_历史",
     "teachingClassName": "高一3班历史班",
     "subject": "历史",
@@ -26361,7 +31641,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_938",
+    "id": "S_ITEM_1378",
     "teachingClassId": "C_高一_C3_地理",
     "teachingClassName": "高一3班地理班",
     "subject": "地理",
@@ -26373,7 +31653,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_939",
+    "id": "S_ITEM_1379",
     "teachingClassId": "C_高一_C3_物理",
     "teachingClassName": "高一3班物理班",
     "subject": "物理",
@@ -26385,7 +31665,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_940",
+    "id": "S_ITEM_1380",
     "teachingClassId": "C_高一_C3_物理",
     "teachingClassName": "高一3班物理班",
     "subject": "物理",
@@ -26397,7 +31677,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_941",
+    "id": "S_ITEM_1381",
     "teachingClassId": "C_高一_C3_物理",
     "teachingClassName": "高一3班物理班",
     "subject": "物理",
@@ -26409,7 +31689,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_942",
+    "id": "S_ITEM_1382",
     "teachingClassId": "C_高一_C3_物理",
     "teachingClassName": "高一3班物理班",
     "subject": "物理",
@@ -26421,7 +31701,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_943",
+    "id": "S_ITEM_1383",
     "teachingClassId": "C_高一_C3_物理",
     "teachingClassName": "高一3班物理班",
     "subject": "物理",
@@ -26433,7 +31713,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_944",
+    "id": "S_ITEM_1384",
     "teachingClassId": "C_高一_C3_化学",
     "teachingClassName": "高一3班化学班",
     "subject": "化学",
@@ -26445,7 +31725,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_945",
+    "id": "S_ITEM_1385",
     "teachingClassId": "C_高一_C3_化学",
     "teachingClassName": "高一3班化学班",
     "subject": "化学",
@@ -26457,7 +31737,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_946",
+    "id": "S_ITEM_1386",
     "teachingClassId": "C_高一_C3_化学",
     "teachingClassName": "高一3班化学班",
     "subject": "化学",
@@ -26469,7 +31749,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_947",
+    "id": "S_ITEM_1387",
     "teachingClassId": "C_高一_C3_化学",
     "teachingClassName": "高一3班化学班",
     "subject": "化学",
@@ -26481,7 +31761,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_948",
+    "id": "S_ITEM_1388",
     "teachingClassId": "C_高一_C3_生物",
     "teachingClassName": "高一3班生物班",
     "subject": "生物",
@@ -26493,7 +31773,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_949",
+    "id": "S_ITEM_1389",
     "teachingClassId": "C_高一_C3_生物",
     "teachingClassName": "高一3班生物班",
     "subject": "生物",
@@ -26505,7 +31785,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_950",
+    "id": "S_ITEM_1390",
     "teachingClassId": "C_高一_C3_生物",
     "teachingClassName": "高一3班生物班",
     "subject": "生物",
@@ -26517,7 +31797,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_951",
+    "id": "S_ITEM_1391",
     "teachingClassId": "C_高一_C3_生物",
     "teachingClassName": "高一3班生物班",
     "subject": "生物",
@@ -26529,7 +31809,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_952",
+    "id": "S_ITEM_1392",
     "teachingClassId": "C_高一_C3_体育",
     "teachingClassName": "高一3班体育班",
     "subject": "体育",
@@ -26541,7 +31821,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_953",
+    "id": "S_ITEM_1393",
     "teachingClassId": "C_高一_C4_语文",
     "teachingClassName": "高一4班语文班",
     "subject": "语文",
@@ -26553,7 +31833,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_954",
+    "id": "S_ITEM_1394",
     "teachingClassId": "C_高一_C4_语文",
     "teachingClassName": "高一4班语文班",
     "subject": "语文",
@@ -26565,7 +31845,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_955",
+    "id": "S_ITEM_1395",
     "teachingClassId": "C_高一_C4_语文",
     "teachingClassName": "高一4班语文班",
     "subject": "语文",
@@ -26577,7 +31857,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_956",
+    "id": "S_ITEM_1396",
     "teachingClassId": "C_高一_C4_语文",
     "teachingClassName": "高一4班语文班",
     "subject": "语文",
@@ -26589,7 +31869,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_957",
+    "id": "S_ITEM_1397",
     "teachingClassId": "C_高一_C4_语文",
     "teachingClassName": "高一4班语文班",
     "subject": "语文",
@@ -26601,7 +31881,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_958",
+    "id": "S_ITEM_1398",
     "teachingClassId": "C_高一_C4_语文",
     "teachingClassName": "高一4班语文班",
     "subject": "语文",
@@ -26613,7 +31893,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_959",
+    "id": "S_ITEM_1399",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26625,7 +31905,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_960",
+    "id": "S_ITEM_1400",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26637,7 +31917,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_961",
+    "id": "S_ITEM_1401",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26649,7 +31929,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_962",
+    "id": "S_ITEM_1402",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26661,7 +31941,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_963",
+    "id": "S_ITEM_1403",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26673,7 +31953,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_964",
+    "id": "S_ITEM_1404",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26685,7 +31965,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_965",
+    "id": "S_ITEM_1405",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26697,7 +31977,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_966",
+    "id": "S_ITEM_1406",
     "teachingClassId": "C_高一_C4_数学",
     "teachingClassName": "高一4班数学班",
     "subject": "数学",
@@ -26709,7 +31989,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_967",
+    "id": "S_ITEM_1407",
     "teachingClassId": "C_高一_C4_英语",
     "teachingClassName": "高一4班英语班",
     "subject": "英语",
@@ -26721,7 +32001,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_968",
+    "id": "S_ITEM_1408",
     "teachingClassId": "C_高一_C4_英语",
     "teachingClassName": "高一4班英语班",
     "subject": "英语",
@@ -26733,7 +32013,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_969",
+    "id": "S_ITEM_1409",
     "teachingClassId": "C_高一_C4_英语",
     "teachingClassName": "高一4班英语班",
     "subject": "英语",
@@ -26745,7 +32025,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_970",
+    "id": "S_ITEM_1410",
     "teachingClassId": "C_高一_C4_英语",
     "teachingClassName": "高一4班英语班",
     "subject": "英语",
@@ -26757,7 +32037,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_971",
+    "id": "S_ITEM_1411",
     "teachingClassId": "C_高一_C4_英语",
     "teachingClassName": "高一4班英语班",
     "subject": "英语",
@@ -26769,7 +32049,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_972",
+    "id": "S_ITEM_1412",
     "teachingClassId": "C_高一_C4_英语",
     "teachingClassName": "高一4班英语班",
     "subject": "英语",
@@ -26781,7 +32061,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_973",
+    "id": "S_ITEM_1413",
     "teachingClassId": "C_高一_C4_英语",
     "teachingClassName": "高一4班英语班",
     "subject": "英语",
@@ -26793,7 +32073,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_974",
+    "id": "S_ITEM_1414",
     "teachingClassId": "C_高一_C4_历史",
     "teachingClassName": "高一4班历史班",
     "subject": "历史",
@@ -26805,7 +32085,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_975",
+    "id": "S_ITEM_1415",
     "teachingClassId": "C_高一_C4_地理",
     "teachingClassName": "高一4班地理班",
     "subject": "地理",
@@ -26817,7 +32097,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_976",
+    "id": "S_ITEM_1416",
     "teachingClassId": "C_高一_C4_物理",
     "teachingClassName": "高一4班物理班",
     "subject": "物理",
@@ -26829,7 +32109,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_977",
+    "id": "S_ITEM_1417",
     "teachingClassId": "C_高一_C4_物理",
     "teachingClassName": "高一4班物理班",
     "subject": "物理",
@@ -26841,7 +32121,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_978",
+    "id": "S_ITEM_1418",
     "teachingClassId": "C_高一_C4_物理",
     "teachingClassName": "高一4班物理班",
     "subject": "物理",
@@ -26853,7 +32133,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_979",
+    "id": "S_ITEM_1419",
     "teachingClassId": "C_高一_C4_物理",
     "teachingClassName": "高一4班物理班",
     "subject": "物理",
@@ -26865,7 +32145,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_980",
+    "id": "S_ITEM_1420",
     "teachingClassId": "C_高一_C4_物理",
     "teachingClassName": "高一4班物理班",
     "subject": "物理",
@@ -26877,7 +32157,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_981",
+    "id": "S_ITEM_1421",
     "teachingClassId": "C_高一_C4_化学",
     "teachingClassName": "高一4班化学班",
     "subject": "化学",
@@ -26889,7 +32169,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_982",
+    "id": "S_ITEM_1422",
     "teachingClassId": "C_高一_C4_化学",
     "teachingClassName": "高一4班化学班",
     "subject": "化学",
@@ -26901,7 +32181,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_983",
+    "id": "S_ITEM_1423",
     "teachingClassId": "C_高一_C4_化学",
     "teachingClassName": "高一4班化学班",
     "subject": "化学",
@@ -26913,7 +32193,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_984",
+    "id": "S_ITEM_1424",
     "teachingClassId": "C_高一_C4_化学",
     "teachingClassName": "高一4班化学班",
     "subject": "化学",
@@ -26925,7 +32205,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_985",
+    "id": "S_ITEM_1425",
     "teachingClassId": "C_高一_C4_生物",
     "teachingClassName": "高一4班生物班",
     "subject": "生物",
@@ -26937,7 +32217,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_986",
+    "id": "S_ITEM_1426",
     "teachingClassId": "C_高一_C4_生物",
     "teachingClassName": "高一4班生物班",
     "subject": "生物",
@@ -26949,7 +32229,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_987",
+    "id": "S_ITEM_1427",
     "teachingClassId": "C_高一_C4_生物",
     "teachingClassName": "高一4班生物班",
     "subject": "生物",
@@ -26961,7 +32241,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_988",
+    "id": "S_ITEM_1428",
     "teachingClassId": "C_高一_C4_生物",
     "teachingClassName": "高一4班生物班",
     "subject": "生物",
@@ -26973,7 +32253,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_989",
+    "id": "S_ITEM_1429",
     "teachingClassId": "C_高一_C5_语文",
     "teachingClassName": "高一5班语文班",
     "subject": "语文",
@@ -26985,7 +32265,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_990",
+    "id": "S_ITEM_1430",
     "teachingClassId": "C_高一_C5_语文",
     "teachingClassName": "高一5班语文班",
     "subject": "语文",
@@ -26997,7 +32277,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_991",
+    "id": "S_ITEM_1431",
     "teachingClassId": "C_高一_C5_语文",
     "teachingClassName": "高一5班语文班",
     "subject": "语文",
@@ -27009,7 +32289,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_992",
+    "id": "S_ITEM_1432",
     "teachingClassId": "C_高一_C5_语文",
     "teachingClassName": "高一5班语文班",
     "subject": "语文",
@@ -27021,7 +32301,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_993",
+    "id": "S_ITEM_1433",
     "teachingClassId": "C_高一_C5_语文",
     "teachingClassName": "高一5班语文班",
     "subject": "语文",
@@ -27033,7 +32313,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_994",
+    "id": "S_ITEM_1434",
     "teachingClassId": "C_高一_C5_语文",
     "teachingClassName": "高一5班语文班",
     "subject": "语文",
@@ -27045,7 +32325,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_995",
+    "id": "S_ITEM_1435",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27057,7 +32337,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_996",
+    "id": "S_ITEM_1436",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27069,7 +32349,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_997",
+    "id": "S_ITEM_1437",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27081,7 +32361,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_998",
+    "id": "S_ITEM_1438",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27093,7 +32373,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_999",
+    "id": "S_ITEM_1439",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27105,7 +32385,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1000",
+    "id": "S_ITEM_1440",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27117,7 +32397,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1001",
+    "id": "S_ITEM_1441",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27129,7 +32409,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1002",
+    "id": "S_ITEM_1442",
     "teachingClassId": "C_高一_C5_数学",
     "teachingClassName": "高一5班数学班",
     "subject": "数学",
@@ -27141,7 +32421,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1003",
+    "id": "S_ITEM_1443",
     "teachingClassId": "C_高一_C5_英语",
     "teachingClassName": "高一5班英语班",
     "subject": "英语",
@@ -27153,7 +32433,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1004",
+    "id": "S_ITEM_1444",
     "teachingClassId": "C_高一_C5_英语",
     "teachingClassName": "高一5班英语班",
     "subject": "英语",
@@ -27165,7 +32445,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1005",
+    "id": "S_ITEM_1445",
     "teachingClassId": "C_高一_C5_英语",
     "teachingClassName": "高一5班英语班",
     "subject": "英语",
@@ -27177,7 +32457,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1006",
+    "id": "S_ITEM_1446",
     "teachingClassId": "C_高一_C5_英语",
     "teachingClassName": "高一5班英语班",
     "subject": "英语",
@@ -27189,7 +32469,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1007",
+    "id": "S_ITEM_1447",
     "teachingClassId": "C_高一_C5_英语",
     "teachingClassName": "高一5班英语班",
     "subject": "英语",
@@ -27201,7 +32481,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1008",
+    "id": "S_ITEM_1448",
     "teachingClassId": "C_高一_C5_英语",
     "teachingClassName": "高一5班英语班",
     "subject": "英语",
@@ -27213,7 +32493,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1009",
+    "id": "S_ITEM_1449",
     "teachingClassId": "C_高一_C5_英语",
     "teachingClassName": "高一5班英语班",
     "subject": "英语",
@@ -27225,7 +32505,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1010",
+    "id": "S_ITEM_1450",
     "teachingClassId": "C_高一_C5_历史",
     "teachingClassName": "高一5班历史班",
     "subject": "历史",
@@ -27237,7 +32517,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1011",
+    "id": "S_ITEM_1451",
     "teachingClassId": "C_高一_C5_地理",
     "teachingClassName": "高一5班地理班",
     "subject": "地理",
@@ -27249,7 +32529,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1012",
+    "id": "S_ITEM_1452",
     "teachingClassId": "C_高一_C5_地理",
     "teachingClassName": "高一5班地理班",
     "subject": "地理",
@@ -27261,7 +32541,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1013",
+    "id": "S_ITEM_1453",
     "teachingClassId": "C_高一_C5_地理",
     "teachingClassName": "高一5班地理班",
     "subject": "地理",
@@ -27273,7 +32553,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1014",
+    "id": "S_ITEM_1454",
     "teachingClassId": "C_高一_C5_地理",
     "teachingClassName": "高一5班地理班",
     "subject": "地理",
@@ -27285,7 +32565,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1015",
+    "id": "S_ITEM_1455",
     "teachingClassId": "C_高一_C5_物理",
     "teachingClassName": "高一5班物理班",
     "subject": "物理",
@@ -27297,7 +32577,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1016",
+    "id": "S_ITEM_1456",
     "teachingClassId": "C_高一_C5_物理",
     "teachingClassName": "高一5班物理班",
     "subject": "物理",
@@ -27309,7 +32589,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1017",
+    "id": "S_ITEM_1457",
     "teachingClassId": "C_高一_C5_物理",
     "teachingClassName": "高一5班物理班",
     "subject": "物理",
@@ -27321,7 +32601,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1018",
+    "id": "S_ITEM_1458",
     "teachingClassId": "C_高一_C5_物理",
     "teachingClassName": "高一5班物理班",
     "subject": "物理",
@@ -27333,7 +32613,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1019",
+    "id": "S_ITEM_1459",
     "teachingClassId": "C_高一_C5_物理",
     "teachingClassName": "高一5班物理班",
     "subject": "物理",
@@ -27345,7 +32625,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1020",
+    "id": "S_ITEM_1460",
     "teachingClassId": "C_高一_C5_化学",
     "teachingClassName": "高一5班化学班",
     "subject": "化学",
@@ -27357,7 +32637,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1021",
+    "id": "S_ITEM_1461",
     "teachingClassId": "C_高一_C5_化学",
     "teachingClassName": "高一5班化学班",
     "subject": "化学",
@@ -27369,7 +32649,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1022",
+    "id": "S_ITEM_1462",
     "teachingClassId": "C_高一_C5_化学",
     "teachingClassName": "高一5班化学班",
     "subject": "化学",
@@ -27381,7 +32661,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1023",
+    "id": "S_ITEM_1463",
     "teachingClassId": "C_高一_C5_化学",
     "teachingClassName": "高一5班化学班",
     "subject": "化学",
@@ -27393,7 +32673,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1024",
+    "id": "S_ITEM_1464",
     "teachingClassId": "C_高一_C5_生物",
     "teachingClassName": "高一5班生物班",
     "subject": "生物",
@@ -27405,7 +32685,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1025",
+    "id": "S_ITEM_1465",
     "teachingClassId": "C_高一_C6_语文",
     "teachingClassName": "高一6班语文班",
     "subject": "语文",
@@ -27417,7 +32697,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1026",
+    "id": "S_ITEM_1466",
     "teachingClassId": "C_高一_C6_语文",
     "teachingClassName": "高一6班语文班",
     "subject": "语文",
@@ -27429,7 +32709,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1027",
+    "id": "S_ITEM_1467",
     "teachingClassId": "C_高一_C6_语文",
     "teachingClassName": "高一6班语文班",
     "subject": "语文",
@@ -27441,7 +32721,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1028",
+    "id": "S_ITEM_1468",
     "teachingClassId": "C_高一_C6_语文",
     "teachingClassName": "高一6班语文班",
     "subject": "语文",
@@ -27453,7 +32733,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1029",
+    "id": "S_ITEM_1469",
     "teachingClassId": "C_高一_C6_语文",
     "teachingClassName": "高一6班语文班",
     "subject": "语文",
@@ -27465,7 +32745,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1030",
+    "id": "S_ITEM_1470",
     "teachingClassId": "C_高一_C6_语文",
     "teachingClassName": "高一6班语文班",
     "subject": "语文",
@@ -27477,7 +32757,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1031",
+    "id": "S_ITEM_1471",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27489,7 +32769,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1032",
+    "id": "S_ITEM_1472",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27501,7 +32781,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1033",
+    "id": "S_ITEM_1473",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27513,7 +32793,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1034",
+    "id": "S_ITEM_1474",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27525,7 +32805,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1035",
+    "id": "S_ITEM_1475",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27537,7 +32817,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1036",
+    "id": "S_ITEM_1476",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27549,7 +32829,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1037",
+    "id": "S_ITEM_1477",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27561,7 +32841,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1038",
+    "id": "S_ITEM_1478",
     "teachingClassId": "C_高一_C6_数学",
     "teachingClassName": "高一6班数学班",
     "subject": "数学",
@@ -27573,7 +32853,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1039",
+    "id": "S_ITEM_1479",
     "teachingClassId": "C_高一_C6_英语",
     "teachingClassName": "高一6班英语班",
     "subject": "英语",
@@ -27585,7 +32865,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1040",
+    "id": "S_ITEM_1480",
     "teachingClassId": "C_高一_C6_英语",
     "teachingClassName": "高一6班英语班",
     "subject": "英语",
@@ -27597,7 +32877,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1041",
+    "id": "S_ITEM_1481",
     "teachingClassId": "C_高一_C6_英语",
     "teachingClassName": "高一6班英语班",
     "subject": "英语",
@@ -27609,7 +32889,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1042",
+    "id": "S_ITEM_1482",
     "teachingClassId": "C_高一_C6_英语",
     "teachingClassName": "高一6班英语班",
     "subject": "英语",
@@ -27621,7 +32901,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1043",
+    "id": "S_ITEM_1483",
     "teachingClassId": "C_高一_C6_英语",
     "teachingClassName": "高一6班英语班",
     "subject": "英语",
@@ -27633,7 +32913,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1044",
+    "id": "S_ITEM_1484",
     "teachingClassId": "C_高一_C6_英语",
     "teachingClassName": "高一6班英语班",
     "subject": "英语",
@@ -27645,7 +32925,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1045",
+    "id": "S_ITEM_1485",
     "teachingClassId": "C_高一_C6_英语",
     "teachingClassName": "高一6班英语班",
     "subject": "英语",
@@ -27657,7 +32937,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1046",
+    "id": "S_ITEM_1486",
     "teachingClassId": "C_高一_C6_政治",
     "teachingClassName": "高一6班政治班",
     "subject": "政治",
@@ -27669,7 +32949,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1047",
+    "id": "S_ITEM_1487",
     "teachingClassId": "C_高一_C6_政治",
     "teachingClassName": "高一6班政治班",
     "subject": "政治",
@@ -27681,7 +32961,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1048",
+    "id": "S_ITEM_1488",
     "teachingClassId": "C_高一_C6_政治",
     "teachingClassName": "高一6班政治班",
     "subject": "政治",
@@ -27693,7 +32973,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1049",
+    "id": "S_ITEM_1489",
     "teachingClassId": "C_高一_C6_政治",
     "teachingClassName": "高一6班政治班",
     "subject": "政治",
@@ -27705,7 +32985,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1050",
+    "id": "S_ITEM_1490",
     "teachingClassId": "C_高一_C6_历史",
     "teachingClassName": "高一6班历史班",
     "subject": "历史",
@@ -27717,7 +32997,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1051",
+    "id": "S_ITEM_1491",
     "teachingClassId": "C_高一_C6_历史",
     "teachingClassName": "高一6班历史班",
     "subject": "历史",
@@ -27729,7 +33009,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1052",
+    "id": "S_ITEM_1492",
     "teachingClassId": "C_高一_C6_历史",
     "teachingClassName": "高一6班历史班",
     "subject": "历史",
@@ -27741,7 +33021,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1053",
+    "id": "S_ITEM_1493",
     "teachingClassId": "C_高一_C6_历史",
     "teachingClassName": "高一6班历史班",
     "subject": "历史",
@@ -27753,7 +33033,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1054",
+    "id": "S_ITEM_1494",
     "teachingClassId": "C_高一_C6_历史",
     "teachingClassName": "高一6班历史班",
     "subject": "历史",
@@ -27765,7 +33045,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1055",
+    "id": "S_ITEM_1495",
     "teachingClassId": "C_高一_C6_地理",
     "teachingClassName": "高一6班地理班",
     "subject": "地理",
@@ -27777,7 +33057,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1056",
+    "id": "S_ITEM_1496",
     "teachingClassId": "C_高一_C6_地理",
     "teachingClassName": "高一6班地理班",
     "subject": "地理",
@@ -27789,19 +33069,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1057",
-    "teachingClassId": "C_高一_C6_地理",
-    "teachingClassName": "高一6班地理班",
-    "subject": "地理",
-    "teacherId": "T075",
-    "teacherName": "燕润旭",
-    "classroomId": "R_高一_6",
-    "classroomName": "高一6班普通教室",
-    "day": 5,
-    "period": 1
-  },
-  {
-    "id": "S_ITEM_1058",
+    "id": "S_ITEM_1497",
     "teachingClassId": "C_高一_C6_地理",
     "teachingClassName": "高一6班地理班",
     "subject": "地理",
@@ -27810,10 +33078,22 @@ export function generatePrepopulatedSchedules(
     "classroomId": "R_高一_6",
     "classroomName": "高一6班普通教室",
     "day": 5,
+    "period": 1
+  },
+  {
+    "id": "S_ITEM_1498",
+    "teachingClassId": "C_高一_C6_地理",
+    "teachingClassName": "高一6班地理班",
+    "subject": "地理",
+    "teacherId": "T075",
+    "teacherName": "燕润旭",
+    "classroomId": "R_高一_6",
+    "classroomName": "高一6班普通教室",
+    "day": 5,
     "period": 2
   },
   {
-    "id": "S_ITEM_1059",
+    "id": "S_ITEM_1499",
     "teachingClassId": "C_高一_C6_化学",
     "teachingClassName": "高一6班化学班",
     "subject": "化学",
@@ -27825,7 +33105,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1060",
+    "id": "S_ITEM_1500",
     "teachingClassId": "C_高一_C6_生物",
     "teachingClassName": "高一6班生物班",
     "subject": "生物",
@@ -27837,7 +33117,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1061",
+    "id": "S_ITEM_1501",
     "teachingClassId": "C_高一_C6_体育",
     "teachingClassName": "高一6班体育班",
     "subject": "体育",
@@ -27849,7 +33129,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1062",
+    "id": "S_ITEM_1502",
     "teachingClassId": "C_高一_C6_体育",
     "teachingClassName": "高一6班体育班",
     "subject": "体育",
@@ -27861,7 +33141,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1063",
+    "id": "S_ITEM_1503",
     "teachingClassId": "C_高一_C7_语文",
     "teachingClassName": "高一7班语文班",
     "subject": "语文",
@@ -27873,7 +33153,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1064",
+    "id": "S_ITEM_1504",
     "teachingClassId": "C_高一_C7_语文",
     "teachingClassName": "高一7班语文班",
     "subject": "语文",
@@ -27885,7 +33165,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1065",
+    "id": "S_ITEM_1505",
     "teachingClassId": "C_高一_C7_语文",
     "teachingClassName": "高一7班语文班",
     "subject": "语文",
@@ -27897,7 +33177,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1066",
+    "id": "S_ITEM_1506",
     "teachingClassId": "C_高一_C7_语文",
     "teachingClassName": "高一7班语文班",
     "subject": "语文",
@@ -27909,7 +33189,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1067",
+    "id": "S_ITEM_1507",
     "teachingClassId": "C_高一_C7_语文",
     "teachingClassName": "高一7班语文班",
     "subject": "语文",
@@ -27921,7 +33201,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1068",
+    "id": "S_ITEM_1508",
     "teachingClassId": "C_高一_C7_语文",
     "teachingClassName": "高一7班语文班",
     "subject": "语文",
@@ -27933,7 +33213,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1069",
+    "id": "S_ITEM_1509",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -27945,7 +33225,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1070",
+    "id": "S_ITEM_1510",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -27957,7 +33237,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1071",
+    "id": "S_ITEM_1511",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -27969,7 +33249,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1072",
+    "id": "S_ITEM_1512",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -27981,7 +33261,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1073",
+    "id": "S_ITEM_1513",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -27993,7 +33273,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1074",
+    "id": "S_ITEM_1514",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -28005,7 +33285,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1075",
+    "id": "S_ITEM_1515",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -28017,7 +33297,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1076",
+    "id": "S_ITEM_1516",
     "teachingClassId": "C_高一_C7_数学",
     "teachingClassName": "高一7班数学班",
     "subject": "数学",
@@ -28029,7 +33309,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1077",
+    "id": "S_ITEM_1517",
     "teachingClassId": "C_高一_C7_英语",
     "teachingClassName": "高一7班英语班",
     "subject": "英语",
@@ -28041,7 +33321,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1078",
+    "id": "S_ITEM_1518",
     "teachingClassId": "C_高一_C7_英语",
     "teachingClassName": "高一7班英语班",
     "subject": "英语",
@@ -28053,7 +33333,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1079",
+    "id": "S_ITEM_1519",
     "teachingClassId": "C_高一_C7_英语",
     "teachingClassName": "高一7班英语班",
     "subject": "英语",
@@ -28065,7 +33345,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1080",
+    "id": "S_ITEM_1520",
     "teachingClassId": "C_高一_C7_英语",
     "teachingClassName": "高一7班英语班",
     "subject": "英语",
@@ -28077,7 +33357,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1081",
+    "id": "S_ITEM_1521",
     "teachingClassId": "C_高一_C7_英语",
     "teachingClassName": "高一7班英语班",
     "subject": "英语",
@@ -28089,7 +33369,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1082",
+    "id": "S_ITEM_1522",
     "teachingClassId": "C_高一_C7_英语",
     "teachingClassName": "高一7班英语班",
     "subject": "英语",
@@ -28101,7 +33381,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1083",
+    "id": "S_ITEM_1523",
     "teachingClassId": "C_高一_C7_英语",
     "teachingClassName": "高一7班英语班",
     "subject": "英语",
@@ -28113,7 +33393,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1084",
+    "id": "S_ITEM_1524",
     "teachingClassId": "C_高一_C7_历史",
     "teachingClassName": "高一7班历史班",
     "subject": "历史",
@@ -28125,7 +33405,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1085",
+    "id": "S_ITEM_1525",
     "teachingClassId": "C_高一_C7_地理",
     "teachingClassName": "高一7班地理班",
     "subject": "地理",
@@ -28137,7 +33417,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1086",
+    "id": "S_ITEM_1526",
     "teachingClassId": "C_高一_C7_物理",
     "teachingClassName": "高一7班物理班",
     "subject": "物理",
@@ -28149,7 +33429,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1087",
+    "id": "S_ITEM_1527",
     "teachingClassId": "C_高一_C7_物理",
     "teachingClassName": "高一7班物理班",
     "subject": "物理",
@@ -28161,7 +33441,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1088",
+    "id": "S_ITEM_1528",
     "teachingClassId": "C_高一_C7_物理",
     "teachingClassName": "高一7班物理班",
     "subject": "物理",
@@ -28173,7 +33453,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1089",
+    "id": "S_ITEM_1529",
     "teachingClassId": "C_高一_C7_物理",
     "teachingClassName": "高一7班物理班",
     "subject": "物理",
@@ -28185,7 +33465,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1090",
+    "id": "S_ITEM_1530",
     "teachingClassId": "C_高一_C7_物理",
     "teachingClassName": "高一7班物理班",
     "subject": "物理",
@@ -28197,7 +33477,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1091",
+    "id": "S_ITEM_1531",
     "teachingClassId": "C_高一_C7_化学",
     "teachingClassName": "高一7班化学班",
     "subject": "化学",
@@ -28209,7 +33489,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1092",
+    "id": "S_ITEM_1532",
     "teachingClassId": "C_高一_C7_化学",
     "teachingClassName": "高一7班化学班",
     "subject": "化学",
@@ -28221,7 +33501,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1093",
+    "id": "S_ITEM_1533",
     "teachingClassId": "C_高一_C7_化学",
     "teachingClassName": "高一7班化学班",
     "subject": "化学",
@@ -28233,7 +33513,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1094",
+    "id": "S_ITEM_1534",
     "teachingClassId": "C_高一_C7_化学",
     "teachingClassName": "高一7班化学班",
     "subject": "化学",
@@ -28245,7 +33525,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1095",
+    "id": "S_ITEM_1535",
     "teachingClassId": "C_高一_C7_生物",
     "teachingClassName": "高一7班生物班",
     "subject": "生物",
@@ -28257,7 +33537,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1096",
+    "id": "S_ITEM_1536",
     "teachingClassId": "C_高一_C7_生物",
     "teachingClassName": "高一7班生物班",
     "subject": "生物",
@@ -28269,7 +33549,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1097",
+    "id": "S_ITEM_1537",
     "teachingClassId": "C_高一_C7_生物",
     "teachingClassName": "高一7班生物班",
     "subject": "生物",
@@ -28281,7 +33561,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1098",
+    "id": "S_ITEM_1538",
     "teachingClassId": "C_高一_C7_生物",
     "teachingClassName": "高一7班生物班",
     "subject": "生物",
@@ -28293,7 +33573,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1099",
+    "id": "S_ITEM_1539",
     "teachingClassId": "C_高一_C7_体育",
     "teachingClassName": "高一7班体育班",
     "subject": "体育",
@@ -28305,7 +33585,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1100",
+    "id": "S_ITEM_1540",
     "teachingClassId": "C_高一_C7_体育",
     "teachingClassName": "高一7班体育班",
     "subject": "体育",
@@ -28317,7 +33597,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1101",
+    "id": "S_ITEM_1541",
     "teachingClassId": "C_高一_C8_语文",
     "teachingClassName": "高一8班语文班",
     "subject": "语文",
@@ -28329,7 +33609,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1102",
+    "id": "S_ITEM_1542",
     "teachingClassId": "C_高一_C8_语文",
     "teachingClassName": "高一8班语文班",
     "subject": "语文",
@@ -28341,7 +33621,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1103",
+    "id": "S_ITEM_1543",
     "teachingClassId": "C_高一_C8_语文",
     "teachingClassName": "高一8班语文班",
     "subject": "语文",
@@ -28353,7 +33633,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1104",
+    "id": "S_ITEM_1544",
     "teachingClassId": "C_高一_C8_语文",
     "teachingClassName": "高一8班语文班",
     "subject": "语文",
@@ -28365,7 +33645,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1105",
+    "id": "S_ITEM_1545",
     "teachingClassId": "C_高一_C8_语文",
     "teachingClassName": "高一8班语文班",
     "subject": "语文",
@@ -28377,7 +33657,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1106",
+    "id": "S_ITEM_1546",
     "teachingClassId": "C_高一_C8_语文",
     "teachingClassName": "高一8班语文班",
     "subject": "语文",
@@ -28389,7 +33669,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1107",
+    "id": "S_ITEM_1547",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28401,7 +33681,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1108",
+    "id": "S_ITEM_1548",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28413,7 +33693,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1109",
+    "id": "S_ITEM_1549",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28425,7 +33705,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1110",
+    "id": "S_ITEM_1550",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28437,7 +33717,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1111",
+    "id": "S_ITEM_1551",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28449,7 +33729,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1112",
+    "id": "S_ITEM_1552",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28461,7 +33741,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1113",
+    "id": "S_ITEM_1553",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28473,7 +33753,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1114",
+    "id": "S_ITEM_1554",
     "teachingClassId": "C_高一_C8_数学",
     "teachingClassName": "高一8班数学班",
     "subject": "数学",
@@ -28485,7 +33765,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1115",
+    "id": "S_ITEM_1555",
     "teachingClassId": "C_高一_C8_英语",
     "teachingClassName": "高一8班英语班",
     "subject": "英语",
@@ -28497,7 +33777,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1116",
+    "id": "S_ITEM_1556",
     "teachingClassId": "C_高一_C8_英语",
     "teachingClassName": "高一8班英语班",
     "subject": "英语",
@@ -28509,7 +33789,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1117",
+    "id": "S_ITEM_1557",
     "teachingClassId": "C_高一_C8_英语",
     "teachingClassName": "高一8班英语班",
     "subject": "英语",
@@ -28521,7 +33801,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1118",
+    "id": "S_ITEM_1558",
     "teachingClassId": "C_高一_C8_英语",
     "teachingClassName": "高一8班英语班",
     "subject": "英语",
@@ -28533,7 +33813,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1119",
+    "id": "S_ITEM_1559",
     "teachingClassId": "C_高一_C8_英语",
     "teachingClassName": "高一8班英语班",
     "subject": "英语",
@@ -28545,7 +33825,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1120",
+    "id": "S_ITEM_1560",
     "teachingClassId": "C_高一_C8_英语",
     "teachingClassName": "高一8班英语班",
     "subject": "英语",
@@ -28557,7 +33837,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1121",
+    "id": "S_ITEM_1561",
     "teachingClassId": "C_高一_C8_英语",
     "teachingClassName": "高一8班英语班",
     "subject": "英语",
@@ -28569,7 +33849,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1122",
+    "id": "S_ITEM_1562",
     "teachingClassId": "C_高一_C8_历史",
     "teachingClassName": "高一8班历史班",
     "subject": "历史",
@@ -28581,7 +33861,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1123",
+    "id": "S_ITEM_1563",
     "teachingClassId": "C_高一_C8_地理",
     "teachingClassName": "高一8班地理班",
     "subject": "地理",
@@ -28593,7 +33873,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1124",
+    "id": "S_ITEM_1564",
     "teachingClassId": "C_高一_C8_物理",
     "teachingClassName": "高一8班物理班",
     "subject": "物理",
@@ -28605,7 +33885,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1125",
+    "id": "S_ITEM_1565",
     "teachingClassId": "C_高一_C8_物理",
     "teachingClassName": "高一8班物理班",
     "subject": "物理",
@@ -28617,7 +33897,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1126",
+    "id": "S_ITEM_1566",
     "teachingClassId": "C_高一_C8_物理",
     "teachingClassName": "高一8班物理班",
     "subject": "物理",
@@ -28629,7 +33909,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1127",
+    "id": "S_ITEM_1567",
     "teachingClassId": "C_高一_C8_物理",
     "teachingClassName": "高一8班物理班",
     "subject": "物理",
@@ -28641,7 +33921,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1128",
+    "id": "S_ITEM_1568",
     "teachingClassId": "C_高一_C8_物理",
     "teachingClassName": "高一8班物理班",
     "subject": "物理",
@@ -28653,7 +33933,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1129",
+    "id": "S_ITEM_1569",
     "teachingClassId": "C_高一_C8_化学",
     "teachingClassName": "高一8班化学班",
     "subject": "化学",
@@ -28665,7 +33945,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1130",
+    "id": "S_ITEM_1570",
     "teachingClassId": "C_高一_C8_化学",
     "teachingClassName": "高一8班化学班",
     "subject": "化学",
@@ -28677,7 +33957,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1131",
+    "id": "S_ITEM_1571",
     "teachingClassId": "C_高一_C8_化学",
     "teachingClassName": "高一8班化学班",
     "subject": "化学",
@@ -28689,7 +33969,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1132",
+    "id": "S_ITEM_1572",
     "teachingClassId": "C_高一_C8_化学",
     "teachingClassName": "高一8班化学班",
     "subject": "化学",
@@ -28701,7 +33981,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1133",
+    "id": "S_ITEM_1573",
     "teachingClassId": "C_高一_C8_生物",
     "teachingClassName": "高一8班生物班",
     "subject": "生物",
@@ -28713,7 +33993,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1134",
+    "id": "S_ITEM_1574",
     "teachingClassId": "C_高一_C8_生物",
     "teachingClassName": "高一8班生物班",
     "subject": "生物",
@@ -28725,7 +34005,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1135",
+    "id": "S_ITEM_1575",
     "teachingClassId": "C_高一_C8_生物",
     "teachingClassName": "高一8班生物班",
     "subject": "生物",
@@ -28737,7 +34017,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1136",
+    "id": "S_ITEM_1576",
     "teachingClassId": "C_高一_C8_生物",
     "teachingClassName": "高一8班生物班",
     "subject": "生物",
@@ -28749,7 +34029,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1137",
+    "id": "S_ITEM_1577",
     "teachingClassId": "C_高一_C8_体育",
     "teachingClassName": "高一8班体育班",
     "subject": "体育",
@@ -28761,7 +34041,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1138",
+    "id": "S_ITEM_1578",
     "teachingClassId": "C_高一_C8_体育",
     "teachingClassName": "高一8班体育班",
     "subject": "体育",
@@ -28773,7 +34053,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1139",
+    "id": "S_ITEM_1579",
     "teachingClassId": "C_高一_C9_语文",
     "teachingClassName": "高一9班语文班",
     "subject": "语文",
@@ -28785,7 +34065,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1140",
+    "id": "S_ITEM_1580",
     "teachingClassId": "C_高一_C9_语文",
     "teachingClassName": "高一9班语文班",
     "subject": "语文",
@@ -28797,7 +34077,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1141",
+    "id": "S_ITEM_1581",
     "teachingClassId": "C_高一_C9_语文",
     "teachingClassName": "高一9班语文班",
     "subject": "语文",
@@ -28809,7 +34089,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1142",
+    "id": "S_ITEM_1582",
     "teachingClassId": "C_高一_C9_语文",
     "teachingClassName": "高一9班语文班",
     "subject": "语文",
@@ -28821,7 +34101,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1143",
+    "id": "S_ITEM_1583",
     "teachingClassId": "C_高一_C9_语文",
     "teachingClassName": "高一9班语文班",
     "subject": "语文",
@@ -28833,7 +34113,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1144",
+    "id": "S_ITEM_1584",
     "teachingClassId": "C_高一_C9_语文",
     "teachingClassName": "高一9班语文班",
     "subject": "语文",
@@ -28845,7 +34125,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1145",
+    "id": "S_ITEM_1585",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28857,7 +34137,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1146",
+    "id": "S_ITEM_1586",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28869,7 +34149,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1147",
+    "id": "S_ITEM_1587",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28881,7 +34161,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1148",
+    "id": "S_ITEM_1588",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28893,7 +34173,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1149",
+    "id": "S_ITEM_1589",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28905,7 +34185,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1150",
+    "id": "S_ITEM_1590",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28917,7 +34197,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1151",
+    "id": "S_ITEM_1591",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28929,7 +34209,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1152",
+    "id": "S_ITEM_1592",
     "teachingClassId": "C_高一_C9_数学",
     "teachingClassName": "高一9班数学班",
     "subject": "数学",
@@ -28941,7 +34221,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1153",
+    "id": "S_ITEM_1593",
     "teachingClassId": "C_高一_C9_英语",
     "teachingClassName": "高一9班英语班",
     "subject": "英语",
@@ -28953,7 +34233,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1154",
+    "id": "S_ITEM_1594",
     "teachingClassId": "C_高一_C9_英语",
     "teachingClassName": "高一9班英语班",
     "subject": "英语",
@@ -28965,7 +34245,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1155",
+    "id": "S_ITEM_1595",
     "teachingClassId": "C_高一_C9_英语",
     "teachingClassName": "高一9班英语班",
     "subject": "英语",
@@ -28977,7 +34257,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1156",
+    "id": "S_ITEM_1596",
     "teachingClassId": "C_高一_C9_英语",
     "teachingClassName": "高一9班英语班",
     "subject": "英语",
@@ -28989,7 +34269,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1157",
+    "id": "S_ITEM_1597",
     "teachingClassId": "C_高一_C9_英语",
     "teachingClassName": "高一9班英语班",
     "subject": "英语",
@@ -29001,7 +34281,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1158",
+    "id": "S_ITEM_1598",
     "teachingClassId": "C_高一_C9_英语",
     "teachingClassName": "高一9班英语班",
     "subject": "英语",
@@ -29013,7 +34293,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1159",
+    "id": "S_ITEM_1599",
     "teachingClassId": "C_高一_C9_英语",
     "teachingClassName": "高一9班英语班",
     "subject": "英语",
@@ -29025,7 +34305,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1160",
+    "id": "S_ITEM_1600",
     "teachingClassId": "C_高一_C9_历史",
     "teachingClassName": "高一9班历史班",
     "subject": "历史",
@@ -29037,7 +34317,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1161",
+    "id": "S_ITEM_1601",
     "teachingClassId": "C_高一_C9_地理",
     "teachingClassName": "高一9班地理班",
     "subject": "地理",
@@ -29049,7 +34329,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1162",
+    "id": "S_ITEM_1602",
     "teachingClassId": "C_高一_C9_地理",
     "teachingClassName": "高一9班地理班",
     "subject": "地理",
@@ -29061,7 +34341,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1163",
+    "id": "S_ITEM_1603",
     "teachingClassId": "C_高一_C9_地理",
     "teachingClassName": "高一9班地理班",
     "subject": "地理",
@@ -29073,7 +34353,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1164",
+    "id": "S_ITEM_1604",
     "teachingClassId": "C_高一_C9_地理",
     "teachingClassName": "高一9班地理班",
     "subject": "地理",
@@ -29085,7 +34365,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1165",
+    "id": "S_ITEM_1605",
     "teachingClassId": "C_高一_C9_物理",
     "teachingClassName": "高一9班物理班",
     "subject": "物理",
@@ -29097,7 +34377,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1166",
+    "id": "S_ITEM_1606",
     "teachingClassId": "C_高一_C9_物理",
     "teachingClassName": "高一9班物理班",
     "subject": "物理",
@@ -29109,7 +34389,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1167",
+    "id": "S_ITEM_1607",
     "teachingClassId": "C_高一_C9_物理",
     "teachingClassName": "高一9班物理班",
     "subject": "物理",
@@ -29121,7 +34401,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1168",
+    "id": "S_ITEM_1608",
     "teachingClassId": "C_高一_C9_物理",
     "teachingClassName": "高一9班物理班",
     "subject": "物理",
@@ -29133,7 +34413,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1169",
+    "id": "S_ITEM_1609",
     "teachingClassId": "C_高一_C9_物理",
     "teachingClassName": "高一9班物理班",
     "subject": "物理",
@@ -29145,7 +34425,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1170",
+    "id": "S_ITEM_1610",
     "teachingClassId": "C_高一_C9_化学",
     "teachingClassName": "高一9班化学班",
     "subject": "化学",
@@ -29157,7 +34437,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1171",
+    "id": "S_ITEM_1611",
     "teachingClassId": "C_高一_C9_化学",
     "teachingClassName": "高一9班化学班",
     "subject": "化学",
@@ -29169,7 +34449,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1172",
+    "id": "S_ITEM_1612",
     "teachingClassId": "C_高一_C9_化学",
     "teachingClassName": "高一9班化学班",
     "subject": "化学",
@@ -29181,7 +34461,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1173",
+    "id": "S_ITEM_1613",
     "teachingClassId": "C_高一_C9_化学",
     "teachingClassName": "高一9班化学班",
     "subject": "化学",
@@ -29193,7 +34473,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1174",
+    "id": "S_ITEM_1614",
     "teachingClassId": "C_高一_C9_生物",
     "teachingClassName": "高一9班生物班",
     "subject": "生物",
@@ -29205,7 +34485,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1175",
+    "id": "S_ITEM_1615",
     "teachingClassId": "C_高一_C9_体育",
     "teachingClassName": "高一9班体育班",
     "subject": "体育",
@@ -29217,7 +34497,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1176",
+    "id": "S_ITEM_1616",
     "teachingClassId": "C_高一_C9_体育",
     "teachingClassName": "高一9班体育班",
     "subject": "体育",
@@ -29229,7 +34509,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1177",
+    "id": "S_ITEM_1617",
     "teachingClassId": "C_高一_C9_信息技术",
     "teachingClassName": "高一9班信息技术班",
     "subject": "信息技术",
@@ -29241,7 +34521,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1178",
+    "id": "S_ITEM_1618",
     "teachingClassId": "C_高一_C10_语文",
     "teachingClassName": "高一10班语文班",
     "subject": "语文",
@@ -29253,7 +34533,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1179",
+    "id": "S_ITEM_1619",
     "teachingClassId": "C_高一_C10_语文",
     "teachingClassName": "高一10班语文班",
     "subject": "语文",
@@ -29265,7 +34545,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1180",
+    "id": "S_ITEM_1620",
     "teachingClassId": "C_高一_C10_语文",
     "teachingClassName": "高一10班语文班",
     "subject": "语文",
@@ -29277,7 +34557,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1181",
+    "id": "S_ITEM_1621",
     "teachingClassId": "C_高一_C10_语文",
     "teachingClassName": "高一10班语文班",
     "subject": "语文",
@@ -29289,7 +34569,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1182",
+    "id": "S_ITEM_1622",
     "teachingClassId": "C_高一_C10_语文",
     "teachingClassName": "高一10班语文班",
     "subject": "语文",
@@ -29301,7 +34581,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1183",
+    "id": "S_ITEM_1623",
     "teachingClassId": "C_高一_C10_数学",
     "teachingClassName": "高一10班数学班",
     "subject": "数学",
@@ -29313,7 +34593,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1184",
+    "id": "S_ITEM_1624",
     "teachingClassId": "C_高一_C10_数学",
     "teachingClassName": "高一10班数学班",
     "subject": "数学",
@@ -29325,7 +34605,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1185",
+    "id": "S_ITEM_1625",
     "teachingClassId": "C_高一_C10_数学",
     "teachingClassName": "高一10班数学班",
     "subject": "数学",
@@ -29337,7 +34617,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1186",
+    "id": "S_ITEM_1626",
     "teachingClassId": "C_高一_C10_数学",
     "teachingClassName": "高一10班数学班",
     "subject": "数学",
@@ -29349,7 +34629,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1187",
+    "id": "S_ITEM_1627",
     "teachingClassId": "C_高一_C10_数学",
     "teachingClassName": "高一10班数学班",
     "subject": "数学",
@@ -29361,7 +34641,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1188",
+    "id": "S_ITEM_1628",
     "teachingClassId": "C_高一_C10_数学",
     "teachingClassName": "高一10班数学班",
     "subject": "数学",
@@ -29373,7 +34653,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1189",
+    "id": "S_ITEM_1629",
     "teachingClassId": "C_高一_C10_英语",
     "teachingClassName": "高一10班英语班",
     "subject": "英语",
@@ -29385,7 +34665,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1190",
+    "id": "S_ITEM_1630",
     "teachingClassId": "C_高一_C10_英语",
     "teachingClassName": "高一10班英语班",
     "subject": "英语",
@@ -29397,7 +34677,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1191",
+    "id": "S_ITEM_1631",
     "teachingClassId": "C_高一_C10_英语",
     "teachingClassName": "高一10班英语班",
     "subject": "英语",
@@ -29409,7 +34689,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1192",
+    "id": "S_ITEM_1632",
     "teachingClassId": "C_高一_C10_英语",
     "teachingClassName": "高一10班英语班",
     "subject": "英语",
@@ -29421,7 +34701,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1193",
+    "id": "S_ITEM_1633",
     "teachingClassId": "C_高一_C10_英语",
     "teachingClassName": "高一10班英语班",
     "subject": "英语",
@@ -29433,7 +34713,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1194",
+    "id": "S_ITEM_1634",
     "teachingClassId": "C_高一_C10_英语",
     "teachingClassName": "高一10班英语班",
     "subject": "英语",
@@ -29445,7 +34725,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1195",
+    "id": "S_ITEM_1635",
     "teachingClassId": "C_高一_C10_政治",
     "teachingClassName": "高一10班政治班",
     "subject": "政治",
@@ -29457,7 +34737,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1196",
+    "id": "S_ITEM_1636",
     "teachingClassId": "C_高一_C10_政治",
     "teachingClassName": "高一10班政治班",
     "subject": "政治",
@@ -29469,7 +34749,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1197",
+    "id": "S_ITEM_1637",
     "teachingClassId": "C_高一_C10_政治",
     "teachingClassName": "高一10班政治班",
     "subject": "政治",
@@ -29481,7 +34761,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1198",
+    "id": "S_ITEM_1638",
     "teachingClassId": "C_高一_C10_政治",
     "teachingClassName": "高一10班政治班",
     "subject": "政治",
@@ -29493,7 +34773,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1199",
+    "id": "S_ITEM_1639",
     "teachingClassId": "C_高一_C10_历史",
     "teachingClassName": "高一10班历史班",
     "subject": "历史",
@@ -29505,7 +34785,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1200",
+    "id": "S_ITEM_1640",
     "teachingClassId": "C_高一_C10_历史",
     "teachingClassName": "高一10班历史班",
     "subject": "历史",
@@ -29517,7 +34797,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1201",
+    "id": "S_ITEM_1641",
     "teachingClassId": "C_高一_C10_历史",
     "teachingClassName": "高一10班历史班",
     "subject": "历史",
@@ -29529,7 +34809,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1202",
+    "id": "S_ITEM_1642",
     "teachingClassId": "C_高一_C10_历史",
     "teachingClassName": "高一10班历史班",
     "subject": "历史",
@@ -29541,7 +34821,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1203",
+    "id": "S_ITEM_1643",
     "teachingClassId": "C_高一_C10_地理",
     "teachingClassName": "高一10班地理班",
     "subject": "地理",
@@ -29553,7 +34833,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1204",
+    "id": "S_ITEM_1644",
     "teachingClassId": "C_高一_C10_地理",
     "teachingClassName": "高一10班地理班",
     "subject": "地理",
@@ -29565,7 +34845,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1205",
+    "id": "S_ITEM_1645",
     "teachingClassId": "C_高一_C10_地理",
     "teachingClassName": "高一10班地理班",
     "subject": "地理",
@@ -29577,7 +34857,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1206",
+    "id": "S_ITEM_1646",
     "teachingClassId": "C_高一_C10_地理",
     "teachingClassName": "高一10班地理班",
     "subject": "地理",
@@ -29589,7 +34869,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1207",
+    "id": "S_ITEM_1647",
     "teachingClassId": "C_高一_C10_化学",
     "teachingClassName": "高一10班化学班",
     "subject": "化学",
@@ -29601,7 +34881,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1208",
+    "id": "S_ITEM_1648",
     "teachingClassId": "C_高一_C10_生物",
     "teachingClassName": "高一10班生物班",
     "subject": "生物",
@@ -29613,7 +34893,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1209",
+    "id": "S_ITEM_1649",
     "teachingClassId": "C_高一_C10_体育",
     "teachingClassName": "高一10班体育班",
     "subject": "体育",
@@ -29625,7 +34905,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1210",
+    "id": "S_ITEM_1650",
     "teachingClassId": "C_高一_C10_体育",
     "teachingClassName": "高一10班体育班",
     "subject": "体育",
@@ -29637,7 +34917,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1211",
+    "id": "S_ITEM_1651",
     "teachingClassId": "C_高一_C10_信息技术",
     "teachingClassName": "高一10班信息技术班",
     "subject": "信息技术",
@@ -29649,7 +34929,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1212",
+    "id": "S_ITEM_1652",
     "teachingClassId": "C_高一_C11_语文",
     "teachingClassName": "高一11班语文班",
     "subject": "语文",
@@ -29661,7 +34941,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1213",
+    "id": "S_ITEM_1653",
     "teachingClassId": "C_高一_C11_语文",
     "teachingClassName": "高一11班语文班",
     "subject": "语文",
@@ -29673,7 +34953,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1214",
+    "id": "S_ITEM_1654",
     "teachingClassId": "C_高一_C11_语文",
     "teachingClassName": "高一11班语文班",
     "subject": "语文",
@@ -29685,7 +34965,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1215",
+    "id": "S_ITEM_1655",
     "teachingClassId": "C_高一_C11_语文",
     "teachingClassName": "高一11班语文班",
     "subject": "语文",
@@ -29697,7 +34977,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1216",
+    "id": "S_ITEM_1656",
     "teachingClassId": "C_高一_C11_语文",
     "teachingClassName": "高一11班语文班",
     "subject": "语文",
@@ -29709,7 +34989,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1217",
+    "id": "S_ITEM_1657",
     "teachingClassId": "C_高一_C11_数学",
     "teachingClassName": "高一11班数学班",
     "subject": "数学",
@@ -29721,7 +35001,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1218",
+    "id": "S_ITEM_1658",
     "teachingClassId": "C_高一_C11_数学",
     "teachingClassName": "高一11班数学班",
     "subject": "数学",
@@ -29733,7 +35013,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1219",
+    "id": "S_ITEM_1659",
     "teachingClassId": "C_高一_C11_数学",
     "teachingClassName": "高一11班数学班",
     "subject": "数学",
@@ -29745,7 +35025,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1220",
+    "id": "S_ITEM_1660",
     "teachingClassId": "C_高一_C11_数学",
     "teachingClassName": "高一11班数学班",
     "subject": "数学",
@@ -29757,7 +35037,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1221",
+    "id": "S_ITEM_1661",
     "teachingClassId": "C_高一_C11_数学",
     "teachingClassName": "高一11班数学班",
     "subject": "数学",
@@ -29769,7 +35049,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1222",
+    "id": "S_ITEM_1662",
     "teachingClassId": "C_高一_C11_数学",
     "teachingClassName": "高一11班数学班",
     "subject": "数学",
@@ -29781,7 +35061,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1223",
+    "id": "S_ITEM_1663",
     "teachingClassId": "C_高一_C11_英语",
     "teachingClassName": "高一11班英语班",
     "subject": "英语",
@@ -29793,7 +35073,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1224",
+    "id": "S_ITEM_1664",
     "teachingClassId": "C_高一_C11_英语",
     "teachingClassName": "高一11班英语班",
     "subject": "英语",
@@ -29805,7 +35085,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1225",
+    "id": "S_ITEM_1665",
     "teachingClassId": "C_高一_C11_英语",
     "teachingClassName": "高一11班英语班",
     "subject": "英语",
@@ -29817,7 +35097,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1226",
+    "id": "S_ITEM_1666",
     "teachingClassId": "C_高一_C11_英语",
     "teachingClassName": "高一11班英语班",
     "subject": "英语",
@@ -29829,7 +35109,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1227",
+    "id": "S_ITEM_1667",
     "teachingClassId": "C_高一_C11_英语",
     "teachingClassName": "高一11班英语班",
     "subject": "英语",
@@ -29841,7 +35121,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1228",
+    "id": "S_ITEM_1668",
     "teachingClassId": "C_高一_C11_英语",
     "teachingClassName": "高一11班英语班",
     "subject": "英语",
@@ -29853,7 +35133,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1229",
+    "id": "S_ITEM_1669",
     "teachingClassId": "C_高一_C11_历史",
     "teachingClassName": "高一11班历史班",
     "subject": "历史",
@@ -29865,7 +35145,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1230",
+    "id": "S_ITEM_1670",
     "teachingClassId": "C_高一_C11_地理",
     "teachingClassName": "高一11班地理班",
     "subject": "地理",
@@ -29877,7 +35157,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1231",
+    "id": "S_ITEM_1671",
     "teachingClassId": "C_高一_C11_地理",
     "teachingClassName": "高一11班地理班",
     "subject": "地理",
@@ -29889,7 +35169,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1232",
+    "id": "S_ITEM_1672",
     "teachingClassId": "C_高一_C11_地理",
     "teachingClassName": "高一11班地理班",
     "subject": "地理",
@@ -29901,7 +35181,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1233",
+    "id": "S_ITEM_1673",
     "teachingClassId": "C_高一_C11_地理",
     "teachingClassName": "高一11班地理班",
     "subject": "地理",
@@ -29913,7 +35193,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1234",
+    "id": "S_ITEM_1674",
     "teachingClassId": "C_高一_C11_物理",
     "teachingClassName": "高一11班物理班",
     "subject": "物理",
@@ -29925,7 +35205,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1235",
+    "id": "S_ITEM_1675",
     "teachingClassId": "C_高一_C11_物理",
     "teachingClassName": "高一11班物理班",
     "subject": "物理",
@@ -29937,7 +35217,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1236",
+    "id": "S_ITEM_1676",
     "teachingClassId": "C_高一_C11_物理",
     "teachingClassName": "高一11班物理班",
     "subject": "物理",
@@ -29949,7 +35229,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1237",
+    "id": "S_ITEM_1677",
     "teachingClassId": "C_高一_C11_物理",
     "teachingClassName": "高一11班物理班",
     "subject": "物理",
@@ -29961,7 +35241,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1238",
+    "id": "S_ITEM_1678",
     "teachingClassId": "C_高一_C11_化学",
     "teachingClassName": "高一11班化学班",
     "subject": "化学",
@@ -29973,7 +35253,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1239",
+    "id": "S_ITEM_1679",
     "teachingClassId": "C_高一_C11_化学",
     "teachingClassName": "高一11班化学班",
     "subject": "化学",
@@ -29985,7 +35265,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1240",
+    "id": "S_ITEM_1680",
     "teachingClassId": "C_高一_C11_化学",
     "teachingClassName": "高一11班化学班",
     "subject": "化学",
@@ -29997,7 +35277,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1241",
+    "id": "S_ITEM_1681",
     "teachingClassId": "C_高一_C11_化学",
     "teachingClassName": "高一11班化学班",
     "subject": "化学",
@@ -30009,7 +35289,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1242",
+    "id": "S_ITEM_1682",
     "teachingClassId": "C_高一_C11_生物",
     "teachingClassName": "高一11班生物班",
     "subject": "生物",
@@ -30021,7 +35301,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1243",
+    "id": "S_ITEM_1683",
     "teachingClassId": "C_高一_C11_体育",
     "teachingClassName": "高一11班体育班",
     "subject": "体育",
@@ -30033,7 +35313,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1244",
+    "id": "S_ITEM_1684",
     "teachingClassId": "C_高一_C11_体育",
     "teachingClassName": "高一11班体育班",
     "subject": "体育",
@@ -30045,7 +35325,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1245",
+    "id": "S_ITEM_1685",
     "teachingClassId": "C_高一_C11_信息技术",
     "teachingClassName": "高一11班信息技术班",
     "subject": "信息技术",
@@ -30057,7 +35337,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1246",
+    "id": "S_ITEM_1686",
     "teachingClassId": "C_高一_C12_语文",
     "teachingClassName": "高一12班语文班",
     "subject": "语文",
@@ -30069,7 +35349,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1247",
+    "id": "S_ITEM_1687",
     "teachingClassId": "C_高一_C12_语文",
     "teachingClassName": "高一12班语文班",
     "subject": "语文",
@@ -30081,7 +35361,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1248",
+    "id": "S_ITEM_1688",
     "teachingClassId": "C_高一_C12_语文",
     "teachingClassName": "高一12班语文班",
     "subject": "语文",
@@ -30093,7 +35373,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1249",
+    "id": "S_ITEM_1689",
     "teachingClassId": "C_高一_C12_语文",
     "teachingClassName": "高一12班语文班",
     "subject": "语文",
@@ -30105,7 +35385,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1250",
+    "id": "S_ITEM_1690",
     "teachingClassId": "C_高一_C12_语文",
     "teachingClassName": "高一12班语文班",
     "subject": "语文",
@@ -30117,7 +35397,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1251",
+    "id": "S_ITEM_1691",
     "teachingClassId": "C_高一_C12_数学",
     "teachingClassName": "高一12班数学班",
     "subject": "数学",
@@ -30129,7 +35409,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1252",
+    "id": "S_ITEM_1692",
     "teachingClassId": "C_高一_C12_数学",
     "teachingClassName": "高一12班数学班",
     "subject": "数学",
@@ -30141,7 +35421,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1253",
+    "id": "S_ITEM_1693",
     "teachingClassId": "C_高一_C12_数学",
     "teachingClassName": "高一12班数学班",
     "subject": "数学",
@@ -30153,7 +35433,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1254",
+    "id": "S_ITEM_1694",
     "teachingClassId": "C_高一_C12_数学",
     "teachingClassName": "高一12班数学班",
     "subject": "数学",
@@ -30165,7 +35445,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1255",
+    "id": "S_ITEM_1695",
     "teachingClassId": "C_高一_C12_数学",
     "teachingClassName": "高一12班数学班",
     "subject": "数学",
@@ -30177,7 +35457,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1256",
+    "id": "S_ITEM_1696",
     "teachingClassId": "C_高一_C12_数学",
     "teachingClassName": "高一12班数学班",
     "subject": "数学",
@@ -30189,7 +35469,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1257",
+    "id": "S_ITEM_1697",
     "teachingClassId": "C_高一_C12_英语",
     "teachingClassName": "高一12班英语班",
     "subject": "英语",
@@ -30201,7 +35481,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1258",
+    "id": "S_ITEM_1698",
     "teachingClassId": "C_高一_C12_英语",
     "teachingClassName": "高一12班英语班",
     "subject": "英语",
@@ -30213,7 +35493,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1259",
+    "id": "S_ITEM_1699",
     "teachingClassId": "C_高一_C12_英语",
     "teachingClassName": "高一12班英语班",
     "subject": "英语",
@@ -30225,7 +35505,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1260",
+    "id": "S_ITEM_1700",
     "teachingClassId": "C_高一_C12_英语",
     "teachingClassName": "高一12班英语班",
     "subject": "英语",
@@ -30237,7 +35517,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1261",
+    "id": "S_ITEM_1701",
     "teachingClassId": "C_高一_C12_英语",
     "teachingClassName": "高一12班英语班",
     "subject": "英语",
@@ -30249,7 +35529,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1262",
+    "id": "S_ITEM_1702",
     "teachingClassId": "C_高一_C12_英语",
     "teachingClassName": "高一12班英语班",
     "subject": "英语",
@@ -30261,7 +35541,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1263",
+    "id": "S_ITEM_1703",
     "teachingClassId": "C_高一_C12_历史",
     "teachingClassName": "高一12班历史班",
     "subject": "历史",
@@ -30273,7 +35553,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1264",
+    "id": "S_ITEM_1704",
     "teachingClassId": "C_高一_C12_地理",
     "teachingClassName": "高一12班地理班",
     "subject": "地理",
@@ -30285,7 +35565,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1265",
+    "id": "S_ITEM_1705",
     "teachingClassId": "C_高一_C12_物理",
     "teachingClassName": "高一12班物理班",
     "subject": "物理",
@@ -30297,7 +35577,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1266",
+    "id": "S_ITEM_1706",
     "teachingClassId": "C_高一_C12_物理",
     "teachingClassName": "高一12班物理班",
     "subject": "物理",
@@ -30309,7 +35589,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1267",
+    "id": "S_ITEM_1707",
     "teachingClassId": "C_高一_C12_物理",
     "teachingClassName": "高一12班物理班",
     "subject": "物理",
@@ -30321,7 +35601,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1268",
+    "id": "S_ITEM_1708",
     "teachingClassId": "C_高一_C12_物理",
     "teachingClassName": "高一12班物理班",
     "subject": "物理",
@@ -30333,7 +35613,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1269",
+    "id": "S_ITEM_1709",
     "teachingClassId": "C_高一_C12_化学",
     "teachingClassName": "高一12班化学班",
     "subject": "化学",
@@ -30345,7 +35625,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1270",
+    "id": "S_ITEM_1710",
     "teachingClassId": "C_高一_C12_化学",
     "teachingClassName": "高一12班化学班",
     "subject": "化学",
@@ -30357,7 +35637,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1271",
+    "id": "S_ITEM_1711",
     "teachingClassId": "C_高一_C12_化学",
     "teachingClassName": "高一12班化学班",
     "subject": "化学",
@@ -30369,7 +35649,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1272",
+    "id": "S_ITEM_1712",
     "teachingClassId": "C_高一_C12_化学",
     "teachingClassName": "高一12班化学班",
     "subject": "化学",
@@ -30381,7 +35661,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1273",
+    "id": "S_ITEM_1713",
     "teachingClassId": "C_高一_C12_生物",
     "teachingClassName": "高一12班生物班",
     "subject": "生物",
@@ -30393,7 +35673,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1274",
+    "id": "S_ITEM_1714",
     "teachingClassId": "C_高一_C12_生物",
     "teachingClassName": "高一12班生物班",
     "subject": "生物",
@@ -30405,7 +35685,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1275",
+    "id": "S_ITEM_1715",
     "teachingClassId": "C_高一_C12_生物",
     "teachingClassName": "高一12班生物班",
     "subject": "生物",
@@ -30417,7 +35697,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1276",
+    "id": "S_ITEM_1716",
     "teachingClassId": "C_高一_C12_生物",
     "teachingClassName": "高一12班生物班",
     "subject": "生物",
@@ -30429,7 +35709,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1277",
+    "id": "S_ITEM_1717",
     "teachingClassId": "C_高一_C12_体育",
     "teachingClassName": "高一12班体育班",
     "subject": "体育",
@@ -30441,7 +35721,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1278",
+    "id": "S_ITEM_1718",
     "teachingClassId": "C_高一_C12_信息技术",
     "teachingClassName": "高一12班信息技术班",
     "subject": "信息技术",
@@ -30453,7 +35733,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1279",
+    "id": "S_ITEM_1719",
     "teachingClassId": "C_高一_C13_语文",
     "teachingClassName": "高一13班语文班",
     "subject": "语文",
@@ -30465,7 +35745,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1280",
+    "id": "S_ITEM_1720",
     "teachingClassId": "C_高一_C13_语文",
     "teachingClassName": "高一13班语文班",
     "subject": "语文",
@@ -30477,7 +35757,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1281",
+    "id": "S_ITEM_1721",
     "teachingClassId": "C_高一_C13_语文",
     "teachingClassName": "高一13班语文班",
     "subject": "语文",
@@ -30489,7 +35769,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1282",
+    "id": "S_ITEM_1722",
     "teachingClassId": "C_高一_C13_语文",
     "teachingClassName": "高一13班语文班",
     "subject": "语文",
@@ -30501,7 +35781,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1283",
+    "id": "S_ITEM_1723",
     "teachingClassId": "C_高一_C13_语文",
     "teachingClassName": "高一13班语文班",
     "subject": "语文",
@@ -30513,7 +35793,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1284",
+    "id": "S_ITEM_1724",
     "teachingClassId": "C_高一_C13_数学",
     "teachingClassName": "高一13班数学班",
     "subject": "数学",
@@ -30525,7 +35805,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1285",
+    "id": "S_ITEM_1725",
     "teachingClassId": "C_高一_C13_数学",
     "teachingClassName": "高一13班数学班",
     "subject": "数学",
@@ -30537,7 +35817,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1286",
+    "id": "S_ITEM_1726",
     "teachingClassId": "C_高一_C13_数学",
     "teachingClassName": "高一13班数学班",
     "subject": "数学",
@@ -30549,7 +35829,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1287",
+    "id": "S_ITEM_1727",
     "teachingClassId": "C_高一_C13_数学",
     "teachingClassName": "高一13班数学班",
     "subject": "数学",
@@ -30561,7 +35841,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1288",
+    "id": "S_ITEM_1728",
     "teachingClassId": "C_高一_C13_数学",
     "teachingClassName": "高一13班数学班",
     "subject": "数学",
@@ -30573,7 +35853,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1289",
+    "id": "S_ITEM_1729",
     "teachingClassId": "C_高一_C13_数学",
     "teachingClassName": "高一13班数学班",
     "subject": "数学",
@@ -30585,7 +35865,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1290",
+    "id": "S_ITEM_1730",
     "teachingClassId": "C_高一_C13_英语",
     "teachingClassName": "高一13班英语班",
     "subject": "英语",
@@ -30597,7 +35877,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1291",
+    "id": "S_ITEM_1731",
     "teachingClassId": "C_高一_C13_英语",
     "teachingClassName": "高一13班英语班",
     "subject": "英语",
@@ -30609,7 +35889,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1292",
+    "id": "S_ITEM_1732",
     "teachingClassId": "C_高一_C13_英语",
     "teachingClassName": "高一13班英语班",
     "subject": "英语",
@@ -30621,7 +35901,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1293",
+    "id": "S_ITEM_1733",
     "teachingClassId": "C_高一_C13_英语",
     "teachingClassName": "高一13班英语班",
     "subject": "英语",
@@ -30633,7 +35913,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1294",
+    "id": "S_ITEM_1734",
     "teachingClassId": "C_高一_C13_英语",
     "teachingClassName": "高一13班英语班",
     "subject": "英语",
@@ -30645,7 +35925,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1295",
+    "id": "S_ITEM_1735",
     "teachingClassId": "C_高一_C13_英语",
     "teachingClassName": "高一13班英语班",
     "subject": "英语",
@@ -30657,7 +35937,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1296",
+    "id": "S_ITEM_1736",
     "teachingClassId": "C_高一_C13_政治",
     "teachingClassName": "高一13班政治班",
     "subject": "政治",
@@ -30669,7 +35949,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1297",
+    "id": "S_ITEM_1737",
     "teachingClassId": "C_高一_C13_政治",
     "teachingClassName": "高一13班政治班",
     "subject": "政治",
@@ -30681,7 +35961,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1298",
+    "id": "S_ITEM_1738",
     "teachingClassId": "C_高一_C13_政治",
     "teachingClassName": "高一13班政治班",
     "subject": "政治",
@@ -30693,7 +35973,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1299",
+    "id": "S_ITEM_1739",
     "teachingClassId": "C_高一_C13_政治",
     "teachingClassName": "高一13班政治班",
     "subject": "政治",
@@ -30705,7 +35985,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1300",
+    "id": "S_ITEM_1740",
     "teachingClassId": "C_高一_C13_历史",
     "teachingClassName": "高一13班历史班",
     "subject": "历史",
@@ -30717,7 +35997,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1301",
+    "id": "S_ITEM_1741",
     "teachingClassId": "C_高一_C13_历史",
     "teachingClassName": "高一13班历史班",
     "subject": "历史",
@@ -30729,7 +36009,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1302",
+    "id": "S_ITEM_1742",
     "teachingClassId": "C_高一_C13_历史",
     "teachingClassName": "高一13班历史班",
     "subject": "历史",
@@ -30741,7 +36021,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1303",
+    "id": "S_ITEM_1743",
     "teachingClassId": "C_高一_C13_历史",
     "teachingClassName": "高一13班历史班",
     "subject": "历史",
@@ -30753,7 +36033,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1304",
+    "id": "S_ITEM_1744",
     "teachingClassId": "C_高一_C13_地理",
     "teachingClassName": "高一13班地理班",
     "subject": "地理",
@@ -30765,7 +36045,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1305",
+    "id": "S_ITEM_1745",
     "teachingClassId": "C_高一_C13_化学",
     "teachingClassName": "高一13班化学班",
     "subject": "化学",
@@ -30777,7 +36057,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1306",
+    "id": "S_ITEM_1746",
     "teachingClassId": "C_高一_C13_生物",
     "teachingClassName": "高一13班生物班",
     "subject": "生物",
@@ -30789,7 +36069,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1307",
+    "id": "S_ITEM_1747",
     "teachingClassId": "C_高一_C13_生物",
     "teachingClassName": "高一13班生物班",
     "subject": "生物",
@@ -30801,7 +36081,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1308",
+    "id": "S_ITEM_1748",
     "teachingClassId": "C_高一_C13_生物",
     "teachingClassName": "高一13班生物班",
     "subject": "生物",
@@ -30813,7 +36093,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1309",
+    "id": "S_ITEM_1749",
     "teachingClassId": "C_高一_C13_生物",
     "teachingClassName": "高一13班生物班",
     "subject": "生物",
@@ -30825,7 +36105,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1310",
+    "id": "S_ITEM_1750",
     "teachingClassId": "C_高一_C13_体育",
     "teachingClassName": "高一13班体育班",
     "subject": "体育",
@@ -30837,7 +36117,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1311",
+    "id": "S_ITEM_1751",
     "teachingClassId": "C_高一_C13_信息技术",
     "teachingClassName": "高一13班信息技术班",
     "subject": "信息技术",
@@ -30849,7 +36129,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1312",
+    "id": "S_ITEM_1752",
     "teachingClassId": "C_高三_C1_语文",
     "teachingClassName": "高三1班语文班",
     "subject": "语文",
@@ -30861,7 +36141,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1313",
+    "id": "S_ITEM_1753",
     "teachingClassId": "C_高三_C1_语文",
     "teachingClassName": "高三1班语文班",
     "subject": "语文",
@@ -30873,7 +36153,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1314",
+    "id": "S_ITEM_1754",
     "teachingClassId": "C_高三_C1_语文",
     "teachingClassName": "高三1班语文班",
     "subject": "语文",
@@ -30885,7 +36165,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1315",
+    "id": "S_ITEM_1755",
     "teachingClassId": "C_高三_C1_语文",
     "teachingClassName": "高三1班语文班",
     "subject": "语文",
@@ -30897,7 +36177,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1316",
+    "id": "S_ITEM_1756",
     "teachingClassId": "C_高三_C1_语文",
     "teachingClassName": "高三1班语文班",
     "subject": "语文",
@@ -30909,7 +36189,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1317",
+    "id": "S_ITEM_1757",
     "teachingClassId": "C_高三_C1_语文",
     "teachingClassName": "高三1班语文班",
     "subject": "语文",
@@ -30921,7 +36201,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1318",
+    "id": "S_ITEM_1758",
     "teachingClassId": "C_高三_C1_语文",
     "teachingClassName": "高三1班语文班",
     "subject": "语文",
@@ -30933,7 +36213,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1319",
+    "id": "S_ITEM_1759",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -30945,7 +36225,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1320",
+    "id": "S_ITEM_1760",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -30957,7 +36237,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1321",
+    "id": "S_ITEM_1761",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -30969,7 +36249,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1322",
+    "id": "S_ITEM_1762",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -30981,7 +36261,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1323",
+    "id": "S_ITEM_1763",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -30993,7 +36273,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1324",
+    "id": "S_ITEM_1764",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -31005,7 +36285,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1325",
+    "id": "S_ITEM_1765",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -31017,7 +36297,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1326",
+    "id": "S_ITEM_1766",
     "teachingClassId": "C_高三_C1_数学",
     "teachingClassName": "高三1班数学班",
     "subject": "数学",
@@ -31029,7 +36309,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1327",
+    "id": "S_ITEM_1767",
     "teachingClassId": "C_高三_C1_英语",
     "teachingClassName": "高三1班英语班",
     "subject": "英语",
@@ -31041,7 +36321,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1328",
+    "id": "S_ITEM_1768",
     "teachingClassId": "C_高三_C1_英语",
     "teachingClassName": "高三1班英语班",
     "subject": "英语",
@@ -31053,7 +36333,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1329",
+    "id": "S_ITEM_1769",
     "teachingClassId": "C_高三_C1_英语",
     "teachingClassName": "高三1班英语班",
     "subject": "英语",
@@ -31065,7 +36345,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1330",
+    "id": "S_ITEM_1770",
     "teachingClassId": "C_高三_C1_英语",
     "teachingClassName": "高三1班英语班",
     "subject": "英语",
@@ -31077,7 +36357,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1331",
+    "id": "S_ITEM_1771",
     "teachingClassId": "C_高三_C1_英语",
     "teachingClassName": "高三1班英语班",
     "subject": "英语",
@@ -31089,7 +36369,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1332",
+    "id": "S_ITEM_1772",
     "teachingClassId": "C_高三_C1_英语",
     "teachingClassName": "高三1班英语班",
     "subject": "英语",
@@ -31101,7 +36381,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1333",
+    "id": "S_ITEM_1773",
     "teachingClassId": "C_高三_C1_英语",
     "teachingClassName": "高三1班英语班",
     "subject": "英语",
@@ -31113,7 +36393,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1334",
+    "id": "S_ITEM_1774",
     "teachingClassId": "C_高三_C1_物理",
     "teachingClassName": "高三1班物理班",
     "subject": "物理",
@@ -31125,7 +36405,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1335",
+    "id": "S_ITEM_1775",
     "teachingClassId": "C_高三_C1_物理",
     "teachingClassName": "高三1班物理班",
     "subject": "物理",
@@ -31137,7 +36417,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1336",
+    "id": "S_ITEM_1776",
     "teachingClassId": "C_高三_C1_物理",
     "teachingClassName": "高三1班物理班",
     "subject": "物理",
@@ -31149,7 +36429,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1337",
+    "id": "S_ITEM_1777",
     "teachingClassId": "C_高三_C1_物理",
     "teachingClassName": "高三1班物理班",
     "subject": "物理",
@@ -31161,7 +36441,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1338",
+    "id": "S_ITEM_1778",
     "teachingClassId": "C_高三_C1_物理",
     "teachingClassName": "高三1班物理班",
     "subject": "物理",
@@ -31173,7 +36453,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1339",
+    "id": "S_ITEM_1779",
     "teachingClassId": "C_高三_C1_物理",
     "teachingClassName": "高三1班物理班",
     "subject": "物理",
@@ -31185,7 +36465,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1340",
+    "id": "S_ITEM_1780",
     "teachingClassId": "C_高三_C1_化学",
     "teachingClassName": "高三1班化学班",
     "subject": "化学",
@@ -31197,7 +36477,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1341",
+    "id": "S_ITEM_1781",
     "teachingClassId": "C_高三_C1_化学",
     "teachingClassName": "高三1班化学班",
     "subject": "化学",
@@ -31209,7 +36489,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1342",
+    "id": "S_ITEM_1782",
     "teachingClassId": "C_高三_C1_化学",
     "teachingClassName": "高三1班化学班",
     "subject": "化学",
@@ -31221,7 +36501,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1343",
+    "id": "S_ITEM_1783",
     "teachingClassId": "C_高三_C1_化学",
     "teachingClassName": "高三1班化学班",
     "subject": "化学",
@@ -31233,7 +36513,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1344",
+    "id": "S_ITEM_1784",
     "teachingClassId": "C_高三_C1_化学",
     "teachingClassName": "高三1班化学班",
     "subject": "化学",
@@ -31245,7 +36525,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1345",
+    "id": "S_ITEM_1785",
     "teachingClassId": "C_高三_C1_生物",
     "teachingClassName": "高三1班生物班",
     "subject": "生物",
@@ -31257,7 +36537,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1346",
+    "id": "S_ITEM_1786",
     "teachingClassId": "C_高三_C1_生物",
     "teachingClassName": "高三1班生物班",
     "subject": "生物",
@@ -31269,7 +36549,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1347",
+    "id": "S_ITEM_1787",
     "teachingClassId": "C_高三_C1_生物",
     "teachingClassName": "高三1班生物班",
     "subject": "生物",
@@ -31281,7 +36561,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1348",
+    "id": "S_ITEM_1788",
     "teachingClassId": "C_高三_C1_生物",
     "teachingClassName": "高三1班生物班",
     "subject": "生物",
@@ -31293,7 +36573,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1349",
+    "id": "S_ITEM_1789",
     "teachingClassId": "C_高三_C1_生物",
     "teachingClassName": "高三1班生物班",
     "subject": "生物",
@@ -31305,7 +36585,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1350",
+    "id": "S_ITEM_1790",
     "teachingClassId": "C_高三_C1_体育",
     "teachingClassName": "高三1班体育班",
     "subject": "体育",
@@ -31317,7 +36597,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1351",
+    "id": "S_ITEM_1791",
     "teachingClassId": "C_高三_C1_通用",
     "teachingClassName": "高三1班通用班",
     "subject": "通用",
@@ -31329,7 +36609,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1352",
+    "id": "S_ITEM_1792",
     "teachingClassId": "C_高三_C2_语文",
     "teachingClassName": "高三2班语文班",
     "subject": "语文",
@@ -31341,7 +36621,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1353",
+    "id": "S_ITEM_1793",
     "teachingClassId": "C_高三_C2_语文",
     "teachingClassName": "高三2班语文班",
     "subject": "语文",
@@ -31353,7 +36633,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1354",
+    "id": "S_ITEM_1794",
     "teachingClassId": "C_高三_C2_语文",
     "teachingClassName": "高三2班语文班",
     "subject": "语文",
@@ -31365,7 +36645,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1355",
+    "id": "S_ITEM_1795",
     "teachingClassId": "C_高三_C2_语文",
     "teachingClassName": "高三2班语文班",
     "subject": "语文",
@@ -31377,7 +36657,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1356",
+    "id": "S_ITEM_1796",
     "teachingClassId": "C_高三_C2_语文",
     "teachingClassName": "高三2班语文班",
     "subject": "语文",
@@ -31389,7 +36669,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1357",
+    "id": "S_ITEM_1797",
     "teachingClassId": "C_高三_C2_语文",
     "teachingClassName": "高三2班语文班",
     "subject": "语文",
@@ -31401,7 +36681,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1358",
+    "id": "S_ITEM_1798",
     "teachingClassId": "C_高三_C2_语文",
     "teachingClassName": "高三2班语文班",
     "subject": "语文",
@@ -31413,7 +36693,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1359",
+    "id": "S_ITEM_1799",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31425,7 +36705,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1360",
+    "id": "S_ITEM_1800",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31437,7 +36717,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1361",
+    "id": "S_ITEM_1801",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31449,7 +36729,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1362",
+    "id": "S_ITEM_1802",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31461,7 +36741,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1363",
+    "id": "S_ITEM_1803",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31473,7 +36753,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1364",
+    "id": "S_ITEM_1804",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31485,7 +36765,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1365",
+    "id": "S_ITEM_1805",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31497,7 +36777,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1366",
+    "id": "S_ITEM_1806",
     "teachingClassId": "C_高三_C2_数学",
     "teachingClassName": "高三2班数学班",
     "subject": "数学",
@@ -31509,7 +36789,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1367",
+    "id": "S_ITEM_1807",
     "teachingClassId": "C_高三_C2_英语",
     "teachingClassName": "高三2班英语班",
     "subject": "英语",
@@ -31521,7 +36801,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1368",
+    "id": "S_ITEM_1808",
     "teachingClassId": "C_高三_C2_英语",
     "teachingClassName": "高三2班英语班",
     "subject": "英语",
@@ -31533,7 +36813,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1369",
+    "id": "S_ITEM_1809",
     "teachingClassId": "C_高三_C2_英语",
     "teachingClassName": "高三2班英语班",
     "subject": "英语",
@@ -31545,7 +36825,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1370",
+    "id": "S_ITEM_1810",
     "teachingClassId": "C_高三_C2_英语",
     "teachingClassName": "高三2班英语班",
     "subject": "英语",
@@ -31557,7 +36837,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1371",
+    "id": "S_ITEM_1811",
     "teachingClassId": "C_高三_C2_英语",
     "teachingClassName": "高三2班英语班",
     "subject": "英语",
@@ -31569,7 +36849,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1372",
+    "id": "S_ITEM_1812",
     "teachingClassId": "C_高三_C2_英语",
     "teachingClassName": "高三2班英语班",
     "subject": "英语",
@@ -31581,7 +36861,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1373",
+    "id": "S_ITEM_1813",
     "teachingClassId": "C_高三_C2_英语",
     "teachingClassName": "高三2班英语班",
     "subject": "英语",
@@ -31593,7 +36873,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1374",
+    "id": "S_ITEM_1814",
     "teachingClassId": "C_高三_C2_政治",
     "teachingClassName": "高三2班政治班",
     "subject": "政治",
@@ -31605,7 +36885,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1375",
+    "id": "S_ITEM_1815",
     "teachingClassId": "C_高三_C2_政治",
     "teachingClassName": "高三2班政治班",
     "subject": "政治",
@@ -31617,7 +36897,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1376",
+    "id": "S_ITEM_1816",
     "teachingClassId": "C_高三_C2_政治",
     "teachingClassName": "高三2班政治班",
     "subject": "政治",
@@ -31629,7 +36909,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1377",
+    "id": "S_ITEM_1817",
     "teachingClassId": "C_高三_C2_政治",
     "teachingClassName": "高三2班政治班",
     "subject": "政治",
@@ -31641,7 +36921,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1378",
+    "id": "S_ITEM_1818",
     "teachingClassId": "C_高三_C2_政治",
     "teachingClassName": "高三2班政治班",
     "subject": "政治",
@@ -31653,7 +36933,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1379",
+    "id": "S_ITEM_1819",
     "teachingClassId": "C_高三_C2_历史",
     "teachingClassName": "高三2班历史班",
     "subject": "历史",
@@ -31665,7 +36945,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1380",
+    "id": "S_ITEM_1820",
     "teachingClassId": "C_高三_C2_历史",
     "teachingClassName": "高三2班历史班",
     "subject": "历史",
@@ -31677,7 +36957,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1381",
+    "id": "S_ITEM_1821",
     "teachingClassId": "C_高三_C2_历史",
     "teachingClassName": "高三2班历史班",
     "subject": "历史",
@@ -31689,7 +36969,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1382",
+    "id": "S_ITEM_1822",
     "teachingClassId": "C_高三_C2_历史",
     "teachingClassName": "高三2班历史班",
     "subject": "历史",
@@ -31701,7 +36981,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1383",
+    "id": "S_ITEM_1823",
     "teachingClassId": "C_高三_C2_历史",
     "teachingClassName": "高三2班历史班",
     "subject": "历史",
@@ -31713,7 +36993,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1384",
+    "id": "S_ITEM_1824",
     "teachingClassId": "C_高三_C2_历史",
     "teachingClassName": "高三2班历史班",
     "subject": "历史",
@@ -31725,7 +37005,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1385",
+    "id": "S_ITEM_1825",
     "teachingClassId": "C_高三_C2_地理",
     "teachingClassName": "高三2班地理班",
     "subject": "地理",
@@ -31737,7 +37017,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1386",
+    "id": "S_ITEM_1826",
     "teachingClassId": "C_高三_C2_地理",
     "teachingClassName": "高三2班地理班",
     "subject": "地理",
@@ -31749,7 +37029,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1387",
+    "id": "S_ITEM_1827",
     "teachingClassId": "C_高三_C2_地理",
     "teachingClassName": "高三2班地理班",
     "subject": "地理",
@@ -31761,7 +37041,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1388",
+    "id": "S_ITEM_1828",
     "teachingClassId": "C_高三_C2_地理",
     "teachingClassName": "高三2班地理班",
     "subject": "地理",
@@ -31773,7 +37053,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1389",
+    "id": "S_ITEM_1829",
     "teachingClassId": "C_高三_C2_地理",
     "teachingClassName": "高三2班地理班",
     "subject": "地理",
@@ -31785,7 +37065,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1390",
+    "id": "S_ITEM_1830",
     "teachingClassId": "C_高三_C2_体育",
     "teachingClassName": "高三2班体育班",
     "subject": "体育",
@@ -31797,7 +37077,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1391",
+    "id": "S_ITEM_1831",
     "teachingClassId": "C_高三_C2_通用",
     "teachingClassName": "高三2班通用班",
     "subject": "通用",
@@ -31809,7 +37089,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1392",
+    "id": "S_ITEM_1832",
     "teachingClassId": "C_高三_C3_语文",
     "teachingClassName": "高三3班语文班",
     "subject": "语文",
@@ -31821,7 +37101,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1393",
+    "id": "S_ITEM_1833",
     "teachingClassId": "C_高三_C3_语文",
     "teachingClassName": "高三3班语文班",
     "subject": "语文",
@@ -31833,7 +37113,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1394",
+    "id": "S_ITEM_1834",
     "teachingClassId": "C_高三_C3_语文",
     "teachingClassName": "高三3班语文班",
     "subject": "语文",
@@ -31845,7 +37125,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1395",
+    "id": "S_ITEM_1835",
     "teachingClassId": "C_高三_C3_语文",
     "teachingClassName": "高三3班语文班",
     "subject": "语文",
@@ -31857,7 +37137,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1396",
+    "id": "S_ITEM_1836",
     "teachingClassId": "C_高三_C3_语文",
     "teachingClassName": "高三3班语文班",
     "subject": "语文",
@@ -31869,7 +37149,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1397",
+    "id": "S_ITEM_1837",
     "teachingClassId": "C_高三_C3_语文",
     "teachingClassName": "高三3班语文班",
     "subject": "语文",
@@ -31881,7 +37161,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1398",
+    "id": "S_ITEM_1838",
     "teachingClassId": "C_高三_C3_语文",
     "teachingClassName": "高三3班语文班",
     "subject": "语文",
@@ -31893,7 +37173,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1399",
+    "id": "S_ITEM_1839",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31905,7 +37185,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1400",
+    "id": "S_ITEM_1840",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31917,7 +37197,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1401",
+    "id": "S_ITEM_1841",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31929,7 +37209,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1402",
+    "id": "S_ITEM_1842",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31941,7 +37221,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1403",
+    "id": "S_ITEM_1843",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31953,7 +37233,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1404",
+    "id": "S_ITEM_1844",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31965,7 +37245,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1405",
+    "id": "S_ITEM_1845",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31977,7 +37257,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1406",
+    "id": "S_ITEM_1846",
     "teachingClassId": "C_高三_C3_数学",
     "teachingClassName": "高三3班数学班",
     "subject": "数学",
@@ -31989,7 +37269,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1407",
+    "id": "S_ITEM_1847",
     "teachingClassId": "C_高三_C3_英语",
     "teachingClassName": "高三3班英语班",
     "subject": "英语",
@@ -32001,7 +37281,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1408",
+    "id": "S_ITEM_1848",
     "teachingClassId": "C_高三_C3_英语",
     "teachingClassName": "高三3班英语班",
     "subject": "英语",
@@ -32013,7 +37293,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1409",
+    "id": "S_ITEM_1849",
     "teachingClassId": "C_高三_C3_英语",
     "teachingClassName": "高三3班英语班",
     "subject": "英语",
@@ -32025,7 +37305,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1410",
+    "id": "S_ITEM_1850",
     "teachingClassId": "C_高三_C3_英语",
     "teachingClassName": "高三3班英语班",
     "subject": "英语",
@@ -32037,7 +37317,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1411",
+    "id": "S_ITEM_1851",
     "teachingClassId": "C_高三_C3_英语",
     "teachingClassName": "高三3班英语班",
     "subject": "英语",
@@ -32049,7 +37329,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1412",
+    "id": "S_ITEM_1852",
     "teachingClassId": "C_高三_C3_英语",
     "teachingClassName": "高三3班英语班",
     "subject": "英语",
@@ -32061,7 +37341,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1413",
+    "id": "S_ITEM_1853",
     "teachingClassId": "C_高三_C3_英语",
     "teachingClassName": "高三3班英语班",
     "subject": "英语",
@@ -32073,7 +37353,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1414",
+    "id": "S_ITEM_1854",
     "teachingClassId": "C_高三_C3_物理",
     "teachingClassName": "高三3班物理班",
     "subject": "物理",
@@ -32085,7 +37365,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1415",
+    "id": "S_ITEM_1855",
     "teachingClassId": "C_高三_C3_物理",
     "teachingClassName": "高三3班物理班",
     "subject": "物理",
@@ -32097,7 +37377,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1416",
+    "id": "S_ITEM_1856",
     "teachingClassId": "C_高三_C3_物理",
     "teachingClassName": "高三3班物理班",
     "subject": "物理",
@@ -32109,7 +37389,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1417",
+    "id": "S_ITEM_1857",
     "teachingClassId": "C_高三_C3_物理",
     "teachingClassName": "高三3班物理班",
     "subject": "物理",
@@ -32121,7 +37401,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1418",
+    "id": "S_ITEM_1858",
     "teachingClassId": "C_高三_C3_物理",
     "teachingClassName": "高三3班物理班",
     "subject": "物理",
@@ -32133,7 +37413,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1419",
+    "id": "S_ITEM_1859",
     "teachingClassId": "C_高三_C3_物理",
     "teachingClassName": "高三3班物理班",
     "subject": "物理",
@@ -32145,7 +37425,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1420",
+    "id": "S_ITEM_1860",
     "teachingClassId": "C_高三_C3_化学",
     "teachingClassName": "高三3班化学班",
     "subject": "化学",
@@ -32157,7 +37437,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1421",
+    "id": "S_ITEM_1861",
     "teachingClassId": "C_高三_C3_化学",
     "teachingClassName": "高三3班化学班",
     "subject": "化学",
@@ -32169,7 +37449,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1422",
+    "id": "S_ITEM_1862",
     "teachingClassId": "C_高三_C3_化学",
     "teachingClassName": "高三3班化学班",
     "subject": "化学",
@@ -32181,7 +37461,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1423",
+    "id": "S_ITEM_1863",
     "teachingClassId": "C_高三_C3_化学",
     "teachingClassName": "高三3班化学班",
     "subject": "化学",
@@ -32193,7 +37473,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1424",
+    "id": "S_ITEM_1864",
     "teachingClassId": "C_高三_C3_化学",
     "teachingClassName": "高三3班化学班",
     "subject": "化学",
@@ -32205,7 +37485,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1425",
+    "id": "S_ITEM_1865",
     "teachingClassId": "C_高三_C3_生物",
     "teachingClassName": "高三3班生物班",
     "subject": "生物",
@@ -32217,7 +37497,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1426",
+    "id": "S_ITEM_1866",
     "teachingClassId": "C_高三_C3_生物",
     "teachingClassName": "高三3班生物班",
     "subject": "生物",
@@ -32229,7 +37509,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1427",
+    "id": "S_ITEM_1867",
     "teachingClassId": "C_高三_C3_体育",
     "teachingClassName": "高三3班体育班",
     "subject": "体育",
@@ -32241,7 +37521,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1428",
+    "id": "S_ITEM_1868",
     "teachingClassId": "C_高三_C3_通用",
     "teachingClassName": "高三3班通用班",
     "subject": "通用",
@@ -32253,7 +37533,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1429",
+    "id": "S_ITEM_1869",
     "teachingClassId": "C_高三_C4_语文",
     "teachingClassName": "高三4班语文班",
     "subject": "语文",
@@ -32265,7 +37545,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1430",
+    "id": "S_ITEM_1870",
     "teachingClassId": "C_高三_C4_语文",
     "teachingClassName": "高三4班语文班",
     "subject": "语文",
@@ -32277,7 +37557,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1431",
+    "id": "S_ITEM_1871",
     "teachingClassId": "C_高三_C4_语文",
     "teachingClassName": "高三4班语文班",
     "subject": "语文",
@@ -32289,7 +37569,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1432",
+    "id": "S_ITEM_1872",
     "teachingClassId": "C_高三_C4_语文",
     "teachingClassName": "高三4班语文班",
     "subject": "语文",
@@ -32301,7 +37581,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1433",
+    "id": "S_ITEM_1873",
     "teachingClassId": "C_高三_C4_语文",
     "teachingClassName": "高三4班语文班",
     "subject": "语文",
@@ -32313,7 +37593,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1434",
+    "id": "S_ITEM_1874",
     "teachingClassId": "C_高三_C4_语文",
     "teachingClassName": "高三4班语文班",
     "subject": "语文",
@@ -32325,7 +37605,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1435",
+    "id": "S_ITEM_1875",
     "teachingClassId": "C_高三_C4_语文",
     "teachingClassName": "高三4班语文班",
     "subject": "语文",
@@ -32337,7 +37617,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1436",
+    "id": "S_ITEM_1876",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32349,7 +37629,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1437",
+    "id": "S_ITEM_1877",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32361,7 +37641,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1438",
+    "id": "S_ITEM_1878",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32373,7 +37653,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1439",
+    "id": "S_ITEM_1879",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32385,7 +37665,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1440",
+    "id": "S_ITEM_1880",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32397,7 +37677,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1441",
+    "id": "S_ITEM_1881",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32409,7 +37689,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1442",
+    "id": "S_ITEM_1882",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32421,7 +37701,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1443",
+    "id": "S_ITEM_1883",
     "teachingClassId": "C_高三_C4_数学",
     "teachingClassName": "高三4班数学班",
     "subject": "数学",
@@ -32433,7 +37713,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1444",
+    "id": "S_ITEM_1884",
     "teachingClassId": "C_高三_C4_英语",
     "teachingClassName": "高三4班英语班",
     "subject": "英语",
@@ -32445,7 +37725,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1445",
+    "id": "S_ITEM_1885",
     "teachingClassId": "C_高三_C4_英语",
     "teachingClassName": "高三4班英语班",
     "subject": "英语",
@@ -32457,7 +37737,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1446",
+    "id": "S_ITEM_1886",
     "teachingClassId": "C_高三_C4_英语",
     "teachingClassName": "高三4班英语班",
     "subject": "英语",
@@ -32469,7 +37749,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1447",
+    "id": "S_ITEM_1887",
     "teachingClassId": "C_高三_C4_英语",
     "teachingClassName": "高三4班英语班",
     "subject": "英语",
@@ -32481,7 +37761,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1448",
+    "id": "S_ITEM_1888",
     "teachingClassId": "C_高三_C4_英语",
     "teachingClassName": "高三4班英语班",
     "subject": "英语",
@@ -32493,7 +37773,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1449",
+    "id": "S_ITEM_1889",
     "teachingClassId": "C_高三_C4_英语",
     "teachingClassName": "高三4班英语班",
     "subject": "英语",
@@ -32505,7 +37785,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1450",
+    "id": "S_ITEM_1890",
     "teachingClassId": "C_高三_C4_英语",
     "teachingClassName": "高三4班英语班",
     "subject": "英语",
@@ -32517,7 +37797,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1451",
+    "id": "S_ITEM_1891",
     "teachingClassId": "C_高三_C4_物理",
     "teachingClassName": "高三4班物理班",
     "subject": "物理",
@@ -32529,7 +37809,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1452",
+    "id": "S_ITEM_1892",
     "teachingClassId": "C_高三_C4_物理",
     "teachingClassName": "高三4班物理班",
     "subject": "物理",
@@ -32541,7 +37821,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1453",
+    "id": "S_ITEM_1893",
     "teachingClassId": "C_高三_C4_物理",
     "teachingClassName": "高三4班物理班",
     "subject": "物理",
@@ -32553,7 +37833,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1454",
+    "id": "S_ITEM_1894",
     "teachingClassId": "C_高三_C4_物理",
     "teachingClassName": "高三4班物理班",
     "subject": "物理",
@@ -32565,7 +37845,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1455",
+    "id": "S_ITEM_1895",
     "teachingClassId": "C_高三_C4_物理",
     "teachingClassName": "高三4班物理班",
     "subject": "物理",
@@ -32577,7 +37857,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1456",
+    "id": "S_ITEM_1896",
     "teachingClassId": "C_高三_C4_物理",
     "teachingClassName": "高三4班物理班",
     "subject": "物理",
@@ -32589,7 +37869,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1457",
+    "id": "S_ITEM_1897",
     "teachingClassId": "C_高三_C4_化学",
     "teachingClassName": "高三4班化学班",
     "subject": "化学",
@@ -32601,7 +37881,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1458",
+    "id": "S_ITEM_1898",
     "teachingClassId": "C_高三_C4_化学",
     "teachingClassName": "高三4班化学班",
     "subject": "化学",
@@ -32613,7 +37893,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1459",
+    "id": "S_ITEM_1899",
     "teachingClassId": "C_高三_C4_化学",
     "teachingClassName": "高三4班化学班",
     "subject": "化学",
@@ -32625,7 +37905,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1460",
+    "id": "S_ITEM_1900",
     "teachingClassId": "C_高三_C4_化学",
     "teachingClassName": "高三4班化学班",
     "subject": "化学",
@@ -32637,7 +37917,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1461",
+    "id": "S_ITEM_1901",
     "teachingClassId": "C_高三_C4_化学",
     "teachingClassName": "高三4班化学班",
     "subject": "化学",
@@ -32649,7 +37929,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1462",
+    "id": "S_ITEM_1902",
     "teachingClassId": "C_高三_C4_体育",
     "teachingClassName": "高三4班体育班",
     "subject": "体育",
@@ -32661,7 +37941,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1463",
+    "id": "S_ITEM_1903",
     "teachingClassId": "C_高三_C4_通用",
     "teachingClassName": "高三4班通用班",
     "subject": "通用",
@@ -32673,7 +37953,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1464",
+    "id": "S_ITEM_1904",
     "teachingClassId": "C_高三_C5_语文",
     "teachingClassName": "高三5班语文班",
     "subject": "语文",
@@ -32685,7 +37965,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1465",
+    "id": "S_ITEM_1905",
     "teachingClassId": "C_高三_C5_语文",
     "teachingClassName": "高三5班语文班",
     "subject": "语文",
@@ -32697,7 +37977,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1466",
+    "id": "S_ITEM_1906",
     "teachingClassId": "C_高三_C5_语文",
     "teachingClassName": "高三5班语文班",
     "subject": "语文",
@@ -32709,7 +37989,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1467",
+    "id": "S_ITEM_1907",
     "teachingClassId": "C_高三_C5_语文",
     "teachingClassName": "高三5班语文班",
     "subject": "语文",
@@ -32721,7 +38001,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1468",
+    "id": "S_ITEM_1908",
     "teachingClassId": "C_高三_C5_语文",
     "teachingClassName": "高三5班语文班",
     "subject": "语文",
@@ -32733,7 +38013,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1469",
+    "id": "S_ITEM_1909",
     "teachingClassId": "C_高三_C5_语文",
     "teachingClassName": "高三5班语文班",
     "subject": "语文",
@@ -32745,7 +38025,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1470",
+    "id": "S_ITEM_1910",
     "teachingClassId": "C_高三_C5_语文",
     "teachingClassName": "高三5班语文班",
     "subject": "语文",
@@ -32757,7 +38037,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1471",
+    "id": "S_ITEM_1911",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32769,7 +38049,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1472",
+    "id": "S_ITEM_1912",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32781,7 +38061,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1473",
+    "id": "S_ITEM_1913",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32793,7 +38073,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1474",
+    "id": "S_ITEM_1914",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32805,7 +38085,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1475",
+    "id": "S_ITEM_1915",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32817,7 +38097,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1476",
+    "id": "S_ITEM_1916",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32829,7 +38109,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1477",
+    "id": "S_ITEM_1917",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32841,7 +38121,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1478",
+    "id": "S_ITEM_1918",
     "teachingClassId": "C_高三_C5_数学",
     "teachingClassName": "高三5班数学班",
     "subject": "数学",
@@ -32853,7 +38133,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1479",
+    "id": "S_ITEM_1919",
     "teachingClassId": "C_高三_C5_英语",
     "teachingClassName": "高三5班英语班",
     "subject": "英语",
@@ -32865,7 +38145,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1480",
+    "id": "S_ITEM_1920",
     "teachingClassId": "C_高三_C5_英语",
     "teachingClassName": "高三5班英语班",
     "subject": "英语",
@@ -32877,7 +38157,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1481",
+    "id": "S_ITEM_1921",
     "teachingClassId": "C_高三_C5_英语",
     "teachingClassName": "高三5班英语班",
     "subject": "英语",
@@ -32889,7 +38169,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1482",
+    "id": "S_ITEM_1922",
     "teachingClassId": "C_高三_C5_英语",
     "teachingClassName": "高三5班英语班",
     "subject": "英语",
@@ -32901,7 +38181,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1483",
+    "id": "S_ITEM_1923",
     "teachingClassId": "C_高三_C5_英语",
     "teachingClassName": "高三5班英语班",
     "subject": "英语",
@@ -32913,7 +38193,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1484",
+    "id": "S_ITEM_1924",
     "teachingClassId": "C_高三_C5_英语",
     "teachingClassName": "高三5班英语班",
     "subject": "英语",
@@ -32925,7 +38205,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1485",
+    "id": "S_ITEM_1925",
     "teachingClassId": "C_高三_C5_英语",
     "teachingClassName": "高三5班英语班",
     "subject": "英语",
@@ -32937,7 +38217,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1486",
+    "id": "S_ITEM_1926",
     "teachingClassId": "C_高三_C5_政治",
     "teachingClassName": "高三5班政治班",
     "subject": "政治",
@@ -32949,7 +38229,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1487",
+    "id": "S_ITEM_1927",
     "teachingClassId": "C_高三_C5_政治",
     "teachingClassName": "高三5班政治班",
     "subject": "政治",
@@ -32961,7 +38241,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1488",
+    "id": "S_ITEM_1928",
     "teachingClassId": "C_高三_C5_政治",
     "teachingClassName": "高三5班政治班",
     "subject": "政治",
@@ -32973,7 +38253,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1489",
+    "id": "S_ITEM_1929",
     "teachingClassId": "C_高三_C5_政治",
     "teachingClassName": "高三5班政治班",
     "subject": "政治",
@@ -32985,7 +38265,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1490",
+    "id": "S_ITEM_1930",
     "teachingClassId": "C_高三_C5_政治",
     "teachingClassName": "高三5班政治班",
     "subject": "政治",
@@ -32997,7 +38277,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1491",
+    "id": "S_ITEM_1931",
     "teachingClassId": "C_高三_C5_物理",
     "teachingClassName": "高三5班物理班",
     "subject": "物理",
@@ -33009,7 +38289,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1492",
+    "id": "S_ITEM_1932",
     "teachingClassId": "C_高三_C5_物理",
     "teachingClassName": "高三5班物理班",
     "subject": "物理",
@@ -33021,7 +38301,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1493",
+    "id": "S_ITEM_1933",
     "teachingClassId": "C_高三_C5_物理",
     "teachingClassName": "高三5班物理班",
     "subject": "物理",
@@ -33033,7 +38313,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1494",
+    "id": "S_ITEM_1934",
     "teachingClassId": "C_高三_C5_物理",
     "teachingClassName": "高三5班物理班",
     "subject": "物理",
@@ -33045,7 +38325,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1495",
+    "id": "S_ITEM_1935",
     "teachingClassId": "C_高三_C5_物理",
     "teachingClassName": "高三5班物理班",
     "subject": "物理",
@@ -33057,7 +38337,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1496",
+    "id": "S_ITEM_1936",
     "teachingClassId": "C_高三_C5_物理",
     "teachingClassName": "高三5班物理班",
     "subject": "物理",
@@ -33069,7 +38349,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1497",
+    "id": "S_ITEM_1937",
     "teachingClassId": "C_高三_C5_化学",
     "teachingClassName": "高三5班化学班",
     "subject": "化学",
@@ -33081,7 +38361,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1498",
+    "id": "S_ITEM_1938",
     "teachingClassId": "C_高三_C5_化学",
     "teachingClassName": "高三5班化学班",
     "subject": "化学",
@@ -33093,7 +38373,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1499",
+    "id": "S_ITEM_1939",
     "teachingClassId": "C_高三_C5_化学",
     "teachingClassName": "高三5班化学班",
     "subject": "化学",
@@ -33105,7 +38385,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1500",
+    "id": "S_ITEM_1940",
     "teachingClassId": "C_高三_C5_化学",
     "teachingClassName": "高三5班化学班",
     "subject": "化学",
@@ -33117,7 +38397,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1501",
+    "id": "S_ITEM_1941",
     "teachingClassId": "C_高三_C5_化学",
     "teachingClassName": "高三5班化学班",
     "subject": "化学",
@@ -33129,7 +38409,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1502",
+    "id": "S_ITEM_1942",
     "teachingClassId": "C_高三_C6_语文",
     "teachingClassName": "高三6班语文班",
     "subject": "语文",
@@ -33141,7 +38421,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1503",
+    "id": "S_ITEM_1943",
     "teachingClassId": "C_高三_C6_语文",
     "teachingClassName": "高三6班语文班",
     "subject": "语文",
@@ -33153,7 +38433,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1504",
+    "id": "S_ITEM_1944",
     "teachingClassId": "C_高三_C6_语文",
     "teachingClassName": "高三6班语文班",
     "subject": "语文",
@@ -33165,7 +38445,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1505",
+    "id": "S_ITEM_1945",
     "teachingClassId": "C_高三_C6_语文",
     "teachingClassName": "高三6班语文班",
     "subject": "语文",
@@ -33177,7 +38457,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1506",
+    "id": "S_ITEM_1946",
     "teachingClassId": "C_高三_C6_语文",
     "teachingClassName": "高三6班语文班",
     "subject": "语文",
@@ -33189,7 +38469,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1507",
+    "id": "S_ITEM_1947",
     "teachingClassId": "C_高三_C6_语文",
     "teachingClassName": "高三6班语文班",
     "subject": "语文",
@@ -33201,7 +38481,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1508",
+    "id": "S_ITEM_1948",
     "teachingClassId": "C_高三_C6_语文",
     "teachingClassName": "高三6班语文班",
     "subject": "语文",
@@ -33213,7 +38493,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1509",
+    "id": "S_ITEM_1949",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33225,7 +38505,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1510",
+    "id": "S_ITEM_1950",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33237,7 +38517,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1511",
+    "id": "S_ITEM_1951",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33249,7 +38529,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1512",
+    "id": "S_ITEM_1952",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33261,7 +38541,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1513",
+    "id": "S_ITEM_1953",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33273,7 +38553,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1514",
+    "id": "S_ITEM_1954",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33285,7 +38565,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1515",
+    "id": "S_ITEM_1955",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33297,7 +38577,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1516",
+    "id": "S_ITEM_1956",
     "teachingClassId": "C_高三_C6_数学",
     "teachingClassName": "高三6班数学班",
     "subject": "数学",
@@ -33309,7 +38589,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1517",
+    "id": "S_ITEM_1957",
     "teachingClassId": "C_高三_C6_英语",
     "teachingClassName": "高三6班英语班",
     "subject": "英语",
@@ -33321,7 +38601,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1518",
+    "id": "S_ITEM_1958",
     "teachingClassId": "C_高三_C6_英语",
     "teachingClassName": "高三6班英语班",
     "subject": "英语",
@@ -33333,7 +38613,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1519",
+    "id": "S_ITEM_1959",
     "teachingClassId": "C_高三_C6_英语",
     "teachingClassName": "高三6班英语班",
     "subject": "英语",
@@ -33345,7 +38625,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1520",
+    "id": "S_ITEM_1960",
     "teachingClassId": "C_高三_C6_英语",
     "teachingClassName": "高三6班英语班",
     "subject": "英语",
@@ -33357,7 +38637,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1521",
+    "id": "S_ITEM_1961",
     "teachingClassId": "C_高三_C6_英语",
     "teachingClassName": "高三6班英语班",
     "subject": "英语",
@@ -33369,7 +38649,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1522",
+    "id": "S_ITEM_1962",
     "teachingClassId": "C_高三_C6_英语",
     "teachingClassName": "高三6班英语班",
     "subject": "英语",
@@ -33381,7 +38661,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1523",
+    "id": "S_ITEM_1963",
     "teachingClassId": "C_高三_C6_英语",
     "teachingClassName": "高三6班英语班",
     "subject": "英语",
@@ -33393,7 +38673,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1524",
+    "id": "S_ITEM_1964",
     "teachingClassId": "C_高三_C6_地理",
     "teachingClassName": "高三6班地理班",
     "subject": "地理",
@@ -33405,7 +38685,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1525",
+    "id": "S_ITEM_1965",
     "teachingClassId": "C_高三_C6_地理",
     "teachingClassName": "高三6班地理班",
     "subject": "地理",
@@ -33417,7 +38697,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1526",
+    "id": "S_ITEM_1966",
     "teachingClassId": "C_高三_C6_地理",
     "teachingClassName": "高三6班地理班",
     "subject": "地理",
@@ -33429,7 +38709,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1527",
+    "id": "S_ITEM_1967",
     "teachingClassId": "C_高三_C6_地理",
     "teachingClassName": "高三6班地理班",
     "subject": "地理",
@@ -33441,7 +38721,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1528",
+    "id": "S_ITEM_1968",
     "teachingClassId": "C_高三_C6_地理",
     "teachingClassName": "高三6班地理班",
     "subject": "地理",
@@ -33453,7 +38733,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1529",
+    "id": "S_ITEM_1969",
     "teachingClassId": "C_高三_C6_物理",
     "teachingClassName": "高三6班物理班",
     "subject": "物理",
@@ -33465,7 +38745,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1530",
+    "id": "S_ITEM_1970",
     "teachingClassId": "C_高三_C6_物理",
     "teachingClassName": "高三6班物理班",
     "subject": "物理",
@@ -33477,7 +38757,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1531",
+    "id": "S_ITEM_1971",
     "teachingClassId": "C_高三_C6_物理",
     "teachingClassName": "高三6班物理班",
     "subject": "物理",
@@ -33489,7 +38769,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1532",
+    "id": "S_ITEM_1972",
     "teachingClassId": "C_高三_C6_物理",
     "teachingClassName": "高三6班物理班",
     "subject": "物理",
@@ -33501,7 +38781,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1533",
+    "id": "S_ITEM_1973",
     "teachingClassId": "C_高三_C6_物理",
     "teachingClassName": "高三6班物理班",
     "subject": "物理",
@@ -33513,7 +38793,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1534",
+    "id": "S_ITEM_1974",
     "teachingClassId": "C_高三_C6_物理",
     "teachingClassName": "高三6班物理班",
     "subject": "物理",
@@ -33525,7 +38805,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1535",
+    "id": "S_ITEM_1975",
     "teachingClassId": "C_高三_C6_化学",
     "teachingClassName": "高三6班化学班",
     "subject": "化学",
@@ -33537,7 +38817,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1536",
+    "id": "S_ITEM_1976",
     "teachingClassId": "C_高三_C6_化学",
     "teachingClassName": "高三6班化学班",
     "subject": "化学",
@@ -33549,7 +38829,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1537",
+    "id": "S_ITEM_1977",
     "teachingClassId": "C_高三_C6_化学",
     "teachingClassName": "高三6班化学班",
     "subject": "化学",
@@ -33561,7 +38841,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1538",
+    "id": "S_ITEM_1978",
     "teachingClassId": "C_高三_C6_化学",
     "teachingClassName": "高三6班化学班",
     "subject": "化学",
@@ -33573,7 +38853,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1539",
+    "id": "S_ITEM_1979",
     "teachingClassId": "C_高三_C6_化学",
     "teachingClassName": "高三6班化学班",
     "subject": "化学",
@@ -33585,7 +38865,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1540",
+    "id": "S_ITEM_1980",
     "teachingClassId": "C_高三_C7_语文",
     "teachingClassName": "高三7班语文班",
     "subject": "语文",
@@ -33597,7 +38877,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1541",
+    "id": "S_ITEM_1981",
     "teachingClassId": "C_高三_C7_语文",
     "teachingClassName": "高三7班语文班",
     "subject": "语文",
@@ -33609,7 +38889,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1542",
+    "id": "S_ITEM_1982",
     "teachingClassId": "C_高三_C7_语文",
     "teachingClassName": "高三7班语文班",
     "subject": "语文",
@@ -33621,7 +38901,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1543",
+    "id": "S_ITEM_1983",
     "teachingClassId": "C_高三_C7_语文",
     "teachingClassName": "高三7班语文班",
     "subject": "语文",
@@ -33633,7 +38913,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1544",
+    "id": "S_ITEM_1984",
     "teachingClassId": "C_高三_C7_语文",
     "teachingClassName": "高三7班语文班",
     "subject": "语文",
@@ -33645,7 +38925,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1545",
+    "id": "S_ITEM_1985",
     "teachingClassId": "C_高三_C7_语文",
     "teachingClassName": "高三7班语文班",
     "subject": "语文",
@@ -33657,7 +38937,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1546",
+    "id": "S_ITEM_1986",
     "teachingClassId": "C_高三_C7_语文",
     "teachingClassName": "高三7班语文班",
     "subject": "语文",
@@ -33669,7 +38949,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1547",
+    "id": "S_ITEM_1987",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33681,7 +38961,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1548",
+    "id": "S_ITEM_1988",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33693,7 +38973,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1549",
+    "id": "S_ITEM_1989",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33705,7 +38985,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1550",
+    "id": "S_ITEM_1990",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33717,7 +38997,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1551",
+    "id": "S_ITEM_1991",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33729,7 +39009,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1552",
+    "id": "S_ITEM_1992",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33741,7 +39021,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1553",
+    "id": "S_ITEM_1993",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33753,7 +39033,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1554",
+    "id": "S_ITEM_1994",
     "teachingClassId": "C_高三_C7_数学",
     "teachingClassName": "高三7班数学班",
     "subject": "数学",
@@ -33765,7 +39045,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1555",
+    "id": "S_ITEM_1995",
     "teachingClassId": "C_高三_C7_英语",
     "teachingClassName": "高三7班英语班",
     "subject": "英语",
@@ -33777,7 +39057,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1556",
+    "id": "S_ITEM_1996",
     "teachingClassId": "C_高三_C7_英语",
     "teachingClassName": "高三7班英语班",
     "subject": "英语",
@@ -33789,7 +39069,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1557",
+    "id": "S_ITEM_1997",
     "teachingClassId": "C_高三_C7_英语",
     "teachingClassName": "高三7班英语班",
     "subject": "英语",
@@ -33801,7 +39081,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1558",
+    "id": "S_ITEM_1998",
     "teachingClassId": "C_高三_C7_英语",
     "teachingClassName": "高三7班英语班",
     "subject": "英语",
@@ -33813,7 +39093,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1559",
+    "id": "S_ITEM_1999",
     "teachingClassId": "C_高三_C7_英语",
     "teachingClassName": "高三7班英语班",
     "subject": "英语",
@@ -33825,7 +39105,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1560",
+    "id": "S_ITEM_2000",
     "teachingClassId": "C_高三_C7_英语",
     "teachingClassName": "高三7班英语班",
     "subject": "英语",
@@ -33837,7 +39117,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1561",
+    "id": "S_ITEM_2001",
     "teachingClassId": "C_高三_C7_英语",
     "teachingClassName": "高三7班英语班",
     "subject": "英语",
@@ -33849,7 +39129,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1562",
+    "id": "S_ITEM_2002",
     "teachingClassId": "C_高三_C7_政治",
     "teachingClassName": "高三7班政治班",
     "subject": "政治",
@@ -33861,7 +39141,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1563",
+    "id": "S_ITEM_2003",
     "teachingClassId": "C_高三_C7_政治",
     "teachingClassName": "高三7班政治班",
     "subject": "政治",
@@ -33873,7 +39153,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1564",
+    "id": "S_ITEM_2004",
     "teachingClassId": "C_高三_C7_政治",
     "teachingClassName": "高三7班政治班",
     "subject": "政治",
@@ -33885,7 +39165,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1565",
+    "id": "S_ITEM_2005",
     "teachingClassId": "C_高三_C7_政治",
     "teachingClassName": "高三7班政治班",
     "subject": "政治",
@@ -33897,7 +39177,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1566",
+    "id": "S_ITEM_2006",
     "teachingClassId": "C_高三_C7_政治",
     "teachingClassName": "高三7班政治班",
     "subject": "政治",
@@ -33909,19 +39189,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1567",
-    "teachingClassId": "C_高三_C7_历史",
-    "teachingClassName": "高三7班历史班",
-    "subject": "历史",
-    "teacherId": "T135",
-    "teacherName": "杨思瑞",
-    "classroomId": "R_高三_7",
-    "classroomName": "高三7班普通教室",
-    "day": 4,
-    "period": 4
-  },
-  {
-    "id": "S_ITEM_1568",
+    "id": "S_ITEM_2007",
     "teachingClassId": "C_高三_C7_历史",
     "teachingClassName": "高三7班历史班",
     "subject": "历史",
@@ -33933,7 +39201,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1569",
+    "id": "S_ITEM_2008",
     "teachingClassId": "C_高三_C7_历史",
     "teachingClassName": "高三7班历史班",
     "subject": "历史",
@@ -33945,7 +39213,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1570",
+    "id": "S_ITEM_2009",
     "teachingClassId": "C_高三_C7_历史",
     "teachingClassName": "高三7班历史班",
     "subject": "历史",
@@ -33957,7 +39225,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1571",
+    "id": "S_ITEM_2010",
     "teachingClassId": "C_高三_C7_历史",
     "teachingClassName": "高三7班历史班",
     "subject": "历史",
@@ -33969,7 +39237,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1572",
+    "id": "S_ITEM_2011",
     "teachingClassId": "C_高三_C7_历史",
     "teachingClassName": "高三7班历史班",
     "subject": "历史",
@@ -33981,7 +39249,31 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1573",
+    "id": "S_ITEM_2012",
+    "teachingClassId": "C_高三_C7_历史",
+    "teachingClassName": "高三7班历史班",
+    "subject": "历史",
+    "teacherId": "T135",
+    "teacherName": "杨思瑞",
+    "classroomId": "R_高三_7",
+    "classroomName": "高三7班普通教室",
+    "day": 5,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_2013",
+    "teachingClassId": "C_高三_C7_生物",
+    "teachingClassName": "高三7班生物班",
+    "subject": "生物",
+    "teacherId": "T070",
+    "teacherName": "王玮颖",
+    "classroomId": "R_高三_7",
+    "classroomName": "高三7班普通教室",
+    "day": 4,
+    "period": 4
+  },
+  {
+    "id": "S_ITEM_2014",
     "teachingClassId": "C_高三_C7_生物",
     "teachingClassName": "高三7班生物班",
     "subject": "生物",
@@ -33993,7 +39285,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1574",
+    "id": "S_ITEM_2015",
     "teachingClassId": "C_高三_C7_生物",
     "teachingClassName": "高三7班生物班",
     "subject": "生物",
@@ -34005,7 +39297,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1575",
+    "id": "S_ITEM_2016",
     "teachingClassId": "C_高三_C7_生物",
     "teachingClassName": "高三7班生物班",
     "subject": "生物",
@@ -34017,7 +39309,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1576",
+    "id": "S_ITEM_2017",
     "teachingClassId": "C_高三_C7_体育",
     "teachingClassName": "高三7班体育班",
     "subject": "体育",
@@ -34026,22 +39318,10 @@ export function generatePrepopulatedSchedules(
     "classroomId": "R_SPEC_1",
     "classroomName": "体育场",
     "day": 5,
-    "period": 4
-  },
-  {
-    "id": "S_ITEM_1577",
-    "teachingClassId": "C_高三_C7_通用",
-    "teachingClassName": "高三7班通用班",
-    "subject": "通用",
-    "teacherId": "T143",
-    "teacherName": "杨勇",
-    "classroomId": "R_SPEC_2",
-    "classroomName": "通用技术教室",
-    "day": 5,
     "period": 5
   },
   {
-    "id": "S_ITEM_1578",
+    "id": "S_ITEM_2018",
     "teachingClassId": "C_高三_C8_语文",
     "teachingClassName": "高三8班语文班",
     "subject": "语文",
@@ -34053,7 +39333,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1579",
+    "id": "S_ITEM_2019",
     "teachingClassId": "C_高三_C8_语文",
     "teachingClassName": "高三8班语文班",
     "subject": "语文",
@@ -34065,7 +39345,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1580",
+    "id": "S_ITEM_2020",
     "teachingClassId": "C_高三_C8_语文",
     "teachingClassName": "高三8班语文班",
     "subject": "语文",
@@ -34077,7 +39357,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1581",
+    "id": "S_ITEM_2021",
     "teachingClassId": "C_高三_C8_语文",
     "teachingClassName": "高三8班语文班",
     "subject": "语文",
@@ -34089,7 +39369,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1582",
+    "id": "S_ITEM_2022",
     "teachingClassId": "C_高三_C8_语文",
     "teachingClassName": "高三8班语文班",
     "subject": "语文",
@@ -34101,7 +39381,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1583",
+    "id": "S_ITEM_2023",
     "teachingClassId": "C_高三_C8_语文",
     "teachingClassName": "高三8班语文班",
     "subject": "语文",
@@ -34113,7 +39393,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1584",
+    "id": "S_ITEM_2024",
     "teachingClassId": "C_高三_C8_语文",
     "teachingClassName": "高三8班语文班",
     "subject": "语文",
@@ -34125,7 +39405,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1585",
+    "id": "S_ITEM_2025",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34137,7 +39417,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1586",
+    "id": "S_ITEM_2026",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34149,7 +39429,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1587",
+    "id": "S_ITEM_2027",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34161,7 +39441,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1588",
+    "id": "S_ITEM_2028",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34173,7 +39453,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1589",
+    "id": "S_ITEM_2029",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34185,7 +39465,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1590",
+    "id": "S_ITEM_2030",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34197,7 +39477,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1591",
+    "id": "S_ITEM_2031",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34209,7 +39489,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1592",
+    "id": "S_ITEM_2032",
     "teachingClassId": "C_高三_C8_数学",
     "teachingClassName": "高三8班数学班",
     "subject": "数学",
@@ -34221,7 +39501,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1593",
+    "id": "S_ITEM_2033",
     "teachingClassId": "C_高三_C8_英语",
     "teachingClassName": "高三8班英语班",
     "subject": "英语",
@@ -34233,7 +39513,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1594",
+    "id": "S_ITEM_2034",
     "teachingClassId": "C_高三_C8_英语",
     "teachingClassName": "高三8班英语班",
     "subject": "英语",
@@ -34245,7 +39525,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1595",
+    "id": "S_ITEM_2035",
     "teachingClassId": "C_高三_C8_英语",
     "teachingClassName": "高三8班英语班",
     "subject": "英语",
@@ -34257,7 +39537,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1596",
+    "id": "S_ITEM_2036",
     "teachingClassId": "C_高三_C8_英语",
     "teachingClassName": "高三8班英语班",
     "subject": "英语",
@@ -34269,7 +39549,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1597",
+    "id": "S_ITEM_2037",
     "teachingClassId": "C_高三_C8_英语",
     "teachingClassName": "高三8班英语班",
     "subject": "英语",
@@ -34281,7 +39561,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1598",
+    "id": "S_ITEM_2038",
     "teachingClassId": "C_高三_C8_英语",
     "teachingClassName": "高三8班英语班",
     "subject": "英语",
@@ -34293,7 +39573,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1599",
+    "id": "S_ITEM_2039",
     "teachingClassId": "C_高三_C8_英语",
     "teachingClassName": "高三8班英语班",
     "subject": "英语",
@@ -34305,7 +39585,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1600",
+    "id": "S_ITEM_2040",
     "teachingClassId": "C_高三_C8_物理",
     "teachingClassName": "高三8班物理班",
     "subject": "物理",
@@ -34317,7 +39597,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1601",
+    "id": "S_ITEM_2041",
     "teachingClassId": "C_高三_C8_物理",
     "teachingClassName": "高三8班物理班",
     "subject": "物理",
@@ -34329,7 +39609,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1602",
+    "id": "S_ITEM_2042",
     "teachingClassId": "C_高三_C8_物理",
     "teachingClassName": "高三8班物理班",
     "subject": "物理",
@@ -34341,7 +39621,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1603",
+    "id": "S_ITEM_2043",
     "teachingClassId": "C_高三_C8_物理",
     "teachingClassName": "高三8班物理班",
     "subject": "物理",
@@ -34353,7 +39633,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1604",
+    "id": "S_ITEM_2044",
     "teachingClassId": "C_高三_C8_物理",
     "teachingClassName": "高三8班物理班",
     "subject": "物理",
@@ -34365,7 +39645,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1605",
+    "id": "S_ITEM_2045",
     "teachingClassId": "C_高三_C8_物理",
     "teachingClassName": "高三8班物理班",
     "subject": "物理",
@@ -34377,7 +39657,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1606",
+    "id": "S_ITEM_2046",
     "teachingClassId": "C_高三_C8_化学",
     "teachingClassName": "高三8班化学班",
     "subject": "化学",
@@ -34389,7 +39669,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1607",
+    "id": "S_ITEM_2047",
     "teachingClassId": "C_高三_C8_化学",
     "teachingClassName": "高三8班化学班",
     "subject": "化学",
@@ -34401,7 +39681,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1608",
+    "id": "S_ITEM_2048",
     "teachingClassId": "C_高三_C8_化学",
     "teachingClassName": "高三8班化学班",
     "subject": "化学",
@@ -34413,7 +39693,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1609",
+    "id": "S_ITEM_2049",
     "teachingClassId": "C_高三_C8_化学",
     "teachingClassName": "高三8班化学班",
     "subject": "化学",
@@ -34425,7 +39705,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1610",
+    "id": "S_ITEM_2050",
     "teachingClassId": "C_高三_C8_化学",
     "teachingClassName": "高三8班化学班",
     "subject": "化学",
@@ -34437,7 +39717,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1611",
+    "id": "S_ITEM_2051",
     "teachingClassId": "C_高三_C8_生物",
     "teachingClassName": "高三8班生物班",
     "subject": "生物",
@@ -34449,7 +39729,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1612",
+    "id": "S_ITEM_2052",
     "teachingClassId": "C_高三_C8_生物",
     "teachingClassName": "高三8班生物班",
     "subject": "生物",
@@ -34461,7 +39741,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1613",
+    "id": "S_ITEM_2053",
     "teachingClassId": "C_高三_C8_生物",
     "teachingClassName": "高三8班生物班",
     "subject": "生物",
@@ -34473,7 +39753,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1614",
+    "id": "S_ITEM_2054",
     "teachingClassId": "C_高三_C8_生物",
     "teachingClassName": "高三8班生物班",
     "subject": "生物",
@@ -34485,7 +39765,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1615",
+    "id": "S_ITEM_2055",
     "teachingClassId": "C_高三_C8_生物",
     "teachingClassName": "高三8班生物班",
     "subject": "生物",
@@ -34497,7 +39777,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1616",
+    "id": "S_ITEM_2056",
     "teachingClassId": "C_高三_C8_体育",
     "teachingClassName": "高三8班体育班",
     "subject": "体育",
@@ -34509,7 +39789,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1617",
+    "id": "S_ITEM_2057",
     "teachingClassId": "C_高三_C9_语文",
     "teachingClassName": "高三9班语文班",
     "subject": "语文",
@@ -34521,7 +39801,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1618",
+    "id": "S_ITEM_2058",
     "teachingClassId": "C_高三_C9_语文",
     "teachingClassName": "高三9班语文班",
     "subject": "语文",
@@ -34533,7 +39813,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1619",
+    "id": "S_ITEM_2059",
     "teachingClassId": "C_高三_C9_语文",
     "teachingClassName": "高三9班语文班",
     "subject": "语文",
@@ -34545,7 +39825,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1620",
+    "id": "S_ITEM_2060",
     "teachingClassId": "C_高三_C9_语文",
     "teachingClassName": "高三9班语文班",
     "subject": "语文",
@@ -34557,7 +39837,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1621",
+    "id": "S_ITEM_2061",
     "teachingClassId": "C_高三_C9_语文",
     "teachingClassName": "高三9班语文班",
     "subject": "语文",
@@ -34569,7 +39849,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1622",
+    "id": "S_ITEM_2062",
     "teachingClassId": "C_高三_C9_语文",
     "teachingClassName": "高三9班语文班",
     "subject": "语文",
@@ -34581,7 +39861,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1623",
+    "id": "S_ITEM_2063",
     "teachingClassId": "C_高三_C9_语文",
     "teachingClassName": "高三9班语文班",
     "subject": "语文",
@@ -34593,7 +39873,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1624",
+    "id": "S_ITEM_2064",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34605,7 +39885,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1625",
+    "id": "S_ITEM_2065",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34617,7 +39897,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1626",
+    "id": "S_ITEM_2066",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34629,7 +39909,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1627",
+    "id": "S_ITEM_2067",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34641,7 +39921,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1628",
+    "id": "S_ITEM_2068",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34653,7 +39933,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1629",
+    "id": "S_ITEM_2069",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34665,7 +39945,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1630",
+    "id": "S_ITEM_2070",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34677,7 +39957,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1631",
+    "id": "S_ITEM_2071",
     "teachingClassId": "C_高三_C9_数学",
     "teachingClassName": "高三9班数学班",
     "subject": "数学",
@@ -34689,7 +39969,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1632",
+    "id": "S_ITEM_2072",
     "teachingClassId": "C_高三_C9_英语",
     "teachingClassName": "高三9班英语班",
     "subject": "英语",
@@ -34701,7 +39981,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1633",
+    "id": "S_ITEM_2073",
     "teachingClassId": "C_高三_C9_英语",
     "teachingClassName": "高三9班英语班",
     "subject": "英语",
@@ -34713,7 +39993,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1634",
+    "id": "S_ITEM_2074",
     "teachingClassId": "C_高三_C9_英语",
     "teachingClassName": "高三9班英语班",
     "subject": "英语",
@@ -34725,7 +40005,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1635",
+    "id": "S_ITEM_2075",
     "teachingClassId": "C_高三_C9_英语",
     "teachingClassName": "高三9班英语班",
     "subject": "英语",
@@ -34737,7 +40017,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1636",
+    "id": "S_ITEM_2076",
     "teachingClassId": "C_高三_C9_英语",
     "teachingClassName": "高三9班英语班",
     "subject": "英语",
@@ -34749,7 +40029,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1637",
+    "id": "S_ITEM_2077",
     "teachingClassId": "C_高三_C9_英语",
     "teachingClassName": "高三9班英语班",
     "subject": "英语",
@@ -34761,7 +40041,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1638",
+    "id": "S_ITEM_2078",
     "teachingClassId": "C_高三_C9_英语",
     "teachingClassName": "高三9班英语班",
     "subject": "英语",
@@ -34773,7 +40053,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1639",
+    "id": "S_ITEM_2079",
     "teachingClassId": "C_高三_C9_政治",
     "teachingClassName": "高三9班政治班",
     "subject": "政治",
@@ -34785,7 +40065,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1640",
+    "id": "S_ITEM_2080",
     "teachingClassId": "C_高三_C9_政治",
     "teachingClassName": "高三9班政治班",
     "subject": "政治",
@@ -34797,7 +40077,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1641",
+    "id": "S_ITEM_2081",
     "teachingClassId": "C_高三_C9_政治",
     "teachingClassName": "高三9班政治班",
     "subject": "政治",
@@ -34809,7 +40089,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1642",
+    "id": "S_ITEM_2082",
     "teachingClassId": "C_高三_C9_政治",
     "teachingClassName": "高三9班政治班",
     "subject": "政治",
@@ -34821,7 +40101,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1643",
+    "id": "S_ITEM_2083",
     "teachingClassId": "C_高三_C9_政治",
     "teachingClassName": "高三9班政治班",
     "subject": "政治",
@@ -34833,7 +40113,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1644",
+    "id": "S_ITEM_2084",
     "teachingClassId": "C_高三_C9_物理",
     "teachingClassName": "高三9班物理班",
     "subject": "物理",
@@ -34845,7 +40125,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1645",
+    "id": "S_ITEM_2085",
     "teachingClassId": "C_高三_C9_物理",
     "teachingClassName": "高三9班物理班",
     "subject": "物理",
@@ -34857,7 +40137,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1646",
+    "id": "S_ITEM_2086",
     "teachingClassId": "C_高三_C9_物理",
     "teachingClassName": "高三9班物理班",
     "subject": "物理",
@@ -34869,7 +40149,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1647",
+    "id": "S_ITEM_2087",
     "teachingClassId": "C_高三_C9_物理",
     "teachingClassName": "高三9班物理班",
     "subject": "物理",
@@ -34881,7 +40161,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1648",
+    "id": "S_ITEM_2088",
     "teachingClassId": "C_高三_C9_物理",
     "teachingClassName": "高三9班物理班",
     "subject": "物理",
@@ -34893,7 +40173,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1649",
+    "id": "S_ITEM_2089",
     "teachingClassId": "C_高三_C9_物理",
     "teachingClassName": "高三9班物理班",
     "subject": "物理",
@@ -34905,7 +40185,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1650",
+    "id": "S_ITEM_2090",
     "teachingClassId": "C_高三_C9_化学",
     "teachingClassName": "高三9班化学班",
     "subject": "化学",
@@ -34917,7 +40197,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1651",
+    "id": "S_ITEM_2091",
     "teachingClassId": "C_高三_C9_化学",
     "teachingClassName": "高三9班化学班",
     "subject": "化学",
@@ -34929,7 +40209,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1652",
+    "id": "S_ITEM_2092",
     "teachingClassId": "C_高三_C9_化学",
     "teachingClassName": "高三9班化学班",
     "subject": "化学",
@@ -34941,7 +40221,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1653",
+    "id": "S_ITEM_2093",
     "teachingClassId": "C_高三_C9_化学",
     "teachingClassName": "高三9班化学班",
     "subject": "化学",
@@ -34953,7 +40233,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1654",
+    "id": "S_ITEM_2094",
     "teachingClassId": "C_高三_C9_化学",
     "teachingClassName": "高三9班化学班",
     "subject": "化学",
@@ -34965,7 +40245,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1655",
+    "id": "S_ITEM_2095",
     "teachingClassId": "C_高三_C9_通用",
     "teachingClassName": "高三9班通用班",
     "subject": "通用",
@@ -34977,7 +40257,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1656",
+    "id": "S_ITEM_2096",
     "teachingClassId": "C_高三_C10_语文",
     "teachingClassName": "高三10班语文班",
     "subject": "语文",
@@ -34989,7 +40269,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1657",
+    "id": "S_ITEM_2097",
     "teachingClassId": "C_高三_C10_语文",
     "teachingClassName": "高三10班语文班",
     "subject": "语文",
@@ -35001,7 +40281,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1658",
+    "id": "S_ITEM_2098",
     "teachingClassId": "C_高三_C10_语文",
     "teachingClassName": "高三10班语文班",
     "subject": "语文",
@@ -35013,7 +40293,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1659",
+    "id": "S_ITEM_2099",
     "teachingClassId": "C_高三_C10_语文",
     "teachingClassName": "高三10班语文班",
     "subject": "语文",
@@ -35025,7 +40305,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1660",
+    "id": "S_ITEM_2100",
     "teachingClassId": "C_高三_C10_语文",
     "teachingClassName": "高三10班语文班",
     "subject": "语文",
@@ -35037,7 +40317,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1661",
+    "id": "S_ITEM_2101",
     "teachingClassId": "C_高三_C10_语文",
     "teachingClassName": "高三10班语文班",
     "subject": "语文",
@@ -35049,7 +40329,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1662",
+    "id": "S_ITEM_2102",
     "teachingClassId": "C_高三_C10_语文",
     "teachingClassName": "高三10班语文班",
     "subject": "语文",
@@ -35061,7 +40341,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1663",
+    "id": "S_ITEM_2103",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35073,7 +40353,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1664",
+    "id": "S_ITEM_2104",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35085,7 +40365,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1665",
+    "id": "S_ITEM_2105",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35097,7 +40377,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1666",
+    "id": "S_ITEM_2106",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35109,7 +40389,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1667",
+    "id": "S_ITEM_2107",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35121,7 +40401,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1668",
+    "id": "S_ITEM_2108",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35133,7 +40413,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1669",
+    "id": "S_ITEM_2109",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35145,7 +40425,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1670",
+    "id": "S_ITEM_2110",
     "teachingClassId": "C_高三_C10_数学",
     "teachingClassName": "高三10班数学班",
     "subject": "数学",
@@ -35157,7 +40437,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1671",
+    "id": "S_ITEM_2111",
     "teachingClassId": "C_高三_C10_英语",
     "teachingClassName": "高三10班英语班",
     "subject": "英语",
@@ -35169,7 +40449,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1672",
+    "id": "S_ITEM_2112",
     "teachingClassId": "C_高三_C10_英语",
     "teachingClassName": "高三10班英语班",
     "subject": "英语",
@@ -35181,7 +40461,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1673",
+    "id": "S_ITEM_2113",
     "teachingClassId": "C_高三_C10_英语",
     "teachingClassName": "高三10班英语班",
     "subject": "英语",
@@ -35193,7 +40473,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1674",
+    "id": "S_ITEM_2114",
     "teachingClassId": "C_高三_C10_英语",
     "teachingClassName": "高三10班英语班",
     "subject": "英语",
@@ -35205,7 +40485,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1675",
+    "id": "S_ITEM_2115",
     "teachingClassId": "C_高三_C10_英语",
     "teachingClassName": "高三10班英语班",
     "subject": "英语",
@@ -35217,7 +40497,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1676",
+    "id": "S_ITEM_2116",
     "teachingClassId": "C_高三_C10_英语",
     "teachingClassName": "高三10班英语班",
     "subject": "英语",
@@ -35229,7 +40509,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1677",
+    "id": "S_ITEM_2117",
     "teachingClassId": "C_高三_C10_英语",
     "teachingClassName": "高三10班英语班",
     "subject": "英语",
@@ -35241,7 +40521,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1678",
+    "id": "S_ITEM_2118",
     "teachingClassId": "C_高三_C10_物理",
     "teachingClassName": "高三10班物理班",
     "subject": "物理",
@@ -35253,7 +40533,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1679",
+    "id": "S_ITEM_2119",
     "teachingClassId": "C_高三_C10_物理",
     "teachingClassName": "高三10班物理班",
     "subject": "物理",
@@ -35265,7 +40545,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1680",
+    "id": "S_ITEM_2120",
     "teachingClassId": "C_高三_C10_物理",
     "teachingClassName": "高三10班物理班",
     "subject": "物理",
@@ -35277,7 +40557,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1681",
+    "id": "S_ITEM_2121",
     "teachingClassId": "C_高三_C10_物理",
     "teachingClassName": "高三10班物理班",
     "subject": "物理",
@@ -35289,7 +40569,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1682",
+    "id": "S_ITEM_2122",
     "teachingClassId": "C_高三_C10_物理",
     "teachingClassName": "高三10班物理班",
     "subject": "物理",
@@ -35301,7 +40581,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1683",
+    "id": "S_ITEM_2123",
     "teachingClassId": "C_高三_C10_物理",
     "teachingClassName": "高三10班物理班",
     "subject": "物理",
@@ -35313,7 +40593,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1684",
+    "id": "S_ITEM_2124",
     "teachingClassId": "C_高三_C10_化学",
     "teachingClassName": "高三10班化学班",
     "subject": "化学",
@@ -35325,7 +40605,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1685",
+    "id": "S_ITEM_2125",
     "teachingClassId": "C_高三_C10_化学",
     "teachingClassName": "高三10班化学班",
     "subject": "化学",
@@ -35337,7 +40617,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1686",
+    "id": "S_ITEM_2126",
     "teachingClassId": "C_高三_C10_化学",
     "teachingClassName": "高三10班化学班",
     "subject": "化学",
@@ -35349,7 +40629,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1687",
+    "id": "S_ITEM_2127",
     "teachingClassId": "C_高三_C10_化学",
     "teachingClassName": "高三10班化学班",
     "subject": "化学",
@@ -35361,7 +40641,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1688",
+    "id": "S_ITEM_2128",
     "teachingClassId": "C_高三_C10_化学",
     "teachingClassName": "高三10班化学班",
     "subject": "化学",
@@ -35373,7 +40653,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1689",
+    "id": "S_ITEM_2129",
     "teachingClassId": "C_高三_C10_生物",
     "teachingClassName": "高三10班生物班",
     "subject": "生物",
@@ -35385,7 +40665,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1690",
+    "id": "S_ITEM_2130",
     "teachingClassId": "C_高三_C10_生物",
     "teachingClassName": "高三10班生物班",
     "subject": "生物",
@@ -35397,7 +40677,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1691",
+    "id": "S_ITEM_2131",
     "teachingClassId": "C_高三_C10_生物",
     "teachingClassName": "高三10班生物班",
     "subject": "生物",
@@ -35409,7 +40689,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1692",
+    "id": "S_ITEM_2132",
     "teachingClassId": "C_高三_C10_生物",
     "teachingClassName": "高三10班生物班",
     "subject": "生物",
@@ -35421,7 +40701,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1693",
+    "id": "S_ITEM_2133",
     "teachingClassId": "C_高三_C10_生物",
     "teachingClassName": "高三10班生物班",
     "subject": "生物",
@@ -35433,7 +40713,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1694",
+    "id": "S_ITEM_2134",
     "teachingClassId": "C_高三_C11_语文",
     "teachingClassName": "高三11班语文班",
     "subject": "语文",
@@ -35445,7 +40725,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1695",
+    "id": "S_ITEM_2135",
     "teachingClassId": "C_高三_C11_语文",
     "teachingClassName": "高三11班语文班",
     "subject": "语文",
@@ -35457,7 +40737,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1696",
+    "id": "S_ITEM_2136",
     "teachingClassId": "C_高三_C11_语文",
     "teachingClassName": "高三11班语文班",
     "subject": "语文",
@@ -35469,7 +40749,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1697",
+    "id": "S_ITEM_2137",
     "teachingClassId": "C_高三_C11_语文",
     "teachingClassName": "高三11班语文班",
     "subject": "语文",
@@ -35481,7 +40761,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1698",
+    "id": "S_ITEM_2138",
     "teachingClassId": "C_高三_C11_语文",
     "teachingClassName": "高三11班语文班",
     "subject": "语文",
@@ -35493,7 +40773,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1699",
+    "id": "S_ITEM_2139",
     "teachingClassId": "C_高三_C11_语文",
     "teachingClassName": "高三11班语文班",
     "subject": "语文",
@@ -35505,7 +40785,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1700",
+    "id": "S_ITEM_2140",
     "teachingClassId": "C_高三_C11_语文",
     "teachingClassName": "高三11班语文班",
     "subject": "语文",
@@ -35517,7 +40797,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1701",
+    "id": "S_ITEM_2141",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35529,7 +40809,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1702",
+    "id": "S_ITEM_2142",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35541,7 +40821,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1703",
+    "id": "S_ITEM_2143",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35553,7 +40833,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1704",
+    "id": "S_ITEM_2144",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35565,7 +40845,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1705",
+    "id": "S_ITEM_2145",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35577,7 +40857,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1706",
+    "id": "S_ITEM_2146",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35589,7 +40869,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1707",
+    "id": "S_ITEM_2147",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35601,7 +40881,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1708",
+    "id": "S_ITEM_2148",
     "teachingClassId": "C_高三_C11_数学",
     "teachingClassName": "高三11班数学班",
     "subject": "数学",
@@ -35613,7 +40893,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1709",
+    "id": "S_ITEM_2149",
     "teachingClassId": "C_高三_C11_英语",
     "teachingClassName": "高三11班英语班",
     "subject": "英语",
@@ -35625,7 +40905,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1710",
+    "id": "S_ITEM_2150",
     "teachingClassId": "C_高三_C11_英语",
     "teachingClassName": "高三11班英语班",
     "subject": "英语",
@@ -35637,7 +40917,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1711",
+    "id": "S_ITEM_2151",
     "teachingClassId": "C_高三_C11_英语",
     "teachingClassName": "高三11班英语班",
     "subject": "英语",
@@ -35649,7 +40929,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1712",
+    "id": "S_ITEM_2152",
     "teachingClassId": "C_高三_C11_英语",
     "teachingClassName": "高三11班英语班",
     "subject": "英语",
@@ -35661,7 +40941,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1713",
+    "id": "S_ITEM_2153",
     "teachingClassId": "C_高三_C11_英语",
     "teachingClassName": "高三11班英语班",
     "subject": "英语",
@@ -35673,7 +40953,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1714",
+    "id": "S_ITEM_2154",
     "teachingClassId": "C_高三_C11_英语",
     "teachingClassName": "高三11班英语班",
     "subject": "英语",
@@ -35685,7 +40965,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1715",
+    "id": "S_ITEM_2155",
     "teachingClassId": "C_高三_C11_英语",
     "teachingClassName": "高三11班英语班",
     "subject": "英语",
@@ -35697,7 +40977,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1716",
+    "id": "S_ITEM_2156",
     "teachingClassId": "C_高三_C11_政治",
     "teachingClassName": "高三11班政治班",
     "subject": "政治",
@@ -35709,7 +40989,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1717",
+    "id": "S_ITEM_2157",
     "teachingClassId": "C_高三_C11_政治",
     "teachingClassName": "高三11班政治班",
     "subject": "政治",
@@ -35721,7 +41001,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1718",
+    "id": "S_ITEM_2158",
     "teachingClassId": "C_高三_C11_政治",
     "teachingClassName": "高三11班政治班",
     "subject": "政治",
@@ -35733,7 +41013,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1719",
+    "id": "S_ITEM_2159",
     "teachingClassId": "C_高三_C11_政治",
     "teachingClassName": "高三11班政治班",
     "subject": "政治",
@@ -35745,7 +41025,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1720",
+    "id": "S_ITEM_2160",
     "teachingClassId": "C_高三_C11_政治",
     "teachingClassName": "高三11班政治班",
     "subject": "政治",
@@ -35757,7 +41037,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1721",
+    "id": "S_ITEM_2161",
     "teachingClassId": "C_高三_C11_物理",
     "teachingClassName": "高三11班物理班",
     "subject": "物理",
@@ -35769,7 +41049,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1722",
+    "id": "S_ITEM_2162",
     "teachingClassId": "C_高三_C11_物理",
     "teachingClassName": "高三11班物理班",
     "subject": "物理",
@@ -35781,7 +41061,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1723",
+    "id": "S_ITEM_2163",
     "teachingClassId": "C_高三_C11_物理",
     "teachingClassName": "高三11班物理班",
     "subject": "物理",
@@ -35793,7 +41073,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1724",
+    "id": "S_ITEM_2164",
     "teachingClassId": "C_高三_C11_物理",
     "teachingClassName": "高三11班物理班",
     "subject": "物理",
@@ -35805,7 +41085,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1725",
+    "id": "S_ITEM_2165",
     "teachingClassId": "C_高三_C11_物理",
     "teachingClassName": "高三11班物理班",
     "subject": "物理",
@@ -35817,7 +41097,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1726",
+    "id": "S_ITEM_2166",
     "teachingClassId": "C_高三_C11_物理",
     "teachingClassName": "高三11班物理班",
     "subject": "物理",
@@ -35829,7 +41109,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1727",
+    "id": "S_ITEM_2167",
     "teachingClassId": "C_高三_C11_化学",
     "teachingClassName": "高三11班化学班",
     "subject": "化学",
@@ -35841,7 +41121,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1728",
+    "id": "S_ITEM_2168",
     "teachingClassId": "C_高三_C11_化学",
     "teachingClassName": "高三11班化学班",
     "subject": "化学",
@@ -35853,7 +41133,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1729",
+    "id": "S_ITEM_2169",
     "teachingClassId": "C_高三_C11_化学",
     "teachingClassName": "高三11班化学班",
     "subject": "化学",
@@ -35865,7 +41145,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1730",
+    "id": "S_ITEM_2170",
     "teachingClassId": "C_高三_C11_体育",
     "teachingClassName": "高三11班体育班",
     "subject": "体育",
@@ -35877,7 +41157,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1731",
+    "id": "S_ITEM_2171",
     "teachingClassId": "C_高三_C11_通用",
     "teachingClassName": "高三11班通用班",
     "subject": "通用",
@@ -35889,7 +41169,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1732",
+    "id": "S_ITEM_2172",
     "teachingClassId": "C_高三_C12_语文",
     "teachingClassName": "高三12班语文班",
     "subject": "语文",
@@ -35901,7 +41181,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1733",
+    "id": "S_ITEM_2173",
     "teachingClassId": "C_高三_C12_语文",
     "teachingClassName": "高三12班语文班",
     "subject": "语文",
@@ -35913,7 +41193,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1734",
+    "id": "S_ITEM_2174",
     "teachingClassId": "C_高三_C12_语文",
     "teachingClassName": "高三12班语文班",
     "subject": "语文",
@@ -35925,7 +41205,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1735",
+    "id": "S_ITEM_2175",
     "teachingClassId": "C_高三_C12_语文",
     "teachingClassName": "高三12班语文班",
     "subject": "语文",
@@ -35937,7 +41217,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1736",
+    "id": "S_ITEM_2176",
     "teachingClassId": "C_高三_C12_语文",
     "teachingClassName": "高三12班语文班",
     "subject": "语文",
@@ -35949,7 +41229,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1737",
+    "id": "S_ITEM_2177",
     "teachingClassId": "C_高三_C12_语文",
     "teachingClassName": "高三12班语文班",
     "subject": "语文",
@@ -35961,7 +41241,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1738",
+    "id": "S_ITEM_2178",
     "teachingClassId": "C_高三_C12_语文",
     "teachingClassName": "高三12班语文班",
     "subject": "语文",
@@ -35973,7 +41253,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1739",
+    "id": "S_ITEM_2179",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -35985,7 +41265,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1740",
+    "id": "S_ITEM_2180",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -35997,7 +41277,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1741",
+    "id": "S_ITEM_2181",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -36009,7 +41289,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1742",
+    "id": "S_ITEM_2182",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -36021,7 +41301,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1743",
+    "id": "S_ITEM_2183",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -36033,7 +41313,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1744",
+    "id": "S_ITEM_2184",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -36045,7 +41325,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1745",
+    "id": "S_ITEM_2185",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -36057,7 +41337,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1746",
+    "id": "S_ITEM_2186",
     "teachingClassId": "C_高三_C12_数学",
     "teachingClassName": "高三12班数学班",
     "subject": "数学",
@@ -36069,7 +41349,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1747",
+    "id": "S_ITEM_2187",
     "teachingClassId": "C_高三_C12_英语",
     "teachingClassName": "高三12班英语班",
     "subject": "英语",
@@ -36081,7 +41361,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1748",
+    "id": "S_ITEM_2188",
     "teachingClassId": "C_高三_C12_英语",
     "teachingClassName": "高三12班英语班",
     "subject": "英语",
@@ -36093,7 +41373,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1749",
+    "id": "S_ITEM_2189",
     "teachingClassId": "C_高三_C12_英语",
     "teachingClassName": "高三12班英语班",
     "subject": "英语",
@@ -36105,7 +41385,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1750",
+    "id": "S_ITEM_2190",
     "teachingClassId": "C_高三_C12_英语",
     "teachingClassName": "高三12班英语班",
     "subject": "英语",
@@ -36117,7 +41397,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1751",
+    "id": "S_ITEM_2191",
     "teachingClassId": "C_高三_C12_英语",
     "teachingClassName": "高三12班英语班",
     "subject": "英语",
@@ -36129,7 +41409,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1752",
+    "id": "S_ITEM_2192",
     "teachingClassId": "C_高三_C12_英语",
     "teachingClassName": "高三12班英语班",
     "subject": "英语",
@@ -36141,7 +41421,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1753",
+    "id": "S_ITEM_2193",
     "teachingClassId": "C_高三_C12_英语",
     "teachingClassName": "高三12班英语班",
     "subject": "英语",
@@ -36153,7 +41433,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1754",
+    "id": "S_ITEM_2194",
     "teachingClassId": "C_高三_C12_政治",
     "teachingClassName": "高三12班政治班",
     "subject": "政治",
@@ -36165,7 +41445,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1755",
+    "id": "S_ITEM_2195",
     "teachingClassId": "C_高三_C12_政治",
     "teachingClassName": "高三12班政治班",
     "subject": "政治",
@@ -36177,7 +41457,7 @@ export function generatePrepopulatedSchedules(
     "period": 4
   },
   {
-    "id": "S_ITEM_1756",
+    "id": "S_ITEM_2196",
     "teachingClassId": "C_高三_C12_政治",
     "teachingClassName": "高三12班政治班",
     "subject": "政治",
@@ -36189,7 +41469,7 @@ export function generatePrepopulatedSchedules(
     "period": 5
   },
   {
-    "id": "S_ITEM_1757",
+    "id": "S_ITEM_2197",
     "teachingClassId": "C_高三_C12_政治",
     "teachingClassName": "高三12班政治班",
     "subject": "政治",
@@ -36201,7 +41481,7 @@ export function generatePrepopulatedSchedules(
     "period": 6
   },
   {
-    "id": "S_ITEM_1758",
+    "id": "S_ITEM_2198",
     "teachingClassId": "C_高三_C12_政治",
     "teachingClassName": "高三12班政治班",
     "subject": "政治",
@@ -36213,7 +41493,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1759",
+    "id": "S_ITEM_2199",
     "teachingClassId": "C_高三_C12_历史",
     "teachingClassName": "高三12班历史班",
     "subject": "历史",
@@ -36225,7 +41505,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1760",
+    "id": "S_ITEM_2200",
     "teachingClassId": "C_高三_C12_历史",
     "teachingClassName": "高三12班历史班",
     "subject": "历史",
@@ -36237,7 +41517,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1761",
+    "id": "S_ITEM_2201",
     "teachingClassId": "C_高三_C12_历史",
     "teachingClassName": "高三12班历史班",
     "subject": "历史",
@@ -36249,7 +41529,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1762",
+    "id": "S_ITEM_2202",
     "teachingClassId": "C_高三_C12_历史",
     "teachingClassName": "高三12班历史班",
     "subject": "历史",
@@ -36261,7 +41541,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1763",
+    "id": "S_ITEM_2203",
     "teachingClassId": "C_高三_C12_历史",
     "teachingClassName": "高三12班历史班",
     "subject": "历史",
@@ -36273,7 +41553,7 @@ export function generatePrepopulatedSchedules(
     "period": 2
   },
   {
-    "id": "S_ITEM_1764",
+    "id": "S_ITEM_2204",
     "teachingClassId": "C_高三_C12_历史",
     "teachingClassName": "高三12班历史班",
     "subject": "历史",
@@ -36285,7 +41565,7 @@ export function generatePrepopulatedSchedules(
     "period": 3
   },
   {
-    "id": "S_ITEM_1765",
+    "id": "S_ITEM_2205",
     "teachingClassId": "C_高三_C12_地理",
     "teachingClassName": "高三12班地理班",
     "subject": "地理",
@@ -36297,7 +41577,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1766",
+    "id": "S_ITEM_2206",
     "teachingClassId": "C_高三_C12_地理",
     "teachingClassName": "高三12班地理班",
     "subject": "地理",
@@ -36309,7 +41589,7 @@ export function generatePrepopulatedSchedules(
     "period": 1
   },
   {
-    "id": "S_ITEM_1767",
+    "id": "S_ITEM_2207",
     "teachingClassId": "C_高三_C12_地理",
     "teachingClassName": "高三12班地理班",
     "subject": "地理",
@@ -36321,7 +41601,7 @@ export function generatePrepopulatedSchedules(
     "period": 7
   },
   {
-    "id": "S_ITEM_1768",
+    "id": "S_ITEM_2208",
     "teachingClassId": "C_高三_C12_地理",
     "teachingClassName": "高三12班地理班",
     "subject": "地理",
@@ -36333,7 +41613,7 @@ export function generatePrepopulatedSchedules(
     "period": 8
   },
   {
-    "id": "S_ITEM_1769",
+    "id": "S_ITEM_2209",
     "teachingClassId": "C_高三_C12_体育",
     "teachingClassName": "高三12班体育班",
     "subject": "体育",
@@ -36342,10 +41622,10 @@ export function generatePrepopulatedSchedules(
     "classroomId": "R_SPEC_1",
     "classroomName": "体育场",
     "day": 5,
-    "period": 5
+    "period": 4
   },
   {
-    "id": "S_ITEM_1770",
+    "id": "S_ITEM_2210",
     "teachingClassId": "C_高三_C12_通用",
     "teachingClassName": "高三12班通用班",
     "subject": "通用",
@@ -36354,7 +41634,7 @@ export function generatePrepopulatedSchedules(
     "classroomId": "R_SPEC_2",
     "classroomName": "通用技术教室",
     "day": 5,
-    "period": 4
+    "period": 5
   }
 ];
   

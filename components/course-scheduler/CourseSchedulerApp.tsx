@@ -1056,7 +1056,7 @@ export default function App() {
       {activeTab === 'management' && (
         <main id="data_management" className="flex-1 min-h-0 overflow-y-auto flex flex-col bg-slate-50 text-left w-full">
           {/* Scrollable overview area */}
-          <div className="scheduler-app-topbar management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80 bg-slate-50">
+          <div className="scheduler-app-topbar management-header px-6 pt-4 pb-2 shrink-0 border-b border-slate-200/80">
             <div className="mb-2 flex flex-wrap justify-between items-start gap-3">
               <div className="min-w-0">
                 <h2 className="text-xl font-bold text-slate-950 tracking-tight">学校教学分工与基础数据</h2>

@@ -51,7 +51,8 @@ runTest('course scheduler management overview stays available as a sticky app to
   assert.match(schedulerStyles, /#data_management\s*\{[\s\S]*overflow-y:\s*auto/);
   assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
   assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*top:\s*0/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*backdrop-filter:\s*blur/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*background:\s*#f8fafc/);
+  assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*backdrop-filter/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*height:\s*auto/);
   assert.match(schedulerStyles, /\.management-content-area\s*\{[\s\S]*overflow:\s*visible/);
   assert.match(schedulerStyles, /\.management-table-scroll\s*\{[\s\S]*max-height:\s*none/);

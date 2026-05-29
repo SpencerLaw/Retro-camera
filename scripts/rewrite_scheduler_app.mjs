@@ -12,7 +12,8 @@ import {
   X,
   Plus,
   Activity,
-  Database
+  Database,
+  RotateCcw
 } from 'lucide-react';
 import { 
   Role, 

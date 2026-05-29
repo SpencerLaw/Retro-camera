@@ -771,11 +771,24 @@ export default function App() {
                     );
                   }
 
+                  const periodColorMap: Record<number, { bg: string; border: string; label: string; tag: string; tagBg: string }> = {
+                    1: { bg: 'bg-amber-50/80',   border: 'border-l-2 border-amber-400',   label: 'text-amber-900',  tag: '上午',   tagBg: 'bg-amber-100 text-amber-700' },
+                    2: { bg: 'bg-amber-50/80',   border: 'border-l-2 border-amber-400',   label: 'text-amber-900',  tag: '上午',   tagBg: 'bg-amber-100 text-amber-700' },
+                    3: { bg: 'bg-teal-50/70',    border: 'border-l-2 border-teal-400',    label: 'text-teal-900',   tag: '上午',   tagBg: 'bg-teal-100 text-teal-700' },
+                    4: { bg: 'bg-teal-50/70',    border: 'border-l-2 border-teal-400',    label: 'text-teal-900',   tag: '上午',   tagBg: 'bg-teal-100 text-teal-700' },
+                    5: { bg: 'bg-indigo-50/70',  border: 'border-l-2 border-indigo-400',  label: 'text-indigo-900', tag: '下午',   tagBg: 'bg-indigo-100 text-indigo-700' },
+                    6: { bg: 'bg-indigo-50/70',  border: 'border-l-2 border-indigo-400',  label: 'text-indigo-900', tag: '下午',   tagBg: 'bg-indigo-100 text-indigo-700' },
+                    7: { bg: 'bg-violet-50/70',  border: 'border-l-2 border-violet-400',  label: 'text-violet-900', tag: '下午',   tagBg: 'bg-violet-100 text-violet-700' },
+                    8: { bg: 'bg-violet-50/70',  border: 'border-l-2 border-violet-400',  label: 'text-violet-900', tag: '下午',   tagBg: 'bg-violet-100 text-violet-700' },
+                  };
+                  const pc = periodColorMap[periodMeta.num] || { bg: 'bg-slate-50/20', border: '', label: 'text-slate-800', tag: '', tagBg: '' };
+
                   return (
                     <div key={`period-row-${periodMeta.num}`} className="grid grid-cols-6 border-b border-slate-100" style={{gridAutoRows: '1fr'}}>
-                      <div className="p-2 border-r border-slate-200 bg-slate-50/20 text-center flex flex-col justify-center items-center shrink-0">
-                        <span className="text-[11px] font-bold text-slate-800">{periodMeta.name}</span>
-                        <span className="text-[9px] text-slate-500 font-medium leading-tight mt-0.5">{periodMeta.time}</span>
+                      <div className={`p-2 border-r border-slate-200 text-center flex flex-col justify-center items-center shrink-0 ${pc.bg} ${pc.border}`}>
+                        <span className={`text-[11px] font-bold ${pc.label}`}>{periodMeta.name}</span>
+                        <span className="text-[9px] text-slate-400 font-medium leading-tight mt-0.5">{periodMeta.time}</span>
+                        {pc.tag && <span className={`mt-1 text-[8px] font-bold px-1 py-0.5 rounded-full ${pc.tagBg}`}>{pc.tag}</span>}
                       </div>
 
                       {DAYS.map((day) => {
@@ -1005,11 +1018,11 @@ export default function App() {
           </div>{/* end fixed header shrink-0 */}
 
           {/* Scrollable table content area */}
-          <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0 flex flex-col">
 
           {/* 1. TEACHERS TABLE */}
           {mgmtSubTab === 'teachers' && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
               <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-blue-600" />
@@ -1070,7 +1083,15 @@ export default function App() {
                     ))}
                     {getGradeTeachers().length === 0 && (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-slate-400">当前年级暂无教师数据</td>
+                        <td colSpan={7}>
+                          <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">
+                              <Users className="w-7 h-7 text-blue-300" />
+                            </div>
+                            <p className="text-sm font-bold text-slate-400">当前年级暂无教师数据</p>
+                            <p className="text-xs text-slate-300 mt-1">请切换年级或点击「添加教师」录入数据</p>
+                          </div>
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -1081,7 +1102,7 @@ export default function App() {
 
           {/* 2. CLASS ASSIGNMENTS EXCEL-STYLE TABLE */}
           {mgmtSubTab === 'assignments' && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
               <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                   <Sliders className="w-4 h-4 text-indigo-600" />
@@ -1176,7 +1197,7 @@ export default function App() {
 
             {/* 3. STUDENTS TABLE */}
             {mgmtSubTab === 'students' && (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
                 <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                   <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                     <User className="w-4 h-4 text-emerald-600" />
@@ -1238,7 +1259,15 @@ export default function App() {
                       })}
                       {getGradeStudents().length === 0 && (
                         <tr>
-                          <td colSpan={7} className="p-8 text-center text-slate-400">当前年级暂无学生走班数据</td>
+                          <td colSpan={7}>
+                            <div className="flex flex-col items-center justify-center py-16 text-center">
+                              <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-3">
+                                <User className="w-7 h-7 text-emerald-300" />
+                              </div>
+                              <p className="text-sm font-bold text-slate-400">当前年级暂无学生走班数据</p>
+                              <p className="text-xs text-slate-300 mt-1">高二年级走班数据将在学生绑定选科组合后自动加载</p>
+                            </div>
+                          </td>
                         </tr>
                       )}
                     </tbody>

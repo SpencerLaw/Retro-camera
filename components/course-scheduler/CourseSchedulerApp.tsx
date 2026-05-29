@@ -836,27 +836,15 @@ export default function App() {
             <span>JSON 数据库导入与备份</span>
           </button>
 
-          <button 
+          <button
             onClick={handleResetData}
-            title="重置为默认演示数据" 
+            title="重置为默认演示数据"
             className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 border border-slate-200 transition-colors"
           >
             <RotateCcw className="w-4 h-4 text-rose-600" />
           </button>
-          
-          <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
-            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs ring-1 ring-blue-200">
-              {role === 'dean' ? '教' : role === 'leader' ? '级' : role === 'teacher' ? '师' : '生'}
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-bold text-slate-900 leading-tight">
-                {role === 'dean' ? '张博教务主任' : role === 'leader' ? '陈老师(高一领组)' : role === 'teacher' ? '赵刚(物理教研室)' : '林子涵(选科物化生)'}
-              </span>
-              <span className="text-[9px] text-slate-500 leading-none">走班授权系统</span>
-            </div>
           </div>
-        </div>
-      </header>
+          </header>
 
       {/* THREE SECTION WORKFLOW LAYOUT */}
       <div className="flex flex-1 overflow-hidden min-h-0">

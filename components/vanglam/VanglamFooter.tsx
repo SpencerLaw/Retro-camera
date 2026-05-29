@@ -38,7 +38,6 @@ export const VanglamFooter: React.FC = () => {
               <a className="vanglam-footer-contact-link" href="tel:+8651088231801">
                 +8651088231801
               </a>
-              <span>， </span>
               <a className="vanglam-footer-contact-link" href="tel:+8613861882862">
                 +8613861882862
               </a>

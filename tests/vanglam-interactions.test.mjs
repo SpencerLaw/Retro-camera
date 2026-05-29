@@ -16,10 +16,12 @@ function runTest(name, fn) {
   }
 }
 
-runTest('homepage CTAs route to the PDF V1 site pages instead of dead actions or mail links', () => {
+runTest('homepage CTAs route to the PDF V1 site pages without the removed sample banner', () => {
   assert.match(homeSource, /navigate\('\/vanglam\/color-system'\)/);
   assert.match(homeSource, /navigate\('\/vanglam\/artcard-lab'\)/);
-  assert.match(homeSource, /to="\/vanglam\/request-sample-kit"/);
+  assert.doesNotMatch(homeSource, /className="vanglam-sample-cta"/);
+  assert.doesNotMatch(homeSource, /id="request-sample-kit"/);
+  assert.doesNotMatch(homeSource, /to="\/vanglam\/request-sample-kit"/);
   assert.doesNotMatch(homeSource, /href="mailto:info@qilipaper\.com\?subject=VANGLAM%20Sample%20Kit"/);
   assert.doesNotMatch(homeSource, /<button className="vanglam-text-link" type="button">\s*EXPLORE ARTCARD LAB/);
 });
@@ -33,7 +35,8 @@ runTest('footer links are routed or real contact links, never inert hash placeho
   assert.match(footerSource, /to="\/vanglam\/request-sample-kit"/);
   assert.match(languageSource, /['"]\/vanglam\/color-system['"]/);
   assert.match(footerSource, /href="mailto:info@qilipaper\.com"/);
-  assert.match(footerSource, /href="tel:\+862112345678"/);
+  assert.match(footerSource, /href="tel:\+8651088231801"/);
+  assert.match(footerSource, /href="tel:\+8613861882862"/);
   assert.doesNotMatch(footerSource, /href="#request-sample-kit"/);
 });
 

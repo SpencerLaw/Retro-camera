@@ -34,9 +34,15 @@ export const VanglamFooter: React.FC = () => {
             <a className="vanglam-footer-contact-link" href="mailto:info@qilipaper.com">
               info@qilipaper.com
             </a>
-            <a className="vanglam-footer-contact-link" href="tel:+862112345678">
-              +86 21 1234 5678
-            </a>
+            <div className="vanglam-footer-phone-links" aria-label="QiLi Paper phone numbers">
+              <a className="vanglam-footer-contact-link" href="tel:+8651088231801">
+                +8651088231801
+              </a>
+              <span>， </span>
+              <a className="vanglam-footer-contact-link" href="tel:+8613861882862">
+                +8613861882862
+              </a>
+            </div>
             <div className="vanglam-socials" aria-label={copy.footer.socialsAria}>
               <Link className="vanglam-footer-social-link" to="/vanglam/request-sample-kit" aria-label={copy.footer.instagramAria}>
                 <Instagram size={16} strokeWidth={1.4} />

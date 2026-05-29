@@ -61,14 +61,6 @@ export const VanglamHome: React.FC = () => {
               ))}
             </h1>
             <div className="vanglam-gold-rule" />
-            <p>
-              {copy.home.heroBodyLines.map((line, index) => (
-                <React.Fragment key={line}>
-                  {line}
-                  {index < copy.home.heroBodyLines.length - 1 && <br />}
-                </React.Fragment>
-              ))}
-            </p>
             <button className="vanglam-text-link" type="button" onClick={() => navigate('/vanglam/color-system')}>
               {copy.home.discoverColorSystem} <ArrowRight size={13} strokeWidth={1.7} />
             </button>
@@ -222,13 +214,6 @@ export const VanglamHome: React.FC = () => {
           <img src="/vanglam/atelier-roll.png" alt="large paper roll in production studio" />
         </section>
 
-        <section id="request-sample-kit" className="vanglam-sample-cta" aria-labelledby="sample-kit-heading">
-          <h2 id="sample-kit-heading">{copy.home.sampleTitle}</h2>
-          <p>{copy.home.sampleBody}</p>
-          <Link to="/vanglam/request-sample-kit" className="vanglam-primary-button">
-            {copy.home.sampleButton} <ArrowRight size={14} strokeWidth={1.7} />
-          </Link>
-        </section>
       </main>
 
       <VanglamFooter />

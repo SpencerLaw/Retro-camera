@@ -107,7 +107,9 @@ runTest('footer restores the PDF contact snippet UI', () => {
   assert.match(footerSource, /info@qilipaper\.com/);
   assert.match(footerSource, /\+8651088231801/);
   assert.match(footerSource, /\+8613861882862/);
+  assert.match(footerSource, /withoutContactPunctuation/);
   assert.doesNotMatch(footerSource, /<span>，\s*<\/span>/);
+  assert.doesNotMatch(footerSource, /\+8651088231801[,，]/);
   assert.doesNotMatch(footerSource, /\+86 21 1234 5678/);
   assert.match(cssSource, /\.vanglam-footer-phone-links\s*\{[\s\S]*display:\s*grid/);
   assert.match(cssSource, /\.vanglam-footer-contact-card\s*\{[\s\S]*border:/);

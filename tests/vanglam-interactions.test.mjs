@@ -34,9 +34,9 @@ runTest('homepage visual cards expose click targets for their Explore affordance
 runTest('footer links are routed or real contact links, never inert hash placeholders', () => {
   assert.match(footerSource, /to="\/vanglam\/request-sample-kit"/);
   assert.match(languageSource, /['"]\/vanglam\/color-system['"]/);
-  assert.match(footerSource, /href="mailto:info@qilipaper\.com"/);
-  assert.match(footerSource, /href="tel:\+8651088231801"/);
-  assert.match(footerSource, /href="tel:\+8613861882862"/);
+  assert.match(footerSource, /href=\{`mailto:\$\{footerContact\.email\}`\}/);
+  assert.match(footerSource, /href=\{`tel:\$\{phoneNumber\}`\}/);
+  assert.match(footerSource, /withoutContactPunctuation/);
   assert.doesNotMatch(footerSource, /href="#request-sample-kit"/);
 });
 

@@ -29,11 +29,15 @@ runTest('VANGLAM has a reusable Chinese and English language state', () => {
 });
 
 runTest('top-right navbar language button exposes Chinese and English states', () => {
+  assert.match(navbarSource, /className="vanglam-nav-actions"/);
+  assert.match(navbarSource, /className="vanglam-nav-cta"[\s\S]*className="vanglam-language-toggle"/);
   assert.match(navbarSource, /vanglam-language-toggle/);
   assert.match(navbarSource, /aria-label=\{copy\.languageToggleAria\}/);
   assert.match(navbarSource, /onClick=\{toggleLanguage\}/);
-  assert.match(cssSource, /\.vanglam-navbar-inner\s*\{[\s\S]*position:\s*relative/);
-  assert.match(cssSource, /\.vanglam-language-toggle\s*\{[\s\S]*position:\s*absolute[\s\S]*right:/);
+  assert.match(cssSource, /\.vanglam-nav-actions\s*\{[\s\S]*display:\s*flex[\s\S]*align-items:\s*center/);
+  assert.match(cssSource, /\.vanglam-nav-cta\s*\{[\s\S]*height:\s*36px/);
+  assert.match(cssSource, /\.vanglam-language-toggle\s*\{[\s\S]*height:\s*36px/);
+  assert.doesNotMatch(cssSource, /\.vanglam-language-toggle\s*\{[^}]*position:\s*absolute/);
 });
 
 runTest('VANGLAM pages render copy through the language dictionary', () => {

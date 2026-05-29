@@ -3,8 +3,16 @@ import { Link } from 'react-router-dom';
 import { Instagram, Linkedin, MessageCircle } from 'lucide-react';
 import { useVanglamCopy } from './VanglamLanguage';
 
+const footerContact = {
+  email: 'info@qilipaper.com',
+  phones: ['+8651088231801', '+8613861882862'],
+} as const;
+
+const withoutContactPunctuation = (value: string) => value.replace(/[,\uFF0C]/g, '');
+
 export const VanglamFooter: React.FC = () => {
   const copy = useVanglamCopy();
+  const footerPhones = footerContact.phones.map(withoutContactPunctuation);
 
   return (
     <footer className="vanglam-footer">
@@ -31,16 +39,15 @@ export const VanglamFooter: React.FC = () => {
           ))}
           <section className="vanglam-footer-contact-card" aria-label={copy.footer.connectTitle}>
             <h2>{copy.footer.connectTitle}</h2>
-            <a className="vanglam-footer-contact-link" href="mailto:info@qilipaper.com">
-              info@qilipaper.com
+            <a className="vanglam-footer-contact-link" href={`mailto:${footerContact.email}`}>
+              {footerContact.email}
             </a>
             <div className="vanglam-footer-phone-links" aria-label="QiLi Paper phone numbers">
-              <a className="vanglam-footer-contact-link" href="tel:+8651088231801">
-                +8651088231801
-              </a>
-              <a className="vanglam-footer-contact-link" href="tel:+8613861882862">
-                +8613861882862
-              </a>
+              {footerPhones.map((phoneNumber) => (
+                <a key={phoneNumber} className="vanglam-footer-contact-link" href={`tel:${phoneNumber}`}>
+                  {phoneNumber}
+                </a>
+              ))}
             </div>
             <div className="vanglam-socials" aria-label={copy.footer.socialsAria}>
               <Link className="vanglam-footer-social-link" to="/vanglam/request-sample-kit" aria-label={copy.footer.instagramAria}>

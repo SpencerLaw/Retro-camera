@@ -8,16 +8,6 @@ export const VanglamNavbar: React.FC = () => {
   return (
     <header className="vanglam-navbar">
       <div className="vanglam-navbar-inner">
-        <button
-          className="vanglam-language-toggle"
-          type="button"
-          aria-label={copy.languageToggleAria}
-          onClick={toggleLanguage}
-        >
-          <span className={language === 'en' ? 'is-active' : undefined}>EN</span>
-          <span className={language === 'zh' ? 'is-active' : undefined}>中</span>
-        </button>
-
         <Link to="/vanglam" className="vanglam-brand" aria-label={copy.brandHomeAria}>
           <span className="vanglam-brand-qili">QiLi Paper</span>
           <span className="vanglam-brand-divider" aria-hidden="true" />
@@ -39,9 +29,20 @@ export const VanglamNavbar: React.FC = () => {
           ))}
         </nav>
 
-        <Link className="vanglam-nav-cta" to="/vanglam/request-sample-kit">
-          {copy.requestSample}
-        </Link>
+        <div className="vanglam-nav-actions">
+          <Link className="vanglam-nav-cta" to="/vanglam/request-sample-kit">
+            {copy.requestSample}
+          </Link>
+          <button
+            className="vanglam-language-toggle"
+            type="button"
+            aria-label={copy.languageToggleAria}
+            onClick={toggleLanguage}
+          >
+            <span className={language === 'en' ? 'is-active' : undefined}>EN</span>
+            <span className={language === 'zh' ? 'is-active' : undefined}>中</span>
+          </button>
+        </div>
       </div>
     </header>
   );

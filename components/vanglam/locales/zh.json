@@ -1,4 +1,10 @@
 {
+  "brand": {
+    "primary": "齐力纸业",
+    "secondary": "梵澜",
+    "tagline": "色彩 · 纸张 · 表面",
+    "homeAria": "齐力纸业 梵澜 官网首页"
+  },
   "navAction": {
     "label": "资料与工具",
     "to": "/vanglam/library-tools"

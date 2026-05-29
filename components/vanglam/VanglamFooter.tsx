@@ -18,10 +18,10 @@ export const VanglamFooter: React.FC = () => {
     <footer className="vanglam-footer">
       <div className="vanglam-footer-inner">
         <div className="vanglam-footer-brand">
-          <span className="vanglam-brand-qili">QiLi Paper</span>
+          <span className="vanglam-brand-qili">{copy.brandPrimary}</span>
           <span className="vanglam-brand-divider" aria-hidden="true" />
           <span className="vanglam-brand-vanglam">
-            VANGLAM
+            {copy.brandSecondary}
             <small>{copy.brandTagline}</small>
           </span>
         </div>

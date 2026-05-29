@@ -78,9 +78,14 @@ runTest('navigation labels mirror the V1 primary navigation', () => {
   assert.doesNotMatch(navbarSource, /VANGLAM 42/);
 });
 
-runTest('navbar brand lockup makes QiLi Paper dominant and VANGLAM secondary', () => {
-  assert.match(navbarSource, /className="vanglam-brand-qili">QiLi Paper/);
-  assert.match(navbarSource, /className="vanglam-brand-vanglam"/);
+runTest('navbar brand lockup uses localized JSON brand names', () => {
+  assert.match(navbarSource, /\{copy\.brandPrimary\}/);
+  assert.match(navbarSource, /\{copy\.brandSecondary\}/);
+  assert.match(footerSource, /\{copy\.brandPrimary\}/);
+  assert.match(footerSource, /\{copy\.brandSecondary\}/);
+  assert.match(languageSource, /brandPrimary:\s*localizedJsonCopy\.en\.brand\.primary/);
+  assert.match(languageSource, /brandSecondary:\s*localizedJsonCopy\.zh\.brand\.secondary/);
+  assert.doesNotMatch(navbarSource, /className="vanglam-brand-qili">QiLi Paper/);
   assert.match(cssSource, /\.vanglam-navbar \.vanglam-brand-qili\s*\{[\s\S]*font-size:\s*34px/);
   assert.match(cssSource, /\.vanglam-navbar \.vanglam-brand-vanglam\s*\{[\s\S]*font-size:\s*19px/);
   assert.match(cssSource, /\.vanglam-navbar \.vanglam-brand-divider\s*\{[\s\S]*height:\s*40px/);

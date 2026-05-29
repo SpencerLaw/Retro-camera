@@ -1,4 +1,10 @@
 {
+  "brand": {
+    "primary": "QiLi Paper",
+    "secondary": "VANGLAM",
+    "tagline": "COLOR · PAPER · SURFACE",
+    "homeAria": "QiLi Paper VANGLAM homepage"
+  },
   "navAction": {
     "label": "Library and Tools",
     "to": "/vanglam/library-tools"

@@ -67,6 +67,12 @@ interface VanglamLibraryToolsCopy {
 }
 
 interface VanglamJsonCopy {
+  brand: {
+    primary: string;
+    secondary: string;
+    tagline: string;
+    homeAria: string;
+  };
   navAction: {
     label: string;
     to: string;
@@ -75,6 +81,8 @@ interface VanglamJsonCopy {
 }
 
 interface VanglamCopy {
+  brandPrimary: string;
+  brandSecondary: string;
   brandHomeAria: string;
   brandTagline: string;
   navAria: string;
@@ -223,8 +231,10 @@ const localizedJsonCopy: Record<VanglamLanguage, VanglamJsonCopy> = {
 
 const copies: Record<VanglamLanguage, VanglamCopy> = {
   en: {
-    brandHomeAria: 'QiLi Paper VANGLAM homepage',
-    brandTagline: 'COLOR · PAPER · SURFACE',
+    brandPrimary: localizedJsonCopy.en.brand.primary,
+    brandSecondary: localizedJsonCopy.en.brand.secondary,
+    brandHomeAria: localizedJsonCopy.en.brand.homeAria,
+    brandTagline: localizedJsonCopy.en.brand.tagline,
     navAria: 'Primary navigation',
     nav: [
       { key: 'color-system', label: 'Color System', to: '/vanglam/color-system' },
@@ -487,8 +497,10 @@ const copies: Record<VanglamLanguage, VanglamCopy> = {
     },
   },
   zh: {
-    brandHomeAria: '齐力纸业 VANGLAM 官网首页',
-    brandTagline: '色彩 · 纸张 · 表面',
+    brandPrimary: localizedJsonCopy.zh.brand.primary,
+    brandSecondary: localizedJsonCopy.zh.brand.secondary,
+    brandHomeAria: localizedJsonCopy.zh.brand.homeAria,
+    brandTagline: localizedJsonCopy.zh.brand.tagline,
     navAria: '主导航',
     nav: [
       { key: 'color-system', label: '色彩系统', to: '/vanglam/color-system' },

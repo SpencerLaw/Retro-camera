@@ -9,10 +9,10 @@ export const VanglamNavbar: React.FC = () => {
     <header className="vanglam-navbar">
       <div className="vanglam-navbar-inner">
         <Link to="/vanglam" className="vanglam-brand" aria-label={copy.brandHomeAria}>
-          <span className="vanglam-brand-qili">QiLi Paper</span>
+          <span className="vanglam-brand-qili">{copy.brandPrimary}</span>
           <span className="vanglam-brand-divider" aria-hidden="true" />
           <span className="vanglam-brand-vanglam">
-            VANGLAM
+            {copy.brandSecondary}
             <small>{copy.brandTagline}</small>
           </span>
         </Link>

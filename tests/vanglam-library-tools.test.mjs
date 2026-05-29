@@ -34,6 +34,10 @@ const expectedLibraryIds = [
 runTest('VANGLAM keeps Library and Tools copy in editable English and Chinese JSON files', () => {
   assert.match(languageSource, /import englishCopy from '\.\/locales\/en\.json'/);
   assert.match(languageSource, /import chineseCopy from '\.\/locales\/zh\.json'/);
+  assert.equal(englishCopy.brand.primary, 'QiLi Paper');
+  assert.equal(englishCopy.brand.secondary, 'VANGLAM');
+  assert.equal(chineseCopy.brand.primary, '齐力纸业');
+  assert.equal(chineseCopy.brand.secondary, '梵澜');
   assert.equal(englishCopy.libraryTools.libraries.length, expectedLibraryIds.length);
   assert.equal(chineseCopy.libraryTools.libraries.length, expectedLibraryIds.length);
   assert.deepEqual(englishCopy.libraryTools.libraries.map((item) => item.id), expectedLibraryIds);

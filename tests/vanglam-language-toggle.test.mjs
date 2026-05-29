@@ -24,6 +24,8 @@ runTest('VANGLAM has a reusable Chinese and English language state', () => {
   assert.match(languageSource, /VanglamLanguageProvider/);
   assert.match(languageSource, /useVanglamLanguage/);
   assert.match(languageSource, /useVanglamCopy/);
+  assert.match(languageSource, /brandPrimary/);
+  assert.match(languageSource, /brandSecondary/);
   assert.match(languageSource, /localStorage/);
   assert.match(languageSource, /toggleLanguage/);
 });
@@ -51,6 +53,8 @@ runTest('VANGLAM pages render copy through the language dictionary', () => {
   assert.match(languageSource, /localizedJsonCopy\.en\.navAction\.label/);
   assert.match(languageSource, /索取样品套装/);
   assert.match(languageSource, /localizedJsonCopy\.zh\.navAction\.label/);
+  assert.match(languageSource, /localizedJsonCopy\.zh\.brand\.primary/);
+  assert.match(languageSource, /localizedJsonCopy\.zh\.brand\.secondary/);
   assert.match(languageSource, /Color System/);
   assert.match(languageSource, /色彩系统/);
 });

@@ -765,12 +765,11 @@ export default function App() {
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg tracking-tight text-slate-900 leading-none">智星排课系统</span>
-              <span className="text-[10px] text-blue-600 font-semibold tracking-wider mt-0.5 px-1.5 py-0.2 bg-blue-50 border border-blue-100 rounded-sm w-fit">V2.4 走班定制版</span>
+              <span className="font-bold text-lg tracking-tight text-slate-900 leading-none">智能排课系统</span>
             </div>
-          </div>
-          
-          <nav className="flex gap-4">
+            </div>
+
+            <nav className="flex gap-4">
             <button 
               onClick={() => setActiveTab('board')}
               className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'board' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
@@ -1443,7 +1442,7 @@ export default function App() {
         {activeTab === 'analysis' && (
           <main id="analysis_diagnostics" className="flex-1 p-6 flex flex-col min-w-0 overflow-y-auto bg-slate-50 text-left">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">智星新高考数据分析面板</h2>
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">新高考数据分析面板</h2>
               <p className="text-xs text-slate-500 mt-1">
                 多源评估指标体系，展示动态排期利用指数、大课间锁定利用情况和代课频次。
               </p>
@@ -2185,7 +2184,7 @@ export default function App() {
               </div>
 
               <p className="text-xs text-slate-500 mb-4 leading-normal font-sans">
-                为了免除云端注册和保护隐私，<strong>智星排课系统数据支持完全在本地进行批量离线编辑与保存</strong>。您可以在此处将当前的全部教师、教室与走班教学班的最新数据结构下载、备份。也可以复制该 JSON 流进行修改，再粘贴导入到浏览器内，实现新数据的批量热初始化与覆盖启动。
+                为了免除云端注册和保护隐私，<strong>智能排课系统数据支持完全在本地进行批量离线编辑与保存</strong>。您可以在此处将当前的全部教师、教室与走班教学班的最新数据结构下载、备份。也可以复制该 JSON 流进行修改，再粘贴导入到浏览器内，实现新数据的批量热初始化与覆盖启动。
               </p>
 
               {jsonError && (
@@ -2223,7 +2222,7 @@ export default function App() {
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `智星排课系统_本地备份_${new Date().toISOString().slice(0, 10)}.json`;
+                      a.download = `智能排课系统_本地备份_${new Date().toISOString().slice(0, 10)}.json`;
                       a.click();
                       URL.revokeObjectURL(url);
                     }}

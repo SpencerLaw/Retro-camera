@@ -12,6 +12,7 @@ import KiddiePlanApp from './kiddieplan/KiddiePlanApp';
 import { TugOfWarApp } from './components/TugOfWarApp';
 import JuzimiApp from './components/JuzimiApp';
 import PromptGalleryApp from './components/PromptGalleryApp';
+import CourseSchedulerApp from './components/course-scheduler/CourseSchedulerApp';
 
 const TslSkinApp = React.lazy(() => import('./components/TslSkinApp'));
 
@@ -45,6 +46,7 @@ const App: React.FC = () => {
           <Route path="/juzimi" element={<JuzimiApp />} />
           <Route path="/prompts" element={<PromptGalleryApp />} />
           <Route path="/tsl-skin" element={<TslSkinRoute />} />
+          <Route path="/course-scheduler" element={<CourseSchedulerApp />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Users, 
   BookOpen, 
@@ -36,6 +36,8 @@ import {
   TimeSlot, 
   SubstituteRecommendation 
 } from './types';
+import { detectConflicts, getSubstituteRecommendations } from './courseSchedulerLogic';
+import { INITIAL_TEACHERS, INITIAL_CLASSROOMS, INITIAL_TEACHING_CLASSES, INITIAL_STUDENTS, generatePrepopulatedSchedules } from './mockData';
 
 export default function App() {
   // Application Data States

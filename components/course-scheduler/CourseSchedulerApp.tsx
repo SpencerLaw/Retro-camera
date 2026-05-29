@@ -739,12 +739,12 @@ export default function App() {
               </div>
 
               {/* Rows (Schedule slots, Break items & Lunch Spacers) */}
-              <div className="flex-1 overflow-y-auto grid grid-cols-1 auto-rows-[minmax(82px,_auto)] divide-y divide-slate-100">
+              <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
                 {PERIODS_METADATA.map((periodMeta, pIdx) => {
                   
                   if (periodMeta.type === 'break') {
                     return (
-                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 min-h-[40px] bg-slate-50/50 hover:bg-slate-50 text-slate-400">
+                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 h-10 bg-slate-50/50 hover:bg-slate-50 text-slate-400 border-b border-slate-200">
                         <div className="p-2 border-r border-slate-200 flex flex-col justify-center items-center">
                           <span className="text-[10px] font-bold tracking-tight">大课间休息</span>
                           <span className="text-[8px] text-slate-400 leading-none">09:30-10:10</span>
@@ -758,7 +758,7 @@ export default function App() {
 
                   if (periodMeta.type === 'lunch') {
                     return (
-                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 min-h-[38px] bg-slate-100/50 text-slate-400">
+                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 h-9 bg-slate-100/50 text-slate-400 border-b border-slate-200">
                         <div className="p-2 border-r border-slate-200 flex flex-col justify-center items-center">
                           <span className="text-[10px] font-bold">午后休餐</span>
                           <span className="text-[8px] text-slate-400">11:40-14:00</span>
@@ -772,8 +772,8 @@ export default function App() {
                   }
 
                   return (
-                    <div key={`period-row-${periodMeta.num}`} className="grid grid-cols-6">
-                      <div className="p-2 border-r border-slate-200 bg-slate-50/20 text-center flex flex-col justify-center items-center">
+                    <div key={`period-row-${periodMeta.num}`} className="grid grid-cols-6 border-b border-slate-100" style={{gridAutoRows: '1fr'}}>
+                      <div className="p-2 border-r border-slate-200 bg-slate-50/20 text-center flex flex-col justify-center items-center shrink-0">
                         <span className="text-[11px] font-bold text-slate-800">{periodMeta.name}</span>
                         <span className="text-[9px] text-slate-500 font-medium leading-tight mt-0.5">{periodMeta.time}</span>
                       </div>
@@ -781,35 +781,35 @@ export default function App() {
                       {DAYS.map((day) => {
                         const cellItems = getFilteredSchedules(day.num, periodMeta.num);
                         const cellConflicts = getCellConflicts(day.num, periodMeta.num);
+                        const hasMany = cellItems.length > 3;
 
                         return (
                           <div 
                             key={`${day.num}-${periodMeta.num}`} 
-                            className={`p-1.5 border-r last:border-r-0 border-slate-200 flex flex-col gap-1.5 relative group/cell transition-colors min-h-[82px] ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
+                            className={`border-r last:border-r-0 border-slate-200 ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
                           >
                             {cellItems.length > 0 ? (
-                              cellItems.map((item) => {
-                                const isSelected = selectedCell && selectedCell.id === item.id;
-                                return (
-                                  <div
-                                    key={item.id}
-                                    onClick={() => handleSelectCell(item)}
-                                    className={`p-2 rounded text-left cursor-pointer transition-all ${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} ${isSelected ? 'ring-2 ring-blue-600 shadow-md transform scale-[1.02]' : 'hover:shadow-xs'}`}
-                                  >
-                                    <div className="flex justify-between items-start">
-                                      <span className="font-bold text-[11px] leading-tight line-clamp-1">
+                              <div className={`p-1 flex flex-col gap-1 ${hasMany ? 'max-h-[320px] overflow-y-auto' : ''}`}>
+                                {cellItems.map((item) => {
+                                  const isSelected = selectedCell && selectedCell.id === item.id;
+                                  return (
+                                    <div
+                                      key={item.id}
+                                      onClick={() => handleSelectCell(item)}
+                                      className={`p-1.5 rounded text-left cursor-pointer transition-all shrink-0 ${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} ${isSelected ? 'ring-2 ring-blue-600 shadow-md' : 'hover:shadow-xs'}`}
+                                    >
+                                      <div className="font-bold text-[11px] leading-tight truncate">
                                         {item.subject} · {item.teacherName}
-                                      </span>
+                                      </div>
+                                      <div className="text-[9px] text-slate-600/80 truncate mt-0.5">
+                                        {item.teachingClassName}
+                                      </div>
                                     </div>
-                                    <div className="text-[9px] mt-1 space-y-0.5 leading-tight text-left">
-                                      <div className="font-semibold text-slate-700 truncate">班级: {item.teachingClassName}</div>
-                                      <div className="text-slate-400 truncate">教室: {item.classroomName.replace('普通教室', '')}</div>
-                                    </div>
-                                  </div>
-                                );
-                              })
+                                  );
+                                })}
+                              </div>
                             ) : (
-                              <div className="flex-1 flex items-center justify-center text-[10px] text-slate-300 select-none">
+                              <div className="h-full min-h-[72px] flex items-center justify-center text-[10px] text-slate-200 select-none">
                                 -
                               </div>
                             )}
@@ -952,34 +952,36 @@ export default function App() {
 
       {/* ALTERNATIVE VIEW: MANAGEMENT SCREEN */}
       {activeTab === 'management' && (
-        <main id="data_management" className="flex-1 p-6 overflow-y-auto bg-slate-50 text-left h-[calc(100vh-4rem)] min-h-0 flex flex-col min-w-0">
-          <div className="mb-6 flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">学校教学分工与基础数据</h2>
-              <p className="text-xs text-slate-500 mt-1">
-                点击表格中的记录，可直接修改学生的请假信息、走班分配，以及教师的课表偏好和紧急任务状态。数据将热同步至排课底座。
-              </p>
+        <main id="data_management" style={{height: 'calc(100vh - 4rem)', overflow: 'hidden', display: 'flex', flexDirection: 'column'}} className="bg-slate-50 text-left w-full">
+          {/* Fixed header area */}
+          <div className="px-6 pt-6 shrink-0">
+            <div className="mb-4 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">学校教学分工与基础数据</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  点击表格中的记录，可直接修改学生的请假信息、走班分配，以及教师的课表偏好和紧急任务状态。数据将热同步至排课底座。
+                </p>
+              </div>
+              
+              {/* Grade Selector on Management Page */}
+              <div className="bg-white rounded-lg border border-slate-200 p-1 flex items-center shadow-sm">
+                <span className="text-xs text-slate-400 font-bold px-2">当前所选年级:</span>
+                <select 
+                  value={selectedGrade}
+                  onChange={(e) => setSelectedGrade(e.target.value)}
+                  className="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold rounded px-2.5 py-1 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                >
+                  <option value="初一">初一年级</option>
+                  <option value="初二">初二年级</option>
+                  <option value="初三">初三年级</option>
+                  <option value="高一">高一年级</option>
+                  <option value="高二">高二年级</option>
+                  <option value="高三">高三年级</option>
+                </select>
+              </div>
             </div>
-            
-            {/* Grade Selector on Management Page */}
-            <div className="bg-white rounded-lg border border-slate-200 p-1 flex items-center shadow-sm">
-              <span className="text-xs text-slate-400 font-bold px-2">当前所选年级:</span>
-              <select 
-                value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold rounded px-2.5 py-1 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-              >
-                <option value="初一">初一年级</option>
-                <option value="初二">初二年级</option>
-                <option value="初三">初三年级</option>
-                <option value="高一">高一年级</option>
-                <option value="高二">高二年级</option>
-                <option value="高三">高三年级</option>
-              </select>
-            </div>
-          </div>
 
-          {/* Sub-tab selection menu */}
+            {/* Sub-tab selection menu */}
           <div className="flex border-b border-slate-200 mb-6 space-x-4">
             <button
               onClick={() => setMgmtSubTab('teachers')}
@@ -1000,6 +1002,10 @@ export default function App() {
               学生走班花名册 ({getGradeStudents().length} 人)
             </button>
           </div>
+          </div>{/* end fixed header shrink-0 */}
+
+          {/* Scrollable table content area */}
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
 
           {/* 1. TEACHERS TABLE */}
           {mgmtSubTab === 'teachers' && (
@@ -1240,6 +1246,7 @@ export default function App() {
                 </div>
               </div>
             )}
+          </div>{/* end scrollable content area */}
         </main>
       )}
 

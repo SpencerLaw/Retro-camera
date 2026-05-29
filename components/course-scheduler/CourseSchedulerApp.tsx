@@ -787,7 +787,7 @@ export default function App() {
             </div>
 
             {/* TIMETABLE DYNAMIC LAYOUT: THE GEOMETRIC GRID */}
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs flex flex-col min-h-0 min-w-[700px]">
+            <div className="scheduler-timetable-shell bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs min-w-[700px]">
               
               {/* Columns Header (Monday - Friday) */}
               <div className="grid grid-cols-6 border-b border-slate-200 bg-slate-50/80 shrink-0 select-none">
@@ -812,7 +812,7 @@ export default function App() {
               </div>
 
               {/* Rows (Schedule slots, Break items & Lunch Spacers) */}
-              <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+              <div className="scheduler-timetable-rows divide-y divide-slate-100">
                 {PERIODS_METADATA.map((periodMeta, pIdx) => {
                   
                   if (periodMeta.type === 'break') {

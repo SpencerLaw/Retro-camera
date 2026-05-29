@@ -137,17 +137,37 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(248, 250, 252, 0.9);
-  border: 1px solid rgba(203, 213, 225, 0.78);
-  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.11);
-  backdrop-filter: blur(16px) saturate(1.18);
-  -webkit-backdrop-filter: blur(16px) saturate(1.18);
+  isolation: isolate;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(239, 246, 255, 0.66) 48%, rgba(248, 250, 252, 0.8));
+  border: 1px solid rgba(148, 163, 184, 0.46);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 18px 44px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
 }
 
 .scheduler-board-headboard {
   margin: -0.35rem -0.35rem 1rem;
   padding: 0.75rem;
   border-radius: 16px;
+}
+
+.scheduler-floating-headboard::before,
+.management-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 52%);
+}
+
+.scheduler-timetable-shell {
+  flex: 0 0 auto;
+}
+
+.scheduler-timetable-rows {
+  overflow: visible;
 }
 
 /* Management page vertical space usage */
@@ -164,10 +184,12 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(248, 250, 252, 0.9);
-  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.11);
-  backdrop-filter: blur(16px) saturate(1.18);
-  -webkit-backdrop-filter: blur(16px) saturate(1.18);
+  isolation: isolate;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(240, 253, 250, 0.62) 42%, rgba(248, 250, 252, 0.82));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 18px 42px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
 }
 
 .management-content-area {

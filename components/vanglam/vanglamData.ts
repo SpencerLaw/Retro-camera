@@ -22,6 +22,21 @@ export interface ProductLine {
   subtitle: string;
 }
 
+export interface VanglamCollection {
+  id: string;
+  name: string;
+  summary: string;
+  icon: string;
+}
+
+export interface SignatureColor {
+  id: string;
+  name: string;
+  phrase: string;
+  asset: string;
+  tone: string;
+}
+
 export interface ApplicationCategory {
   titleEn: string;
   titleZh: string;
@@ -29,6 +44,18 @@ export interface ApplicationCategory {
   subZh: string;
   bgHex: string;
   textLight: boolean;
+}
+
+export interface VanglamApplication {
+  id: string;
+  label: string;
+}
+
+export interface AtelierFeature {
+  id: string;
+  title: string;
+  body: string;
+  icon: string;
 }
 
 export const COLOR_FAMILIES: ColorFamily[] = [
@@ -131,13 +158,75 @@ export const COLOR_FAMILIES: ColorFamily[] = [
 ];
 
 export const PRODUCT_LINES: ProductLine[] = [
-  { id: "p1", num: "01", nameEn: "COLOR PRINT", nameZh: "色彩与印刷纸", subtitle: "IMAGE + USE + PROCESS" },
-  { id: "p2", num: "02", nameEn: "TOUCH", nameZh: "触感纸", subtitle: "IMAGE + USE + PROCESS" },
-  { id: "p3", num: "03", nameEn: "PEARL", nameZh: "珠光纸", subtitle: "IMAGE + USE + PROCESS" },
-  { id: "p4", num: "04", nameEn: "SURFACE", nameZh: "表面工艺纸", subtitle: "IMAGE + USE + PROCESS" },
-  { id: "p5", num: "05", nameEn: "BAG", nameZh: "高端手提袋纸", subtitle: "IMAGE + USE + PROCESS" },
-  { id: "p6", num: "06", nameEn: "LABEL", nameZh: "酒标&标签纸", subtitle: "IMAGE + USE + PROCESS" },
-  { id: "p7", num: "07", nameEn: "BESPOKE LAB", nameZh: "定制实验室", subtitle: "IMAGE + USE + PROCESS" }
+  { id: "p1", num: "01", nameEn: "Color Print", nameZh: "色彩与印刷纸", subtitle: "Rich & Expressive" },
+  { id: "p2", num: "02", nameEn: "Touch", nameZh: "触感纸", subtitle: "Tactile & Natural" },
+  { id: "p3", num: "03", nameEn: "Pearl", nameZh: "珠光纸", subtitle: "Lustre & Elegance" },
+  { id: "p4", num: "04", nameEn: "Coated", nameZh: "涂布纸", subtitle: "Smooth & Refined" },
+  { id: "p5", num: "05", nameEn: "Digital Coated", nameZh: "数码涂布纸", subtitle: "Vivid & Precise" },
+  { id: "p6", num: "06", nameEn: "Bag", nameZh: "高端手提袋纸", subtitle: "Strong & Beautiful" },
+  { id: "p7", num: "07", nameEn: "Label", nameZh: "酒标与标签纸", subtitle: "Fine & Functional" },
+  { id: "p8", num: "08", nameEn: "Bespoke", nameZh: "定制纸张系统", subtitle: "By Your Vision" }
+];
+
+export const SIGNATURE_COLORS: SignatureColor[] = [
+  {
+    id: "stone-green",
+    name: "STONE GREEN",
+    phrase: "Natural depth. Quiet strength.",
+    asset: "/vanglam/signature-green.png",
+    tone: "#2A826A"
+  },
+  {
+    id: "autumn-citron",
+    name: "AUTUMN CITRON",
+    phrase: "Heritage luster. Timeless warmth.",
+    asset: "/vanglam/signature-citron.png",
+    tone: "#9E8F2E"
+  },
+  {
+    id: "cobalt-blue",
+    name: "COBALT BLUE",
+    phrase: "Refined clarity. Global identity.",
+    asset: "/vanglam/signature-blue.png",
+    tone: "#244FA3"
+  }
+];
+
+export const COLLECTIONS: VanglamCollection[] = [
+  { id: "color-print", name: "Color Print", summary: "Rich & Expressive", icon: "flower" },
+  { id: "touch", name: "Touch", summary: "Tactile & Natural", icon: "cube" },
+  { id: "pearl", name: "Pearl", summary: "Lustre & Elegance", icon: "shell" },
+  { id: "coated", name: "Coated", summary: "Smooth & Refined", icon: "diamond" },
+  { id: "digital-coated", name: "Digital Coated", summary: "Vivid & Precise", icon: "box" },
+  { id: "bag", name: "Bag", summary: "Strong & Beautiful", icon: "bag" },
+  { id: "label", name: "Label", summary: "Fine & Functional", icon: "tag" },
+  { id: "bespoke", name: "Bespoke", summary: "By Your Vision", icon: "wand" }
+];
+
+export const SURFACE_TERMS = [
+  "Texture",
+  "Tactility",
+  "Pearlescent",
+  "Embossing",
+  "Coating",
+  "Foil & Stamping",
+  "UV & Special"
+];
+
+export const VANGLAM_APPLICATIONS: VanglamApplication[] = [
+  { id: "wine", label: "Wine & Spirits Labels" },
+  { id: "beauty", label: "Beauty & Fragrance" },
+  { id: "luxury", label: "Luxury Packaging" },
+  { id: "bags", label: "Premium Shopping Bags" },
+  { id: "cards", label: "Invitation & Cards" },
+  { id: "hotel", label: "Hotel & Lifestyle" }
+];
+
+export const ATELIER_FEATURES: AtelierFeature[] = [
+  { id: "manufacturing", title: "Manufacturing", body: "Precision machines. Consistent excellence.", icon: "network" },
+  { id: "sample-making", title: "Sample Making", body: "Rapid & accurate. Material made real.", icon: "swatch" },
+  { id: "quality-control", title: "Quality Control", body: "Instrumented testing. Batch to batch.", icon: "cube" },
+  { id: "material-philosophy", title: "Material Philosophy", body: "Respect paper. Respect the future.", icon: "molecule" }
 ];
 
 export const APPLICATIONS: ApplicationCategory[] = [

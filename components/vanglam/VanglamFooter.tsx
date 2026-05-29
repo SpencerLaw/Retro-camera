@@ -1,26 +1,70 @@
 import React from 'react';
+import { Instagram, Linkedin, MessageCircle } from 'lucide-react';
+
+const footerColumns = [
+  {
+    title: 'COMPANY',
+    links: ['About QiLi Paper', 'Sustainability', 'News & Insights', 'Careers'],
+  },
+  {
+    title: 'SUPPORT',
+    links: ['Sample Kit', 'Technical Information', 'FAQs', 'Contact Us'],
+  },
+  {
+    title: 'POLICIES',
+    links: ['Privacy Policy', 'Terms of Use'],
+  },
+];
 
 export const VanglamFooter: React.FC = () => {
   return (
-    <footer id="request" className="w-full bg-[#0A1A14] text-white py-20 px-6 relative paper-texture">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 border-b border-white/10 pb-16">
-        <div className="space-y-3 text-center md:text-left">
-          <span className="text-[10px] font-bold text-amber-500 tracking-[0.2em] uppercase">FINAL CTA</span>
-          <h2 className="text-3xl md:text-4xl font-serif tracking-wide font-bold">Request the VANGLAM 42 Color Deck</h2>
-          <p className="text-gray-400 text-sm font-light">申请 42 色卡与表面工艺样册，开始您的材料项目。</p>
+    <footer className="vanglam-footer">
+      <div className="vanglam-footer-inner">
+        <div className="vanglam-footer-brand">
+          <span className="vanglam-brand-qili">QiLi Paper</span>
+          <span className="vanglam-brand-divider" aria-hidden="true" />
+          <span className="vanglam-brand-vanglam">
+            VANGLAM
+            <small>COLOR · PAPER · SURFACE</small>
+          </span>
         </div>
-        <button className="px-8 py-4 bg-[#FAF8F5] text-[#0A1A14] rounded-full font-bold hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-2xl tracking-widest text-xs uppercase">
-          REQUEST SAMPLE BOOK
-        </button>
+
+        <div className="vanglam-footer-columns">
+          {footerColumns.map((column) => (
+            <section key={column.title} aria-label={column.title}>
+              <h2>{column.title}</h2>
+              {column.links.map((link) => (
+                <a key={link} href="#request-sample-kit">
+                  {link}
+                </a>
+              ))}
+            </section>
+          ))}
+          <section aria-label="CONNECT">
+            <h2>CONNECT</h2>
+            <a href="mailto:info@qilipaper.com">info@qilipaper.com</a>
+            <a href="tel:+862112345678">+86 21 1234 5678</a>
+            <div className="vanglam-socials" aria-label="Social links">
+              <a href="#request-sample-kit" aria-label="Instagram">
+                <Instagram size={16} strokeWidth={1.4} />
+              </a>
+              <a href="#request-sample-kit" aria-label="LinkedIn">
+                <Linkedin size={16} strokeWidth={1.4} />
+              </a>
+              <a href="#request-sample-kit" aria-label="Contact VANGLAM">
+                <MessageCircle size={16} strokeWidth={1.4} />
+              </a>
+            </div>
+          </section>
+        </div>
       </div>
-      <div className="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row justify-between text-[11px] text-gray-500 gap-4">
-        <p>© 2026 QiLi Paper | VANGLAM. All Rights Reserved. 齐力纸业有限公司 版权所有.</p>
-        <div className="flex gap-6">
-          <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-white transition-colors">Terms of Use</a>
-        </div>
+
+      <div className="vanglam-footer-base">
+        <span>© 2024 QiLi Paper. All rights reserved.</span>
+        <span>Crafted in paper. Made for beauty.</span>
       </div>
     </footer>
   );
 };
+
 export default VanglamFooter;

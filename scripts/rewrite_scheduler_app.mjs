@@ -92,6 +92,7 @@ export default function App() {
   const [showAddTeacherModal, setShowAddTeacherModal] = useState<boolean>(false);
   const [showAddClassroomModal, setShowAddClassroomModal] = useState<boolean>(false);
   const [showJSONModal, setShowJSONModal] = useState<boolean>(false);
+  const [showConflictsModal, setShowConflictsModal] = useState<boolean>(false);
   const [jsonRawText, setJsonRawText] = useState<string>('');
   const [jsonError, setJsonError] = useState<string>('');
   
@@ -265,6 +266,15 @@ export default function App() {
       alert("🎉 JSON 备份数据覆盖导入成功！课表网格与冲突诊断已实时调度热更新。");
     } catch (err: any) {
       setJsonError(\`解析/导入出现错误: \${err.message}\`);
+    }
+  };
+
+  const handleClearAllCache = () => {
+    if (window.confirm("⚠️ 警告：确定要清空浏览器中缓存的所有排课和教师修改吗？该操作将完全清除包括旧版本在内的所有本地缓存数据，并自动刷新页面载入 100% 干净的初始 Excel 静态底座。")) {
+      localStorage.removeItem('course_scheduler_real_data');
+      localStorage.removeItem('course_scheduler_data');
+      alert("🗑️ 本地缓存清除完毕，页面即将刷新...");
+      window.location.reload();
     }
   };
 
@@ -568,6 +578,26 @@ export default function App() {
             <Activity className="w-3.5 h-3.5" />
             <span>🔍 诊断与代课</span>
           </button>
+
+          {conflicts.length > 0 ? (
+            <button
+              onClick={() => setShowConflictsModal(true)}
+              title="查看排课冲突详情"
+              className="px-3 py-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors animate-pulse hover:animate-none"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+              <span>⚠️ \${conflicts.length} 处排课冲突</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowConflictsModal(true)}
+              title="查看排课无冲突详情"
+              className="px-3 py-1.5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+            >
+              <Activity className="w-3.5 h-3.5 text-emerald-600" />
+              <span>🛡️ 排课无冲突</span>
+            </button>
+          )}
 
           <div className="bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-blue-600" />
@@ -906,29 +936,24 @@ export default function App() {
                 </div>
               )}
 
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-left">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle className="w-4 h-4 text-orange-600 shrink-0" />
-                  <span className="text-xs font-bold text-slate-800">当前排课冲突诊断反馈</span>
+              <div 
+                onClick={() => setShowConflictsModal(true)}
+                className="bg-indigo-50/50 hover:bg-indigo-50 p-3.5 rounded-xl border border-indigo-100 text-left cursor-pointer transition-colors"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                    <span className="text-xs font-bold text-slate-800">当前排课冲突诊断反馈</span>
+                  </div>
+                  <span className={\`text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none \${
+                    conflicts.length > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                  }\`}>
+                    {conflicts.length > 0 ? conflicts.length + ' 处' : '零冲突'}
+                  </span>
                 </div>
-                {conflicts.length > 0 ? (
-                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                    {conflicts.map((c) => (
-                      <div key={c.id} className="p-2 bg-white border border-orange-200/60 rounded flex flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className={\`px-1 rounded-sm text-[8px] font-bold uppercase \${c.severity === 'critical' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}\`}>
-                            {c.severity === 'critical' ? '严峻碰撞' : '轻微警告'}
-                          </span>
-                          <span className="text-[10px] font-semibold text-slate-800">{c.message}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-[11px] text-emerald-700 bg-emerald-50 p-2 rounded font-semibold text-center">
-                    ✅ 全校排课冲突零报错 · 通道通畅
-                  </div>
-                )}
+                <p className="text-[11px] text-slate-500 leading-normal">
+                  点击此处可打开极简的可滑动 Dialog 诊断详情，全面释放您的屏幕侧边栏空间。
+                </p>
               </div>
             </div>
           </aside>
@@ -1596,22 +1621,141 @@ export default function App() {
                   />
                 </div>
                 
-                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                  <button 
-                    type="button" 
-                    onClick={() => setShowJSONModal(false)} 
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-bold text-xs"
+                <div className="flex justify-between gap-2 pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={handleClearAllCache}
+                    className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-lg transition-colors font-bold text-xs animate-pulse hover:animate-none"
                   >
-                    取消
+                    🗑️ 清空所有本地缓存
                   </button>
-                  <button 
-                    type="submit" 
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition-colors font-bold text-xs"
-                  >
-                    确认覆盖导入
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowJSONModal(false)} 
+                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-bold text-xs"
+                    >
+                      取消
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition-colors font-bold text-xs"
+                    >
+                      确认覆盖导入
+                    </button>
+                  </div>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING DIALOG MODAL: CONFLICTS DIAGNOSTICS */}
+      {showConflictsModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-2xl">
+              <div className="flex items-center gap-2 text-left">
+                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900">智能排课冲突诊断反馈</h3>
+                  <p className="text-[10px] text-slate-400 font-medium">全校教师课时负荷、教室占用及班级时段防重检测</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowConflictsModal(false)}
+                className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1.5 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-4 text-left flex-1">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={\`w-10 h-10 rounded-full flex items-center justify-center \${conflicts.length > 0 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}\`}>
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-800">当前校验诊断状态</h4>
+                    <p className="text-[10px] text-slate-500">检测底座真实排课记录与同科目教师周负荷均衡性</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {conflicts.length > 0 ? (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                      ⚠️ \${conflicts.length} 处排课冲突
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                      ✅ 全校冲突零报错
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {conflicts.length > 0 ? (
+                <div className="space-y-2 max-h-[45vh] overflow-y-auto pr-1">
+                  {conflicts.map((c) => (
+                    <div 
+                      key={c.id} 
+                      className={\`p-3.5 rounded-xl border flex gap-3 transition-colors \${
+                        c.severity === 'critical' 
+                          ? 'bg-rose-50/50 border-rose-100 hover:bg-rose-50' 
+                          : 'bg-amber-50/30 border-amber-100 hover:bg-amber-50/50'
+                      }\`}
+                    >
+                      <div className="mt-0.5 shrink-0">
+                        {c.severity === 'critical' ? (
+                          <div className="w-5 h-5 bg-rose-500 rounded-full flex items-center justify-center text-white text-[10px] font-black">
+                            !
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center text-white text-[10px] font-black">
+                            i
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className={\`text-[9px] font-extrabold px-1.5 py-0.5 rounded-sm uppercase \${
+                            c.severity === 'critical' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white'
+                          }\`}>
+                            {c.severity === 'critical' ? '严峻碰撞' : '轻微警告'}
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-semibold font-mono">
+                            ID: {c.id}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-bold text-slate-800 mt-1.5 leading-relaxed">{c.message}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-2xl bg-slate-50/30">
+                  <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-800">全校排课冲突零碰撞</h4>
+                  <p className="text-[11px] text-slate-400 mt-1">目前各个行政班、教学班 and 教室教师时段完全无重叠，通道通畅！</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50 rounded-b-2xl">
+              <button
+                onClick={() => setShowConflictsModal(false)}
+                className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-colors text-xs"
+              >
+                我知道了
+              </button>
             </div>
           </div>
         </div>

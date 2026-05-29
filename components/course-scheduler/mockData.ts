@@ -12,7 +12,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13831111413",
+    "phone": "13887263248",
     "email": "张蓓蕾@school.edu.cn",
     "department": "语文组"
   },
@@ -27,7 +27,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13890990621",
+    "phone": "13834446797",
     "email": "李依涵@school.edu.cn",
     "department": "数学组"
   },
@@ -42,7 +42,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13881001206",
+    "phone": "13892310240",
     "email": "刘静@school.edu.cn",
     "department": "英语组"
   },
@@ -57,7 +57,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13813440009",
+    "phone": "13837296239",
     "email": "高会敏@school.edu.cn",
     "department": "政治组"
   },
@@ -72,7 +72,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13820265381",
+    "phone": "13845103000",
     "email": "安冰华@school.edu.cn",
     "department": "历史组"
   },
@@ -87,7 +87,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13821571502",
+    "phone": "13826817579",
     "email": "王勇@school.edu.cn",
     "department": "地理组"
   },
@@ -102,7 +102,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13867774005",
+    "phone": "13849548037",
     "email": "杨茹@school.edu.cn",
     "department": "生物组"
   },
@@ -117,7 +117,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13869901958",
+    "phone": "13876816453",
     "email": "郑乃武@school.edu.cn",
     "department": "体育组"
   },
@@ -132,7 +132,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13817836503",
+    "phone": "13879034932",
     "email": "汪洋@school.edu.cn",
     "department": "通用组"
   },
@@ -147,7 +147,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13844022714",
+    "phone": "13878972175",
     "email": "陈聪敏@school.edu.cn",
     "department": "音乐组"
   },
@@ -162,7 +162,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13854401095",
+    "phone": "13882037297",
     "email": "胡宝峰@school.edu.cn",
     "department": "信息技术组"
   },
@@ -177,7 +177,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13858183252",
+    "phone": "13815327210",
     "email": "牛静@school.edu.cn",
     "department": "语文组"
   },
@@ -192,7 +192,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13835981493",
+    "phone": "13897013244",
     "email": "陈瑞雪@school.edu.cn",
     "department": "数学组"
   },
@@ -207,7 +207,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13826665668",
+    "phone": "13841511628",
     "email": "王丽@school.edu.cn",
     "department": "英语组"
   },
@@ -222,7 +222,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13867535580",
+    "phone": "13871280590",
     "email": "李广@school.edu.cn",
     "department": "政治组"
   },
@@ -237,7 +237,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13818068767",
+    "phone": "13840750277",
     "email": "王文远@school.edu.cn",
     "department": "生物组"
   },
@@ -252,7 +252,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13824456297",
+    "phone": "13841437212",
     "email": "陈玲歌@school.edu.cn",
     "department": "地理组"
   },
@@ -267,7 +267,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13886183028",
+    "phone": "13810018540",
     "email": "颜丹@school.edu.cn",
     "department": "语文组"
   },
@@ -283,7 +283,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13824864511",
+    "phone": "13865504085",
     "email": "杜娟@school.edu.cn",
     "department": "英语组"
   },
@@ -298,7 +298,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13851780893",
+    "phone": "13848637917",
     "email": "闫瑞雪@school.edu.cn",
     "department": "数学组"
   },
@@ -313,7 +313,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13894996292",
+    "phone": "13879369523",
     "email": "罗丹@school.edu.cn",
     "department": "英语组"
   },
@@ -328,7 +328,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初一 教学任务",
-    "phone": "13885338759",
+    "phone": "13863673987",
     "email": "李亚振@school.edu.cn",
     "department": "体育组"
   },
@@ -343,7 +343,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13834197155",
+    "phone": "13899091563",
     "email": "仝锦霞@school.edu.cn",
     "department": "语文组"
   },
@@ -358,7 +358,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13886138368",
+    "phone": "13880695355",
     "email": "毛曙静@school.edu.cn",
     "department": "数学组"
   },
@@ -373,7 +373,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13881416887",
+    "phone": "13867585853",
     "email": "施媛@school.edu.cn",
     "department": "英语组"
   },
@@ -388,7 +388,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13829021079",
+    "phone": "13859366012",
     "email": "林华峰@school.edu.cn",
     "department": "政治组"
   },
@@ -403,7 +403,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13829178822",
+    "phone": "13867235470",
     "email": "张璐歌@school.edu.cn",
     "department": "历史组"
   },
@@ -418,7 +418,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13880844122",
+    "phone": "13864125000",
     "email": "李俏@school.edu.cn",
     "department": "地理组"
   },
@@ -433,7 +433,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13810181843",
+    "phone": "13866244985",
     "email": "屈欣瑶@school.edu.cn",
     "department": "物理组"
   },
@@ -448,7 +448,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13883316285",
+    "phone": "13867779713",
     "email": "张凤琴@school.edu.cn",
     "department": "生物组"
   },
@@ -463,7 +463,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13828557430",
+    "phone": "13813864110",
     "email": "陈涛@school.edu.cn",
     "department": "体育组"
   },
@@ -478,7 +478,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13815871505",
+    "phone": "13859037241",
     "email": "王少飞@school.edu.cn",
     "department": "通用组"
   },
@@ -493,7 +493,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13899220419",
+    "phone": "13847520165",
     "email": "王建录@school.edu.cn",
     "department": "数学组"
   },
@@ -508,7 +508,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13853578467",
+    "phone": "13864949359",
     "email": "李碧亭@school.edu.cn",
     "department": "语文组"
   },
@@ -523,7 +523,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13835322561",
+    "phone": "13895314760",
     "email": "魏敏@school.edu.cn",
     "department": "数学组"
   },
@@ -538,7 +538,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13813125870",
+    "phone": "13870388646",
     "email": "王伊宁@school.edu.cn",
     "department": "英语组"
   },
@@ -553,7 +553,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13822824965",
+    "phone": "13885004837",
     "email": "汪梦琦@school.edu.cn",
     "department": "英语组"
   },
@@ -568,7 +568,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13893356219",
+    "phone": "13818439950",
     "email": "王浩@school.edu.cn",
     "department": "物理组"
   },
@@ -583,7 +583,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13833454003",
+    "phone": "13861484469",
     "email": "雷聪霖@school.edu.cn",
     "department": "语文组"
   },
@@ -598,7 +598,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13848422201",
+    "phone": "13832149292",
     "email": "方雨婷@school.edu.cn",
     "department": "数学组"
   },
@@ -613,7 +613,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初二 教学任务",
-    "phone": "13844606990",
+    "phone": "13851989733",
     "email": "王永香@school.edu.cn",
     "department": "英语组"
   },
@@ -628,7 +628,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13819866002",
+    "phone": "13817243609",
     "email": "党菲@school.edu.cn",
     "department": "语文组"
   },
@@ -643,7 +643,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13818674300",
+    "phone": "13828618128",
     "email": "纪文利@school.edu.cn",
     "department": "数学组"
   },
@@ -658,7 +658,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13828842059",
+    "phone": "13849911069",
     "email": "线展叶@school.edu.cn",
     "department": "英语组"
   },
@@ -673,7 +673,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13813098199",
+    "phone": "13885669800",
     "email": "祁维辉@school.edu.cn",
     "department": "历史组"
   },
@@ -688,7 +688,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13854089864",
+    "phone": "13867598228",
     "email": "焦广利@school.edu.cn",
     "department": "物理组"
   },
@@ -703,7 +703,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13847602404",
+    "phone": "13821845239",
     "email": "刘仙妹@school.edu.cn",
     "department": "化学组"
   },
@@ -718,7 +718,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13829122810",
+    "phone": "13862165801",
     "email": "姚琦@school.edu.cn",
     "department": "体育组"
   },
@@ -733,7 +733,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13824359125",
+    "phone": "13853894058",
     "email": "李荣@school.edu.cn",
     "department": "通用组"
   },
@@ -748,7 +748,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13892322144",
+    "phone": "13849077677",
     "email": "杨洲琴@school.edu.cn",
     "department": "语文组"
   },
@@ -763,7 +763,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13850476333",
+    "phone": "13881411195",
     "email": "燕蕾@school.edu.cn",
     "department": "数学组"
   },
@@ -778,7 +778,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13831346013",
+    "phone": "13877107626",
     "email": "田红玲@school.edu.cn",
     "department": "英语组"
   },
@@ -793,7 +793,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13813391420",
+    "phone": "13828497696",
     "email": "仝梅娜@school.edu.cn",
     "department": "语文组"
   },
@@ -808,7 +808,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13892717468",
+    "phone": "13858827748",
     "email": "王晨光@school.edu.cn",
     "department": "数学组"
   },
@@ -823,7 +823,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13877834794",
+    "phone": "13818537714",
     "email": "王露@school.edu.cn",
     "department": "英语组"
   },
@@ -838,7 +838,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13841778935",
+    "phone": "13851141115",
     "email": "赵颖维@school.edu.cn",
     "department": "政治组"
   },
@@ -853,7 +853,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13831998090",
+    "phone": "13848794151",
     "email": "葛亚东@school.edu.cn",
     "department": "历史组"
   },
@@ -868,7 +868,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13821236604",
+    "phone": "13888182570",
     "email": "闫忠道@school.edu.cn",
     "department": "物理组"
   },
@@ -883,7 +883,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13895247585",
+    "phone": "13877412281",
     "email": "杨亲霞@school.edu.cn",
     "department": "化学组"
   },
@@ -898,7 +898,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13890968348",
+    "phone": "13860901717",
     "email": "关梦迪@school.edu.cn",
     "department": "语文组"
   },
@@ -913,7 +913,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13872598742",
+    "phone": "13883541010",
     "email": "田佳欣@school.edu.cn",
     "department": "数学组"
   },
@@ -928,7 +928,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 初三 教学任务",
-    "phone": "13861951296",
+    "phone": "13835272825",
     "email": "高婉莎@school.edu.cn",
     "department": "英语组"
   },
@@ -943,7 +943,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13812642460",
+    "phone": "13833801813",
     "email": "张爱茸@school.edu.cn",
     "department": "语文组"
   },
@@ -958,7 +958,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13865562754",
+    "phone": "13877666272",
     "email": "姚玲玲@school.edu.cn",
     "department": "数学组"
   },
@@ -973,7 +973,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13828712557",
+    "phone": "13810746326",
     "email": "折阿倩@school.edu.cn",
     "department": "英语组"
   },
@@ -988,7 +988,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13835697665",
+    "phone": "13864528860",
     "email": "米智静@school.edu.cn",
     "department": "历史组"
   },
@@ -1003,7 +1003,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13874764487",
+    "phone": "13832240605",
     "email": "邓婉莹@school.edu.cn",
     "department": "地理组"
   },
@@ -1018,7 +1018,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13885634991",
+    "phone": "13843903441",
     "email": "张静@school.edu.cn",
     "department": "物理组"
   },
@@ -1033,7 +1033,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13890003509",
+    "phone": "13827405073",
     "email": "郭妮@school.edu.cn",
     "department": "化学组"
   },
@@ -1048,7 +1048,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13839377789",
+    "phone": "13815363123",
     "email": "王玮颖@school.edu.cn",
     "department": "生物组"
   },
@@ -1063,7 +1063,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13847257072",
+    "phone": "13846198324",
     "email": "王俊驰@school.edu.cn",
     "department": "体育组"
   },
@@ -1079,7 +1079,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13893327584",
+    "phone": "13876876009",
     "email": "谢怡@school.edu.cn",
     "department": "信息技术组"
   },
@@ -1094,7 +1094,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13885039338",
+    "phone": "13814821011",
     "email": "刘颖@school.edu.cn",
     "department": "语文组"
   },
@@ -1109,7 +1109,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13880801004",
+    "phone": "13845046996",
     "email": "张文刚@school.edu.cn",
     "department": "数学组"
   },
@@ -1124,7 +1124,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13864601745",
+    "phone": "13861490634",
     "email": "燕润旭@school.edu.cn",
     "department": "地理组"
   },
@@ -1139,7 +1139,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13814128159",
+    "phone": "13832524833",
     "email": "高春燕@school.edu.cn",
     "department": "英语组"
   },
@@ -1154,7 +1154,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13856317169",
+    "phone": "13897709792",
     "email": "张霜@school.edu.cn",
     "department": "物理组"
   },
@@ -1169,7 +1169,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13814053027",
+    "phone": "13884106971",
     "email": "陈春霞@school.edu.cn",
     "department": "化学组"
   },
@@ -1184,7 +1184,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13889919061",
+    "phone": "13888118789",
     "email": "李美玉@school.edu.cn",
     "department": "生物组"
   },
@@ -1199,7 +1199,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13893934721",
+    "phone": "13816451722",
     "email": "万学瑞@school.edu.cn",
     "department": "数学组"
   },
@@ -1214,7 +1214,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13867197857",
+    "phone": "13844983920",
     "email": "李红叶@school.edu.cn",
     "department": "英语组"
   },
@@ -1229,7 +1229,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13836432719",
+    "phone": "13873099468",
     "email": "杨冬梅@school.edu.cn",
     "department": "生物组"
   },
@@ -1244,7 +1244,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13825228067",
+    "phone": "13857100441",
     "email": "殷佳怡@school.edu.cn",
     "department": "语文组"
   },
@@ -1259,7 +1259,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13813126666",
+    "phone": "13813182379",
     "email": "全悦@school.edu.cn",
     "department": "数学组"
   },
@@ -1274,7 +1274,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13815467963",
+    "phone": "13818625690",
     "email": "倪梦哲@school.edu.cn",
     "department": "英语组"
   },
@@ -1289,7 +1289,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13889692623",
+    "phone": "13893534073",
     "email": "高晓静@school.edu.cn",
     "department": "化学组"
   },
@@ -1304,7 +1304,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13848641989",
+    "phone": "13817704418",
     "email": "程燕@school.edu.cn",
     "department": "语文组"
   },
@@ -1319,7 +1319,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13893210152",
+    "phone": "13847946408",
     "email": "赵彭丽@school.edu.cn",
     "department": "数学组"
   },
@@ -1334,7 +1334,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13861875060",
+    "phone": "13871630337",
     "email": "骆苏芮@school.edu.cn",
     "department": "政治组"
   },
@@ -1349,7 +1349,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13831892707",
+    "phone": "13861232641",
     "email": "王静怡@school.edu.cn",
     "department": "化学组"
   },
@@ -1364,7 +1364,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13894494104",
+    "phone": "13852745574",
     "email": "肖翔鸽@school.edu.cn",
     "department": "体育组"
   },
@@ -1379,7 +1379,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13899780758",
+    "phone": "13822928921",
     "email": "成谊@school.edu.cn",
     "department": "语文组"
   },
@@ -1394,7 +1394,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13851161120",
+    "phone": "13821774334",
     "email": "商叶明@school.edu.cn",
     "department": "数学组"
   },
@@ -1409,7 +1409,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13886966141",
+    "phone": "13878813518",
     "email": "马国胜@school.edu.cn",
     "department": "历史组"
   },
@@ -1424,7 +1424,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13833558409",
+    "phone": "13840960789",
     "email": "李洁@school.edu.cn",
     "department": "物理组"
   },
@@ -1439,7 +1439,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13843434816",
+    "phone": "13887967709",
     "email": "麻伊迪@school.edu.cn",
     "department": "英语组"
   },
@@ -1454,7 +1454,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13831958066",
+    "phone": "13845105136",
     "email": "高雪@school.edu.cn",
     "department": "英语组"
   },
@@ -1469,7 +1469,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13896642599",
+    "phone": "13859424735",
     "email": "崔奥迎@school.edu.cn",
     "department": "政治组"
   },
@@ -1484,7 +1484,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13874035513",
+    "phone": "13878822030",
     "email": "高春社@school.edu.cn",
     "department": "语文组"
   },
@@ -1499,7 +1499,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13810751429",
+    "phone": "13861660588",
     "email": "李春萍@school.edu.cn",
     "department": "语文组"
   },
@@ -1514,7 +1514,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13843003926",
+    "phone": "13845549045",
     "email": "李锦@school.edu.cn",
     "department": "语文组"
   },
@@ -1529,7 +1529,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高一 教学任务",
-    "phone": "13888067050",
+    "phone": "13862928109",
     "email": "李健@school.edu.cn",
     "department": "英语组"
   },
@@ -1544,7 +1544,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13810306775",
+    "phone": "13835865525",
     "email": "董艳@school.edu.cn",
     "department": "语文组"
   },
@@ -1559,7 +1559,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13821381385",
+    "phone": "13895681280",
     "email": "王静波@school.edu.cn",
     "department": "数学组"
   },
@@ -1574,7 +1574,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13890559297",
+    "phone": "13873287215",
     "email": "杨蓓蕾@school.edu.cn",
     "department": "英语组"
   },
@@ -1589,7 +1589,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13897283396",
+    "phone": "13820782827",
     "email": "高瑜@school.edu.cn",
     "department": "政治组"
   },
@@ -1604,7 +1604,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13884419710",
+    "phone": "13817772169",
     "email": "王锐静@school.edu.cn",
     "department": "物理组"
   },
@@ -1619,7 +1619,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13868111276",
+    "phone": "13858082024",
     "email": "王串串@school.edu.cn",
     "department": "化学组"
   },
@@ -1634,7 +1634,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13848462481",
+    "phone": "13872897792",
     "email": "吴航利@school.edu.cn",
     "department": "生物组"
   },
@@ -1649,7 +1649,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13876012644",
+    "phone": "13887881081",
     "email": "李洋@school.edu.cn",
     "department": "体育组"
   },
@@ -1664,7 +1664,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13892980768",
+    "phone": "13869274048",
     "email": "牟晗@school.edu.cn",
     "department": "语文组"
   },
@@ -1679,7 +1679,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13814037522",
+    "phone": "13821714422",
     "email": "钱赛@school.edu.cn",
     "department": "数学组"
   },
@@ -1694,7 +1694,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13840265496",
+    "phone": "13815128485",
     "email": "葛胜旗@school.edu.cn",
     "department": "英语组"
   },
@@ -1709,7 +1709,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13892435255",
+    "phone": "13859288601",
     "email": "李磊@school.edu.cn",
     "department": "物理组"
   },
@@ -1724,7 +1724,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13895538320",
+    "phone": "13825988537",
     "email": "张梦婷@school.edu.cn",
     "department": "化学组"
   },
@@ -1739,7 +1739,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13855652351",
+    "phone": "13838868765",
     "email": "贾立红@school.edu.cn",
     "department": "语文组"
   },
@@ -1754,7 +1754,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13866357511",
+    "phone": "13886802454",
     "email": "李萍@school.edu.cn",
     "department": "英语组"
   },
@@ -1769,7 +1769,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13886633693",
+    "phone": "13892703279",
     "email": "马珍珍@school.edu.cn",
     "department": "政治组"
   },
@@ -1784,7 +1784,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13833905855",
+    "phone": "13885065941",
     "email": "王肖迪@school.edu.cn",
     "department": "生物组"
   },
@@ -1799,7 +1799,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13885193898",
+    "phone": "13831779483",
     "email": "王一@school.edu.cn",
     "department": "语文组"
   },
@@ -1814,7 +1814,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13845936117",
+    "phone": "13833052628",
     "email": "朱思佳@school.edu.cn",
     "department": "数学组"
   },
@@ -1829,7 +1829,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13845898801",
+    "phone": "13855335962",
     "email": "张红旗@school.edu.cn",
     "department": "英语组"
   },
@@ -1844,7 +1844,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13815596172",
+    "phone": "13877964172",
     "email": "原璐瑶@school.edu.cn",
     "department": "化学组"
   },
@@ -1859,7 +1859,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13884784522",
+    "phone": "13887632212",
     "email": "冯阿凡@school.edu.cn",
     "department": "语文组"
   },
@@ -1874,7 +1874,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13849834072",
+    "phone": "13861679114",
     "email": "陈越亚@school.edu.cn",
     "department": "数学组"
   },
@@ -1889,7 +1889,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13866418099",
+    "phone": "13822580122",
     "email": "张庆林@school.edu.cn",
     "department": "英语组"
   },
@@ -1904,7 +1904,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13873191872",
+    "phone": "13840228387",
     "email": "吕姝彤@school.edu.cn",
     "department": "物理组"
   },
@@ -1919,7 +1919,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13888138089",
+    "phone": "13830369567",
     "email": "李琳@school.edu.cn",
     "department": "数学组"
   },
@@ -1934,7 +1934,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13828377315",
+    "phone": "13894994640",
     "email": "李元@school.edu.cn",
     "department": "英语组"
   },
@@ -1949,7 +1949,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13880332615",
+    "phone": "13867757412",
     "email": "谭叶@school.edu.cn",
     "department": "化学组"
   },
@@ -1964,7 +1964,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13867828869",
+    "phone": "13822472534",
     "email": "马建萍@school.edu.cn",
     "department": "语文组"
   },
@@ -1979,7 +1979,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13845776698",
+    "phone": "13864618638",
     "email": "宋怡娜@school.edu.cn",
     "department": "数学组"
   },
@@ -1994,7 +1994,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13848550045",
+    "phone": "13862795155",
     "email": "邵继东@school.edu.cn",
     "department": "地理组"
   },
@@ -2009,7 +2009,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13838054332",
+    "phone": "13856877723",
     "email": "李煜@school.edu.cn",
     "department": "地理组"
   },
@@ -2024,7 +2024,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13873648107",
+    "phone": "13883328888",
     "email": "杨思瑞@school.edu.cn",
     "department": "历史组"
   },
@@ -2039,7 +2039,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高二 教学任务",
-    "phone": "13833147772",
+    "phone": "13817700034",
     "email": "万恒菲@school.edu.cn",
     "department": "体育组"
   },
@@ -2054,7 +2054,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13815454733",
+    "phone": "13835668553",
     "email": "唐显@school.edu.cn",
     "department": "语文组"
   },
@@ -2069,7 +2069,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13885795628",
+    "phone": "13879490409",
     "email": "郑毅@school.edu.cn",
     "department": "数学组"
   },
@@ -2084,7 +2084,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13879287639",
+    "phone": "13870352021",
     "email": "桂妙妙@school.edu.cn",
     "department": "英语组"
   },
@@ -2099,7 +2099,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13835661545",
+    "phone": "13881976645",
     "email": "高艳@school.edu.cn",
     "department": "物理组"
   },
@@ -2114,7 +2114,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13827265054",
+    "phone": "13812188439",
     "email": "马展迎@school.edu.cn",
     "department": "化学组"
   },
@@ -2129,7 +2129,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13850657847",
+    "phone": "13878707069",
     "email": "孟婵娟@school.edu.cn",
     "department": "生物组"
   },
@@ -2144,7 +2144,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13865677572",
+    "phone": "13857972716",
     "email": "杨勇@school.edu.cn",
     "department": "通用组"
   },
@@ -2159,7 +2159,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13852448238",
+    "phone": "13867811795",
     "email": "任磊@school.edu.cn",
     "department": "语文组"
   },
@@ -2174,7 +2174,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13870245657",
+    "phone": "13842506285",
     "email": "周良军@school.edu.cn",
     "department": "数学组"
   },
@@ -2189,7 +2189,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13885080899",
+    "phone": "13825292945",
     "email": "寇立英@school.edu.cn",
     "department": "英语组"
   },
@@ -2204,7 +2204,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13853514034",
+    "phone": "13824068233",
     "email": "陈倩@school.edu.cn",
     "department": "政治组"
   },
@@ -2219,7 +2219,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13898077825",
+    "phone": "13810751962",
     "email": "王燕谋@school.edu.cn",
     "department": "地理组"
   },
@@ -2234,7 +2234,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13878878207",
+    "phone": "13848971941",
     "email": "薛柳@school.edu.cn",
     "department": "语文组"
   },
@@ -2249,7 +2249,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13813207301",
+    "phone": "13841792558",
     "email": "张玲@school.edu.cn",
     "department": "英语组"
   },
@@ -2264,7 +2264,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13837204643",
+    "phone": "13866158908",
     "email": "张慢@school.edu.cn",
     "department": "物理组"
   },
@@ -2279,7 +2279,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13867367675",
+    "phone": "13863907448",
     "email": "杨文娟@school.edu.cn",
     "department": "化学组"
   },
@@ -2294,7 +2294,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13828875529",
+    "phone": "13886780323",
     "email": "唐娟丽@school.edu.cn",
     "department": "数学组"
   },
@@ -2309,7 +2309,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13899503420",
+    "phone": "13832782951",
     "email": "王建军@school.edu.cn",
     "department": "物理组"
   },
@@ -2324,7 +2324,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13846575950",
+    "phone": "13896002021",
     "email": "陈蓉@school.edu.cn",
     "department": "化学组"
   },
@@ -2339,7 +2339,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13812800607",
+    "phone": "13857521214",
     "email": "刘旭@school.edu.cn",
     "department": "语文组"
   },
@@ -2354,7 +2354,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13867002411",
+    "phone": "13813398546",
     "email": "孟田田@school.edu.cn",
     "department": "数学组"
   },
@@ -2369,7 +2369,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13822605765",
+    "phone": "13810924101",
     "email": "肖照@school.edu.cn",
     "department": "英语组"
   },
@@ -2384,7 +2384,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13874738925",
+    "phone": "13826523782",
     "email": "赵露@school.edu.cn",
     "department": "语文组"
   },
@@ -2399,7 +2399,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13859761801",
+    "phone": "13889182863",
     "email": "李亚飞@school.edu.cn",
     "department": "政治组"
   },
@@ -2414,7 +2414,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13836884934",
+    "phone": "13813031634",
     "email": "李媛擎@school.edu.cn",
     "department": "语文组"
   },
@@ -2429,7 +2429,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13828099760",
+    "phone": "13866452370",
     "email": "李艳玲@school.edu.cn",
     "department": "英语组"
   },
@@ -2444,7 +2444,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13892420684",
+    "phone": "13835223160",
     "email": "姚满彦@school.edu.cn",
     "department": "生物组"
   },
@@ -2459,7 +2459,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13842097357",
+    "phone": "13855887236",
     "email": "张珍@school.edu.cn",
     "department": "数学组"
   },
@@ -2474,7 +2474,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13811980089",
+    "phone": "13849458499",
     "email": "程俊轲@school.edu.cn",
     "department": "英语组"
   },
@@ -2489,7 +2489,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "maxConsecutiveLessons": 2,
     "unavailablePeriods": [],
     "preferences": "主要负责 高三 教学任务",
-    "phone": "13851209568",
+    "phone": "13828831626",
     "email": "乔启迪@school.edu.cn",
     "department": "数学组"
   }

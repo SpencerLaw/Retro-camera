@@ -278,9 +278,13 @@ uniqueAbbrevs.forEach(abbrev => {
   const subjName = singleCharSubjectMap[subjChar];
   
   if (subjName) {
-    const match = uniqueGrade2TeacherNames.find(name => name.includes(namePart));
+    const match = globalTeachers.find(t => 
+      uniqueGrade2TeacherNames.includes(t.name) && 
+      t.name.includes(namePart) && 
+      t.subjects.includes(subjName)
+    );
     if (match) {
-      abbrevToTeacher[abbrev] = { name: match, subject: subjName };
+      abbrevToTeacher[abbrev] = { name: match.name, subject: subjName };
     }
   }
 });

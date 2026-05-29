@@ -794,34 +794,6 @@ export default function App() {
 
         {/* SYSTEM ACTIONS & ROLE SELECTION FOR MULTI-ROLE */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
-            <span className="text-[10px] text-slate-500 pl-2 pr-1 font-bold">查看角色:</span>
-            <button 
-              onClick={() => { setRole('dean'); setSelectedCell(null); setSubstituteData(null); }}
-              className={`px-2 py-1 text-xs rounded-md transition-all font-medium ${role === 'dean' ? 'bg-white text-blue-700 shadow-xs border border-slate-200' : 'text-slate-600 hover:bg-white/50'}`}
-            >
-              教务主任
-            </button>
-            <button 
-              onClick={() => { setRole('leader'); setSelectedCell(null); setSubstituteData(null); }}
-              className={`px-2 py-1 text-xs rounded-md transition-all font-medium ${role === 'leader' ? 'bg-white text-blue-700 shadow-xs border border-slate-200' : 'text-slate-600 hover:bg-white/50'}`}
-            >
-              年级组长
-            </button>
-            <button 
-              onClick={() => { setRole('teacher'); setSelectedCell(null); setSubstituteData(null); }}
-              className={`px-2 py-1 text-xs rounded-md transition-all font-medium ${role === 'teacher' ? 'bg-white text-blue-700 shadow-xs border border-slate-200' : 'text-slate-600 hover:bg-white/50'}`}
-            >
-              任课老师
-            </button>
-            <button 
-              onClick={() => { setRole('student'); setSelectedCell(null); setSubstituteData(null); }}
-              className={`px-2 py-1 text-xs rounded-md transition-all font-medium ${role === 'student' ? 'bg-white text-blue-700 shadow-xs border border-slate-200' : 'text-slate-600 hover:bg-white/50'}`}
-            >
-              学生走班课表
-            </button>
-          </div>
-
           <div className="bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-blue-600" />
             2026学期 · 第15周
@@ -1763,17 +1735,6 @@ export default function App() {
               </div>
             </div>
 
-          </div>
-
-          {/* AI SCORE RATING COUNTER FROM MANDATE METRICS */}
-          <div className="p-4 bg-slate-900 text-white shrink-0 text-left">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold tracking-tight">课表综合评估科学度</span>
-              <span className="text-2xl font-black text-emerald-400 font-mono">94.8</span>
-            </div>
-            <p className="text-[9.5px] text-slate-400 mt-1 leading-normal italic">
-              由算法内核、新高考选科排期大课间锁定达成率实时评定，全力守护在职教师连堂健康负荷。
-            </p>
           </div>
 
         </aside>

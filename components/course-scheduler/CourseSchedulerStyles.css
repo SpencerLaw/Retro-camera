@@ -6,23 +6,64 @@
   --font-mono: "JetBrains Mono", SFMono-Regular, monospace;
 }
 
-/* Custom gorgeous scrollbar */
+/* ─── Timetable Period-Gradient Scrollbar ─────────────────────────── */
+/* Main scrollbar: matches period time-of-day palette                   */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
   border-radius: 9999px;
 }
 
+/* Vertical: amber (morning) → teal → indigo → violet (afternoon) */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    #f59e0b 0%,    /* amber-400  – 第1-2节 上午 */
+    #2dd4bf 35%,   /* teal-400   – 第3-4节 上午 */
+    #818cf8 65%,   /* indigo-400 – 第5-6节 下午 */
+    #a78bfa 100%   /* violet-400 – 第7-8节 下午 */
+  );
+  border-radius: 9999px;
+  transition: opacity 0.2s ease;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: linear-gradient(
+    to bottom,
+    #d97706 0%,    /* amber-600  */
+    #0d9488 35%,   /* teal-600   */
+    #4f46e5 65%,   /* indigo-600 */
+    #7c3aed 100%   /* violet-600 */
+  );
+}
+
+/* Horizontal scrollbar: same palette, left→right */
+::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(
+    to right,
+    #f59e0b 0%,
+    #2dd4bf 35%,
+    #818cf8 65%,
+    #a78bfa 100%
+  );
+}
+
+::-webkit-scrollbar-thumb:horizontal:hover {
+  background: linear-gradient(
+    to right,
+    #d97706 0%,
+    #0d9488 35%,
+    #4f46e5 65%,
+    #7c3aed 100%
+  );
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Timetable-specific styles */

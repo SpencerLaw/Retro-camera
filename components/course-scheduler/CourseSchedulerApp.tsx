@@ -112,21 +112,63 @@ export default function App() {
   const [shiftWeek, setShiftWeek] = useState(10);
   const [shiftReason, setShiftReason] = useState('完成选考学业水平测试，停课释放余下多媒体机房资源');
 
-  // Fetch initial system states
+  const updateConflicts = useCallback((
+    currentSchedules: ScheduleItem[],
+    currentTeachers: Teacher[],
+    currentClassrooms: Classroom[],
+    currentClasses: TeachingClass[],
+    currentStudents: Student[],
+    currentConfig: any
+  ) => {
+    const newConflicts = detectConflicts(
+      currentSchedules,
+      currentTeachers,
+      currentClassrooms,
+      currentClasses,
+      currentStudents,
+      currentConfig
+    );
+    setConflicts(newConflicts);
+  }, []);
+
+  // Fetch initial system states from localStorage or defaults
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/data');
-      const data = await res.json();
-      setTeachers(data.teachers);
-      setClassrooms(data.classrooms);
-      setTeachingClasses(data.teachingClasses);
-      setStudents(data.students);
-      setSchedules(data.schedules);
-      setConflicts(data.conflicts);
-      setHistories(data.histories);
-      if (data.configSettings) {
-        setConfigSettings(data.configSettings);
+      await new Promise(resolve => setTimeout(resolve, 600)); // Simulate loading
+      
+      const savedData = localStorage.getItem('course_scheduler_data');
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        setTeachers(parsed.teachers || []);
+        setClassrooms(parsed.classrooms || []);
+        setTeachingClasses(parsed.teachingClasses || []);
+        setStudents(parsed.students || []);
+        setSchedules(parsed.schedules || []);
+        if (parsed.configSettings) setConfigSettings(parsed.configSettings);
+        
+        updateConflicts(
+          parsed.schedules || [], 
+          parsed.teachers || [], 
+          parsed.classrooms || [], 
+          parsed.teachingClasses || [], 
+          parsed.students || [], 
+          parsed.configSettings || configSettings
+        );
+      } else {
+        const initialTeachers = JSON.parse(JSON.stringify(INITIAL_TEACHERS));
+        const initialClassrooms = JSON.parse(JSON.stringify(INITIAL_CLASSROOMS));
+        const initialTeachingClasses = JSON.parse(JSON.stringify(INITIAL_TEACHING_CLASSES));
+        const initialStudents = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+        const initialSchedules = generatePrepopulatedSchedules(initialTeachers, initialClassrooms, initialTeachingClasses);
+
+        setTeachers(initialTeachers);
+        setClassrooms(initialClassrooms);
+        setTeachingClasses(initialTeachingClasses);
+        setStudents(initialStudents);
+        setSchedules(initialSchedules);
+        
+        updateConflicts(initialSchedules, initialTeachers, initialClassrooms, initialTeachingClasses, initialStudents, configSettings);
       }
     } catch (err) {
       console.error(err);
@@ -139,42 +181,52 @@ export default function App() {
     fetchData();
   }, []);
 
+  // Auto-save to localStorage when core data changes
+  useEffect(() => {
+    if (!loading) {
+      const dataToSave = {
+        teachers,
+        classrooms,
+        teachingClasses,
+        students,
+        schedules,
+        configSettings
+      };
+      localStorage.setItem('course_scheduler_data', JSON.stringify(dataToSave));
+    }
+  }, [teachers, classrooms, teachingClasses, students, schedules, configSettings, loading]);
+
   // Soft/Hard Constraint rules relaxation updater as dynamic NP-hard solver configuration
   const handleUpdateConfig = async (newConfig: Partial<typeof configSettings>) => {
-    try {
-      const res = await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newConfig)
-      });
-      const data = await res.json();
-      if (data.status === 'success') {
-        setConfigSettings(data.configSettings);
-        setConflicts(data.conflicts);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    const updatedConfig = { ...configSettings, ...newConfig };
+    setConfigSettings(updatedConfig);
+    updateConflicts(schedules, teachers, classrooms, teachingClasses, students, updatedConfig);
   };
 
   // Reset data simulation state
   const handleResetData = async () => {
-    if (confirm("您确认需要初始化走班数据吗？当前所有调整进度和产生的快照将被重置。")) {
+    if (confirm("您确认需要初始化走班数据吗？当前所有调整进度和保存的本地缓存将被重置。")) {
       try {
         setLoading(true);
-        const res = await fetch('/api/reset', { method: 'POST' });
-        const data = await res.json();
-        setTeachers(data.teachers);
-        setClassrooms(data.classrooms);
-        setTeachingClasses(data.teachingClasses);
-        setSchedules(data.schedules);
-        setConflicts(data.conflicts);
+        localStorage.removeItem('course_scheduler_data');
+        await new Promise(resolve => setTimeout(resolve, 400));
+        
+        const initialTeachers = JSON.parse(JSON.stringify(INITIAL_TEACHERS));
+        const initialClassrooms = JSON.parse(JSON.stringify(INITIAL_CLASSROOMS));
+        const initialTeachingClasses = JSON.parse(JSON.stringify(INITIAL_TEACHING_CLASSES));
+        const initialStudents = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+        const initialSchedules = generatePrepopulatedSchedules(initialTeachers, initialClassrooms, initialTeachingClasses);
+
+        setTeachers(initialTeachers);
+        setClassrooms(initialClassrooms);
+        setTeachingClasses(initialTeachingClasses);
+        setStudents(initialStudents);
+        setSchedules(initialSchedules);
         setHistories([]);
         setSelectedCell(null);
         setSubstituteData(null);
-        if (data.configSettings) {
-          setConfigSettings(data.configSettings);
-        }
+        
+        updateConflicts(initialSchedules, initialTeachers, initialClassrooms, initialTeachingClasses, initialStudents, configSettings);
       } catch (err) {
         console.error(err);
       } finally {
@@ -186,14 +238,13 @@ export default function App() {
   const loadJSONExportText = async () => {
     try {
       setJsonError('');
-      const res = await fetch('/api/data');
-      const data = await res.json();
       const exportData = {
-        teachers: data.teachers || [],
-        classrooms: data.classrooms || [],
-        teachingClasses: data.teachingClasses || [],
-        students: data.students || [],
-        schedules: data.schedules || []
+        teachers,
+        classrooms,
+        teachingClasses,
+        students,
+        schedules,
+        configSettings
       };
       setJsonRawText(JSON.stringify(exportData, null, 2));
     } catch (err: any) {

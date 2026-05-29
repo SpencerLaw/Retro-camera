@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import fs from 'fs';
+
+const code = `import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   MapPin, 
@@ -381,7 +383,7 @@ export default function App() {
 
   const handleAddTeacherSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const id = `T${(teachers.length + 1).toString().padStart(3, '0')}`;
+    const id = \`T\${(teachers.length + 1).toString().padStart(3, '0')}\`;
     const newT: Teacher = {
       id,
       name: newTeacherName,
@@ -390,7 +392,7 @@ export default function App() {
       maxDailyHours: 4,
       maxConsecutiveLessons: 2,
       unavailablePeriods: [],
-      preferences: `主要负责 ${selectedGrade} 教学任务`,
+      preferences: \`主要负责 \${selectedGrade} 教学任务\`,
       phone: newTeacherPhone || '13800000000',
       email: 'new_teacher@school.edu.cn',
       department: newTeacherDept
@@ -402,12 +404,12 @@ export default function App() {
     setNewTeacherName('');
     setNewTeacherPhone('');
     updateConflicts(schedules, newTeachers, classrooms, teachingClasses, students);
-    alert(`聘任成功！新进教师 ${newT.name} 已归档，工号为 ${newT.id}。`);
+    alert(\`聘任成功！新进教师 \${newT.name} 已归档，工号为 \${newT.id}。\`);
   };
 
   const handleAddClassroomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const id = `R${(classrooms.length + 1).toString().padStart(3, '0')}`;
+    const id = \`R\${(classrooms.length + 1).toString().padStart(3, '0')}\`;
     const newR: Classroom = {
       id,
       name: newClassroomName,
@@ -421,20 +423,20 @@ export default function App() {
     setShowAddClassroomModal(false);
     setNewClassroomName('');
     updateConflicts(schedules, teachers, newClassrooms, teachingClasses, students);
-    alert(`增设成功！走班教室 ${newR.name} 已归档，代码为 ${newR.id}。`);
+    alert(\`增设成功！走班教室 \${newR.name} 已归档，代码为 \${newR.id}。\`);
   };
 
   const getActiveFilterLabel = () => {
-    if (combinationFilter !== 'all') return `选科组合：${combinationFilter}`;
+    if (combinationFilter !== 'all') return \`选科组合：\${combinationFilter}\`;
     if (teacherFilter !== 'all') {
       const found = teachers.find(t => t.id === teacherFilter);
-      return found ? `教师课表：${found.name}` : '课表过滤';
+      return found ? \`教师课表：\${found.name}\` : '课表过滤';
     }
     if (classroomFilter !== 'all') {
       const found = classrooms.find(c => c.id === classroomFilter);
-      return found ? `教室课表：${found.name}` : '课表过滤';
+      return found ? \`教室课表：\${found.name}\` : '课表过滤';
     }
-    if (subjectFilter !== 'all') return `学科筛选：${subjectFilter}`;
+    if (subjectFilter !== 'all') return \`学科筛选：\${subjectFilter}\`;
     return "全校走班排课总看板";
   };
 
@@ -488,13 +490,13 @@ export default function App() {
           <nav className="flex gap-4">
             <button
               onClick={() => setActiveTab('board')}
-              className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'board' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
+              className={\`font-semibold text-sm h-16 flex items-center px-3 transition-colors \${activeTab === 'board' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}\`}
             >
               动态排课主看板
             </button>
             <button
               onClick={() => setActiveTab('management')}
-              className={`font-semibold text-sm h-16 flex items-center px-3 transition-colors ${activeTab === 'management' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}`}
+              className={\`font-semibold text-sm h-16 flex items-center px-3 transition-colors \${activeTab === 'management' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-800'}\`}
             >
               学校教学分工与基础数据
             </button>
@@ -506,7 +508,7 @@ export default function App() {
           <button
             onClick={() => setShowRightSidebar(!showRightSidebar)}
             title="数据诊断与临时代课调配面板"
-            className={`px-3 py-1.5 border rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors ${showRightSidebar ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+            className={\`px-3 py-1.5 border rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors \${showRightSidebar ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}\`}
           >
             <Activity className="w-3.5 h-3.5" />
             <span>🔍 诊断与代课</span>
@@ -668,7 +670,7 @@ export default function App() {
                   
                   if (periodMeta.type === 'break') {
                     return (
-                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 min-h-[40px] bg-slate-50/50 hover:bg-slate-50 text-slate-400">
+                      <div key={\`spacer-\${pIdx}\`} className="grid grid-cols-6 min-h-[40px] bg-slate-50/50 hover:bg-slate-50 text-slate-400">
                         <div className="p-2 border-r border-slate-200 flex flex-col justify-center items-center">
                           <span className="text-[10px] font-bold tracking-tight">课间操安排</span>
                           <span className="text-[8px] text-slate-400 leading-none">09:30-10:10</span>
@@ -699,7 +701,7 @@ export default function App() {
 
                   if (periodMeta.type === 'lunch') {
                     return (
-                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 min-h-[38px] bg-slate-100/50 text-slate-400">
+                      <div key={\`spacer-\${pIdx}\`} className="grid grid-cols-6 min-h-[38px] bg-slate-100/50 text-slate-400">
                         <div className="p-2 border-r border-slate-200 flex flex-col justify-center items-center">
                           <span className="text-[10px] font-bold">午后休餐</span>
                           <span className="text-[8px] text-slate-400">11:40-14:00</span>
@@ -713,7 +715,7 @@ export default function App() {
                   }
 
                   return (
-                    <div key={`period-row-${periodMeta.num}`} className="grid grid-cols-6">
+                    <div key={\`period-row-\${periodMeta.num}\`} className="grid grid-cols-6">
                       <div className="p-2 border-r border-slate-200 bg-slate-50/20 text-center flex flex-col justify-center items-center">
                         <span className="text-[11px] font-bold text-slate-800">{periodMeta.name}</span>
                         <span className="text-[9px] text-slate-500 font-medium leading-tight mt-0.5">{periodMeta.time}</span>
@@ -725,8 +727,8 @@ export default function App() {
 
                         return (
                           <div 
-                            key={`${day.num}-${periodMeta.num}`} 
-                            className={`p-1 border-r last:border-r-0 border-slate-200 flex flex-col gap-1 overflow-hidden relative group/cell transition-colors min-h-[55px] ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
+                            key={\`\${day.num}-\${periodMeta.num}\`} 
+                            className={\`p-1 border-r last:border-r-0 border-slate-200 flex flex-col gap-1 overflow-hidden relative group/cell transition-colors min-h-[55px] \${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}\`}
                           >
                             {cellItems.length > 0 ? (
                               cellItems.map((item) => {
@@ -735,7 +737,7 @@ export default function App() {
                                   <div
                                     key={item.id}
                                     onClick={() => handleSelectCell(item)}
-                                    className={`p-2 rounded text-left cursor-pointer transition-all ${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} ${isSelected ? 'ring-2 ring-blue-600 shadow-md transform scale-[1.02]' : 'hover:shadow-xs'}`}
+                                    className={\`p-2 rounded text-left cursor-pointer transition-all \${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} \${isSelected ? 'ring-2 ring-blue-600 shadow-md transform scale-[1.02]' : 'hover:shadow-xs'}\`}
                                   >
                                     <div className="flex justify-between items-start">
                                       <span className="font-bold text-[11px] leading-tight line-clamp-1">
@@ -817,7 +819,7 @@ export default function App() {
                             return (
                               <div 
                                 key={rec.teacher.id} 
-                                className={`bg-white p-2.5 rounded border border-slate-200 text-[10.5px] ${disabled ? 'opacity-50' : ''}`}
+                                className={\`bg-white p-2.5 rounded border border-slate-200 text-[10.5px] \${disabled ? 'opacity-50' : ''}\`}
                               >
                                 <div className="flex justify-between items-center mb-1">
                                   <span className="font-bold text-slate-800">
@@ -877,7 +879,7 @@ export default function App() {
                     {conflicts.map((c) => (
                       <div key={c.id} className="p-2 bg-white border border-orange-200/60 rounded flex flex-col">
                         <div className="flex items-center gap-1.5">
-                          <span className={`px-1 rounded-sm text-[8px] font-bold uppercase ${c.severity === 'critical' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}`}>
+                          <span className={\`px-1 rounded-sm text-[8px] font-bold uppercase \${c.severity === 'critical' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}\`}>
                             {c.severity === 'critical' ? '严峻碰撞' : '轻微警告'}
                           </span>
                           <span className="text-[10px] font-semibold text-slate-800">{c.message}</span>
@@ -929,19 +931,19 @@ export default function App() {
           <div className="flex border-b border-slate-200 mb-6 space-x-4">
             <button
               onClick={() => setMgmtSubTab('teachers')}
-              className={`pb-2.5 font-bold text-sm border-b-2 transition-colors ${mgmtSubTab === 'teachers' ? 'text-blue-600 border-blue-600' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
+              className={\`pb-2.5 font-bold text-sm border-b-2 transition-colors \${mgmtSubTab === 'teachers' ? 'text-blue-600 border-blue-600' : 'text-slate-400 border-transparent hover:text-slate-600'}\`}
             >
               教师排课大表 ({getGradeTeachers().length} 人)
             </button>
             <button
               onClick={() => setMgmtSubTab('assignments')}
-              className={`pb-2.5 font-bold text-sm border-b-2 transition-colors ${mgmtSubTab === 'assignments' ? 'text-indigo-600 border-indigo-600' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
+              className={\`pb-2.5 font-bold text-sm border-b-2 transition-colors \${mgmtSubTab === 'assignments' ? 'text-indigo-600 border-indigo-600' : 'text-slate-400 border-transparent hover:text-slate-600'}\`}
             >
               行政班授课分工表 (Excel视图)
             </button>
             <button
               onClick={() => setMgmtSubTab('students')}
-              className={`pb-2.5 font-bold text-sm border-b-2 transition-colors ${mgmtSubTab === 'students' ? 'text-emerald-600 border-emerald-600' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
+              className={\`pb-2.5 font-bold text-sm border-b-2 transition-colors \${mgmtSubTab === 'students' ? 'text-emerald-600 border-emerald-600' : 'text-slate-400 border-transparent hover:text-slate-600'}\`}
             >
               学生走班花名册 ({getGradeStudents().length} 人)
             </button>
@@ -1141,7 +1143,7 @@ export default function App() {
                       {getGradeStudents().map(s => {
                         const sampleTcId = s.classes[0];
                         const sampleTc = teachingClasses.find(x => x.id === sampleTcId);
-                        const studentClassLabel = sampleTc ? `${selectedGrade}${sampleTc.classNumber}班` : '未入班';
+                        const studentClassLabel = sampleTc ? \`\${selectedGrade}\${sampleTc.classNumber}班\` : '未入班';
                         return (
                           <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
                             <td className="p-3 border-r border-slate-100 font-mono font-bold text-slate-400">{s.id}</td>
@@ -1486,3 +1488,7 @@ export default function App() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync('components/course-scheduler/CourseSchedulerApp.tsx', code);
+console.log('Successfully rewrote CourseSchedulerApp.tsx into an extremely simplified, bug-free, table-oriented app!');

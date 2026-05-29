@@ -69,28 +69,13 @@ export const detectConflicts = (
       }
     }
 
-    // 3. Student Elective Combination Conflicts
+    // 3. Student Roster Conflicts: Same student cannot be in multiple classes at the same time
     const studentSchedules = new Map<string, ScheduleItem[]>(); // studentId -> ScheduleItem[]
     for (const s of students) {
       for (const item of items) {
-        const tClass = currentClasses.find(c => c.id === item.teachingClassId);
-        if (tClass) {
-          const studentTakesCompulsory = (s.electiveCombo === "物化生" && tClass.id === "C001") ||
-                                         (s.electiveCombo === "物化地" && tClass.id === "C001") ||
-                                         (s.electiveCombo === "史化地" && tClass.id === "C002");
-          
-          const studentTakesElective = (s.electiveCombo === tClass.combination);
-
-          const studentTakesMath = (s.electiveCombo === "物化生" && tClass.id === "C003") ||
-                                   (s.electiveCombo === "物化地" && tClass.id === "C003") ||
-                                   (s.electiveCombo === "史化地" && tClass.id === "C004");
-
-          const studentTakesGeneral = (tClass.id === "C013" || tClass.id === "C012" || tClass.id === "C014");
-
-          if (studentTakesCompulsory || studentTakesElective || studentTakesMath || studentTakesGeneral) {
-            if (!studentSchedules.has(s.id)) studentSchedules.set(s.id, []);
-            studentSchedules.get(s.id)!.push(item);
-          }
+        if (s.classes.includes(item.teachingClassId)) {
+          if (!studentSchedules.has(s.id)) studentSchedules.set(s.id, []);
+          studentSchedules.get(s.id)!.push(item);
         }
       }
     }

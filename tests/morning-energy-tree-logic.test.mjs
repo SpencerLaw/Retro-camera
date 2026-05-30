@@ -544,3 +544,13 @@ runTest('forest map and participant controls are present in the classroom UI', (
   assert.match(html, /id="participant-panel"/);
   assert.match(html, /id="participant-list"/);
 });
+
+runTest('left classroom stack uses a custom polished scrollbar', () => {
+  const css = fs.readFileSync('public/morning-energy-tree/style.css', 'utf8');
+
+  assert.match(css, /\.left-side-stack\s*\{[^}]*scrollbar-width:\s*thin/s);
+  assert.match(css, /\.left-side-stack\s*\{[^}]*scrollbar-color:\s*rgba\(125,\s*249,\s*255/s);
+  assert.match(css, /\.left-side-stack::-webkit-scrollbar\s*\{[^}]*width:\s*10px/s);
+  assert.match(css, /\.left-side-stack::-webkit-scrollbar-thumb\s*\{[^}]*linear-gradient/s);
+  assert.match(css, /\.left-side-stack::-webkit-scrollbar-thumb:hover/s);
+});

@@ -413,9 +413,37 @@ canvas {
     gap: 20px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 4px;
+    padding-right: 8px;
     overscroll-behavior: contain;
     pointer-events: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(125, 249, 255, 0.72) rgba(7, 25, 45, 0.18);
+    scrollbar-gutter: stable;
+}
+
+.left-side-stack::-webkit-scrollbar {
+    width: 10px;
+}
+
+.left-side-stack::-webkit-scrollbar-track {
+    margin: 12px 0;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(8, 29, 52, 0.22)),
+        rgba(7, 25, 45, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.left-side-stack::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(210, 255, 248, 0.96), rgba(76, 216, 232, 0.9) 52%, rgba(255, 224, 130, 0.86));
+    border: 2px solid rgba(18, 83, 118, 0.5);
+    box-shadow: 0 0 12px rgba(125, 249, 255, 0.26);
+}
+
+.left-side-stack::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(238, 255, 252, 1), rgba(104, 239, 247, 0.96) 52%, rgba(255, 235, 157, 0.96));
+    box-shadow: 0 0 16px rgba(125, 249, 255, 0.42);
 }
 
 .task-strip-head {
@@ -821,35 +849,35 @@ canvas {
 .task-day-panel,
 .task-strip-copy {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 118, 188, 0.96) rgba(255, 255, 255, 0.12);
+    scrollbar-color: rgba(125, 249, 255, 0.72) rgba(255, 255, 255, 0.1);
 }
 
 .report-body::-webkit-scrollbar,
 .task-day-panel::-webkit-scrollbar,
 .task-strip-copy::-webkit-scrollbar {
-    width: 12px;
+    width: 10px;
 }
 
 .report-body::-webkit-scrollbar-track,
 .task-day-panel::-webkit-scrollbar-track,
 .task-strip-copy::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(7, 25, 45, 0.12));
     border-radius: 999px;
 }
 
 .report-body::-webkit-scrollbar-thumb,
 .task-day-panel::-webkit-scrollbar-thumb,
 .task-strip-copy::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(255, 162, 216, 0.98) 0%, rgba(255, 96, 175, 0.98) 100%);
+    background: linear-gradient(180deg, rgba(210, 255, 248, 0.96), rgba(76, 216, 232, 0.9) 58%, rgba(255, 224, 130, 0.86));
     border-radius: 999px;
     border: 2px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 0 12px rgba(255, 105, 180, 0.26);
+    box-shadow: 0 0 12px rgba(125, 249, 255, 0.24);
 }
 
 .report-body::-webkit-scrollbar-thumb:hover,
 .task-day-panel::-webkit-scrollbar-thumb:hover,
 .task-strip-copy::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(255, 182, 225, 1) 0%, rgba(255, 82, 168, 1) 100%);
+    background: linear-gradient(180deg, rgba(238, 255, 252, 1), rgba(104, 239, 247, 0.96) 58%, rgba(255, 235, 157, 0.96));
 }
 
 .task-body {

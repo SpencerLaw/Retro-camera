@@ -477,7 +477,18 @@
     "rewards": {
       "water": "Water",
       "fertilizer": "Fertilizer",
-      "overLoud": "Over-loud"
+      "overLoud": "Over-loud",
+      "liveTitle": "Water / Fertilizer",
+      "liveSub": "Auto-earned in this reading session",
+      "localOnly": "Local only",
+      "done": "Earned",
+      "timesSuffix": " times",
+      "noOverLoud": "None",
+      "waterRule": "Water: read steadily for 12 seconds in a row while the current sound stays at or below 96dB.",
+      "fertilizerRule": "Fertilizer: reach 60 seconds of effective reading in this session while the sound is below 100dB.",
+      "overLoudRule": "Above 100dB: records an over-loud warning only, with no reward, to avoid shout-based growth.",
+      "waterToast": "Water earned: steady reading for 12 seconds",
+      "fertilizerToast": "Fertilizer earned: 60 seconds of effective reading"
     },
     "forest": {
       "trigger": "Energy Forest",
@@ -494,7 +505,9 @@
       "manage": "Edit",
       "save": "Save Branches",
       "slotLabel": "Branch",
-      "branchTitle": "Student branches"
+      "branchTitle": "Student branches",
+      "helpTitle": "Student Branch Guide",
+      "helpBody": "This is a teacher-selected reader/group tool, not automatic voiceprint recognition. Before reading or during turn-taking, select the matching branch. The selected branch grows from steady reading, and the data stays on this device in reports and the forest to encourage quiet students to participate."
     },
     "report": {
       "trigger": "Weekly Report",

@@ -121,13 +121,38 @@
                             <strong data-i18n="morningTree.participants.title">学生枝干</strong>
                             <span data-i18n="morningTree.participants.sub">选择当前朗读学生/小组</span>
                         </div>
-                        <button id="participant-manage-btn" class="participant-manage-btn" type="button" data-i18n="morningTree.participants.manage">编辑</button>
+                        <div class="participant-panel-actions">
+                            <button id="participant-help-btn" class="participant-help-btn" type="button" aria-label="学生枝干说明" aria-expanded="false" aria-controls="participant-help-popover" data-i18n-title="morningTree.participants.helpTitle" data-i18n-aria-label="morningTree.participants.helpTitle" title="学生枝干说明">
+                                <span aria-hidden="true">i</span>
+                            </button>
+                            <button id="participant-manage-btn" class="participant-manage-btn" type="button" data-i18n="morningTree.participants.manage">编辑</button>
+                        </div>
+                    </div>
+                    <div id="participant-help-popover" class="participant-help-popover hidden" role="note">
+                        <strong data-i18n="morningTree.participants.helpTitle">学生枝干说明</strong>
+                        <p data-i18n="morningTree.participants.helpBody">这是老师手动选择当前朗读学生/小组的工具，不是自动声纹识别。早读开始前或轮读时点选对应枝干，被选中的枝干会根据稳定朗读增长，数据只保存在本机报告和森林里，用来鼓励不出声的孩子参与。</p>
                     </div>
                     <div id="participant-list" class="participant-list"></div>
                     <div id="participant-editor" class="participant-editor hidden">
                         <div id="participant-fields" class="participant-fields"></div>
                         <button id="participant-save-btn" class="participant-save-btn" type="button" data-i18n="morningTree.participants.save">保存枝干</button>
                     </div>
+                </section>
+
+                <section id="reward-panel" class="reward-panel" aria-label="浇水施肥规则">
+                    <div class="reward-panel-head">
+                        <div>
+                            <strong data-i18n="morningTree.rewards.liveTitle">浇水 / 施肥</strong>
+                            <span data-i18n="morningTree.rewards.liveSub">本场早读自动触发</span>
+                        </div>
+                        <span class="reward-panel-badge" data-i18n="morningTree.rewards.localOnly">本机记录</span>
+                    </div>
+                    <div id="reward-live-panel" class="reward-live-panel" aria-live="polite"></div>
+                    <ul class="reward-rule-list">
+                        <li data-i18n="morningTree.rewards.waterRule">浇水：连续稳定朗读满 12 秒，且当前声音不超过 96dB。</li>
+                        <li data-i18n="morningTree.rewards.fertilizerRule">施肥：本场有效朗读累计满 60 秒，触发时声音低于 100dB。</li>
+                        <li data-i18n="morningTree.rewards.overLoudRule">超过 100dB：只记录过响提醒，不奖励，避免喊叫刷成长。</li>
+                    </ul>
                 </section>
 
                 <!-- Bottom: Controls -->

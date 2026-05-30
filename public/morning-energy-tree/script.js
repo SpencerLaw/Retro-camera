@@ -88,6 +88,7 @@ const STATE = {
     participants: null,
     activeParticipantId: null,
     participantLastRenderAt: 0,
+    rewardLastRenderAt: 0,
     frameNow: 0
 };
 
@@ -261,6 +262,10 @@ const participantManageBtn = $('participant-manage-btn');
 const participantEditor = $('participant-editor');
 const participantFields = $('participant-fields');
 const participantSaveBtn = $('participant-save-btn');
+const participantHelpBtn = $('participant-help-btn');
+const participantHelpPopover = $('participant-help-popover');
+const rewardPanel = $('reward-panel');
+const rewardLivePanel = $('reward-live-panel');
 
 // Help Tooltip Toggle
 const helpTrigger = $('help-trigger');
@@ -413,6 +418,92 @@ function updateSessionRewards(rewardState, options = {}) {
     }
 
     return state;
+}
+
+function getRewardProgress(rewardState = createSessionRewardState(), effectiveReadingSeconds = STATE.reportEffectiveReadingSeconds) {
+    const state = rewardState || createSessionRewardState();
+    const stableReadingSeconds = Math.max(0, Number(state.stableReadingSeconds) || 0);
+    const readingSeconds = Math.max(0, Number(effectiveReadingSeconds) || 0);
+    const waterCount = Math.max(0, Math.round(Number(state.waterCount) || 0));
+    const fertilizerCount = Math.max(0, Math.round(Number(state.fertilizerCount) || 0));
+    const overLoudCount = Math.max(0, Math.round(Number(state.overLoudCount) || 0));
+    const waterComplete = waterCount > 0;
+    const fertilizerComplete = fertilizerCount > 0;
+
+    return {
+        waterCount,
+        fertilizerCount,
+        overLoudCount,
+        stableReadingSeconds,
+        effectiveReadingSeconds: readingSeconds,
+        waterTargetSeconds: WATER_STABLE_SECONDS,
+        fertilizerTargetSeconds: FERTILIZER_READING_SECONDS,
+        waterRemainingSeconds: waterComplete ? 0 : Math.ceil(Math.max(0, WATER_STABLE_SECONDS - stableReadingSeconds)),
+        fertilizerRemainingSeconds: fertilizerComplete ? 0 : Math.ceil(Math.max(0, FERTILIZER_READING_SECONDS - readingSeconds)),
+        waterProgressRatio: waterComplete ? 1 : clamp(stableReadingSeconds / WATER_STABLE_SECONDS, 0, 1),
+        fertilizerProgressRatio: fertilizerComplete ? 1 : clamp(readingSeconds / FERTILIZER_READING_SECONDS, 0, 1),
+        waterComplete,
+        fertilizerComplete
+    };
+}
+
+function formatRewardSeconds(seconds) {
+    return `${Math.max(0, Math.round(Number(seconds) || 0))}s`;
+}
+
+function renderRewardPanel() {
+    if (!rewardLivePanel) return;
+
+    const progress = getRewardProgress(STATE.rewardState || createSessionRewardState(), STATE.reportEffectiveReadingSeconds);
+    const waterStatus = progress.waterComplete
+        ? (t('morningTree.rewards.done') || '已触发')
+        : `${formatRewardSeconds(progress.stableReadingSeconds)} / ${formatRewardSeconds(progress.waterTargetSeconds)}`;
+    const fertilizerStatus = progress.fertilizerComplete
+        ? (t('morningTree.rewards.done') || '已触发')
+        : `${formatRewardSeconds(progress.effectiveReadingSeconds)} / ${formatRewardSeconds(progress.fertilizerTargetSeconds)}`;
+    const overLoudStatus = progress.overLoudCount
+        ? `${progress.overLoudCount}${t('morningTree.rewards.timesSuffix') || '次'}`
+        : (t('morningTree.rewards.noOverLoud') || '暂无');
+
+    rewardLivePanel.innerHTML = `
+        <div class="reward-stat-card water ${progress.waterComplete ? 'complete' : ''}" style="--reward-progress: ${Math.round(progress.waterProgressRatio * 100)}%">
+            <div class="reward-stat-top">
+                <span class="reward-symbol" aria-hidden="true">水</span>
+                <span>${t('morningTree.rewards.water') || '浇水'}</span>
+                <strong id="reward-water-count">${progress.waterCount}/1</strong>
+            </div>
+            <div class="reward-progress-track"><span></span></div>
+            <small>${waterStatus}</small>
+        </div>
+        <div class="reward-stat-card fertilizer ${progress.fertilizerComplete ? 'complete' : ''}" style="--reward-progress: ${Math.round(progress.fertilizerProgressRatio * 100)}%">
+            <div class="reward-stat-top">
+                <span class="reward-symbol" aria-hidden="true">肥</span>
+                <span>${t('morningTree.rewards.fertilizer') || '施肥'}</span>
+                <strong id="reward-fertilizer-count">${progress.fertilizerCount}/1</strong>
+            </div>
+            <div class="reward-progress-track"><span></span></div>
+            <small>${fertilizerStatus}</small>
+        </div>
+        <div class="reward-stat-card alert">
+            <div class="reward-stat-top">
+                <span class="reward-symbol" aria-hidden="true">!</span>
+                <span>${t('morningTree.rewards.overLoud') || '过响提醒'}</span>
+                <strong id="reward-over-loud-count">${progress.overLoudCount}</strong>
+            </div>
+            <small>${overLoudStatus}</small>
+        </div>
+    `;
+}
+
+function announceRewardChanges(previousCounts, nextState) {
+    if (!previousCounts || !nextState || !STATE.isListening) return;
+
+    if ((nextState.waterCount || 0) > (previousCounts.waterCount || 0)) {
+        showToast(t('morningTree.rewards.waterToast') || '浇水完成：稳定朗读满 12 秒');
+    }
+    if ((nextState.fertilizerCount || 0) > (previousCounts.fertilizerCount || 0)) {
+        showToast(t('morningTree.rewards.fertilizerToast') || '施肥完成：有效朗读满 60 秒');
+    }
 }
 
 function createDefaultParticipants() {
@@ -1090,6 +1181,7 @@ function startReportSession() {
     }
     STATE.participantMetrics = createParticipantMetrics(STATE.participants);
     renderParticipantPanel();
+    renderRewardPanel();
 }
 
 function captureReportPoint() {
@@ -1141,6 +1233,7 @@ function finalizeReportSession() {
     STATE.manifestedElapsedSeconds = null;
     STATE.rewardState = createSessionRewardState();
     STATE.participantMetrics = null;
+    renderRewardPanel();
 
     if (durationSeconds < 5) return;
 
@@ -1694,6 +1787,25 @@ function initParticipantUI() {
     STATE.participants = loadStoredParticipants();
     STATE.activeParticipantId = STATE.participants[0]?.id || null;
     renderParticipantPanel();
+
+    if (participantHelpBtn && participantHelpPopover) {
+        participantHelpBtn.onclick = (event) => {
+            event.stopPropagation();
+            const isOpen = participantHelpPopover.classList.toggle('hidden') === false;
+            participantHelpBtn.setAttribute('aria-expanded', String(isOpen));
+        };
+        participantHelpPopover.onclick = (event) => event.stopPropagation();
+        document.addEventListener('click', () => {
+            participantHelpPopover.classList.add('hidden');
+            participantHelpBtn.setAttribute('aria-expanded', 'false');
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                participantHelpPopover.classList.add('hidden');
+                participantHelpBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
 
     if (participantManageBtn && participantEditor) {
         participantManageBtn.onclick = () => {
@@ -2355,6 +2467,7 @@ function resetGame() {
     trunkTransfers.length = 0;
     soilTransfers.length = 0;
     resetMeadowPlants();
+    renderRewardPanel();
 }
 
 function calculateDB() {
@@ -2395,18 +2508,28 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         STATE.reportEffectiveReadingSeconds += frameSeconds;
     }
     const audioActivation = getAudioActivation(STATE.currentDB, sensitivityProfile, STATE.readingHoldSeconds);
-    STATE.rewardState = updateSessionRewards(STATE.rewardState || createSessionRewardState(), {
+    const previousRewardState = STATE.rewardState || createSessionRewardState();
+    const previousRewardCounts = {
+        waterCount: previousRewardState.waterCount || 0,
+        fertilizerCount: previousRewardState.fertilizerCount || 0
+    };
+    STATE.rewardState = updateSessionRewards(previousRewardState, {
         currentDB: STATE.currentDB,
         deltaSeconds: frameSeconds,
         isReadingLoudly,
         effectiveReadingSeconds: STATE.reportEffectiveReadingSeconds
     });
+    announceRewardChanges(previousRewardCounts, STATE.rewardState);
     updateParticipantBranchMetrics(STATE.participantMetrics, STATE.activeParticipantId, {
         currentDB: STATE.currentDB,
         deltaSeconds: frameSeconds,
         isReadingLoudly
     });
     const renderNow = Date.now();
+    if (rewardPanel && renderNow - (STATE.rewardLastRenderAt || 0) > 500) {
+        STATE.rewardLastRenderAt = renderNow;
+        renderRewardPanel();
+    }
     if (participantPanel && STATE.isListening && renderNow - (STATE.participantLastRenderAt || 0) > 1000) {
         STATE.participantLastRenderAt = renderNow;
         renderParticipantPanel();
@@ -3601,6 +3724,12 @@ function translateUI() {
         if (translated) el.title = translated;
     });
 
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+        const key = el.getAttribute('data-i18n-aria-label');
+        const translated = t(key);
+        if (translated) el.setAttribute('aria-label', translated);
+    });
+
     updateTaskStrip();
     renderWeeklyReport();
     renderForestMap();
@@ -3643,6 +3772,7 @@ initLocalization().then(() => {
     initTaskUI();
     initReportUI();
     initForestUI();
+    renderRewardPanel();
     updateSensitivityControl();
 });
 micBtn.onclick = toggleMic;

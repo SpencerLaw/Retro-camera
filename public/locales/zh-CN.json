@@ -493,7 +493,18 @@
     "rewards": {
       "water": "浇水",
       "fertilizer": "施肥",
-      "overLoud": "过响提醒"
+      "overLoud": "过响提醒",
+      "liveTitle": "浇水 / 施肥",
+      "liveSub": "本场早读自动触发",
+      "localOnly": "本机记录",
+      "done": "已触发",
+      "timesSuffix": "次",
+      "noOverLoud": "暂无",
+      "waterRule": "浇水：连续稳定朗读满 12 秒，且当前声音不超过 96dB。",
+      "fertilizerRule": "施肥：本场有效朗读累计满 60 秒，触发时声音低于 100dB。",
+      "overLoudRule": "超过 100dB：只记录过响提醒，不奖励，避免喊叫刷成长。",
+      "waterToast": "浇水完成：稳定朗读满 12 秒",
+      "fertilizerToast": "施肥完成：有效朗读满 60 秒"
     },
     "forest": {
       "trigger": "能量森林",
@@ -510,7 +521,9 @@
       "manage": "编辑",
       "save": "保存枝干",
       "slotLabel": "枝干",
-      "branchTitle": "学生枝干"
+      "branchTitle": "学生枝干",
+      "helpTitle": "学生枝干说明",
+      "helpBody": "这是老师手动选择当前朗读学生/小组的工具，不是自动声纹识别。早读开始前或轮读时点选对应枝干，被选中的枝干会根据稳定朗读增长，数据只保存在本机报告和森林里，用来鼓励不出声的孩子参与。"
     },
     "report": {
       "trigger": "一周报告",

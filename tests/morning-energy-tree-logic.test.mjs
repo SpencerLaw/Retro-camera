@@ -147,6 +147,8 @@ function loadMorningTree() {
       getAudioActivation: typeof getAudioActivation === 'function' ? getAudioActivation : undefined,
       createSessionRewardState: typeof createSessionRewardState === 'function' ? createSessionRewardState : undefined,
       updateSessionRewards: typeof updateSessionRewards === 'function' ? updateSessionRewards : undefined,
+      getRewardProgress: typeof getRewardProgress === 'function' ? getRewardProgress : undefined,
+      renderRewardPanel: typeof renderRewardPanel === 'function' ? renderRewardPanel : undefined,
       normalizeParticipants: typeof normalizeParticipants === 'function' ? normalizeParticipants : undefined,
       createParticipantMetrics: typeof createParticipantMetrics === 'function' ? createParticipantMetrics : undefined,
       updateParticipantBranchMetrics: typeof updateParticipantBranchMetrics === 'function' ? updateParticipantBranchMetrics : undefined,
@@ -468,6 +470,39 @@ runTest('stable reading earns water and fertilizer while unsafe spikes only warn
   assert.equal(unsafe.overLoudCount, 1);
 });
 
+runTest('live reward panel writes out watering and fertilizer trigger rules', () => {
+  const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
+  const { api, elements } = loadMorningTree();
+
+  assert.match(html, /id="reward-panel"/);
+  assert.match(html, /id="reward-live-panel"/);
+  assert.match(html, /data-i18n="morningTree\.rewards\.waterRule"/);
+  assert.match(html, /data-i18n="morningTree\.rewards\.fertilizerRule"/);
+  assert.match(html, /data-i18n="morningTree\.rewards\.overLoudRule"/);
+  assert.equal(typeof api.getRewardProgress, 'function');
+  assert.equal(typeof api.renderRewardPanel, 'function');
+
+  const rewardState = api.createSessionRewardState();
+  rewardState.stableReadingSeconds = 6;
+  rewardState.overLoudCount = 2;
+  const progress = api.getRewardProgress(rewardState, 30);
+  assert.equal(progress.waterTargetSeconds, 12);
+  assert.equal(progress.fertilizerTargetSeconds, 60);
+  assert.equal(progress.waterRemainingSeconds, 6);
+  assert.equal(progress.fertilizerRemainingSeconds, 30);
+
+  api.STATE.rewardState = rewardState;
+  api.STATE.reportEffectiveReadingSeconds = 30;
+  api.renderRewardPanel();
+
+  const panelHtml = elements.get('reward-live-panel').innerHTML;
+  assert.match(panelHtml, /id="reward-water-count"/);
+  assert.match(panelHtml, /id="reward-fertilizer-count"/);
+  assert.match(panelHtml, /12s/);
+  assert.match(panelHtml, /60s/);
+  assert.match(panelHtml, /2/);
+});
+
 runTest('participant branch metrics update only the selected local branch', () => {
   const { api } = loadMorningTree();
 
@@ -543,6 +578,27 @@ runTest('forest map and participant controls are present in the classroom UI', (
   assert.match(html, /id="forest-map-grid"/);
   assert.match(html, /id="participant-panel"/);
   assert.match(html, /id="participant-list"/);
+});
+
+runTest('student branch panel explains teacher-selected local branches', () => {
+  const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
+  const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  const zh = JSON.parse(fs.readFileSync('public/locales/zh-CN.json', 'utf8'));
+  const en = JSON.parse(fs.readFileSync('public/locales/en.json', 'utf8'));
+
+  assert.match(html, /id="participant-help-btn"/);
+  assert.match(html, /aria-controls="participant-help-popover"/);
+  assert.match(html, /data-i18n-aria-label="morningTree\.participants\.helpTitle"/);
+  assert.match(html, /id="participant-help-popover"/);
+  assert.match(html, /data-i18n="morningTree\.participants\.helpTitle"/);
+  assert.match(script, /participantHelpBtn/);
+  assert.match(script, /participantHelpPopover/);
+  assert.match(script, /data-i18n-aria-label/);
+  assert.match(script, /aria-expanded/);
+  assert.equal(zh.morningTree.participants.helpTitle, '学生枝干说明');
+  assert.match(zh.morningTree.participants.helpBody, /不是自动声纹识别/);
+  assert.match(zh.morningTree.participants.helpBody, /老师手动选择/);
+  assert.match(en.morningTree.participants.helpBody, /not automatic voiceprint recognition/i);
 });
 
 runTest('left classroom stack uses a custom polished scrollbar', () => {

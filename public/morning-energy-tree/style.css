@@ -286,6 +286,13 @@ canvas {
     margin-bottom: 10px;
 }
 
+.participant-panel-actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .participant-panel-head strong,
 .participant-panel-head span {
     display: block;
@@ -304,6 +311,7 @@ canvas {
 }
 
 .participant-manage-btn,
+.participant-help-btn,
 .participant-save-btn {
     min-height: 44px;
     border-radius: 12px;
@@ -313,6 +321,68 @@ canvas {
     font-size: 0.74rem;
     font-weight: 900;
     cursor: pointer;
+}
+
+.participant-help-btn {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    border-color: rgba(125, 249, 255, 0.38);
+    background:
+        radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.34), transparent 31%),
+        linear-gradient(135deg, rgba(125, 249, 255, 0.24), rgba(255, 224, 130, 0.12));
+    color: #f7fffc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 22px rgba(13, 225, 235, 0.12);
+}
+
+.participant-help-btn span {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin: 0 auto;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.9rem;
+    font-style: italic;
+    line-height: 1;
+}
+
+.participant-help-btn:hover,
+.participant-help-btn:focus-visible,
+.participant-manage-btn:hover,
+.participant-manage-btn:focus-visible {
+    border-color: rgba(125, 249, 255, 0.62);
+    box-shadow: 0 0 0 3px rgba(125, 249, 255, 0.16), 0 12px 24px rgba(13, 225, 235, 0.12);
+    outline: none;
+}
+
+.participant-help-popover {
+    margin: -2px 0 10px;
+    padding: 11px 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(125, 249, 255, 0.26);
+    background:
+        linear-gradient(135deg, rgba(4, 14, 28, 0.88), rgba(22, 44, 57, 0.78)),
+        radial-gradient(circle at 92% 8%, rgba(255, 224, 130, 0.2), transparent 34%);
+    color: rgba(245, 255, 251, 0.9);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+
+.participant-help-popover strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #e9fffb;
+    font-size: 0.76rem;
+    font-weight: 900;
+}
+
+.participant-help-popover p {
+    margin: 0;
+    color: rgba(245, 255, 251, 0.78);
+    font-size: 0.72rem;
+    line-height: 1.55;
 }
 
 .participant-list {
@@ -395,6 +465,163 @@ canvas {
 
 .participant-save-btn {
     width: 100%;
+}
+
+.reward-panel {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 100%;
+    border-radius: 18px;
+    padding: 12px;
+    background:
+        radial-gradient(circle at 12% 12%, rgba(125, 249, 255, 0.13), transparent 34%),
+        linear-gradient(135deg, rgba(9, 28, 36, 0.42), rgba(55, 51, 31, 0.24));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+}
+
+.reward-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.reward-panel-head strong,
+.reward-panel-head span {
+    display: block;
+}
+
+.reward-panel-head strong {
+    font-size: 0.86rem;
+    font-weight: 900;
+}
+
+.reward-panel-head span {
+    margin-top: 3px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.68);
+    line-height: 1.35;
+}
+
+.reward-panel-badge {
+    flex: 0 0 auto;
+    min-height: 28px;
+    display: inline-flex !important;
+    align-items: center;
+    padding: 0 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 224, 130, 0.32);
+    background: rgba(255, 224, 130, 0.12);
+    color: #fff1bc;
+    font-size: 0.64rem !important;
+    font-weight: 900;
+}
+
+.reward-live-panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.reward-stat-card {
+    --reward-progress: 0%;
+    min-width: 0;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    padding: 9px 10px;
+}
+
+.reward-stat-card.water.complete {
+    border-color: rgba(125, 249, 255, 0.42);
+    background: linear-gradient(135deg, rgba(125, 249, 255, 0.2), rgba(125, 249, 255, 0.08));
+}
+
+.reward-stat-card.fertilizer.complete {
+    border-color: rgba(255, 224, 130, 0.42);
+    background: linear-gradient(135deg, rgba(255, 224, 130, 0.2), rgba(125, 249, 255, 0.08));
+}
+
+.reward-stat-card.alert {
+    border-color: rgba(255, 107, 107, 0.18);
+    background: rgba(255, 107, 107, 0.08);
+}
+
+.reward-stat-top {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.reward-symbol {
+    display: grid !important;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin: 0 !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fffd;
+    font-size: 0.72rem !important;
+    font-weight: 900;
+}
+
+.reward-stat-top > span:not(.reward-symbol) {
+    min-width: 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.76rem;
+    font-weight: 900;
+}
+
+.reward-stat-top strong {
+    color: #fff7c9;
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+.reward-progress-track {
+    height: 6px;
+    margin-top: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.reward-progress-track span {
+    display: block;
+    width: var(--reward-progress);
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7df9ff, #ffe082);
+    box-shadow: 0 0 14px rgba(125, 249, 255, 0.28);
+}
+
+.reward-stat-card small {
+    display: block;
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 0.67rem;
+    line-height: 1.35;
+}
+
+.reward-rule-list {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 10px 0 0 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.68rem;
+    line-height: 1.45;
+}
+
+.reward-rule-list li::marker {
+    color: rgba(255, 224, 130, 0.92);
 }
 
 .left-side-stack {
@@ -2366,7 +2593,8 @@ input[type="range"] {
         gap: 10px;
     }
 
-    .participant-panel {
+    .participant-panel,
+    .reward-panel {
         padding: 10px;
     }
 

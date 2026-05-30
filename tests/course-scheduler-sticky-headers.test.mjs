@@ -59,6 +59,19 @@ runTest('board pinned state exposes schedule filters below the top bar', () => {
   assert.match(schedulerStyles, /\.scheduler-board-filters--pinned\s+select\s*\{[\s\S]*min-width:\s*10rem/);
 });
 
+runTest('weekday timetable header sticks below the pinned filters', () => {
+  assert.match(schedulerSource, /scheduler-weekday-header/);
+  assert.match(schedulerSource, /scheduler-weekday-cell/);
+  assert.match(schedulerSource, /周一/);
+  assert.match(schedulerSource, /周五/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*position:\s*sticky/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*top:\s*-1\.5rem/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*backdrop-filter:\s*blur\(12px\)/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*z-index:\s*12/);
+  assert.match(schedulerStyles, /\.scheduler-timetable-shell\s*\{[\s\S]*overflow:\s*visible/);
+  assert.doesNotMatch(schedulerSource, /scheduler-timetable-shell[^"]*overflow-hidden/);
+});
+
 runTest('management scroll uses the same collapsible tab layout', () => {
   assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto[^"]*" onScroll=\{handleSchedulerScroll\}/);
   assert.match(schedulerSource, /scheduler-page-head management-header/);

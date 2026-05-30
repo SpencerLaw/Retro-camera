@@ -817,18 +817,18 @@ export default function App() {
             </div>
 
             {/* TIMETABLE DYNAMIC LAYOUT: THE GEOMETRIC GRID */}
-            <div className="scheduler-timetable-shell bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs min-w-[700px]">
+            <div className="scheduler-timetable-shell bg-white border border-slate-200 rounded-xl shadow-xs min-w-[700px]">
               
               {/* Columns Header (Monday - Friday) */}
-              <div className="grid grid-cols-6 border-b border-slate-200 bg-slate-50/80 shrink-0 select-none">
-                <div className="p-3 border-r border-slate-200 flex items-center justify-center text-[11px] font-bold text-slate-400">
+              <div className="scheduler-weekday-header grid grid-cols-6 border-b border-slate-200 bg-slate-50/80 shrink-0 select-none">
+                <div className="scheduler-weekday-cell p-3 border-r border-slate-200 flex items-center justify-center text-[11px] font-bold text-slate-400">
                   时刻节段
                 </div>
                 {DAYS.map((day) => {
                   return (
-                    <div 
-                      key={day.num} 
-                      className="p-3 border-r last:border-r-0 border-slate-200 text-center flex flex-col items-center justify-center"
+                    <div
+                      key={day.num}
+                      className="scheduler-weekday-cell p-3 border-r last:border-r-0 border-slate-200 text-center flex flex-col items-center justify-center"
                     >
                       <span className="text-xs font-bold text-slate-900">
                         {day.name}

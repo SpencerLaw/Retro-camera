@@ -51,6 +51,11 @@ const STATE = {
     // Weekly report tracking
     sessionStartedAt: null,
     curveBuffer: [],
+    energyCurveBuffer: [],
+    manifestedAt: null,
+    manifestedElapsedSeconds: null,
+    reportEffectiveReadingSeconds: 0,
+    reportPeakEnergy: 0,
     reportActiveDay: null,
     reportActiveSession: 0,
 
@@ -433,6 +438,78 @@ function getCurveStats(report) {
     };
 }
 
+function getReportEnergyValue(report, key, fallback = 0) {
+    const value = Number(report?.[key]);
+    if (Number.isFinite(value)) return Math.round(clampEnergy(value));
+    return fallback;
+}
+
+function getReportReadingSeconds(report) {
+    const readingSeconds = Number(report?.readingSeconds);
+    if (Number.isFinite(readingSeconds)) return Math.max(0, Math.round(readingSeconds));
+    return null;
+}
+
+function getReportActiveRatio(report) {
+    const activeRatio = Number(report?.activeRatio);
+    if (Number.isFinite(activeRatio)) return clamp(activeRatio, 0, 1);
+    const readingSeconds = getReportReadingSeconds(report);
+    const durationSeconds = Number(report?.durationSeconds);
+    if (readingSeconds !== null && Number.isFinite(durationSeconds) && durationSeconds > 0) {
+        return clamp(readingSeconds / durationSeconds, 0, 1);
+    }
+    return null;
+}
+
+function getManifestedElapsedSeconds(report) {
+    const elapsed = Number(report?.manifestedElapsedSeconds);
+    if (Number.isFinite(elapsed) && elapsed >= 0) return Math.round(elapsed);
+    if (report?.manifestedAt && report?.startedAt) {
+        const start = new Date(report.startedAt).getTime();
+        const manifestedAt = new Date(report.manifestedAt).getTime();
+        if (Number.isFinite(start) && Number.isFinite(manifestedAt) && manifestedAt >= start) {
+            return Math.round((manifestedAt - start) / 1000);
+        }
+    }
+    return null;
+}
+
+function getManifestedDisplay(report) {
+    if (!report?.manifested) {
+        return {
+            value: t('morningTree.report.notManifested') || '未长成',
+            hint: t('morningTree.report.notManifestedHint') || '本场未达到满能量'
+        };
+    }
+
+    const elapsedSeconds = getManifestedElapsedSeconds(report);
+    if (report.manifestedAt) {
+        return {
+            value: formatPreciseClock(report.manifestedAt),
+            hint: `${t('morningTree.report.elapsedToManifest') || '用时'} ${formatDuration(elapsedSeconds || 0)}`
+        };
+    }
+
+    if (elapsedSeconds !== null) {
+        return {
+            value: formatDuration(elapsedSeconds),
+            hint: t('morningTree.report.elapsedOnlyHint') || '旧记录仅保存了用时'
+        };
+    }
+
+    return {
+        value: t('morningTree.report.manifested') || '显灵成功',
+        hint: t('morningTree.report.legacyManifestedHint') || '旧记录未保存具体时间'
+    };
+}
+
+function getManifestedRatio(report) {
+    const elapsedSeconds = getManifestedElapsedSeconds(report);
+    const durationSeconds = Number(report?.durationSeconds);
+    if (!Number.isFinite(elapsedSeconds) || !Number.isFinite(durationSeconds) || durationSeconds <= 0) return null;
+    return clamp(elapsedSeconds / durationSeconds, 0, 1);
+}
+
 function formatCurveTickLabel(report, ratio) {
     const start = new Date(report.startedAt);
     const fallbackDuration = Math.max(1, report.durationSeconds || 0) * 1000;
@@ -541,6 +618,8 @@ function buildCurveSVG(report) {
     const areaPath = `${linePath} L ${points[points.length - 1].x} ${baselineY} L ${points[0].x} ${baselineY} Z`;
     const peakPoint = points[Math.min(points.length - 1, Math.max(0, stats.peakIndex))] || points[0];
     const lowPoint = points[Math.min(points.length - 1, Math.max(0, stats.lowIndex))] || points[0];
+    const manifestedRatio = getManifestedRatio(report);
+    const manifestedX = manifestedRatio === null ? null : plotLeft + (graphWidth * manifestedRatio);
     const chartBounds = {
         left: plotLeft + 6,
         right: plotRight - 6,
@@ -571,6 +650,13 @@ function buildCurveSVG(report) {
 
     const peakBadge = buildCurveBadge(peakPoint, `${peakLabel} ${stats.peakValue} dB`, '#ff9bd6', 'top', chartBounds);
     const lowBadge = buildCurveBadge(lowPoint, `${lowLabel} ${stats.lowValue} dB`, '#8cf7d9', 'bottom', chartBounds);
+    const manifestedMarker = manifestedX === null ? '' : `
+        <g>
+            <line x1="${manifestedX}" y1="${plotTop - 6}" x2="${manifestedX}" y2="${baselineY + 10}" stroke="#ffe082" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" />
+            <rect x="${clamp(manifestedX - 34, plotLeft, plotRight - 68)}" y="${plotTop - 28}" width="68" height="22" rx="11" fill="rgba(66, 45, 10, 0.82)" stroke="rgba(255, 224, 130, 0.58)" />
+            <text x="${clamp(manifestedX, plotLeft + 34, plotRight - 34)}" y="${plotTop - 13}" fill="#ffe082" font-size="10.5" font-weight="900" text-anchor="middle">${t('morningTree.report.manifestPoint') || '长成'}</text>
+        </g>
+    `;
 
     return `
         <svg class="report-curve-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -605,6 +691,7 @@ function buildCurveSVG(report) {
             <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="11" fill="none" stroke="rgba(140, 247, 217, 0.24)" stroke-width="2" />
             ${peakBadge}
             ${lowBadge}
+            ${manifestedMarker}
         </svg>
     `;
 }
@@ -612,11 +699,19 @@ function buildCurveSVG(report) {
 function startReportSession() {
     STATE.sessionStartedAt = new Date().toISOString();
     STATE.curveBuffer = [Math.round(STATE.currentDB || 40)];
+    STATE.energyCurveBuffer = [Math.round(clampEnergy(STATE.energy))];
+    STATE.manifestedAt = null;
+    STATE.manifestedElapsedSeconds = null;
+    STATE.reportEffectiveReadingSeconds = 0;
+    STATE.reportPeakEnergy = Math.round(clampEnergy(STATE.energy));
 }
 
 function captureReportPoint() {
     if (!STATE.isListening || !STATE.sessionStartedAt) return;
     STATE.curveBuffer.push(Math.round(STATE.currentDB || 40));
+    const currentEnergy = Math.round(clampEnergy(STATE.energy));
+    STATE.energyCurveBuffer.push(currentEnergy);
+    STATE.reportPeakEnergy = Math.max(STATE.reportPeakEnergy || 0, currentEnergy);
 }
 
 function finalizeReportSession() {
@@ -628,13 +723,30 @@ function finalizeReportSession() {
     const rawCurve = STATE.curveBuffer.length
         ? STATE.curveBuffer.map(point => Math.round(point))
         : [Math.round(STATE.currentDB || 40)];
+    const rawEnergyCurve = STATE.energyCurveBuffer.length
+        ? STATE.energyCurveBuffer.map(point => Math.round(clampEnergy(point)))
+        : [Math.round(clampEnergy(STATE.energy))];
     const curve = compressCurve(rawCurve, 40);
+    const energyCurve = compressCurve(rawEnergyCurve, 40);
     const peakDb = Math.max(...rawCurve);
     const lowDb = Math.min(...rawCurve);
     const averageDb = Math.round(rawCurve.reduce((sum, value) => sum + value, 0) / rawCurve.length);
+    const finalEnergy = Math.round(clampEnergy(STATE.energy));
+    const peakEnergy = Math.max(finalEnergy, Math.round(STATE.reportPeakEnergy || 0), ...rawEnergyCurve);
+    const readingSeconds = Math.max(0, Math.round(STATE.reportEffectiveReadingSeconds || 0));
+    const activeRatio = durationSeconds > 0 ? Math.round((readingSeconds / durationSeconds) * 100) / 100 : 0;
+    const manifestedAt = STATE.hasManifested && STATE.manifestedAt ? STATE.manifestedAt : null;
+    const manifestedElapsedSeconds = STATE.hasManifested && Number.isFinite(STATE.manifestedElapsedSeconds)
+        ? Math.max(0, Math.round(STATE.manifestedElapsedSeconds))
+        : null;
 
     STATE.sessionStartedAt = null;
     STATE.curveBuffer = [];
+    STATE.energyCurveBuffer = [];
+    STATE.reportEffectiveReadingSeconds = 0;
+    STATE.reportPeakEnergy = 0;
+    STATE.manifestedAt = null;
+    STATE.manifestedElapsedSeconds = null;
 
     if (durationSeconds < 5) return;
 
@@ -644,9 +756,17 @@ function finalizeReportSession() {
         endedAt,
         durationSeconds,
         curve,
+        energyCurve,
         peakDb,
         lowDb,
         averageDb,
+        finalEnergy,
+        peakEnergy,
+        readingSeconds,
+        activeRatio,
+        sensitivity: clampSensitivity(STATE.sensitivity),
+        manifestedAt,
+        manifestedElapsedSeconds,
         manifested: Boolean(STATE.hasManifested)
     };
 
@@ -741,6 +861,22 @@ function renderReportFocus(selectedDay) {
     const stats = getCurveStats(selectedReport);
     const hasPrev = selectedIndex > 0;
     const hasNext = selectedIndex < selectedDay.records.length - 1;
+    const manifestedDisplay = getManifestedDisplay(selectedReport);
+    const readingSeconds = getReportReadingSeconds(selectedReport);
+    const activeRatio = getReportActiveRatio(selectedReport);
+    const finalEnergy = typeof selectedReport.finalEnergy === 'number'
+        ? getReportEnergyValue(selectedReport, 'finalEnergy')
+        : (selectedReport.manifested ? 100 : null);
+    const peakEnergy = typeof selectedReport.peakEnergy === 'number'
+        ? getReportEnergyValue(selectedReport, 'peakEnergy')
+        : finalEnergy;
+    const sensitivity = typeof selectedReport.sensitivity === 'number'
+        ? `${clampSensitivity(selectedReport.sensitivity)}%`
+        : '--';
+    const activeRatioLabel = activeRatio === null ? '--' : `${Math.round(activeRatio * 100)}%`;
+    const readingSecondsLabel = readingSeconds === null ? '--' : formatDuration(readingSeconds);
+    const finalEnergyLabel = finalEnergy === null ? '--' : `${finalEnergy}%`;
+    const peakEnergyLabel = peakEnergy === null ? '--' : `${peakEnergy}%`;
 
     reportDayList.innerHTML = `
         <div class="report-day-header">
@@ -778,6 +914,24 @@ function renderReportFocus(selectedDay) {
                 </div>
             </div>
 
+            <div class="report-detail-grid">
+                <div class="report-detail-item wide">
+                    <span>${t('morningTree.report.readingWindow') || '早读时间'}</span>
+                    <strong>${formatPreciseClock(selectedReport.startedAt)} - ${formatPreciseClock(selectedReport.endedAt)}</strong>
+                    <small>${formatShortDate(selectedReport.startedAt)}</small>
+                </div>
+                <div class="report-detail-item mature">
+                    <span>${t('morningTree.report.manifestTime') || '长成时间'}</span>
+                    <strong>${manifestedDisplay.value}</strong>
+                    <small>${manifestedDisplay.hint}</small>
+                </div>
+                <div class="report-detail-item">
+                    <span>${t('morningTree.report.effectiveReading') || '有效朗读'}</span>
+                    <strong>${readingSecondsLabel}</strong>
+                    <small>${t('morningTree.report.activeRatio') || '有效占比'} ${activeRatioLabel}</small>
+                </div>
+            </div>
+
             <div class="report-curve-panel">
                 <div class="report-curve-head">
                     <span class="report-curve-label">${t('morningTree.report.curve') || '早读曲线'}</span>
@@ -794,7 +948,7 @@ function renderReportFocus(selectedDay) {
                     <strong>${formatDuration(selectedReport.durationSeconds)}</strong>
                 </div>
                 <div class="report-metric-card peak">
-                    <span>${t('morningTree.report.peak') || '峰值'}</span>
+                    <span>${t('morningTree.report.peakDb') || t('morningTree.report.peak') || '最高分贝'}</span>
                     <strong>${stats.peakValue} dB</strong>
                 </div>
                 <div class="report-metric-card low">
@@ -804,6 +958,18 @@ function renderReportFocus(selectedDay) {
                 <div class="report-metric-card">
                     <span>${t('morningTree.report.average') || '均值'}</span>
                     <strong>${stats.averageValue} dB</strong>
+                </div>
+                <div class="report-metric-card energy">
+                    <span>${t('morningTree.report.finalEnergy') || '最终能量'}</span>
+                    <strong>${finalEnergyLabel}</strong>
+                </div>
+                <div class="report-metric-card energy">
+                    <span>${t('morningTree.report.peakEnergy') || '最高能量'}</span>
+                    <strong>${peakEnergyLabel}</strong>
+                </div>
+                <div class="report-metric-card">
+                    <span>${t('morningTree.report.sensitivity') || '灵敏度'}</span>
+                    <strong>${sensitivity}</strong>
                 </div>
             </div>
         </article>
@@ -1491,7 +1657,12 @@ function stopMic() {
 function resetGame() {
     STATE.sessionStartedAt = null;
     STATE.curveBuffer = [];
+    STATE.energyCurveBuffer = [];
     STATE.reportActiveSession = 0;
+    STATE.manifestedAt = null;
+    STATE.manifestedElapsedSeconds = null;
+    STATE.reportEffectiveReadingSeconds = 0;
+    STATE.reportPeakEnergy = 0;
     STATE.energy = 0;
     STATE.readingHoldSeconds = 0;
     STATE.lastFrameAt = null;
@@ -1545,6 +1716,9 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         STATE.readingHoldSeconds = 0;
     }
     const isReadingLoudly = isAboveReadingThreshold && STATE.readingHoldSeconds >= sensitivityProfile.minimumReadingSeconds;
+    if (isReadingLoudly) {
+        STATE.reportEffectiveReadingSeconds += frameSeconds;
+    }
 
     if (STATE.currentDB > 85) {
         dbValue.style.color = '#ff6b6b';
@@ -1573,6 +1747,7 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         deltaSeconds: frameSeconds,
         readingHoldSeconds: STATE.readingHoldSeconds
     });
+    STATE.reportPeakEnergy = Math.max(STATE.reportPeakEnergy || 0, Math.round(clampEnergy(STATE.energy)));
 
     // FIX: Reduced shake threshold and diverted to canvas only
     if (isReadingLoudly && STATE.currentDB > 100) shakeCanvas(2);
@@ -1589,6 +1764,14 @@ function triggerSuperMode() {
     }
     STATE.isSuperMode = true;
     STATE.hasManifested = true;
+    if (STATE.sessionStartedAt && !STATE.manifestedAt) {
+        const now = new Date();
+        const startedAt = new Date(STATE.sessionStartedAt).getTime();
+        STATE.manifestedAt = now.toISOString();
+        STATE.manifestedElapsedSeconds = Number.isFinite(startedAt)
+            ? Math.max(0, Math.round((now.getTime() - startedAt) / 1000))
+            : null;
+    }
     STATE.energy = 100;
     STATE.treeColor = '#ffd700';
     showToast(t('morningTree.superModeToast') || "🎉 能量树显灵了！全班棒棒哒！ 🎉");

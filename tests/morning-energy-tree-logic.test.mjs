@@ -129,6 +129,9 @@ function loadMorningTree() {
       STATE,
       updateState,
       triggerSuperMode,
+      finalizeReportSession: typeof finalizeReportSession === 'function' ? finalizeReportSession : undefined,
+      loadStoredReports: typeof loadStoredReports === 'function' ? loadStoredReports : undefined,
+      renderReportFocus: typeof renderReportFocus === 'function' ? renderReportFocus : undefined,
       getNextEnergy: typeof getNextEnergy === 'function' ? getNextEnergy : undefined,
       getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined,
       applySensitivityToDb: typeof applySensitivityToDb === 'function' ? applySensitivityToDb : undefined,
@@ -271,6 +274,67 @@ runTest('short sound spikes do not grow the tree before the sustain gate opens',
 
   assert.ok(loudAdjustedDb >= lowProfile.readingThreshold);
   assert.ok(nextEnergy <= 20);
+});
+
+runTest('finalized report stores local metrics for teacher review', () => {
+  const { api } = loadMorningTree();
+  const startedAt = new Date(Date.now() - 12_000).toISOString();
+  const manifestedAt = new Date(Date.now() - 5_000).toISOString();
+
+  assert.equal(typeof api.finalizeReportSession, 'function');
+  assert.equal(typeof api.loadStoredReports, 'function');
+
+  api.STATE.sessionStartedAt = startedAt;
+  api.STATE.curveBuffer = [42, 68, 81, 76, 62];
+  api.STATE.energy = 96;
+  api.STATE.hasManifested = true;
+  api.STATE.manifestedAt = manifestedAt;
+  api.STATE.manifestedElapsedSeconds = 7;
+  api.STATE.reportEffectiveReadingSeconds = 8.4;
+  api.STATE.reportPeakEnergy = 100;
+  api.STATE.sensitivity = 35;
+
+  api.finalizeReportSession();
+
+  const [report] = api.loadStoredReports();
+  assert.equal(report.peakDb, 81);
+  assert.equal(report.finalEnergy, 96);
+  assert.equal(report.peakEnergy, 100);
+  assert.equal(report.sensitivity, 35);
+  assert.equal(report.manifestedAt, manifestedAt);
+  assert.equal(report.manifestedElapsedSeconds, 7);
+  assert.equal(report.readingSeconds, 8);
+  assert.ok(report.activeRatio > 0.6);
+  assert.ok(Array.isArray(report.energyCurve));
+});
+
+runTest('weekly report renders enhanced metrics with legacy mature-time fallback', () => {
+  const { api, elements } = loadMorningTree();
+
+  assert.equal(typeof api.renderReportFocus, 'function');
+
+  api.renderReportFocus({
+    label: '周一',
+    dateLabel: '05/30',
+    records: [{
+      id: 'legacy-report',
+      startedAt: '2026-05-30T07:30:00.000Z',
+      endedAt: '2026-05-30T07:40:00.000Z',
+      durationSeconds: 600,
+      curve: [42, 78, 63],
+      peakDb: 78,
+      lowDb: 42,
+      averageDb: 61,
+      manifested: true,
+    }],
+  });
+
+  const html = elements.get('report-day-list').innerHTML;
+  assert.match(html, /report-detail-grid/);
+  assert.match(html, /长成时间/);
+  assert.match(html, /旧记录未保存具体时间/);
+  assert.match(html, /最终能量/);
+  assert.match(html, /有效朗读/);
 });
 
 runTest('sensitivity control uses a slider instead of fixed three-level buttons', () => {

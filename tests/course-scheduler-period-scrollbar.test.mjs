@@ -35,3 +35,22 @@ runTest('course scheduler defines distinct scrollbar colors for each period band
   assert.match(schedulerStyles, /scrollbar-color:\s*#3b82f6 transparent/);
   assert.match(schedulerStyles, /scrollbar-color:\s*#8b5cf6 transparent/);
 });
+
+runTest('course scheduler separates the four two-period modules with glass backgrounds', () => {
+  assert.match(schedulerSource, /getPeriodModuleClass/);
+  assert.match(schedulerSource, /period-module-morning-early/);
+  assert.match(schedulerSource, /period-module-morning-late/);
+  assert.match(schedulerSource, /period-module-afternoon-early/);
+  assert.match(schedulerSource, /period-module-afternoon-late/);
+  assert.match(schedulerSource, /period-module-row/);
+  assert.match(schedulerSource, /period-module-row--start/);
+  assert.match(schedulerSource, /period-module-row--end/);
+  assert.match(schedulerSource, /period-module-cell/);
+  assert.match(schedulerSource, /getPeriodModuleClass\(periodMeta\.num\)/);
+  assert.match(schedulerStyles, /\.period-module-row::before\s*\{[\s\S]*backdrop-filter:\s*blur\(12px\)/);
+  assert.match(schedulerStyles, /\.period-module-row--start\s*\{[\s\S]*border-top:\s*8px solid rgba\(255,\s*255,\s*255,\s*0\.9\)/);
+  assert.match(schedulerStyles, /\.period-module-morning-early\s*\{[\s\S]*--period-module-bg/);
+  assert.match(schedulerStyles, /\.period-module-morning-late\s*\{[\s\S]*--period-module-bg/);
+  assert.match(schedulerStyles, /\.period-module-afternoon-early\s*\{[\s\S]*--period-module-bg/);
+  assert.match(schedulerStyles, /\.period-module-afternoon-late\s*\{[\s\S]*--period-module-bg/);
+});

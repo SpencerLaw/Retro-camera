@@ -63,6 +63,16 @@ const getPeriodScrollbarClass = (periodNum: number) => {
   return 'period-scrollbar-afternoon-late';
 };
 
+const getPeriodModuleClass = (periodNum: number) => {
+  if (periodNum <= 2) return 'period-module-morning-early';
+  if (periodNum <= 4) return 'period-module-morning-late';
+  if (periodNum <= 6) return 'period-module-afternoon-early';
+  return 'period-module-afternoon-late';
+};
+
+const isPeriodModuleStart = (periodNum: number) => [1, 3, 5, 7].includes(periodNum);
+const isPeriodModuleEnd = (periodNum: number) => [2, 4, 6, 8].includes(periodNum);
+
 export default function App() {
   // Application Data States
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -885,10 +895,17 @@ export default function App() {
                     8: { bg: 'bg-violet-50/70',  border: 'border-l-2 border-violet-400',  label: 'text-violet-900', tag: '下午',   tagBg: 'bg-violet-100 text-violet-700' },
                   };
                   const pc = periodColorMap[periodMeta.num] || { bg: 'bg-slate-50/20', border: '', label: 'text-slate-800', tag: '', tagBg: '' };
+                  const periodModuleClass = getPeriodModuleClass(periodMeta.num);
+                  const periodModuleStartClass = isPeriodModuleStart(periodMeta.num) ? 'period-module-row--start' : '';
+                  const periodModuleEndClass = isPeriodModuleEnd(periodMeta.num) ? 'period-module-row--end' : '';
 
                   return (
-                    <div key={`period-row-${periodMeta.num}`} className="grid grid-cols-6 border-b border-slate-100" style={{gridAutoRows: '1fr'}}>
-                      <div className={`p-2 border-r border-slate-200 text-center flex flex-col justify-center items-center shrink-0 ${pc.bg} ${pc.border}`}>
+                    <div
+                      key={`period-row-${periodMeta.num}`}
+                      className={`period-module-row ${periodModuleClass} ${periodModuleStartClass} ${periodModuleEndClass} grid grid-cols-6 border-b border-slate-100`}
+                      style={{gridAutoRows: '1fr'}}
+                    >
+                      <div className={`period-module-label p-2 border-r border-slate-200 text-center flex flex-col justify-center items-center shrink-0 ${pc.bg} ${pc.border}`}>
                         <span className={`text-[11px] font-bold ${pc.label}`}>{periodMeta.name}</span>
                         <span className="text-[9px] text-slate-400 font-medium leading-tight mt-0.5">{periodMeta.time}</span>
                         {pc.tag && <span className={`mt-1 text-[8px] font-bold px-1 py-0.5 rounded-full ${pc.tagBg}`}>{pc.tag}</span>}
@@ -901,9 +918,9 @@ export default function App() {
                         const periodScrollbarClass = getPeriodScrollbarClass(periodMeta.num);
 
                         return (
-                          <div 
-                            key={`${day.num}-${periodMeta.num}`} 
-                            className={`border-r last:border-r-0 border-slate-200 ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
+                          <div
+                            key={`${day.num}-${periodMeta.num}`}
+                            className={`period-module-cell border-r last:border-r-0 border-slate-200 ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
                           >
                             {cellItems.length > 0 ? (
                               <div className={`p-1 flex flex-col gap-1 ${periodScrollbarClass} ${hasMany ? 'max-h-[320px] overflow-y-auto' : ''}`}>

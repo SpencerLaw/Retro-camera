@@ -136,7 +136,21 @@ function loadMorningTree() {
       getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined,
       applySensitivityToDb: typeof applySensitivityToDb === 'function' ? applySensitivityToDb : undefined,
       clampSensitivity: typeof clampSensitivity === 'function' ? clampSensitivity : undefined,
-      getSensitivityProfile: typeof getSensitivityProfile === 'function' ? getSensitivityProfile : undefined
+      getSensitivityProfile: typeof getSensitivityProfile === 'function' ? getSensitivityProfile : undefined,
+      REPORT_WEEKDAYS: typeof REPORT_WEEKDAYS !== 'undefined' ? REPORT_WEEKDAYS : undefined,
+      createDefaultWeeklyTasks: typeof createDefaultWeeklyTasks === 'function' ? createDefaultWeeklyTasks : undefined,
+      getCurrentWeekdayKey: typeof getCurrentWeekdayKey === 'function' ? getCurrentWeekdayKey : undefined,
+      getWeeklyDayGroups: typeof getWeeklyDayGroups === 'function' ? getWeeklyDayGroups : undefined,
+      getTaskDayGroups: typeof getTaskDayGroups === 'function' ? getTaskDayGroups : undefined,
+      getTreeLifecycleStage: typeof getTreeLifecycleStage === 'function' ? getTreeLifecycleStage : undefined,
+      getAudioActivation: typeof getAudioActivation === 'function' ? getAudioActivation : undefined,
+      createSessionRewardState: typeof createSessionRewardState === 'function' ? createSessionRewardState : undefined,
+      updateSessionRewards: typeof updateSessionRewards === 'function' ? updateSessionRewards : undefined,
+      normalizeParticipants: typeof normalizeParticipants === 'function' ? normalizeParticipants : undefined,
+      createParticipantMetrics: typeof createParticipantMetrics === 'function' ? createParticipantMetrics : undefined,
+      updateParticipantBranchMetrics: typeof updateParticipantBranchMetrics === 'function' ? updateParticipantBranchMetrics : undefined,
+      loadStoredForest: typeof loadStoredForest === 'function' ? loadStoredForest : undefined,
+      getTreeSnapshotFromReport: typeof getTreeSnapshotFromReport === 'function' ? getTreeSnapshotFromReport : undefined
     };
   `, sandbox);
 
@@ -349,4 +363,168 @@ runTest('sensitivity control uses a slider instead of fixed three-level buttons'
   assert.doesNotMatch(html, /data-sens="50"/);
   assert.doesNotMatch(html, /data-sens="75"/);
   assert.doesNotMatch(script, /querySelectorAll\('\.sens-btn'\)/);
+});
+
+runTest('weekly reports and task boards cover Monday through Sunday', () => {
+  const { api } = loadMorningTree();
+
+  assert.deepEqual(Array.from(api.REPORT_WEEKDAYS, (day) => day.key), ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']);
+  assert.equal(api.getCurrentWeekdayKey(new Date('2026-05-30T08:00:00+08:00')), 'sat');
+  assert.equal(api.getCurrentWeekdayKey(new Date('2026-05-31T08:00:00+08:00')), 'sun');
+
+  const taskMap = api.createDefaultWeeklyTasks();
+  assert.ok(taskMap.sat);
+  assert.ok(taskMap.sun);
+
+  const monday = new Date('2026-05-25T00:00:00+08:00');
+  const reportGroups = api.getWeeklyDayGroups([], monday);
+  const taskGroups = api.getTaskDayGroups(taskMap, monday);
+  assert.equal(reportGroups.length, 7);
+  assert.equal(taskGroups.length, 7);
+  assert.equal(reportGroups[6].key, 'sun');
+});
+
+runTest('tree lifecycle stages are fine grained from seed to final energy tree', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getTreeLifecycleStage, 'function');
+  assert.equal(api.getTreeLifecycleStage({ finalEnergy: 2 }).key, 'seed');
+  assert.equal(api.getTreeLifecycleStage({ finalEnergy: 18 }).key, 'sprout');
+  assert.equal(api.getTreeLifecycleStage({ finalEnergy: 35 }).key, 'branches');
+  assert.equal(api.getTreeLifecycleStage({ finalEnergy: 55 }).key, 'leaves');
+  assert.equal(api.getTreeLifecycleStage({ finalEnergy: 74 }).key, 'flowers');
+  assert.equal(api.getTreeLifecycleStage({ finalEnergy: 91 }).key, 'fruit');
+  assert.equal(api.getTreeLifecycleStage({ finalEnergy: 100, manifested: true }).key, 'final');
+});
+
+runTest('audio activation makes light orbs clearly correlated with decibels', () => {
+  const { api } = loadMorningTree();
+  const profile = api.getSensitivityProfile(50);
+
+  assert.equal(typeof api.getAudioActivation, 'function');
+
+  const quiet = api.getAudioActivation(62, profile, 0.2);
+  const medium = api.getAudioActivation(78, profile, 1.2);
+  const loud = api.getAudioActivation(92, profile, 2.5);
+  const overLoud = api.getAudioActivation(104, profile, 2.5);
+
+  assert.ok(medium.intensity > quiet.intensity);
+  assert.ok(loud.intensity > medium.intensity);
+  assert.ok(overLoud.intensity >= loud.intensity);
+  assert.equal(overLoud.overLoud, true);
+  assert.ok(loud.orbCount > quiet.orbCount);
+});
+
+runTest('stable reading earns water and fertilizer while unsafe spikes only warn', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.createSessionRewardState, 'function');
+  assert.equal(typeof api.updateSessionRewards, 'function');
+
+  const stable = api.createSessionRewardState();
+  api.updateSessionRewards(stable, {
+    currentDB: 82,
+    deltaSeconds: 12,
+    isReadingLoudly: true,
+    effectiveReadingSeconds: 12,
+  });
+  api.updateSessionRewards(stable, {
+    currentDB: 84,
+    deltaSeconds: 48,
+    isReadingLoudly: true,
+    effectiveReadingSeconds: 60,
+  });
+
+  assert.equal(stable.waterCount, 1);
+  assert.equal(stable.fertilizerCount, 1);
+  assert.equal(stable.overLoudCount, 0);
+
+  const unsafe = api.createSessionRewardState();
+  api.updateSessionRewards(unsafe, {
+    currentDB: 106,
+    deltaSeconds: 12,
+    isReadingLoudly: true,
+    effectiveReadingSeconds: 12,
+  });
+
+  assert.equal(unsafe.waterCount, 0);
+  assert.equal(unsafe.fertilizerCount, 0);
+  assert.equal(unsafe.overLoudCount, 1);
+});
+
+runTest('participant branch metrics update only the selected local branch', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.normalizeParticipants, 'function');
+  assert.equal(typeof api.createParticipantMetrics, 'function');
+  assert.equal(typeof api.updateParticipantBranchMetrics, 'function');
+
+  const participants = api.normalizeParticipants([
+    { id: 'a', name: '第一组' },
+    { id: 'b', name: '第二组' },
+    { id: 'c', name: '第三组' },
+    { id: 'd', name: '第四组' },
+    { id: 'e', name: '第五组' },
+    { id: 'f', name: '第六组' },
+  ]);
+  const metrics = api.createParticipantMetrics(participants);
+
+  api.updateParticipantBranchMetrics(metrics, 'b', {
+    currentDB: 86,
+    deltaSeconds: 8,
+    isReadingLoudly: true,
+  });
+
+  assert.equal(participants.length, 5);
+  assert.equal(metrics.b.readingSeconds, 8);
+  assert.equal(metrics.b.peakDb, 86);
+  assert.equal(metrics.b.energyScore > metrics.a.energyScore, true);
+  assert.equal(metrics.a.readingSeconds, 0);
+});
+
+runTest('finalized reports create a local forest day snapshot', () => {
+  const { api } = loadMorningTree();
+  const startedAt = new Date('2026-05-30T07:30:00+08:00').toISOString();
+  const endedAt = new Date('2026-05-30T07:42:00+08:00').toISOString();
+
+  assert.equal(typeof api.loadStoredForest, 'function');
+  assert.equal(typeof api.getTreeSnapshotFromReport, 'function');
+
+  api.STATE.sessionStartedAt = startedAt;
+  api.STATE.curveBuffer = [46, 76, 83, 88, 79];
+  api.STATE.energyCurveBuffer = [5, 30, 62, 88, 100];
+  api.STATE.energy = 100;
+  api.STATE.hasManifested = true;
+  api.STATE.manifestedAt = endedAt;
+  api.STATE.manifestedElapsedSeconds = 720;
+  api.STATE.reportEffectiveReadingSeconds = 660;
+  api.STATE.reportPeakEnergy = 100;
+  api.STATE.rewardState = {
+    waterCount: 2,
+    fertilizerCount: 1,
+    overLoudCount: 0,
+    stableReadingSeconds: 0,
+    nextWaterAt: 12,
+    nextFertilizerAt: 60,
+  };
+
+  api.finalizeReportSession();
+
+  const forest = api.loadStoredForest();
+  assert.equal(forest.length, 1);
+  assert.equal(forest[0].dateKey, '2026-05-30');
+  assert.equal(forest[0].sessionCount, 1);
+  assert.equal(forest[0].peakDb, 88);
+  assert.equal(forest[0].treeStage.key, 'final');
+  assert.equal(forest[0].rewards.waterCount, 2);
+});
+
+runTest('forest map and participant controls are present in the classroom UI', () => {
+  const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
+
+  assert.match(html, /id="forest-trigger-btn"/);
+  assert.match(html, /id="forest-modal"/);
+  assert.match(html, /id="forest-map-grid"/);
+  assert.match(html, /id="participant-panel"/);
+  assert.match(html, /id="participant-list"/);
 });

@@ -200,7 +200,7 @@
     "report": {
       "title": "Weekly Class Report",
       "trigger": "Weekly Report",
-      "subtitle": "Monday to Friday · Open in a dialog",
+      "subtitle": "Monday to Sunday · Open in a dialog",
       "show": "Open report",
       "hide": "Hide report",
       "localOnly": "Saved on this computer only. Nothing is uploaded.",
@@ -464,10 +464,42 @@
     "timeEndToast": "⏰ Reading session ended!",
     "micError": "Cannot access microphone, please check permissions.",
     "superModeToast": "🎉 The Energy Tree is glowing! Great job, class! 🎉",
+    "lifecycle": {
+      "title": "Growth Stage",
+      "seed": "Seed",
+      "sprout": "Sprout",
+      "branches": "Branches",
+      "leaves": "Leaves",
+      "flowers": "Flowers",
+      "fruit": "Fruit",
+      "final": "Final Energy Tree"
+    },
+    "rewards": {
+      "water": "Water",
+      "fertilizer": "Fertilizer",
+      "overLoud": "Over-loud"
+    },
+    "forest": {
+      "trigger": "Energy Forest",
+      "title": "This Week's Energy Forest",
+      "sub": "Each daily tree is saved on this device",
+      "localOnly": "Local record only",
+      "emptyDay": "No energy tree was planted on this day yet",
+      "emptyShort": "No tree",
+      "noBranches": "No branch data yet"
+    },
+    "participants": {
+      "title": "Student Branches",
+      "sub": "Select the current reader/group",
+      "manage": "Edit",
+      "save": "Save Branches",
+      "slotLabel": "Branch",
+      "branchTitle": "Student branches"
+    },
     "report": {
       "trigger": "Weekly Report",
       "title": "This Week's Reading Report",
-      "sub": "Saved on this device only, grouped from Monday to Friday",
+      "sub": "Saved on this device only, grouped from Monday to Sunday",
       "summarySessions": "Sessions",
       "summaryPeak": "Peak This Week",
       "duration": "Reading duration",
@@ -501,7 +533,9 @@
         "tue": "Tue",
         "wed": "Wed",
         "thu": "Thu",
-        "fri": "Fri"
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
       }
     },
     "tasks": {
@@ -510,7 +544,7 @@
       "sub": "Saved only on this device and shown automatically on the matching day",
       "todayBadge": "Today's Tasks",
       "emptyToday": "No task scheduled for today",
-      "emptyHint": "Click Today's Tasks on the right to set Monday to Friday content",
+      "emptyHint": "Click Today's Tasks on the right to set Monday to Sunday content",
       "pendingTask": "Please enter a task",
       "nextTask": "Next: {time} {content}",
       "upcoming": "Starting soon",

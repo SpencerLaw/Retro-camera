@@ -30,12 +30,16 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(schedulerSource, /scheduler-timetable-rows/);
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-rows[^"]*overflow-y-auto/);
   assert.doesNotMatch(schedulerSource, /<div className="flex-1 overflow-y-auto divide-y divide-slate-100">/);
+  assert.match(schedulerStyles, /\.scheduler-board-head\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.08\)/);
+  assert.match(schedulerStyles, /\.scheduler-board-head\s*\{[\s\S]*backdrop-filter:\s*blur\(22px\)/);
   assert.match(schedulerStyles, /\.scheduler-main-header--tabs\s*\{[\s\S]*box-shadow/);
-  assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.58\)/);
-  assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*backdrop-filter:\s*blur\(22px\)/);
+  assert.match(schedulerStyles, /\.course-scheduler-root\s*\{[\s\S]*background-image:/);
+  assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.1\)/);
+  assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*backdrop-filter:\s*blur\(30px\)/);
   assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*border-radius:\s*9999px/);
   assert.match(schedulerSource, /scheduler-glass-action/);
   assert.match(schedulerSource, /scheduler-term-chip/);
+  assert.match(schedulerStyles, /\.scheduler-glass-action,\s*\n\.scheduler-term-chip\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.12\)/);
   assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*gap:\s*1\.5rem/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*display:\s*inline-flex/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*border-radius:\s*12px/);
@@ -60,7 +64,9 @@ runTest('board pinned state exposes schedule filters below the top bar', () => {
   assert.match(schedulerSource, /所有备课\/走班教室/);
   assert.match(schedulerStyles, /\.scheduler-pinned-filter-bar\s*\{[\s\S]*max-height:\s*0/);
   assert.match(schedulerStyles, /\.scheduler-pinned-filter-bar\.is-visible\s*\{[\s\S]*max-height:\s*4\.5rem/);
-  assert.match(schedulerStyles, /\.scheduler-pinned-filter-inner\s*\{[\s\S]*backdrop-filter:\s*blur\(14px\)/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-filter-inner\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.1\)/);
+  assert.match(schedulerStyles, /\.scheduler-pinned-filter-inner\s*\{[\s\S]*backdrop-filter:\s*blur\(28px\)/);
+  assert.match(schedulerStyles, /\.scheduler-board-filter-select\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.12\)/);
   assert.match(schedulerStyles, /\.scheduler-board-filters--pinned\s+select\s*\{[\s\S]*min-width:\s*10rem/);
 });
 
@@ -71,8 +77,8 @@ runTest('weekday timetable header sticks below the pinned filters', () => {
   assert.match(schedulerSource, /周五/);
   assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*position:\s*sticky/);
   assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*top:\s*-1\.5rem/);
-  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*backdrop-filter:\s*blur\(18px\)/);
-  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.58\)/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*backdrop-filter:\s*blur\(28px\)/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.12\)/);
   assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*z-index:\s*12/);
   assert.match(schedulerStyles, /\.scheduler-timetable-shell\s*\{[\s\S]*overflow:\s*visible/);
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-shell[^"]*overflow-hidden/);
@@ -83,6 +89,8 @@ runTest('management scroll uses the same collapsible tab layout', () => {
   assert.match(schedulerSource, /scheduler-page-head management-header/);
   assert.doesNotMatch(schedulerSource, /scheduler-app-topbar management-header/);
   assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*relative/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.08\)/);
+  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*backdrop-filter:\s*blur\(22px\)/);
   assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
 });
 

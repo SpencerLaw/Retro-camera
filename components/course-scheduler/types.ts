@@ -47,6 +47,19 @@ export interface TimeSlot {
   period: number; // 1 to 8 (1-4 Morning, 5-8 Afternoon, can also display Special slots like Morning Reading, Self Study)
 }
 
+export interface ScheduleAdjustmentNote {
+  id: string;
+  type: 'substitute' | 'student' | 'manual';
+  reason: string;
+  summary: string;
+  createdAt: string;
+  originalTeacherId?: string;
+  originalTeacherName?: string;
+  substituteTeacherId?: string;
+  substituteTeacherName?: string;
+  studentName?: string;
+}
+
 export interface ScheduleItem {
   id: string;
   teachingClassId: string;
@@ -61,6 +74,7 @@ export interface ScheduleItem {
   isTemp?: boolean; // temporary change/swap
   isFinished?: boolean; // e.g., General Technology test finished, early completion
   finishedWeek?: number; // finished after which week
+  adjustmentNote?: ScheduleAdjustmentNote;
 }
 
 export interface Conflict {

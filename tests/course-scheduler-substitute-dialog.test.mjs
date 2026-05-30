@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const schedulerSource = fs.readFileSync('components/course-scheduler/CourseSchedulerApp.tsx', 'utf8');
+const schedulerTypes = fs.readFileSync('components/course-scheduler/types.ts', 'utf8');
 
 function runTest(name, fn) {
   try {
@@ -34,4 +35,24 @@ runTest('course scheduler no longer reserves a right sidebar for substitute reco
 
 runTest('substitute recommendation cards do not display suitability scores', () => {
   assert.doesNotMatch(schedulerSource, /评分\s*\{rec\.suitabilityScore\}/);
+});
+
+runTest('substitute changes capture a structured adjustment note', () => {
+  assert.match(schedulerTypes, /export interface ScheduleAdjustmentNote/);
+  assert.match(schedulerTypes, /adjustmentNote\?: ScheduleAdjustmentNote/);
+  assert.match(schedulerSource, /substituteReason/);
+  assert.match(schedulerSource, /临时有事请假/);
+  assert.match(schedulerSource, /adjustmentNote:\s*\{/);
+  assert.match(schedulerSource, /originalTeacherName/);
+  assert.match(schedulerSource, /substituteTeacherName/);
+  assert.match(schedulerSource, /summary/);
+  assert.match(schedulerSource, /createdAt:\s*new Date\(\)\.toISOString\(\)/);
+});
+
+runTest('schedule cards expose temporary adjustment labels', () => {
+  assert.match(schedulerSource, /schedule-remark-card/);
+  assert.match(schedulerSource, /schedule-remark-badge/);
+  assert.match(schedulerSource, /schedule-remark-line/);
+  assert.match(schedulerSource, /item\.adjustmentNote/);
+  assert.match(schedulerSource, /title=\{item\.adjustmentNote\.summary\}/);
 });

@@ -11,7 +11,8 @@ import {
   Plus,
   Activity,
   Database,
-  RotateCcw
+  RotateCcw,
+  MessageSquareText
 } from 'lucide-react';
 import { 
   Role, 
@@ -72,6 +73,7 @@ const getPeriodModuleClass = (periodNum: number) => {
 
 const isPeriodModuleStart = (periodNum: number) => [1, 3, 5, 7].includes(periodNum);
 const isPeriodModuleEnd = (periodNum: number) => [2, 4, 6, 8].includes(periodNum);
+const SUBSTITUTE_REASON_OPTIONS = ['临时有事请假', '教研活动', '外出培训', '病假', '会议冲突', '走班临调'];
 
 export default function App() {
   // Application Data States
@@ -103,6 +105,8 @@ export default function App() {
   const [selectedCell, setSelectedCell] = useState<ScheduleItem | null>(null);
   const [substituteLoading, setSubstituteLoading] = useState<boolean>(false);
   const [substituteData, setSubstituteData] = useState<{ item: ScheduleItem; recommendations: SubstituteRecommendation[] } | null>(null);
+  const [substituteReason, setSubstituteReason] = useState<string>('临时有事请假');
+  const [substituteReasonDetail, setSubstituteReasonDetail] = useState<string>('');
   
   // Modals
   const [showAddTeacherModal, setShowAddTeacherModal] = useState<boolean>(false);
@@ -110,6 +114,7 @@ export default function App() {
   const [showSubstituteDialog, setShowSubstituteDialog] = useState<boolean>(false);
   const [showJSONModal, setShowJSONModal] = useState<boolean>(false);
   const [showConflictsModal, setShowConflictsModal] = useState<boolean>(false);
+  const [showRemarksModal, setShowRemarksModal] = useState<boolean>(false);
   const [jsonRawText, setJsonRawText] = useState<string>('');
   const [jsonError, setJsonError] = useState<string>('');
   
@@ -356,10 +361,21 @@ export default function App() {
     return conflicts.filter(c => c.affectedSlots.some(s => s.day === day && s.period === period));
   };
 
+  const getSubstituteReasonText = () => {
+    return substituteReasonDetail.trim() || substituteReason;
+  };
+
+  const getPeriodTimeLabel = (period: number) => {
+    const periodMeta = PERIODS_METADATA.find(item => item.type === 'period' && item.num === period);
+    return periodMeta ? periodMeta.time : `第${period}节`;
+  };
+
   // Substitute Recommend Trigger
   const handleSelectCell = async (item: ScheduleItem) => {
     setSelectedCell(item);
     setSubstituteData(null);
+    setSubstituteReason(item.adjustmentNote?.reason || '临时有事请假');
+    setSubstituteReasonDetail('');
     setShowSubstituteDialog(true);
     setSubstituteLoading(true);
     try {
@@ -378,6 +394,8 @@ export default function App() {
     setSelectedCell(null);
     setSubstituteData(null);
     setSubstituteLoading(false);
+    setSubstituteReason('临时有事请假');
+    setSubstituteReasonDetail('');
   };
 
   // Confirm Substitute Substitute Action
@@ -386,14 +404,30 @@ export default function App() {
     const substituteTeacher = teachers.find(t => t.id === substituteTeacherId);
     if (!substituteTeacher) return;
 
-    if (window.confirm('确定要将 [' + selectedCell.teachingClassName + '] 的原定老师 [' + selectedCell.teacherName + '] 临时调整为 [' + substituteTeacher.name + '] 老师吗？')) {
+    const reason = getSubstituteReasonText();
+    const originalTeacherId = selectedCell.adjustmentNote?.originalTeacherId || selectedCell.teacherId;
+    const originalTeacherName = selectedCell.adjustmentNote?.originalTeacherName || selectedCell.teacherName;
+    const summary = `${originalTeacherName}老师${reason}，已临时调配${substituteTeacher.name}老师`;
+
+    if (window.confirm('确定要将 [' + selectedCell.teachingClassName + '] 的原定老师 [' + originalTeacherName + '] 因 [' + reason + '] 临时调整为 [' + substituteTeacher.name + '] 老师吗？')) {
       const newSchedules = schedules.map(s => {
         if (s.id === selectedCell.id) {
           return {
             ...s,
             teacherId: substituteTeacherId,
             teacherName: substituteTeacher.name,
-            isTemp: true
+            isTemp: true,
+            adjustmentNote: {
+              id: `remark-${selectedCell.id}-${Date.now()}`,
+              type: 'substitute',
+              reason,
+              summary,
+              createdAt: new Date().toISOString(),
+              originalTeacherId,
+              originalTeacherName,
+              substituteTeacherId,
+              substituteTeacherName: substituteTeacher.name
+            }
           };
         }
         return s;
@@ -403,8 +437,10 @@ export default function App() {
       setSelectedCell(null);
       setSubstituteData(null);
       setShowSubstituteDialog(false);
+      setSubstituteReason('临时有事请假');
+      setSubstituteReasonDetail('');
       updateConflicts(newSchedules, teachers, classrooms, teachingClasses, students);
-      alert('代课调优成功应用，课表排期已热更新！');
+      alert('代课调优成功应用，备注已同步写入课表 JSON 数据！');
     }
   };
 
@@ -465,7 +501,8 @@ export default function App() {
           ...s,
           teacherId: teacherId,
           teacherName: newTeacher.name,
-          isTemp: false
+          isTemp: false,
+          adjustmentNote: undefined
         };
       }
       return s;
@@ -565,6 +602,12 @@ export default function App() {
   const hasCriticalConflicts = criticalConflicts.length > 0;
   const hasDiagnosticWarnings = warningConflicts.length > 0;
   const diagnosticSummary = `${criticalConflicts.length} 处硬冲突 / ${warningConflicts.length} 条提醒`;
+  const weeklyRemarks = schedules
+    .filter((s): s is ScheduleItem & { adjustmentNote: NonNullable<ScheduleItem['adjustmentNote']> } => (
+      s.teachingClassName.startsWith(selectedGrade) && Boolean(s.adjustmentNote)
+    ))
+    .sort((a, b) => (a.day - b.day) || (a.period - b.period) || a.teachingClassName.localeCompare(b.teachingClassName));
+  const getRemarksForDay = (dayNum: number) => weeklyRemarks.filter(item => item.day === dayNum);
   const managementStats = [
     {
       label: '当前教师',
@@ -771,6 +814,18 @@ export default function App() {
           </div>
 
           <button
+            onClick={() => setShowRemarksModal(true)}
+            title="查看本周备注汇总"
+            className="px-3 py-1.5 border border-sky-200 bg-sky-50/80 hover:bg-sky-100 text-sky-800 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+          >
+            <MessageSquareText className="w-3.5 h-3.5 text-sky-600" />
+            <span>备注汇总</span>
+            <span className="min-w-5 rounded-full bg-white px-1.5 py-0.5 text-[10px] leading-none text-sky-700 border border-sky-100">
+              {weeklyRemarks.length}
+            </span>
+          </button>
+
+          <button
             onClick={handleResetData}
             title="重置为默认数据"
             className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 border border-slate-200 transition-colors"
@@ -930,14 +985,24 @@ export default function App() {
                                     <div
                                       key={item.id}
                                       onClick={() => handleSelectCell(item)}
-                                      className={`p-1.5 rounded text-left cursor-pointer transition-all shrink-0 ${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} ${isSelected ? 'ring-2 ring-blue-600 shadow-md' : 'hover:shadow-xs'}`}
+                                      className={`schedule-remark-card relative p-1.5 rounded text-left cursor-pointer transition-all shrink-0 ${item.adjustmentNote ? 'pr-9' : ''} ${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} ${isSelected ? 'ring-2 ring-blue-600 shadow-md' : 'hover:shadow-xs'}`}
                                     >
+                                      {item.adjustmentNote && (
+                                        <span className="schedule-remark-badge" title={item.adjustmentNote.summary}>
+                                          代
+                                        </span>
+                                      )}
                                       <div className="font-bold text-[11px] leading-tight truncate">
                                         {item.subject} · {item.teacherName}
                                       </div>
                                       <div className="text-[9px] text-slate-600/80 truncate mt-0.5">
                                         {item.teachingClassName}
                                       </div>
+                                      {item.adjustmentNote && (
+                                        <div className="schedule-remark-line" title={item.adjustmentNote.summary}>
+                                          {item.adjustmentNote.originalTeacherName || '原老师'} → {item.adjustmentNote.substituteTeacherName || item.teacherName}
+                                        </div>
+                                      )}
                                     </div>
                                   );
                                 })}
@@ -1014,11 +1079,49 @@ export default function App() {
                     </div>
                     <div>
                       <span className="block text-[10px] font-bold text-slate-400">原定老师</span>
-                      <span className="font-bold text-slate-700">{selectedCell.teacherName}</span>
+                      <span className="font-bold text-slate-700">{selectedCell.adjustmentNote?.originalTeacherName || selectedCell.teacherName}</span>
                     </div>
+                    {selectedCell.adjustmentNote && (
+                      <div>
+                        <span className="block text-[10px] font-bold text-slate-400">当前代课</span>
+                        <span className="font-bold text-orange-700">{selectedCell.teacherName}</span>
+                      </div>
+                    )}
                   </div>
-                  {selectedCell.isTemp && (
-                    <div className="mt-2 text-[10px] text-orange-600 font-bold">ℹ️ 该课程经历过手动微调。</div>
+
+                  <div className="mt-3 rounded-lg border border-sky-100 bg-white/80 p-3">
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-bold text-slate-800">调班原因备注</span>
+                      <span className="text-[10px] text-slate-400">会同步写入 JSON 课表项</span>
+                    </div>
+                    <div className="mb-2 flex flex-wrap gap-1.5">
+                      {SUBSTITUTE_REASON_OPTIONS.map(reason => (
+                        <button
+                          key={reason}
+                          type="button"
+                          onClick={() => setSubstituteReason(reason)}
+                          className={`rounded-full border px-2.5 py-1 text-[10px] font-bold transition-colors ${
+                            substituteReason === reason
+                              ? 'border-sky-300 bg-sky-100 text-sky-800'
+                              : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-sky-200 hover:text-sky-700'
+                          }`}
+                        >
+                          {reason}
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={substituteReasonDetail}
+                      onChange={(e) => setSubstituteReasonDetail(e.target.value)}
+                      placeholder="可补充更具体的备注，例如：上午9点临时请假，第二节语文由张老师改为李老师代课"
+                      className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                    />
+                  </div>
+                  {selectedCell.adjustmentNote && (
+                    <div className="mt-2 rounded-lg border border-orange-100 bg-orange-50/70 px-3 py-2 text-[10px] font-bold text-orange-700">
+                      当前备注：{selectedCell.adjustmentNote.summary}
+                    </div>
                   )}
 
                   <div className="mt-4">
@@ -1094,6 +1197,97 @@ export default function App() {
                   点击此处可打开可滑动诊断详情，分开查看硬冲突、资源负载与数据完整性提醒。
                 </p>
               </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* FLOATING DIALOG: WEEKLY REMARKS TIMELINE */}
+      {showRemarksModal && (
+        <div
+          data-ui-surface="remarks-summary-dialog"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="本周备注汇总"
+        >
+          <button
+            type="button"
+            aria-label="关闭备注汇总"
+            onClick={() => setShowRemarksModal(false)}
+            className="absolute inset-0 cursor-default"
+          />
+
+          <section className="remarks-summary-panel relative z-10 flex max-h-[86vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/70 bg-white/90 text-left shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/70 bg-white/70 px-5 py-4">
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+                  <MessageSquareText className="h-4 w-4 text-sky-600" />
+                  本周备注汇总
+                </h3>
+                <p className="mt-1 text-[11px] font-medium text-slate-500">
+                  2026学期 · 第15周 · {selectedGrade} · 共 {weeklyRemarks.length} 条调班/走班备注
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="关闭备注汇总"
+                onClick={() => setShowRemarksModal(false)}
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="remarks-timeline overflow-y-auto p-5">
+              <div className="grid gap-3 md:grid-cols-5">
+                {DAYS.map(day => {
+                  const dayRemarks = getRemarksForDay(day.num);
+                  return (
+                    <section key={`remark-day-${day.num}`} className="rounded-xl border border-slate-200/70 bg-white/70 p-3 shadow-sm">
+                      <div className="mb-3 flex items-center justify-between gap-2">
+                        <div>
+                          <div className="text-xs font-extrabold text-slate-900">{day.name}</div>
+                          <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{day.engName}</div>
+                        </div>
+                        <span className="rounded-full border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700">
+                          {dayRemarks.length}
+                        </span>
+                      </div>
+
+                      {dayRemarks.length > 0 ? (
+                        <div className="space-y-2">
+                          {dayRemarks.map(remark => (
+                            <article key={remark.adjustmentNote.id} className="remarks-timeline-item">
+                              <div className="mb-1 flex items-center justify-between gap-2">
+                                <span className="font-mono text-[9px] font-bold text-sky-700">
+                                  {getPeriodTimeLabel(remark.period)}
+                                </span>
+                                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[8px] font-bold text-slate-500">
+                                  第{remark.period}节
+                                </span>
+                              </div>
+                              <div className="text-[11px] font-extrabold leading-snug text-slate-800">
+                                {remark.subject} · {remark.teachingClassName}
+                              </div>
+                              <p className="mt-1 text-[10.5px] font-semibold leading-relaxed text-slate-600">
+                                {remark.adjustmentNote.summary}
+                              </p>
+                              <div className="mt-2 text-[9px] font-bold text-slate-400">
+                                原因：{remark.adjustmentNote.reason}
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex min-h-[112px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50/70 text-[11px] font-bold text-slate-300">
+                          暂无备注
+                        </div>
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
             </div>
           </section>
         </div>

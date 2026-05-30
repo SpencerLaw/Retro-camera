@@ -450,7 +450,14 @@
     "helpAdviceMute": "Mute Test",
     "helpAdviceMuteDesc": ": 40-50 dB is normal; if over 65dB, lower sensitivity.",
     "helpAdviceRead": "Reading Test",
-    "helpAdviceReadDesc": ": 70-75 dB is ideal; if hard to reach 70dB, raise sensitivity.",
+    "helpAdviceReadDesc": ": lower settings require louder, steadier reading before growth; higher settings help weak microphones respond.",
+    "sensitivityRangeDesc": "Move left to raise the growth gate, slow growth, and filter short spikes; move right for a lower gate and faster response.",
+    "sensitivityHint": "{mode}: grows after about {seconds}s above {threshold}dB",
+    "sensitivityModes": {
+      "steady": "Steady",
+      "standard": "Standard",
+      "sensitive": "Sensitive"
+    },
     "tapToClose": "Tap to close",
     "resetBtnTitle": "Reset Tree",
     "micToggleTitle": "Start/Stop Listening",

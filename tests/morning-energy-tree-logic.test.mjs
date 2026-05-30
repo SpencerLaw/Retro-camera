@@ -132,7 +132,8 @@ function loadMorningTree() {
       getNextEnergy: typeof getNextEnergy === 'function' ? getNextEnergy : undefined,
       getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined,
       applySensitivityToDb: typeof applySensitivityToDb === 'function' ? applySensitivityToDb : undefined,
-      clampSensitivity: typeof clampSensitivity === 'function' ? clampSensitivity : undefined
+      clampSensitivity: typeof clampSensitivity === 'function' ? clampSensitivity : undefined,
+      getSensitivityProfile: typeof getSensitivityProfile === 'function' ? getSensitivityProfile : undefined
     };
   `, sandbox);
 
@@ -176,20 +177,100 @@ runTest('morning tree size returns to sapling range at low energy', () => {
   assert.equal(api.getTreeSizeForEnergy(100), 240);
 });
 
-runTest('lowest sensitivity still allows loud reading to grow the tree', () => {
+runTest('sensitivity profile gives teachers a meaningful control range', () => {
   const { api } = loadMorningTree();
 
   assert.equal(typeof api.applySensitivityToDb, 'function');
   assert.equal(typeof api.clampSensitivity, 'function');
+  assert.equal(typeof api.getSensitivityProfile, 'function');
 
   const lowestSensitivity = api.clampSensitivity(0);
-  const adjustedDb = api.applySensitivityToDb(75, lowestSensitivity);
+  const highestSensitivity = api.clampSensitivity(100);
+  const lowProfile = api.getSensitivityProfile(lowestSensitivity);
+  const defaultProfile = api.getSensitivityProfile(50);
+  const highProfile = api.getSensitivityProfile(highestSensitivity);
 
-  assert.equal(typeof api.getNextEnergy, 'function');
-  assert.ok(adjustedDb >= 70);
+  assert.ok(lowProfile.readingThreshold > defaultProfile.readingThreshold);
+  assert.ok(lowProfile.growthMultiplier < defaultProfile.growthMultiplier);
+  assert.ok(lowProfile.minimumReadingSeconds > defaultProfile.minimumReadingSeconds);
+  assert.ok(highProfile.readingThreshold < defaultProfile.readingThreshold);
+  assert.ok(highProfile.growthMultiplier > defaultProfile.growthMultiplier);
   assert.ok(api.applySensitivityToDb(65, lowestSensitivity) < 70);
   assert.ok(api.applySensitivityToDb(60, 85) > api.applySensitivityToDb(60, 50));
-  assert.ok(api.getNextEnergy(0, adjustedDb, api.STATE.baseGrowthRate) > 0);
+});
+
+runTest('lowest sensitivity ignores borderline reading that used to grow too quickly', () => {
+  const { api } = loadMorningTree();
+
+  const lowestSensitivity = api.clampSensitivity(0);
+  const lowProfile = api.getSensitivityProfile(lowestSensitivity);
+  const adjustedDb = api.applySensitivityToDb(75, lowestSensitivity);
+  const nextEnergy = api.getNextEnergy(30, adjustedDb, api.STATE.baseGrowthRate, {
+    sensitivity: lowestSensitivity,
+    deltaSeconds: 1,
+    readingHoldSeconds: lowProfile.minimumReadingSeconds + 0.1,
+  });
+
+  assert.ok(adjustedDb < lowProfile.readingThreshold);
+  assert.ok(nextEnergy < 30);
+});
+
+runTest('lowest sensitivity still allows truly loud sustained reading to grow slowly', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getNextEnergy, 'function');
+
+  const lowestSensitivity = api.clampSensitivity(0);
+  const lowProfile = api.getSensitivityProfile(lowestSensitivity);
+  const loudAdjustedDb = api.applySensitivityToDb(90, lowestSensitivity);
+  const lowNextEnergy = api.getNextEnergy(0, loudAdjustedDb, api.STATE.baseGrowthRate, {
+    sensitivity: lowestSensitivity,
+    deltaSeconds: 1,
+    readingHoldSeconds: lowProfile.minimumReadingSeconds + 0.1,
+  });
+  const defaultNextEnergy = api.getNextEnergy(0, 75, api.STATE.baseGrowthRate, {
+    sensitivity: 50,
+    deltaSeconds: 1,
+    readingHoldSeconds: api.getSensitivityProfile(50).minimumReadingSeconds + 0.1,
+  });
+
+  assert.ok(loudAdjustedDb >= lowProfile.readingThreshold);
+  assert.ok(lowNextEnergy > 0);
+  assert.ok(lowNextEnergy < defaultNextEnergy);
+});
+
+runTest('energy growth is proportional to elapsed seconds instead of frame count', () => {
+  const { api } = loadMorningTree();
+  const profile = api.getSensitivityProfile(50);
+
+  const halfSecond = api.getNextEnergy(0, 75, api.STATE.baseGrowthRate, {
+    sensitivity: 50,
+    deltaSeconds: 0.5,
+    readingHoldSeconds: profile.minimumReadingSeconds + 0.1,
+  });
+  const fullSecond = api.getNextEnergy(0, 75, api.STATE.baseGrowthRate, {
+    sensitivity: 50,
+    deltaSeconds: 1,
+    readingHoldSeconds: profile.minimumReadingSeconds + 0.1,
+  });
+
+  assert.ok(fullSecond > halfSecond);
+  assert.ok(Math.abs(fullSecond - (halfSecond * 2)) < 0.02);
+});
+
+runTest('short sound spikes do not grow the tree before the sustain gate opens', () => {
+  const { api } = loadMorningTree();
+  const lowestSensitivity = api.clampSensitivity(0);
+  const lowProfile = api.getSensitivityProfile(lowestSensitivity);
+  const loudAdjustedDb = api.applySensitivityToDb(95, lowestSensitivity);
+  const nextEnergy = api.getNextEnergy(20, loudAdjustedDb, api.STATE.baseGrowthRate, {
+    sensitivity: lowestSensitivity,
+    deltaSeconds: 0.2,
+    readingHoldSeconds: Math.max(0, lowProfile.minimumReadingSeconds - 0.3),
+  });
+
+  assert.ok(loudAdjustedDb >= lowProfile.readingThreshold);
+  assert.ok(nextEnergy <= 20);
 });
 
 runTest('sensitivity control uses a slider instead of fixed three-level buttons', () => {

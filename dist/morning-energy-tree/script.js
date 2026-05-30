@@ -22,12 +22,15 @@ const REPORT_WEEKDAYS = [
     { key: 'thu', offset: 3 },
     { key: 'fri', offset: 4 }
 ];
+const DEFAULT_GROWTH_PER_SECOND = 100 / 90;
 
 const STATE = {
     isListening: false,
     energy: 0,
     sensitivity: 50,
     currentDB: 30,
+    readingHoldSeconds: 0,
+    lastFrameAt: null,
     treeColor: '#4caf50',
     isSuperMode: false,
     hasManifested: false,
@@ -38,8 +41,8 @@ const STATE = {
     remainingTime: 30 * 60,
     timerInterval: null,
 
-    // Growth calibration: 1 min loud reading = full tree
-    baseGrowthRate: 1.67 / 60,
+    // Growth calibration: default reading fills the tree in about 70-90 seconds.
+    baseGrowthRate: DEFAULT_GROWTH_PER_SECOND,
 
     // Localization context
     language: localStorage.getItem('global-language') || 'en',
@@ -77,20 +80,41 @@ const MATURE_TREE_SIZE = 240;
 const SENSITIVITY_MIN = 35;
 const SENSITIVITY_MAX = 85;
 const SENSITIVITY_DEFAULT = 50;
+const FRAME_DELTA_FALLBACK_SECONDS = 1 / 60;
+const MAX_FRAME_DELTA_SECONDS = 0.35;
 
 function clampEnergy(value) {
     if (!Number.isFinite(value)) return 0;
     return Math.max(0, Math.min(100, value));
 }
 
-function getNextEnergy(currentEnergy, currentDB, baseGrowthRate) {
-    if (currentDB >= READING_THRESHOLD) {
-        const volumeBonus = Math.min((currentDB - READING_THRESHOLD) / 20, 1);
-        const rate = baseGrowthRate * (1 + volumeBonus);
-        return clampEnergy(currentEnergy + rate);
+function normalizeDeltaSeconds(deltaSeconds) {
+    const numericValue = Number(deltaSeconds);
+    if (!Number.isFinite(numericValue) || numericValue <= 0) return FRAME_DELTA_FALLBACK_SECONDS;
+    return numericValue;
+}
+
+function getFrameDeltaSeconds(now = Date.now()) {
+    if (!STATE.lastFrameAt) return FRAME_DELTA_FALLBACK_SECONDS;
+    const elapsedSeconds = normalizeDeltaSeconds((now - STATE.lastFrameAt) / 1000);
+    return Math.min(elapsedSeconds, MAX_FRAME_DELTA_SECONDS);
+}
+
+function getNextEnergy(currentEnergy, currentDB, baseGrowthRate, options = {}) {
+    const profile = getSensitivityProfile(options.sensitivity ?? SENSITIVITY_DEFAULT);
+    const deltaSeconds = normalizeDeltaSeconds(options.deltaSeconds);
+    const readingHoldSeconds = Number.isFinite(options.readingHoldSeconds)
+        ? options.readingHoldSeconds
+        : profile.minimumReadingSeconds;
+    const safeBaseGrowthRate = Number.isFinite(baseGrowthRate) ? baseGrowthRate : DEFAULT_GROWTH_PER_SECOND;
+
+    if (currentDB >= profile.readingThreshold && readingHoldSeconds >= profile.minimumReadingSeconds) {
+        const volumeBonus = Math.min((currentDB - profile.readingThreshold) / 22, 1);
+        const rate = safeBaseGrowthRate * profile.growthMultiplier * (1 + volumeBonus);
+        return clampEnergy(currentEnergy + (rate * deltaSeconds));
     }
 
-    return clampEnergy(currentEnergy - QUIET_ENERGY_DECAY_RATE);
+    return clampEnergy(currentEnergy - (QUIET_ENERGY_DECAY_RATE * profile.quietDecayMultiplier * deltaSeconds));
 }
 
 function getTreeSizeForEnergy(energy) {
@@ -107,12 +131,29 @@ function clampSensitivity(value) {
 function getSensitivityDbOffset(sensitivity) {
     const safeSensitivity = clampSensitivity(sensitivity);
     const delta = safeSensitivity - 50;
-    return delta < 0 ? delta * 0.18 : delta * 0.35;
+    return delta < 0 ? delta * 0.42 : delta * 0.3;
 }
 
 function applySensitivityToDb(rawDb, sensitivity) {
     const safeDb = Number.isFinite(rawDb) ? rawDb : 30;
     return Math.max(30, Math.min(120, safeDb + getSensitivityDbOffset(sensitivity)));
+}
+
+function getSensitivityProfile(sensitivity) {
+    const safeSensitivity = clampSensitivity(sensitivity);
+    const lowRatio = safeSensitivity < SENSITIVITY_DEFAULT
+        ? (SENSITIVITY_DEFAULT - safeSensitivity) / (SENSITIVITY_DEFAULT - SENSITIVITY_MIN)
+        : 0;
+    const highRatio = safeSensitivity > SENSITIVITY_DEFAULT
+        ? (safeSensitivity - SENSITIVITY_DEFAULT) / (SENSITIVITY_MAX - SENSITIVITY_DEFAULT)
+        : 0;
+
+    return {
+        readingThreshold: READING_THRESHOLD + (lowRatio * 4) - (highRatio * 4),
+        growthMultiplier: Math.max(0.4, 1 - (lowRatio * 0.55) + (highRatio * 0.25)),
+        minimumReadingSeconds: Math.max(0.2, 0.45 + (lowRatio * 0.75) - (highRatio * 0.2)),
+        quietDecayMultiplier: Math.max(0.65, 1 + (lowRatio * 0.35) - (highRatio * 0.15))
+    };
 }
 
 /* --- DOM Elements --- */
@@ -166,6 +207,7 @@ const dbStatus = $('db-status');
 const ringBar = $('ring-bar');
 const sensitivitySlider = $('sensitivity-slider');
 const sensitivityValue = $('sensitivity-value');
+const sensitivityHint = $('sensitivity-hint');
 let taskSaveFeedbackTimer = null;
 let taskStripResetTimer = null;
 let taskStripClockTimer = null;
@@ -1402,6 +1444,8 @@ async function startMic() {
         dataArray = new Uint8Array(analyser.fftSize);
 
         STATE.isListening = true;
+        STATE.readingHoldSeconds = 0;
+        STATE.lastFrameAt = Date.now();
         micBtn.textContent = '暂停早读';
         micBtn.classList.add('active');
         dbDisplay.classList.add('active');
@@ -1432,6 +1476,8 @@ function stopMic() {
     dataArray = null;
     finalizeReportSession();
     STATE.isListening = false;
+    STATE.readingHoldSeconds = 0;
+    STATE.lastFrameAt = null;
     micBtn.textContent = '开始早读';
     micBtn.classList.remove('active');
     dbDisplay.classList.remove('active');
@@ -1447,6 +1493,8 @@ function resetGame() {
     STATE.curveBuffer = [];
     STATE.reportActiveSession = 0;
     STATE.energy = 0;
+    STATE.readingHoldSeconds = 0;
+    STATE.lastFrameAt = null;
     STATE.isSuperMode = false;
     STATE.hasManifested = false;
     STATE.treeColor = '#4caf50';
@@ -1480,23 +1528,36 @@ function calculateDB() {
 }
 
 /* --- 4. Game Logic --- */
-function updateState() {
+function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
     if (!STATE.isListening) return;
 
+    const frameSeconds = normalizeDeltaSeconds(deltaSeconds);
+    const sensitivityProfile = getSensitivityProfile(STATE.sensitivity);
     const targetDB = calculateDB();
     STATE.currentDB += (targetDB - STATE.currentDB) * 0.3;
 
     const displayDB = Math.round(STATE.currentDB);
     dbValue.textContent = displayDB;
+    const isAboveReadingThreshold = STATE.currentDB >= sensitivityProfile.readingThreshold;
+    if (isAboveReadingThreshold) {
+        STATE.readingHoldSeconds += frameSeconds;
+    } else {
+        STATE.readingHoldSeconds = 0;
+    }
+    const isReadingLoudly = isAboveReadingThreshold && STATE.readingHoldSeconds >= sensitivityProfile.minimumReadingSeconds;
 
     if (STATE.currentDB > 85) {
         dbValue.style.color = '#ff6b6b';
         dbDisplay.style.borderColor = 'rgba(255, 107, 107, 0.8)';
         if (dbStatus) { dbStatus.textContent = '📢 太吵了'; dbStatus.style.color = '#ff6b6b'; }
-    } else if (STATE.currentDB > 70) {
+    } else if (isReadingLoudly) {
         dbValue.style.color = '#4caf50';
         dbDisplay.style.borderColor = 'rgba(76, 175, 80, 0.8)';
         if (dbStatus) { dbStatus.textContent = '📚 朗读中'; dbStatus.style.color = '#4caf50'; }
+    } else if (isAboveReadingThreshold) {
+        dbValue.style.color = '#fff';
+        dbDisplay.style.borderColor = 'rgba(255, 255, 255, 0.52)';
+        if (dbStatus) { dbStatus.textContent = '保持朗读'; dbStatus.style.color = 'rgba(255,255,255,0.82)'; }
     } else if (STATE.currentDB > 50) {
         dbValue.style.color = '#fff';
         dbDisplay.style.borderColor = 'rgba(255,255,255,0.4)';
@@ -1507,8 +1568,11 @@ function updateState() {
         if (dbStatus) { dbStatus.textContent = '等待中'; dbStatus.style.color = 'rgba(255,255,255,0.5)'; }
     }
 
-    const isReadingLoudly = STATE.currentDB >= READING_THRESHOLD;
-    STATE.energy = getNextEnergy(STATE.energy, STATE.currentDB, STATE.baseGrowthRate);
+    STATE.energy = getNextEnergy(STATE.energy, STATE.currentDB, STATE.baseGrowthRate, {
+        sensitivity: STATE.sensitivity,
+        deltaSeconds: frameSeconds,
+        readingHoldSeconds: STATE.readingHoldSeconds
+    });
 
     // FIX: Reduced shake threshold and diverted to canvas only
     if (isReadingLoudly && STATE.currentDB > 100) shakeCanvas(2);
@@ -2407,8 +2471,11 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
 }
 
 function loop() {
-    updateState();
-    STATE.frameNow = Date.now();
+    const now = Date.now();
+    const deltaSeconds = getFrameDeltaSeconds(now);
+    STATE.lastFrameAt = now;
+    updateState(deltaSeconds);
+    STATE.frameNow = now;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -2418,7 +2485,6 @@ function loop() {
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const now = Date.now();
     const sunScale = 1 + Math.sin(now / 1000) * 0.05;
     ctx.save();
     ctx.translate(canvas.width - 100, 100);
@@ -2547,6 +2613,7 @@ function translateUI() {
 
 function updateSensitivityControl(value = STATE.sensitivity) {
     const nextSensitivity = clampSensitivity(value);
+    const profile = getSensitivityProfile(nextSensitivity);
     STATE.sensitivity = nextSensitivity;
 
     if (sensitivitySlider) {
@@ -2557,6 +2624,18 @@ function updateSensitivityControl(value = STATE.sensitivity) {
 
     if (sensitivityValue) {
         sensitivityValue.textContent = `${nextSensitivity}%`;
+    }
+
+    if (sensitivityHint) {
+        const modeKey = nextSensitivity <= 45 ? 'steady' : nextSensitivity >= 70 ? 'sensitive' : 'standard';
+        const modeLabel = t(`morningTree.sensitivityModes.${modeKey}`) || (
+            modeKey === 'steady' ? '稳健' : modeKey === 'sensitive' ? '灵敏' : '标准'
+        );
+        const hintTemplate = t('morningTree.sensitivityHint') || '{mode}：约 {threshold}dB 后持续 {seconds} 秒才增长';
+        sensitivityHint.textContent = hintTemplate
+            .replace('{mode}', modeLabel)
+            .replace('{threshold}', Math.round(profile.readingThreshold))
+            .replace('{seconds}', profile.minimumReadingSeconds.toFixed(1));
     }
 }
 

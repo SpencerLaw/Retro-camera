@@ -466,7 +466,14 @@
     "helpAdviceMute": "静音测试",
     "helpAdviceMuteDesc": "：安静时数值 40-50 为正常；若超过 65dB 请调低灵敏度。",
     "helpAdviceRead": "朗读测试",
-    "helpAdviceReadDesc": "：标准音量在 70-75 为佳；若很难达到 70dB 请调高灵敏度。",
+    "helpAdviceReadDesc": "：调低后需要更响、更持续的朗读才会成长；调高后更适合收音偏弱的设备。",
+    "sensitivityRangeDesc": "滑块靠左会提高成长门槛、放慢成长并过滤短促噪声；靠右会降低门槛、响应更快。",
+    "sensitivityHint": "{mode}：约 {threshold}dB 后持续 {seconds} 秒才增长",
+    "sensitivityModes": {
+      "steady": "稳健",
+      "standard": "标准",
+      "sensitive": "灵敏"
+    },
     "tapToClose": "点击此处关闭",
     "resetBtnTitle": "重置树木",
     "micToggleTitle": "开始/停止监听",

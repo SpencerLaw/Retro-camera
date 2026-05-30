@@ -134,6 +134,7 @@ function loadMorningTree() {
       renderReportFocus: typeof renderReportFocus === 'function' ? renderReportFocus : undefined,
       getNextEnergy: typeof getNextEnergy === 'function' ? getNextEnergy : undefined,
       getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined,
+      getTreeRenderSize: typeof getTreeRenderSize === 'function' ? getTreeRenderSize : undefined,
       applySensitivityToDb: typeof applySensitivityToDb === 'function' ? applySensitivityToDb : undefined,
       clampSensitivity: typeof clampSensitivity === 'function' ? clampSensitivity : undefined,
       getSensitivityProfile: typeof getSensitivityProfile === 'function' ? getSensitivityProfile : undefined,
@@ -192,6 +193,21 @@ runTest('morning tree size returns to sapling range at low energy', () => {
   assert.ok(api.getTreeSizeForEnergy(0) <= 60);
   assert.ok(api.getTreeSizeForEnergy(50) > api.getTreeSizeForEnergy(0));
   assert.equal(api.getTreeSizeForEnergy(100), 240);
+});
+
+runTest('final tree render size is capped so the mature canopy stays in frame', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getTreeRenderSize, 'function');
+
+  const desktopFinalSize = api.getTreeRenderSize(100, { width: 1920, height: 900 });
+  const compactFinalSize = api.getTreeRenderSize(100, { width: 1024, height: 720 });
+  const halfEnergySize = api.getTreeRenderSize(50, { width: 1920, height: 900 });
+
+  assert.ok(desktopFinalSize < api.getTreeSizeForEnergy(100));
+  assert.ok(desktopFinalSize <= 172);
+  assert.ok(compactFinalSize <= 140);
+  assert.ok(halfEnergySize < desktopFinalSize);
 });
 
 runTest('sensitivity profile gives teachers a meaningful control range', () => {

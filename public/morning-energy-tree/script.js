@@ -152,6 +152,25 @@ function getTreeSizeForEnergy(energy) {
     return SAPLING_TREE_SIZE + ((MATURE_TREE_SIZE - SAPLING_TREE_SIZE) * normalizedEnergy);
 }
 
+function getTreeRenderSize(energy, viewport = {}) {
+    const logicalSize = getTreeSizeForEnergy(energy);
+    const viewportHeight = Number.isFinite(viewport.height)
+        ? viewport.height
+        : Number.isFinite(canvas?.height)
+            ? canvas.height
+            : window.innerHeight;
+    const viewportWidth = Number.isFinite(viewport.width)
+        ? viewport.width
+        : Number.isFinite(canvas?.width)
+            ? canvas.width
+            : window.innerWidth;
+    const heightCap = clamp(viewportHeight * 0.18, 118, 172);
+    const widthCap = clamp(viewportWidth * 0.16, 112, 176);
+    const renderCap = Math.min(heightCap, widthCap);
+
+    return Math.min(logicalSize, renderCap);
+}
+
 function clampSensitivity(value) {
     const numericValue = Number.parseInt(value, 10);
     if (!Number.isFinite(numericValue)) return SENSITIVITY_DEFAULT;
@@ -3495,7 +3514,7 @@ function loop() {
         bird.draw();
     });
 
-    const treeSize = getTreeSizeForEnergy(STATE.energy);
+    const treeSize = getTreeRenderSize(STATE.energy, { width: canvas.width, height: canvas.height });
     const renderMode = getRenderMode(treeSize);
     const lifecycleStage = getTreeLifecycleStage({
         finalEnergy: STATE.energy,

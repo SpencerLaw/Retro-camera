@@ -49,6 +49,17 @@ runTest('substitute changes capture a structured adjustment note', () => {
   assert.match(schedulerSource, /createdAt:\s*new Date\(\)\.toISOString\(\)/);
 });
 
+runTest('substitute apply uses a custom confirmation dialog instead of browser confirm', () => {
+  assert.match(schedulerSource, /pendingSubstituteConfirm/);
+  assert.match(schedulerSource, /setPendingSubstituteConfirm/);
+  assert.match(schedulerSource, /confirmPendingSubstitute/);
+  assert.match(schedulerSource, /cancelPendingSubstitute/);
+  assert.match(schedulerSource, /data-ui-surface="substitute-confirm-dialog"/);
+  assert.match(schedulerSource, /aria-label="确认临时代课调整"/);
+  assert.doesNotMatch(schedulerSource, /window\.confirm\('确定要将 \['/);
+  assert.doesNotMatch(schedulerSource, /alert\('代课调优成功应用/);
+});
+
 runTest('schedule cards expose temporary adjustment labels', () => {
   assert.match(schedulerSource, /schedule-remark-card/);
   assert.match(schedulerSource, /schedule-remark-badge/);

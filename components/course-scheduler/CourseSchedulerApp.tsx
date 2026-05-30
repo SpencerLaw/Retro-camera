@@ -89,6 +89,22 @@ const TIMETABLE_BLOCKS = [
 ] as const;
 const SUBSTITUTE_REASON_OPTIONS = ['临时有事请假', '教研活动', '外出培训', '病假', '会议冲突', '走班临调'];
 
+type PendingSubstituteConfirm = {
+  scheduleId: string;
+  teachingClassName: string;
+  subject: string;
+  classroomName: string;
+  day: number;
+  period: number;
+  periodTimeLabel: string;
+  originalTeacherId: string;
+  originalTeacherName: string;
+  substituteTeacherId: string;
+  substituteTeacherName: string;
+  reason: string;
+  summary: string;
+};
+
 export default function App() {
   // Application Data States
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -121,6 +137,7 @@ export default function App() {
   const [substituteData, setSubstituteData] = useState<{ item: ScheduleItem; recommendations: SubstituteRecommendation[] } | null>(null);
   const [substituteReason, setSubstituteReason] = useState<string>('临时有事请假');
   const [substituteReasonDetail, setSubstituteReasonDetail] = useState<string>('');
+  const [pendingSubstituteConfirm, setPendingSubstituteConfirm] = useState<PendingSubstituteConfirm | null>(null);
   
   // Modals
   const [showAddTeacherModal, setShowAddTeacherModal] = useState<boolean>(false);
@@ -407,6 +424,7 @@ export default function App() {
     setShowSubstituteDialog(false);
     setSelectedCell(null);
     setSubstituteData(null);
+    setPendingSubstituteConfirm(null);
     setSubstituteLoading(false);
     setSubstituteReason('临时有事请假');
     setSubstituteReasonDetail('');
@@ -423,39 +441,61 @@ export default function App() {
     const originalTeacherName = selectedCell.adjustmentNote?.originalTeacherName || selectedCell.teacherName;
     const summary = `${originalTeacherName}老师${reason}，已临时调配${substituteTeacher.name}老师`;
 
-    if (window.confirm('确定要将 [' + selectedCell.teachingClassName + '] 的原定老师 [' + originalTeacherName + '] 因 [' + reason + '] 临时调整为 [' + substituteTeacher.name + '] 老师吗？')) {
-      const newSchedules = schedules.map(s => {
-        if (s.id === selectedCell.id) {
-          return {
-            ...s,
-            teacherId: substituteTeacherId,
-            teacherName: substituteTeacher.name,
-            isTemp: true,
-            adjustmentNote: {
-              id: `remark-${selectedCell.id}-${Date.now()}`,
-              type: 'substitute',
-              reason,
-              summary,
-              createdAt: new Date().toISOString(),
-              originalTeacherId,
-              originalTeacherName,
-              substituteTeacherId,
-              substituteTeacherName: substituteTeacher.name
-            }
-          };
-        }
-        return s;
-      });
+    setPendingSubstituteConfirm({
+      scheduleId: selectedCell.id,
+      teachingClassName: selectedCell.teachingClassName,
+      subject: selectedCell.subject,
+      classroomName: selectedCell.classroomName,
+      day: selectedCell.day,
+      period: selectedCell.period,
+      periodTimeLabel: getPeriodTimeLabel(selectedCell.period),
+      originalTeacherId,
+      originalTeacherName,
+      substituteTeacherId,
+      substituteTeacherName: substituteTeacher.name,
+      reason,
+      summary
+    });
+  };
 
-      setSchedules(newSchedules);
-      setSelectedCell(null);
-      setSubstituteData(null);
-      setShowSubstituteDialog(false);
-      setSubstituteReason('临时有事请假');
-      setSubstituteReasonDetail('');
-      updateConflicts(newSchedules, teachers, classrooms, teachingClasses, students);
-      alert('代课调优成功应用，备注已同步写入课表 JSON 数据！');
-    }
+  const cancelPendingSubstitute = () => {
+    setPendingSubstituteConfirm(null);
+  };
+
+  const confirmPendingSubstitute = () => {
+    if (!pendingSubstituteConfirm) return;
+
+    const newSchedules = schedules.map(s => {
+      if (s.id === pendingSubstituteConfirm.scheduleId) {
+        return {
+          ...s,
+          teacherId: pendingSubstituteConfirm.substituteTeacherId,
+          teacherName: pendingSubstituteConfirm.substituteTeacherName,
+          isTemp: true,
+          adjustmentNote: {
+            id: `remark-${pendingSubstituteConfirm.scheduleId}-${Date.now()}`,
+            type: 'substitute',
+            reason: pendingSubstituteConfirm.reason,
+            summary: pendingSubstituteConfirm.summary,
+            createdAt: new Date().toISOString(),
+            originalTeacherId: pendingSubstituteConfirm.originalTeacherId,
+            originalTeacherName: pendingSubstituteConfirm.originalTeacherName,
+            substituteTeacherId: pendingSubstituteConfirm.substituteTeacherId,
+            substituteTeacherName: pendingSubstituteConfirm.substituteTeacherName
+          }
+        };
+      }
+      return s;
+    });
+
+    setSchedules(newSchedules);
+    setSelectedCell(null);
+    setSubstituteData(null);
+    setPendingSubstituteConfirm(null);
+    setShowSubstituteDialog(false);
+    setSubstituteReason('临时有事请假');
+    setSubstituteReasonDetail('');
+    updateConflicts(newSchedules, teachers, classrooms, teachingClasses, students);
   };
 
   const handleSaveTeacher = () => {
@@ -1226,6 +1266,103 @@ export default function App() {
                 <p className="text-[11px] text-slate-500 leading-normal">
                   点击此处可打开可滑动诊断详情，分开查看硬冲突、资源负载与数据完整性提醒。
                 </p>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* FLOATING DIALOG: SUBSTITUTE CONFIRMATION */}
+      {pendingSubstituteConfirm && (
+        <div
+          data-ui-surface="substitute-confirm-dialog"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-label="确认临时代课调整"
+        >
+          <button
+            type="button"
+            aria-label="取消临时代课调整"
+            onClick={cancelPendingSubstitute}
+            className="absolute inset-0 cursor-default"
+          />
+
+          <section className="substitute-confirm-panel relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-white/70 bg-white/[0.88] text-left shadow-2xl">
+            <div className="border-b border-white/60 bg-white/40 px-5 py-4">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600 shadow-sm">
+                  <AlertTriangle className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-base font-extrabold text-slate-950">确认临时代课调整</h3>
+                  <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
+                    请确认这条调配备注，确认后会同步写入本地 JSON 课表数据。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 px-5 py-5">
+              <div className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-extrabold text-sky-800 shadow-sm">
+                    {pendingSubstituteConfirm.teachingClassName}
+                  </span>
+                  <span className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-sm">
+                    周{pendingSubstituteConfirm.day} · 第{pendingSubstituteConfirm.period}节 · {pendingSubstituteConfirm.periodTimeLabel}
+                  </span>
+                </div>
+
+                <div className="grid gap-3 text-xs sm:grid-cols-3">
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400">课程</span>
+                    <span className="font-extrabold text-slate-800">{pendingSubstituteConfirm.subject}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400">教室</span>
+                    <span className="font-bold text-slate-700">{pendingSubstituteConfirm.classroomName}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400">原因</span>
+                    <span className="font-bold text-amber-700">{pendingSubstituteConfirm.reason}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/70 p-4">
+                <div>
+                  <span className="block text-[10px] font-bold text-slate-400">原定老师</span>
+                  <span className="text-sm font-extrabold text-slate-900">{pendingSubstituteConfirm.originalTeacherName}</span>
+                </div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/20">
+                  <CheckCircle className="h-4 w-4" />
+                </div>
+                <div className="text-right">
+                  <span className="block text-[10px] font-bold text-slate-400">临时代课</span>
+                  <span className="text-sm font-extrabold text-blue-700">{pendingSubstituteConfirm.substituteTeacherName}</span>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-orange-100 bg-orange-50/80 px-4 py-3 text-xs font-bold leading-relaxed text-orange-800">
+                {pendingSubstituteConfirm.summary}
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-2 border-t border-white/60 bg-white/40 px-5 py-4 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={cancelPendingSubstitute}
+                className="min-h-11 rounded-xl border border-slate-200 bg-white/70 px-4 py-2 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={confirmPendingSubstitute}
+                className="min-h-11 rounded-xl bg-blue-600 px-5 py-2 text-sm font-extrabold text-white shadow-lg shadow-blue-500/25 transition-colors hover:bg-blue-700"
+              >
+                确认调整并写入备注
               </button>
             </div>
           </section>

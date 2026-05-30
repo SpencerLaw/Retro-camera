@@ -22,6 +22,8 @@ runTest('schedule adjustment notes are part of the JSON-backed schedule data', (
   assert.match(schedulerTypes, /summary:\s*string/);
   assert.match(schedulerTypes, /createdAt:\s*string/);
   assert.match(schedulerTypes, /adjustmentNote\?: ScheduleAdjustmentNote/);
+  assert.match(schedulerTypes, /adjustmentHistory\?: ScheduleAdjustmentNote\[\]/);
+  assert.match(schedulerSource, /adjustmentHistory:\s*\[\.\.\.existingHistory,\s*nextAdjustmentNote\]/);
   assert.match(schedulerSource, /schedules/);
   assert.match(schedulerSource, /setSchedules\(parsed\.schedules\)/);
 });
@@ -39,6 +41,8 @@ runTest('weekly remarks dialog renders a Monday to Friday timeline', () => {
   assert.match(schedulerSource, /aria-label="本周备注汇总"/);
   assert.match(schedulerSource, /remarks-timeline/);
   assert.match(schedulerSource, /remarks-timeline-item/);
+  assert.match(schedulerSource, /\.flatMap\(s =>/);
+  assert.match(schedulerSource, /const logs = s\.adjustmentHistory && s\.adjustmentHistory\.length > 0/);
   assert.match(schedulerSource, /DAYS\.map/);
   assert.match(schedulerSource, /暂无备注/);
   assert.match(schedulerSource, /PERIODS_METADATA\.find/);

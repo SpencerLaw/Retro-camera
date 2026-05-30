@@ -40,13 +40,30 @@ runTest('substitute recommendation cards do not display suitability scores', () 
 runTest('substitute changes capture a structured adjustment note', () => {
   assert.match(schedulerTypes, /export interface ScheduleAdjustmentNote/);
   assert.match(schedulerTypes, /adjustmentNote\?: ScheduleAdjustmentNote/);
+  assert.match(schedulerTypes, /adjustmentHistory\?: ScheduleAdjustmentNote\[\]/);
+  assert.match(schedulerTypes, /fromTeacherName\?: string/);
+  assert.match(schedulerTypes, /toTeacherName\?: string/);
   assert.match(schedulerSource, /substituteReason/);
   assert.match(schedulerSource, /临时有事请假/);
-  assert.match(schedulerSource, /adjustmentNote:\s*\{/);
+  assert.match(schedulerSource, /adjustmentNote:\s*nextAdjustmentNote/);
+  assert.match(schedulerSource, /adjustmentHistory:\s*\[\.\.\.existingHistory,\s*nextAdjustmentNote\]/);
   assert.match(schedulerSource, /originalTeacherName/);
   assert.match(schedulerSource, /substituteTeacherName/);
+  assert.match(schedulerSource, /fromTeacherName/);
+  assert.match(schedulerSource, /toTeacherName/);
   assert.match(schedulerSource, /summary/);
   assert.match(schedulerSource, /createdAt:\s*new Date\(\)\.toISOString\(\)/);
+});
+
+runTest('repeat substitute changes append A-to-B-to-C logs instead of overwriting history', () => {
+  assert.match(schedulerSource, /const fromTeacherId = selectedCell\.teacherId/);
+  assert.match(schedulerSource, /const fromTeacherName = selectedCell\.teacherName/);
+  assert.match(schedulerSource, /const rootOriginalTeacherId = selectedCell\.adjustmentNote\?\.originalTeacherId \|\| selectedCell\.teacherId/);
+  assert.match(schedulerSource, /const existingHistory = s\.adjustmentHistory \?\? \(s\.adjustmentNote \? \[s\.adjustmentNote\] : \[\]\)/);
+  assert.match(schedulerSource, /chainIndex:\s*existingHistory\.length \+ 1/);
+  assert.match(schedulerSource, /const summary = `\$\{fromTeacherName\}老师\$\{reason\}，已临时调配\$\{substituteTeacher\.name\}老师`/);
+  assert.match(schedulerSource, /setPendingSubstituteConfirm\(\{[\s\S]*fromTeacherName/);
+  assert.match(schedulerSource, /setPendingSubstituteConfirm\(\{[\s\S]*rootOriginalTeacherName/);
 });
 
 runTest('substitute apply uses a custom confirmation dialog instead of browser confirm', () => {

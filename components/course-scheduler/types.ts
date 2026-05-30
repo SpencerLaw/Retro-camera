@@ -53,8 +53,13 @@ export interface ScheduleAdjustmentNote {
   reason: string;
   summary: string;
   createdAt: string;
+  chainIndex?: number;
   originalTeacherId?: string;
   originalTeacherName?: string;
+  fromTeacherId?: string;
+  fromTeacherName?: string;
+  toTeacherId?: string;
+  toTeacherName?: string;
   substituteTeacherId?: string;
   substituteTeacherName?: string;
   studentName?: string;
@@ -75,6 +80,7 @@ export interface ScheduleItem {
   isFinished?: boolean; // e.g., General Technology test finished, early completion
   finishedWeek?: number; // finished after which week
   adjustmentNote?: ScheduleAdjustmentNote;
+  adjustmentHistory?: ScheduleAdjustmentNote[];
 }
 
 export interface Conflict {

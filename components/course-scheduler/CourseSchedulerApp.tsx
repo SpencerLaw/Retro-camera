@@ -97,8 +97,10 @@ type PendingSubstituteConfirm = {
   day: number;
   period: number;
   periodTimeLabel: string;
-  originalTeacherId: string;
-  originalTeacherName: string;
+  rootOriginalTeacherId: string;
+  rootOriginalTeacherName: string;
+  fromTeacherId: string;
+  fromTeacherName: string;
   substituteTeacherId: string;
   substituteTeacherName: string;
   reason: string;
@@ -401,6 +403,11 @@ export default function App() {
     return periodMeta ? periodMeta.time : `第${period}节`;
   };
 
+  const getScheduleAdjustmentLogs = (item: ScheduleItem) => {
+    if (item.adjustmentHistory && item.adjustmentHistory.length > 0) return item.adjustmentHistory;
+    return item.adjustmentNote ? [item.adjustmentNote] : [];
+  };
+
   // Substitute Recommend Trigger
   const handleSelectCell = async (item: ScheduleItem) => {
     setSelectedCell(item);
@@ -437,9 +444,11 @@ export default function App() {
     if (!substituteTeacher) return;
 
     const reason = getSubstituteReasonText();
-    const originalTeacherId = selectedCell.adjustmentNote?.originalTeacherId || selectedCell.teacherId;
-    const originalTeacherName = selectedCell.adjustmentNote?.originalTeacherName || selectedCell.teacherName;
-    const summary = `${originalTeacherName}老师${reason}，已临时调配${substituteTeacher.name}老师`;
+    const rootOriginalTeacherId = selectedCell.adjustmentNote?.originalTeacherId || selectedCell.teacherId;
+    const rootOriginalTeacherName = selectedCell.adjustmentNote?.originalTeacherName || selectedCell.teacherName;
+    const fromTeacherId = selectedCell.teacherId;
+    const fromTeacherName = selectedCell.teacherName;
+    const summary = `${fromTeacherName}老师${reason}，已临时调配${substituteTeacher.name}老师`;
 
     setPendingSubstituteConfirm({
       scheduleId: selectedCell.id,
@@ -449,8 +458,10 @@ export default function App() {
       day: selectedCell.day,
       period: selectedCell.period,
       periodTimeLabel: getPeriodTimeLabel(selectedCell.period),
-      originalTeacherId,
-      originalTeacherName,
+      rootOriginalTeacherId,
+      rootOriginalTeacherName,
+      fromTeacherId,
+      fromTeacherName,
       substituteTeacherId,
       substituteTeacherName: substituteTeacher.name,
       reason,
@@ -467,22 +478,30 @@ export default function App() {
 
     const newSchedules = schedules.map(s => {
       if (s.id === pendingSubstituteConfirm.scheduleId) {
+        const existingHistory = s.adjustmentHistory ?? (s.adjustmentNote ? [s.adjustmentNote] : []);
+        const nextAdjustmentNote = {
+          id: `remark-${pendingSubstituteConfirm.scheduleId}-${Date.now()}`,
+          type: 'substitute' as const,
+          reason: pendingSubstituteConfirm.reason,
+          summary: pendingSubstituteConfirm.summary,
+          createdAt: new Date().toISOString(),
+          chainIndex: existingHistory.length + 1,
+          originalTeacherId: pendingSubstituteConfirm.rootOriginalTeacherId,
+          originalTeacherName: pendingSubstituteConfirm.rootOriginalTeacherName,
+          fromTeacherId: pendingSubstituteConfirm.fromTeacherId,
+          fromTeacherName: pendingSubstituteConfirm.fromTeacherName,
+          toTeacherId: pendingSubstituteConfirm.substituteTeacherId,
+          toTeacherName: pendingSubstituteConfirm.substituteTeacherName,
+          substituteTeacherId: pendingSubstituteConfirm.substituteTeacherId,
+          substituteTeacherName: pendingSubstituteConfirm.substituteTeacherName
+        };
         return {
           ...s,
           teacherId: pendingSubstituteConfirm.substituteTeacherId,
           teacherName: pendingSubstituteConfirm.substituteTeacherName,
           isTemp: true,
-          adjustmentNote: {
-            id: `remark-${pendingSubstituteConfirm.scheduleId}-${Date.now()}`,
-            type: 'substitute',
-            reason: pendingSubstituteConfirm.reason,
-            summary: pendingSubstituteConfirm.summary,
-            createdAt: new Date().toISOString(),
-            originalTeacherId: pendingSubstituteConfirm.originalTeacherId,
-            originalTeacherName: pendingSubstituteConfirm.originalTeacherName,
-            substituteTeacherId: pendingSubstituteConfirm.substituteTeacherId,
-            substituteTeacherName: pendingSubstituteConfirm.substituteTeacherName
-          }
+          adjustmentNote: nextAdjustmentNote,
+          adjustmentHistory: [...existingHistory, nextAdjustmentNote]
         };
       }
       return s;
@@ -657,10 +676,19 @@ export default function App() {
   const hasDiagnosticWarnings = warningConflicts.length > 0;
   const diagnosticSummary = `${criticalConflicts.length} 处硬冲突 / ${warningConflicts.length} 条提醒`;
   const weeklyRemarks = schedules
-    .filter((s): s is ScheduleItem & { adjustmentNote: NonNullable<ScheduleItem['adjustmentNote']> } => (
-      s.teachingClassName.startsWith(selectedGrade) && Boolean(s.adjustmentNote)
-    ))
-    .sort((a, b) => (a.day - b.day) || (a.period - b.period) || a.teachingClassName.localeCompare(b.teachingClassName));
+    .filter(s => s.teachingClassName.startsWith(selectedGrade))
+    .flatMap(s => {
+      const logs = s.adjustmentHistory && s.adjustmentHistory.length > 0
+        ? s.adjustmentHistory
+        : (s.adjustmentNote ? [s.adjustmentNote] : []);
+      return logs.map(adjustmentNote => ({ ...s, adjustmentNote }));
+    })
+    .sort((a, b) => (
+      (a.day - b.day) ||
+      (a.period - b.period) ||
+      a.teachingClassName.localeCompare(b.teachingClassName) ||
+      a.adjustmentNote.createdAt.localeCompare(b.adjustmentNote.createdAt)
+    ));
   const getRemarksForDay = (dayNum: number) => weeklyRemarks.filter(item => item.day === dayNum);
   const managementStats = [
     {
@@ -1190,7 +1218,18 @@ export default function App() {
                   </div>
                   {selectedCell.adjustmentNote && (
                     <div className="mt-2 rounded-lg border border-orange-100 bg-orange-50/70 px-3 py-2 text-[10px] font-bold text-orange-700">
-                      当前备注：{selectedCell.adjustmentNote.summary}
+                      <div>当前备注：{selectedCell.adjustmentNote.summary}</div>
+                      {getScheduleAdjustmentLogs(selectedCell).length > 1 && (
+                        <div className="mt-2 space-y-1 border-t border-orange-100 pt-2 text-orange-600">
+                          <span className="block text-[9px] text-orange-400">历史调配日志</span>
+                          {getScheduleAdjustmentLogs(selectedCell).map(log => (
+                            <div key={log.id} className="flex items-center justify-between gap-2">
+                              <span className="truncate">{log.chainIndex ? `${log.chainIndex}. ` : ''}{log.summary}</span>
+                              <span className="shrink-0 text-[8px] text-orange-400">{new Date(log.createdAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1332,8 +1371,8 @@ export default function App() {
 
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/70 p-4">
                 <div>
-                  <span className="block text-[10px] font-bold text-slate-400">原定老师</span>
-                  <span className="text-sm font-extrabold text-slate-900">{pendingSubstituteConfirm.originalTeacherName}</span>
+                  <span className="block text-[10px] font-bold text-slate-400">本次调出</span>
+                  <span className="text-sm font-extrabold text-slate-900">{pendingSubstituteConfirm.fromTeacherName}</span>
                 </div>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/20">
                   <CheckCircle className="h-4 w-4" />
@@ -1343,6 +1382,12 @@ export default function App() {
                   <span className="text-sm font-extrabold text-blue-700">{pendingSubstituteConfirm.substituteTeacherName}</span>
                 </div>
               </div>
+
+              {pendingSubstituteConfirm.rootOriginalTeacherName !== pendingSubstituteConfirm.fromTeacherName && (
+                <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-[11px] font-bold leading-relaxed text-slate-500">
+                  原定老师：{pendingSubstituteConfirm.rootOriginalTeacherName} · 本次是在既有代课基础上继续调整
+                </div>
+              )}
 
               <div className="rounded-2xl border border-orange-100 bg-orange-50/80 px-4 py-3 text-xs font-bold leading-relaxed text-orange-800">
                 {pendingSubstituteConfirm.summary}

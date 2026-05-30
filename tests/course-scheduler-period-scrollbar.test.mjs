@@ -37,18 +37,24 @@ runTest('course scheduler defines distinct scrollbar colors for each period band
 });
 
 runTest('course scheduler separates the four two-period modules with glass backgrounds', () => {
+  assert.match(schedulerSource, /PERIOD_MODULES/);
   assert.match(schedulerSource, /getPeriodModuleClass/);
   assert.match(schedulerSource, /period-module-morning-early/);
   assert.match(schedulerSource, /period-module-morning-late/);
   assert.match(schedulerSource, /period-module-afternoon-early/);
   assert.match(schedulerSource, /period-module-afternoon-late/);
+  assert.match(schedulerSource, /period-module-group/);
+  assert.match(schedulerSource, /period-module-group-title/);
+  assert.match(schedulerSource, /data-period-module/);
   assert.match(schedulerSource, /period-module-row/);
   assert.match(schedulerSource, /period-module-row--start/);
   assert.match(schedulerSource, /period-module-row--end/);
   assert.match(schedulerSource, /period-module-cell/);
-  assert.match(schedulerSource, /getPeriodModuleClass\(periodMeta\.num\)/);
-  assert.match(schedulerStyles, /\.period-module-row::before\s*\{[\s\S]*backdrop-filter:\s*blur\(12px\)/);
-  assert.match(schedulerStyles, /\.period-module-row--start\s*\{[\s\S]*border-top:\s*8px solid rgba\(255,\s*255,\s*255,\s*0\.9\)/);
+  assert.doesNotMatch(schedulerSource, /scheduler-timetable-rows divide-y/);
+  assert.match(schedulerStyles, /\.scheduler-timetable-rows\s*\{[\s\S]*gap:\s*0\.875rem/);
+  assert.match(schedulerStyles, /\.period-module-group\s*\{[\s\S]*backdrop-filter:\s*blur\(18px\)/);
+  assert.match(schedulerStyles, /\.period-module-group\s*\{[\s\S]*border-radius:\s*18px/);
+  assert.match(schedulerStyles, /\.period-module-row \+ \.period-module-row\s*\{[\s\S]*margin-top:\s*0\.45rem/);
   assert.match(schedulerStyles, /\.period-module-morning-early\s*\{[\s\S]*--period-module-bg/);
   assert.match(schedulerStyles, /\.period-module-morning-late\s*\{[\s\S]*--period-module-bg/);
   assert.match(schedulerStyles, /\.period-module-afternoon-early\s*\{[\s\S]*--period-module-bg/);

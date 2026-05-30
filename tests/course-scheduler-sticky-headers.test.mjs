@@ -31,6 +31,11 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-rows[^"]*overflow-y-auto/);
   assert.doesNotMatch(schedulerSource, /<div className="flex-1 overflow-y-auto divide-y divide-slate-100">/);
   assert.match(schedulerStyles, /\.scheduler-main-header--tabs\s*\{[\s\S]*box-shadow/);
+  assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.58\)/);
+  assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*backdrop-filter:\s*blur\(22px\)/);
+  assert.match(schedulerStyles, /\.scheduler-main-header\s*\{[\s\S]*border-radius:\s*9999px/);
+  assert.match(schedulerSource, /scheduler-glass-action/);
+  assert.match(schedulerSource, /scheduler-term-chip/);
   assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*gap:\s*1\.5rem/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*display:\s*inline-flex/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*border-radius:\s*12px/);
@@ -66,7 +71,8 @@ runTest('weekday timetable header sticks below the pinned filters', () => {
   assert.match(schedulerSource, /周五/);
   assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*position:\s*sticky/);
   assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*top:\s*-1\.5rem/);
-  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*backdrop-filter:\s*blur\(12px\)/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*backdrop-filter:\s*blur\(18px\)/);
+  assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.58\)/);
   assert.match(schedulerStyles, /\.scheduler-weekday-header\s*\{[\s\S]*z-index:\s*12/);
   assert.match(schedulerStyles, /\.scheduler-timetable-shell\s*\{[\s\S]*overflow:\s*visible/);
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-shell[^"]*overflow-hidden/);

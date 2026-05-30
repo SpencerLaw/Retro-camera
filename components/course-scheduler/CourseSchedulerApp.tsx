@@ -73,6 +73,20 @@ const getPeriodModuleClass = (periodNum: number) => {
 
 const isPeriodModuleStart = (periodNum: number) => [1, 3, 5, 7].includes(periodNum);
 const isPeriodModuleEnd = (periodNum: number) => [2, 4, 6, 8].includes(periodNum);
+const PERIOD_MODULES = [
+  { id: 'morning-early', title: '第一节 / 第二节', subtitle: '上午第一段', periodNums: [1, 2], className: getPeriodModuleClass(1) },
+  { id: 'morning-late', title: '第三节 / 第四节', subtitle: '上午第二段', periodNums: [3, 4], className: getPeriodModuleClass(3) },
+  { id: 'afternoon-early', title: '第五节 / 第六节', subtitle: '下午第一段', periodNums: [5, 6], className: getPeriodModuleClass(5) },
+  { id: 'afternoon-late', title: '第七节 / 第八节', subtitle: '下午第二段', periodNums: [7, 8], className: getPeriodModuleClass(7) }
+];
+const TIMETABLE_BLOCKS = [
+  { type: 'module', module: PERIOD_MODULES[0] },
+  { type: 'break', meta: PERIODS_METADATA[2] },
+  { type: 'module', module: PERIOD_MODULES[1] },
+  { type: 'lunch', meta: PERIODS_METADATA[5] },
+  { type: 'module', module: PERIOD_MODULES[2] },
+  { type: 'module', module: PERIOD_MODULES[3] }
+] as const;
 const SUBSTITUTE_REASON_OPTIONS = ['临时有事请假', '教研活动', '外出培训', '病假', '会议冲突', '走班临调'];
 
 export default function App() {
@@ -753,7 +767,7 @@ export default function App() {
       )}
 
       {/* TOP HEADER NAVIGATION AREA */}
-      <header id="main_header" className={`scheduler-main-header h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-30 shadow-xs ${isTabLayoutPinned ? 'scheduler-main-header--tabs' : ''}`}>
+      <header id="main_header" className={`scheduler-main-header scheduler-glass-topbar h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-30 shadow-xs ${isTabLayoutPinned ? 'scheduler-main-header--tabs' : ''}`}>
         <div className="scheduler-brand-strip flex items-center">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 bg-blue-600 rounded flex items-center justify-center shadow-md shadow-blue-200">
@@ -774,7 +788,7 @@ export default function App() {
           <button
             onClick={handleOpenJSONModal}
             title="JSON 数据导入与导出备份"
-            className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+            className="scheduler-glass-action px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
           >
             <Database className="w-3.5 h-3.5 text-indigo-600" />
             <span>💾 导入/导出 JSON</span>
@@ -783,7 +797,7 @@ export default function App() {
             <button
               onClick={() => setShowConflictsModal(true)}
               title="查看排课硬冲突详情"
-              className="px-3 py-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors animate-pulse hover:animate-none"
+              className="scheduler-glass-action scheduler-glass-action--danger px-3 py-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors animate-pulse hover:animate-none"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
               <span>{criticalConflicts.length} 处硬冲突 · {warningConflicts.length} 条提醒</span>
@@ -792,7 +806,7 @@ export default function App() {
             <button
               onClick={() => setShowConflictsModal(true)}
               title="查看排课诊断提醒"
-              className="px-3 py-1.5 border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+              className="scheduler-glass-action scheduler-glass-action--warning px-3 py-1.5 border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
               <span>0 处硬冲突 · {warningConflicts.length} 条提醒</span>
@@ -801,14 +815,14 @@ export default function App() {
             <button
               onClick={() => setShowConflictsModal(true)}
               title="查看排课诊断详情"
-              className="px-3 py-1.5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+              className="scheduler-glass-action scheduler-glass-action--ok px-3 py-1.5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
             >
               <Activity className="w-3.5 h-3.5 text-emerald-600" />
               <span>硬冲突与提醒均为 0</span>
             </button>
           )}
 
-          <div className="bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+          <div className="scheduler-term-chip bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-blue-600" />
             2026学期 · 第15周
           </div>
@@ -816,7 +830,7 @@ export default function App() {
           <button
             onClick={() => setShowRemarksModal(true)}
             title="查看本周备注汇总"
-            className="px-3 py-1.5 border border-sky-200 bg-sky-50/80 hover:bg-sky-100 text-sky-800 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
+            className="scheduler-glass-action scheduler-glass-action--info px-3 py-1.5 border border-sky-200 bg-sky-50/80 hover:bg-sky-100 text-sky-800 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
           >
             <MessageSquareText className="w-3.5 h-3.5 text-sky-600" />
             <span>备注汇总</span>
@@ -828,7 +842,7 @@ export default function App() {
           <button
             onClick={handleResetData}
             title="重置为默认数据"
-            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 border border-slate-200 transition-colors"
+            className="scheduler-glass-action scheduler-icon-action p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 border border-slate-200 transition-colors"
           >
             <RotateCcw className="w-4 h-4 text-rose-600" />
           </button>
@@ -907,12 +921,11 @@ export default function App() {
               </div>
 
               {/* Rows (Schedule slots, Break items & Lunch Spacers) */}
-              <div className="scheduler-timetable-rows divide-y divide-slate-100">
-                {PERIODS_METADATA.map((periodMeta, pIdx) => {
-                  
-                  if (periodMeta.type === 'break') {
+              <div className="scheduler-timetable-rows">
+                {TIMETABLE_BLOCKS.map((block, blockIdx) => {
+                  if (block.type === 'break') {
                     return (
-                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 h-10 bg-slate-50/50 hover:bg-slate-50 text-slate-400 border-b border-slate-200">
+                      <div key={`spacer-${blockIdx}`} className="scheduler-break-block grid grid-cols-6 h-10 bg-slate-50/50 hover:bg-slate-50 text-slate-400 border-b border-slate-200">
                         <div className="p-2 border-r border-slate-200 flex flex-col justify-center items-center">
                           <span className="text-[10px] font-bold tracking-tight">大课间休息</span>
                           <span className="text-[8px] text-slate-400 leading-none">09:30-10:10</span>
@@ -924,9 +937,9 @@ export default function App() {
                     );
                   }
 
-                  if (periodMeta.type === 'lunch') {
+                  if (block.type === 'lunch') {
                     return (
-                      <div key={`spacer-${pIdx}`} className="grid grid-cols-6 h-9 bg-slate-100/50 text-slate-400 border-b border-slate-200">
+                      <div key={`spacer-${blockIdx}`} className="scheduler-lunch-block grid grid-cols-6 h-9 bg-slate-100/50 text-slate-400 border-b border-slate-200">
                         <div className="p-2 border-r border-slate-200 flex flex-col justify-center items-center">
                           <span className="text-[10px] font-bold">午后休餐</span>
                           <span className="text-[8px] text-slate-400">11:40-14:00</span>
@@ -939,83 +952,100 @@ export default function App() {
                     );
                   }
 
-                  const periodColorMap: Record<number, { bg: string; border: string; label: string; tag: string; tagBg: string }> = {
-                    1: { bg: 'bg-amber-50/80',   border: 'border-l-2 border-amber-400',   label: 'text-amber-900',  tag: '上午',   tagBg: 'bg-amber-100 text-amber-700' },
-                    2: { bg: 'bg-amber-50/80',   border: 'border-l-2 border-amber-400',   label: 'text-amber-900',  tag: '上午',   tagBg: 'bg-amber-100 text-amber-700' },
-                    3: { bg: 'bg-teal-50/70',    border: 'border-l-2 border-teal-400',    label: 'text-teal-900',   tag: '上午',   tagBg: 'bg-teal-100 text-teal-700' },
-                    4: { bg: 'bg-teal-50/70',    border: 'border-l-2 border-teal-400',    label: 'text-teal-900',   tag: '上午',   tagBg: 'bg-teal-100 text-teal-700' },
-                    5: { bg: 'bg-indigo-50/70',  border: 'border-l-2 border-indigo-400',  label: 'text-indigo-900', tag: '下午',   tagBg: 'bg-indigo-100 text-indigo-700' },
-                    6: { bg: 'bg-indigo-50/70',  border: 'border-l-2 border-indigo-400',  label: 'text-indigo-900', tag: '下午',   tagBg: 'bg-indigo-100 text-indigo-700' },
-                    7: { bg: 'bg-violet-50/70',  border: 'border-l-2 border-violet-400',  label: 'text-violet-900', tag: '下午',   tagBg: 'bg-violet-100 text-violet-700' },
-                    8: { bg: 'bg-violet-50/70',  border: 'border-l-2 border-violet-400',  label: 'text-violet-900', tag: '下午',   tagBg: 'bg-violet-100 text-violet-700' },
-                  };
-                  const pc = periodColorMap[periodMeta.num] || { bg: 'bg-slate-50/20', border: '', label: 'text-slate-800', tag: '', tagBg: '' };
-                  const periodModuleClass = getPeriodModuleClass(periodMeta.num);
-                  const periodModuleStartClass = isPeriodModuleStart(periodMeta.num) ? 'period-module-row--start' : '';
-                  const periodModuleEndClass = isPeriodModuleEnd(periodMeta.num) ? 'period-module-row--end' : '';
-
                   return (
-                    <div
-                      key={`period-row-${periodMeta.num}`}
-                      className={`period-module-row ${periodModuleClass} ${periodModuleStartClass} ${periodModuleEndClass} grid grid-cols-6 border-b border-slate-100`}
-                      style={{gridAutoRows: '1fr'}}
+                    <section
+                      key={block.module.id}
+                      data-period-module={block.module.id}
+                      className={`period-module-group ${block.module.className}`}
                     >
-                      <div className={`period-module-label p-2 border-r border-slate-200 text-center flex flex-col justify-center items-center shrink-0 ${pc.bg} ${pc.border}`}>
-                        <span className={`text-[11px] font-bold ${pc.label}`}>{periodMeta.name}</span>
-                        <span className="text-[9px] text-slate-400 font-medium leading-tight mt-0.5">{periodMeta.time}</span>
-                        {pc.tag && <span className={`mt-1 text-[8px] font-bold px-1 py-0.5 rounded-full ${pc.tagBg}`}>{pc.tag}</span>}
+                      <div className="period-module-group-title">
+                        <span>{block.module.title}</span>
+                        <small>{block.module.subtitle}</small>
                       </div>
 
-                      {DAYS.map((day) => {
-                        const cellItems = getFilteredSchedules(day.num, periodMeta.num);
-                        const cellConflicts = getCellConflicts(day.num, periodMeta.num);
-                        const hasMany = cellItems.length > 3;
-                        const periodScrollbarClass = getPeriodScrollbarClass(periodMeta.num);
+                      {block.module.periodNums.map((periodNum) => {
+                        const periodMeta = PERIODS_METADATA.find(item => item.type === 'period' && item.num === periodNum);
+                        if (!periodMeta) return null;
+
+                        const periodColorMap: Record<number, { bg: string; border: string; label: string; tag: string; tagBg: string }> = {
+                          1: { bg: 'bg-amber-50/80',   border: 'border-l-2 border-amber-400',   label: 'text-amber-900',  tag: '上午',   tagBg: 'bg-amber-100 text-amber-700' },
+                          2: { bg: 'bg-amber-50/80',   border: 'border-l-2 border-amber-400',   label: 'text-amber-900',  tag: '上午',   tagBg: 'bg-amber-100 text-amber-700' },
+                          3: { bg: 'bg-teal-50/70',    border: 'border-l-2 border-teal-400',    label: 'text-teal-900',   tag: '上午',   tagBg: 'bg-teal-100 text-teal-700' },
+                          4: { bg: 'bg-teal-50/70',    border: 'border-l-2 border-teal-400',    label: 'text-teal-900',   tag: '上午',   tagBg: 'bg-teal-100 text-teal-700' },
+                          5: { bg: 'bg-indigo-50/70',  border: 'border-l-2 border-indigo-400',  label: 'text-indigo-900', tag: '下午',   tagBg: 'bg-indigo-100 text-indigo-700' },
+                          6: { bg: 'bg-indigo-50/70',  border: 'border-l-2 border-indigo-400',  label: 'text-indigo-900', tag: '下午',   tagBg: 'bg-indigo-100 text-indigo-700' },
+                          7: { bg: 'bg-violet-50/70',  border: 'border-l-2 border-violet-400',  label: 'text-violet-900', tag: '下午',   tagBg: 'bg-violet-100 text-violet-700' },
+                          8: { bg: 'bg-violet-50/70',  border: 'border-l-2 border-violet-400',  label: 'text-violet-900', tag: '下午',   tagBg: 'bg-violet-100 text-violet-700' },
+                        };
+                        const pc = periodColorMap[periodMeta.num] || { bg: 'bg-slate-50/20', border: '', label: 'text-slate-800', tag: '', tagBg: '' };
+                        const periodModuleStartClass = isPeriodModuleStart(periodMeta.num) ? 'period-module-row--start' : '';
+                        const periodModuleEndClass = isPeriodModuleEnd(periodMeta.num) ? 'period-module-row--end' : '';
 
                         return (
                           <div
-                            key={`${day.num}-${periodMeta.num}`}
-                            className={`period-module-cell border-r last:border-r-0 border-slate-200 ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
+                            key={`period-row-${periodMeta.num}`}
+                            className={`period-module-row ${periodModuleStartClass} ${periodModuleEndClass} grid grid-cols-6 border-b border-slate-100`}
+                            style={{gridAutoRows: '1fr'}}
                           >
-                            {cellItems.length > 0 ? (
-                              <div className={`p-1 flex flex-col gap-1 ${periodScrollbarClass} ${hasMany ? 'max-h-[320px] overflow-y-auto' : ''}`}>
-                                {cellItems.map((item) => {
-                                  const isSelected = selectedCell && selectedCell.id === item.id;
-                                  return (
-                                    <div
-                                      key={item.id}
-                                      onClick={() => handleSelectCell(item)}
-                                      className={`schedule-remark-card relative p-1.5 rounded text-left cursor-pointer transition-all shrink-0 ${item.adjustmentNote ? 'pr-9' : ''} ${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} ${isSelected ? 'ring-2 ring-blue-600 shadow-md' : 'hover:shadow-xs'}`}
-                                    >
-                                      {item.adjustmentNote && (
-                                        <span className="schedule-remark-badge" title={item.adjustmentNote.summary}>
-                                          代
-                                        </span>
-                                      )}
-                                      <div className="font-bold text-[11px] leading-tight truncate">
-                                        {item.subject} · {item.teacherName}
-                                      </div>
-                                      <div className="text-[9px] text-slate-600/80 truncate mt-0.5">
-                                        {item.teachingClassName}
-                                      </div>
-                                      {item.adjustmentNote && (
-                                        <div className="schedule-remark-line" title={item.adjustmentNote.summary}>
-                                          {item.adjustmentNote.originalTeacherName || '原老师'} → {item.adjustmentNote.substituteTeacherName || item.teacherName}
-                                        </div>
-                                      )}
+                            <div className={`period-module-label p-2 border-r border-slate-200 text-center flex flex-col justify-center items-center shrink-0 ${pc.bg} ${pc.border}`}>
+                              <span className={`text-[11px] font-bold ${pc.label}`}>{periodMeta.name}</span>
+                              <span className="text-[9px] text-slate-400 font-medium leading-tight mt-0.5">{periodMeta.time}</span>
+                              {pc.tag && <span className={`mt-1 text-[8px] font-bold px-1 py-0.5 rounded-full ${pc.tagBg}`}>{pc.tag}</span>}
+                            </div>
+
+                            {DAYS.map((day) => {
+                              const cellItems = getFilteredSchedules(day.num, periodMeta.num);
+                              const cellConflicts = getCellConflicts(day.num, periodMeta.num);
+                              const hasMany = cellItems.length > 3;
+                              const periodScrollbarClass = getPeriodScrollbarClass(periodMeta.num);
+
+                              return (
+                                <div
+                                  key={`${day.num}-${periodMeta.num}`}
+                                  className={`period-module-cell border-r last:border-r-0 border-slate-200 ${cellConflicts.length > 0 ? 'bg-orange-50/20' : 'bg-transparent'}`}
+                                >
+                                  {cellItems.length > 0 ? (
+                                    <div className={`p-1 flex flex-col gap-1 ${periodScrollbarClass} ${hasMany ? 'max-h-[320px] overflow-y-auto' : ''}`}>
+                                      {cellItems.map((item) => {
+                                        const isSelected = selectedCell && selectedCell.id === item.id;
+                                        return (
+                                          <div
+                                            key={item.id}
+                                            onClick={() => handleSelectCell(item)}
+                                            className={`schedule-remark-card relative p-1.5 rounded text-left cursor-pointer transition-all shrink-0 ${item.adjustmentNote ? 'pr-9' : ''} ${getSubjectColorClass(item.subject, item.isFinished, item.isTemp)} ${isSelected ? 'ring-2 ring-blue-600 shadow-md' : 'hover:shadow-xs'}`}
+                                          >
+                                            {item.adjustmentNote && (
+                                              <span className="schedule-remark-badge" title={item.adjustmentNote.summary}>
+                                                代
+                                              </span>
+                                            )}
+                                            <div className="font-bold text-[11px] leading-tight truncate">
+                                              {item.subject} · {item.teacherName}
+                                            </div>
+                                            <div className="text-[9px] text-slate-600/80 truncate mt-0.5">
+                                              {item.teachingClassName}
+                                            </div>
+                                            {item.adjustmentNote && (
+                                              <div className="schedule-remark-line" title={item.adjustmentNote.summary}>
+                                                {item.adjustmentNote.originalTeacherName || '原老师'} → {item.adjustmentNote.substituteTeacherName || item.teacherName}
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <div className="h-full min-h-[72px] flex items-center justify-center text-[10px] text-slate-200 select-none">
-                                -
-                              </div>
-                            )}
+                                  ) : (
+                                    <div className="h-full min-h-[72px] flex items-center justify-center text-[10px] text-slate-200 select-none">
+                                      -
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         );
                       })}
-                    </div>
+                    </section>
                   );
                 })}
               </div>

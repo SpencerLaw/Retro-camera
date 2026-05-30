@@ -361,6 +361,48 @@
   background: rgba(255, 241, 242, 0.24);
 }
 
+.scheduler-board-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex: 0 0 auto;
+  padding: 0.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(22px) saturate(1.24);
+  -webkit-backdrop-filter: blur(22px) saturate(1.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 8px 18px rgba(15, 23, 42, 0.1);
+}
+
+.scheduler-board-mode-toggle--pinned {
+  height: 2.25rem;
+}
+
+.scheduler-board-mode-option {
+  height: 1.75rem;
+  min-width: 4rem;
+  padding: 0 0.7rem;
+  border-radius: 9999px;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.scheduler-board-mode-option:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.scheduler-board-mode-option.is-active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #0f766e);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
 .scheduler-page-head {
   position: relative;
   z-index: 1;
@@ -573,6 +615,285 @@
   font-size: 0.55rem;
   font-weight: 800;
   line-height: 1.15;
+}
+
+.class-board-shell {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0.95rem;
+  min-width: 760px;
+}
+
+.class-board-summary,
+.class-board-day-block {
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(20px) saturate(1.18);
+  -webkit-backdrop-filter: blur(20px) saturate(1.18);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.class-board-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 18px;
+  padding: 0.85rem 1rem;
+}
+
+.class-board-kicker {
+  display: block;
+  color: #2563eb;
+  font-size: 0.66rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.class-board-summary h3 {
+  margin-top: 0.18rem;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.class-board-summary p {
+  max-width: 42rem;
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.class-board-day-block {
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.class-board-day-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.78rem 0.95rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(240, 249, 255, 0.16));
+}
+
+.class-board-day-title span {
+  display: block;
+  color: #64748b;
+  font-size: 0.58rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.class-board-day-title strong {
+  display: block;
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 950;
+  line-height: 1.1;
+}
+
+.class-board-day-title small {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.class-board-scroll {
+  overflow-x: auto;
+  padding: 0.7rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(37, 99, 235, 0.55) transparent;
+}
+
+.class-board-grid {
+  display: grid;
+  gap: 0.32rem;
+  min-width: max-content;
+}
+
+.class-board-corner,
+.class-board-class-head,
+.class-board-period-label,
+.class-board-slot {
+  min-height: 3.2rem;
+  border: 1px solid rgba(226, 232, 240, 0.82);
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.class-board-corner,
+.class-board-class-head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.class-board-corner,
+.class-board-period-label {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.class-board-corner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 950;
+}
+
+.class-board-class-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: 12px;
+}
+
+.class-board-number-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.68rem;
+  height: 1.68rem;
+  border: 2px solid rgba(239, 68, 68, 0.62);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #991b1b;
+  font-size: 0.78rem;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.class-board-class-head small {
+  color: #64748b;
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+
+.class-board-period-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.18rem;
+  border-radius: 12px;
+  padding: 0.55rem;
+  background: rgba(248, 250, 252, 0.86);
+}
+
+.class-board-period-label strong {
+  color: #0f172a;
+  font-size: 0.72rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.class-board-period-label small {
+  color: #64748b;
+  font-size: 0.54rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.class-board-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+  min-width: 3.7rem;
+  border-radius: 10px;
+  padding: 0.22rem;
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.class-board-slot.has-overlap {
+  outline: 2px solid rgba(249, 115, 22, 0.35);
+  outline-offset: -2px;
+}
+
+.class-board-course-card {
+  --subject-hue: 215;
+  --teacher-lightness: 84%;
+  --teacher-border-lightness: 58%;
+  --teacher-chip-lightness: 92%;
+  position: relative;
+  display: flex;
+  min-height: 2.65rem;
+  width: 100%;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  overflow: hidden;
+  border: 1px solid;
+  border-color: hsl(var(--subject-hue) 72% var(--teacher-border-lightness));
+  border-radius: 8px;
+  background: hsl(var(--subject-hue) 84% var(--teacher-lightness));
+  color: hsl(var(--subject-hue) 70% 18%);
+  text-align: center;
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
+
+.class-board-course-card:hover {
+  z-index: 2;
+  filter: saturate(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
+}
+
+.class-board-course-card strong {
+  font-size: 0.78rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.class-board-course-card > span:not(.class-board-substitute-dot) {
+  max-width: 100%;
+  overflow: hidden;
+  color: rgba(15, 23, 42, 0.68);
+  font-size: 0.48rem;
+  font-weight: 850;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.class-board-substitute-dot {
+  position: absolute;
+  top: 0.18rem;
+  right: 0.18rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  height: 0.9rem;
+  border-radius: 9999px;
+  background: hsl(var(--subject-hue) 88% var(--teacher-chip-lightness));
+  color: #9a3412;
+  font-size: 0.48rem;
+  font-weight: 950;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.class-board-empty {
+  display: flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  color: rgba(148, 163, 184, 0.7);
+  font-size: 0.76rem;
+  font-weight: 850;
 }
 
 .substitute-confirm-panel {

@@ -88,6 +88,38 @@ const TIMETABLE_BLOCKS = [
   { type: 'module', module: PERIOD_MODULES[3] }
 ] as const;
 const SUBSTITUTE_REASON_OPTIONS = ['临时有事请假', '教研活动', '外出培训', '病假', '会议冲突', '走班临调'];
+const subjectHueMap: Record<string, number> = {
+  '语文': 358,
+  '数学': 146,
+  '英语': 55,
+  '物理': 196,
+  '化学': 8,
+  '生物': 122,
+  '历史': 42,
+  '地理': 210,
+  '政治': 218,
+  '通用': 88,
+  '信息技术': 202,
+  '音乐': 326,
+  '美术': 48,
+  '体育': 96
+};
+const subjectBriefNameMap: Record<string, string> = {
+  '语文': '语',
+  '数学': '数',
+  '英语': '英',
+  '物理': '物',
+  '化学': '化',
+  '生物': '生',
+  '历史': '史',
+  '地理': '地',
+  '政治': '政',
+  '通用': '通',
+  '信息技术': '信',
+  '音乐': '音',
+  '美术': '美',
+  '体育': '体'
+};
 
 type PendingSubstituteConfirm = {
   scheduleId: string;
@@ -119,6 +151,7 @@ export default function App() {
   // Loading & View Controls
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'board' | 'management'>('board');
+  const [boardDisplayMode, setBoardDisplayMode] = useState<'time' | 'class'>('time');
   const [isTabLayoutPinned, setIsTabLayoutPinned] = useState<boolean>(false);
   const [selectedGrade, setSelectedGrade] = useState<string>('高二');
   const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students'>('teachers');
@@ -388,6 +421,32 @@ export default function App() {
     }
 
     return list;
+  };
+
+  const getScheduleClassNumber = (item: ScheduleItem) => {
+    const teachingClass = teachingClasses.find(tc => tc.id === item.teachingClassId);
+    if (teachingClass?.classNumber) return teachingClass.classNumber;
+    const classNumberMatch = item.teachingClassName.match(/(?:初一|初二|初三|高一|高二|高三)(\d+)班/);
+    return classNumberMatch ? Number(classNumberMatch[1]) : null;
+  };
+
+  const getGradeClassNumbers = () => {
+    const classNumbersFromAssignments = getGradeTeachingClasses()
+      .map(tc => tc.classNumber)
+      .filter((classNumber): classNumber is number => typeof classNumber === 'number');
+    const classNumbersFromSchedules = schedules
+      .filter(item => item.teachingClassName.startsWith(selectedGrade))
+      .map(item => getScheduleClassNumber(item))
+      .filter((classNumber): classNumber is number => typeof classNumber === 'number');
+
+    return Array.from(new Set([...classNumbersFromAssignments, ...classNumbersFromSchedules]))
+      .sort((a, b) => a - b);
+  };
+
+  const getClassViewSchedules = (day: number, period: number, classNumber: number) => {
+    return getFilteredSchedules(day, period)
+      .filter(item => getScheduleClassNumber(item) === classNumber)
+      .sort((a, b) => a.subject.localeCompare(b.subject) || a.teacherName.localeCompare(b.teacherName));
   };
 
   const getCellConflicts = (day: number, period: number) => {
@@ -666,6 +725,32 @@ export default function App() {
     }
   };
 
+  const getTeacherToneIndex = (teacherId: string) => {
+    return teacherId.split('').reduce((total, char) => total + char.charCodeAt(0), 0) % 5;
+  };
+
+  const getClassMatrixCellStyle = (item: ScheduleItem): React.CSSProperties => {
+    const toneIndex = getTeacherToneIndex(item.teacherId);
+    const lightnessByTone = [90, 84, 78, 72, 66];
+    const hue = subjectHueMap[item.subject] ?? 215;
+
+    return {
+      '--subject-hue': hue,
+      '--teacher-lightness': `${lightnessByTone[toneIndex]}%`,
+      '--teacher-border-lightness': `${Math.max(38, lightnessByTone[toneIndex] - 24)}%`,
+      '--teacher-chip-lightness': `${Math.min(96, lightnessByTone[toneIndex] + 5)}%`
+    } as React.CSSProperties;
+  };
+
+  const getSubjectBriefName = (subject: string) => {
+    return subjectBriefNameMap[subject] || subject.slice(0, 1);
+  };
+
+  const getTeacherBriefName = (teacherName: string) => {
+    if (!teacherName) return '';
+    return teacherName.length >= 3 ? teacherName.slice(1, 2) : teacherName.slice(-1);
+  };
+
   const gradeTeachers = getGradeTeachers();
   const gradeTeachingClasses = getGradeTeachingClasses();
   const gradeStudents = getGradeStudents();
@@ -749,6 +834,30 @@ export default function App() {
     );
   };
 
+  const renderBoardModeToggle = (variant: 'head' | 'pinned') => {
+    return (
+      <div
+        className={`scheduler-board-mode-toggle scheduler-board-mode-toggle--${variant}`}
+        aria-label="排课检查模式"
+      >
+        <button
+          type="button"
+          onClick={() => setBoardDisplayMode('time')}
+          className={boardDisplayMode === 'time' ? 'scheduler-board-mode-option is-active' : 'scheduler-board-mode-option'}
+        >
+          时间视图
+        </button>
+        <button
+          type="button"
+          onClick={() => setBoardDisplayMode('class')}
+          className={boardDisplayMode === 'class' ? 'scheduler-board-mode-option is-active' : 'scheduler-board-mode-option'}
+        >
+          按班级看
+        </button>
+      </div>
+    );
+  };
+
   const renderBoardFilters = (variant: 'head' | 'pinned') => {
     return (
       <div className={`scheduler-board-filters scheduler-board-filters--${variant}`}>
@@ -819,6 +928,95 @@ export default function App() {
             清除筛选
           </button>
         )}
+      </div>
+    );
+  };
+
+  const renderClassBoardView = () => {
+    const classNumbers = getGradeClassNumbers();
+    const periodRows = PERIODS_METADATA.filter(meta => meta.type === 'period');
+    const gridTemplateColumns = `4.1rem repeat(${Math.max(classNumbers.length, 1)}, minmax(3.7rem, 1fr))`;
+
+    return (
+      <div className="class-board-shell" data-view-mode="class-inspection">
+        <div className="class-board-summary">
+          <div>
+            <span className="class-board-kicker">班级横向检查</span>
+            <h3>{selectedGrade}各班本周课程矩阵</h3>
+          </div>
+          <p>
+            横向是班级号，纵向是节次；同学科保持同一色系，同科不同老师用深浅区分，点击任意课程可继续查看诊断和临时代课。
+          </p>
+        </div>
+
+        {DAYS.map(day => {
+          const dayCourseCount = schedules.filter(item => item.teachingClassName.startsWith(selectedGrade) && item.day === day.num).length;
+
+          return (
+            <section key={`class-board-day-${day.num}`} className="class-board-day-block">
+              <div className="class-board-day-title">
+                <div>
+                  <span>{day.engName}</span>
+                  <strong>{day.name}</strong>
+                </div>
+                <small>{classNumbers.length} 个班级 · {dayCourseCount} 节课</small>
+              </div>
+
+              <div className="class-board-scroll">
+                <div className="class-board-grid" style={{ gridTemplateColumns }}>
+                  <div className="class-board-corner">节次</div>
+                  {classNumbers.map(classNumber => (
+                    <div key={`class-head-${day.num}-${classNumber}`} className="class-board-class-head">
+                      <span className="class-board-number-badge">{classNumber}</span>
+                      <small>班</small>
+                    </div>
+                  ))}
+
+                  {periodRows.map(period => (
+                    <React.Fragment key={`class-period-row-${day.num}-${period.num}`}>
+                      <div className="class-board-period-label">
+                        <strong>{period.name}</strong>
+                        <small>{period.time}</small>
+                      </div>
+
+                      {classNumbers.map(classNumber => {
+                        const cellItems = getClassViewSchedules(day.num, period.num, classNumber);
+
+                        return (
+                          <div
+                            key={`class-slot-${day.num}-${period.num}-${classNumber}`}
+                            className={`class-board-slot ${cellItems.length > 1 ? 'has-overlap' : ''}`}
+                          >
+                            {cellItems.length > 0 ? (
+                              cellItems.map(item => (
+                                <button
+                                  type="button"
+                                  key={item.id}
+                                  onClick={() => handleSelectCell(item)}
+                                  className="class-board-course-card"
+                                  style={getClassMatrixCellStyle(item)}
+                                  title={`${day.name} ${period.name} · ${selectedGrade}${classNumber}班 · ${item.subject} · ${item.teacherName}`}
+                                >
+                                  {item.adjustmentNote && (
+                                    <span className="class-board-substitute-dot">代</span>
+                                  )}
+                                  <strong>{getSubjectBriefName(item.subject)}{getTeacherBriefName(item.teacherName)}</strong>
+                                  <span>{item.teacherName}</span>
+                                </button>
+                              ))
+                            ) : (
+                              <span className="class-board-empty">-</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })}
       </div>
     );
   };
@@ -921,6 +1119,7 @@ export default function App() {
         <div className={`scheduler-pinned-filter-bar ${isTabLayoutPinned ? 'is-visible' : ''}`} aria-hidden={!isTabLayoutPinned}>
           {isTabLayoutPinned && (
             <div className="scheduler-pinned-filter-inner">
+              {renderBoardModeToggle('pinned')}
               {renderBoardFilters('pinned')}
             </div>
           )}
@@ -938,7 +1137,9 @@ export default function App() {
             <div className={`scheduler-page-head scheduler-board-head flex justify-between items-end mb-4 shrink-0 ${isTabLayoutPinned ? 'scheduler-page-head--collapsed' : ''}`}>
               <div className="text-left">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{getActiveFilterLabel()}</h2>
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    {boardDisplayMode === 'class' ? `班级课程检查：${selectedGrade}` : getActiveFilterLabel()}
+                  </h2>
                   <select 
                     value={selectedGrade}
                     onChange={(e) => setSelectedGrade(e.target.value)}
@@ -951,9 +1152,12 @@ export default function App() {
                     <option value="高二">高二年级</option>
                     <option value="高三">高三年级</option>
                   </select>
+                  {renderBoardModeToggle('head')}
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  采用一键自动排课+手动微调保障。排上课表项代表走班制上课组织，包含行政班与教学班时间。
+                  {boardDisplayMode === 'class'
+                    ? '按行政班号横向扫描每一天的课程，用颜色和教师缩写快速发现缺课、重复或临时代课。'
+                    : '采用一键自动排课+手动微调保障。排上课表项代表走班制上课组织，包含行政班与教学班时间。'}
                 </p>
               </div>
 
@@ -964,6 +1168,7 @@ export default function App() {
             </div>
 
             {/* TIMETABLE DYNAMIC LAYOUT: THE GEOMETRIC GRID */}
+            {boardDisplayMode === 'time' ? (
             <div className="scheduler-timetable-shell bg-white border border-slate-200 rounded-xl shadow-xs min-w-[700px]">
               
               {/* Columns Header (Monday - Friday) */}
@@ -1118,6 +1323,7 @@ export default function App() {
                 })}
               </div>
             </div>
+            ) : renderClassBoardView()}
           </main>
 
         </div>

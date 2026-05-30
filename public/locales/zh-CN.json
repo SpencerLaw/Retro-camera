@@ -200,7 +200,7 @@
     "report": {
       "title": "本周课堂报告",
       "trigger": "一周报告",
-      "subtitle": "周一到周五 · 弹窗查看",
+      "subtitle": "周一到周日 · 弹窗查看",
       "show": "展开报告",
       "hide": "收起报告",
       "localOnly": "仅保存在这台电脑本地，关闭后不会上传。",
@@ -480,10 +480,42 @@
     "timeEndToast": "⏰ 早读时间结束！",
     "micError": "无法访问麦克风，请检查权限设置。",
     "superModeToast": "🎉 能量树显灵了！全班棒棒哒！ 🎉",
+    "lifecycle": {
+      "title": "成长层次",
+      "seed": "种子",
+      "sprout": "发芽",
+      "branches": "枝条",
+      "leaves": "叶片",
+      "flowers": "开花",
+      "fruit": "结果",
+      "final": "最终能量树"
+    },
+    "rewards": {
+      "water": "浇水",
+      "fertilizer": "施肥",
+      "overLoud": "过响提醒"
+    },
+    "forest": {
+      "trigger": "能量森林",
+      "title": "本周能量森林",
+      "sub": "每天种下的小树都会保存在本机",
+      "localOnly": "仅本机记录",
+      "emptyDay": "这一天还没有种下能量树",
+      "emptyShort": "未种下",
+      "noBranches": "暂无学生枝干数据"
+    },
+    "participants": {
+      "title": "学生枝干",
+      "sub": "选择当前朗读学生/小组",
+      "manage": "编辑",
+      "save": "保存枝干",
+      "slotLabel": "枝干",
+      "branchTitle": "学生枝干"
+    },
     "report": {
       "trigger": "一周报告",
       "title": "本周早读报告",
-      "sub": "仅保存在本机，按周一到周五查看",
+      "sub": "仅保存在本机，按周一到周日查看",
       "summarySessions": "记录场次",
       "summaryPeak": "本周峰值",
       "duration": "早读时长",
@@ -517,7 +549,9 @@
         "tue": "周二",
         "wed": "周三",
         "thu": "周四",
-        "fri": "周五"
+        "fri": "周五",
+        "sat": "周六",
+        "sun": "周日"
       }
     },
     "tasks": {
@@ -526,7 +560,7 @@
       "sub": "仅保存在本机，到当天会自动显示",
       "todayBadge": "今日任务",
       "emptyToday": "今日暂无早读任务",
-      "emptyHint": "点击右侧今日任务，设置周一到周五内容",
+      "emptyHint": "点击右侧今日任务，设置周一到周日内容",
       "pendingTask": "请填写任务内容",
       "nextTask": "下一项：{time} {content}",
       "upcoming": "即将开始",

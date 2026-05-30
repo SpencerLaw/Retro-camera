@@ -13,16 +13,35 @@ const AUTH_KEY = 'morning_tree_auth';
 const LICENSE_PREFIX = 'ZD';
 const REPORT_STORAGE_KEY = 'morning_tree_weekly_reports_v1';
 const TASK_STORAGE_KEY = 'morning_tree_weekly_tasks_v1';
+const FOREST_STORAGE_KEY = 'morning_tree_daily_forest_v1';
+const PARTICIPANT_STORAGE_KEY = 'morning_tree_participants_v1';
 const MAX_STORED_REPORTS = 100;
+const MAX_STORED_FOREST_DAYS = 180;
 const MAX_TASK_SLOTS = 6;
+const MAX_PARTICIPANTS = 5;
 const REPORT_WEEKDAYS = [
     { key: 'mon', offset: 0 },
     { key: 'tue', offset: 1 },
     { key: 'wed', offset: 2 },
     { key: 'thu', offset: 3 },
-    { key: 'fri', offset: 4 }
+    { key: 'fri', offset: 4 },
+    { key: 'sat', offset: 5 },
+    { key: 'sun', offset: 6 }
 ];
 const DEFAULT_GROWTH_PER_SECOND = 100 / 90;
+const WATER_STABLE_SECONDS = 12;
+const FERTILIZER_READING_SECONDS = 60;
+const HEALTHY_READING_DB_MAX = 96;
+const OVER_LOUD_DB = 100;
+const TREE_LIFECYCLE_STAGES = [
+    { key: 'seed', minEnergy: 0 },
+    { key: 'sprout', minEnergy: 12 },
+    { key: 'branches', minEnergy: 28 },
+    { key: 'leaves', minEnergy: 48 },
+    { key: 'flowers', minEnergy: 68 },
+    { key: 'fruit', minEnergy: 86 },
+    { key: 'final', minEnergy: 100 }
+];
 
 const STATE = {
     isListening: false,
@@ -56,13 +75,19 @@ const STATE = {
     manifestedElapsedSeconds: null,
     reportEffectiveReadingSeconds: 0,
     reportPeakEnergy: 0,
+    rewardState: null,
+    participantMetrics: null,
     reportActiveDay: null,
     reportActiveSession: 0,
+    forestActiveDateKey: null,
 
     // Weekly task board
     taskActiveDay: null,
     taskDrafts: null,
     taskStripPreviewDay: null,
+    participants: null,
+    activeParticipantId: null,
+    participantLastRenderAt: 0,
     frameNow: 0
 };
 
@@ -204,6 +229,19 @@ const reportSummaryCount = $('report-summary-count');
 const reportSummaryPeak = $('report-summary-peak');
 const reportDayChipRow = $('report-day-chip-row');
 const reportDayList = $('report-day-list');
+const forestTriggerBtn = $('forest-trigger-btn');
+const forestModal = $('forest-modal');
+const forestBackdrop = $('forest-backdrop');
+const forestCloseBtn = $('forest-close-btn');
+const forestWeekLabel = $('forest-week-label');
+const forestMapGrid = $('forest-map-grid');
+const forestDetail = $('forest-detail');
+const participantPanel = $('participant-panel');
+const participantList = $('participant-list');
+const participantManageBtn = $('participant-manage-btn');
+const participantEditor = $('participant-editor');
+const participantFields = $('participant-fields');
+const participantSaveBtn = $('participant-save-btn');
 
 // Help Tooltip Toggle
 const helpTrigger = $('help-trigger');
@@ -251,6 +289,328 @@ function loadStoredReports() {
 
 function persistReports(reports) {
     localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(reports.slice(0, MAX_STORED_REPORTS)));
+}
+
+function getTreeLifecycleStage(source) {
+    const sourceObject = typeof source === 'object' && source !== null ? source : { finalEnergy: source };
+    const rawEnergy = Number(
+        sourceObject.finalEnergy ?? sourceObject.energy ?? sourceObject.peakEnergy ?? sourceObject.energyScore ?? 0
+    );
+    const energy = clampEnergy(Number.isFinite(rawEnergy) ? rawEnergy : 0);
+    const manifested = Boolean(sourceObject.manifested) || energy >= 100;
+    const stageIndex = manifested
+        ? TREE_LIFECYCLE_STAGES.length - 1
+        : TREE_LIFECYCLE_STAGES.reduce((bestIndex, stage, index) => (
+            energy >= stage.minEnergy ? index : bestIndex
+        ), 0);
+    const stage = TREE_LIFECYCLE_STAGES[stageIndex];
+    const nextStage = TREE_LIFECYCLE_STAGES[stageIndex + 1] || null;
+    const prevStage = TREE_LIFECYCLE_STAGES[Math.max(0, stageIndex - 1)];
+    const rangeStart = stage.minEnergy;
+    const rangeEnd = nextStage?.minEnergy ?? 100;
+    const progress = nextStage
+        ? clamp((energy - rangeStart) / Math.max(1, rangeEnd - rangeStart), 0, 1)
+        : 1;
+
+    return {
+        ...stage,
+        index: stageIndex,
+        energy: Math.round(energy),
+        labelKey: `morningTree.lifecycle.${stage.key}`,
+        previousKey: prevStage?.key || stage.key,
+        nextKey: nextStage?.key || null,
+        progress
+    };
+}
+
+function getAudioActivation(currentDB, profile = getSensitivityProfile(STATE.sensitivity), readingHoldSeconds = STATE.readingHoldSeconds) {
+    const safeDb = Number.isFinite(currentDB) ? currentDB : 30;
+    const threshold = Number.isFinite(profile?.readingThreshold) ? profile.readingThreshold : READING_THRESHOLD;
+    const holdSeconds = Number.isFinite(readingHoldSeconds) ? Math.max(0, readingHoldSeconds) : 0;
+    const minimumHold = Number.isFinite(profile?.minimumReadingSeconds) ? Math.max(0.1, profile.minimumReadingSeconds) : 0.45;
+    const overLoud = safeDb >= OVER_LOUD_DB;
+    const dbRatio = clamp((safeDb - (threshold - 8)) / 36, 0, 1.35);
+    const holdRatio = clamp(holdSeconds / (minimumHold + 0.8), 0, 1);
+    const stabilityBoost = 0.58 + (holdRatio * 0.42);
+    const intensity = clamp(dbRatio * stabilityBoost, 0, 1.42);
+
+    return {
+        intensity,
+        dbRatio,
+        holdRatio,
+        overLoud,
+        orbCount: Math.max(0, Math.round(1 + (intensity * 5))),
+        glow: clamp(0.14 + (intensity * 0.68), 0.14, 1),
+        speed: clamp(0.8 + (intensity * 1.1), 0.8, 2.4)
+    };
+}
+
+function createSessionRewardState() {
+    return {
+        waterCount: 0,
+        fertilizerCount: 0,
+        overLoudCount: 0,
+        stableReadingSeconds: 0,
+        overLoudSeconds: 0,
+        overLoudCooldownSeconds: 0,
+        nextWaterAt: WATER_STABLE_SECONDS,
+        nextFertilizerAt: FERTILIZER_READING_SECONDS
+    };
+}
+
+function updateSessionRewards(rewardState, options = {}) {
+    const state = rewardState || createSessionRewardState();
+    const deltaSeconds = normalizeDeltaSeconds(options.deltaSeconds);
+    const currentDB = Number.isFinite(options.currentDB) ? options.currentDB : 30;
+    const effectiveReadingSeconds = Number.isFinite(options.effectiveReadingSeconds)
+        ? Math.max(0, options.effectiveReadingSeconds)
+        : 0;
+    const isReadingLoudly = Boolean(options.isReadingLoudly);
+    const isOverLoud = currentDB >= OVER_LOUD_DB;
+    const isHealthyStableReading = isReadingLoudly && currentDB < OVER_LOUD_DB && currentDB <= HEALTHY_READING_DB_MAX;
+
+    state.overLoudCooldownSeconds = Math.max(0, (state.overLoudCooldownSeconds || 0) - deltaSeconds);
+    if (isOverLoud) {
+        state.overLoudSeconds = (state.overLoudSeconds || 0) + deltaSeconds;
+        if (state.overLoudCooldownSeconds <= 0) {
+            state.overLoudCount = (state.overLoudCount || 0) + 1;
+            state.overLoudCooldownSeconds = 2;
+        }
+    }
+
+    if (isHealthyStableReading) {
+        state.stableReadingSeconds = (state.stableReadingSeconds || 0) + deltaSeconds;
+        if ((state.waterCount || 0) < 1 && state.stableReadingSeconds >= WATER_STABLE_SECONDS) {
+            state.waterCount = 1;
+            state.nextWaterAt = Number.POSITIVE_INFINITY;
+        }
+    } else if (!isReadingLoudly) {
+        state.stableReadingSeconds = Math.max(0, (state.stableReadingSeconds || 0) - (deltaSeconds * 0.5));
+    }
+
+    if (!isOverLoud && isReadingLoudly && (state.fertilizerCount || 0) < 1 && effectiveReadingSeconds >= FERTILIZER_READING_SECONDS) {
+        state.fertilizerCount = 1;
+        state.nextFertilizerAt = Number.POSITIVE_INFINITY;
+    }
+
+    return state;
+}
+
+function createDefaultParticipants() {
+    return Array.from({ length: MAX_PARTICIPANTS }, (_, index) => ({
+        id: `group-${index + 1}`,
+        name: `第${index + 1}组`
+    }));
+}
+
+function normalizeParticipants(rawParticipants) {
+    const source = Array.isArray(rawParticipants) && rawParticipants.length
+        ? rawParticipants
+        : createDefaultParticipants();
+    const normalized = [];
+    const usedIds = new Set();
+
+    source.slice(0, MAX_PARTICIPANTS).forEach((participant, index) => {
+        const fallbackId = `group-${index + 1}`;
+        const rawId = typeof participant?.id === 'string' && participant.id.trim()
+            ? participant.id.trim()
+            : fallbackId;
+        const id = usedIds.has(rawId) ? fallbackId : rawId;
+        usedIds.add(id);
+        normalized.push({
+            id,
+            name: typeof participant?.name === 'string' && participant.name.trim()
+                ? participant.name.trim().slice(0, 12)
+                : `第${index + 1}组`
+        });
+    });
+
+    while (normalized.length < MAX_PARTICIPANTS) {
+        const index = normalized.length;
+        normalized.push({
+            id: `group-${index + 1}`,
+            name: `第${index + 1}组`
+        });
+    }
+
+    return normalized.slice(0, MAX_PARTICIPANTS);
+}
+
+function loadStoredParticipants() {
+    try {
+        const raw = localStorage.getItem(PARTICIPANT_STORAGE_KEY);
+        if (!raw) return normalizeParticipants();
+        return normalizeParticipants(JSON.parse(raw));
+    } catch (error) {
+        console.error('Failed to load morning tree participants:', error);
+        return normalizeParticipants();
+    }
+}
+
+function persistParticipants(participants) {
+    localStorage.setItem(PARTICIPANT_STORAGE_KEY, JSON.stringify(normalizeParticipants(participants)));
+}
+
+function createParticipantMetrics(participants = normalizeParticipants()) {
+    return participants.reduce((acc, participant) => {
+        acc[participant.id] = {
+            id: participant.id,
+            name: participant.name,
+            readingSeconds: 0,
+            peakDb: 0,
+            energyScore: 0,
+            branchStage: getTreeLifecycleStage({ finalEnergy: 0 })
+        };
+        return acc;
+    }, {});
+}
+
+function updateParticipantBranchMetrics(metrics, activeParticipantId, options = {}) {
+    if (!metrics || !activeParticipantId || !metrics[activeParticipantId]) return metrics;
+    const current = metrics[activeParticipantId];
+    const deltaSeconds = normalizeDeltaSeconds(options.deltaSeconds);
+    const currentDB = Number.isFinite(options.currentDB) ? options.currentDB : 30;
+    const isReadingLoudly = Boolean(options.isReadingLoudly);
+
+    current.peakDb = Math.max(current.peakDb || 0, Math.round(currentDB));
+    if (isReadingLoudly) {
+        current.readingSeconds = Math.max(0, (current.readingSeconds || 0) + deltaSeconds);
+        const dbBonus = clamp((currentDB - READING_THRESHOLD) / 30, 0, 1.2);
+        current.energyScore = clampEnergy((current.energyScore || 0) + deltaSeconds * (1.25 + dbBonus));
+        current.branchStage = getTreeLifecycleStage({ finalEnergy: current.energyScore });
+    }
+
+    return metrics;
+}
+
+function loadStoredForest() {
+    try {
+        const raw = localStorage.getItem(FOREST_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+            .filter(item => item && typeof item.dateKey === 'string')
+            .map(item => ({
+                ...item,
+                sessionCount: Math.max(1, Number.parseInt(item.sessionCount || 1, 10)),
+                treeStage: item.treeStage?.key ? item.treeStage : getTreeLifecycleStage(item),
+                rewards: {
+                    waterCount: Math.max(0, Math.round(Number(item.rewards?.waterCount) || 0)),
+                    fertilizerCount: Math.max(0, Math.round(Number(item.rewards?.fertilizerCount) || 0)),
+                    overLoudCount: Math.max(0, Math.round(Number(item.rewards?.overLoudCount) || 0))
+                },
+                participantMetrics: item.participantMetrics && typeof item.participantMetrics === 'object'
+                    ? item.participantMetrics
+                    : {}
+            }));
+    } catch (error) {
+        console.error('Failed to load morning tree forest:', error);
+        return [];
+    }
+}
+
+function persistForest(forest) {
+    const normalized = Array.isArray(forest) ? forest : [];
+    localStorage.setItem(
+        FOREST_STORAGE_KEY,
+        JSON.stringify(normalized
+            .sort((a, b) => new Date(b.startedAt || b.dateKey).getTime() - new Date(a.startedAt || a.dateKey).getTime())
+            .slice(0, MAX_STORED_FOREST_DAYS))
+    );
+}
+
+function getTreeSnapshotFromReport(report) {
+    const finalEnergy = getReportEnergyValue(report, 'finalEnergy', report?.manifested ? 100 : 0);
+    const peakEnergy = getReportEnergyValue(report, 'peakEnergy', finalEnergy);
+    const treeStage = getTreeLifecycleStage({
+        finalEnergy: Math.max(finalEnergy, peakEnergy),
+        manifested: Boolean(report?.manifested)
+    });
+
+    return {
+        dateKey: toDateKey(report.startedAt),
+        dateLabel: formatShortDate(report.startedAt),
+        startedAt: report.startedAt,
+        endedAt: report.endedAt,
+        sessionCount: 1,
+        durationSeconds: Math.max(0, Math.round(Number(report.durationSeconds) || 0)),
+        readingSeconds: Math.max(0, Math.round(Number(report.readingSeconds) || 0)),
+        peakDb: Math.max(0, Math.round(Number(report.peakDb) || 0)),
+        averageDb: Math.max(0, Math.round(Number(report.averageDb) || 0)),
+        finalEnergy,
+        peakEnergy,
+        manifested: Boolean(report.manifested),
+        manifestedAt: report.manifestedAt || null,
+        manifestedElapsedSeconds: Number.isFinite(report.manifestedElapsedSeconds) ? report.manifestedElapsedSeconds : null,
+        treeStage,
+        rewards: {
+            waterCount: Math.max(0, Math.round(Number(report.rewards?.waterCount) || 0)),
+            fertilizerCount: Math.max(0, Math.round(Number(report.rewards?.fertilizerCount) || 0)),
+            overLoudCount: Math.max(0, Math.round(Number(report.rewards?.overLoudCount) || 0))
+        },
+        participantMetrics: report.participantMetrics && typeof report.participantMetrics === 'object'
+            ? report.participantMetrics
+            : {}
+    };
+}
+
+function mergeForestSnapshots(existing, incoming) {
+    if (!existing) return incoming;
+    const finalEnergy = Math.max(existing.finalEnergy || 0, incoming.finalEnergy || 0);
+    const peakEnergy = Math.max(existing.peakEnergy || 0, incoming.peakEnergy || 0);
+    const manifested = Boolean(existing.manifested || incoming.manifested);
+    const participantMetrics = { ...(existing.participantMetrics || {}) };
+
+    Object.entries(incoming.participantMetrics || {}).forEach(([id, metric]) => {
+        const previous = participantMetrics[id] || { readingSeconds: 0, peakDb: 0, energyScore: 0 };
+        const energyScore = Math.max(previous.energyScore || 0, metric.energyScore || 0);
+        participantMetrics[id] = {
+            ...previous,
+            ...metric,
+            readingSeconds: Math.round((previous.readingSeconds || 0) + (metric.readingSeconds || 0)),
+            peakDb: Math.max(previous.peakDb || 0, metric.peakDb || 0),
+            energyScore,
+            branchStage: getTreeLifecycleStage({ finalEnergy: energyScore })
+        };
+    });
+
+    return {
+        ...existing,
+        ...incoming,
+        sessionCount: (existing.sessionCount || 1) + 1,
+        durationSeconds: (existing.durationSeconds || 0) + (incoming.durationSeconds || 0),
+        readingSeconds: (existing.readingSeconds || 0) + (incoming.readingSeconds || 0),
+        peakDb: Math.max(existing.peakDb || 0, incoming.peakDb || 0),
+        averageDb: Math.round(((existing.averageDb || 0) + (incoming.averageDb || 0)) / 2),
+        finalEnergy,
+        peakEnergy,
+        manifested,
+        manifestedAt: incoming.manifestedAt || existing.manifestedAt || null,
+        manifestedElapsedSeconds: Number.isFinite(incoming.manifestedElapsedSeconds)
+            ? incoming.manifestedElapsedSeconds
+            : existing.manifestedElapsedSeconds ?? null,
+        treeStage: getTreeLifecycleStage({ finalEnergy: Math.max(finalEnergy, peakEnergy), manifested }),
+        rewards: {
+            waterCount: (existing.rewards?.waterCount || 0) + (incoming.rewards?.waterCount || 0),
+            fertilizerCount: (existing.rewards?.fertilizerCount || 0) + (incoming.rewards?.fertilizerCount || 0),
+            overLoudCount: (existing.rewards?.overLoudCount || 0) + (incoming.rewards?.overLoudCount || 0)
+        },
+        participantMetrics
+    };
+}
+
+function upsertForestDayRecord(report) {
+    const incoming = getTreeSnapshotFromReport(report);
+    const forest = loadStoredForest();
+    const index = forest.findIndex(item => item.dateKey === incoming.dateKey);
+    if (index >= 0) {
+        forest[index] = mergeForestSnapshots(forest[index], incoming);
+    } else {
+        forest.push(incoming);
+    }
+    persistForest(forest);
+    return incoming;
 }
 
 function createDefaultTaskSlot(index = 0) {
@@ -373,8 +733,8 @@ function parseClockMinutes(value) {
 
 function getCurrentWeekdayKey(baseDate = new Date()) {
     const day = baseDate.getDay();
-    if (day === 0 || day === 6) return null;
-    return REPORT_WEEKDAYS[Math.max(0, Math.min(4, day - 1))]?.key || 'mon';
+    const index = day === 0 ? 6 : day - 1;
+    return REPORT_WEEKDAYS[Math.max(0, Math.min(REPORT_WEEKDAYS.length - 1, index))]?.key || 'mon';
 }
 
 function clamp(value, min, max) {
@@ -704,6 +1064,13 @@ function startReportSession() {
     STATE.manifestedElapsedSeconds = null;
     STATE.reportEffectiveReadingSeconds = 0;
     STATE.reportPeakEnergy = Math.round(clampEnergy(STATE.energy));
+    STATE.rewardState = createSessionRewardState();
+    STATE.participants = normalizeParticipants(STATE.participants || loadStoredParticipants());
+    if (!STATE.activeParticipantId || !STATE.participants.some(participant => participant.id === STATE.activeParticipantId)) {
+        STATE.activeParticipantId = STATE.participants[0]?.id || null;
+    }
+    STATE.participantMetrics = createParticipantMetrics(STATE.participants);
+    renderParticipantPanel();
 }
 
 function captureReportPoint() {
@@ -739,6 +1106,12 @@ function finalizeReportSession() {
     const manifestedElapsedSeconds = STATE.hasManifested && Number.isFinite(STATE.manifestedElapsedSeconds)
         ? Math.max(0, Math.round(STATE.manifestedElapsedSeconds))
         : null;
+    const rewardState = STATE.rewardState || createSessionRewardState();
+    const participantMetrics = STATE.participantMetrics || createParticipantMetrics(STATE.participants || loadStoredParticipants());
+    const treeStage = getTreeLifecycleStage({
+        finalEnergy: Math.max(finalEnergy, peakEnergy),
+        manifested: Boolean(STATE.hasManifested)
+    });
 
     STATE.sessionStartedAt = null;
     STATE.curveBuffer = [];
@@ -747,6 +1120,8 @@ function finalizeReportSession() {
     STATE.reportPeakEnergy = 0;
     STATE.manifestedAt = null;
     STATE.manifestedElapsedSeconds = null;
+    STATE.rewardState = createSessionRewardState();
+    STATE.participantMetrics = null;
 
     if (durationSeconds < 5) return;
 
@@ -765,6 +1140,13 @@ function finalizeReportSession() {
         readingSeconds,
         activeRatio,
         sensitivity: clampSensitivity(STATE.sensitivity),
+        rewards: {
+            waterCount: Math.max(0, Math.round(rewardState.waterCount || 0)),
+            fertilizerCount: Math.max(0, Math.round(rewardState.fertilizerCount || 0)),
+            overLoudCount: Math.max(0, Math.round(rewardState.overLoudCount || 0))
+        },
+        participantMetrics,
+        treeStage,
         manifestedAt,
         manifestedElapsedSeconds,
         manifested: Boolean(STATE.hasManifested)
@@ -778,7 +1160,9 @@ function finalizeReportSession() {
         .slice(0, MAX_STORED_REPORTS);
 
     persistReports(nextReports);
+    upsertForestDayRecord(nextRecord);
     renderWeeklyReport();
+    renderForestMap();
 }
 
 function getWeeklyDayGroups(reports, monday) {
@@ -801,7 +1185,7 @@ function getWeeklyDayGroups(reports, monday) {
 }
 
 function pickDefaultReportDay(dayGroups) {
-    const today = REPORT_WEEKDAYS[new Date().getDay() === 0 ? 0 : Math.max(0, Math.min(4, new Date().getDay() - 1))]?.key || 'mon';
+    const today = getCurrentWeekdayKey(new Date()) || 'mon';
     return dayGroups.find(group => group.key === today && group.records.length)?.key
         || dayGroups.find(group => group.records.length)?.key
         || 'mon';
@@ -877,6 +1261,16 @@ function renderReportFocus(selectedDay) {
     const readingSecondsLabel = readingSeconds === null ? '--' : formatDuration(readingSeconds);
     const finalEnergyLabel = finalEnergy === null ? '--' : `${finalEnergy}%`;
     const peakEnergyLabel = peakEnergy === null ? '--' : `${peakEnergy}%`;
+    const reportStage = selectedReport.treeStage?.key
+        ? selectedReport.treeStage
+        : getTreeLifecycleStage({
+            finalEnergy: Math.max(finalEnergy || 0, peakEnergy || 0),
+            manifested: selectedReport.manifested
+        });
+    const rewards = selectedReport.rewards || {};
+    const overLoudCount = Math.max(0, Math.round(Number(rewards.overLoudCount) || 0));
+    const waterCount = Math.max(0, Math.round(Number(rewards.waterCount) || 0));
+    const fertilizerCount = Math.max(0, Math.round(Number(rewards.fertilizerCount) || 0));
 
     reportDayList.innerHTML = `
         <div class="report-day-header">
@@ -930,6 +1324,11 @@ function renderReportFocus(selectedDay) {
                     <strong>${readingSecondsLabel}</strong>
                     <small>${t('morningTree.report.activeRatio') || '有效占比'} ${activeRatioLabel}</small>
                 </div>
+                <div class="report-detail-item">
+                    <span>${t('morningTree.lifecycle.title') || '成长层次'}</span>
+                    <strong>${getLifecycleLabel(reportStage)}</strong>
+                    <small>${t('morningTree.forest.localOnly') || '记录保存在本机'}</small>
+                </div>
             </div>
 
             <div class="report-curve-panel">
@@ -971,6 +1370,18 @@ function renderReportFocus(selectedDay) {
                     <span>${t('morningTree.report.sensitivity') || '灵敏度'}</span>
                     <strong>${sensitivity}</strong>
                 </div>
+                <div class="report-metric-card energy">
+                    <span>${t('morningTree.rewards.water') || '浇水'}</span>
+                    <strong>${waterCount}</strong>
+                </div>
+                <div class="report-metric-card energy">
+                    <span>${t('morningTree.rewards.fertilizer') || '施肥'}</span>
+                    <strong>${fertilizerCount}</strong>
+                </div>
+                <div class="report-metric-card ${overLoudCount ? 'peak' : ''}">
+                    <span>${t('morningTree.rewards.overLoud') || '过响提醒'}</span>
+                    <strong>${overLoudCount}</strong>
+                </div>
             </div>
         </article>
     `;
@@ -993,13 +1404,13 @@ function renderWeeklyReport() {
     if (!reportWeekLabel || !reportDayChipRow || !reportDayList) return;
 
     const monday = getCurrentWeekMonday();
-    const friday = new Date(monday);
-    friday.setDate(monday.getDate() + 4);
-    friday.setHours(23, 59, 59, 999);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
 
     const reports = loadStoredReports().filter(report => {
         const startedAt = new Date(report.startedAt).getTime();
-        return startedAt >= monday.getTime() && startedAt <= friday.getTime();
+        return startedAt >= monday.getTime() && startedAt <= sunday.getTime();
     });
     const weeklyPeak = reports.length
         ? Math.max(...reports.map(report => getCurveStats(report).peakValue))
@@ -1011,7 +1422,7 @@ function renderWeeklyReport() {
         STATE.reportActiveDay = defaultDay;
     }
 
-    reportWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(friday)}`;
+    reportWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(sunday)}`;
     if (reportSummaryCount) reportSummaryCount.textContent = `${reports.length}`;
     if (reportSummaryPeak) reportSummaryPeak.textContent = reports.length ? `${weeklyPeak} dB` : '--';
 
@@ -1022,6 +1433,7 @@ function renderWeeklyReport() {
 
 function openReportModal() {
     if (taskModal?.classList.contains('open')) closeTaskModal();
+    if (forestModal?.classList.contains('open')) closeForestModal();
     STATE.reportActiveDay = null;
     STATE.reportActiveSession = 0;
     renderWeeklyReport();
@@ -1045,9 +1457,250 @@ function initReportUI() {
         if (event.key !== 'Escape') return;
         if (taskModal?.classList.contains('open')) closeTaskModal();
         if (reportModal?.classList.contains('open')) closeReportModal();
+        if (forestModal?.classList.contains('open')) closeForestModal();
     });
 
     renderWeeklyReport();
+}
+
+function getLifecycleLabel(stageLike) {
+    const stage = typeof stageLike === 'string' ? { key: stageLike } : stageLike;
+    const key = stage?.key || 'seed';
+    return t(`morningTree.lifecycle.${key}`) || ({
+        seed: '种子',
+        sprout: '发芽',
+        branches: '枝条',
+        leaves: '叶片',
+        flowers: '开花',
+        fruit: '结果',
+        final: '能量树'
+    }[key] || key);
+}
+
+function getForestWeekGroups(forest, monday = getCurrentWeekMonday()) {
+    return REPORT_WEEKDAYS.map(({ key, offset }) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + offset);
+        const dateKey = toDateKey(date);
+        const record = forest.find(item => item.dateKey === dateKey) || null;
+        return {
+            key,
+            date,
+            dateKey,
+            dateLabel: formatShortDate(date),
+            label: t(`morningTree.report.days.${key}`) || key,
+            record
+        };
+    });
+}
+
+function pickDefaultForestDate(dayGroups) {
+    const todayKey = toDateKey(new Date());
+    return dayGroups.find(group => group.dateKey === todayKey)?.dateKey
+        || dayGroups.find(group => group.record)?.dateKey
+        || dayGroups[0]?.dateKey
+        || null;
+}
+
+function renderForestDetail(selectedGroup) {
+    if (!forestDetail) return;
+
+    const record = selectedGroup?.record || null;
+    if (!record) {
+        forestDetail.innerHTML = `
+            <div class="forest-detail-empty">
+                <strong>${selectedGroup?.dateLabel || '--'}</strong>
+                <span>${t('morningTree.forest.emptyDay') || '这一天还没有种下能量树'}</span>
+            </div>
+        `;
+        return;
+    }
+
+    const manifestedDisplay = getManifestedDisplay(record);
+    const branchEntries = Object.values(record.participantMetrics || {})
+        .sort((a, b) => (b.energyScore || 0) - (a.energyScore || 0))
+        .slice(0, MAX_PARTICIPANTS);
+    const branchHtml = branchEntries.length
+        ? branchEntries.map(metric => `
+            <div class="forest-branch-row">
+                <span>${escapeHtml(metric.name || metric.id)}</span>
+                <strong>${Math.round(metric.energyScore || 0)}%</strong>
+                <small>${formatDuration(Math.round(metric.readingSeconds || 0))} / ${Math.round(metric.peakDb || 0)} dB</small>
+            </div>
+        `).join('')
+        : `<div class="forest-branch-empty">${t('morningTree.forest.noBranches') || '暂无学生枝干数据'}</div>`;
+
+    forestDetail.innerHTML = `
+        <div class="forest-detail-head">
+            <div>
+                <strong>${record.dateLabel || selectedGroup.dateLabel}</strong>
+                <span>${getLifecycleLabel(record.treeStage)} · ${record.sessionCount}${t('morningTree.report.sessionSuffix') || '场'}</span>
+            </div>
+            <span class="forest-stage-badge is-${record.treeStage?.key || 'seed'}">${getLifecycleLabel(record.treeStage)}</span>
+        </div>
+        <div class="forest-detail-grid">
+            <div><span>${t('morningTree.report.effectiveReading') || '有效朗读'}</span><strong>${formatDuration(record.readingSeconds || 0)}</strong></div>
+            <div><span>${t('morningTree.report.peakDb') || '最高分贝'}</span><strong>${record.peakDb || 0} dB</strong></div>
+            <div><span>${t('morningTree.report.finalEnergy') || '最终能量'}</span><strong>${Math.round(record.finalEnergy || 0)}%</strong></div>
+            <div><span>${t('morningTree.report.manifestTime') || '长成时间'}</span><strong>${manifestedDisplay.value}</strong></div>
+        </div>
+        <div class="forest-reward-row">
+            <span>${t('morningTree.rewards.water') || '浇水'} ${record.rewards?.waterCount || 0}</span>
+            <span>${t('morningTree.rewards.fertilizer') || '施肥'} ${record.rewards?.fertilizerCount || 0}</span>
+            <span>${t('morningTree.rewards.overLoud') || '过响'} ${record.rewards?.overLoudCount || 0}</span>
+        </div>
+        <div class="forest-branch-list">
+            <div class="forest-branch-title">${t('morningTree.participants.branchTitle') || '学生枝干'}</div>
+            ${branchHtml}
+        </div>
+    `;
+}
+
+function renderForestMap() {
+    if (!forestMapGrid || !forestDetail) return;
+
+    const forest = loadStoredForest();
+    const monday = getCurrentWeekMonday();
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const dayGroups = getForestWeekGroups(forest, monday);
+
+    if (!STATE.forestActiveDateKey || !dayGroups.some(group => group.dateKey === STATE.forestActiveDateKey)) {
+        STATE.forestActiveDateKey = pickDefaultForestDate(dayGroups);
+    }
+
+    if (forestWeekLabel) {
+        forestWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(sunday)}`;
+    }
+
+    forestMapGrid.innerHTML = dayGroups.map(group => {
+        const record = group.record;
+        const stage = record?.treeStage || getTreeLifecycleStage({ finalEnergy: 0 });
+        return `
+            <button type="button" class="forest-map-node ${record ? 'has-tree' : ''} ${group.dateKey === STATE.forestActiveDateKey ? 'selected' : ''} is-${stage.key}" data-forest-date="${group.dateKey}">
+                <span class="forest-node-day">${group.label}</span>
+                <strong>${group.dateLabel}</strong>
+                <span class="forest-node-tree" aria-hidden="true"></span>
+                <small>${record ? getLifecycleLabel(stage) : (t('morningTree.forest.emptyShort') || '未种下')}</small>
+            </button>
+        `;
+    }).join('');
+
+    forestMapGrid.querySelectorAll('[data-forest-date]').forEach(button => {
+        button.onpointerdown = (event) => {
+            event.preventDefault();
+            STATE.forestActiveDateKey = button.getAttribute('data-forest-date');
+            renderForestMap();
+        };
+    });
+
+    const selected = dayGroups.find(group => group.dateKey === STATE.forestActiveDateKey) || dayGroups[0];
+    renderForestDetail(selected);
+}
+
+function openForestModal() {
+    if (taskModal?.classList.contains('open')) closeTaskModal();
+    if (reportModal?.classList.contains('open')) closeReportModal();
+    STATE.forestActiveDateKey = null;
+    renderForestMap();
+    forestModal.classList.add('open');
+    forestModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeForestModal() {
+    forestModal?.classList.remove('open');
+    forestModal?.setAttribute('aria-hidden', 'true');
+}
+
+function initForestUI() {
+    if (!forestTriggerBtn || !forestModal) return;
+
+    forestTriggerBtn.onclick = openForestModal;
+    if (forestBackdrop) forestBackdrop.onclick = closeForestModal;
+    if (forestCloseBtn) forestCloseBtn.onclick = closeForestModal;
+    renderForestMap();
+}
+
+function getActiveParticipantMetrics() {
+    if (!STATE.participantMetrics || !STATE.activeParticipantId) return null;
+    return STATE.participantMetrics[STATE.activeParticipantId] || null;
+}
+
+function renderParticipantEditor() {
+    if (!participantFields) return;
+    const participants = normalizeParticipants(STATE.participants || loadStoredParticipants());
+    participantFields.innerHTML = participants.map((participant, index) => `
+        <label class="participant-field">
+            <span>${t('morningTree.participants.slotLabel') || '枝干'} ${index + 1}</span>
+            <input type="text" value="${escapeHtml(participant.name)}" data-participant-index="${index}" maxlength="12">
+        </label>
+    `).join('');
+}
+
+function renderParticipantPanel() {
+    if (!participantPanel || !participantList) return;
+
+    STATE.participants = normalizeParticipants(STATE.participants || loadStoredParticipants());
+    if (!STATE.activeParticipantId || !STATE.participants.some(participant => participant.id === STATE.activeParticipantId)) {
+        STATE.activeParticipantId = STATE.participants[0]?.id || null;
+    }
+
+    participantList.innerHTML = STATE.participants.map(participant => {
+        const metric = STATE.participantMetrics?.[participant.id] || null;
+        const stage = metric?.branchStage || getTreeLifecycleStage({ finalEnergy: metric?.energyScore || 0 });
+        return `
+            <button type="button" class="participant-chip ${participant.id === STATE.activeParticipantId ? 'selected' : ''} is-${stage.key}" data-participant-id="${participant.id}">
+                <span>${escapeHtml(participant.name)}</span>
+                <strong>${Math.round(metric?.energyScore || 0)}%</strong>
+            </button>
+        `;
+    }).join('');
+
+    participantList.querySelectorAll('[data-participant-id]').forEach(button => {
+        button.onpointerdown = (event) => {
+            event.preventDefault();
+            STATE.activeParticipantId = button.getAttribute('data-participant-id');
+            renderParticipantPanel();
+        };
+    });
+
+    const activeMetric = getActiveParticipantMetrics();
+    participantPanel.style.setProperty('--active-branch-energy', `${Math.round(activeMetric?.energyScore || 0)}%`);
+    renderParticipantEditor();
+}
+
+function initParticipantUI() {
+    if (!participantPanel) return;
+
+    STATE.participants = loadStoredParticipants();
+    STATE.activeParticipantId = STATE.participants[0]?.id || null;
+    renderParticipantPanel();
+
+    if (participantManageBtn && participantEditor) {
+        participantManageBtn.onclick = () => {
+            participantEditor.classList.toggle('hidden');
+            renderParticipantEditor();
+        };
+    }
+
+    if (participantSaveBtn) {
+        participantSaveBtn.onclick = () => {
+            const nextParticipants = normalizeParticipants(STATE.participants).map((participant, index) => {
+                const input = participantFields?.querySelector(`[data-participant-index="${index}"]`);
+                return {
+                    ...participant,
+                    name: input?.value?.trim() || participant.name
+                };
+            });
+            STATE.participants = normalizeParticipants(nextParticipants);
+            persistParticipants(STATE.participants);
+            if (!STATE.activeParticipantId || !STATE.participants.some(participant => participant.id === STATE.activeParticipantId)) {
+                STATE.activeParticipantId = STATE.participants[0]?.id || null;
+            }
+            if (participantEditor) participantEditor.classList.add('hidden');
+            renderParticipantPanel();
+        };
+    }
 }
 
 function getTaskDayGroups(taskMap, monday = getCurrentWeekMonday()) {
@@ -1184,7 +1837,7 @@ function updateTaskStrip() {
         taskStripTimeline.classList.add('hidden');
         if (taskStripEmpty) taskStripEmpty.classList.remove('hidden');
         taskStripTitle.textContent = t('morningTree.tasks.emptyToday') || '今日暂无早读任务';
-        taskStripMeta.textContent = (t('morningTree.tasks.emptyHint') || '点击右侧今日任务，设置周一到周五内容')
+        taskStripMeta.textContent = (t('morningTree.tasks.emptyHint') || '点击右侧今日任务，设置周一到周日内容')
             .replace('{day}', dayLabel);
         return;
     }
@@ -1318,8 +1971,8 @@ function renderTaskBoard() {
     if (!STATE.taskDrafts) STATE.taskDrafts = loadStoredTasks();
 
     const monday = getCurrentWeekMonday();
-    const friday = new Date(monday);
-    friday.setDate(monday.getDate() + 4);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
 
     const dayGroups = getTaskDayGroups(STATE.taskDrafts, monday);
     const weekdayKey = getCurrentWeekdayKey() || 'mon';
@@ -1327,7 +1980,7 @@ function renderTaskBoard() {
         STATE.taskActiveDay = weekdayKey;
     }
 
-    taskWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(friday)}`;
+    taskWeekLabel.textContent = `${formatShortDate(monday)} - ${formatShortDate(sunday)}`;
     renderTaskDaySidebar(dayGroups, STATE.taskActiveDay);
 
     const selectedDay = dayGroups.find(group => group.key === STATE.taskActiveDay) || dayGroups[0];
@@ -1415,6 +2068,7 @@ function renderTaskBoard() {
 
 function openTaskModal() {
     if (reportModal?.classList.contains('open')) closeReportModal();
+    if (forestModal?.classList.contains('open')) closeForestModal();
     STATE.taskDrafts = loadStoredTasks();
     STATE.taskActiveDay = getCurrentWeekdayKey() || 'mon';
     renderTaskBoard();
@@ -1663,6 +2317,8 @@ function resetGame() {
     STATE.manifestedElapsedSeconds = null;
     STATE.reportEffectiveReadingSeconds = 0;
     STATE.reportPeakEnergy = 0;
+    STATE.rewardState = createSessionRewardState();
+    STATE.participantMetrics = null;
     STATE.energy = 0;
     STATE.readingHoldSeconds = 0;
     STATE.lastFrameAt = null;
@@ -1719,15 +2375,36 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
     if (isReadingLoudly) {
         STATE.reportEffectiveReadingSeconds += frameSeconds;
     }
+    const audioActivation = getAudioActivation(STATE.currentDB, sensitivityProfile, STATE.readingHoldSeconds);
+    STATE.rewardState = updateSessionRewards(STATE.rewardState || createSessionRewardState(), {
+        currentDB: STATE.currentDB,
+        deltaSeconds: frameSeconds,
+        isReadingLoudly,
+        effectiveReadingSeconds: STATE.reportEffectiveReadingSeconds
+    });
+    updateParticipantBranchMetrics(STATE.participantMetrics, STATE.activeParticipantId, {
+        currentDB: STATE.currentDB,
+        deltaSeconds: frameSeconds,
+        isReadingLoudly
+    });
+    const renderNow = Date.now();
+    if (participantPanel && STATE.isListening && renderNow - (STATE.participantLastRenderAt || 0) > 1000) {
+        STATE.participantLastRenderAt = renderNow;
+        renderParticipantPanel();
+    }
 
-    if (STATE.currentDB > 85) {
+    if (audioActivation.overLoud) {
         dbValue.style.color = '#ff6b6b';
         dbDisplay.style.borderColor = 'rgba(255, 107, 107, 0.8)';
-        if (dbStatus) { dbStatus.textContent = '📢 太吵了'; dbStatus.style.color = '#ff6b6b'; }
+        if (dbStatus) { dbStatus.textContent = '超过100dB'; dbStatus.style.color = '#ff6b6b'; }
+    } else if (STATE.currentDB > 88) {
+        dbValue.style.color = '#ffd166';
+        dbDisplay.style.borderColor = 'rgba(255, 209, 102, 0.78)';
+        if (dbStatus) { dbStatus.textContent = '声音偏强'; dbStatus.style.color = '#ffd166'; }
     } else if (isReadingLoudly) {
         dbValue.style.color = '#4caf50';
         dbDisplay.style.borderColor = 'rgba(76, 175, 80, 0.8)';
-        if (dbStatus) { dbStatus.textContent = '📚 朗读中'; dbStatus.style.color = '#4caf50'; }
+        if (dbStatus) { dbStatus.textContent = '稳定朗读'; dbStatus.style.color = '#4caf50'; }
     } else if (isAboveReadingThreshold) {
         dbValue.style.color = '#fff';
         dbDisplay.style.borderColor = 'rgba(255, 255, 255, 0.52)';
@@ -1750,7 +2427,7 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
     STATE.reportPeakEnergy = Math.max(STATE.reportPeakEnergy || 0, Math.round(clampEnergy(STATE.energy)));
 
     // FIX: Reduced shake threshold and diverted to canvas only
-    if (isReadingLoudly && STATE.currentDB > 100) shakeCanvas(2);
+    if (isReadingLoudly && STATE.currentDB > OVER_LOUD_DB) shakeCanvas(2);
 
     energyFill.style.width = STATE.energy + '%';
 
@@ -2347,6 +3024,119 @@ function drawFlowerCluster(x, y, blossomSize, petalColor) {
     ctx.restore();
 }
 
+function drawSeedAndSprout(startX, startY, stage) {
+    const energy = clampEnergy(STATE.energy);
+    const sproutGrowth = clamp(energy / 24, 0, 1);
+
+    ctx.save();
+    ctx.translate(startX, startY);
+    ctx.fillStyle = '#6d4c41';
+    ctx.beginPath();
+    ctx.ellipse(0, 4, 18, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (stage.key === 'seed') {
+        drawEnergyAura(0, 0, 10 + sproutGrowth * 8, '#d8ff66', 0.08 + sproutGrowth * 0.08);
+        ctx.fillStyle = '#8d6e63';
+        ctx.beginPath();
+        ctx.ellipse(0, -2, 7, 10, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        return;
+    }
+
+    ctx.strokeStyle = '#5abf59';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-5, -18 * sproutGrowth, -2, -42 * sproutGrowth);
+    ctx.stroke();
+
+    ctx.fillStyle = '#7fd36d';
+    ctx.beginPath();
+    ctx.ellipse(-12 * sproutGrowth, -28 * sproutGrowth, 12 * sproutGrowth, 5 * sproutGrowth, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(11 * sproutGrowth, -36 * sproutGrowth, 11 * sproutGrowth, 5 * sproutGrowth, 0.48, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawLifecycleAccents(treeSize, stage, renderMode) {
+    if (!stage || stage.index < 4) return;
+    const anchors = getEnergyAnchors(treeSize);
+    const countBase = stage.key === 'flowers' ? 12 : stage.key === 'fruit' ? 16 : 22;
+    const count = renderMode.ultraLowPower ? Math.ceil(countBase * 0.42) : renderMode.lowPower ? Math.ceil(countBase * 0.64) : countBase;
+    const radiusX = treeSize * 0.34;
+    const radiusY = treeSize * 0.24;
+
+    for (let i = 0; i < count; i++) {
+        const seed = (i + 1) * 2.417;
+        const ring = 0.35 + ((Math.sin(seed * 1.7) + 1) * 0.32);
+        const x = anchors.canopy.x + Math.cos(seed) * radiusX * ring;
+        const y = anchors.canopy.y + Math.sin(seed * 1.23) * radiusY * ring;
+        const size = 4.2 + ((Math.sin(seed * 2.2) + 1) * 2.4);
+
+        if (stage.index >= 5 && i % 3 === 0) {
+            ctx.save();
+            ctx.fillStyle = stage.key === 'final' ? '#ffd166' : '#ff9f43';
+            ctx.strokeStyle = 'rgba(90, 57, 27, 0.36)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        } else {
+            drawFlowerCluster(x, y, size, stage.key === 'final' ? '#fff3a3' : '#ffd1f5');
+        }
+    }
+
+    if (stage.key === 'final') {
+        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, treeSize * 0.34, '#ffe082', 0.18);
+    }
+}
+
+function drawParticipantBranches(treeSize, stage, renderMode) {
+    if (!STATE.participants?.length || !STATE.participantMetrics || stage.index < 2) return;
+    const baseX = canvas.width / 2;
+    const baseY = canvas.height - 76;
+    const branchPalette = ['#8cf7d9', '#ffe082', '#ff9bd6', '#9be15d', '#a7c7ff'];
+    const entries = STATE.participants.slice(0, MAX_PARTICIPANTS);
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    entries.forEach((participant, index) => {
+        const metric = STATE.participantMetrics[participant.id] || { energyScore: 0 };
+        const score = clampEnergy(metric.energyScore || 0);
+        const side = index % 2 === 0 ? -1 : 1;
+        const lane = Math.floor(index / 2);
+        const y = baseY - (lane * 30) - (score * 0.28);
+        const len = 34 + (score * 0.58);
+        const endX = baseX + side * len;
+        const endY = y - 22 - score * 0.08;
+        const color = branchPalette[index % branchPalette.length];
+
+        ctx.strokeStyle = participant.id === STATE.activeParticipantId ? color : 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = participant.id === STATE.activeParticipantId ? 4 : 2.6;
+        ctx.beginPath();
+        ctx.moveTo(baseX, y);
+        ctx.quadraticCurveTo(baseX + side * len * 0.45, y - 26, endX, endY);
+        ctx.stroke();
+
+        if (score > 8 && !renderMode.ultraLowPower) {
+            ctx.fillStyle = color;
+            ctx.globalAlpha = participant.id === STATE.activeParticipantId ? 0.9 : 0.58;
+            ctx.beginPath();
+            ctx.ellipse(endX, endY, 7 + score * 0.04, 4 + score * 0.03, side * 0.55, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+    });
+    ctx.restore();
+}
+
 function drawFlowerPlant(plant, sway, lowPowerMode = false) {
     const growth = plant.growth;
     const stemHeight = plant.stemHeight * growth;
@@ -2441,7 +3231,8 @@ function drawMeadowPlants() {
 
 function spawnSkyEnergy(treeSize, anchors) {
     if (!STATE.isListening) return;
-    const activation = Math.max(0, (STATE.currentDB - 56) / 26);
+    const activationMeta = getAudioActivation(STATE.currentDB, getSensitivityProfile(STATE.sensitivity), STATE.readingHoldSeconds);
+    const activation = activationMeta.intensity;
     const renderMode = getRenderMode(treeSize);
     const particleLimit = getFxLimit('energyParticles', treeSize);
     if (activation <= 0) return;
@@ -2457,7 +3248,7 @@ function spawnSkyEnergy(treeSize, anchors) {
 
     const availableSlots = Math.max(0, particleLimit - energyParticles.length);
     if (!availableSlots) return;
-    let spawnCount = 1;
+    let spawnCount = Math.max(1, Math.min(activationMeta.orbCount, 3));
     if (!renderMode.ultraLowPower && Math.random() < (0.2 + activation * 0.24)) {
         spawnCount += 1;
     }
@@ -2481,7 +3272,8 @@ function spawnSkyEnergy(treeSize, anchors) {
 }
 
 function drawEnergyFlow(treeSize) {
-    const activation = Math.max(0, (STATE.currentDB - 56) / 26);
+    const activationMeta = getAudioActivation(STATE.currentDB, getSensitivityProfile(STATE.sensitivity), STATE.readingHoldSeconds);
+    const activation = activationMeta.intensity;
     const anchors = getEnergyAnchors(treeSize);
     const renderMode = getRenderMode(treeSize);
     const hasFlow = activation > 0.04 || energyParticles.length || trunkTransfers.length || soilTransfers.length;
@@ -2490,7 +3282,7 @@ function drawEnergyFlow(treeSize) {
     }
 
     if (hasFlow) {
-        const flowAlpha = Math.min(0.85, 0.18 + activation * 0.55);
+        const flowAlpha = Math.min(0.9, activationMeta.glow);
         const auraScale = renderMode.ultraLowPower ? 0.64 : renderMode.lowPower ? 0.86 : 1.08;
         drawEnergyAura(anchors.canopy.x, anchors.canopy.y, (14 + (activation * 14)) * auraScale, '#8cf7d9', (0.12 + flowAlpha * 0.2) * auraScale);
         drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, (13 + (activation * 16)) * auraScale, '#d8ff66', (0.1 + flowAlpha * 0.2) * auraScale);
@@ -2569,6 +3361,10 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
     ctx.beginPath();
     ctx.save();
     const frameTime = (STATE.frameNow || Date.now()) / 1000;
+    const lifecycleStage = getTreeLifecycleStage({
+        finalEnergy: STATE.energy,
+        manifested: STATE.hasManifested
+    });
 
     ctx.lineCap = 'round';
     ctx.lineWidth = branchWidth;
@@ -2592,7 +3388,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
 
     // 🌳 LUSH FOLIAGE (CLUMPS) 🌳
     if (depth >= 4 || (len < 10 && depth > 2)) {
-        if (STATE.energy > 15 && shouldRenderCanopyCluster(depth, len, angle, renderMode)) {
+        if (lifecycleStage.index >= 3 && shouldRenderCanopyCluster(depth, len, angle, renderMode)) {
             const baseSize = (STATE.energy / 100) * 12 + 3;
             const leafPulse = renderMode.lowPower ? 1 : 1.5;
             const size = baseSize + Math.sin(frameTime + depth) * leafPulse;
@@ -2701,6 +3497,10 @@ function loop() {
 
     const treeSize = getTreeSizeForEnergy(STATE.energy);
     const renderMode = getRenderMode(treeSize);
+    const lifecycleStage = getTreeLifecycleStage({
+        finalEnergy: STATE.energy,
+        manifested: STATE.hasManifested
+    });
 
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
@@ -2708,21 +3508,14 @@ function loop() {
     ctx.fillStyle = '#66bb6a';
     ctx.fill();
 
-    if (treeSize > 60) {
+    if (lifecycleStage.index >= 2 && treeSize > 60) {
         drawEnhancedTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 9, 0, renderMode);
+        drawParticipantBranches(treeSize, lifecycleStage, renderMode);
+        drawLifecycleAccents(treeSize, lifecycleStage, renderMode);
     } else {
-        ctx.beginPath();
         const startX = canvas.width / 2;
         const startY = canvas.height - 30;
-        ctx.fillStyle = '#795548';
-        ctx.ellipse(startX, startY, 10, 6, 0.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.quadraticCurveTo(startX - 5, startY - 15, startX - 15, startY - 20);
-        ctx.strokeStyle = '#66bb6a';
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        drawSeedAndSprout(startX, startY, lifecycleStage);
     }
 
     drawEnergyFlow(treeSize);
@@ -2791,6 +3584,8 @@ function translateUI() {
 
     updateTaskStrip();
     renderWeeklyReport();
+    renderForestMap();
+    renderParticipantPanel();
     if (taskModal?.classList.contains('open')) renderTaskBoard();
 }
 
@@ -2825,8 +3620,10 @@ function updateSensitivityControl(value = STATE.sensitivity) {
 // Init
 initLocalization().then(() => {
     initGatekeeper();
+    initParticipantUI();
     initTaskUI();
     initReportUI();
+    initForestUI();
     updateSensitivityControl();
 });
 micBtn.onclick = toggleMic;

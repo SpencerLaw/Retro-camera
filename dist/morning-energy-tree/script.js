@@ -256,6 +256,7 @@ const forestCloseBtn = $('forest-close-btn');
 const forestWeekLabel = $('forest-week-label');
 const forestMapGrid = $('forest-map-grid');
 const forestDetail = $('forest-detail');
+const forestBody = $('forest-body');
 const participantPanel = $('participant-panel');
 const participantList = $('participant-list');
 const participantManageBtn = $('participant-manage-btn');
@@ -1715,6 +1716,7 @@ function openForestModal() {
     if (reportModal?.classList.contains('open')) closeReportModal();
     STATE.forestActiveDateKey = null;
     renderForestMap();
+    if (forestBody) forestBody.scrollTop = 0;
     forestModal.classList.add('open');
     forestModal.setAttribute('aria-hidden', 'false');
 }

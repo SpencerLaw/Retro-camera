@@ -149,6 +149,7 @@ function loadMorningTree() {
       updateSessionRewards: typeof updateSessionRewards === 'function' ? updateSessionRewards : undefined,
       getRewardProgress: typeof getRewardProgress === 'function' ? getRewardProgress : undefined,
       renderRewardPanel: typeof renderRewardPanel === 'function' ? renderRewardPanel : undefined,
+      openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
       normalizeParticipants: typeof normalizeParticipants === 'function' ? normalizeParticipants : undefined,
       createParticipantMetrics: typeof createParticipantMetrics === 'function' ? createParticipantMetrics : undefined,
       updateParticipantBranchMetrics: typeof updateParticipantBranchMetrics === 'function' ? updateParticipantBranchMetrics : undefined,
@@ -473,6 +474,7 @@ runTest('stable reading earns water and fertilizer while unsafe spikes only warn
 runTest('live reward panel writes out watering and fertilizer trigger rules', () => {
   const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
   const { api, elements } = loadMorningTree();
+  const zh = JSON.parse(fs.readFileSync('public/locales/zh-CN.json', 'utf8'));
 
   assert.match(html, /id="reward-panel"/);
   assert.match(html, /id="reward-live-panel"/);
@@ -501,6 +503,10 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.match(panelHtml, /12s/);
   assert.match(panelHtml, /60s/);
   assert.match(panelHtml, /2/);
+  assert.match(zh.morningTree.rewards.liveSub, /不需要老师手动点/);
+  assert.match(zh.morningTree.rewards.waterRule, /连续保持 12 秒/);
+  assert.match(zh.morningTree.rewards.fertilizerRule, /累计 60 秒/);
+  assert.match(zh.morningTree.rewards.overLoudRule, /不浇水、不施肥/);
 });
 
 runTest('participant branch metrics update only the selected local branch', () => {
@@ -575,9 +581,26 @@ runTest('forest map and participant controls are present in the classroom UI', (
 
   assert.match(html, /id="forest-trigger-btn"/);
   assert.match(html, /id="forest-modal"/);
+  assert.match(html, /id="forest-body"/);
   assert.match(html, /id="forest-map-grid"/);
   assert.match(html, /id="participant-panel"/);
   assert.match(html, /id="participant-list"/);
+});
+
+runTest('forest modal uses a full-width map and resets scroll when opened', () => {
+  const css = fs.readFileSync('public/morning-energy-tree/style.css', 'utf8');
+  const { api, elements } = loadMorningTree();
+
+  assert.match(css, /\.forest-layout\s*\{[^}]*grid-template-columns:\s*1fr/s);
+  assert.match(css, /\.forest-map-grid\s*\{[^}]*grid-template-columns:\s*repeat\(7,\s*minmax\(96px,\s*1fr\)\)/s);
+  assert.match(css, /\.forest-map-grid\s*\{[^}]*overflow-x:\s*auto/s);
+  assert.match(css, /\.forest-detail-empty\s*\{[^}]*min-height:\s*180px/s);
+  assert.equal(typeof api.openForestModal, 'function');
+
+  elements.get('forest-body').scrollTop = 96;
+  api.openForestModal();
+
+  assert.equal(elements.get('forest-body').scrollTop, 0);
 });
 
 runTest('student branch panel explains teacher-selected local branches', () => {

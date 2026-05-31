@@ -142,16 +142,16 @@
                 <section id="reward-panel" class="reward-panel" aria-label="浇水施肥规则">
                     <div class="reward-panel-head">
                         <div>
-                            <strong data-i18n="morningTree.rewards.liveTitle">浇水 / 施肥</strong>
-                            <span data-i18n="morningTree.rewards.liveSub">本场早读自动触发</span>
+                            <strong data-i18n="morningTree.rewards.liveTitle">奖励规则</strong>
+                            <span data-i18n="morningTree.rewards.liveSub">自动点亮，不需要老师手动点</span>
                         </div>
                         <span class="reward-panel-badge" data-i18n="morningTree.rewards.localOnly">本机记录</span>
                     </div>
                     <div id="reward-live-panel" class="reward-live-panel" aria-live="polite"></div>
                     <ul class="reward-rule-list">
-                        <li data-i18n="morningTree.rewards.waterRule">浇水：连续稳定朗读满 12 秒，且当前声音不超过 96dB。</li>
-                        <li data-i18n="morningTree.rewards.fertilizerRule">施肥：本场有效朗读累计满 60 秒，触发时声音低于 100dB。</li>
-                        <li data-i18n="morningTree.rewards.overLoudRule">超过 100dB：只记录过响提醒，不奖励，避免喊叫刷成长。</li>
+                        <li data-i18n="morningTree.rewards.waterRule">浇水：声音进入稳定朗读区后连续保持 12 秒，本场点亮 1 次。</li>
+                        <li data-i18n="morningTree.rewards.fertilizerRule">施肥：本场有效朗读累计 60 秒，并且触发时低于 100dB，本场点亮 1 次。</li>
+                        <li data-i18n="morningTree.rewards.overLoudRule">100dB 以上是过响提醒：不浇水、不施肥，只记录提醒，避免喊叫刷成长。</li>
                     </ul>
                 </section>
 
@@ -248,7 +248,7 @@
                     </div>
                     <button id="forest-close-btn" class="report-close-btn" type="button" aria-label="Close forest">✕</button>
                 </div>
-                <div class="report-body forest-body">
+                <div id="forest-body" class="report-body forest-body">
                     <div class="forest-toolbar">
                         <div id="forest-week-label" class="report-week-label"></div>
                         <span class="forest-local-pill" data-i18n="morningTree.forest.localOnly">仅本机记录</span>

@@ -147,6 +147,8 @@ function loadMorningTree() {
       getAudioActivation: typeof getAudioActivation === 'function' ? getAudioActivation : undefined,
       createSessionRewardState: typeof createSessionRewardState === 'function' ? createSessionRewardState : undefined,
       updateSessionRewards: typeof updateSessionRewards === 'function' ? updateSessionRewards : undefined,
+      getRewardEnergyBonus: typeof getRewardEnergyBonus === 'function' ? getRewardEnergyBonus : undefined,
+      applyRewardEnergyBonus: typeof applyRewardEnergyBonus === 'function' ? applyRewardEnergyBonus : undefined,
       getRewardProgress: typeof getRewardProgress === 'function' ? getRewardProgress : undefined,
       renderRewardPanel: typeof renderRewardPanel === 'function' ? renderRewardPanel : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
@@ -471,11 +473,41 @@ runTest('stable reading earns water and fertilizer while unsafe spikes only warn
   assert.equal(unsafe.overLoudCount, 1);
 });
 
+runTest('water and fertilizer bonuses directly grow the top energy progress once', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getRewardEnergyBonus, 'function');
+  assert.equal(typeof api.applyRewardEnergyBonus, 'function');
+
+  const waterOnly = api.getRewardEnergyBonus(
+    { waterCount: 0, fertilizerCount: 0 },
+    { waterCount: 1, fertilizerCount: 0 }
+  );
+  assert.equal(waterOnly.totalBonus, 2);
+  assert.equal(waterOnly.waterBonus, 2);
+  assert.equal(waterOnly.fertilizerBonus, 0);
+  assert.equal(api.applyRewardEnergyBonus(40, waterOnly), 42);
+
+  const bothRewards = api.getRewardEnergyBonus(
+    { waterCount: 0, fertilizerCount: 0 },
+    { waterCount: 1, fertilizerCount: 1 }
+  );
+  assert.equal(bothRewards.totalBonus, 7);
+  assert.equal(api.applyRewardEnergyBonus(96, bothRewards), 100);
+
+  const alreadyCounted = api.getRewardEnergyBonus(
+    { waterCount: 1, fertilizerCount: 1 },
+    { waterCount: 1, fertilizerCount: 1 }
+  );
+  assert.equal(alreadyCounted.totalBonus, 0);
+});
+
 runTest('live reward panel writes out watering and fertilizer trigger rules', () => {
   const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
   const { api, elements } = loadMorningTree();
   const zh = JSON.parse(fs.readFileSync('public/locales/zh-CN.json', 'utf8'));
 
+  assert.match(html, /能量树成长进度/);
   assert.match(html, /id="reward-panel"/);
   assert.match(html, /id="reward-live-panel"/);
   assert.match(html, /data-i18n="morningTree\.rewards\.waterRule"/);
@@ -503,9 +535,12 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.match(panelHtml, /12s/);
   assert.match(panelHtml, /60s/);
   assert.match(panelHtml, /2/);
+  assert.equal(zh.morningTree.energyLabel, '🌳 能量树成长进度');
   assert.match(zh.morningTree.rewards.liveSub, /不需要老师手动点/);
   assert.match(zh.morningTree.rewards.waterRule, /连续保持 12 秒/);
+  assert.match(zh.morningTree.rewards.waterRule, /\+2%/);
   assert.match(zh.morningTree.rewards.fertilizerRule, /累计 60 秒/);
+  assert.match(zh.morningTree.rewards.fertilizerRule, /\+5%/);
   assert.match(zh.morningTree.rewards.overLoudRule, /不浇水、不施肥/);
 });
 

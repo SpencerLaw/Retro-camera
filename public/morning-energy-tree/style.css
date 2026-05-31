@@ -2271,6 +2271,27 @@ canvas {
     box-shadow: 0 0 10px #f1c40f;
 }
 
+#energy-fill.reward-boost {
+    animation: rewardEnergyBoost 0.85s ease-out;
+}
+
+@keyframes rewardEnergyBoost {
+    0% {
+        filter: brightness(1);
+        box-shadow: 0 0 10px #f1c40f;
+    }
+
+    42% {
+        filter: brightness(1.45);
+        box-shadow: 0 0 24px rgba(125, 249, 255, 0.78), 0 0 32px rgba(255, 224, 130, 0.54);
+    }
+
+    100% {
+        filter: brightness(1);
+        box-shadow: 0 0 10px #f1c40f;
+    }
+}
+
 /* ── Bottom Controls (bottom-LEFT, touch-friendly) ── */
 .bottom-controls {
     box-sizing: border-box;

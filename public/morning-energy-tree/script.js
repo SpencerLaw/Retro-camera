@@ -31,6 +31,8 @@ const REPORT_WEEKDAYS = [
 const DEFAULT_GROWTH_PER_SECOND = 100 / 90;
 const WATER_STABLE_SECONDS = 12;
 const FERTILIZER_READING_SECONDS = 60;
+const WATER_ENERGY_BONUS = 2;
+const FERTILIZER_ENERGY_BONUS = 5;
 const HEALTHY_READING_DB_MAX = 96;
 const OVER_LOUD_DB = 100;
 const TREE_LIFECYCLE_STAGES = [
@@ -419,6 +421,36 @@ function updateSessionRewards(rewardState, options = {}) {
     }
 
     return state;
+}
+
+function getRewardEnergyBonus(previousCounts = {}, nextState = {}) {
+    const previousWaterCount = Math.max(0, Math.round(Number(previousCounts.waterCount) || 0));
+    const previousFertilizerCount = Math.max(0, Math.round(Number(previousCounts.fertilizerCount) || 0));
+    const nextWaterCount = Math.max(0, Math.round(Number(nextState.waterCount) || 0));
+    const nextFertilizerCount = Math.max(0, Math.round(Number(nextState.fertilizerCount) || 0));
+    const waterBonus = nextWaterCount > previousWaterCount ? WATER_ENERGY_BONUS : 0;
+    const fertilizerBonus = nextFertilizerCount > previousFertilizerCount ? FERTILIZER_ENERGY_BONUS : 0;
+
+    return {
+        waterBonus,
+        fertilizerBonus,
+        totalBonus: waterBonus + fertilizerBonus
+    };
+}
+
+function applyRewardEnergyBonus(currentEnergy, rewardBonus = {}) {
+    const totalBonus = Number.isFinite(rewardBonus.totalBonus) ? rewardBonus.totalBonus : 0;
+    return clampEnergy((Number.isFinite(currentEnergy) ? currentEnergy : 0) + totalBonus);
+}
+
+function flashRewardEnergyBonus(rewardBonus = {}) {
+    if (!energyFill || !(rewardBonus.totalBonus > 0)) return;
+
+    energyFill.classList.remove('reward-boost');
+    // Restart the short flash even if water and fertilizer trigger close together.
+    void energyFill.offsetWidth;
+    energyFill.classList.add('reward-boost');
+    setTimeout(() => energyFill.classList.remove('reward-boost'), 900);
 }
 
 function getRewardProgress(rewardState = createSessionRewardState(), effectiveReadingSeconds = STATE.reportEffectiveReadingSeconds) {
@@ -2521,6 +2553,7 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         isReadingLoudly,
         effectiveReadingSeconds: STATE.reportEffectiveReadingSeconds
     });
+    const rewardEnergyBonus = getRewardEnergyBonus(previousRewardCounts, STATE.rewardState);
     announceRewardChanges(previousRewardCounts, STATE.rewardState);
     updateParticipantBranchMetrics(STATE.participantMetrics, STATE.activeParticipantId, {
         currentDB: STATE.currentDB,
@@ -2568,6 +2601,10 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         deltaSeconds: frameSeconds,
         readingHoldSeconds: STATE.readingHoldSeconds
     });
+    if (rewardEnergyBonus.totalBonus > 0) {
+        STATE.energy = applyRewardEnergyBonus(STATE.energy, rewardEnergyBonus);
+        flashRewardEnergyBonus(rewardEnergyBonus);
+    }
     STATE.reportPeakEnergy = Math.max(STATE.reportPeakEnergy || 0, Math.round(clampEnergy(STATE.energy)));
 
     // FIX: Reduced shake threshold and diverted to canvas only

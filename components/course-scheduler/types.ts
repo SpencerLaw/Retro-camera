@@ -93,6 +93,79 @@ export interface Conflict {
   involvedScheduleIds: string[];
 }
 
+export type PreferenceSeverity = 'warning' | 'critical';
+export type PreferenceRuleType = 'teacherPeriodBalance' | 'doubleLesson' | 'forbiddenSlot' | 'syncLesson';
+
+export interface SchedulingPreferences {
+  version: 1;
+  teacherPeriodBalance: TeacherPeriodBalanceRule[];
+  doubleLessonRules: DoubleLessonRule[];
+  forbiddenSlotRules: ForbiddenSlotRule[];
+  syncLessonRules: SyncLessonRule[];
+}
+
+export interface TeacherPeriodBalanceRule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  grade?: string;
+  teacherIds?: string[];
+  watchedPeriods: number[];
+  minPerTeacherPerWeek?: number;
+  maxPerTeacherPerWeek?: number;
+  severity: PreferenceSeverity;
+}
+
+export interface DoubleLessonRule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  grade: string;
+  subject: string;
+  day?: number;
+  classNumbers: number[] | 'all';
+  requiredAdjacentCount: number;
+  allowedPairs?: Array<[number, number]>;
+  severity: PreferenceSeverity;
+}
+
+export interface ForbiddenSlotRule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  scope: 'teacher' | 'class' | 'subject' | 'teachingClass';
+  targetIds?: string[];
+  grade?: string;
+  classNumbers?: number[];
+  subject?: string;
+  slots: TimeSlot[];
+  severity: PreferenceSeverity;
+}
+
+export interface SyncLessonRule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  grade: string;
+  subject?: string;
+  teachingClassIds?: string[];
+  classNumbers?: number[];
+  requiredSameSlot: boolean;
+  severity: PreferenceSeverity;
+}
+
+export interface PreferenceDiagnostic {
+  id: string;
+  ruleId: string;
+  ruleName: string;
+  ruleType: 'teacherPeriodBalance' | 'doubleLesson' | 'forbiddenSlot' | 'syncLesson';
+  severity: PreferenceSeverity;
+  message: string;
+  affectedSlots: TimeSlot[];
+  involvedScheduleIds: string[];
+  suggestedAction?: string;
+}
+
 export interface TimetableShift {
   id: string;
   subject: string;

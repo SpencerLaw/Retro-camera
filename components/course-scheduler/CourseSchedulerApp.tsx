@@ -22,9 +22,14 @@ import {
   Student, 
   ScheduleItem, 
   Conflict, 
+  SchedulingPreferences,
   SubstituteRecommendation 
 } from './types';
 import { detectConflicts, getSubstituteRecommendations } from './courseSchedulerLogic';
+import {
+  createDefaultSchedulingPreferences,
+  normalizeSchedulingPreferences
+} from './courseSchedulerPreferences';
 import { 
   INITIAL_TEACHERS, 
   INITIAL_CLASSROOMS, 
@@ -147,6 +152,7 @@ export default function App() {
   const [students, setStudents] = useState<Student[]>([]);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [conflicts, setConflicts] = useState<Conflict[]>([]);
+  const [schedulingPreferences, setSchedulingPreferences] = useState<SchedulingPreferences>(createDefaultSchedulingPreferences());
   
   // Loading & View Controls
   const [loading, setLoading] = useState<boolean>(true);
@@ -210,6 +216,7 @@ export default function App() {
         setTeachingClasses(parsed.teachingClasses || []);
         setStudents(parsed.students || []);
         setSchedules(parsed.schedules || []);
+        setSchedulingPreferences(normalizeSchedulingPreferences(parsed.schedulingPreferences));
         
         const initialConflicts = detectConflicts(
           parsed.schedules || [], 
@@ -226,12 +233,14 @@ export default function App() {
         const initialTeachingClasses = JSON.parse(JSON.stringify(INITIAL_TEACHING_CLASSES));
         const initialStudents = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
         const initialSchedules = generatePrepopulatedSchedules(initialTeachers, initialClassrooms, initialTeachingClasses);
+        const initialSchedulingPreferences = createDefaultSchedulingPreferences();
 
         setTeachers(initialTeachers);
         setClassrooms(initialClassrooms);
         setTeachingClasses(initialTeachingClasses);
         setStudents(initialStudents);
         setSchedules(initialSchedules);
+        setSchedulingPreferences(initialSchedulingPreferences);
         
         const initialConflicts = detectConflicts(
           initialSchedules, 
@@ -262,11 +271,12 @@ export default function App() {
         classrooms,
         teachingClasses,
         students,
-        schedules
+        schedules,
+        schedulingPreferences
       };
       localStorage.setItem('course_scheduler_real_data', JSON.stringify(dataToSave));
     }
-  }, [teachers, classrooms, teachingClasses, students, schedules, loading]);
+  }, [teachers, classrooms, teachingClasses, students, schedules, schedulingPreferences, loading]);
 
   const updateConflicts = (
     currentSchedules: ScheduleItem[],
@@ -296,12 +306,14 @@ export default function App() {
         const initialTeachingClasses = JSON.parse(JSON.stringify(INITIAL_TEACHING_CLASSES));
         const initialStudents = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
         const initialSchedules = generatePrepopulatedSchedules(initialTeachers, initialClassrooms, initialTeachingClasses);
+        const initialSchedulingPreferences = createDefaultSchedulingPreferences();
 
         setTeachers(initialTeachers);
         setClassrooms(initialClassrooms);
         setTeachingClasses(initialTeachingClasses);
         setStudents(initialStudents);
         setSchedules(initialSchedules);
+        setSchedulingPreferences(initialSchedulingPreferences);
         setSelectedCell(null);
         setSubstituteData(null);
         setShowSubstituteDialog(false);
@@ -332,7 +344,8 @@ export default function App() {
       classrooms,
       teachingClasses,
       students,
-      schedules
+      schedules,
+      schedulingPreferences
     };
     setJsonRawText(JSON.stringify(exportData, null, 2));
     setShowJSONModal(true);
@@ -352,6 +365,7 @@ export default function App() {
       setTeachingClasses(parsed.teachingClasses);
       setStudents(parsed.students || []);
       setSchedules(parsed.schedules);
+      setSchedulingPreferences(normalizeSchedulingPreferences(parsed.schedulingPreferences));
       
       updateConflicts(
         parsed.schedules,

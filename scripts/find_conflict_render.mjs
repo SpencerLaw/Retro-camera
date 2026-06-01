@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-const content = fs.readFileSync('scripts/rewrite_scheduler_app.mjs', 'utf8');
+const content = fs.readFileSync('components/course-scheduler/CourseSchedulerApp.tsx', 'utf8');
 const lines = content.split('\n');
 
 lines.forEach((line, idx) => {

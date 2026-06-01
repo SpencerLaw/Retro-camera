@@ -1,10 +1,15 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
+function readIfExists(path) {
+  return fs.existsSync(path) ? fs.readFileSync(path, 'utf8') : '';
+}
+
 const appSource = fs.readFileSync('components/course-scheduler/CourseSchedulerApp.tsx', 'utf8');
-const generatorSource = fs.readFileSync('scripts/generate_all_grades_mockdata.mjs', 'utf8');
+const generatorPath = 'scripts/generate_all_grades_excel_data.mjs';
+const generatorSource = readIfExists(generatorPath);
 const excelDataPath = 'components/course-scheduler/excelData.ts';
-const excelDataSource = fs.existsSync(excelDataPath) ? fs.readFileSync(excelDataPath, 'utf8') : '';
+const excelDataSource = readIfExists(excelDataPath);
 
 function runTest(name, fn) {
   try {
@@ -38,9 +43,31 @@ runTest('generated scheduler data does not contain fabricated contact or student
 });
 
 runTest('Excel generator writes explicit real-data output without random fabricated values', () => {
+  assert.ok(fs.existsSync(generatorPath));
   assert.doesNotMatch(generatorSource, /Math\.random/);
   assert.match(generatorSource, /components\/course-scheduler\/excelData\.ts/);
   assert.match(generatorSource, /phone:\s*''/);
   assert.match(generatorSource, /email:\s*''/);
   assert.match(generatorSource, /EXCEL_DATA_SOURCES/);
+});
+
+runTest('scheduler tooling no longer exposes mock data entrypoints or fabricated fallbacks', () => {
+  [
+    'scripts/generate_all_grades_mockdata.mjs',
+    'scripts/generate_mockdata_file.mjs',
+    'scripts/parse_to_mockdata.mjs'
+  ].forEach(path => assert.equal(fs.existsSync(path), false, `${path} should be renamed to Excel data terminology`));
+
+  [
+    'scripts/generate_all_grades_excel_data.mjs',
+    'scripts/generate_excel_data_file.mjs',
+    'scripts/rewrite_scheduler_app.mjs'
+  ].forEach(path => {
+    const source = readIfExists(path);
+    assert.ok(source, `${path} should exist`);
+    assert.doesNotMatch(source, /from ['"]\.\/mockData['"]/);
+    assert.doesNotMatch(source, /13800000000/);
+    assert.doesNotMatch(source, /new_teacher@school\.edu\.cn/);
+    assert.doesNotMatch(source, /@school\.edu\.cn/);
+  });
 });

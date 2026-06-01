@@ -42,3 +42,12 @@ runTest('app persists scheduling preferences in existing JSON data flow', () => 
   assert.match(appSource, /schedulingPreferences,/);
   assert.match(appSource, /setJsonRawText\(JSON\.stringify\(exportData, null, 2\)\)/);
 });
+
+runTest('app keeps preference diagnostics separate from hard conflicts', () => {
+  assert.match(appSource, /preferenceDiagnostics/);
+  assert.match(appSource, /detectPreferenceDiagnostics/);
+  assert.match(appSource, /preferenceCriticalDiagnostics/);
+  assert.match(appSource, /preferenceWarningDiagnostics/);
+  assert.match(appSource, /偏好诊断/);
+  assert.doesNotMatch(appSource, /排课冲突.*preferenceWarningDiagnostics/);
+});

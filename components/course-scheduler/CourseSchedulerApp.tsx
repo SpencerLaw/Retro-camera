@@ -23,12 +23,14 @@ import {
   ScheduleItem, 
   Conflict, 
   SchedulingPreferences,
+  PreferenceDiagnostic,
   SubstituteRecommendation 
 } from './types';
 import { detectConflicts, getSubstituteRecommendations } from './courseSchedulerLogic';
 import {
   createDefaultSchedulingPreferences,
-  normalizeSchedulingPreferences
+  normalizeSchedulingPreferences,
+  detectPreferenceDiagnostics
 } from './courseSchedulerPreferences';
 import { 
   INITIAL_TEACHERS, 
@@ -153,6 +155,7 @@ export default function App() {
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const [schedulingPreferences, setSchedulingPreferences] = useState<SchedulingPreferences>(createDefaultSchedulingPreferences());
+  const [preferenceDiagnostics, setPreferenceDiagnostics] = useState<PreferenceDiagnostic[]>([]);
   
   // Loading & View Controls
   const [loading, setLoading] = useState<boolean>(true);
@@ -202,6 +205,20 @@ export default function App() {
   const [newClassroomCapacity, setNewClassroomCapacity] = useState(45);
   const [newClassroomSubject, setNewClassroomSubject] = useState('物理');
 
+  const updatePreferenceDiagnostics = (
+    currentSchedules: ScheduleItem[],
+    currentTeachers: Teacher[],
+    currentClasses: TeachingClass[],
+    currentPreferences: SchedulingPreferences
+  ) => {
+    setPreferenceDiagnostics(detectPreferenceDiagnostics(
+      currentSchedules,
+      currentTeachers,
+      currentClasses,
+      currentPreferences
+    ));
+  };
+
   // Load defaults or saved states
   const fetchData = async () => {
     try {
@@ -211,22 +228,30 @@ export default function App() {
       const savedData = localStorage.getItem('course_scheduler_real_data');
       if (savedData && JSON.parse(savedData).teachers?.length >= 100 && JSON.parse(savedData).schedules?.length >= 400) {
         const parsed = JSON.parse(savedData);
-        setTeachers(parsed.teachers || []);
-        setClassrooms(parsed.classrooms || []);
-        setTeachingClasses(parsed.teachingClasses || []);
-        setStudents(parsed.students || []);
-        setSchedules(parsed.schedules || []);
-        setSchedulingPreferences(normalizeSchedulingPreferences(parsed.schedulingPreferences));
+        const parsedTeachers = parsed.teachers || [];
+        const parsedClassrooms = parsed.classrooms || [];
+        const parsedTeachingClasses = parsed.teachingClasses || [];
+        const parsedStudents = parsed.students || [];
+        const parsedSchedules = parsed.schedules || [];
+        const parsedSchedulingPreferences = normalizeSchedulingPreferences(parsed.schedulingPreferences);
+
+        setTeachers(parsedTeachers);
+        setClassrooms(parsedClassrooms);
+        setTeachingClasses(parsedTeachingClasses);
+        setStudents(parsedStudents);
+        setSchedules(parsedSchedules);
+        setSchedulingPreferences(parsedSchedulingPreferences);
         
         const initialConflicts = detectConflicts(
-          parsed.schedules || [], 
-          parsed.teachers || [], 
-          parsed.classrooms || [], 
-          parsed.teachingClasses || [], 
-          parsed.students || [], 
+          parsedSchedules, 
+          parsedTeachers, 
+          parsedClassrooms, 
+          parsedTeachingClasses, 
+          parsedStudents, 
           { hardStudentConflict: true, hardTeacherConflict: true, hardClassroomConflict: true, allowTeacherPrefRelaxation: false, allowClassroomLoadRelaxation: false }
         );
         setConflicts(initialConflicts);
+        updatePreferenceDiagnostics(parsedSchedules, parsedTeachers, parsedTeachingClasses, parsedSchedulingPreferences);
       } else {
         const initialTeachers = JSON.parse(JSON.stringify(INITIAL_TEACHERS));
         const initialClassrooms = JSON.parse(JSON.stringify(INITIAL_CLASSROOMS));
@@ -251,6 +276,7 @@ export default function App() {
           { hardStudentConflict: true, hardTeacherConflict: true, hardClassroomConflict: true, allowTeacherPrefRelaxation: false, allowClassroomLoadRelaxation: false }
         );
         setConflicts(initialConflicts);
+        updatePreferenceDiagnostics(initialSchedules, initialTeachers, initialTeachingClasses, initialSchedulingPreferences);
       }
     } catch (err) {
       console.error(err);
@@ -262,6 +288,12 @@ export default function App() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      updatePreferenceDiagnostics(schedules, teachers, teachingClasses, schedulingPreferences);
+    }
+  }, [schedules, teachers, teachingClasses, schedulingPreferences, loading]);
 
   // Save to localStorage when state changes
   useEffect(() => {
@@ -294,6 +326,7 @@ export default function App() {
       { hardStudentConflict: true, hardTeacherConflict: true, hardClassroomConflict: true, allowTeacherPrefRelaxation: false, allowClassroomLoadRelaxation: false }
     );
     setConflicts(newConflicts);
+    updatePreferenceDiagnostics(currentSchedules, currentTeachers, currentClasses, schedulingPreferences);
   };
 
   const handleResetData = async () => {
@@ -319,6 +352,7 @@ export default function App() {
         setShowSubstituteDialog(false);
         
         updateConflicts(initialSchedules, initialTeachers, initialClassrooms, initialTeachingClasses, initialStudents);
+        updatePreferenceDiagnostics(initialSchedules, initialTeachers, initialTeachingClasses, initialSchedulingPreferences);
       } catch (err) {
         console.error(err);
       } finally {
@@ -365,7 +399,8 @@ export default function App() {
       setTeachingClasses(parsed.teachingClasses);
       setStudents(parsed.students || []);
       setSchedules(parsed.schedules);
-      setSchedulingPreferences(normalizeSchedulingPreferences(parsed.schedulingPreferences));
+      const importedSchedulingPreferences = normalizeSchedulingPreferences(parsed.schedulingPreferences);
+      setSchedulingPreferences(importedSchedulingPreferences);
       
       updateConflicts(
         parsed.schedules,
@@ -374,6 +409,7 @@ export default function App() {
         parsed.teachingClasses,
         parsed.students || []
       );
+      updatePreferenceDiagnostics(parsed.schedules, parsed.teachers, parsed.teachingClasses, importedSchedulingPreferences);
       
       setShowJSONModal(false);
       alert("🎉 JSON 备份数据覆盖导入成功！课表网格与冲突诊断已实时调度热更新。");
@@ -771,9 +807,11 @@ export default function App() {
   const gradeScheduleCount = schedules.filter(s => s.teachingClassName.startsWith(selectedGrade)).length;
   const criticalConflicts = conflicts.filter(c => c.severity === 'critical');
   const warningConflicts = conflicts.filter(c => c.severity === 'warning');
+  const preferenceCriticalDiagnostics = preferenceDiagnostics.filter(item => item.severity === 'critical');
+  const preferenceWarningDiagnostics = preferenceDiagnostics.filter(item => item.severity === 'warning');
   const hasCriticalConflicts = criticalConflicts.length > 0;
-  const hasDiagnosticWarnings = warningConflicts.length > 0;
-  const diagnosticSummary = `${criticalConflicts.length} 处硬冲突 / ${warningConflicts.length} 条提醒`;
+  const hasDiagnosticWarnings = warningConflicts.length > 0 || preferenceDiagnostics.length > 0;
+  const diagnosticSummary = `${criticalConflicts.length} 处硬冲突 / ${warningConflicts.length} 条资源提醒 / ${preferenceDiagnostics.length} 条偏好诊断`;
   const weeklyRemarks = schedules
     .filter(s => s.teachingClassName.startsWith(selectedGrade))
     .flatMap(s => {
@@ -818,7 +856,7 @@ export default function App() {
       label: '硬冲突',
       value: criticalConflicts.length,
       suffix: '处',
-      detail: `${warningConflicts.length} 条提醒 · ${selectedGrade}课表 ${gradeScheduleCount} 节`,
+      detail: `${warningConflicts.length} 条资源提醒 · ${preferenceDiagnostics.length} 条偏好诊断 · ${selectedGrade}课表 ${gradeScheduleCount} 节`,
       icon: <AlertTriangle className="w-4 h-4 text-amber-600" />,
       className: hasCriticalConflicts ? 'border-rose-100 bg-rose-50/70 text-rose-900' : 'border-amber-100 bg-amber-50/70 text-amber-900'
     }
@@ -1080,7 +1118,7 @@ export default function App() {
               className="scheduler-glass-action scheduler-glass-action--danger px-3 py-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors animate-pulse hover:animate-none"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-              <span>{criticalConflicts.length} 处硬冲突 · {warningConflicts.length} 条提醒</span>
+              <span>{criticalConflicts.length} 处硬冲突 · {warningConflicts.length} 条资源提醒 · {preferenceDiagnostics.length} 条偏好诊断</span>
             </button>
           ) : hasDiagnosticWarnings ? (
             <button
@@ -1089,7 +1127,7 @@ export default function App() {
               className="scheduler-glass-action scheduler-glass-action--warning px-3 py-1.5 border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-              <span>0 处硬冲突 · {warningConflicts.length} 条提醒</span>
+              <span>0 处硬冲突 · {warningConflicts.length} 条资源提醒 · {preferenceDiagnostics.length} 条偏好诊断</span>
             </button>
           ) : (
             <button
@@ -2496,11 +2534,11 @@ export default function App() {
                 <div className="text-right">
                   {hasCriticalConflicts ? (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
-                      {criticalConflicts.length} 处硬冲突 / {warningConflicts.length} 条提醒
+                      {criticalConflicts.length} 处硬冲突 / {warningConflicts.length} 条资源提醒 / {preferenceDiagnostics.length} 条偏好诊断
                     </span>
                   ) : hasDiagnosticWarnings ? (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                      0 处硬冲突 / {warningConflicts.length} 条提醒
+                      0 处硬冲突 / {warningConflicts.length} 条资源提醒 / {preferenceDiagnostics.length} 条偏好诊断
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
@@ -2545,7 +2583,7 @@ export default function App() {
                     </div>
                   ))}
                 </div>
-              ) : (
+              ) : preferenceDiagnostics.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-2xl bg-slate-50/30">
                   <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2554,6 +2592,47 @@ export default function App() {
                   </div>
                   <h4 className="text-xs font-bold text-slate-800">硬冲突与诊断提醒均为 0</h4>
                   <p className="text-[11px] text-slate-400 mt-1">当前教师、教室、课时口径与学生走班基础数据未发现异常。</p>
+                </div>
+              ) : null}
+
+              {preferenceDiagnostics.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-extrabold text-slate-900">偏好诊断</h4>
+                    <span className="text-[10px] font-bold text-slate-500">
+                      {preferenceCriticalDiagnostics.length} 条严重 / {preferenceWarningDiagnostics.length} 条提醒
+                    </span>
+                  </div>
+                  <div className="space-y-2 max-h-[26vh] overflow-y-auto pr-1">
+                    {preferenceDiagnostics.map(item => (
+                      <div
+                        key={item.id}
+                        className={`p-3.5 rounded-xl border flex gap-3 transition-colors ${
+                          item.severity === 'critical'
+                            ? 'bg-rose-50/50 border-rose-100 hover:bg-rose-50'
+                            : 'bg-sky-50/40 border-sky-100 hover:bg-sky-50/70'
+                        }`}
+                      >
+                        <div className="mt-0.5 shrink-0">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-black ${item.severity === 'critical' ? 'bg-rose-500' : 'bg-sky-500'}`}>
+                            {item.severity === 'critical' ? '!' : 'i'}
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-sm uppercase ${item.severity === 'critical' ? 'bg-rose-500 text-white' : 'bg-sky-500 text-white'}`}>
+                              {item.severity === 'critical' ? '严重偏好' : '偏好提醒'}
+                            </span>
+                            <span className="text-[9px] font-bold text-slate-400">{item.ruleName}</span>
+                          </div>
+                          <p className="text-[11px] font-bold text-slate-800 mt-1.5 leading-relaxed">{item.message}</p>
+                          {item.suggestedAction && (
+                            <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">{item.suggestedAction}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

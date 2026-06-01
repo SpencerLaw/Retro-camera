@@ -160,7 +160,8 @@ export default function App() {
   // Loading & View Controls
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'board' | 'management'>('board');
-  const [boardDisplayMode, setBoardDisplayMode] = useState<'time' | 'class'>('time');
+  const [boardDisplayMode, setBoardDisplayMode] = useState<'time' | 'class' | 'dayCards'>('time');
+  const [expandedDayCard, setExpandedDayCard] = useState<number>(1);
   const [isTabLayoutPinned, setIsTabLayoutPinned] = useState<boolean>(false);
   const [selectedGrade, setSelectedGrade] = useState<string>('高二');
   const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students' | 'preferences'>('teachers');
@@ -753,6 +754,24 @@ export default function App() {
     return "全校走班排课总看板";
   };
 
+  const getBoardHeadingTitle = () => {
+    if (boardDisplayMode === 'class') return `班级课程检查：${selectedGrade}`;
+    if (boardDisplayMode === 'dayCards') return `周卡片排班：${selectedGrade}`;
+    return getActiveFilterLabel();
+  };
+
+  const getBoardHeadingDescription = () => {
+    if (boardDisplayMode === 'class') {
+      return '按行政班号横向扫描每一天的课程，用颜色和教师缩写快速发现缺课、重复或临时代课。';
+    }
+
+    if (boardDisplayMode === 'dayCards') {
+      return '五个工作日横向铺开，当前日期展开完整排班，其余日期收起为课程、教师和备注摘要。';
+    }
+
+    return '采用一键自动排课+手动微调保障。排上课表项代表走班制上课组织，包含行政班与教学班时间。';
+  };
+
   const getSubjectColorClass = (subj: string, isFinished?: boolean, isTemp?: boolean) => {
     if (isFinished) return "bg-slate-50 border-l-4 border-slate-300 text-slate-400 opacity-50";
     if (isTemp) return "bg-orange-50 border-2 border-orange-200 text-orange-800";
@@ -895,6 +914,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => setBoardDisplayMode('time')}
+          aria-pressed={boardDisplayMode === 'time'}
           className={boardDisplayMode === 'time' ? 'scheduler-board-mode-option is-active' : 'scheduler-board-mode-option'}
         >
           时间视图
@@ -902,9 +922,18 @@ export default function App() {
         <button
           type="button"
           onClick={() => setBoardDisplayMode('class')}
+          aria-pressed={boardDisplayMode === 'class'}
           className={boardDisplayMode === 'class' ? 'scheduler-board-mode-option is-active' : 'scheduler-board-mode-option'}
         >
           按班级看
+        </button>
+        <button
+          type="button"
+          onClick={() => setBoardDisplayMode('dayCards')}
+          aria-pressed={boardDisplayMode === 'dayCards'}
+          className={boardDisplayMode === 'dayCards' ? 'scheduler-board-mode-option is-active' : 'scheduler-board-mode-option'}
+        >
+          周卡片
         </button>
       </div>
     );
@@ -1069,6 +1098,121 @@ export default function App() {
             </section>
           );
         })}
+      </div>
+    );
+  };
+
+  const renderDayCardsBoardView = () => {
+    const periodRows = PERIODS_METADATA.filter(meta => meta.type === 'period');
+
+    return (
+      <div className="day-card-board-shell" data-view-mode="weekday-accordion">
+        <div className="day-card-board-summary">
+          <div>
+            <span className="day-card-board-kicker">周一至周五</span>
+            <h3>{selectedGrade}横向排班卡片</h3>
+          </div>
+          <div className="day-card-board-totals">
+            <span>{DAYS.length} 天</span>
+            <span>{periodRows.length} 节</span>
+            <span>{gradeScheduleCount} 条课表</span>
+          </div>
+        </div>
+
+        <div className="weekday-accordion-row">
+          {DAYS.map(day => {
+            const daySchedules = periodRows.flatMap(period => getFilteredSchedules(day.num, period.num));
+            const dayTeacherCount = new Set(daySchedules.map(item => item.teacherId)).size;
+            const dayRemarkCount = daySchedules.filter(item => getScheduleAdjustmentLogs(item).length > 0).length;
+            const subjectSummary = Array.from(new Set(daySchedules.map(item => item.subject))).slice(0, 4);
+            const isExpanded = expandedDayCard === day.num;
+
+            return (
+              <section
+                key={`weekday-card-${day.num}`}
+                className={`weekday-accordion-card ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
+              >
+                <button
+                  type="button"
+                  className="weekday-card-trigger"
+                  aria-expanded={isExpanded}
+                  aria-pressed={isExpanded}
+                  onClick={() => setExpandedDayCard(day.num)}
+                >
+                  <span className="weekday-card-eng">{day.engName}</span>
+                  <strong>{day.name}</strong>
+                  <span className="weekday-card-count">{daySchedules.length} 节</span>
+                </button>
+
+                {isExpanded ? (
+                  <div className="weekday-expanded-panel">
+                    {periodRows.map(period => {
+                      const cellItems = getFilteredSchedules(day.num, period.num);
+                      const periodScrollbarClass = getPeriodScrollbarClass(period.num);
+
+                      return (
+                        <section
+                          key={`weekday-expanded-${day.num}-${period.num}`}
+                          className={`weekday-period-row ${getPeriodModuleClass(period.num)}`}
+                        >
+                          <div className="weekday-period-label">
+                            <strong>{period.name}</strong>
+                            <span>{period.time}</span>
+                          </div>
+                          <div className={`weekday-period-courses ${periodScrollbarClass}`}>
+                            {cellItems.length > 0 ? (
+                              cellItems.map(item => (
+                                <button
+                                  type="button"
+                                  key={item.id}
+                                  className="weekday-period-course"
+                                  style={getClassMatrixCellStyle(item)}
+                                  onClick={() => handleSelectCell(item)}
+                                  title={`${day.name} ${period.name} · ${item.teachingClassName} · ${item.subject} · ${item.teacherName}`}
+                                >
+                                  {item.adjustmentNote && (
+                                    <span className="weekday-period-course-badge" title={item.adjustmentNote.summary}>
+                                      代
+                                    </span>
+                                  )}
+                                  <strong>{item.subject} · {item.teacherName}</strong>
+                                  <span>{item.teachingClassName}</span>
+                                  {item.adjustmentNote && (
+                                    <small title={item.adjustmentNote.summary}>
+                                      {item.adjustmentNote.originalTeacherName || '原老师'} → {item.adjustmentNote.substituteTeacherName || item.teacherName}
+                                    </small>
+                                  )}
+                                </button>
+                              ))
+                            ) : (
+                              <span className="weekday-period-empty">-</span>
+                            )}
+                          </div>
+                        </section>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="weekday-collapsed-summary">
+                    <div className="weekday-card-metrics">
+                      <span>{dayTeacherCount} 位教师</span>
+                      <span>{dayRemarkCount} 条备注</span>
+                    </div>
+                    <div className="weekday-card-subjects">
+                      {subjectSummary.length > 0 ? (
+                        subjectSummary.map(subject => (
+                          <span key={`weekday-${day.num}-${subject}`}>{getSubjectBriefName(subject)}</span>
+                        ))
+                      ) : (
+                        <span>空</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
       </div>
     );
   };
@@ -1248,7 +1392,7 @@ export default function App() {
               <div className="text-left">
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-                    {boardDisplayMode === 'class' ? `班级课程检查：${selectedGrade}` : getActiveFilterLabel()}
+                    {getBoardHeadingTitle()}
                   </h2>
                   <select 
                     value={selectedGrade}
@@ -1265,9 +1409,7 @@ export default function App() {
                   {renderBoardModeToggle('head')}
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  {boardDisplayMode === 'class'
-                    ? '按行政班号横向扫描每一天的课程，用颜色和教师缩写快速发现缺课、重复或临时代课。'
-                    : '采用一键自动排课+手动微调保障。排上课表项代表走班制上课组织，包含行政班与教学班时间。'}
+                  {getBoardHeadingDescription()}
                 </p>
               </div>
 
@@ -1433,7 +1575,7 @@ export default function App() {
                 })}
               </div>
             </div>
-            ) : renderClassBoardView()}
+            ) : boardDisplayMode === 'class' ? renderClassBoardView() : renderDayCardsBoardView()}
           </main>
 
         </div>

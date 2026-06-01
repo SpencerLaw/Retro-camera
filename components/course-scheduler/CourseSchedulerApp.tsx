@@ -181,6 +181,9 @@ export default function App() {
   const [teacherFilter, setTeacherFilter] = useState<string>('all');
   const [classroomFilter, setClassroomFilter] = useState<string>('all');
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
+  const [dataAuditSearchTerm, setDataAuditSearchTerm] = useState<string>('');
+  const [dataAuditMappingStatusFilter, setDataAuditMappingStatusFilter] = useState<string>('all');
+  const [dataAuditClassNumberFilter, setDataAuditClassNumberFilter] = useState<string>('all');
   
   // Interactive Cell States
   const [selectedCell, setSelectedCell] = useState<ScheduleItem | null>(null);
@@ -1317,7 +1320,52 @@ export default function App() {
     ] as const;
     const abbreviationAuditRows = EXCEL_TIMETABLE_ABBREVIATION_AUDIT.filter(row => row.grade === selectedGrade);
     const periodMismatchRows = EXCEL_PERIOD_MISMATCH_AUDIT.filter(row => row.grade === selectedGrade);
-    const reviewMappingCount = abbreviationAuditRows.filter(row => row.status !== 'matched').length;
+    const auditSearchTerm = dataAuditSearchTerm.trim().toLowerCase();
+    const selectedAuditClassNumber = dataAuditClassNumberFilter === 'all' ? null : Number(dataAuditClassNumberFilter);
+    const auditClassNumbers = Array.from(new Set([
+      ...abbreviationAuditRows.flatMap(row => row.classNumbers),
+      ...periodMismatchRows.map(row => row.classNumber),
+    ])).filter(Number.isFinite).sort((a, b) => a - b);
+    const matchesAuditSearch = (values: Array<string | number | null | undefined>) => (
+      auditSearchTerm.length === 0 ||
+      values.some(value => String(value ?? '').toLowerCase().includes(auditSearchTerm))
+    );
+    const matchesMappingStatus = (status: string) => {
+      if (dataAuditMappingStatusFilter === 'all') return true;
+      if (dataAuditMappingStatusFilter === 'review') return status !== 'matched';
+      return status === dataAuditMappingStatusFilter;
+    };
+    const filteredAbbreviationAuditRows = abbreviationAuditRows.filter(row => (
+      matchesMappingStatus(row.status) &&
+      (selectedAuditClassNumber === null || row.classNumbers.includes(selectedAuditClassNumber)) &&
+      matchesAuditSearch([
+        row.abbreviation,
+        row.subject,
+        row.teacherName,
+        row.status,
+        row.note,
+        row.classNumbers.map(classNumber => `${selectedGrade}${classNumber}班`).join(' '),
+      ])
+    ));
+    const filteredPeriodMismatchRows = periodMismatchRows.filter(row => (
+      (selectedAuditClassNumber === null || row.classNumber === selectedAuditClassNumber) &&
+      matchesAuditSearch([
+        row.subject,
+        row.teacherName,
+        row.teachingClassName,
+        row.classNumber,
+        `${row.grade}${row.classNumber}班`,
+        row.assignedPeriods,
+        row.scheduledPeriods,
+        row.delta,
+      ])
+    ));
+    const reviewMappingCount = filteredAbbreviationAuditRows.filter(row => row.status !== 'matched').length;
+    const isDataAuditFilterActive = Boolean(
+      auditSearchTerm ||
+      dataAuditMappingStatusFilter !== 'all' ||
+      dataAuditClassNumberFilter !== 'all'
+    );
     const getMappingStatusLabel = (status: string) => {
       if (status === 'matched') return '已匹配';
       if (status === 'needsReview') return '需人工确认';
@@ -1381,6 +1429,61 @@ export default function App() {
         </section>
 
         <section className="data-audit-reconciliation-grid">
+          <div className="data-audit-filter-bar" role="search" aria-label="数据核对筛选">
+            <label className="data-audit-filter-field">
+              <span>关键字</span>
+              <input
+                value={dataAuditSearchTerm}
+                onChange={(event) => setDataAuditSearchTerm(event.target.value)}
+                placeholder="搜索缩写、老师、学科"
+              />
+            </label>
+            <label className="data-audit-filter-field">
+              <span>映射</span>
+              <select
+                value={dataAuditMappingStatusFilter}
+                onChange={(event) => setDataAuditMappingStatusFilter(event.target.value)}
+              >
+                <option value="all">全部映射状态</option>
+                <option value="review">只看需人工确认</option>
+                <option value="matched">只看已匹配</option>
+                <option value="ambiguous">只看多候选</option>
+                <option value="unmatched">只看未匹配</option>
+              </select>
+            </label>
+            <label className="data-audit-filter-field">
+              <span>班级</span>
+              <select
+                value={dataAuditClassNumberFilter}
+                onChange={(event) => setDataAuditClassNumberFilter(event.target.value)}
+              >
+                <option value="all">全部班级</option>
+                {auditClassNumbers.map(classNumber => (
+                  <option key={classNumber} value={String(classNumber)}>{selectedGrade}{classNumber}班</option>
+                ))}
+              </select>
+            </label>
+            <div className="data-audit-filter-result">
+              <strong>{filteredAbbreviationAuditRows.length}</strong>
+              <span>缩写</span>
+              <strong>{filteredPeriodMismatchRows.length}</strong>
+              <span>节数差异</span>
+            </div>
+            <button
+              type="button"
+              className="data-audit-filter-reset"
+              disabled={!isDataAuditFilterActive}
+              onClick={() => {
+                setDataAuditSearchTerm('');
+                setDataAuditMappingStatusFilter('all');
+                setDataAuditClassNumberFilter('all');
+              }}
+            >
+              <RotateCcw size={14} />
+              清空
+            </button>
+          </div>
+
           <div className="data-audit-mapping-panel">
             <div className="data-audit-issues-head">
               <div>
@@ -1388,7 +1491,7 @@ export default function App() {
                 <h3>课程表缩写到真实教师</h3>
               </div>
               <div className="data-audit-issue-counts">
-                <span>{abbreviationAuditRows.length} 个缩写</span>
+                <span>{filteredAbbreviationAuditRows.length}/{abbreviationAuditRows.length} 个缩写</span>
                 <span>{reviewMappingCount} 需人工确认</span>
               </div>
             </div>
@@ -1400,7 +1503,7 @@ export default function App() {
                 <span>出现</span>
                 <span>状态</span>
               </div>
-              {abbreviationAuditRows.length > 0 ? abbreviationAuditRows.map(row => (
+              {filteredAbbreviationAuditRows.length > 0 ? filteredAbbreviationAuditRows.map(row => (
                 <div key={`${row.grade}-${row.abbreviation}`} className={`data-audit-mapping-row data-audit-mapping-row--${row.status}`} role="row" title={row.note}>
                   <span className="data-audit-abbrev">{row.abbreviation}</span>
                   <span>{row.subject || '-'}</span>
@@ -1409,7 +1512,9 @@ export default function App() {
                   <span>{getMappingStatusLabel(row.status)}</span>
                 </div>
               )) : (
-                <div className="data-audit-inline-empty">当前年级没有导入真实课程表缩写数据</div>
+                <div className="data-audit-inline-empty">
+                  {abbreviationAuditRows.length > 0 ? '没有符合筛选条件的缩写映射' : '当前年级没有导入真实课程表缩写数据'}
+                </div>
               )}
             </div>
           </div>
@@ -1421,11 +1526,11 @@ export default function App() {
                 <h3>分工表节数 vs 课表实排格子</h3>
               </div>
               <div className="data-audit-issue-counts">
-                <span>{periodMismatchRows.length} 项差异</span>
+                <span>{filteredPeriodMismatchRows.length}/{periodMismatchRows.length} 项差异</span>
               </div>
             </div>
             <div className="data-audit-period-list">
-              {periodMismatchRows.length > 0 ? periodMismatchRows.slice(0, 12).map(row => (
+              {filteredPeriodMismatchRows.length > 0 ? filteredPeriodMismatchRows.slice(0, 24).map(row => (
                 <article key={`${row.grade}-${row.classNumber}-${row.subject}`} className="data-audit-period-item">
                   <div>
                     <strong>{row.grade}{row.classNumber}班 · {row.subject}</strong>
@@ -1437,7 +1542,9 @@ export default function App() {
                   </p>
                 </article>
               )) : (
-                <div className="data-audit-inline-empty">当前年级分工表节数与课表实排格子一致，或尚未导入该年级真实课表。</div>
+                <div className="data-audit-inline-empty">
+                  {periodMismatchRows.length > 0 ? '没有符合筛选条件的节数差异' : '当前年级分工表节数与课表实排格子一致，或尚未导入该年级真实课表。'}
+                </div>
               )}
             </div>
           </div>

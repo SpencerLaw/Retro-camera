@@ -1613,7 +1613,7 @@ export default function App() {
         </div>
 
         {/* SYSTEM ACTIONS & HEADER CONTROLS */}
-        <div className="flex items-center gap-4">
+        <div className="scheduler-header-actions flex items-center gap-4">
           <button
             onClick={handleOpenJSONModal}
             title="JSON 数据导入与导出备份"

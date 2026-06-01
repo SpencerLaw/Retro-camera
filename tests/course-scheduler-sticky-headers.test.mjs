@@ -26,17 +26,19 @@ runTest('top navigation uses reference-style translucent frosted glass', () => {
   const mainHeaderHighlightStyles = getCssBlock('.scheduler-main-header::before');
   const pinnedFilterStyles = getCssBlock('.scheduler-pinned-filter-inner');
 
-  assert.match(mainHeaderStyles, /linear-gradient\(115deg/);
-  assert.match(mainHeaderStyles, /rgba\(255,\s*245,\s*230,\s*0\.16\)/);
-  assert.match(mainHeaderStyles, /rgba\(255,\s*255,\s*255,\s*0\.07\)/);
-  assert.match(mainHeaderStyles, /backdrop-filter:\s*blur\(38px\)\s*saturate\(1\.55\)/);
+  assert.match(mainHeaderStyles, /linear-gradient\(128deg/);
+  assert.match(mainHeaderStyles, /rgba\(255,\s*255,\s*255,\s*0\.1\)/);
+  assert.match(mainHeaderStyles, /backdrop-filter:\s*blur\(22px\)\s*saturate\(1\.36\)/);
+  assert.match(mainHeaderStyles, /border:\s*1px solid rgba\(255,\s*255,\s*255,\s*0\.24\)/);
   assert.match(mainHeaderStyles, /isolation:\s*isolate/);
   assert.match(mainHeaderHighlightStyles, /pointer-events:\s*none/);
-  assert.match(mainHeaderHighlightStyles, /linear-gradient\(90deg/);
-  assert.match(pinnedFilterStyles, /linear-gradient\(110deg/);
-  assert.match(pinnedFilterStyles, /rgba\(255,\s*255,\s*255,\s*0\.07\)/);
+  assert.match(mainHeaderHighlightStyles, /radial-gradient\(circle at 18% 10%/);
+  assert.match(pinnedFilterStyles, /linear-gradient\(118deg/);
+  assert.match(pinnedFilterStyles, /rgba\(255,\s*255,\s*255,\s*0\.1\)/);
+  assert.match(pinnedFilterStyles, /border-radius:\s*9999px/);
   assert.match(schedulerStyles, /\.scheduler-glass-action,\s*\n\.scheduler-term-chip\s*\{[\s\S]*linear-gradient\(135deg/);
   assert.match(schedulerStyles, /\.scheduler-board-filters \.scheduler-board-filter-select\s*\{[\s\S]*linear-gradient\(135deg/);
+  assert.match(schedulerStyles, /\.course-scheduler-root::before\s*\{[\s\S]*radial-gradient\(circle at 10% 18%/);
 });
 
 runTest('board scroll collapses the main navigation into a tab layout', () => {
@@ -59,12 +61,12 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(schedulerSource, /scheduler-timetable-rows/);
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-rows[^"]*overflow-y-auto/);
   assert.doesNotMatch(schedulerSource, /<div className="flex-1 overflow-y-auto divide-y divide-slate-100">/);
-  assert.match(boardHeadStyles, /linear-gradient\(115deg/);
-  assert.match(boardHeadStyles, /backdrop-filter:\s*blur\(32px\)/);
+  assert.match(boardHeadStyles, /linear-gradient\(128deg/);
+  assert.match(boardHeadStyles, /backdrop-filter:\s*blur\(18px\)/);
   assert.match(schedulerStyles, /\.scheduler-main-header--tabs\s*\{[\s\S]*box-shadow/);
   assert.match(schedulerStyles, /\.course-scheduler-root\s*\{[\s\S]*background-image:/);
-  assert.match(mainHeaderStyles, /linear-gradient\(115deg/);
-  assert.match(mainHeaderStyles, /backdrop-filter:\s*blur\(38px\)/);
+  assert.match(mainHeaderStyles, /linear-gradient\(128deg/);
+  assert.match(mainHeaderStyles, /backdrop-filter:\s*blur\(22px\)/);
   assert.match(mainHeaderStyles, /border-radius:\s*9999px/);
   assert.match(schedulerSource, /scheduler-glass-action/);
   assert.match(schedulerSource, /scheduler-term-chip/);
@@ -81,6 +83,8 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
 });
 
 runTest('board pinned state exposes schedule filters below the top bar', () => {
+  const pinnedFilterBarStyles = getCssBlock('.scheduler-pinned-filter-bar');
+  const pinnedFilterVisibleStyles = getCssBlock('.scheduler-pinned-filter-bar.is-visible');
   const pinnedFilterStyles = getCssBlock('.scheduler-pinned-filter-inner');
   const boardFilterSelectStyles = getCssBlock('.scheduler-board-filters .scheduler-board-filter-select');
 
@@ -95,11 +99,36 @@ runTest('board pinned state exposes schedule filters below the top bar', () => {
   assert.match(schedulerSource, /所有任课教师/);
   assert.match(schedulerSource, /所有备课\/走班教室/);
   assert.match(schedulerStyles, /\.scheduler-pinned-filter-bar\s*\{[\s\S]*max-height:\s*0/);
-  assert.match(schedulerStyles, /\.scheduler-pinned-filter-bar\.is-visible\s*\{[\s\S]*max-height:\s*4\.5rem/);
-  assert.match(pinnedFilterStyles, /linear-gradient\(110deg/);
-  assert.match(pinnedFilterStyles, /backdrop-filter:\s*blur\(34px\)/);
+  assert.match(pinnedFilterBarStyles, /padding:\s*0 1rem/);
+  assert.match(pinnedFilterBarStyles, /background:\s*transparent/);
+  assert.match(pinnedFilterVisibleStyles, /max-height:\s*6\.5rem/);
+  assert.match(pinnedFilterStyles, /width:\s*100%/);
+  assert.match(pinnedFilterStyles, /box-sizing:\s*border-box/);
+  assert.match(pinnedFilterStyles, /overflow:\s*hidden/);
+  assert.match(pinnedFilterStyles, /linear-gradient\(118deg/);
+  assert.match(pinnedFilterStyles, /backdrop-filter:\s*blur\(20px\)/);
+  assert.doesNotMatch(pinnedFilterStyles, /border-bottom/);
   assert.match(boardFilterSelectStyles, /linear-gradient\(135deg/);
-  assert.match(schedulerStyles, /\.scheduler-board-filters--pinned\s+select\s*\{[\s\S]*min-width:\s*10rem/);
+  assert.match(schedulerStyles, /\.scheduler-board-filters--pinned\s+select\s*\{[\s\S]*min-width:\s*0/);
+});
+
+runTest('board mode and filters stay inside their glass containers', () => {
+  const boardHeadStyles = getCssBlock('.scheduler-board-head');
+  const modeToggleStyles = getCssBlock('.scheduler-board-mode-toggle');
+  const pinnedFiltersStyles = getCssBlock('.scheduler-board-filters--pinned');
+  const headFiltersStyles = getCssBlock('.scheduler-board-filters--head');
+
+  assert.match(boardHeadStyles, /overflow:\s*hidden/);
+  assert.match(schedulerStyles, /\.scheduler-board-head > \.text-left\s*\{[\s\S]*min-width:\s*0/);
+  assert.match(schedulerStyles, /\.scheduler-board-head > \.text-left > \.flex\s*\{[\s\S]*flex-wrap:\s*wrap/);
+  assert.match(schedulerStyles, /\.scheduler-board-head > \.flex\.items-center\.gap-2\s*\{[\s\S]*min-width:\s*0/);
+  assert.match(headFiltersStyles, /flex-wrap:\s*wrap/);
+  assert.match(headFiltersStyles, /max-width:\s*100%/);
+  assert.match(pinnedFiltersStyles, /min-width:\s*0/);
+  assert.match(modeToggleStyles, /max-width:\s*100%/);
+  assert.match(modeToggleStyles, /overflow-x:\s*auto/);
+  assert.match(schedulerSource, /scheduler-header-actions flex items-center gap-4/);
+  assert.match(schedulerStyles, /\.scheduler-header-actions\s*\{[\s\S]*overflow-x:\s*auto/);
 });
 
 runTest('weekday timetable header sticks below the pinned filters', () => {

@@ -32,6 +32,7 @@ import {
   normalizeSchedulingPreferences,
   detectPreferenceDiagnostics
 } from './courseSchedulerPreferences';
+import { buildDataAuditReport } from './courseSchedulerDataAudit';
 import { 
   INITIAL_TEACHERS, 
   INITIAL_CLASSROOMS, 
@@ -164,7 +165,7 @@ export default function App() {
   const [expandedDayCard, setExpandedDayCard] = useState<number>(1);
   const [isTabLayoutPinned, setIsTabLayoutPinned] = useState<boolean>(false);
   const [selectedGrade, setSelectedGrade] = useState<string>('高二');
-  const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students' | 'preferences'>('teachers');
+  const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students' | 'audit' | 'preferences'>('teachers');
 
   // Base Data Edit States
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
@@ -824,6 +825,14 @@ export default function App() {
   const gradeTeachingClasses = getGradeTeachingClasses();
   const gradeStudents = getGradeStudents();
   const gradeScheduleCount = schedules.filter(s => s.teachingClassName.startsWith(selectedGrade)).length;
+  const dataAuditReport = buildDataAuditReport({
+    selectedGrade,
+    teachers,
+    classrooms,
+    teachingClasses,
+    students,
+    schedules,
+  });
   const criticalConflicts = conflicts.filter(c => c.severity === 'critical');
   const warningConflicts = conflicts.filter(c => c.severity === 'warning');
   const preferenceCriticalDiagnostics = preferenceDiagnostics.filter(item => item.severity === 'critical');
@@ -1274,6 +1283,76 @@ export default function App() {
       </section>
     </div>
   );
+
+  const renderDataAuditPanel = () => {
+    const categoryCards = [
+      { key: 'integrity', label: '引用完整性', detail: '教师、教室、教学班 ID 是否能互相对应', tone: 'sky' },
+      { key: 'periods', label: '课时口径', detail: '分工表节数与当前课表格子数是否一致', tone: 'indigo' },
+      { key: 'load', label: '教师负荷', detail: '教师每周上限是否被当前课表突破', tone: 'amber' },
+      { key: 'students', label: '学生数据', detail: '学生选科与教学班绑定是否足够支撑走班冲突检测', tone: 'emerald' },
+    ] as const;
+
+    return (
+      <div className="data-audit-grid">
+        <section className={`data-audit-summary-card ${dataAuditReport.summary.readyForAlgorithm ? 'is-ready' : 'has-issues'}`}>
+          <div>
+            <span className="data-audit-kicker">算法可用性</span>
+            <h3>{dataAuditReport.summary.readyForAlgorithm ? '当前数据可进入自动排课' : '当前数据需要先核对'}</h3>
+            <p>
+              根据本地 JSON 中的教师、教学分工、课表与学生绑定数据，先把会影响自动排课和代课推荐的口径问题集中列出来。
+            </p>
+          </div>
+          <div className="data-audit-score">
+            <strong>{dataAuditReport.summary.totalIssues}</strong>
+            <span>待核对</span>
+          </div>
+        </section>
+
+        <div className="data-audit-category-row">
+          {categoryCards.map(card => (
+            <section key={card.key} className={`data-audit-category-card data-audit-category-card--${card.tone}`}>
+              <div>
+                <span>{card.label}</span>
+                <strong>{dataAuditReport.categoryCounts[card.key]} 条</strong>
+              </div>
+              <p>{card.detail}</p>
+            </section>
+          ))}
+        </div>
+
+        <section className="data-audit-issues-panel">
+          <div className="data-audit-issues-head">
+            <div>
+              <span className="data-audit-kicker">核对结果</span>
+              <h3>{selectedGrade}数据诊断清单</h3>
+            </div>
+            <div className="data-audit-issue-counts">
+              <span>{dataAuditReport.summary.criticalCount} 严重</span>
+              <span>{dataAuditReport.summary.warningCount} 提醒</span>
+            </div>
+          </div>
+
+          <div className="data-audit-issue-list">
+            {dataAuditReport.issues.length > 0 ? dataAuditReport.issues.map(issue => (
+              <article key={issue.id} className={`data-audit-issue-card data-audit-issue-card--${issue.severity}`}>
+                <div className="data-audit-issue-title">
+                  <span>{issue.title}</span>
+                  <strong>{issue.severity === 'critical' ? '严重' : '提醒'}</strong>
+                </div>
+                <p>{issue.message}</p>
+                <small>{issue.suggestedAction}</small>
+              </article>
+            )) : (
+              <div className="data-audit-empty">
+                <CheckCircle className="w-5 h-5 text-emerald-600" />
+                <span>当前年级没有发现会阻断算法的数据核对问题</span>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    );
+  };
 
   return (
     <div className="course-scheduler-root flex flex-col h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-600">
@@ -2037,6 +2116,12 @@ export default function App() {
               学生走班花名册 ({gradeStudents.length} 人)
             </button>
             <button
+              onClick={() => setMgmtSubTab('audit')}
+              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'audit' ? 'bg-cyan-600 text-white border-cyan-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
+            >
+              数据核对 ({dataAuditReport.summary.totalIssues} 条)
+            </button>
+            <button
               onClick={() => setMgmtSubTab('preferences')}
               className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'preferences' ? 'bg-sky-600 text-white border-sky-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
             >
@@ -2303,6 +2388,7 @@ export default function App() {
                 </div>
               </div>
             )}
+            {mgmtSubTab === 'audit' && renderDataAuditPanel()}
             {mgmtSubTab === 'preferences' && renderPreferenceSettingsPanel()}
           </div>{/* end scrollable content area */}
         </main>

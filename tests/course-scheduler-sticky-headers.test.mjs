@@ -14,6 +14,13 @@ function runTest(name, fn) {
   }
 }
 
+function getCssBlock(selector) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = schedulerStyles.match(new RegExp(`${escapedSelector}\\s*\\{[^}]*\\}`));
+  assert.ok(match, `Missing CSS block for ${selector}`);
+  return match[0];
+}
+
 runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(schedulerSource, /const \[isTabLayoutPinned, setIsTabLayoutPinned\]/);
   assert.match(schedulerSource, /handleSchedulerScroll/);
@@ -85,13 +92,15 @@ runTest('weekday timetable header sticks below the pinned filters', () => {
 });
 
 runTest('management scroll uses the same collapsible tab layout', () => {
+  const managementHeaderStyles = getCssBlock('.management-header');
+
   assert.match(schedulerSource, /id="data_management" className="[^"]*overflow-y-auto[^"]*" onScroll=\{handleSchedulerScroll\}/);
   assert.match(schedulerSource, /scheduler-page-head management-header/);
   assert.doesNotMatch(schedulerSource, /scheduler-app-topbar management-header/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*relative/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*0\.08\)/);
-  assert.match(schedulerStyles, /\.management-header\s*\{[\s\S]*backdrop-filter:\s*blur\(22px\)/);
-  assert.doesNotMatch(schedulerStyles, /\.management-header\s*\{[\s\S]*position:\s*sticky/);
+  assert.match(managementHeaderStyles, /position:\s*relative/);
+  assert.match(managementHeaderStyles, /background:\s*rgba\(255,\s*255,\s*255,\s*0\.08\)/);
+  assert.match(managementHeaderStyles, /backdrop-filter:\s*blur\(22px\)/);
+  assert.doesNotMatch(managementHeaderStyles, /position:\s*sticky/);
 });
 
 runTest('content headings scroll away instead of hovering as hollow top bars', () => {

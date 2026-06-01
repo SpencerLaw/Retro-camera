@@ -188,7 +188,7 @@ export const buildDataAuditReport = ({
       category: 'load',
       title: '教师负荷',
       message: `${overloadedTeachers.length} 位教师超过上限：${examples.join('；')}。请确认这些上限来自真实岗位限制表。`,
-      suggestedAction: '把教师上限字段校正为真实值，再让代课评分和自动排课使用该约束。',
+      suggestedAction: '把教师上限字段校正为真实值，再让代课推荐排序和自动排课使用该约束。',
       affectedIds: overloadedTeachers.map(({ teacher }) => teacher.id),
     });
   }

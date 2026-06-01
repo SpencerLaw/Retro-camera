@@ -380,43 +380,35 @@ export const getSubstituteRecommendations = (
     const hasLoadConflict = t.maxWeeklyHours > 0 && capacityRemaining <= 0;
     const hasAvailabilityConflict = t.unavailablePeriods.some(p => p.day === day && p.period === period);
 
-    let score = 50; 
     const reasons: string[] = [];
 
     const isSameSubject = t.subjects.includes(targetItem.subject);
     if (isSameSubject) {
-      score += 35;
       reasons.push(`同科目教师 (教授 ${targetItem.subject})`);
     } else {
       reasons.push(`不同科目教师 (教授 ${t.subjects.join('/')})`);
     }
 
-    if (capacityRemaining > 4) {
-      score += 15;
+    if (t.maxWeeklyHours <= 0) {
+      reasons.push(`源表未提供周课时上限，当前已排 ${currentWeeklyLoad} 节，仅作人工参考`);
+    } else if (capacityRemaining > 4) {
       reasons.push(`教学周课时充沛 (当前已排 ${currentWeeklyLoad}/${t.maxWeeklyHours} 节)`);
     } else if (hasLoadConflict) {
-      score = 0;
       reasons.push(`周课时上限冲突: 已达到最大周课时负荷 (当前已排 ${currentWeeklyLoad}/${t.maxWeeklyHours} 节)`);
     } else {
-      score += 5;
       reasons.push(`课时富余较小 (当前已排 ${currentWeeklyLoad}/${t.maxWeeklyHours} 节)`);
     }
 
     if (hasAvailabilityConflict) {
-      score = 0;
       reasons.push(`时段冲突: 被标记为教师偏好不可排时段`);
     }
 
     if (hasConflict) {
-      score = 0; 
       reasons.push(`严重冲突: 教师在同一时段有其他课时`);
     }
 
-    score = Math.max(0, Math.min(100, score));
-
     recommendations.push({
       teacher: t,
-      suitabilityScore: score,
       reasons,
       hasConflictOnChosenSlot: hasConflict,
       hasLoadConflict,
@@ -425,7 +417,25 @@ export const getSubstituteRecommendations = (
     });
   }
 
-  recommendations.sort((a, b) => b.suitabilityScore - a.suitabilityScore);
+  const hasBlockingIssue = (rec: SubstituteRecommendation) => (
+    rec.hasConflictOnChosenSlot || rec.hasLoadConflict || rec.hasAvailabilityConflict
+  );
+  const remainingWeeklyCapacity = (rec: SubstituteRecommendation) => (
+    rec.teacher.maxWeeklyHours > 0 ? rec.teacher.maxWeeklyHours - rec.currentWeeklyLoad : 0
+  );
+
+  recommendations.sort((a, b) => {
+    const blockedDelta = Number(hasBlockingIssue(a)) - Number(hasBlockingIssue(b));
+    if (blockedDelta !== 0) return blockedDelta;
+
+    const sameSubjectDelta = Number(b.teacher.subjects.includes(targetItem.subject)) - Number(a.teacher.subjects.includes(targetItem.subject));
+    if (sameSubjectDelta !== 0) return sameSubjectDelta;
+
+    const capacityDelta = remainingWeeklyCapacity(b) - remainingWeeklyCapacity(a);
+    if (capacityDelta !== 0) return capacityDelta;
+
+    return a.currentWeeklyLoad - b.currentWeeklyLoad || a.teacher.name.localeCompare(b.teacher.name, 'zh-CN');
+  });
 
   return recommendations.slice(0, 5); 
 };

@@ -176,7 +176,6 @@ export interface TimetableShift {
 
 export interface SubstituteRecommendation {
   teacher: Teacher;
-  suitabilityScore: number; // 0-100 rating based on load, overlap, subject matching
   reasons: string[];
   hasConflictOnChosenSlot: boolean;
   hasLoadConflict?: boolean;

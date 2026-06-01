@@ -3,6 +3,8 @@ import fs from 'node:fs';
 
 const schedulerSource = fs.readFileSync('components/course-scheduler/CourseSchedulerApp.tsx', 'utf8');
 const schedulerTypes = fs.readFileSync('components/course-scheduler/types.ts', 'utf8');
+const schedulerLogic = fs.readFileSync('components/course-scheduler/courseSchedulerLogic.ts', 'utf8');
+const dataAuditSource = fs.readFileSync('components/course-scheduler/courseSchedulerDataAudit.ts', 'utf8');
 
 function runTest(name, fn) {
   try {
@@ -35,6 +37,14 @@ runTest('course scheduler no longer reserves a right sidebar for substitute reco
 
 runTest('substitute recommendation cards do not display suitability scores', () => {
   assert.doesNotMatch(schedulerSource, /评分\s*\{rec\.suitabilityScore\}/);
+});
+
+runTest('substitute recommendations do not expose numeric suitability scores', () => {
+  assert.doesNotMatch(schedulerTypes, /suitabilityScore/);
+  assert.doesNotMatch(schedulerLogic, /suitabilityScore/);
+  assert.doesNotMatch(schedulerLogic, /let score|score \+=|score =/);
+  assert.doesNotMatch(schedulerSource, /rec\.suitabilityScore/);
+  assert.doesNotMatch(dataAuditSource, /代课评分/);
 });
 
 runTest('substitute changes capture a structured adjustment note', () => {

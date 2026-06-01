@@ -2013,7 +2013,7 @@ export default function App() {
 
                           <div className="grid gap-2 sm:grid-cols-2">
                             {substituteData.recommendations.map((rec) => {
-                              const disabled = rec.hasConflictOnChosenSlot || rec.hasLoadConflict || rec.hasAvailabilityConflict || rec.suitabilityScore === 0;
+                              const disabled = rec.hasConflictOnChosenSlot || rec.hasLoadConflict || rec.hasAvailabilityConflict;
                               return (
                                 <div
                                   key={rec.teacher.id}

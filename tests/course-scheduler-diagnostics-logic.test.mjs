@@ -142,7 +142,8 @@ runTest('getSubstituteRecommendations blocks teachers already at weekly capacity
   );
 
   const overloaded = recommendations.find(rec => rec.teacher.id === 'T2');
-  assert.equal(overloaded?.suitabilityScore, 0);
+  assert.ok(overloaded);
+  assert.equal('suitabilityScore' in overloaded, false);
   assert.equal(overloaded?.hasLoadConflict, true);
   assert.ok(overloaded?.reasons.some(reason => reason.includes('周课时上限')));
 });

@@ -1596,7 +1596,7 @@ export default function App() {
       )}
 
       {/* TOP HEADER NAVIGATION AREA */}
-      <header id="main_header" className={`scheduler-main-header scheduler-glass-topbar h-16 flex items-center justify-between px-6 shrink-0 z-30 ${isTabLayoutPinned ? 'scheduler-main-header--tabs' : ''}`}>
+      <header id="main_header" className={`scheduler-main-header scheduler-glass-topbar flex items-center justify-between px-6 shrink-0 z-30 ${isTabLayoutPinned ? 'scheduler-main-header--tabs' : ''}`}>
         <div className="scheduler-brand-strip flex items-center">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 bg-blue-600 rounded flex items-center justify-center shadow-md shadow-blue-200">

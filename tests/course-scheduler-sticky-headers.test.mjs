@@ -30,6 +30,12 @@ runTest('top navigation uses reference-style translucent frosted glass', () => {
   assert.match(mainHeaderStyles, /rgba\(255,\s*255,\s*255,\s*0\.1\)/);
   assert.match(mainHeaderStyles, /backdrop-filter:\s*blur\(22px\)\s*saturate\(1\.36\)/);
   assert.match(mainHeaderStyles, /border:\s*1px solid rgba\(255,\s*255,\s*255,\s*0\.24\)/);
+  assert.match(mainHeaderStyles, /height:\s*auto !important/);
+  assert.match(mainHeaderStyles, /min-height:\s*4\.25rem/);
+  assert.match(mainHeaderStyles, /width:\s*calc\(100% - 2rem\)/);
+  assert.doesNotMatch(mainHeaderStyles, /100vw/);
+  assert.match(mainHeaderStyles, /flex-wrap:\s*wrap/);
+  assert.match(mainHeaderStyles, /row-gap:\s*0\.55rem/);
   assert.match(mainHeaderStyles, /isolation:\s*isolate/);
   assert.match(mainHeaderHighlightStyles, /pointer-events:\s*none/);
   assert.match(mainHeaderHighlightStyles, /radial-gradient\(circle at 18% 10%/);
@@ -72,7 +78,10 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(schedulerSource, /scheduler-glass-action/);
   assert.match(schedulerSource, /scheduler-term-chip/);
   assert.match(glassControlStyles, /linear-gradient\(135deg/);
-  assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*gap:\s*1\.5rem/);
+  assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*flex:\s*1 1 34rem/);
+  assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*gap:\s*1rem/);
+  assert.match(schedulerStyles, /\.scheduler-header-actions\s*\{[\s\S]*flex:\s*1 1 42rem/);
+  assert.match(schedulerStyles, /\.scheduler-header-actions\s*\{[\s\S]*justify-content:\s*flex-end/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*display:\s*inline-flex/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*border-radius:\s*12px/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs--pinned\s*\{[\s\S]*border-radius:\s*999px/);
@@ -114,6 +123,8 @@ runTest('board pinned state exposes schedule filters below the top bar', () => {
   assert.match(pinnedFilterStyles, /backdrop-filter:\s*blur\(20px\)/);
   assert.doesNotMatch(pinnedFilterStyles, /border-bottom/);
   assert.match(boardFilterSelectStyles, /linear-gradient\(135deg/);
+  assert.match(boardFilterSelectStyles, /border-radius:\s*9999px/);
+  assert.match(boardFilterSelectStyles, /padding-left:\s*0\.75rem/);
   assert.match(schedulerStyles, /\.scheduler-board-filters--pinned\s+select\s*\{[\s\S]*min-width:\s*0/);
 });
 
@@ -159,6 +170,7 @@ runTest('weekday timetable header sticks below the pinned filters', () => {
   assert.match(weekdayCellDividerStyles, /border-left:\s*1px solid rgba\(148,\s*163,\s*184,\s*0\.14\)/);
   assert.match(timetableShellStyles, /border:\s*1px solid rgba\(255,\s*255,\s*255,\s*0\.2\)/);
   assert.match(timetableShellStyles, /border-radius:\s*28px/);
+  assert.match(timetableShellStyles, /clip-path:\s*inset\(0 round 28px\)/);
   assert.match(timetableShellStyles, /background:\s*rgba\(255,\s*255,\s*255,\s*0\.1\)/);
   assert.match(timetableShellStyles, /backdrop-filter:\s*blur\(24px\)/);
   assert.match(timetableShellStyles, /0 0 0 1px rgba\(255,\s*255,\s*255,\s*0\.05\)/);

@@ -151,6 +151,9 @@ function loadMorningTree() {
       applyRewardEnergyBonus: typeof applyRewardEnergyBonus === 'function' ? applyRewardEnergyBonus : undefined,
       getRewardProgress: typeof getRewardProgress === 'function' ? getRewardProgress : undefined,
       renderRewardPanel: typeof renderRewardPanel === 'function' ? renderRewardPanel : undefined,
+      setActiveRewardHelp: typeof setActiveRewardHelp === 'function' ? setActiveRewardHelp : undefined,
+      getRewardHelpContent: typeof getRewardHelpContent === 'function' ? getRewardHelpContent : undefined,
+      getRewardBonusLabel: typeof getRewardBonusLabel === 'function' ? getRewardBonusLabel : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
       normalizeParticipants: typeof normalizeParticipants === 'function' ? normalizeParticipants : undefined,
       createParticipantMetrics: typeof createParticipantMetrics === 'function' ? createParticipantMetrics : undefined,
@@ -542,6 +545,62 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.match(zh.morningTree.rewards.fertilizerRule, /累计 60 秒/);
   assert.match(zh.morningTree.rewards.fertilizerRule, /\+5%/);
   assert.match(zh.morningTree.rewards.overLoudRule, /不浇水、不施肥/);
+});
+
+runTest('reward cards are clickable and reveal trigger explanations', () => {
+  const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
+  const css = fs.readFileSync('public/morning-energy-tree/style.css', 'utf8');
+  const { api, elements } = loadMorningTree();
+  const zh = JSON.parse(fs.readFileSync('public/locales/zh-CN.json', 'utf8'));
+
+  assert.match(html, /id="reward-energy-float"/);
+  assert.equal(typeof api.setActiveRewardHelp, 'function');
+  assert.equal(typeof api.getRewardHelpContent, 'function');
+
+  const waterHelp = api.getRewardHelpContent('water');
+  const fertilizerHelp = api.getRewardHelpContent('fertilizer');
+  const overLoudHelp = api.getRewardHelpContent('overLoud');
+  assert.match(waterHelp.condition, /12 秒/);
+  assert.match(waterHelp.effect, /\+2%/);
+  assert.match(fertilizerHelp.condition, /60 秒/);
+  assert.match(fertilizerHelp.effect, /\+5%/);
+  assert.match(overLoudHelp.effect, /不浇水、不施肥/);
+
+  api.renderRewardPanel();
+  let panelHtml = elements.get('reward-live-panel').innerHTML;
+  assert.match(panelHtml, /button[^>]+data-reward-help="water"/);
+  assert.match(panelHtml, /button[^>]+data-reward-help="fertilizer"/);
+  assert.match(panelHtml, /button[^>]+data-reward-help="overLoud"/);
+  assert.match(panelHtml, /reward-help-mark/);
+  assert.match(panelHtml, /奖励 \+2%/);
+  assert.doesNotMatch(panelHtml, /id="reward-help-water"/);
+
+  api.setActiveRewardHelp('water');
+  panelHtml = elements.get('reward-live-panel').innerHTML;
+  assert.match(panelHtml, /id="reward-help-water"/);
+  assert.match(panelHtml, /aria-expanded="true"/);
+  assert.match(panelHtml, /触发条件/);
+  assert.match(panelHtml, /稳定朗读区/);
+
+  api.setActiveRewardHelp('fertilizer');
+  panelHtml = elements.get('reward-live-panel').innerHTML;
+  assert.match(panelHtml, /id="reward-help-fertilizer"/);
+  assert.match(panelHtml, /有效朗读/);
+  assert.doesNotMatch(panelHtml, /id="reward-help-water"/);
+
+  assert.match(css, /\.reward-help-mark/);
+  assert.match(css, /\.reward-card-help/);
+  assert.match(css, /\.reward-energy-float/);
+  assert.match(zh.morningTree.rewards.tapHint, /点击/);
+});
+
+runTest('reward boost creates a visible growth bonus label', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getRewardBonusLabel, 'function');
+  assert.equal(api.getRewardBonusLabel({ waterBonus: 2, fertilizerBonus: 0, totalBonus: 2 }), '浇水 +2%');
+  assert.equal(api.getRewardBonusLabel({ waterBonus: 0, fertilizerBonus: 5, totalBonus: 5 }), '施肥 +5%');
+  assert.equal(api.getRewardBonusLabel({ waterBonus: 2, fertilizerBonus: 5, totalBonus: 7 }), '浇水 +2% · 施肥 +5%');
 });
 
 runTest('participant branch metrics update only the selected local branch', () => {

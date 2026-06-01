@@ -91,6 +91,7 @@ const STATE = {
     activeParticipantId: null,
     participantLastRenderAt: 0,
     rewardLastRenderAt: 0,
+    activeRewardHelp: null,
     frameNow: 0
 };
 
@@ -215,6 +216,7 @@ const appContainer = $('app-container');
 const canvas = $('tree-canvas');
 const ctx = canvas.getContext('2d');
 const energyFill = $('energy-fill');
+const rewardEnergyFloat = $('reward-energy-float');
 const micBtn = $('mic-toggle-btn');
 const dbValue = $('db-value');
 const dbDisplay = document.querySelector('.db-display');
@@ -443,6 +445,21 @@ function applyRewardEnergyBonus(currentEnergy, rewardBonus = {}) {
     return clampEnergy((Number.isFinite(currentEnergy) ? currentEnergy : 0) + totalBonus);
 }
 
+function getRewardBonusLabel(rewardBonus = {}) {
+    const parts = [];
+    const waterBonus = Number(rewardBonus.waterBonus) || 0;
+    const fertilizerBonus = Number(rewardBonus.fertilizerBonus) || 0;
+
+    if (waterBonus > 0) {
+        parts.push(`${t('morningTree.rewards.water') || '浇水'} +${waterBonus}%`);
+    }
+    if (fertilizerBonus > 0) {
+        parts.push(`${t('morningTree.rewards.fertilizer') || '施肥'} +${fertilizerBonus}%`);
+    }
+
+    return parts.join(' · ');
+}
+
 function flashRewardEnergyBonus(rewardBonus = {}) {
     if (!energyFill || !(rewardBonus.totalBonus > 0)) return;
 
@@ -451,6 +468,15 @@ function flashRewardEnergyBonus(rewardBonus = {}) {
     void energyFill.offsetWidth;
     energyFill.classList.add('reward-boost');
     setTimeout(() => energyFill.classList.remove('reward-boost'), 900);
+
+    if (rewardEnergyFloat) {
+        const label = getRewardBonusLabel(rewardBonus);
+        rewardEnergyFloat.textContent = label || `+${rewardBonus.totalBonus}%`;
+        rewardEnergyFloat.classList.remove('show');
+        void rewardEnergyFloat.offsetWidth;
+        rewardEnergyFloat.classList.add('show');
+        setTimeout(() => rewardEnergyFloat.classList.remove('show'), 1400);
+    }
 }
 
 function getRewardProgress(rewardState = createSessionRewardState(), effectiveReadingSeconds = STATE.reportEffectiveReadingSeconds) {
@@ -484,6 +510,105 @@ function formatRewardSeconds(seconds) {
     return `${Math.max(0, Math.round(Number(seconds) || 0))}s`;
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getRewardHelpContent(type) {
+    const fallback = {
+        water: {
+            title: '浇水触发条件',
+            condition: `声音进入稳定朗读区后连续保持 ${WATER_STABLE_SECONDS} 秒。`,
+            effect: `自动浇水一次，并让成长进度 +${WATER_ENERGY_BONUS}%。`,
+            blocker: '如果没有触发，多半是声音断续、不够稳定，或刚才超过 100dB。'
+        },
+        fertilizer: {
+            title: '施肥触发条件',
+            condition: `本场有效朗读累计 ${FERTILIZER_READING_SECONDS} 秒，触发时低于 ${OVER_LOUD_DB}dB。`,
+            effect: `自动施肥一次，并让成长进度 +${FERTILIZER_ENERGY_BONUS}%。`,
+            blocker: '如果已经很响但没有触发，请看是否超过 100dB，过响不会奖励。'
+        },
+        overLoud: {
+            title: '过响提醒规则',
+            condition: `声音达到 ${OVER_LOUD_DB}dB 以上会记录一次过响提醒。`,
+            effect: '不浇水、不施肥，只记录提醒，避免喊叫刷成长。',
+            blocker: '提醒学生回到清晰、稳定、不过喊的朗读状态。'
+        }
+    };
+    const key = type === 'overLoud' ? 'overLoud' : type;
+    const copy = fallback[key] || fallback.water;
+    return {
+        title: t(`morningTree.rewards.${key}HelpTitle`) || copy.title,
+        condition: t(`morningTree.rewards.${key}HelpCondition`) || copy.condition,
+        effect: t(`morningTree.rewards.${key}HelpEffect`) || copy.effect,
+        blocker: t(`morningTree.rewards.${key}HelpBlocker`) || copy.blocker
+    };
+}
+
+function getRewardHelpId(type) {
+    return type === 'overLoud' ? 'reward-help-over-loud' : `reward-help-${type}`;
+}
+
+function isRewardHelpType(type) {
+    return type === 'water' || type === 'fertilizer' || type === 'overLoud';
+}
+
+function setActiveRewardHelp(type) {
+    if (!isRewardHelpType(type)) return;
+    STATE.activeRewardHelp = STATE.activeRewardHelp === type ? null : type;
+    renderRewardPanel();
+}
+
+function renderRewardHelp(type) {
+    if (STATE.activeRewardHelp !== type) return '';
+
+    const help = getRewardHelpContent(type);
+    const conditionLabel = t('morningTree.rewards.conditionLabel') || '触发条件';
+    const effectLabel = t('morningTree.rewards.effectLabel') || '成长奖励';
+    const blockerLabel = t('morningTree.rewards.blockerLabel') || '为什么没触发';
+
+    return `
+        <div id="${getRewardHelpId(type)}" class="reward-card-help" role="note">
+            <strong>${escapeHtml(help.title)}</strong>
+            <p><span>${escapeHtml(conditionLabel)}：</span>${escapeHtml(help.condition)}</p>
+            <p><span>${escapeHtml(effectLabel)}：</span>${escapeHtml(help.effect)}</p>
+            <p><span>${escapeHtml(blockerLabel)}：</span>${escapeHtml(help.blocker)}</p>
+        </div>
+    `;
+}
+
+function renderRewardCard(type, options = {}) {
+    const isActive = STATE.activeRewardHelp === type;
+    const helpId = getRewardHelpId(type);
+    const tapHint = t('morningTree.rewards.tapHint') || '点击查看条件';
+    const bonusText = options.bonusText ? `<span class="reward-bonus-pill">${escapeHtml(options.bonusText)}</span>` : '';
+
+    return `
+        <div class="reward-item ${type}">
+            <button class="reward-stat-card ${type} ${options.complete ? 'complete' : ''}" type="button" data-reward-help="${type}" aria-expanded="${isActive ? 'true' : 'false'}" aria-controls="${helpId}" style="--reward-progress: ${Math.round((options.progressRatio || 0) * 100)}%">
+                <div class="reward-stat-top">
+                    <span class="reward-symbol" aria-hidden="true">${escapeHtml(options.symbol || '')}</span>
+                    <span>${escapeHtml(options.title || '')}</span>
+                    <strong id="${escapeHtml(options.countId || '')}">${escapeHtml(options.countText || '')}</strong>
+                    <span class="reward-help-mark" aria-hidden="true">?</span>
+                </div>
+                <div class="reward-progress-track"><span></span></div>
+                <small>${escapeHtml(options.status || '')}</small>
+                <div class="reward-card-foot">
+                    ${bonusText}
+                    <span>${escapeHtml(tapHint)}</span>
+                </div>
+            </button>
+            ${renderRewardHelp(type)}
+        </div>
+    `;
+}
+
 function renderRewardPanel() {
     if (!rewardLivePanel) return;
 
@@ -498,34 +623,36 @@ function renderRewardPanel() {
         ? `${progress.overLoudCount}${t('morningTree.rewards.timesSuffix') || '次'}`
         : (t('morningTree.rewards.noOverLoud') || '暂无');
 
-    rewardLivePanel.innerHTML = `
-        <div class="reward-stat-card water ${progress.waterComplete ? 'complete' : ''}" style="--reward-progress: ${Math.round(progress.waterProgressRatio * 100)}%">
-            <div class="reward-stat-top">
-                <span class="reward-symbol" aria-hidden="true">水</span>
-                <span>${t('morningTree.rewards.water') || '浇水'}</span>
-                <strong id="reward-water-count">${progress.waterCount}/1</strong>
-            </div>
-            <div class="reward-progress-track"><span></span></div>
-            <small>${waterStatus}</small>
-        </div>
-        <div class="reward-stat-card fertilizer ${progress.fertilizerComplete ? 'complete' : ''}" style="--reward-progress: ${Math.round(progress.fertilizerProgressRatio * 100)}%">
-            <div class="reward-stat-top">
-                <span class="reward-symbol" aria-hidden="true">肥</span>
-                <span>${t('morningTree.rewards.fertilizer') || '施肥'}</span>
-                <strong id="reward-fertilizer-count">${progress.fertilizerCount}/1</strong>
-            </div>
-            <div class="reward-progress-track"><span></span></div>
-            <small>${fertilizerStatus}</small>
-        </div>
-        <div class="reward-stat-card alert">
-            <div class="reward-stat-top">
-                <span class="reward-symbol" aria-hidden="true">!</span>
-                <span>${t('morningTree.rewards.overLoud') || '过响提醒'}</span>
-                <strong id="reward-over-loud-count">${progress.overLoudCount}</strong>
-            </div>
-            <small>${overLoudStatus}</small>
-        </div>
-    `;
+    rewardLivePanel.innerHTML = [
+        renderRewardCard('water', {
+            symbol: '水',
+            title: t('morningTree.rewards.water') || '浇水',
+            countId: 'reward-water-count',
+            countText: `${progress.waterCount}/1`,
+            status: waterStatus,
+            progressRatio: progress.waterProgressRatio,
+            complete: progress.waterComplete,
+            bonusText: `${t('morningTree.rewards.bonusLabel') || '奖励'} +${WATER_ENERGY_BONUS}%`
+        }),
+        renderRewardCard('fertilizer', {
+            symbol: '肥',
+            title: t('morningTree.rewards.fertilizer') || '施肥',
+            countId: 'reward-fertilizer-count',
+            countText: `${progress.fertilizerCount}/1`,
+            status: fertilizerStatus,
+            progressRatio: progress.fertilizerProgressRatio,
+            complete: progress.fertilizerComplete,
+            bonusText: `${t('morningTree.rewards.bonusLabel') || '奖励'} +${FERTILIZER_ENERGY_BONUS}%`
+        }),
+        renderRewardCard('overLoud', {
+            symbol: '!',
+            title: t('morningTree.rewards.overLoud') || '过响提醒',
+            countId: 'reward-over-loud-count',
+            countText: `${progress.overLoudCount}`,
+            status: overLoudStatus,
+            progressRatio: progress.overLoudCount ? 1 : 0
+        })
+    ].join('');
 }
 
 function announceRewardChanges(previousCounts, nextState) {
@@ -537,6 +664,16 @@ function announceRewardChanges(previousCounts, nextState) {
     if ((nextState.fertilizerCount || 0) > (previousCounts.fertilizerCount || 0)) {
         showToast(t('morningTree.rewards.fertilizerToast') || '施肥完成：有效朗读满 60 秒');
     }
+}
+
+function initRewardUI() {
+    if (!rewardLivePanel) return;
+
+    rewardLivePanel.addEventListener('click', (event) => {
+        const trigger = event.target.closest?.('[data-reward-help]');
+        if (!trigger || !rewardLivePanel.contains(trigger)) return;
+        setActiveRewardHelp(trigger.dataset.rewardHelp);
+    });
 }
 
 function createDefaultParticipants() {
@@ -3811,6 +3948,7 @@ initLocalization().then(() => {
     initTaskUI();
     initReportUI();
     initForestUI();
+    initRewardUI();
     renderRewardPanel();
     updateSensitivityControl();
 });

@@ -35,6 +35,7 @@ runTest('top navigation uses reference-style translucent frosted glass', () => {
   assert.match(mainHeaderStyles, /width:\s*calc\(100% - 2rem\)/);
   assert.doesNotMatch(mainHeaderStyles, /100vw/);
   assert.match(mainHeaderStyles, /flex-wrap:\s*wrap/);
+  assert.match(mainHeaderStyles, /overflow:\s*visible/);
   assert.match(mainHeaderStyles, /row-gap:\s*0\.55rem/);
   assert.match(mainHeaderStyles, /isolation:\s*isolate/);
   assert.match(mainHeaderHighlightStyles, /pointer-events:\s*none/);
@@ -50,6 +51,7 @@ runTest('top navigation uses reference-style translucent frosted glass', () => {
 
 runTest('board scroll collapses the main navigation into a tab layout', () => {
   const mainHeaderStyles = getCssBlock('.scheduler-main-header');
+  const headerActionsStyles = getCssBlock('.scheduler-header-actions');
   const boardHeadStyles = getCssBlock('.scheduler-board-head');
   const glassControlStyles = schedulerStyles.match(/\.scheduler-glass-action,\s*\n\.scheduler-term-chip\s*\{[\s\S]*?\}/)?.[0] || '';
 
@@ -80,8 +82,12 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(glassControlStyles, /linear-gradient\(135deg/);
   assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*flex:\s*1 1 34rem/);
   assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*gap:\s*1rem/);
-  assert.match(schedulerStyles, /\.scheduler-header-actions\s*\{[\s\S]*flex:\s*1 1 42rem/);
-  assert.match(schedulerStyles, /\.scheduler-header-actions\s*\{[\s\S]*justify-content:\s*flex-end/);
+  assert.match(headerActionsStyles, /flex:\s*1 1 42rem/);
+  assert.match(headerActionsStyles, /justify-content:\s*flex-end/);
+  assert.match(headerActionsStyles, /flex-wrap:\s*wrap/);
+  assert.match(headerActionsStyles, /overflow:\s*visible/);
+  assert.doesNotMatch(headerActionsStyles, /overflow-x:\s*auto/);
+  assert.doesNotMatch(schedulerSource, /💾 导入\/导出 JSON/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*display:\s*inline-flex/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*border-radius:\s*12px/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs--pinned\s*\{[\s\S]*border-radius:\s*999px/);
@@ -131,6 +137,7 @@ runTest('board pinned state exposes schedule filters below the top bar', () => {
 runTest('board mode and filters stay inside their glass containers', () => {
   const boardHeadStyles = getCssBlock('.scheduler-board-head');
   const modeToggleStyles = getCssBlock('.scheduler-board-mode-toggle');
+  const headerActionsStyles = getCssBlock('.scheduler-header-actions');
   const modeOptionStyles = getCssBlock('.scheduler-board-mode-option');
   const activeModeOptionStyles = getCssBlock('.scheduler-board-mode-option.is-active');
   const boardFilterSelectStyles = getCssBlock('.scheduler-board-filters .scheduler-board-filter-select');
@@ -156,7 +163,7 @@ runTest('board mode and filters stay inside their glass containers', () => {
   assert.match(boardFilterSelectStyles, /background:[\s\S]*!important/);
   assert.doesNotMatch(schedulerSource, /scheduler-board-filter-select[^"]*bg-slate-50/);
   assert.match(schedulerSource, /scheduler-header-actions flex items-center gap-4/);
-  assert.match(schedulerStyles, /\.scheduler-header-actions\s*\{[\s\S]*overflow-x:\s*auto/);
+  assert.match(headerActionsStyles, /overflow:\s*visible/);
 });
 
 runTest('weekday timetable header sticks below the pinned filters', () => {

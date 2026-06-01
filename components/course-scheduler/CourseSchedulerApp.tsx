@@ -1620,7 +1620,7 @@ export default function App() {
             className="scheduler-glass-action px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors"
           >
             <Database className="w-3.5 h-3.5 text-indigo-600" />
-            <span>💾 导入/导出 JSON</span>
+            <span>导入/导出 JSON</span>
           </button>
           {hasCriticalConflicts ? (
             <button

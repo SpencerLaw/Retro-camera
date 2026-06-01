@@ -41,7 +41,9 @@ import {
   generatePrepopulatedSchedules,
   EXCEL_DATASET_ID,
   EXCEL_DATA_SOURCES,
-  EXCEL_DATA_LIMITATIONS
+  EXCEL_DATA_LIMITATIONS,
+  EXCEL_TIMETABLE_ABBREVIATION_AUDIT,
+  EXCEL_PERIOD_MISMATCH_AUDIT
 } from './excelData';
 import './CourseSchedulerStyles.css';
 
@@ -1313,6 +1315,15 @@ export default function App() {
       { key: 'load', label: '教师负荷', detail: '教师每周上限是否被当前课表突破', tone: 'amber' },
       { key: 'students', label: '学生数据', detail: '学生选科与教学班绑定是否足够支撑走班冲突检测', tone: 'emerald' },
     ] as const;
+    const abbreviationAuditRows = EXCEL_TIMETABLE_ABBREVIATION_AUDIT.filter(row => row.grade === selectedGrade);
+    const periodMismatchRows = EXCEL_PERIOD_MISMATCH_AUDIT.filter(row => row.grade === selectedGrade);
+    const reviewMappingCount = abbreviationAuditRows.filter(row => row.status !== 'matched').length;
+    const getMappingStatusLabel = (status: string) => {
+      if (status === 'matched') return '已匹配';
+      if (status === 'needsReview') return '需人工确认';
+      if (status === 'ambiguous') return '多候选';
+      return '未匹配';
+    };
 
     return (
       <div className="data-audit-grid">
@@ -1365,6 +1376,69 @@ export default function App() {
               {EXCEL_DATA_LIMITATIONS.map(item => (
                 <p key={item}>{item}</p>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="data-audit-reconciliation-grid">
+          <div className="data-audit-mapping-panel">
+            <div className="data-audit-issues-head">
+              <div>
+                <span className="data-audit-kicker">缩写映射核对</span>
+                <h3>课程表缩写到真实教师</h3>
+              </div>
+              <div className="data-audit-issue-counts">
+                <span>{abbreviationAuditRows.length} 个缩写</span>
+                <span>{reviewMappingCount} 需人工确认</span>
+              </div>
+            </div>
+            <div className="data-audit-mapping-table" role="table" aria-label={`${selectedGrade}课表缩写映射核对`}>
+              <div className="data-audit-mapping-row data-audit-mapping-row--head" role="row">
+                <span>课表缩写</span>
+                <span>学科</span>
+                <span>映射老师</span>
+                <span>出现</span>
+                <span>状态</span>
+              </div>
+              {abbreviationAuditRows.length > 0 ? abbreviationAuditRows.map(row => (
+                <div key={`${row.grade}-${row.abbreviation}`} className={`data-audit-mapping-row data-audit-mapping-row--${row.status}`} role="row" title={row.note}>
+                  <span className="data-audit-abbrev">{row.abbreviation}</span>
+                  <span>{row.subject || '-'}</span>
+                  <span>{row.teacherName || '未匹配'}</span>
+                  <span>{row.occurrenceCount} 格</span>
+                  <span>{getMappingStatusLabel(row.status)}</span>
+                </div>
+              )) : (
+                <div className="data-audit-inline-empty">当前年级没有导入真实课程表缩写数据</div>
+              )}
+            </div>
+          </div>
+
+          <div className="data-audit-mapping-panel">
+            <div className="data-audit-issues-head">
+              <div>
+                <span className="data-audit-kicker">节数差异明细</span>
+                <h3>分工表节数 vs 课表实排格子</h3>
+              </div>
+              <div className="data-audit-issue-counts">
+                <span>{periodMismatchRows.length} 项差异</span>
+              </div>
+            </div>
+            <div className="data-audit-period-list">
+              {periodMismatchRows.length > 0 ? periodMismatchRows.slice(0, 12).map(row => (
+                <article key={`${row.grade}-${row.classNumber}-${row.subject}`} className="data-audit-period-item">
+                  <div>
+                    <strong>{row.grade}{row.classNumber}班 · {row.subject}</strong>
+                    <span>{row.teacherName || '未匹配教师'}</span>
+                  </div>
+                  <p>
+                    分工表 {row.assignedPeriods} 节 / 课表 {row.scheduledPeriods} 格
+                    <b>{row.delta > 0 ? `+${row.delta}` : row.delta}</b>
+                  </p>
+                </article>
+              )) : (
+                <div className="data-audit-inline-empty">当前年级分工表节数与课表实排格子一致，或尚未导入该年级真实课表。</div>
+              )}
             </div>
           </div>
         </section>

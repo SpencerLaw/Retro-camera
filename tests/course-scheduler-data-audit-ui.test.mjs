@@ -31,9 +31,23 @@ runTest('data audit panel shows algorithm readiness and issue categories', () =>
   assert.match(appSource, /dataAuditReport\.issues\.map/);
 });
 
+runTest('data audit panel exposes real Excel abbreviation mappings and period reconciliation', () => {
+  assert.match(appSource, /EXCEL_TIMETABLE_ABBREVIATION_AUDIT/);
+  assert.match(appSource, /EXCEL_PERIOD_MISMATCH_AUDIT/);
+  assert.match(appSource, /缩写映射核对/);
+  assert.match(appSource, /课表缩写/);
+  assert.match(appSource, /映射老师/);
+  assert.match(appSource, /需人工确认/);
+  assert.match(appSource, /节数差异明细/);
+  assert.match(appSource, /assignedPeriods/);
+  assert.match(appSource, /scheduledPeriods/);
+});
+
 runTest('data audit panel uses dense glass operational styling', () => {
   assert.match(stylesSource, /\.data-audit-grid/);
   assert.match(stylesSource, /\.data-audit-summary-card/);
   assert.match(stylesSource, /\.data-audit-issue-card/);
+  assert.match(stylesSource, /\.data-audit-reconciliation-grid/);
+  assert.match(stylesSource, /\.data-audit-mapping-table/);
   assert.match(stylesSource, /backdrop-filter:\s*blur\(20px\)/);
 });

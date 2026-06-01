@@ -51,6 +51,19 @@ runTest('Excel generator writes explicit real-data output without random fabrica
   assert.match(generatorSource, /EXCEL_DATA_SOURCES/);
 });
 
+runTest('Excel generator exports timetable abbreviation and period reconciliation audits', () => {
+  assert.match(generatorSource, /abbreviationAudit/);
+  assert.match(generatorSource, /periodMismatchAudit/);
+  assert.match(generatorSource, /status:\s*'needsReview'/);
+  assert.match(excelDataSource, /EXCEL_TIMETABLE_ABBREVIATION_AUDIT/);
+  assert.match(excelDataSource, /EXCEL_PERIOD_MISMATCH_AUDIT/);
+  assert.match(excelDataSource, /"abbreviation":\s*"英程"/);
+  assert.match(excelDataSource, /"teacherName":\s*"张红旗"/);
+  assert.match(excelDataSource, /"status":\s*"needsReview"/);
+  assert.match(excelDataSource, /"assignedPeriods"/);
+  assert.match(excelDataSource, /"scheduledPeriods"/);
+});
+
 runTest('scheduler tooling no longer exposes mock data entrypoints or fabricated fallbacks', () => {
   [
     'scripts/generate_all_grades_mockdata.mjs',

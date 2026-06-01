@@ -22,6 +22,787 @@ export const EXCEL_DATA_LIMITATIONS = [
   '源 Excel 未提供教师周课时/日课时/连堂上限，相关数值保持为 0，不参与硬性负荷约束。'
 ] as const;
 
+export const EXCEL_TIMETABLE_ABBREVIATION_AUDIT = [
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "物锐",
+    "occurrenceCount": 18,
+    "classNumbers": [
+      1,
+      2,
+      7
+    ],
+    "subject": "物理",
+    "teacherName": "王锐静",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“物”和姓名片段“锐”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "化串",
+    "occurrenceCount": 8,
+    "classNumbers": [
+      1,
+      2
+    ],
+    "subject": "化学",
+    "teacherName": "王串串",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“化”和姓名片段“串”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "化梦",
+    "occurrenceCount": 8,
+    "classNumbers": [
+      3,
+      4
+    ],
+    "subject": "化学",
+    "teacherName": "张梦婷",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“化”和姓名片段“梦”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "物磊",
+    "occurrenceCount": 22,
+    "classNumbers": [
+      3,
+      4,
+      5,
+      9
+    ],
+    "subject": "物理",
+    "teacherName": "李磊",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“物”和姓名片段“磊”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "语王",
+    "occurrenceCount": 13,
+    "classNumbers": [
+      5,
+      12
+    ],
+    "subject": "语文",
+    "teacherName": "王一",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“语”和姓名片段“王”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "物吕",
+    "occurrenceCount": 18,
+    "classNumbers": [
+      6,
+      8,
+      10,
+      11,
+      12
+    ],
+    "subject": "物理",
+    "teacherName": "吕姝彤",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“物”和姓名片段“吕”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "数琳",
+    "occurrenceCount": 16,
+    "classNumbers": [
+      7,
+      10
+    ],
+    "subject": "数学",
+    "teacherName": "李琳",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“数”和姓名片段“琳”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "语凡",
+    "occurrenceCount": 13,
+    "classNumbers": [
+      6,
+      8
+    ],
+    "subject": "语文",
+    "teacherName": "冯阿凡",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“语”和姓名片段“凡”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "数娜",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      9,
+      12
+    ],
+    "subject": "数学",
+    "teacherName": "宋怡娜",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“数”和姓名片段“娜”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "语马",
+    "occurrenceCount": 13,
+    "classNumbers": [
+      9,
+      10
+    ],
+    "subject": "语文",
+    "teacherName": "马建萍",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“语”和姓名片段“马”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "史杨",
+    "occurrenceCount": 9,
+    "classNumbers": [
+      11,
+      12
+    ],
+    "subject": "历史",
+    "teacherName": "杨思瑞",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“史”和姓名片段“杨”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "英葛",
+    "occurrenceCount": 13,
+    "classNumbers": [
+      3,
+      12
+    ],
+    "subject": "英语",
+    "teacherName": "葛胜旗",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“英”和姓名片段“葛”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "体洋",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "subject": "体育",
+    "teacherName": "李洋",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“体”和姓名片段“洋”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "英元",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      7,
+      11
+    ],
+    "subject": "英语",
+    "teacherName": "李元",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“英”和姓名片段“元”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "体俊",
+    "occurrenceCount": 6,
+    "classNumbers": [
+      8,
+      9,
+      10
+    ],
+    "subject": "体育",
+    "teacherName": "王俊驰",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“体”和姓名片段“俊”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "化谭",
+    "occurrenceCount": 12,
+    "classNumbers": [
+      7,
+      9,
+      10
+    ],
+    "subject": "化学",
+    "teacherName": "谭叶",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“化”和姓名片段“谭”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "语牟",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      3,
+      11
+    ],
+    "subject": "语文",
+    "teacherName": "牟晗",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“语”和姓名片段“牟”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "数静",
+    "occurrenceCount": 16,
+    "classNumbers": [
+      1,
+      2
+    ],
+    "subject": "数学",
+    "teacherName": "王静波",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“数”和姓名片段“静”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "语董",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      1,
+      2
+    ],
+    "subject": "语文",
+    "teacherName": "董艳",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“语”和姓名片段“董”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "英萍",
+    "occurrenceCount": 13,
+    "classNumbers": [
+      4,
+      8
+    ],
+    "subject": "英语",
+    "teacherName": "李萍",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“英”和姓名片段“萍”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "英程",
+    "occurrenceCount": 13,
+    "classNumbers": [
+      5,
+      9
+    ],
+    "subject": "英语",
+    "teacherName": "张红旗",
+    "status": "needsReview",
+    "matchMethod": "manualReview",
+    "note": "课表缩写“英程”与分工表英语教师姓名缩写不一致；当前按高二分工表对应英语教师张红旗保留，并标记需人工确认。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "数越",
+    "occurrenceCount": 15,
+    "classNumbers": [
+      6,
+      8
+    ],
+    "subject": "数学",
+    "teacherName": "陈越亚",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“数”和姓名片段“越”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "政马",
+    "occurrenceCount": 13,
+    "classNumbers": [
+      4,
+      6,
+      8,
+      9,
+      10,
+      12
+    ],
+    "subject": "政治",
+    "teacherName": "马珍珍",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“政”和姓名片段“马”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "数佳",
+    "occurrenceCount": 16,
+    "classNumbers": [
+      5,
+      11
+    ],
+    "subject": "数学",
+    "teacherName": "朱思佳",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“数”和姓名片段“佳”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "英蓓",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      1,
+      2
+    ],
+    "subject": "英语",
+    "teacherName": "杨蓓蕾",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“英”和姓名片段“蓓”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "数赛",
+    "occurrenceCount": 16,
+    "classNumbers": [
+      3,
+      4
+    ],
+    "subject": "数学",
+    "teacherName": "钱赛",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“数”和姓名片段“赛”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "英庆",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      6,
+      10
+    ],
+    "subject": "英语",
+    "teacherName": "张庆林",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“英”和姓名片段“庆”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "生迪",
+    "occurrenceCount": 12,
+    "classNumbers": [
+      4,
+      5,
+      6
+    ],
+    "subject": "生物",
+    "teacherName": "王肖迪",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“生”和姓名片段“迪”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "政高",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      11
+    ],
+    "subject": "政治",
+    "teacherName": "高瑜",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“政”和姓名片段“高”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "地煜",
+    "occurrenceCount": 12,
+    "classNumbers": [
+      10,
+      11,
+      12
+    ],
+    "subject": "地理",
+    "teacherName": "李煜",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“地”和姓名片段“煜”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "化原",
+    "occurrenceCount": 12,
+    "classNumbers": [
+      5,
+      6,
+      8
+    ],
+    "subject": "化学",
+    "teacherName": "原璐瑶",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“化”和姓名片段“原”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "语贾",
+    "occurrenceCount": 14,
+    "classNumbers": [
+      4,
+      7
+    ],
+    "subject": "语文",
+    "teacherName": "贾立红",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“语”和姓名片段“贾”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "体万",
+    "occurrenceCount": 4,
+    "classNumbers": [
+      11,
+      12
+    ],
+    "subject": "体育",
+    "teacherName": "万恒菲",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“体”和姓名片段“万”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "生吴",
+    "occurrenceCount": 12,
+    "classNumbers": [
+      1,
+      2,
+      3
+    ],
+    "subject": "生物",
+    "teacherName": "吴航利",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“生”和姓名片段“吴”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "地邵",
+    "occurrenceCount": 4,
+    "classNumbers": [
+      9
+    ],
+    "subject": "地理",
+    "teacherName": "邵继东",
+    "status": "matched",
+    "matchMethod": "subjectPrefixAndNamePart",
+    "note": "按学科前缀“地”和姓名片段“邵”匹配。"
+  },
+  {
+    "grade": "高二",
+    "timetableFileName": "高二课程表3.5.xlsx",
+    "sheetName": "3.2定稿",
+    "abbreviation": "通用",
+    "occurrenceCount": 12,
+    "classNumbers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "subject": "通用",
+    "teacherName": "谢怡",
+    "status": "matched",
+    "matchMethod": "specialCase",
+    "note": "课表单元写作“通用”，按高二分工表通用技术教师映射。"
+  }
+] as const;
+
+export const EXCEL_PERIOD_MISMATCH_AUDIT = [
+  {
+    "grade": "高二",
+    "classNumber": 5,
+    "subject": "数学",
+    "teachingClassName": "高二5班数学班",
+    "teacherName": "朱思佳",
+    "assignedPeriods": 7,
+    "scheduledPeriods": 8,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 5,
+    "subject": "物理",
+    "teachingClassName": "高二5班物理班",
+    "teacherName": "李磊",
+    "assignedPeriods": 4,
+    "scheduledPeriods": 6,
+    "delta": 2,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 5,
+    "subject": "英语",
+    "teachingClassName": "高二5班英语班",
+    "teacherName": "张红旗",
+    "assignedPeriods": 6,
+    "scheduledPeriods": 7,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 5,
+    "subject": "语文",
+    "teachingClassName": "高二5班语文班",
+    "teacherName": "王一",
+    "assignedPeriods": 6,
+    "scheduledPeriods": 7,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 6,
+    "subject": "数学",
+    "teachingClassName": "高二6班数学班",
+    "teacherName": "陈越亚",
+    "assignedPeriods": 7,
+    "scheduledPeriods": 8,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 6,
+    "subject": "物理",
+    "teachingClassName": "高二6班物理班",
+    "teacherName": "吕姝彤",
+    "assignedPeriods": 4,
+    "scheduledPeriods": 6,
+    "delta": 2,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 6,
+    "subject": "英语",
+    "teachingClassName": "高二6班英语班",
+    "teacherName": "张庆林",
+    "assignedPeriods": 6,
+    "scheduledPeriods": 7,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 6,
+    "subject": "语文",
+    "teachingClassName": "高二6班语文班",
+    "teacherName": "冯阿凡",
+    "assignedPeriods": 6,
+    "scheduledPeriods": 7,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 9,
+    "subject": "生物",
+    "teachingClassName": "高二9班生物班",
+    "teacherName": "吴航利",
+    "assignedPeriods": 4,
+    "scheduledPeriods": 0,
+    "delta": -4,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 10,
+    "subject": "数学",
+    "teachingClassName": "高二10班数学班",
+    "teacherName": "李琳",
+    "assignedPeriods": 7,
+    "scheduledPeriods": 8,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 10,
+    "subject": "物理",
+    "teachingClassName": "高二10班物理班",
+    "teacherName": "吕姝彤",
+    "assignedPeriods": 4,
+    "scheduledPeriods": 6,
+    "delta": 2,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 10,
+    "subject": "英语",
+    "teachingClassName": "高二10班英语班",
+    "teacherName": "张庆林",
+    "assignedPeriods": 6,
+    "scheduledPeriods": 7,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 10,
+    "subject": "语文",
+    "teachingClassName": "高二10班语文班",
+    "teacherName": "马建萍",
+    "assignedPeriods": 6,
+    "scheduledPeriods": 7,
+    "delta": 1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 11,
+    "subject": "历史",
+    "teachingClassName": "高二11班历史班",
+    "teacherName": "杨思瑞",
+    "assignedPeriods": 6,
+    "scheduledPeriods": 5,
+    "delta": -1,
+    "status": "mismatch"
+  },
+  {
+    "grade": "高二",
+    "classNumber": 11,
+    "subject": "政治",
+    "teachingClassName": "高二11班政治班",
+    "teacherName": "高瑜",
+    "assignedPeriods": 4,
+    "scheduledPeriods": 5,
+    "delta": 1,
+    "status": "mismatch"
+  }
+] as const;
+
 export const INITIAL_TEACHERS: Teacher[] = [
   {
     "id": "T001",

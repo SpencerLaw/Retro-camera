@@ -253,6 +253,7 @@ dayMap.forEach(d => {
 
 const uniqueAbbrevs = [...new Set(rawTimetableItems.map(item => item.value))];
 const abbrevToTeacher = {};
+const abbreviationAudit = [];
 
 // Helper to find teacher from High School Grade 11
 const grade2Teachers = parsedGradesData['高二']?.classes.flatMap(c => c.teachers) || [];
@@ -264,12 +265,43 @@ const singleCharSubjectMap = {
 };
 
 uniqueAbbrevs.forEach(abbrev => {
+  const occurrences = rawTimetableItems.filter(item => item.value === abbrev);
+  const baseAudit = {
+    grade: '高二',
+    timetableFileName: '高二课程表3.5.xlsx',
+    sheetName,
+    abbreviation: abbrev,
+    occurrenceCount: occurrences.length,
+    classNumbers: [...new Set(occurrences.map(item => item.classNumber))].sort((a, b) => a - b),
+    subject: '',
+    teacherName: '',
+    status: 'unmatched',
+    matchMethod: 'none',
+    note: ''
+  };
+
   if (abbrev === '通用') {
     abbrevToTeacher[abbrev] = { name: '谢怡', subject: '通用' };
+    abbreviationAudit.push({
+      ...baseAudit,
+      subject: '通用',
+      teacherName: '谢怡',
+      status: 'matched',
+      matchMethod: 'specialCase',
+      note: '课表单元写作“通用”，按高二分工表通用技术教师映射。'
+    });
     return;
   }
   if (abbrev === '英程') {
     abbrevToTeacher[abbrev] = { name: '张红旗', subject: '英语' };
+    abbreviationAudit.push({
+      ...baseAudit,
+      subject: '英语',
+      teacherName: '张红旗',
+      status: 'needsReview',
+      matchMethod: 'manualReview',
+      note: '课表缩写“英程”与分工表英语教师姓名缩写不一致；当前按高二分工表对应英语教师张红旗保留，并标记需人工确认。'
+    });
     return;
   }
   
@@ -278,15 +310,43 @@ uniqueAbbrevs.forEach(abbrev => {
   const subjName = singleCharSubjectMap[subjChar];
   
   if (subjName) {
-    const match = globalTeachers.find(t => 
+    const matches = globalTeachers.filter(t =>
       uniqueGrade2TeacherNames.includes(t.name) && 
       t.name.includes(namePart) && 
       t.subjects.includes(subjName)
     );
-    if (match) {
+    if (matches.length === 1) {
+      const match = matches[0];
       abbrevToTeacher[abbrev] = { name: match.name, subject: subjName };
+      abbreviationAudit.push({
+        ...baseAudit,
+        subject: subjName,
+        teacherName: match.name,
+        status: 'matched',
+        matchMethod: 'subjectPrefixAndNamePart',
+        note: `按学科前缀“${subjChar}”和姓名片段“${namePart}”匹配。`
+      });
+      return;
     }
+
+    abbreviationAudit.push({
+      ...baseAudit,
+      subject: subjName,
+      status: matches.length > 1 ? 'ambiguous' : 'unmatched',
+      matchMethod: matches.length > 1 ? 'multipleCandidates' : 'noCandidate',
+      note: matches.length > 1
+        ? `姓名片段“${namePart}”匹配到多个${subjName}教师：${matches.map(t => t.name).join('、')}。`
+        : `姓名片段“${namePart}”未在高二${subjName}分工表教师中匹配到。`
+    });
+    return;
   }
+
+  abbreviationAudit.push({
+    ...baseAudit,
+    status: 'unmatched',
+    matchMethod: 'unknownSubjectPrefix',
+    note: `无法识别课表缩写的学科前缀“${subjChar}”。`
+  });
 });
 
 // Helper to look up teaching class by classNumber and subject and grade
@@ -322,6 +382,37 @@ rawTimetableItems.forEach(item => {
   }
 });
 
+const scheduledCountByTeachingClassId = new Map();
+globalSchedules.forEach(item => {
+  scheduledCountByTeachingClassId.set(
+    item.teachingClassId,
+    (scheduledCountByTeachingClassId.get(item.teachingClassId) || 0) + 1
+  );
+});
+
+const periodMismatchAudit = globalTeachingClasses
+  .filter(item => item.grade === '高二')
+  .map(item => {
+    const teacher = globalTeachers.find(t => t.id === item.teacherId);
+    const scheduledPeriods = scheduledCountByTeachingClassId.get(item.id) || 0;
+    return {
+      grade: item.grade,
+      classNumber: item.classNumber,
+      subject: item.subject,
+      teachingClassName: item.name,
+      teacherName: teacher ? teacher.name : '',
+      assignedPeriods: item.periods || 0,
+      scheduledPeriods,
+      delta: scheduledPeriods - (item.periods || 0),
+      status: scheduledPeriods === (item.periods || 0) ? 'matched' : 'mismatch'
+    };
+  })
+  .filter(item => item.status === 'mismatch')
+  .sort((a, b) => (
+    a.classNumber - b.classNumber ||
+    a.subject.localeCompare(b.subject)
+  ));
+
 // We only load real schedules for 高二, other grades do not have timetable files, so they remain unscheduled to keep data 100% real.
 console.log(`Parsed ${globalTeachers.length} unique teachers in total.`);
 console.log(`Generated ${globalClassrooms.length} classrooms.`);
@@ -356,6 +447,10 @@ export const EXCEL_DATA_LIMITATIONS = [
   '源 Excel 未提供教室容量与教学班学生人数，相关数值保持为 0，不参与容量判断。',
   '源 Excel 未提供教师周课时/日课时/连堂上限，相关数值保持为 0，不参与硬性负荷约束。'
 ] as const;
+
+export const EXCEL_TIMETABLE_ABBREVIATION_AUDIT = ${JSON.stringify(abbreviationAudit, null, 2)} as const;
+
+export const EXCEL_PERIOD_MISMATCH_AUDIT = ${JSON.stringify(periodMismatchAudit, null, 2)} as const;
 
 export const INITIAL_TEACHERS: Teacher[] = ${JSON.stringify(globalTeachers, null, 2)};
 

@@ -160,6 +160,7 @@ export interface PreferenceDiagnostic {
   ruleName: string;
   ruleType: 'teacherPeriodBalance' | 'doubleLesson' | 'forbiddenSlot' | 'syncLesson';
   severity: PreferenceSeverity;
+  targetId?: string;
   message: string;
   affectedSlots: TimeSlot[];
   involvedScheduleIds: string[];

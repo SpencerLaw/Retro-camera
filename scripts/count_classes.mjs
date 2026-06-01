@@ -1,13 +1,15 @@
 import fs from 'fs';
 
-const content = fs.readFileSync('components/course-scheduler/mockData.ts', 'utf8');
+const content = fs.readFileSync('components/course-scheduler/excelData.ts', 'utf8');
 
 function extractArray(varName) {
   const marker = `export const ${varName}: `;
   const startIdx = content.indexOf(marker);
   if (startIdx === -1) return [];
   const afterMarker = content.substring(startIdx + marker.length);
-  const openBracket = afterMarker.indexOf('[');
+  const equalsIdx = afterMarker.indexOf('=');
+  if (equalsIdx === -1) return [];
+  const openBracket = afterMarker.indexOf('[', equalsIdx);
   if (openBracket === -1) return [];
   
   // Find matching closing bracket
@@ -74,4 +76,3 @@ grades.forEach(grade => {
 });
 
 console.log('Total Schedules Count:', schedules.length);
-

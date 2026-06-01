@@ -47,7 +47,7 @@ function getSpecialRoomId(name, type) {
     id: id,
     name: name,
     type: type,
-    capacity: 100,
+    capacity: 0,
     assignedSubjects: [type === 'art' ? '体育' : '通用']
   });
   return id;
@@ -141,13 +141,13 @@ grades.forEach(gradeName => {
             id: id,
             name: tName,
             subjects: new Set(),
-            maxWeeklyHours: 16,
-            maxDailyHours: 4,
-            maxConsecutiveLessons: 2,
+            maxWeeklyHours: 0,
+            maxDailyHours: 0,
+            maxConsecutiveLessons: 0,
             unavailablePeriods: [],
             preferences: `主要负责 ${gradeName} 教学任务`,
-            phone: `138${Math.floor(10000000 + Math.random() * 90000000)}`,
-            email: `${tName.toLowerCase()}@school.edu.cn`,
+            phone: '',
+            email: '',
             department: `${field.subjectName}组`
           };
           teachersMapByName.set(tName, tObj);
@@ -177,7 +177,7 @@ grades.forEach(gradeName => {
       id: `R_${gradeName}_${cls.classNumber}`,
       name: `${gradeName}${cls.classNumber}班普通教室`,
       type: 'ordinary',
-      capacity: 50,
+      capacity: 0,
       assignedSubjects: ['语文', '数学', '英语', '政治', '历史', '地理', '物理', '化学', '生物', '音乐', '美术', '信息技术']
     });
   });
@@ -203,7 +203,7 @@ grades.forEach(gradeName => {
         subject: tInfo.subject,
         teacherId: teacherId,
         classroomId: roomId,
-        studentCount: 45,
+        studentCount: 0,
         combination: cls.type || '通用',
         classNumber: cls.classNumber,
         grade: gradeName,
@@ -332,8 +332,30 @@ console.log(`Generated ${globalSchedules.length} schedule items.`);
 const globalStudents = [];
 console.log('No students generated to ensure 100% real data.');
 
-// 6. Write to mockData.ts
+// 6. Write to excelData.ts
 const code = `import { Teacher, Classroom, TeachingClass, Student, ScheduleItem } from './types';
+
+export const EXCEL_DATASET_ID = '2026-spring-real-excel-assignments-3.1-grade2-timetable-3.5-v2';
+
+export const EXCEL_DATA_SOURCES = [
+  {
+    kind: 'teachingAssignments',
+    fileName: '2026春各年级分工表（3.1）.xlsx',
+    sheets: ${JSON.stringify(grades)}
+  },
+  {
+    kind: 'gradeTimetable',
+    fileName: '高二课程表3.5.xlsx',
+    sheetName: ${JSON.stringify(sheetName)}
+  }
+] as const;
+
+export const EXCEL_DATA_LIMITATIONS = [
+  '源 Excel 未提供学生花名册、学生选科组合与教学班绑定，学生级走班冲突需要后续导入真实学生表。',
+  '源 Excel 未提供教师电话和邮箱，相关字段保持为空。',
+  '源 Excel 未提供教室容量与教学班学生人数，相关数值保持为 0，不参与容量判断。',
+  '源 Excel 未提供教师周课时/日课时/连堂上限，相关数值保持为 0，不参与硬性负荷约束。'
+] as const;
 
 export const INITIAL_TEACHERS: Teacher[] = ${JSON.stringify(globalTeachers, null, 2)};
 
@@ -368,5 +390,5 @@ export function generatePrepopulatedSchedules(
 }
 `;
 
-fs.writeFileSync('components/course-scheduler/mockData.ts', code);
-console.log('Successfully wrote components/course-scheduler/mockData.ts for ALL GRADES!');
+fs.writeFileSync('components/course-scheduler/excelData.ts', code);
+console.log('Successfully wrote components/course-scheduler/excelData.ts for ALL GRADES!');

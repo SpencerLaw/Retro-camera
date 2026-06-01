@@ -38,8 +38,11 @@ import {
   INITIAL_CLASSROOMS, 
   INITIAL_TEACHING_CLASSES, 
   INITIAL_STUDENTS, 
-  generatePrepopulatedSchedules 
-} from './mockData';
+  generatePrepopulatedSchedules,
+  EXCEL_DATASET_ID,
+  EXCEL_DATA_SOURCES,
+  EXCEL_DATA_LIMITATIONS
+} from './excelData';
 import './CourseSchedulerStyles.css';
 
 // Days mapping
@@ -198,7 +201,7 @@ export default function App() {
   // Modals Form Data
   const [newTeacherName, setNewTeacherName] = useState('');
   const [newTeacherSubject, setNewTeacherSubject] = useState('语文');
-  const [newTeacherWeeklyHours, setNewTeacherWeeklyHours] = useState(16);
+  const [newTeacherWeeklyHours, setNewTeacherWeeklyHours] = useState(0);
   const [newTeacherPhone, setNewTeacherPhone] = useState('');
   const [newTeacherDept, setNewTeacherDept] = useState('综合组');
 
@@ -221,6 +224,18 @@ export default function App() {
     ));
   };
 
+  const createExcelDataSourceSnapshot = () => ({
+    module: 'excelData',
+    datasetId: EXCEL_DATASET_ID,
+    sources: EXCEL_DATA_SOURCES,
+    limitations: EXCEL_DATA_LIMITATIONS,
+  });
+
+  const isTrustedExcelSavedData = (value: any) => (
+    value?.dataSource?.module === 'excelData' &&
+    value?.dataSource?.datasetId === EXCEL_DATASET_ID
+  );
+
   // Load defaults or saved states
   const fetchData = async () => {
     try {
@@ -228,8 +243,14 @@ export default function App() {
       await new Promise(resolve => setTimeout(resolve, 300));
       
       const savedData = localStorage.getItem('course_scheduler_real_data');
-      if (savedData && JSON.parse(savedData).teachers?.length >= 100 && JSON.parse(savedData).schedules?.length >= 400) {
-        const parsed = JSON.parse(savedData);
+      const parsedSavedData = savedData ? JSON.parse(savedData) : null;
+      if (
+        parsedSavedData &&
+        isTrustedExcelSavedData(parsedSavedData) &&
+        parsedSavedData.teachers?.length >= 100 &&
+        parsedSavedData.schedules?.length >= 400
+      ) {
+        const parsed = parsedSavedData;
         const parsedTeachers = parsed.teachers || [];
         const parsedClassrooms = parsed.classrooms || [];
         const parsedTeachingClasses = parsed.teachingClasses || [];
@@ -301,6 +322,7 @@ export default function App() {
   useEffect(() => {
     if (!loading && teachers.length > 0) {
       const dataToSave = {
+        dataSource: createExcelDataSourceSnapshot(),
         teachers,
         classrooms,
         teachingClasses,
@@ -376,6 +398,7 @@ export default function App() {
   const handleOpenJSONModal = () => {
     setJsonError('');
     const exportData = {
+      dataSource: createExcelDataSourceSnapshot(),
       teachers,
       classrooms,
       teachingClasses,
@@ -394,6 +417,9 @@ export default function App() {
       const parsed = JSON.parse(jsonRawText);
       if (!parsed.teachers || !parsed.classrooms || !parsed.teachingClasses || !parsed.schedules) {
         throw new Error("JSON数据结构不规范！缺少必要的 'teachers', 'classrooms', 'teachingClasses' 或 'schedules' 字段。");
+      }
+      if (!isTrustedExcelSavedData(parsed)) {
+        throw new Error("JSON缺少当前真实 Excel 数据来源标记，请先从本系统导出带 dataSource 的 JSON，避免导入旧版模拟/伪造数据。");
       }
       
       setTeachers(parsed.teachers);
@@ -708,8 +734,8 @@ export default function App() {
       maxConsecutiveLessons: 2,
       unavailablePeriods: [],
       preferences: `主要负责 ${selectedGrade} 教学任务`,
-      phone: newTeacherPhone || '13800000000',
-      email: 'new_teacher@school.edu.cn',
+      phone: newTeacherPhone,
+      email: '',
       department: newTeacherDept
     };
 
@@ -1319,6 +1345,33 @@ export default function App() {
             </section>
           ))}
         </div>
+
+        <section className="data-audit-source-card">
+          <div className="data-audit-issues-head">
+            <div>
+              <span className="data-audit-kicker">真实 Excel 来源</span>
+              <h3>当前本地数据底座</h3>
+            </div>
+            <div className="data-audit-issue-counts">
+              <span>{EXCEL_DATA_SOURCES.length} 个源文件/工作表</span>
+            </div>
+          </div>
+          <div className="data-audit-source-body">
+            <div className="data-audit-source-list">
+              {EXCEL_DATA_SOURCES.map((source, index) => (
+                <div key={`${source.fileName}-${index}`} className="data-audit-source-item">
+                  <strong>{source.fileName}</strong>
+                  <span>{'sheetName' in source ? source.sheetName : source.sheets.join(' / ')}</span>
+                </div>
+              ))}
+            </div>
+            <div className="data-audit-limitations">
+              {EXCEL_DATA_LIMITATIONS.map(item => (
+                <p key={item}>{item}</p>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section className="data-audit-issues-panel">
           <div className="data-audit-issues-head">
@@ -2173,7 +2226,9 @@ export default function App() {
                           </span>
                         </td>
                         <td className="p-3 border-r border-slate-100 text-slate-600">{t.department}</td>
-                        <td className="p-3 border-r border-slate-100 font-semibold text-slate-700">{t.maxWeeklyHours} 节/周</td>
+                        <td className="p-3 border-r border-slate-100 font-semibold text-slate-700">
+                          {t.maxWeeklyHours > 0 ? `${t.maxWeeklyHours} 节/周` : '未导入'}
+                        </td>
                         <td className="p-3 border-r border-slate-100">
                           {t.preferences && !t.preferences.startsWith('主要负责') ? (
                             <span className="text-orange-600 font-semibold flex items-center gap-1">
@@ -2573,7 +2628,7 @@ export default function App() {
                       type="number" 
                       required 
                       value={newTeacherWeeklyHours} 
-                      onChange={e => setNewTeacherWeeklyHours(parseInt(e.target.value) || 16)}
+                      onChange={e => setNewTeacherWeeklyHours(parseInt(e.target.value) || 0)}
                       className="w-full bg-slate-50 border border-slate-200 rounded p-2 focus:ring-1 focus:ring-blue-500"
                     />
                   </div>

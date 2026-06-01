@@ -187,9 +187,24 @@ export const buildDataAuditReport = ({
       severity: 'warning',
       category: 'load',
       title: '教师负荷',
-      message: `${overloadedTeachers.length} 位教师超过上限：${examples.join('；')}。如果 16 节是默认值，请先改成真实岗位上限。`,
+      message: `${overloadedTeachers.length} 位教师超过上限：${examples.join('；')}。请确认这些上限来自真实岗位限制表。`,
       suggestedAction: '把教师上限字段校正为真实值，再让代课评分和自动排课使用该约束。',
       affectedIds: overloadedTeachers.map(({ teacher }) => teacher.id),
+    });
+  }
+
+  const teachersMissingWeeklyLimits = teachers
+    .filter(teacher => (scheduledByTeacherId.get(teacher.id)?.length || 0) > 0 && teacher.maxWeeklyHours <= 0);
+
+  if (teachersMissingWeeklyLimits.length > 0) {
+    const examples = teachersMissingWeeklyLimits.slice(0, 4).map(teacher => teacher.name);
+    addIssue({
+      severity: 'warning',
+      category: 'load',
+      title: '教师负荷',
+      message: `${teachersMissingWeeklyLimits.length} 位有课教师未导入真实周课时上限：${examples.join('；')}。系统不会用默认值替代真实上限。`,
+      suggestedAction: '从真实岗位限制表导入周课时上限，或在教师表中手动维护后再启用负荷约束。',
+      affectedIds: teachersMissingWeeklyLimits.map(teacher => teacher.id),
     });
   }
 

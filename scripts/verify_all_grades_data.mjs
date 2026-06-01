@@ -110,9 +110,9 @@ grades.forEach(gradeName => {
 });
 
 console.log('\n=== DB INTEGRITY AUDIT ===');
-// Let's read the actual mockData.ts and do an integrity check
+// Let's read the actual Excel-derived data module and do an integrity check
 import fs from 'fs';
-const content = fs.readFileSync('components/course-scheduler/mockData.ts', 'utf8');
+const content = fs.readFileSync('components/course-scheduler/excelData.ts', 'utf8');
 
 function extractArray(varName) {
   const marker = `export const ${varName}: `;

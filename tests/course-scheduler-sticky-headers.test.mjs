@@ -75,7 +75,11 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*display:\s*inline-flex/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*border-radius:\s*12px/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs--pinned\s*\{[\s\S]*border-radius:\s*999px/);
-  assert.match(schedulerStyles, /\.scheduler-header-tabs--pinned\s+\.scheduler-view-tab\.is-active\s*\{[\s\S]*background:\s*#2563eb/);
+  assert.match(schedulerStyles, /\.scheduler-view-tab\.is-active\s*\{[\s\S]*backdrop-filter:\s*blur\(14px\)/);
+  assert.match(schedulerStyles, /\.scheduler-view-tab\.is-active::before\s*\{[\s\S]*linear-gradient\(120deg/);
+  assert.match(schedulerStyles, /\.scheduler-header-tabs--pinned\s+\.scheduler-view-tab\.is-active\s*\{[\s\S]*linear-gradient\(135deg/);
+  assert.match(schedulerStyles, /\.scheduler-header-tabs--pinned\s+\.scheduler-view-tab\.is-active\s*\{[\s\S]*rgba\(37,\s*99,\s*235,\s*0\.22\)/);
+  assert.doesNotMatch(schedulerStyles, /\.scheduler-header-tabs--pinned\s+\.scheduler-view-tab\.is-active\s*\{[\s\S]*background:\s*#2563eb/);
   assert.match(schedulerStyles, /\.scheduler-timetable-rows\s*\{[\s\S]*overflow:\s*visible/);
   assert.doesNotMatch(schedulerSource, /scheduler-pinned-tabs-host/);
   assert.doesNotMatch(schedulerSource, /renderSchedulerViewTabs\('expanded'\)/);

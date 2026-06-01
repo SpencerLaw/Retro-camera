@@ -981,7 +981,7 @@ export default function App() {
         <select
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
-          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+          className="scheduler-board-filter-select text-xs px-3 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
         >
           <option value="all">所有科目</option>
           <option value="语文">语文</option>
@@ -1001,7 +1001,7 @@ export default function App() {
         <select
           value={combinationFilter}
           onChange={(e) => setCombinationFilter(e.target.value)}
-          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+          className="scheduler-board-filter-select text-xs px-3 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
         >
           <option value="all">所有选修组合/类型</option>
           <option value="物化生">物化生 组 (高二复合)</option>
@@ -1013,7 +1013,7 @@ export default function App() {
         <select
           value={teacherFilter}
           onChange={(e) => setTeacherFilter(e.target.value)}
-          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+          className="scheduler-board-filter-select text-xs px-3 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
         >
           <option value="all">所有任课教师</option>
           {getGradeTeachers().map(t => (
@@ -1024,7 +1024,7 @@ export default function App() {
         <select
           value={classroomFilter}
           onChange={(e) => setClassroomFilter(e.target.value)}
-          className="scheduler-board-filter-select text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
+          className="scheduler-board-filter-select text-xs px-3 py-1 focus:ring-1 focus:ring-blue-500 font-medium"
         >
           <option value="all">所有备课/走班教室</option>
           {getGradeClassrooms().map(c => (

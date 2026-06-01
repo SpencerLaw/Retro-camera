@@ -131,6 +131,9 @@ runTest('board pinned state exposes schedule filters below the top bar', () => {
 runTest('board mode and filters stay inside their glass containers', () => {
   const boardHeadStyles = getCssBlock('.scheduler-board-head');
   const modeToggleStyles = getCssBlock('.scheduler-board-mode-toggle');
+  const modeOptionStyles = getCssBlock('.scheduler-board-mode-option');
+  const activeModeOptionStyles = getCssBlock('.scheduler-board-mode-option.is-active');
+  const boardFilterSelectStyles = getCssBlock('.scheduler-board-filters .scheduler-board-filter-select');
   const pinnedFiltersStyles = getCssBlock('.scheduler-board-filters--pinned');
   const headFiltersStyles = getCssBlock('.scheduler-board-filters--head');
 
@@ -143,6 +146,15 @@ runTest('board mode and filters stay inside their glass containers', () => {
   assert.match(pinnedFiltersStyles, /min-width:\s*0/);
   assert.match(modeToggleStyles, /max-width:\s*100%/);
   assert.match(modeToggleStyles, /overflow-x:\s*auto/);
+  assert.match(modeOptionStyles, /background:\s*rgba\(255,\s*255,\s*255,\s*0\.08\)/);
+  assert.match(modeOptionStyles, /backdrop-filter:\s*blur\(14px\)/);
+  assert.match(activeModeOptionStyles, /rgba\(37,\s*99,\s*235,\s*0\.22\)/);
+  assert.match(activeModeOptionStyles, /backdrop-filter:\s*blur\(16px\)/);
+  assert.doesNotMatch(activeModeOptionStyles, /#2563eb|#0f766e/);
+  assert.match(boardFilterSelectStyles, /appearance:\s*none/);
+  assert.match(boardFilterSelectStyles, /border:\s*1px solid rgba\(255,\s*255,\s*255,\s*0\.24\)/);
+  assert.match(boardFilterSelectStyles, /background:[\s\S]*!important/);
+  assert.doesNotMatch(schedulerSource, /scheduler-board-filter-select[^"]*bg-slate-50/);
   assert.match(schedulerSource, /scheduler-header-actions flex items-center gap-4/);
   assert.match(schedulerStyles, /\.scheduler-header-actions\s*\{[\s\S]*overflow-x:\s*auto/);
 });

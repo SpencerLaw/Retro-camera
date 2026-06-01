@@ -163,7 +163,7 @@ export default function App() {
   const [boardDisplayMode, setBoardDisplayMode] = useState<'time' | 'class'>('time');
   const [isTabLayoutPinned, setIsTabLayoutPinned] = useState<boolean>(false);
   const [selectedGrade, setSelectedGrade] = useState<string>('高二');
-  const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students'>('teachers');
+  const [mgmtSubTab, setMgmtSubTab] = useState<'teachers' | 'assignments' | 'students' | 'preferences'>('teachers');
 
   // Base Data Edit States
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
@@ -1073,6 +1073,64 @@ export default function App() {
     );
   };
 
+  const renderPreferenceSettingsPanel = () => (
+    <div className="preference-settings-grid">
+      <section className="preference-rule-panel">
+        <div className="preference-rule-panel-head">
+          <span>教师重点节次均衡</span>
+          <strong>{schedulingPreferences.teacherPeriodBalance.length} 条规则</strong>
+        </div>
+        <p>避免同一老师反复排在第一、第四、第五、第八节；默认每周 1-2 次为可接受范围。</p>
+        <div className="preference-period-chip-row">
+          {[1, 4, 5, 8].map(period => (
+            <span key={period} className="preference-period-chip">第{period}节</span>
+          ))}
+        </div>
+      </section>
+
+      <section className="preference-rule-panel">
+        <div className="preference-rule-panel-head">
+          <span>连堂偏好</span>
+          <strong>{schedulingPreferences.doubleLessonRules.length} 条规则</strong>
+        </div>
+        <p>用于设置某年级某学科在指定星期尽量连续两节，例如周三语文连堂。</p>
+      </section>
+
+      <section className="preference-rule-panel">
+        <div className="preference-rule-panel-head">
+          <span>禁排时段</span>
+          <strong>{schedulingPreferences.forbiddenSlotRules.length} 条规则</strong>
+        </div>
+        <p>用于限制某老师、某班、某学科或某教学班不能出现在指定星期和节次。</p>
+      </section>
+
+      <section className="preference-rule-panel">
+        <div className="preference-rule-panel-head">
+          <span>同步上课</span>
+          <strong>{schedulingPreferences.syncLessonRules.length} 条规则</strong>
+        </div>
+        <p>用于走班选课场景，要求多个班级或教学班必须安排在同一时段。</p>
+      </section>
+
+      <section className="preference-rule-panel preference-rule-panel--wide">
+        <div className="preference-rule-panel-head">
+          <span>偏好诊断</span>
+          <strong>{preferenceCriticalDiagnostics.length} 条严重 / {preferenceWarningDiagnostics.length} 条提醒</strong>
+        </div>
+        <div className="preference-diagnostics-list">
+          {preferenceDiagnostics.length > 0 ? preferenceDiagnostics.slice(0, 8).map(item => (
+            <div key={item.id} className={`preference-diagnostic-item preference-diagnostic-item--${item.severity}`}>
+              <span>{item.ruleName}</span>
+              <p>{item.message}</p>
+            </div>
+          )) : (
+            <div className="preference-diagnostic-empty">当前排课偏好诊断无异常</div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+
   return (
     <div className="course-scheduler-root flex flex-col h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-600">
       
@@ -1836,6 +1894,12 @@ export default function App() {
             >
               学生走班花名册 ({gradeStudents.length} 人)
             </button>
+            <button
+              onClick={() => setMgmtSubTab('preferences')}
+              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'preferences' ? 'bg-sky-600 text-white border-sky-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
+            >
+              排课偏好设置 ({preferenceDiagnostics.length} 条)
+            </button>
           </div>
           </div>{/* end scrollable overview area */}
 
@@ -2097,6 +2161,7 @@ export default function App() {
                 </div>
               </div>
             )}
+            {mgmtSubTab === 'preferences' && renderPreferenceSettingsPanel()}
           </div>{/* end scrollable content area */}
         </main>
       )}

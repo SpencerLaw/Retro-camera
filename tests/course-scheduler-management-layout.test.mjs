@@ -20,7 +20,9 @@ runTest('course scheduler management view uses a dense operations layout', () =>
   assert.match(schedulerSource, /授课分工/);
   assert.match(schedulerSource, /走班学生/);
   assert.match(schedulerSource, /硬冲突/);
-  assert.match(schedulerSource, /`\$\{warningConflicts\.length\} 条提醒 · \$\{selectedGrade\}课表 \$\{gradeScheduleCount\} 节`/);
+  assert.match(schedulerSource, /\$\{warningConflicts\.length\} 条资源提醒/);
+  assert.match(schedulerSource, /\$\{preferenceDiagnostics\.length\} 条偏好诊断/);
+  assert.match(schedulerSource, /\$\{selectedGrade\}课表 \$\{gradeScheduleCount\} 节/);
   assert.match(schedulerSource, /\{selectedGrade\}年级走班数据将在学生绑定选科组合后自动加载/);
 });
 

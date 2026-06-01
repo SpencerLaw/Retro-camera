@@ -72,8 +72,8 @@ runTest('course scheduler management overview scrolls under the collapsible tab 
   assert.doesNotMatch(schedulerStyles, /\.scheduler-pinned-tabs-host/);
   assert.match(schedulerHeaderTabsStyles, /display:\s*inline-flex/);
   assert.match(schedulerPinnedTabsStyles, /border-radius:\s*999px/);
-  assert.match(managementHeaderStyles, /background:\s*rgba\(255,\s*255,\s*255,\s*0\.08\)/);
-  assert.match(managementHeaderStyles, /backdrop-filter:\s*blur\(22px\)/);
+  assert.match(managementHeaderStyles, /linear-gradient\(115deg/);
+  assert.match(managementHeaderStyles, /backdrop-filter:\s*blur\(32px\)/);
   assert.match(managementContentStyles, /height:\s*auto/);
   assert.match(managementContentStyles, /overflow:\s*visible/);
   assert.match(managementTableScrollStyles, /max-height:\s*none/);

@@ -2932,22 +2932,27 @@ export default function App() {
 
       {/* 5. JSON IMPORT/EXPORT MODAL */}
       {showJSONModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="scheduler-json-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="json-import-export-title"
+            className="scheduler-json-modal-panel w-full max-w-2xl animate-in zoom-in-95 duration-200"
+          >
+            <div className="scheduler-json-modal-header px-6 py-4 flex items-center justify-between">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
                 <Database className="w-5 h-5 text-indigo-600" />
-                教学排课数据 JSON 导入与本地备份
+                <span id="json-import-export-title">教学排课数据 JSON 导入与本地备份</span>
               </h3>
               <button 
                 onClick={() => setShowJSONModal(false)} 
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                className="scheduler-json-modal-close text-slate-500 hover:text-slate-700 p-1 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="p-6">
+            <div className="scheduler-json-modal-body p-6">
               <p className="text-xs text-slate-500 mb-4 leading-relaxed">
                 系统采用 100% 本地运行。您可以在此处将当前的全部教师、教室、授课分工及课表网格数据打包导出，复制为 JSON 字符串保存备份，或粘贴之前导出的 JSON 数据流来批量重置初始化排课底座。
               </p>
@@ -2959,9 +2964,9 @@ export default function App() {
                 </div>
               )}
               
-              <form onSubmit={handleJSONImportSubmit} className="space-y-4">
+              <form onSubmit={handleJSONImportSubmit} className="scheduler-json-modal-form space-y-4">
                 <div>
-                  <div className="flex justify-between items-center mb-1.5">
+                  <div className="scheduler-json-toolbar flex justify-between items-center mb-1.5">
                     <label className="text-xs font-bold text-slate-700">JSON 数据流编辑与贴入区 (可自由复制或粘贴覆盖)</label>
                     <div className="flex gap-2">
                       <button
@@ -2998,12 +3003,12 @@ export default function App() {
                     value={jsonRawText}
                     onChange={e => setJsonRawText(e.target.value)}
                     rows={12}
-                    className="w-full font-mono text-[10px] bg-slate-900 text-slate-100 p-4 rounded-xl border border-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    className="scheduler-json-textarea w-full font-mono text-[10px] bg-slate-900 text-slate-100 p-4 rounded-xl border border-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                     placeholder="在此处贴入干净的 JSON 备份数据..."
                   />
                 </div>
                 
-                <div className="flex justify-between gap-2 pt-2 border-t border-slate-100">
+                <div className="scheduler-json-modal-footer flex justify-between gap-2 pt-2">
                   <button
                     type="button"
                     onClick={handleClearAllCache}

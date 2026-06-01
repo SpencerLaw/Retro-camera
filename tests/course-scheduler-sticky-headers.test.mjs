@@ -82,10 +82,13 @@ runTest('board scroll collapses the main navigation into a tab layout', () => {
   assert.match(glassControlStyles, /linear-gradient\(135deg/);
   assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*flex:\s*1 1 34rem/);
   assert.match(schedulerStyles, /\.scheduler-brand-strip\s*\{[\s\S]*gap:\s*1rem/);
-  assert.match(headerActionsStyles, /flex:\s*1 1 42rem/);
-  assert.match(headerActionsStyles, /justify-content:\s*flex-end/);
+  assert.match(headerActionsStyles, /flex:\s*0 1 auto/);
+  assert.match(headerActionsStyles, /width:\s*max-content/);
+  assert.match(headerActionsStyles, /margin-left:\s*auto/);
+  assert.match(headerActionsStyles, /justify-content:\s*flex-start/);
   assert.match(headerActionsStyles, /flex-wrap:\s*wrap/);
   assert.match(headerActionsStyles, /overflow:\s*visible/);
+  assert.doesNotMatch(headerActionsStyles, /justify-content:\s*flex-end/);
   assert.doesNotMatch(headerActionsStyles, /overflow-x:\s*auto/);
   assert.doesNotMatch(schedulerSource, /💾 导入\/导出 JSON/);
   assert.match(schedulerStyles, /\.scheduler-header-tabs\s*\{[\s\S]*display:\s*inline-flex/);
@@ -164,6 +167,39 @@ runTest('board mode and filters stay inside their glass containers', () => {
   assert.doesNotMatch(schedulerSource, /scheduler-board-filter-select[^"]*bg-slate-50/);
   assert.match(schedulerSource, /scheduler-header-actions flex items-center gap-4/);
   assert.match(headerActionsStyles, /overflow:\s*visible/);
+});
+
+runTest('json import export dialog stays inside the viewport', () => {
+  const overlayStyles = getCssBlock('.scheduler-json-modal-overlay');
+  const panelStyles = getCssBlock('.scheduler-json-modal-panel');
+  const bodyStyles = getCssBlock('.scheduler-json-modal-body');
+  const textareaStyles = getCssBlock('.scheduler-json-textarea');
+  const footerStyles = getCssBlock('.scheduler-json-modal-footer');
+
+  assert.match(schedulerSource, /scheduler-json-modal-overlay fixed inset-0 z-50/);
+  assert.match(schedulerSource, /role="dialog"/);
+  assert.match(schedulerSource, /aria-modal="true"/);
+  assert.match(schedulerSource, /aria-labelledby="json-import-export-title"/);
+  assert.match(schedulerSource, /scheduler-json-modal-body p-6/);
+  assert.match(schedulerSource, /scheduler-json-textarea/);
+  assert.match(schedulerSource, /scheduler-json-modal-footer flex justify-between/);
+  assert.match(overlayStyles, /backdrop-filter:\s*blur\(18px\)\s*saturate\(1\.22\)/);
+  assert.match(overlayStyles, /overflow:\s*hidden/);
+  assert.match(panelStyles, /display:\s*flex/);
+  assert.match(panelStyles, /flex-direction:\s*column/);
+  assert.match(panelStyles, /max-height:\s*min\(90vh,\s*760px\)/);
+  assert.match(panelStyles, /overflow:\s*hidden/);
+  assert.match(panelStyles, /border-radius:\s*28px/);
+  assert.match(panelStyles, /backdrop-filter:\s*blur\(28px\)\s*saturate\(1\.34\)/);
+  assert.match(bodyStyles, /min-height:\s*0/);
+  assert.match(bodyStyles, /overflow-y:\s*auto/);
+  assert.match(textareaStyles, /height:\s*clamp\(13rem,\s*38vh,\s*24rem\)/);
+  assert.match(textareaStyles, /max-height:\s*46vh/);
+  assert.match(footerStyles, /position:\s*sticky/);
+  assert.match(footerStyles, /bottom:\s*0/);
+  assert.match(footerStyles, /flex-wrap:\s*wrap/);
+  assert.match(schedulerStyles, /\.course-scheduler-root > :not\(\.fixed\)\s*\{[\s\S]*position:\s*relative/);
+  assert.doesNotMatch(schedulerStyles, /\.course-scheduler-root > \*\s*\{/);
 });
 
 runTest('weekday timetable header sticks below the pinned filters', () => {

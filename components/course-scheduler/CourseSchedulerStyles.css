@@ -1327,6 +1327,28 @@
   background: linear-gradient(180deg, #0ea5e9, #f97316);
 }
 
+.remarks-handoff {
+  margin-top: 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(14, 165, 233, 0.16);
+  background: rgba(255, 255, 255, 0.58);
+  padding: 0.32rem 0.45rem;
+  color: #0369a1;
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.remarks-handoff span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Management page vertical space usage */
 #data_management {
   flex: 1 1 0;

@@ -712,7 +712,8 @@ export default function App() {
           teacherId: teacherId,
           teacherName: newTeacher.name,
           isTemp: false,
-          adjustmentNote: undefined
+          adjustmentNote: undefined,
+          adjustmentHistory: undefined
         };
       }
       return s;
@@ -2060,12 +2061,22 @@ export default function App() {
                                 <span className="font-mono text-[9px] font-bold text-sky-700">
                                   {getPeriodTimeLabel(remark.period)}
                                 </span>
-                                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[8px] font-bold text-slate-500">
-                                  第{remark.period}节
-                                </span>
+                                <div className="flex shrink-0 items-center gap-1">
+                                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[8px] font-bold text-slate-500">
+                                    第{remark.period}节
+                                  </span>
+                                  <span className="rounded-full bg-sky-100 px-1.5 py-0.5 text-[8px] font-bold text-sky-700">
+                                    第{remark.adjustmentNote.chainIndex || 1}次调配
+                                  </span>
+                                </div>
                               </div>
                               <div className="text-[11px] font-extrabold leading-snug text-slate-800">
                                 {remark.subject} · {remark.teachingClassName}
+                              </div>
+                              <div className="remarks-handoff">
+                                <span>{remark.adjustmentNote.fromTeacherName || remark.adjustmentNote.originalTeacherName || '原老师'}</span>
+                                <span>→</span>
+                                <span>{remark.adjustmentNote.toTeacherName || remark.adjustmentNote.substituteTeacherName || remark.teacherName}</span>
                               </div>
                               <p className="mt-1 text-[10.5px] font-semibold leading-relaxed text-slate-600">
                                 {remark.adjustmentNote.summary}

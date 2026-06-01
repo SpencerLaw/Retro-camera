@@ -49,10 +49,18 @@ runTest('weekly remarks dialog renders a Monday to Friday timeline', () => {
   assert.match(schedulerSource, /adjustmentNote\.summary/);
 });
 
+runTest('weekly remarks timeline exposes chain index and teacher handoff details', () => {
+  assert.match(schedulerSource, /第\{remark\.adjustmentNote\.chainIndex \|\| 1\}次调配/);
+  assert.match(schedulerSource, /remark\.adjustmentNote\.fromTeacherName/);
+  assert.match(schedulerSource, /remark\.adjustmentNote\.toTeacherName/);
+  assert.match(schedulerSource, /remarks-handoff/);
+});
+
 runTest('remarks surfaces use glassy but legible styling', () => {
   assert.match(schedulerStyles, /\.schedule-remark-badge\s*\{/);
   assert.match(schedulerStyles, /\.schedule-remark-line\s*\{/);
   assert.match(schedulerStyles, /\.remarks-summary-panel\s*\{/);
   assert.match(schedulerStyles, /backdrop-filter:\s*blur\(18px\)/);
   assert.match(schedulerStyles, /\.remarks-timeline-item\s*\{/);
+  assert.match(schedulerStyles, /\.remarks-handoff\s*\{/);
 });

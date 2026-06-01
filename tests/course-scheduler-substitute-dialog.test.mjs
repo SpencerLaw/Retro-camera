@@ -66,6 +66,13 @@ runTest('repeat substitute changes append A-to-B-to-C logs instead of overwritin
   assert.match(schedulerSource, /setPendingSubstituteConfirm\(\{[\s\S]*rootOriginalTeacherName/);
 });
 
+runTest('permanent subject teacher changes clear temporary substitute notes and history', () => {
+  assert.match(schedulerSource, /handleSubjectTeacherChange/);
+  assert.match(schedulerSource, /isTemp:\s*false/);
+  assert.match(schedulerSource, /adjustmentNote:\s*undefined/);
+  assert.match(schedulerSource, /adjustmentHistory:\s*undefined/);
+});
+
 runTest('substitute apply uses a custom confirmation dialog instead of browser confirm', () => {
   assert.match(schedulerSource, /pendingSubstituteConfirm/);
   assert.match(schedulerSource, /setPendingSubstituteConfirm/);

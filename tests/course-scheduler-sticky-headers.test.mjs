@@ -137,6 +137,7 @@ runTest('board mode and filters stay inside their glass containers', () => {
 
 runTest('weekday timetable header sticks below the pinned filters', () => {
   const weekdayHeaderStyles = getCssBlock('.scheduler-weekday-header');
+  const weekdayCellDividerStyles = getCssBlock('.scheduler-weekday-cell + .scheduler-weekday-cell');
 
   assert.match(schedulerSource, /scheduler-weekday-header/);
   assert.match(schedulerSource, /scheduler-weekday-cell/);
@@ -144,9 +145,17 @@ runTest('weekday timetable header sticks below the pinned filters', () => {
   assert.match(schedulerSource, /周五/);
   assert.match(weekdayHeaderStyles, /position:\s*sticky/);
   assert.match(weekdayHeaderStyles, /top:\s*-1\.5rem/);
-  assert.match(weekdayHeaderStyles, /backdrop-filter:\s*blur\(34px\)/);
-  assert.match(weekdayHeaderStyles, /linear-gradient\(115deg/);
+  assert.match(weekdayHeaderStyles, /margin:\s*0\.75rem 0\.875rem 0/);
+  assert.match(weekdayHeaderStyles, /border:\s*1px solid rgba\(255,\s*255,\s*255,\s*0\.24\)/);
+  assert.match(weekdayHeaderStyles, /border-radius:\s*9999px/);
+  assert.match(weekdayHeaderStyles, /rgba\(255,\s*255,\s*255,\s*0\.1\)/);
+  assert.match(weekdayHeaderStyles, /backdrop-filter:\s*blur\(20px\)/);
+  assert.match(weekdayHeaderStyles, /linear-gradient\(128deg/);
   assert.match(weekdayHeaderStyles, /z-index:\s*12/);
+  assert.doesNotMatch(weekdayHeaderStyles, /border-top-left-radius|border-top-right-radius/);
+  assert.match(weekdayCellDividerStyles, /border-left:\s*1px solid rgba\(148,\s*163,\s*184,\s*0\.14\)/);
+  assert.doesNotMatch(schedulerSource, /scheduler-weekday-header grid grid-cols-6 border-b border-slate-200 bg-slate-50\/80/);
+  assert.doesNotMatch(schedulerSource, /scheduler-weekday-cell p-3 border-r/);
   assert.match(schedulerStyles, /\.scheduler-timetable-shell\s*\{[\s\S]*overflow:\s*visible/);
   assert.doesNotMatch(schedulerSource, /scheduler-timetable-shell[^"]*overflow-hidden/);
 });

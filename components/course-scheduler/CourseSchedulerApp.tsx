@@ -842,11 +842,6 @@ export default function App() {
     return subjectBriefNameMap[subject] || subject.slice(0, 1);
   };
 
-  const getTeacherBriefName = (teacherName: string) => {
-    if (!teacherName) return '';
-    return teacherName.length >= 3 ? teacherName.slice(1, 2) : teacherName.slice(-1);
-  };
-
   const gradeTeachers = getGradeTeachers();
   const gradeTeachingClasses = getGradeTeachingClasses();
   const gradeStudents = getGradeStudents();
@@ -1116,7 +1111,7 @@ export default function App() {
                                   {item.adjustmentNote && (
                                     <span className="class-board-substitute-dot">代</span>
                                   )}
-                                  <strong>{getSubjectBriefName(item.subject)}{getTeacherBriefName(item.teacherName)}</strong>
+                                  <strong>{item.subject}</strong>
                                   <span>{item.teacherName}</span>
                                 </button>
                               ))

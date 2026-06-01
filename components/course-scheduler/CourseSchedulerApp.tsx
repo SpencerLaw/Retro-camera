@@ -916,7 +916,7 @@ export default function App() {
       className: hasCriticalConflicts ? 'border-rose-100 bg-rose-50/70 text-rose-900' : 'border-amber-100 bg-amber-50/70 text-amber-900'
     }
   ];
-  const managementTableShellClass = 'management-table-shell bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col min-h-0';
+  const managementTableShellClass = 'management-table-shell overflow-hidden flex flex-col min-h-0';
   const managementTableScrollClass = 'management-table-scroll min-h-0 overflow-x-auto overflow-y-visible';
 
   const renderSchedulerViewTabs = () => {
@@ -2296,12 +2296,12 @@ export default function App() {
               </div>
               
               {/* Grade Selector on Management Page */}
-              <div className="bg-white rounded-lg border border-slate-200 p-1 flex items-center shadow-sm shrink-0">
+              <div className="management-grade-pill flex items-center shrink-0">
                 <span className="text-xs text-slate-400 font-bold px-2">当前所选年级:</span>
                 <select 
                   value={selectedGrade}
                   onChange={(e) => setSelectedGrade(e.target.value)}
-                  className="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold rounded px-2.5 py-1 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                  className="management-grade-select text-xs font-bold cursor-pointer"
                 >
                   <option value="初一">初一年级</option>
                   <option value="初二">初二年级</option>
@@ -2315,7 +2315,7 @@ export default function App() {
 
             <div className="management-stats-rail grid grid-cols-2 xl:grid-cols-4 gap-2 mb-2">
               {managementStats.map(stat => (
-                <div key={stat.label} className={`rounded-lg border px-2.5 py-1.5 ${stat.className}`}>
+                <div key={stat.label} className={`management-stat-card rounded-lg border px-2.5 py-1.5 ${stat.className}`}>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="w-7 h-7 rounded-lg bg-white/70 border border-white/80 flex items-center justify-center shrink-0">
@@ -2339,31 +2339,31 @@ export default function App() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setMgmtSubTab('teachers')}
-              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'teachers' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
+              className={`management-subtab-button ${mgmtSubTab === 'teachers' ? 'is-active' : ''}`}
             >
               教师排课大表 ({gradeTeachers.length} 人)
             </button>
             <button
               onClick={() => setMgmtSubTab('assignments')}
-              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'assignments' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
+              className={`management-subtab-button ${mgmtSubTab === 'assignments' ? 'is-active' : ''}`}
             >
               行政班授课分工表 (Excel视图)
             </button>
             <button
               onClick={() => setMgmtSubTab('students')}
-              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'students' ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
+              className={`management-subtab-button ${mgmtSubTab === 'students' ? 'is-active' : ''}`}
             >
               学生走班花名册 ({gradeStudents.length} 人)
             </button>
             <button
               onClick={() => setMgmtSubTab('audit')}
-              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'audit' ? 'bg-cyan-600 text-white border-cyan-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
+              className={`management-subtab-button ${mgmtSubTab === 'audit' ? 'is-active' : ''}`}
             >
               数据核对 ({dataAuditReport.summary.totalIssues} 条)
             </button>
             <button
               onClick={() => setMgmtSubTab('preferences')}
-              className={`h-9 px-3 rounded-lg font-bold text-sm border transition-colors ${mgmtSubTab === 'preferences' ? 'bg-sky-600 text-white border-sky-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:border-slate-300'}`}
+              className={`management-subtab-button ${mgmtSubTab === 'preferences' ? 'is-active' : ''}`}
             >
               排课偏好设置 ({preferenceDiagnostics.length} 条)
             </button>
@@ -2376,14 +2376,14 @@ export default function App() {
           {/* 1. TEACHERS TABLE */}
           {mgmtSubTab === 'teachers' && (
             <div className={managementTableShellClass}>
-              <div className="px-4 py-3 border-b border-slate-100 bg-white flex justify-between items-center shrink-0">
+              <div className="management-table-toolbar px-4 py-3 flex justify-between items-center shrink-0">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-blue-600" />
                   {selectedGrade}年级教师聘任偏好与排课量限制表
                 </h3>
                 <button
                   onClick={() => setShowAddTeacherModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
+                  className="management-table-action text-xs px-2.5 py-1.5 font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   添加教师
@@ -2458,7 +2458,7 @@ export default function App() {
           {/* 2. CLASS ASSIGNMENTS EXCEL-STYLE TABLE */}
           {mgmtSubTab === 'assignments' && (
             <div className={managementTableShellClass}>
-              <div className="px-4 py-3 border-b border-slate-100 bg-white flex justify-between items-center shrink-0">
+              <div className="management-table-toolbar px-4 py-3 flex justify-between items-center shrink-0">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                   <Sliders className="w-4 h-4 text-indigo-600" />
                   {selectedGrade}年级教师教学岗位聘任与授课分工大表
@@ -2553,7 +2553,7 @@ export default function App() {
             {/* 3. STUDENTS TABLE */}
             {mgmtSubTab === 'students' && (
               <div className={managementTableShellClass}>
-                <div className="px-4 py-3 border-b border-slate-100 bg-white flex justify-between items-center shrink-0">
+                <div className="management-table-toolbar px-4 py-3 flex justify-between items-center shrink-0">
                   <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                     <User className="w-4 h-4 text-emerald-600" />
                     {selectedGrade}年级学生走班绑定与考勤异常登记表

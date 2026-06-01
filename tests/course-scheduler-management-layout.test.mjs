@@ -33,6 +33,37 @@ runTest('course scheduler management view uses a dense operations layout', () =>
   assert.match(schedulerSource, /\{selectedGrade\}年级走班数据将在学生绑定选科组合后自动加载/);
 });
 
+runTest('course scheduler management controls use translucent frosted glass', () => {
+  const gradePillStyles = getCssBlock('.management-grade-pill');
+  const gradeSelectStyles = getCssBlock('.management-grade-select');
+  const subtabButtonStyles = getCssBlock('.management-subtab-button');
+  const activeSubtabButtonStyles = getCssBlock('.management-subtab-button.is-active');
+  const statsCardStyles = getCssBlock('.management-stat-card');
+  const tableShellStyles = getCssBlock('.management-table-shell');
+  const tableToolbarStyles = getCssBlock('.management-table-toolbar');
+
+  assert.match(schedulerSource, /management-grade-pill/);
+  assert.match(schedulerSource, /management-grade-select/);
+  assert.match(schedulerSource, /management-subtab-button/);
+  assert.match(schedulerSource, /management-stat-card/);
+  assert.match(schedulerSource, /management-table-toolbar/);
+  assert.doesNotMatch(schedulerSource, /managementTableShellClass = 'management-table-shell bg-white/);
+  assert.doesNotMatch(schedulerSource, /mgmtSubTab === 'teachers' \? 'bg-blue-600 text-white/);
+  assert.match(gradePillStyles, /border-radius:\s*9999px/);
+  assert.match(gradePillStyles, /backdrop-filter:\s*blur\(16px\)/);
+  assert.match(gradeSelectStyles, /appearance:\s*none/);
+  assert.match(gradeSelectStyles, /background:[\s\S]*!important/);
+  assert.match(subtabButtonStyles, /border-radius:\s*9999px/);
+  assert.match(subtabButtonStyles, /background:\s*rgba\(255,\s*255,\s*255,\s*0\.08\)/);
+  assert.match(subtabButtonStyles, /backdrop-filter:\s*blur\(14px\)/);
+  assert.match(activeSubtabButtonStyles, /rgba\(37,\s*99,\s*235,\s*0\.22\)/);
+  assert.doesNotMatch(activeSubtabButtonStyles, /#2563eb|#4f46e5|#059669|#0891b2|#0284c7/);
+  assert.match(statsCardStyles, /backdrop-filter:\s*blur\(16px\)/);
+  assert.match(tableShellStyles, /background:\s*rgba\(255,\s*255,\s*255,\s*0\.12\)/);
+  assert.match(tableShellStyles, /backdrop-filter:\s*blur\(22px\)/);
+  assert.match(tableToolbarStyles, /background:[\s\S]*rgba\(255,\s*255,\s*255,\s*0\.1\)/);
+});
+
 runTest('course scheduler management tables fill the available viewport instead of leaving blank space', () => {
   assert.match(schedulerSource, /managementTableShellClass/);
   assert.match(schedulerSource, /managementTableScrollClass/);

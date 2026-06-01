@@ -33,6 +33,7 @@ runTest('top navigation uses reference-style translucent frosted glass', () => {
   assert.match(mainHeaderStyles, /isolation:\s*isolate/);
   assert.match(mainHeaderHighlightStyles, /pointer-events:\s*none/);
   assert.match(mainHeaderHighlightStyles, /radial-gradient\(circle at 18% 10%/);
+  assert.doesNotMatch(schedulerSource, /scheduler-main-header[^"]*bg-white[^"]*border-b border-slate-200/);
   assert.match(pinnedFilterStyles, /linear-gradient\(118deg/);
   assert.match(pinnedFilterStyles, /rgba\(255,\s*255,\s*255,\s*0\.1\)/);
   assert.match(pinnedFilterStyles, /border-radius:\s*9999px/);
@@ -136,6 +137,8 @@ runTest('board mode and filters stay inside their glass containers', () => {
 });
 
 runTest('weekday timetable header sticks below the pinned filters', () => {
+  const timetableShellStyles = getCssBlock('.scheduler-timetable-shell');
+  const timetableShellHighlightStyles = getCssBlock('.scheduler-timetable-shell::before');
   const weekdayHeaderStyles = getCssBlock('.scheduler-weekday-header');
   const weekdayCellDividerStyles = getCssBlock('.scheduler-weekday-cell + .scheduler-weekday-cell');
 
@@ -154,6 +157,13 @@ runTest('weekday timetable header sticks below the pinned filters', () => {
   assert.match(weekdayHeaderStyles, /z-index:\s*12/);
   assert.doesNotMatch(weekdayHeaderStyles, /border-top-left-radius|border-top-right-radius/);
   assert.match(weekdayCellDividerStyles, /border-left:\s*1px solid rgba\(148,\s*163,\s*184,\s*0\.14\)/);
+  assert.match(timetableShellStyles, /border:\s*1px solid rgba\(255,\s*255,\s*255,\s*0\.2\)/);
+  assert.match(timetableShellStyles, /border-radius:\s*28px/);
+  assert.match(timetableShellStyles, /background:\s*rgba\(255,\s*255,\s*255,\s*0\.1\)/);
+  assert.match(timetableShellStyles, /backdrop-filter:\s*blur\(24px\)/);
+  assert.match(timetableShellStyles, /0 0 0 1px rgba\(255,\s*255,\s*255,\s*0\.05\)/);
+  assert.match(timetableShellHighlightStyles, /radial-gradient\(circle at 12% 12%/);
+  assert.doesNotMatch(schedulerSource, /scheduler-timetable-shell bg-white border border-slate-200 rounded-xl shadow-xs/);
   assert.doesNotMatch(schedulerSource, /scheduler-weekday-header grid grid-cols-6 border-b border-slate-200 bg-slate-50\/80/);
   assert.doesNotMatch(schedulerSource, /scheduler-weekday-cell p-3 border-r/);
   assert.match(schedulerStyles, /\.scheduler-timetable-shell\s*\{[\s\S]*overflow:\s*visible/);

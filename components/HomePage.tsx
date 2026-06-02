@@ -778,7 +778,7 @@ export const HomePage: React.FC = () => {
             <div className="relative z-10 text-center text-white">
               <h2 className="font-bold text-4xl text-[#E5DFD5] mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">齐力纸业官网</h2>
               <p className="text-base text-gray-300 mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
-                VANGLAM 万格澜
+                VANGLAM 梵澜
               </p>
               <p className="text-sm text-gray-400 leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
                 特种纸高端包装与色彩表面工艺系统官网，包含 42 色族分类与精密细节网格。

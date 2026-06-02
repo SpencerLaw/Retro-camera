@@ -1,6 +1,6 @@
 # VANGLAM Website 1:1 Reconstruction Design Specification
 **Date**: 2026-05-29
-**Brand**: QiLi Paper | VANGLAM (齐力纸业 | 万格澜)
+**Brand**: QiLi Paper | VANGLAM (齐力纸业 | 梵澜)
 **Target**: 1:1 high-fidelity pixel-perfect reproduction of UI Wireframes & High-Fidelity Mockups (V2 PDF)
 
 ---

@@ -5,7 +5,7 @@ import './vanglam.css';
 
 const overviewRows = [
   ['项目名称', '齐力纸业梵澜官网后台管理系统'],
-  ['第一期费用', '人民币三万元'],
+  ['第一期费用', '详见“费用与开发周期”章节'],
   ['开发周期', '六到八周'],
   ['建设方式', '服务端框架、后台入口、上传入口、数据库、接口和前台读取一次搭建'],
   ['数据结构', '三十二张核心表'],
@@ -264,7 +264,7 @@ const renderMindMap = () => (
       <div className="vanglam-doc-mindmap-root">
         <span>总入口</span>
         <strong>齐力纸业梵澜官网后台</strong>
-        <p>一个主业务数据库 / 三十二张核心表 / 开发周期六到八周 / 第一期费用人民币三万元</p>
+        <p>一个主业务数据库 / 三十二张核心表 / 开发周期六到八周 / 费用见第七部分</p>
       </div>
       <div className="vanglam-doc-mindmap-grid">
         {mindMapRows.map((topic, index) => (
@@ -359,7 +359,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             <section id="workload" className="vanglam-doc-section">
               <h2>三、工作量拆解</h2>
               <p>
-                第一期人民币三万元对应的是官网后台和服务端基础能力建设，不是单独制作一个资料页面。交付内容覆盖后台管理端、服务端接口、数据库结构、文件上传、前台读取、小程序预留、权限日志和基础部署联调。
+                第一期费用对应的是官网后台和服务端基础能力建设，不是单独制作一个资料页面。交付内容覆盖后台管理端、服务端接口、数据库结构、文件上传、前台读取、小程序预留、权限日志和基础部署联调。
               </p>
               <div className="vanglam-doc-workload-grid">
                 {workloadGroups.map((group) => (
@@ -500,7 +500,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
 
             <section id="maintenance" className="vanglam-doc-section">
               <h2>八、后续维护方式</h2>
-              <p>后续维护费用不包含在三万元开发费用内。项目交付后维护分为按月维护和按功能维护两种方式。</p>
+              <p>后续维护费用不包含在本期开发费用内。项目交付后维护分为按月维护和按功能维护两种方式。</p>
               <table className="vanglam-doc-table">
                 <thead>
                   <tr>

@@ -56,6 +56,11 @@ runTest('backend plan page contains the confirmed customer-facing scope', () => 
   }
 });
 
+runTest('backend plan mentions the confirmed first phase price only once', () => {
+  assert.equal((planSource.match(/人民币三万元/g) || []).length, 1);
+  assert.equal((planSource.match(/三万元/g) || []).length, 1);
+});
+
 runTest('backend plan uses a development document layout, not a decorative flow map', () => {
   for (const className of [
     '.vanglam-backend-doc',

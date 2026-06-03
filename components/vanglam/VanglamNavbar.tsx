@@ -30,6 +30,9 @@ export const VanglamNavbar: React.FC = () => {
         </nav>
 
         <div className="vanglam-nav-actions">
+          <Link className="vanglam-plan-link" to="/vanglam/backend-plan">
+            后台规划图
+          </Link>
           <Link className="vanglam-nav-cta" to={copy.navActionTo}>
             {copy.navAction}
           </Link>

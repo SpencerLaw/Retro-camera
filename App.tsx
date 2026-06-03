@@ -14,6 +14,7 @@ import JuzimiApp from './components/JuzimiApp';
 import PromptGalleryApp from './components/PromptGalleryApp';
 import CourseSchedulerApp from './components/course-scheduler/CourseSchedulerApp';
 import { VanglamHome } from './components/vanglam/VanglamHome';
+import { VanglamBackendPlanPage } from './components/vanglam/VanglamBackendPlan';
 import { VanglamColorDeck } from './components/vanglam/VanglamColorDeck';
 import {
   VanglamApplicationsPage,
@@ -65,6 +66,7 @@ const App: React.FC = () => {
           <Route path="/tsl-skin" element={<TslSkinRoute />} />
           <Route path="/course-scheduler" element={<CourseSchedulerApp />} />
           <Route path="/vanglam" element={withVanglamLanguage(<VanglamHome />)} />
+          <Route path="/vanglam/backend-plan" element={withVanglamLanguage(<VanglamBackendPlanPage />)} />
           <Route path="/vanglam/color-system" element={withVanglamLanguage(<VanglamColorSystemPage />)} />
           <Route path="/vanglam/collections" element={withVanglamLanguage(<VanglamCollectionsPage />)} />
           <Route path="/vanglam/surfaces" element={withVanglamLanguage(<VanglamSurfacesPage />)} />

@@ -228,6 +228,30 @@
   background: rgba(255, 255, 255, 0.68);
 }
 
+.vanglam-plan-link {
+  height: 36px;
+  min-width: 108px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(23, 63, 53, 0.82);
+  background: var(--vanglam-green);
+  color: #f8f4eb;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.vanglam-plan-link:hover {
+  border-color: var(--vanglam-gold);
+  background: #205648;
+  color: #fffaf1;
+  transform: translateY(-1px);
+}
+
 .vanglam-hero,
 .vanglam-signature-section,
 .vanglam-color-system,
@@ -1279,6 +1303,563 @@
   color: var(--vanglam-gold);
 }
 
+.vanglam-backend-plan-page {
+  background:
+    radial-gradient(circle at 86% 10%, rgba(232, 246, 241, 0.92), transparent 28%),
+    linear-gradient(180deg, #fbfaf7 0%, #f1efe8 100%);
+}
+
+.vanglam-backend-hero,
+.vanglam-flow-window,
+.vanglam-plan-band,
+.vanglam-plan-split,
+.vanglam-plan-database,
+.vanglam-maintenance-band,
+.vanglam-plan-final-cta {
+  width: min(100%, var(--vanglam-max));
+  margin: 0 auto;
+}
+
+.vanglam-backend-hero {
+  min-height: 390px;
+  padding: 62px 90px 58px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 54px;
+  align-items: center;
+  border-bottom: 1px solid var(--vanglam-line);
+  background:
+    linear-gradient(110deg, rgba(248, 246, 240, 0.96), rgba(239, 246, 240, 0.8)),
+    url('/vanglam/hero-paper.png') right center / auto 100% no-repeat;
+}
+
+.vanglam-backend-hero > div:first-child > span,
+.vanglam-maintenance-band > div > span,
+.vanglam-plan-final-cta span {
+  color: var(--vanglam-gold);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.vanglam-backend-hero h1 {
+  max-width: 760px;
+  margin: 12px 0 20px;
+  color: var(--vanglam-ink);
+  font-size: clamp(38px, 4.2vw, 64px);
+  font-weight: 500;
+  line-height: 1.02;
+}
+
+.vanglam-backend-hero p,
+.vanglam-maintenance-band p,
+.vanglam-plan-final-cta p {
+  max-width: 720px;
+  margin: 0;
+  color: #5d5850;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.62;
+}
+
+.vanglam-backend-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.vanglam-backend-hero-metrics article {
+  min-height: 132px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border: 1px solid rgba(40, 40, 40, 0.11);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 18px 34px rgba(40, 40, 40, 0.07);
+}
+
+.vanglam-backend-hero-metrics svg {
+  color: var(--vanglam-gold);
+  margin-bottom: auto;
+}
+
+.vanglam-backend-hero-metrics span {
+  color: #706a61;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.vanglam-backend-hero-metrics strong {
+  margin-top: 5px;
+  color: var(--vanglam-ink);
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.vanglam-flow-window {
+  display: grid;
+  grid-template-columns: 188px minmax(0, 1fr);
+  min-height: 610px;
+  border-bottom: 1px solid var(--vanglam-line);
+  background: #fff;
+}
+
+.vanglam-flow-sidebar {
+  padding: 30px 22px;
+  border-right: 1px solid rgba(40, 40, 40, 0.1);
+  background: linear-gradient(180deg, #f8f8f7, #efeeec);
+}
+
+.vanglam-flow-sidebar h2 {
+  margin: 0 0 24px;
+  color: #3a3835;
+  font-family: "Source Sans 3", "Noto Sans SC", sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.vanglam-flow-sidebar-item {
+  height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  color: #4f4b46;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.vanglam-flow-sidebar-item:first-of-type {
+  background: rgba(23, 63, 53, 0.1);
+  color: var(--vanglam-green);
+}
+
+.vanglam-flow-sidebar-item svg {
+  color: currentColor;
+}
+
+.vanglam-flow-main {
+  min-width: 0;
+  padding: 34px 34px 42px;
+  background: linear-gradient(180deg, #fff 0%, #fbfaf7 100%);
+}
+
+.vanglam-flow-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+.vanglam-flow-heading span {
+  color: #958c81;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.vanglam-flow-heading h2 {
+  margin: 6px 0 0;
+  color: #252525;
+  font-family: "Source Sans 3", "Noto Sans SC", sans-serif;
+  font-size: clamp(24px, 2.6vw, 36px);
+  font-weight: 900;
+}
+
+.vanglam-flow-heading strong {
+  margin-top: 8px;
+  padding: 9px 12px;
+  border: 1px solid rgba(23, 63, 53, 0.16);
+  border-radius: 999px;
+  background: rgba(23, 63, 53, 0.08);
+  color: var(--vanglam-green);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.vanglam-flow-scroll {
+  margin-top: 30px;
+  overflow-x: auto;
+  border: 1px solid rgba(40, 40, 40, 0.09);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.98)),
+    radial-gradient(circle at 40% 42%, rgba(184, 222, 239, 0.28), transparent 26%),
+    radial-gradient(circle at 75% 46%, rgba(226, 211, 130, 0.22), transparent 28%);
+}
+
+.vanglam-flow-canvas {
+  position: relative;
+  width: 1000px;
+  height: 430px;
+}
+
+.vanglam-flow-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.vanglam-flow-lines path {
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.48;
+}
+
+.vanglam-flow-lines .flow-blue {
+  stroke: #7fb5ff;
+}
+
+.vanglam-flow-lines .flow-cyan {
+  stroke: #8fd9ee;
+}
+
+.vanglam-flow-lines .flow-green {
+  stroke: #93d9a4;
+}
+
+.vanglam-flow-lines .flow-gold {
+  stroke: #e9cc60;
+}
+
+.vanglam-flow-lines .flow-rose {
+  stroke: #f09aa5;
+}
+
+.vanglam-flow-node {
+  position: absolute;
+  z-index: 2;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(40, 40, 40, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 26px rgba(40, 40, 40, 0.08);
+  color: #2f2c28;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.vanglam-flow-node span,
+.vanglam-flow-node strong {
+  display: block;
+}
+
+.vanglam-flow-node span {
+  color: #2f2c28;
+}
+
+.vanglam-flow-node strong {
+  margin-top: 5px;
+  color: #746e66;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.node-source {
+  left: 24px;
+  top: 205px;
+  width: 130px;
+  border-color: rgba(25, 133, 240, 0.2);
+  background: #f3f9ff;
+}
+
+.node-topic {
+  left: 250px;
+  width: 138px;
+  min-height: 33px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  border-color: rgba(20, 180, 217, 0.24);
+  background: #effbfe;
+  color: #236273;
+  text-align: center;
+}
+
+.node-module {
+  left: 438px;
+  width: 170px;
+  min-height: 76px;
+  border-color: rgba(20, 190, 86, 0.2);
+  background: #f0fbf2;
+}
+
+.module-one {
+  top: 104px;
+}
+
+.module-two {
+  top: 185px;
+}
+
+.module-three {
+  top: 266px;
+}
+
+.node-core {
+  left: 650px;
+  width: 158px;
+  min-height: 72px;
+  display: grid;
+  align-content: center;
+  border-color: rgba(176, 138, 66, 0.24);
+  background: #fff9df;
+}
+
+.node-core svg {
+  color: var(--vanglam-gold);
+  margin-bottom: 6px;
+}
+
+.core-db {
+  top: 98px;
+}
+
+.core-api {
+  top: 185px;
+}
+
+.core-media {
+  top: 272px;
+}
+
+.node-output {
+  left: 848px;
+  width: 142px;
+  min-height: 72px;
+  border-color: rgba(255, 72, 96, 0.2);
+  background: #fff2f3;
+}
+
+.output-web {
+  top: 92px;
+}
+
+.output-mini {
+  top: 198px;
+}
+
+.output-client {
+  top: 292px;
+}
+
+.vanglam-plan-band,
+.vanglam-plan-database {
+  padding: 64px 90px;
+  border-bottom: 1px solid var(--vanglam-line);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.vanglam-plan-topic-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vanglam-plan-topic-card {
+  min-height: 172px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(40, 40, 40, 0.1);
+  border-radius: 8px;
+  background: rgba(250, 248, 244, 0.84);
+}
+
+.vanglam-plan-topic-card span {
+  color: var(--vanglam-gold);
+  font-size: 10px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.vanglam-plan-topic-card h3 {
+  margin: 20px 0 10px;
+  color: var(--vanglam-ink);
+  font-family: "Source Sans 3", "Noto Sans SC", sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.vanglam-plan-topic-card p {
+  margin: auto 0 0;
+  color: #605a52;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.vanglam-plan-split {
+  padding: 64px 90px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border-bottom: 1px solid var(--vanglam-line);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.vanglam-plan-split article {
+  min-height: 410px;
+  padding: 32px;
+  border: 1px solid rgba(40, 40, 40, 0.1);
+  border-radius: 8px;
+  background: rgba(250, 248, 244, 0.86);
+}
+
+.vanglam-plan-split h2 {
+  margin: 0 0 24px;
+  color: var(--vanglam-ink);
+  font-family: "Source Sans 3", "Noto Sans SC", sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.vanglam-plan-split ul {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  list-style: none;
+}
+
+.vanglam-plan-split li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #4f4a43;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.42;
+}
+
+.vanglam-plan-split svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--vanglam-gold);
+}
+
+.vanglam-database-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vanglam-database-list div {
+  min-height: 86px;
+  padding: 18px;
+  display: grid;
+  align-content: space-between;
+  border: 1px solid rgba(40, 40, 40, 0.1);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.vanglam-database-list span {
+  color: var(--vanglam-gold);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.vanglam-database-list strong {
+  color: #34312d;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.vanglam-maintenance-band {
+  padding: 64px 90px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: 42px;
+  align-items: start;
+  border-bottom: 1px solid var(--vanglam-line);
+  background: rgba(248, 246, 240, 0.78);
+}
+
+.vanglam-maintenance-band h2,
+.vanglam-plan-final-cta h2 {
+  margin: 12px 0 16px;
+  color: var(--vanglam-ink);
+  font-size: clamp(30px, 3vw, 48px);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.vanglam-maintenance-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.vanglam-maintenance-cards article {
+  min-height: 220px;
+  padding: 28px;
+  border: 1px solid rgba(23, 63, 53, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.vanglam-maintenance-cards svg {
+  color: var(--vanglam-green);
+}
+
+.vanglam-maintenance-cards h3 {
+  margin: 22px 0 12px;
+  color: var(--vanglam-ink);
+  font-family: "Source Sans 3", "Noto Sans SC", sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.vanglam-maintenance-cards p {
+  font-size: 13px;
+}
+
+.vanglam-plan-final-cta {
+  padding: 64px 90px 74px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 34px;
+  align-items: center;
+  background: rgba(23, 63, 53, 0.94);
+}
+
+.vanglam-plan-final-cta h2,
+.vanglam-plan-final-cta p {
+  color: #f8f4eb;
+}
+
+.vanglam-plan-final-cta p {
+  color: rgba(248, 244, 235, 0.75);
+}
+
+.vanglam-plan-final-cta a {
+  min-height: 54px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid rgba(248, 244, 235, 0.44);
+  border-radius: 8px;
+  color: #f8f4eb;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.vanglam-plan-final-cta a:hover {
+  border-color: var(--vanglam-gold);
+  color: #fff;
+}
+
 /* Paper fibers noise overlay simulation */
 .paper-texture {
   position: relative;
@@ -1356,7 +1937,14 @@
   .vanglam-sample-form-section,
   .vanglam-request-links,
   .vanglam-library-tool-grid,
-  .vanglam-library-tool-cta {
+  .vanglam-library-tool-cta,
+  .vanglam-backend-hero,
+  .vanglam-flow-main,
+  .vanglam-plan-band,
+  .vanglam-plan-split,
+  .vanglam-plan-database,
+  .vanglam-maintenance-band,
+  .vanglam-plan-final-cta {
     padding-left: 34px;
     padding-right: 34px;
   }
@@ -1373,6 +1961,37 @@
   .vanglam-process-strip,
   .vanglam-library-tool-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vanglam-backend-hero,
+  .vanglam-maintenance-band {
+    grid-template-columns: 1fr;
+  }
+
+  .vanglam-flow-window {
+    grid-template-columns: 1fr;
+  }
+
+  .vanglam-flow-sidebar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(40, 40, 40, 0.1);
+  }
+
+  .vanglam-flow-sidebar h2 {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .vanglam-plan-topic-grid,
+  .vanglam-database-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vanglam-plan-split {
+    grid-template-columns: 1fr;
   }
 
   .vanglam-feature-grid article {
@@ -1456,8 +2075,16 @@
   .vanglam-process-strip,
   .vanglam-library-tool-grid,
   .vanglam-request-links,
-  .vanglam-sample-form {
+  .vanglam-sample-form,
+  .vanglam-backend-hero-metrics,
+  .vanglam-maintenance-cards,
+  .vanglam-plan-final-cta {
     grid-template-columns: 1fr;
+  }
+
+  .vanglam-plan-topic-grid,
+  .vanglam-database-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .vanglam-color-family-block header {
@@ -1516,7 +2143,14 @@
   .vanglam-sample-form-section,
   .vanglam-request-links,
   .vanglam-library-tool-grid,
-  .vanglam-library-tool-cta {
+  .vanglam-library-tool-cta,
+  .vanglam-backend-hero,
+  .vanglam-flow-main,
+  .vanglam-plan-band,
+  .vanglam-plan-split,
+  .vanglam-plan-database,
+  .vanglam-maintenance-band,
+  .vanglam-plan-final-cta {
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -1532,11 +2166,26 @@
   .vanglam-spec-card,
   .vanglam-color-family-block,
   .vanglam-process-strip article,
-  .vanglam-library-tool-card {
+  .vanglam-library-tool-card,
+  .vanglam-plan-split article,
+  .vanglam-maintenance-cards article {
     padding: 24px;
   }
 
   .vanglam-surface-panel ul {
     grid-template-columns: 1fr;
+  }
+
+  .vanglam-plan-topic-grid,
+  .vanglam-database-list {
+    grid-template-columns: 1fr;
+  }
+
+  .vanglam-flow-heading {
+    display: grid;
+  }
+
+  .vanglam-flow-heading strong {
+    width: max-content;
   }
 }

@@ -51,6 +51,11 @@ runTest('backend plan page contains the confirmed customer-facing scope', () => 
     '可编辑范围',
     '费用对应工作',
     '每个页面、每个栏目、每个按钮、每张图片、每个视频和每份资料文件',
+    '报价、下单、订单管理、库存管理、审批流程等公司内部业务功能',
+    '销售人员自动分配、客户等级、客户跟进提醒等销售管理功能',
+    '下载资料前填写联系方式',
+    '按颜色、工艺、克重、用途等多个条件筛选产品',
+    '根据场景自动推荐纸张、自动生成报价等功能',
   ]) {
     assert.match(planSource, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
@@ -86,4 +91,8 @@ runTest('backend plan shows the mind map before the main document layout', () =>
 
 runTest('backend plan avoids internal uncertainty language', () => {
   assert.doesNotMatch(planSource, /我的建议|可谈|不建议|建议维护|维护费用建议|稳定版|扩展版|三万元左右/);
+});
+
+runTest('backend plan avoids vague customer-facing scope words', () => {
+  assert.doesNotMatch(planSource, /复杂业务系统|复杂筛选推荐|复杂客户关系系统|复杂销售分配流程|资料下载留资|资料留资|复杂筛选、推荐、报价流程/);
 });

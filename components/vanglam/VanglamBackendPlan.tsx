@@ -1,333 +1,276 @@
 import React from 'react';
-import {
-  ArrowRight,
-  CheckCircle2,
-  CircleDollarSign,
-  Clock3,
-  CloudUpload,
-  Database,
-  FileText,
-  MonitorCog,
-  Smartphone,
-  Wrench,
-  Workflow,
-} from 'lucide-react';
 import { VanglamFooter } from './VanglamFooter';
 import { VanglamNavbar } from './VanglamNavbar';
 import './vanglam.css';
 
+const overviewRows = [
+  ['项目名称', '齐力纸业梵澜官网后台管理系统'],
+  ['第一期费用', '人民币三万元'],
+  ['开发周期', '六到八周'],
+  ['建设方式', '服务端框架、后台入口、上传入口、数据库、接口和前台读取一次搭建'],
+  ['数据结构', '三十二张核心表'],
+  ['后续小程序', '小程序共用同一套后台、数据库、接口和媒体资源库'],
+  ['内容录入', '客户负责正式文字、图片、视频和资料文件的整理、上传、录入和维护'],
+];
+
 const topicRows = [
-  { name: '色彩系统', path: '/vanglam/color-system', module: '色系、颜色、标志色、色彩关联' },
-  { name: '产品系列', path: '/vanglam/collections', module: '八个产品系列、规格、推荐关系' },
-  { name: '表面工艺', path: '/vanglam/surfaces', module: '工艺分类、纹理库、工艺兼容关系' },
-  { name: '应用场景', path: '/vanglam/applications', module: '六类应用场景、材料方案、推荐关系' },
-  { name: '艺术卡实验室', path: '/vanglam/artcard-lab', module: '作品分类、作品条目、定制入口' },
-  { name: '纸艺工坊', path: '/vanglam/atelier', module: '生产制造、样品制作、品质控制、材料理念' },
-  { name: '资料与工具', path: '/vanglam/library-tools', module: '资料分类、资料文件、下载按钮、关联关系' },
-];
-
-const developerScope = [
-  '整体服务端框架',
-  '后台登录与权限',
-  '七大主题后台入口',
-  '首页与按钮维护入口',
-  '图片、视频、文件上传入口',
-  '数据库、文件存储与接口',
-  '前台读取后台内容',
-  '基础操作日志',
-];
-
-const clientScope = [
-  '整理并录入最终中文文案',
-  '整理并录入最终外文文案',
-  '整理并上传产品、色卡、工艺、场景图片',
-  '整理并上传视频资源',
-  '整理并上传样册、技术、防伪、定制资料',
-  '检查按钮跳转和最终展示内容',
-];
-
-const excludedScope = [
-  '小程序前端开发',
-  '客户正式内容整理、上传和录入执行',
-  '复杂客户关系系统',
-  '复杂销售分配流程',
-  '复杂筛选、推荐、报价流程',
-  '第三方业务系统对接',
+  ['色彩系统', '/vanglam/color-system', '色系、颜色、标志色、色彩关联', '点击顶部“色彩系统”进入'],
+  ['产品系列', '/vanglam/collections', '八个产品系列、规格、推荐关系', '点击顶部“产品系列”进入'],
+  ['表面工艺', '/vanglam/surfaces', '工艺分类、纹理库、工艺兼容关系', '点击顶部“表面工艺”进入'],
+  ['应用场景', '/vanglam/applications', '六类应用场景、材料方案、推荐关系', '点击顶部“应用场景”进入'],
+  ['艺术卡实验室', '/vanglam/artcard-lab', '作品分类、作品条目、定制入口', '点击顶部“艺术卡实验室”进入'],
+  ['纸艺工坊', '/vanglam/atelier', '生产制造、样品制作、品质控制、材料理念', '点击顶部“纸艺工坊”进入'],
+  ['资料与工具', '/vanglam/library-tools', '资料分类、资料文件、下载按钮、关联关系', '点击顶部“资料与工具”进入'],
 ];
 
 const databaseRows = [
-  '管理员、角色、权限',
-  '品牌信息、导航、按钮链接',
-  '页面基础、页面模块、媒体资源',
-  '色系、颜色、标志色',
-  '产品系列、产品规格',
-  '表面工艺、纹理库',
-  '应用场景、场景方案',
-  '艺术卡分类、艺术卡作品',
-  '纸艺工坊内容',
-  '资料分类、资料文件',
-  '样品申请、客户线索、跟进记录',
-  '跨主题关联、操作日志、页面优化',
+  ['01', '管理员表、角色表、权限表', '后台账号、角色和操作权限'],
+  ['02', '品牌信息表、导航表、按钮链接表', '公司信息、顶部七大主题、全站按钮和跳转地址'],
+  ['03', '页面基础表、页面模块表、页面优化表', '页面标题、模块顺序、页面描述和分享信息'],
+  ['04', '媒体资源表', '图片、视频、样册、技术资料和其他文件资源'],
+  ['05', '色系表、颜色表、标志色表', '六大色系、四十二色、首页三款标志色'],
+  ['06', '产品系列表、产品规格表', '八个产品系列、克重、厚度、工艺适配等资料'],
+  ['07', '表面工艺表、纹理库表', '工艺分类、二百多种纹理、工艺兼容关系'],
+  ['08', '应用场景表、场景方案表', '六个应用场景、材料推荐方案'],
+  ['09', '艺术卡分类表、艺术卡作品表', '邀请函、贺卡、明信片、纸艺物件等作品'],
+  ['10', '纸艺工坊内容表', '生产制造、样品制作、品质控制、材料哲学、创始人故事'],
+  ['11', '资料分类表、资料文件表', '颜色搭配库、纸张纹路库、纸样工艺库、定制库、防伪库、特殊工艺库'],
+  ['12', '样品申请表、客户线索表、跟进记录表', '样品申请、客户联系方式、销售跟进记录'],
+  ['13', '颜色产品关联表、产品工艺关联表、场景推荐关联表、资料关联表', '七大主题之间的推荐关系和资料引用关系'],
+  ['14', '操作日志表', '后台关键操作记录'],
+];
+
+const developerScope = [
+  '搭建整体服务端框架。',
+  '搭建后台管理系统。',
+  '建立数据库、文件存储、接口和权限。',
+  '打通前台页面与后台数据。',
+  '做好首页、七大主题、按钮、栏目、图片、视频、文件的维护入口。',
+  '做好样品申请、客户线索、媒体资源库和基础操作日志。',
+  '预留小程序字段和接口方向。',
+];
+
+const clientScope = [
+  '整理并录入最终中文文案。',
+  '整理并录入最终外文文案。',
+  '整理并上传产品、色卡、工艺、场景、艺术卡、工坊图片。',
+  '整理并上传视频资源。',
+  '整理并上传样册、技术资料、防伪资料和定制资料。',
+  '确认每个按钮跳转是否符合业务要求。',
+  '确认每个页面最终展示内容。',
+];
+
+const excludedScope = [
+  '小程序前端开发。',
+  '客户正式内容整理、上传和录入执行。',
+  '复杂客户关系系统。',
+  '复杂销售分配流程。',
+  '资料下载留资的复杂规则。',
+  '复杂统计报表。',
+  '复杂筛选、推荐、报价流程。',
+  '第三方业务系统对接。',
 ];
 
 const maintenanceRows = [
-  {
-    title: '按月维护',
-    body: '每月固定维护费，覆盖基础技术支持、简单问题修复、服务器检查、备份检查、上传异常处理、表单异常处理。',
-  },
-  {
-    title: '按功能维护',
-    body: '每次新增页面、功能、接口、小程序能力、复杂筛选、资料留资或统计报表前，先确认需求、价格和周期。',
-  },
+  ['按月维护', '每月固定维护费', '基础技术支持、简单问题修复、服务器检查、备份检查、上传异常处理、表单异常处理、后台登录异常处理。'],
+  ['按功能维护', '按单次功能报价', '新增页面、新增功能、新增接口、小程序能力扩展、复杂筛选、资料留资、统计报表和第三方系统对接。'],
 ];
 
-const mapLines = [
-  { d: 'M88 250 C150 88 184 70 258 70', className: 'flow-blue', width: 18 },
-  { d: 'M88 250 C150 128 184 114 258 114', className: 'flow-blue', width: 18 },
-  { d: 'M88 250 C150 166 184 158 258 158', className: 'flow-blue', width: 18 },
-  { d: 'M88 250 C150 210 184 202 258 202', className: 'flow-blue', width: 18 },
-  { d: 'M88 250 C150 252 184 246 258 246', className: 'flow-blue', width: 18 },
-  { d: 'M88 250 C150 296 184 290 258 290', className: 'flow-blue', width: 18 },
-  { d: 'M88 250 C150 340 184 334 258 334', className: 'flow-blue', width: 18 },
-  { d: 'M330 114 C378 116 406 124 462 142', className: 'flow-cyan', width: 20 },
-  { d: 'M330 202 C378 202 406 194 462 184', className: 'flow-cyan', width: 20 },
-  { d: 'M330 290 C378 284 406 266 462 238', className: 'flow-cyan', width: 20 },
-  { d: 'M540 172 C588 152 614 138 666 138', className: 'flow-green', width: 30 },
-  { d: 'M540 216 C588 218 614 222 666 222', className: 'flow-green', width: 28 },
-  { d: 'M540 264 C588 298 614 320 666 326', className: 'flow-green', width: 26 },
-  { d: 'M735 138 C794 132 838 128 890 126', className: 'flow-gold', width: 28 },
-  { d: 'M735 222 C794 220 838 226 890 232', className: 'flow-gold', width: 26 },
-  { d: 'M735 326 C794 322 838 312 890 304', className: 'flow-gold', width: 24 },
-  { d: 'M735 222 C795 258 840 282 890 304', className: 'flow-rose', width: 14 },
+const acceptanceRows = [
+  '后台入口是否完整。',
+  '图片、视频和文件是否可以上传。',
+  '后台保存后前台是否能读取和显示。',
+  '按钮链接是否可以修改。',
+  '栏目是否可以排序和设置显示。',
+  '样品申请是否可以提交并进入后台。',
+  '客户线索是否可以查看和记录跟进。',
+  '操作日志是否能记录关键操作。',
 ];
 
-const topicNodes = [
-  '色彩系统',
-  '产品系列',
-  '表面工艺',
-  '应用场景',
-  '艺术卡实验室',
-  '纸艺工坊',
-  '资料与工具',
-];
+const renderList = (items: string[]) => (
+  <ul className="vanglam-doc-list">
+    {items.map((item) => (
+      <li key={item}>{item}</li>
+    ))}
+  </ul>
+);
 
 export const VanglamBackendPlanPage: React.FC = () => {
   return (
-    <div className="vanglam-v1-page vanglam-backend-plan-page">
+    <div className="vanglam-v1-page vanglam-backend-doc-page">
       <VanglamNavbar />
-      <main>
-        <section className="vanglam-backend-hero" aria-labelledby="backend-plan-title">
-          <div>
-            <span>后台建设规划图</span>
-            <h1 id="backend-plan-title">把官网现有页面，变成客户可维护的后台入口。</h1>
-            <p>
-              第一期开通服务端框架、后台入口、上传入口、数据库、接口和前台读取关系。客户在后台自行整理、上传、录入和维护正式内容。
-            </p>
-          </div>
-          <div className="vanglam-backend-hero-metrics" aria-label="第一期确认信息">
-            <article>
-              <CircleDollarSign size={22} strokeWidth={1.4} />
-              <span>第一期费用</span>
-              <strong>人民币三万元</strong>
-            </article>
-            <article>
-              <Clock3 size={22} strokeWidth={1.4} />
-              <span>开发周期</span>
-              <strong>六到八周</strong>
-            </article>
-            <article>
-              <Database size={22} strokeWidth={1.4} />
-              <span>数据结构</span>
-              <strong>三十二张核心表</strong>
-            </article>
-            <article>
-              <Smartphone size={22} strokeWidth={1.4} />
-              <span>后续小程序</span>
-              <strong>共用同一套后台</strong>
-            </article>
+      <main className="vanglam-backend-doc">
+        <section className="vanglam-doc-cover" aria-labelledby="backend-plan-title">
+          <p>客户确认版 / 后台开发范围</p>
+          <h1 id="backend-plan-title">齐力纸业梵澜官网后台建设开发文档</h1>
+          <div className="vanglam-doc-meta-grid" aria-label="项目基础信息">
+            {overviewRows.map(([label, value]) => (
+              <div key={label}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
           </div>
         </section>
 
-        <section className="vanglam-flow-window" aria-labelledby="backend-flow-title">
-          <aside className="vanglam-flow-sidebar" aria-label="后台规划目录">
-            <h2>齐力纸业后台</h2>
-            {[
-              ['总览', Workflow],
-              ['七大主题', MonitorCog],
-              ['数据库', Database],
-              ['上传入口', CloudUpload],
-              ['开发边界', FileText],
-              ['后续维护', Wrench],
-            ].map(([label, Icon]) => {
-              const SidebarIcon = Icon as typeof Workflow;
-              return (
-                <div key={label as string} className="vanglam-flow-sidebar-item">
-                  <SidebarIcon size={16} strokeWidth={1.55} />
-                  <span>{label as string}</span>
-                </div>
-              );
-            })}
+        <div className="vanglam-doc-layout">
+          <aside className="vanglam-doc-toc" aria-label="文档目录">
+            <a href="#goal">一、建设目标</a>
+            <a href="#scope">二、开发边界</a>
+            <a href="#topics">三、七大主题</a>
+            <a href="#database">四、数据库</a>
+            <a href="#mini-program">五、小程序关联</a>
+            <a href="#price">六、费用周期</a>
+            <a href="#maintenance">七、后续维护</a>
+            <a href="#acceptance">八、验收标准</a>
           </aside>
 
-          <div className="vanglam-flow-main">
-            <header className="vanglam-flow-heading">
-              <div>
-                <span>Client Confirmation Map</span>
-                <h2 id="backend-flow-title">官网前台到后台服务端的流向</h2>
-              </div>
-              <strong>开发方做入口 · 客户上传内容</strong>
-            </header>
+          <div className="vanglam-doc-content">
+            <section id="goal" className="vanglam-doc-section">
+              <h2>一、建设目标</h2>
+              <p>
+                后台建设目标是把官网已经展示出来的页面、栏目、按钮、图片、视频、资料文件和客户线索做成可维护入口。
+                第一期开通服务端框架、后台入口、上传入口、数据库、接口和前台读取关系。
+              </p>
+              <p>
+                官网后续新增内容由客户在后台自行整理、上传、录入和维护。开发方负责把入口、数据结构、接口和前台读取搭好。
+              </p>
+            </section>
 
-            <div className="vanglam-flow-scroll" aria-label="后台建设流向图">
-              <div className="vanglam-flow-canvas">
-                <svg className="vanglam-flow-lines" viewBox="0 0 980 430" aria-hidden="true">
-                  {mapLines.map((line) => (
-                    <path key={line.d} d={line.d} className={line.className} strokeWidth={line.width} />
+            <section id="scope" className="vanglam-doc-section">
+              <h2>二、开发边界</h2>
+              <div className="vanglam-doc-scope-grid">
+                <article>
+                  <h3>开发方负责</h3>
+                  {renderList(developerScope)}
+                </article>
+                <article>
+                  <h3>客户负责</h3>
+                  {renderList(clientScope)}
+                </article>
+                <article>
+                  <h3>第一期不包含</h3>
+                  {renderList(excludedScope)}
+                </article>
+              </div>
+            </section>
+
+            <section id="topics" className="vanglam-doc-section">
+              <h2>三、七大主题与后台模块</h2>
+              <table className="vanglam-doc-table">
+                <thead>
+                  <tr>
+                    <th>顶部主题</th>
+                    <th>前台路径</th>
+                    <th>后台模块</th>
+                    <th>点击关系</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topicRows.map(([name, path, module, relation]) => (
+                    <tr key={name}>
+                      <td>{name}</td>
+                      <td>{path}</td>
+                      <td>{module}</td>
+                      <td>{relation}</td>
+                    </tr>
                   ))}
-                </svg>
+                </tbody>
+              </table>
+            </section>
 
-                <div className="vanglam-flow-node node-source">
-                  <span>前台现有页面</span>
-                  <strong>文字 / 图片 / 视频 / 按钮 / 栏目 / 文件</strong>
-                </div>
+            <section id="database" className="vanglam-doc-section">
+              <h2>四、数据库建设清单</h2>
+              <p>第一期按一个主业务数据库建设，核心结构按三十二张核心表规划，官网和后续小程序共用同一套内容数据。</p>
+              <table className="vanglam-doc-table">
+                <thead>
+                  <tr>
+                    <th>序号</th>
+                    <th>数据表</th>
+                    <th>用途</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {databaseRows.map(([number, name, usage]) => (
+                    <tr key={number}>
+                      <td>{number}</td>
+                      <td>{name}</td>
+                      <td>{usage}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
 
-                {topicNodes.map((topic, index) => (
-                  <div key={topic} className="vanglam-flow-node node-topic" style={{ top: 47 + index * 44 }}>
-                    {topic}
-                  </div>
-                ))}
+            <section id="mini-program" className="vanglam-doc-section">
+              <h2>五、小程序关联方式</h2>
+              <p>
+                后续小程序直接复用官网后台、服务端、数据库、媒体资源库和客户线索库，不再单独开发一套小程序后台。
+              </p>
+              {renderList([
+                '小程序读取同一套七大主题内容。',
+                '小程序读取同一套图片、视频、样册和资料文件。',
+                '小程序提交的样品申请进入同一个后台。',
+                '小程序字段包含是否在小程序显示、小程序排序、小程序封面图、小程序简介和分享信息。',
+              ])}
+            </section>
 
-                <div className="vanglam-flow-node node-module module-one">
-                  <span>七大主题维护入口</span>
-                  <strong>首页 + 色彩 + 产品 + 工艺 + 场景 + 艺术卡 + 工坊 + 资料</strong>
-                </div>
-                <div className="vanglam-flow-node node-module module-two">
-                  <span>全站可编辑入口</span>
-                  <strong>按钮链接 / 栏目排序 / 显示隐藏 / 页面基础信息</strong>
-                </div>
-                <div className="vanglam-flow-node node-module module-three">
-                  <span>资源与线索入口</span>
-                  <strong>媒体库 / 样品申请 / 客户线索 / 跟进记录</strong>
-                </div>
+            <section id="price" className="vanglam-doc-section">
+              <h2>六、费用与开发周期</h2>
+              <table className="vanglam-doc-table">
+                <tbody>
+                  <tr>
+                    <th>第一期基础版费用</th>
+                    <td>人民币三万元</td>
+                  </tr>
+                  <tr>
+                    <th>开发周期</th>
+                    <td>六到八周</td>
+                  </tr>
+                  <tr>
+                    <th>费用包含</th>
+                    <td>服务端框架、后台入口、上传入口、数据库、接口、前台读取、基础操作日志、小程序字段和接口方向预留。</td>
+                  </tr>
+                  <tr>
+                    <th>费用不包含</th>
+                    <td>小程序前端开发、客户正式内容整理上传录入、复杂业务系统、复杂筛选推荐、第三方系统对接。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
 
-                <div className="vanglam-flow-node node-core core-db">
-                  <Database size={18} strokeWidth={1.45} />
-                  <span>主业务数据库</span>
-                  <strong>三十二张核心表</strong>
-                </div>
-                <div className="vanglam-flow-node node-core core-api">
-                  <Workflow size={18} strokeWidth={1.45} />
-                  <span>服务端接口</span>
-                  <strong>官网读取 + 小程序预留</strong>
-                </div>
-                <div className="vanglam-flow-node node-core core-media">
-                  <CloudUpload size={18} strokeWidth={1.45} />
-                  <span>统一媒体资源库</span>
-                  <strong>图片 / 视频 / 样册 / 技术资料</strong>
-                </div>
+            <section id="maintenance" className="vanglam-doc-section">
+              <h2>七、后续维护方式</h2>
+              <p>后续维护费用不包含在三万元开发费用内。项目交付后维护分为按月维护和按功能维护两种方式。</p>
+              <table className="vanglam-doc-table">
+                <thead>
+                  <tr>
+                    <th>维护方式</th>
+                    <th>计费方式</th>
+                    <th>执行范围</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {maintenanceRows.map(([type, billing, scope]) => (
+                    <tr key={type}>
+                      <td>{type}</td>
+                      <td>{billing}</td>
+                      <td>{scope}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
 
-                <div className="vanglam-flow-node node-output output-web">
-                  <span>官网前台</span>
-                  <strong>保存后读取后台内容</strong>
-                </div>
-                <div className="vanglam-flow-node node-output output-mini">
-                  <span>后续小程序</span>
-                  <strong>共用后台、数据库与资源库</strong>
-                </div>
-                <div className="vanglam-flow-node node-output output-client">
-                  <span>客户运营</span>
-                  <strong>整理、上传、录入和维护正式内容</strong>
-                </div>
-              </div>
-            </div>
+            <section id="acceptance" className="vanglam-doc-section">
+              <h2>八、验收标准</h2>
+              <p>
+                技术验收看服务端框架、后台入口、上传能力、保存能力和前台读取是否完成，不以客户是否已经完成正式内容整理、上传和录入作为验收前提。
+              </p>
+              {renderList(acceptanceRows)}
+            </section>
           </div>
-        </section>
-
-        <section className="vanglam-plan-band" aria-labelledby="plan-topics-title">
-          <div className="vanglam-page-section-heading">
-            <span>七大主题与后台模块</span>
-            <h2 id="plan-topics-title">顶部固定七个主题，每个主题都有后台入口。</h2>
-          </div>
-          <div className="vanglam-plan-topic-grid">
-            {topicRows.map((topic) => (
-              <article key={topic.name} className="vanglam-plan-topic-card">
-                <span>{topic.path}</span>
-                <h3>{topic.name}</h3>
-                <p>{topic.module}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="vanglam-plan-split" aria-label="开发边界">
-          <article>
-            <h2>开发方负责</h2>
-            <ul>
-              {developerScope.map((item) => (
-                <li key={item}><CheckCircle2 size={15} strokeWidth={1.7} />{item}</li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <h2>客户负责</h2>
-            <ul>
-              {clientScope.map((item) => (
-                <li key={item}><CheckCircle2 size={15} strokeWidth={1.7} />{item}</li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <h2>第一期不包含</h2>
-            <ul>
-              {excludedScope.map((item) => (
-                <li key={item}><CheckCircle2 size={15} strokeWidth={1.7} />{item}</li>
-              ))}
-            </ul>
-          </article>
-        </section>
-
-        <section className="vanglam-plan-database" aria-labelledby="plan-database-title">
-          <div className="vanglam-page-section-heading">
-            <span>数据库与关联关系</span>
-            <h2 id="plan-database-title">一个主业务数据库，三十二张核心表，官网和小程序共用。</h2>
-          </div>
-          <div className="vanglam-database-list">
-            {databaseRows.map((row, index) => (
-              <div key={row}>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <strong>{row}</strong>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="vanglam-maintenance-band" aria-labelledby="maintenance-title">
-          <div>
-            <span>后续维护</span>
-            <h2 id="maintenance-title">维护费用不包含在三万元开发费用内。</h2>
-            <p>项目交付后，维护按月维护或按功能维护执行。新增功能在执行前确认需求、价格和周期。</p>
-          </div>
-          <div className="vanglam-maintenance-cards">
-            {maintenanceRows.map((row) => (
-              <article key={row.title}>
-                <Wrench size={20} strokeWidth={1.4} />
-                <h3>{row.title}</h3>
-                <p>{row.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="vanglam-plan-final-cta">
-          <div>
-            <span>第一期确认口径</span>
-            <h2>三万元用于搭建框架、入口、上传能力、数据库、接口和前台读取。</h2>
-            <p>客户正式内容整理、上传和录入执行属于客户运营工作，不作为服务端框架和后台入口完成的验收标准。</p>
-          </div>
-          <a href="#backend-flow-title">
-            回到规划图 <ArrowRight size={14} strokeWidth={1.6} />
-          </a>
-        </section>
+        </div>
       </main>
       <VanglamFooter />
     </div>

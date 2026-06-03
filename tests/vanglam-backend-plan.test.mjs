@@ -21,7 +21,7 @@ runTest('VANGLAM exposes the backend plan from the top-right navigation', () => 
   assert.match(appSource, /VanglamBackendPlanPage/);
   assert.match(navbarSource, /className="vanglam-plan-link"/);
   assert.match(navbarSource, /to="\/vanglam\/backend-plan"/);
-  assert.match(navbarSource, /后台规划图/);
+  assert.match(navbarSource, /后台开发文档/);
 });
 
 runTest('backend plan page contains the confirmed customer-facing scope', () => {
@@ -41,18 +41,19 @@ runTest('backend plan page contains the confirmed customer-facing scope', () => 
   }
 });
 
-runTest('backend plan uses a visual flow map, not a markdown document link', () => {
+runTest('backend plan uses a development document layout, not a decorative flow map', () => {
   for (const className of [
-    '.vanglam-flow-window',
-    '.vanglam-flow-canvas',
-    '.vanglam-flow-lines',
-    '.vanglam-flow-node',
-    '.vanglam-plan-topic-grid',
-    '.vanglam-plan-split',
+    '.vanglam-backend-doc',
+    '.vanglam-doc-cover',
+    '.vanglam-doc-meta-grid',
+    '.vanglam-doc-toc',
+    '.vanglam-doc-section',
+    '.vanglam-doc-table',
   ]) {
     assert.match(cssSource, new RegExp(className.replace('.', '\\.')));
   }
   assert.doesNotMatch(planSource, /\.md/);
+  assert.doesNotMatch(planSource, /mapLines|vanglam-flow|flow-blue|node-source/);
 });
 
 runTest('backend plan avoids internal uncertainty language', () => {

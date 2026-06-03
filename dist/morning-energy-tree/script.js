@@ -88,6 +88,7 @@ const STATE = {
     competitionSession: null,
     competitionLastResult: null,
     activeCompetitionGroupId: null,
+    lastCompletedCompetitionGroupId: null,
     reportActiveDay: null,
     reportActiveSession: 0,
     forestActiveDateKey: null,
@@ -770,53 +771,192 @@ function createCompetitionSession(config = STATE.competitionConfig || loadCompet
         id: group.id,
         name: group.name,
         peakDb: 0,
+        challengeSeconds: 0,
         readingSeconds: 0,
         triggeredSeconds: 0,
         attempts: 0,
-        lastPeakAt: null
+        lastPeakAt: null,
+        attemptStartedAt: null,
+        attemptEndedAt: null,
+        completedAt: null
     }));
 
     return {
         startedAt,
+        activeGroupId: null,
+        activeAttemptStartedAt: null,
+        lastCompletedGroupId: null,
         groups
     };
 }
 
+function syncCompetitionSessionWithConfig(session, config = STATE.competitionConfig || loadCompetitionConfig()) {
+    if (!session) return createCompetitionSession(config);
+    const activeGroups = getActiveCompetitionGroups(config);
+    const existingGroups = Array.isArray(session.groups) ? session.groups : [];
+    session.groups = activeGroups.map(group => {
+        const existing = existingGroups.find(item => item.id === group.id) || {};
+        return {
+            id: group.id,
+            name: group.name,
+            peakDb: Math.max(0, Math.round(Number(existing.peakDb) || 0)),
+            challengeSeconds: Math.max(0, Number(existing.challengeSeconds) || 0),
+            readingSeconds: Math.max(0, Number(existing.readingSeconds) || 0),
+            triggeredSeconds: Math.max(0, Number(existing.triggeredSeconds) || 0),
+            attempts: Math.max(0, Math.round(Number(existing.attempts) || 0)),
+            lastPeakAt: existing.lastPeakAt || null,
+            attemptStartedAt: existing.attemptStartedAt || null,
+            attemptEndedAt: existing.attemptEndedAt || null,
+            completedAt: existing.completedAt || null
+        };
+    });
+
+    if (!session.startedAt) session.startedAt = new Date().toISOString();
+    if (session.activeGroupId && !session.groups.some(group => group.id === session.activeGroupId)) {
+        session.activeGroupId = null;
+        session.activeAttemptStartedAt = null;
+    }
+    if (session.lastCompletedGroupId && !session.groups.some(group => group.id === session.lastCompletedGroupId)) {
+        session.lastCompletedGroupId = null;
+    }
+    return session;
+}
+
+function hasCompetitionGroupCompleted(group) {
+    if (!group) return false;
+    if (group.completedAt || group.attemptEndedAt) return true;
+    const hasAttemptMarkers = Boolean(group.attemptStartedAt || group.attemptEndedAt || group.completedAt);
+    if (hasAttemptMarkers) return false;
+    return (
+        Number(group.peakDb) > 0 ||
+        Number(group.readingSeconds) > 0 ||
+        Number(group.triggeredSeconds) > 0
+    );
+}
+
+function getCompetitionCompletion(sessionLike) {
+    const groups = Array.isArray(sessionLike?.groups)
+        ? sessionLike.groups
+        : Array.isArray(sessionLike?.rankings)
+            ? sessionLike.rankings
+            : [];
+    const completedCount = groups.filter(hasCompetitionGroupCompleted).length;
+    return {
+        total: groups.length,
+        completedCount,
+        isComplete: groups.length > 0 && completedCount >= groups.length
+    };
+}
+
 function getCompetitionRankings(sessionLike) {
-    const groups = Array.isArray(sessionLike?.groups) ? sessionLike.groups : [];
+    const groups = Array.isArray(sessionLike?.groups)
+        ? sessionLike.groups
+        : Array.isArray(sessionLike?.rankings)
+            ? sessionLike.rankings
+            : [];
     return groups
         .map(group => ({
             id: group.id,
             name: group.name,
             peakDb: Math.max(0, Math.round(Number(group.peakDb) || 0)),
+            challengeSeconds: Math.max(0, Math.round(Number(group.challengeSeconds) || 0)),
             readingSeconds: Math.max(0, Math.round(Number(group.readingSeconds) || 0)),
             triggeredSeconds: Math.max(0, Math.round(Number(group.triggeredSeconds) || 0)),
             attempts: Math.max(0, Math.round(Number(group.attempts) || 0)),
-            lastPeakAt: group.lastPeakAt || null
+            lastPeakAt: group.lastPeakAt || null,
+            attemptStartedAt: group.attemptStartedAt || null,
+            attemptEndedAt: group.attemptEndedAt || null,
+            completedAt: group.completedAt || null,
+            isComplete: hasCompetitionGroupCompleted(group)
         }))
         .sort((a, b) => (
             (b.peakDb - a.peakDb)
+            || (Number(b.isComplete) - Number(a.isComplete))
             || (b.readingSeconds - a.readingSeconds)
             || a.name.localeCompare(b.name)
         ));
 }
 
 function getCompetitionWinner(sessionLike) {
+    if (!getCompetitionCompletion(sessionLike).isComplete) return null;
     const [winner] = getCompetitionRankings(sessionLike);
     return winner && winner.peakDb > 0 ? winner : null;
+}
+
+function getNextPendingCompetitionGroup(sessionLike, afterGroupId = null) {
+    const groups = Array.isArray(sessionLike?.groups) ? sessionLike.groups : [];
+    if (!groups.length) return null;
+    const startIndex = afterGroupId
+        ? Math.max(0, groups.findIndex(group => group.id === afterGroupId) + 1)
+        : 0;
+    const orderedGroups = [
+        ...groups.slice(startIndex),
+        ...groups.slice(0, startIndex)
+    ];
+    return orderedGroups.find(group => !hasCompetitionGroupCompleted(group)) || null;
+}
+
+function getOrCreateCompetitionSession() {
+    STATE.competitionConfig = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
+    STATE.competitionSession = syncCompetitionSessionWithConfig(
+        STATE.competitionSession || createCompetitionSession(STATE.competitionConfig),
+        STATE.competitionConfig
+    );
+    return STATE.competitionSession;
+}
+
+function startCompetitionGroupAttempt(session, groupId, startedAt = new Date().toISOString()) {
+    if (!session || !groupId) return null;
+    const group = session.groups?.find(item => item.id === groupId);
+    if (!group) return null;
+
+    session.activeGroupId = groupId;
+    session.activeAttemptStartedAt = startedAt;
+    group.attempts = Math.max(0, Math.round(Number(group.attempts) || 0)) + 1;
+    group.attemptStartedAt = startedAt;
+    group.attemptEndedAt = null;
+    group.completedAt = null;
+    STATE.lastCompletedCompetitionGroupId = null;
+    return group;
+}
+
+function finishCompetitionGroupAttempt(session, groupId, endedAt = new Date().toISOString()) {
+    if (!session || !groupId) return null;
+    const group = session.groups?.find(item => item.id === groupId);
+    if (!group) return null;
+
+    group.attemptEndedAt = endedAt;
+    group.completedAt = endedAt;
+    session.lastCompletedGroupId = groupId;
+    if (session.activeGroupId === groupId) {
+        session.activeGroupId = null;
+        session.activeAttemptStartedAt = null;
+    }
+    STATE.lastCompletedCompetitionGroupId = groupId;
+    return group;
 }
 
 function buildCompetitionReportPayload(sessionLike, mode = STATE.activeMode) {
     if (mode !== APP_MODES.COMPETITION || !sessionLike) return null;
     const rankings = getCompetitionRankings(sessionLike);
-    const winner = rankings.find(group => group.peakDb > 0) || null;
+    const completion = getCompetitionCompletion(sessionLike);
+    const winner = completion.isComplete ? (rankings.find(group => group.peakDb > 0) || null) : null;
+    const lastCompletedGroupId = sessionLike.lastCompletedGroupId || STATE.lastCompletedCompetitionGroupId || null;
+    const lastCompletedGroup = lastCompletedGroupId
+        ? rankings.find(group => group.id === lastCompletedGroupId) || null
+        : null;
 
     return {
         mode: APP_MODES.COMPETITION,
         groupCount: rankings.length,
+        completedCount: completion.completedCount,
+        isComplete: completion.isComplete,
         winnerId: winner?.id || null,
         winnerName: winner?.name || null,
         winnerPeakDb: winner?.peakDb || 0,
+        lastCompletedGroupId: lastCompletedGroup?.id || null,
+        lastCompletedGroupName: lastCompletedGroup?.name || null,
+        lastCompletedGroupPeakDb: lastCompletedGroup?.peakDb || 0,
         rankings,
         startedAt: sessionLike.startedAt || null,
         endedAt: new Date().toISOString()
@@ -834,9 +974,14 @@ function updateCompetitionSessionMetrics(session, activeGroupId, options = {}) {
     const isReadingLoudly = Boolean(options.isReadingLoudly);
     const shouldScorePeak = isAboveReadingThreshold || isReadingLoudly;
 
+    group.challengeSeconds = Math.max(0, (Number(group.challengeSeconds) || 0) + deltaSeconds);
+    if (!group.attemptStartedAt) {
+        group.attemptStartedAt = session.activeAttemptStartedAt || new Date().toISOString();
+    }
+    group.attempts = Math.max(1, Math.round(Number(group.attempts) || 0));
+
     if (shouldScorePeak) {
         group.triggeredSeconds = Math.max(0, (group.triggeredSeconds || 0) + deltaSeconds);
-        group.attempts = Math.max(1, Math.round(Number(group.attempts) || 0));
         const roundedDb = Math.round(currentDB);
         if (roundedDb > (group.peakDb || 0)) {
             group.peakDb = roundedDb;
@@ -1420,14 +1565,16 @@ function startReportSession() {
     STATE.reportPeakEnergy = Math.round(clampEnergy(STATE.energy));
     STATE.rewardState = createSessionRewardState();
     if (STATE.activeMode === APP_MODES.COMPETITION) {
-        STATE.competitionConfig = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
-        STATE.competitionSession = createCompetitionSession(STATE.competitionConfig);
+        const session = getOrCreateCompetitionSession();
         if (!STATE.activeCompetitionGroupId || !STATE.competitionSession.groups.some(group => group.id === STATE.activeCompetitionGroupId)) {
-            STATE.activeCompetitionGroupId = STATE.competitionSession.groups[0]?.id || null;
+            STATE.activeCompetitionGroupId = getNextPendingCompetitionGroup(session)?.id || STATE.competitionSession.groups[0]?.id || null;
         }
-        STATE.competitionLastResult = null;
+        if (STATE.activeCompetitionGroupId) {
+            startCompetitionGroupAttempt(session, STATE.activeCompetitionGroupId, STATE.sessionStartedAt);
+        }
     } else {
         STATE.competitionSession = null;
+        STATE.competitionLastResult = null;
     }
     renderCompetitionPanel();
     renderRewardPanel();
@@ -1467,7 +1614,16 @@ function finalizeReportSession() {
         ? Math.max(0, Math.round(STATE.manifestedElapsedSeconds))
         : null;
     const rewardState = STATE.rewardState || createSessionRewardState();
+    const completedCompetitionGroupId = STATE.activeMode === APP_MODES.COMPETITION
+        ? STATE.activeCompetitionGroupId
+        : null;
+    if (STATE.activeMode === APP_MODES.COMPETITION && STATE.competitionSession && completedCompetitionGroupId) {
+        finishCompetitionGroupAttempt(STATE.competitionSession, completedCompetitionGroupId, endedAt);
+    }
     const competition = buildCompetitionReportPayload(STATE.competitionSession, STATE.activeMode);
+    const nextCompetitionGroup = STATE.activeMode === APP_MODES.COMPETITION && STATE.competitionSession
+        ? getNextPendingCompetitionGroup(STATE.competitionSession, completedCompetitionGroupId)
+        : null;
     const treeStage = getTreeLifecycleStage({
         finalEnergy: Math.max(finalEnergy, peakEnergy),
         manifested: Boolean(STATE.hasManifested)
@@ -1482,11 +1638,27 @@ function finalizeReportSession() {
     STATE.manifestedElapsedSeconds = null;
     STATE.rewardState = createSessionRewardState();
     STATE.competitionLastResult = competition;
-    STATE.competitionSession = null;
+    if (STATE.activeMode === APP_MODES.COMPETITION) {
+        STATE.activeCompetitionGroupId = nextCompetitionGroup?.id || completedCompetitionGroupId || STATE.activeCompetitionGroupId;
+    } else {
+        STATE.competitionSession = null;
+        STATE.lastCompletedCompetitionGroupId = null;
+    }
     renderRewardPanel();
     renderCompetitionPanel();
 
-    if (durationSeconds < 5) return;
+    announceCompetitionResult(competition);
+
+    const shouldStoreReport = durationSeconds >= 5 && (
+        STATE.activeMode !== APP_MODES.COMPETITION ||
+        competition?.isComplete
+    );
+
+    if (!shouldStoreReport) {
+        renderWeeklyReport();
+        renderForestMap();
+        return;
+    }
 
     const nextRecord = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -1524,7 +1696,6 @@ function finalizeReportSession() {
 
     persistReports(nextReports);
     upsertForestDayRecord(nextRecord);
-    announceCompetitionResult(competition);
     renderWeeklyReport();
     renderForestMap();
 }
@@ -1587,7 +1758,11 @@ function renderReportDaySidebar(dayGroups, selectedKey) {
 function buildCompetitionReportSection(competition) {
     if (!competition || !Array.isArray(competition.rankings) || !competition.rankings.length) return '';
     const rankings = getCompetitionRankings({ groups: competition.rankings });
-    const winner = rankings.find(group => group.peakDb > 0) || null;
+    const winner = competition.winnerId
+        ? rankings.find(group => group.id === competition.winnerId) || null
+        : competition.isComplete
+            ? rankings.find(group => group.peakDb > 0) || null
+            : null;
 
     return `
         <section class="report-competition-panel">
@@ -1600,7 +1775,7 @@ function buildCompetitionReportSection(competition) {
             </div>
             <div class="report-competition-ranks">
                 ${rankings.map((group, index) => `
-                    <div class="report-competition-row ${index === 0 && group.peakDb > 0 ? 'leader' : ''}">
+                    <div class="report-competition-row ${winner?.id === group.id ? 'leader' : ''}">
                         <span>${index + 1}</span>
                         <strong>${escapeHtml(group.name)}</strong>
                         <em>${group.peakDb ? `${group.peakDb} dB` : '--'}</em>
@@ -1913,7 +2088,12 @@ function renderForestDetail(selectedGroup) {
 
     const manifestedDisplay = getManifestedDisplay(record);
     const competition = record.competition || null;
-    const competitionWinner = competition ? getCompetitionWinner({ groups: competition.rankings || competition.groups }) : null;
+    const competitionRankings = competition ? (competition.rankings || competition.groups) : null;
+    const competitionWinner = competition?.winnerId
+        ? (competitionRankings || []).find(group => group.id === competition.winnerId) || null
+        : competition?.isComplete
+            ? getCompetitionWinner({ groups: competitionRankings })
+            : null;
     const competitionHtml = competition
         ? `
             <div class="forest-competition-row">
@@ -2018,6 +2198,12 @@ function getCurrentCompetitionSource() {
     return STATE.competitionSession || STATE.competitionLastResult || null;
 }
 
+function getCompetitionSourceGroups(source) {
+    if (Array.isArray(source?.groups)) return source.groups;
+    if (Array.isArray(source?.rankings)) return source.rankings;
+    return [];
+}
+
 function renderCompetitionEditor() {
     if (!competitionFields) return;
     const config = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
@@ -2037,22 +2223,24 @@ function renderCompetitionSummary(source = getCurrentCompetitionSource()) {
     }
 
     const rankings = getCompetitionRankings(source);
-    const winner = rankings.find(group => group.peakDb > 0) || null;
-    const emptyText = t('morningTree.competition.noScore') || '选中小组后开始朗读，进入朗读区的最高分贝会记录在这里。';
+    const completion = getCompetitionCompletion(source);
+    const leader = rankings.find(group => group.peakDb > 0) || null;
+    const emptyText = t('morningTree.competition.noScore') || '点击某个小组开始挑战，结束后会记录该组最高分贝。';
 
-    if (!rankings.length || !winner) {
+    if (!rankings.length || !leader) {
         competitionSummary.innerHTML = `<div class="competition-empty">${emptyText}</div>`;
         return;
     }
 
+    const statusText = `${completion.completedCount}/${completion.total} ${t('morningTree.competition.completedSuffix') || '组已记录'}`;
     competitionSummary.innerHTML = `
         <div class="competition-winner">
-            <span>${t('morningTree.competition.currentWinner') || '当前领先'}</span>
-            <strong>${escapeHtml(winner.name)} · ${winner.peakDb} dB</strong>
+            <span>${t('morningTree.competition.currentWinner') || '当前领先'} · ${statusText}</span>
+            <strong>${escapeHtml(leader.name)} · ${leader.peakDb} dB</strong>
         </div>
         <div class="competition-ranking">
             ${rankings.map((group, index) => `
-                <div class="competition-rank-row ${index === 0 ? 'leader' : ''}">
+                <div class="competition-rank-row ${index === 0 && group.peakDb > 0 ? 'leader' : ''}">
                     <span>${index + 1}</span>
                     <strong>${escapeHtml(group.name)}</strong>
                     <em>${group.peakDb ? `${group.peakDb} dB` : '--'}</em>
@@ -2077,34 +2265,50 @@ function renderCompetitionPanel() {
     const config = STATE.competitionConfig;
     const activeGroups = getActiveCompetitionGroups(config);
     const source = getCurrentCompetitionSource();
-    const sourceGroups = Array.isArray(source?.groups) ? source.groups : [];
+    const sourceGroups = getCompetitionSourceGroups(source);
     if (!STATE.activeCompetitionGroupId || !activeGroups.some(group => group.id === STATE.activeCompetitionGroupId)) {
-        STATE.activeCompetitionGroupId = activeGroups[0]?.id || null;
+        STATE.activeCompetitionGroupId = getNextPendingCompetitionGroup(source)?.id || activeGroups[0]?.id || null;
     }
 
     if (competitionGroupCount) {
         competitionGroupCount.value = String(config.groupCount);
-        competitionGroupCount.disabled = STATE.isListening;
+        competitionGroupCount.disabled = STATE.isListening || getCompetitionCompletion(source).completedCount > 0;
     }
 
     competitionList.innerHTML = activeGroups.map(group => {
         const metric = sourceGroups.find(item => item.id === group.id) || {};
         const peakDb = Math.round(Number(metric.peakDb) || 0);
-        const readingSeconds = Math.round(Number(metric.readingSeconds) || 0);
+        const challengeSeconds = Math.round(Number(metric.challengeSeconds ?? metric.readingSeconds) || 0);
+        const isRunning = STATE.isListening && group.id === STATE.activeCompetitionGroupId;
+        const isComplete = hasCompetitionGroupCompleted(metric);
+        const statusText = isRunning
+            ? (t('morningTree.competition.groupRunning') || '挑战中')
+            : isComplete
+                ? (t('morningTree.competition.groupRecorded') || '已记录')
+                : (t('morningTree.competition.groupReady') || '点击开始');
+        const isLocked = STATE.isListening && group.id !== STATE.activeCompetitionGroupId;
         return `
-            <button type="button" class="competition-chip ${group.id === STATE.activeCompetitionGroupId ? 'selected' : ''}" data-competition-group-id="${group.id}">
+            <button type="button" class="competition-chip ${group.id === STATE.activeCompetitionGroupId ? 'selected' : ''} ${isRunning ? 'running' : ''} ${isComplete ? 'complete' : ''}" data-competition-group-id="${group.id}" ${isLocked ? 'disabled' : ''}>
                 <span>${escapeHtml(group.name)}</span>
                 <strong>${peakDb ? `${peakDb} dB` : '--'}</strong>
-                <small>${formatDuration(readingSeconds)}</small>
+                <small>${isLocked ? (t('morningTree.competition.groupLocked') || '先结束当前组') : `${statusText} · ${formatDuration(challengeSeconds)}`}</small>
             </button>
         `;
     }).join('');
 
     competitionList.querySelectorAll('[data-competition-group-id]').forEach(button => {
-        button.onpointerdown = (event) => {
+        button.onclick = async (event) => {
             event.preventDefault();
-            STATE.activeCompetitionGroupId = button.getAttribute('data-competition-group-id');
+            const groupId = button.getAttribute('data-competition-group-id');
+            if (STATE.isListening) {
+                if (groupId !== STATE.activeCompetitionGroupId) {
+                    showToast(t('morningTree.competition.finishCurrentToast') || '请先结束当前小组挑战');
+                }
+                return;
+            }
+            STATE.activeCompetitionGroupId = groupId;
             renderCompetitionPanel();
+            await startMic();
         };
     });
 
@@ -2147,9 +2351,16 @@ function updateModeUI() {
 
     if (currentModeBadge) currentModeBadge.textContent = modeLabel;
     if (micBtn) {
-        micBtn.textContent = isCompetitionMode
-            ? (t('morningTree.controls.startCompetition') || '开始竞赛')
-            : (t('morningTree.controls.startClass') || '开始早读');
+        if (STATE.isListening) {
+            micBtn.textContent = t('morningTree.controls.pause') || '暂停早读';
+        } else if (isCompetitionMode) {
+            const activeGroup = getActiveCompetitionGroups(STATE.competitionConfig || loadCompetitionConfig())
+                .find(group => group.id === STATE.activeCompetitionGroupId);
+            const template = t('morningTree.controls.startGroup') || '开始{name}';
+            micBtn.textContent = template.replace('{name}', activeGroup?.name || (t('morningTree.controls.startCompetition') || '竞赛'));
+        } else {
+            micBtn.textContent = t('morningTree.controls.startClass') || '开始早读';
+        }
     }
     if (document.body?.dataset) {
         document.body.dataset.morningTreeMode = STATE.activeMode || 'none';
@@ -2158,6 +2369,20 @@ function updateModeUI() {
 
 function announceCompetitionResult(competition) {
     if (!competition || STATE.activeMode !== APP_MODES.COMPETITION) return;
+    if (!competition.isComplete) {
+        const name = competition.lastCompletedGroupName || '';
+        const peakDb = Math.round(Number(competition.lastCompletedGroupPeakDb) || 0);
+        const template = peakDb
+            ? (t('morningTree.competition.partialToast') || '{name} 已记录，最高 {db} dB，请选择下一组')
+            : (t('morningTree.competition.partialNoScoreToast') || '{name} 已结束，还没有有效分贝，请选择下一组');
+        if (name) {
+            showToast(template
+                .replace('{name}', name)
+                .replace('{db}', String(peakDb)));
+        }
+        return;
+    }
+
     if (!competition.winnerName || !competition.winnerPeakDb) {
         showToast(t('morningTree.competition.noWinnerToast') || '本场竞赛未产生有效分贝记录');
         return;
@@ -2183,7 +2408,10 @@ function initCompetitionUI() {
 
     if (competitionGroupCount) {
         competitionGroupCount.onchange = (event) => {
-            if (STATE.isListening) return;
+            if (STATE.isListening || getCompetitionCompletion(getCurrentCompetitionSource()).completedCount > 0) {
+                renderCompetitionPanel();
+                return;
+            }
             STATE.competitionConfig = persistCompetitionConfig({
                 ...normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig()),
                 groupCount: event.target.value
@@ -2228,6 +2456,8 @@ function initCompetitionUI() {
             if (STATE.isListening) return;
             STATE.competitionLastResult = null;
             STATE.competitionSession = null;
+            STATE.lastCompletedCompetitionGroupId = null;
+            STATE.activeCompetitionGroupId = getActiveCompetitionGroups(STATE.competitionConfig || loadCompetitionConfig())[0]?.id || null;
             renderCompetitionPanel();
         };
     }
@@ -2838,6 +3068,7 @@ function stopMic() {
     micBtn.classList.remove('active');
     dbDisplay.classList.remove('active');
     dbValue.textContent = '--';
+    renderCompetitionPanel();
     if (STATE.timerInterval) {
         clearInterval(STATE.timerInterval);
         STATE.timerInterval = null;
@@ -2856,6 +3087,7 @@ function resetGame() {
     STATE.rewardState = createSessionRewardState();
     STATE.competitionSession = null;
     STATE.competitionLastResult = null;
+    STATE.lastCompletedCompetitionGroupId = null;
     STATE.energy = 0;
     STATE.readingHoldSeconds = 0;
     STATE.lastFrameAt = null;

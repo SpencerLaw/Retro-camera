@@ -483,6 +483,7 @@
     "controls": {
       "startClass": "开始早读",
       "startCompetition": "开始竞赛",
+      "startGroup": "开始{name}",
       "pause": "暂停早读"
     },
     "mode": {
@@ -554,14 +555,22 @@
     },
     "competition": {
       "title": "小组竞赛",
-      "sub": "选中当前挑战小组，系统记录最高分贝",
+      "sub": "点击小组开始本轮，结束后只记录该组最高分贝",
       "edit": "编辑",
       "save": "保存小组",
       "groupLabel": "小组",
       "clearResult": "清空本场结果",
-      "noScore": "选中小组后开始朗读，进入朗读区的最高分贝会记录在这里。",
+      "noScore": "点击某个小组开始挑战，结束后会记录该组最高分贝。",
       "currentWinner": "当前领先",
       "winnerToast": "本场冠军：{name}，最高 {db} dB",
+      "partialToast": "{name} 已记录，最高 {db} dB，请选择下一组",
+      "partialNoScoreToast": "{name} 已结束，还没有有效分贝，请选择下一组",
+      "finishCurrentToast": "请先结束当前小组挑战",
+      "groupReady": "点击开始",
+      "groupRunning": "挑战中",
+      "groupRecorded": "已记录",
+      "groupLocked": "先结束当前组",
+      "completedSuffix": "组已记录",
       "noWinnerToast": "本场竞赛未产生有效分贝记录",
       "reportTitle": "小组竞赛结果",
       "highestDbRule": "按最高分贝排名",

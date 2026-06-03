@@ -467,6 +467,7 @@
     "controls": {
       "startClass": "Start Reading",
       "startCompetition": "Start Match",
+      "startGroup": "Start {name}",
       "pause": "Pause Reading"
     },
     "mode": {
@@ -538,14 +539,22 @@
     },
     "competition": {
       "title": "Group Match",
-      "sub": "Select the active group; the app records its highest dB",
+      "sub": "Tap a group to start its round. Ending the round records only that group's highest dB.",
       "edit": "Edit",
       "save": "Save Groups",
       "groupLabel": "Group",
       "clearResult": "Clear Result",
-      "noScore": "Select a group and start reading. The highest dB after entering the reading zone will appear here.",
+      "noScore": "Tap a group to start its round. The group's highest dB will appear here after the round ends.",
       "currentWinner": "Current Leader",
       "winnerToast": "Winner: {name}, highest {db} dB",
+      "partialToast": "{name} recorded, highest {db} dB. Choose the next group.",
+      "partialNoScoreToast": "{name} ended without a valid dB record. Choose the next group.",
+      "finishCurrentToast": "Finish the current group round first",
+      "groupReady": "Tap to start",
+      "groupRunning": "Running",
+      "groupRecorded": "Recorded",
+      "groupLocked": "Finish current group",
+      "completedSuffix": "groups recorded",
       "noWinnerToast": "No valid dB record was produced in this match",
       "reportTitle": "Group Match Result",
       "highestDbRule": "Ranked by highest dB",

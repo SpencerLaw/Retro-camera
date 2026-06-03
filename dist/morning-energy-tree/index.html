@@ -69,15 +69,17 @@
 
             <!-- Top: Energy Bar -->
             <div class="top-bar">
-                <div class="mode-toolbar">
-                    <span id="current-mode-badge" class="current-mode-badge">未选择模式</span>
-                    <button id="mode-switch-btn" class="mode-switch-btn" type="button" data-i18n="morningTree.mode.switch">切换模式</button>
+                <div class="progress-stage">
+                    <div class="mode-toolbar">
+                        <span id="current-mode-badge" class="current-mode-badge">未选择模式</span>
+                        <button id="mode-switch-btn" class="mode-switch-btn" type="button" data-i18n="morningTree.mode.switch">切换模式</button>
+                    </div>
+                    <div class="energy-label" data-i18n="morningTree.energyLabel">🌳 能量树成长进度</div>
+                    <div class="energy-container">
+                        <div id="energy-fill"></div>
+                    </div>
+                    <div id="reward-energy-float" class="reward-energy-float" aria-live="polite"></div>
                 </div>
-                <div class="energy-label" data-i18n="morningTree.energyLabel">🌳 能量树成长进度</div>
-                <div class="energy-container">
-                    <div id="energy-fill"></div>
-                </div>
-                <div id="reward-energy-float" class="reward-energy-float" aria-live="polite"></div>
 
                 <!-- Circular Ring Timer (Segmented Energy Blocks) -->
                 <div class="timer-ring-wrap">
@@ -144,7 +146,7 @@
                     <div class="competition-panel-head">
                         <div>
                             <strong data-i18n="morningTree.competition.title">小组竞赛</strong>
-                            <span data-i18n="morningTree.competition.sub">选中当前挑战小组，系统记录最高分贝</span>
+                            <span data-i18n="morningTree.competition.sub">点击小组开始本轮，结束后只记录该组最高分贝</span>
                         </div>
                         <div class="competition-panel-actions">
                             <select id="competition-group-count" class="competition-count-select" aria-label="竞赛小组数量">

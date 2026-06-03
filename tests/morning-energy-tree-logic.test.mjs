@@ -137,6 +137,7 @@ function loadMorningTree() {
       STATE,
       updateState,
       triggerSuperMode,
+      startReportSession: typeof startReportSession === 'function' ? startReportSession : undefined,
       finalizeReportSession: typeof finalizeReportSession === 'function' ? finalizeReportSession : undefined,
       loadStoredReports: typeof loadStoredReports === 'function' ? loadStoredReports : undefined,
       renderReportFocus: typeof renderReportFocus === 'function' ? renderReportFocus : undefined,
@@ -168,7 +169,11 @@ function loadMorningTree() {
       showModePicker: typeof showModePicker === 'function' ? showModePicker : undefined,
       normalizeCompetitionConfig: typeof normalizeCompetitionConfig === 'function' ? normalizeCompetitionConfig : undefined,
       createCompetitionSession: typeof createCompetitionSession === 'function' ? createCompetitionSession : undefined,
+      startCompetitionGroupAttempt: typeof startCompetitionGroupAttempt === 'function' ? startCompetitionGroupAttempt : undefined,
+      finishCompetitionGroupAttempt: typeof finishCompetitionGroupAttempt === 'function' ? finishCompetitionGroupAttempt : undefined,
       updateCompetitionSessionMetrics: typeof updateCompetitionSessionMetrics === 'function' ? updateCompetitionSessionMetrics : undefined,
+      getCompetitionCompletion: typeof getCompetitionCompletion === 'function' ? getCompetitionCompletion : undefined,
+      getNextPendingCompetitionGroup: typeof getNextPendingCompetitionGroup === 'function' ? getNextPendingCompetitionGroup : undefined,
       getCompetitionRankings: typeof getCompetitionRankings === 'function' ? getCompetitionRankings : undefined,
       getCompetitionWinner: typeof getCompetitionWinner === 'function' ? getCompetitionWinner : undefined,
       buildCompetitionReportPayload: typeof buildCompetitionReportPayload === 'function' ? buildCompetitionReportPayload : undefined,
@@ -623,7 +628,10 @@ runTest('competition metrics update only the selected group and rank by highest 
 
   assert.equal(typeof api.normalizeCompetitionConfig, 'function');
   assert.equal(typeof api.createCompetitionSession, 'function');
+  assert.equal(typeof api.startCompetitionGroupAttempt, 'function');
+  assert.equal(typeof api.finishCompetitionGroupAttempt, 'function');
   assert.equal(typeof api.updateCompetitionSessionMetrics, 'function');
+  assert.equal(typeof api.getCompetitionCompletion, 'function');
   assert.equal(typeof api.getCompetitionWinner, 'function');
 
   api.STATE.activeMode = api.APP_MODES.COMPETITION;
@@ -640,25 +648,44 @@ runTest('competition metrics update only the selected group and rank by highest 
   });
   const session = api.createCompetitionSession(config);
 
+  api.startCompetitionGroupAttempt(session, 'b', new Date(Date.now() - 14_000).toISOString());
   api.updateCompetitionSessionMetrics(session, 'b', {
     currentDB: 86,
     deltaSeconds: 8,
     isAboveReadingThreshold: true,
     isReadingLoudly: true,
   });
+  api.finishCompetitionGroupAttempt(session, 'b');
+
+  api.startCompetitionGroupAttempt(session, 'a', new Date(Date.now() - 8_000).toISOString());
   api.updateCompetitionSessionMetrics(session, 'a', {
     currentDB: 92,
     deltaSeconds: 4,
     isAboveReadingThreshold: true,
     isReadingLoudly: false,
   });
+  api.finishCompetitionGroupAttempt(session, 'a');
 
   assert.equal(config.groupCount, 3);
   assert.equal(config.groups.length, 5);
   assert.equal(session.groups.length, 3);
+  assert.equal(session.groups.find(group => group.id === 'b').challengeSeconds, 8);
   assert.equal(session.groups.find(group => group.id === 'b').readingSeconds, 8);
   assert.equal(session.groups.find(group => group.id === 'b').peakDb, 86);
   assert.equal(session.groups.find(group => group.id === 'a').peakDb, 92);
+  assert.equal(api.getCompetitionCompletion(session).completedCount, 2);
+  assert.equal(api.getCompetitionWinner(session), null);
+
+  api.startCompetitionGroupAttempt(session, 'c', new Date(Date.now() - 6_000).toISOString());
+  api.updateCompetitionSessionMetrics(session, 'c', {
+    currentDB: 78,
+    deltaSeconds: 3,
+    isAboveReadingThreshold: true,
+    isReadingLoudly: false,
+  });
+  api.finishCompetitionGroupAttempt(session, 'c');
+
+  assert.equal(api.getCompetitionCompletion(session).isComplete, true);
   assert.equal(api.getCompetitionWinner(session).id, 'a');
 });
 
@@ -691,6 +718,36 @@ runTest('competition mode report stores the end-of-session winner and rankings',
   assert.equal(report.competition.winnerPeakDb, 91);
   assert.equal(report.competition.rankings[0].name, '第二组');
   assert.equal(api.STATE.competitionLastResult.winnerId, 'b');
+});
+
+runTest('competition mode waits for every group before declaring a winner', () => {
+  const { api } = loadMorningTree();
+
+  api.STATE.activeMode = api.APP_MODES.COMPETITION;
+  const session = api.createCompetitionSession(api.normalizeCompetitionConfig({
+    groupCount: 3,
+    groups: [
+      { id: 'a', name: '第一组' },
+      { id: 'b', name: '第二组' },
+      { id: 'c', name: '第三组' },
+    ],
+  }));
+
+  api.startCompetitionGroupAttempt(session, 'a', new Date(Date.now() - 10_000).toISOString());
+  api.updateCompetitionSessionMetrics(session, 'a', {
+    currentDB: 89,
+    deltaSeconds: 5,
+    isAboveReadingThreshold: true,
+    isReadingLoudly: true,
+  });
+  api.finishCompetitionGroupAttempt(session, 'a');
+
+  const incomplete = api.buildCompetitionReportPayload(session, api.APP_MODES.COMPETITION);
+  assert.equal(incomplete.isComplete, false);
+  assert.equal(incomplete.completedCount, 1);
+  assert.equal(incomplete.winnerName, null);
+  assert.equal(incomplete.lastCompletedGroupName, '第一组');
+  assert.equal(api.getNextPendingCompetitionGroup(session).id, 'b');
 });
 
 runTest('finalized reports create a local forest day snapshot', () => {

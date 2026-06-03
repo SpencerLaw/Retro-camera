@@ -44,11 +44,35 @@
         <!-- Visualization Canvas -->
         <canvas id="tree-canvas"></canvas>
 
+        <div id="mode-picker" class="mode-picker" role="dialog" aria-modal="true" aria-labelledby="mode-picker-title">
+            <div class="mode-dialog">
+                <div class="mode-kicker" data-i18n="morningTree.mode.kicker">早读开始前</div>
+                <h1 id="mode-picker-title" data-i18n="morningTree.mode.title">选择今天的早读模式</h1>
+                <p data-i18n="morningTree.mode.sub">全班早读用于整体能量树，小组竞赛用于 3-5 个小组轮流 PK 最高分贝。</p>
+                <div class="mode-card-grid">
+                    <button class="mode-card class-mode" type="button" data-mode-choice="class">
+                        <span data-i18n="morningTree.mode.classBadge">全班</span>
+                        <strong data-i18n="morningTree.mode.classTitle">全班早读模式</strong>
+                        <small data-i18n="morningTree.mode.classBody">全班一起朗读，只统计整体分贝、能量树和早读报告。</small>
+                    </button>
+                    <button class="mode-card competition-mode" type="button" data-mode-choice="competition">
+                        <span data-i18n="morningTree.mode.competitionBadge">竞赛</span>
+                        <strong data-i18n="morningTree.mode.competitionTitle">小组竞赛模式</strong>
+                        <small data-i18n="morningTree.mode.competitionBody">3-5 个小组轮流挑战，记录每组本场最高分贝并生成排行榜。</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- UI Overlay -->
         <div class="ui-layer">
 
             <!-- Top: Energy Bar -->
             <div class="top-bar">
+                <div class="mode-toolbar">
+                    <span id="current-mode-badge" class="current-mode-badge">未选择模式</span>
+                    <button id="mode-switch-btn" class="mode-switch-btn" type="button" data-i18n="morningTree.mode.switch">切换模式</button>
+                </div>
                 <div class="energy-label" data-i18n="morningTree.energyLabel">🌳 能量树成长进度</div>
                 <div class="energy-container">
                     <div id="energy-fill"></div>
@@ -116,28 +140,28 @@
                     </div>
                 </div>
 
-                <section id="participant-panel" class="participant-panel" aria-label="学生枝干">
-                    <div class="participant-panel-head">
+                <section id="competition-panel" class="competition-panel hidden" aria-label="小组竞赛">
+                    <div class="competition-panel-head">
                         <div>
-                            <strong data-i18n="morningTree.participants.title">学生枝干</strong>
-                            <span data-i18n="morningTree.participants.sub">选择当前朗读学生/小组</span>
+                            <strong data-i18n="morningTree.competition.title">小组竞赛</strong>
+                            <span data-i18n="morningTree.competition.sub">选中当前挑战小组，系统记录最高分贝</span>
                         </div>
-                        <div class="participant-panel-actions">
-                            <button id="participant-help-btn" class="participant-help-btn" type="button" aria-label="学生枝干说明" aria-expanded="false" aria-controls="participant-help-popover" data-i18n-title="morningTree.participants.helpTitle" data-i18n-aria-label="morningTree.participants.helpTitle" title="学生枝干说明">
-                                <span aria-hidden="true">i</span>
-                            </button>
-                            <button id="participant-manage-btn" class="participant-manage-btn" type="button" data-i18n="morningTree.participants.manage">编辑</button>
+                        <div class="competition-panel-actions">
+                            <select id="competition-group-count" class="competition-count-select" aria-label="竞赛小组数量">
+                                <option value="3">3组</option>
+                                <option value="4">4组</option>
+                                <option value="5">5组</option>
+                            </select>
+                            <button id="competition-edit-btn" class="competition-action-btn" type="button" data-i18n="morningTree.competition.edit">编辑</button>
                         </div>
                     </div>
-                    <div id="participant-help-popover" class="participant-help-popover hidden" role="note">
-                        <strong data-i18n="morningTree.participants.helpTitle">学生枝干说明</strong>
-                        <p data-i18n="morningTree.participants.helpBody">这是老师手动选择当前朗读学生/小组的工具，不是自动声纹识别。早读开始前或轮读时点选对应枝干，被选中的枝干会根据稳定朗读增长，数据只保存在本机报告和森林里，用来鼓励不出声的孩子参与。</p>
+                    <div id="competition-list" class="competition-list"></div>
+                    <div id="competition-editor" class="competition-editor hidden">
+                        <div id="competition-fields" class="competition-fields"></div>
+                        <button id="competition-save-btn" class="competition-save-btn" type="button" data-i18n="morningTree.competition.save">保存小组</button>
                     </div>
-                    <div id="participant-list" class="participant-list"></div>
-                    <div id="participant-editor" class="participant-editor hidden">
-                        <div id="participant-fields" class="participant-fields"></div>
-                        <button id="participant-save-btn" class="participant-save-btn" type="button" data-i18n="morningTree.participants.save">保存枝干</button>
-                    </div>
+                    <div id="competition-summary" class="competition-summary" aria-live="polite"></div>
+                    <button id="competition-reset-btn" class="competition-reset-btn" type="button" data-i18n="morningTree.competition.clearResult">清空本场结果</button>
                 </section>
 
                 <section id="reward-panel" class="reward-panel" aria-label="浇水施肥规则">

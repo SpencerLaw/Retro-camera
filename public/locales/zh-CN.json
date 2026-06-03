@@ -480,6 +480,26 @@
     "timeEndToast": "⏰ 早读时间结束！",
     "micError": "无法访问麦克风，请检查权限设置。",
     "superModeToast": "🎉 能量树显灵了！全班棒棒哒！ 🎉",
+    "controls": {
+      "startClass": "开始早读",
+      "startCompetition": "开始竞赛",
+      "pause": "暂停早读"
+    },
+    "mode": {
+      "kicker": "早读开始前",
+      "title": "选择今天的早读模式",
+      "sub": "全班早读用于整体能量树，小组竞赛用于 3-5 个小组轮流 PK 最高分贝。",
+      "classBadge": "全班",
+      "classTitle": "全班早读模式",
+      "classBody": "全班一起朗读，只统计整体分贝、能量树和早读报告。",
+      "competitionBadge": "竞赛",
+      "competitionTitle": "小组竞赛模式",
+      "competitionBody": "3-5 个小组轮流挑战，记录每组本场最高分贝并生成排行榜。",
+      "classShort": "全班早读",
+      "competitionShort": "小组竞赛",
+      "unselected": "未选择模式",
+      "switch": "切换模式"
+    },
     "lifecycle": {
       "title": "成长层次",
       "seed": "种子",
@@ -530,17 +550,22 @@
       "localOnly": "仅本机记录",
       "emptyDay": "这一天还没有种下能量树",
       "emptyShort": "未种下",
-      "noBranches": "暂无学生枝干数据"
+      "noCompetition": "这一天没有竞赛记录"
     },
-    "participants": {
-      "title": "学生枝干",
-      "sub": "选择当前朗读学生/小组",
-      "manage": "编辑",
-      "save": "保存枝干",
-      "slotLabel": "枝干",
-      "branchTitle": "学生枝干",
-      "helpTitle": "学生枝干说明",
-      "helpBody": "这是老师手动选择当前朗读学生/小组的工具，不是自动声纹识别。早读开始前或轮读时点选对应枝干，被选中的枝干会根据稳定朗读增长，数据只保存在本机报告和森林里，用来鼓励不出声的孩子参与。"
+    "competition": {
+      "title": "小组竞赛",
+      "sub": "选中当前挑战小组，系统记录最高分贝",
+      "edit": "编辑",
+      "save": "保存小组",
+      "groupLabel": "小组",
+      "clearResult": "清空本场结果",
+      "noScore": "选中小组后开始朗读，进入朗读区的最高分贝会记录在这里。",
+      "currentWinner": "当前领先",
+      "winnerToast": "本场冠军：{name}，最高 {db} dB",
+      "noWinnerToast": "本场竞赛未产生有效分贝记录",
+      "reportTitle": "小组竞赛结果",
+      "highestDbRule": "按最高分贝排名",
+      "noWinner": "暂无冠军"
     },
     "report": {
       "trigger": "一周报告",

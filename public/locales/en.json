@@ -464,6 +464,26 @@
     "timeEndToast": "⏰ Reading session ended!",
     "micError": "Cannot access microphone, please check permissions.",
     "superModeToast": "🎉 The Energy Tree is glowing! Great job, class! 🎉",
+    "controls": {
+      "startClass": "Start Reading",
+      "startCompetition": "Start Match",
+      "pause": "Pause Reading"
+    },
+    "mode": {
+      "kicker": "Before reading starts",
+      "title": "Choose today's reading mode",
+      "sub": "Class reading grows one shared Energy Tree. Group match mode lets 3-5 groups take turns competing for the highest decibel peak.",
+      "classBadge": "Class",
+      "classTitle": "Class Reading Mode",
+      "classBody": "The whole class reads together. The app records only the shared decibel curve, tree growth, and reading report.",
+      "competitionBadge": "Match",
+      "competitionTitle": "Group Match Mode",
+      "competitionBody": "3-5 groups take turns. Each group's highest dB is recorded and ranked at the end.",
+      "classShort": "Class Reading",
+      "competitionShort": "Group Match",
+      "unselected": "No mode selected",
+      "switch": "Switch Mode"
+    },
     "lifecycle": {
       "title": "Growth Stage",
       "seed": "Seed",
@@ -514,17 +534,22 @@
       "localOnly": "Local record only",
       "emptyDay": "No energy tree was planted on this day yet",
       "emptyShort": "No tree",
-      "noBranches": "No branch data yet"
+      "noCompetition": "No match record for this day"
     },
-    "participants": {
-      "title": "Student Branches",
-      "sub": "Select the current reader/group",
-      "manage": "Edit",
-      "save": "Save Branches",
-      "slotLabel": "Branch",
-      "branchTitle": "Student branches",
-      "helpTitle": "Student Branch Guide",
-      "helpBody": "This is a teacher-selected reader/group tool, not automatic voiceprint recognition. Before reading or during turn-taking, select the matching branch. The selected branch grows from steady reading, and the data stays on this device in reports and the forest to encourage quiet students to participate."
+    "competition": {
+      "title": "Group Match",
+      "sub": "Select the active group; the app records its highest dB",
+      "edit": "Edit",
+      "save": "Save Groups",
+      "groupLabel": "Group",
+      "clearResult": "Clear Result",
+      "noScore": "Select a group and start reading. The highest dB after entering the reading zone will appear here.",
+      "currentWinner": "Current Leader",
+      "winnerToast": "Winner: {name}, highest {db} dB",
+      "noWinnerToast": "No valid dB record was produced in this match",
+      "reportTitle": "Group Match Result",
+      "highestDbRule": "Ranked by highest dB",
+      "noWinner": "No winner yet"
     },
     "report": {
       "trigger": "Weekly Report",

@@ -8,7 +8,15 @@ function createClassList() {
     add: (...names) => names.forEach((name) => values.add(name)),
     remove: (...names) => names.forEach((name) => values.delete(name)),
     contains: (name) => values.has(name),
-    toggle: (name) => {
+    toggle: (name, force) => {
+      if (typeof force === 'boolean') {
+        if (force) {
+          values.add(name);
+          return true;
+        }
+        values.delete(name);
+        return false;
+      }
       if (values.has(name)) {
         values.delete(name);
         return false;
@@ -155,9 +163,16 @@ function loadMorningTree() {
       getRewardHelpContent: typeof getRewardHelpContent === 'function' ? getRewardHelpContent : undefined,
       getRewardBonusLabel: typeof getRewardBonusLabel === 'function' ? getRewardBonusLabel : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
-      normalizeParticipants: typeof normalizeParticipants === 'function' ? normalizeParticipants : undefined,
-      createParticipantMetrics: typeof createParticipantMetrics === 'function' ? createParticipantMetrics : undefined,
-      updateParticipantBranchMetrics: typeof updateParticipantBranchMetrics === 'function' ? updateParticipantBranchMetrics : undefined,
+      APP_MODES: typeof APP_MODES !== 'undefined' ? APP_MODES : undefined,
+      selectAppMode: typeof selectAppMode === 'function' ? selectAppMode : undefined,
+      showModePicker: typeof showModePicker === 'function' ? showModePicker : undefined,
+      normalizeCompetitionConfig: typeof normalizeCompetitionConfig === 'function' ? normalizeCompetitionConfig : undefined,
+      createCompetitionSession: typeof createCompetitionSession === 'function' ? createCompetitionSession : undefined,
+      updateCompetitionSessionMetrics: typeof updateCompetitionSessionMetrics === 'function' ? updateCompetitionSessionMetrics : undefined,
+      getCompetitionRankings: typeof getCompetitionRankings === 'function' ? getCompetitionRankings : undefined,
+      getCompetitionWinner: typeof getCompetitionWinner === 'function' ? getCompetitionWinner : undefined,
+      buildCompetitionReportPayload: typeof buildCompetitionReportPayload === 'function' ? buildCompetitionReportPayload : undefined,
+      renderCompetitionPanel: typeof renderCompetitionPanel === 'function' ? renderCompetitionPanel : undefined,
       loadStoredForest: typeof loadStoredForest === 'function' ? loadStoredForest : undefined,
       getTreeSnapshotFromReport: typeof getTreeSnapshotFromReport === 'function' ? getTreeSnapshotFromReport : undefined
     };
@@ -603,34 +618,79 @@ runTest('reward boost creates a visible growth bonus label', () => {
   assert.equal(api.getRewardBonusLabel({ waterBonus: 2, fertilizerBonus: 5, totalBonus: 7 }), '浇水 +2% · 施肥 +5%');
 });
 
-runTest('participant branch metrics update only the selected local branch', () => {
+runTest('competition metrics update only the selected group and rank by highest decibel', () => {
   const { api } = loadMorningTree();
 
-  assert.equal(typeof api.normalizeParticipants, 'function');
-  assert.equal(typeof api.createParticipantMetrics, 'function');
-  assert.equal(typeof api.updateParticipantBranchMetrics, 'function');
+  assert.equal(typeof api.normalizeCompetitionConfig, 'function');
+  assert.equal(typeof api.createCompetitionSession, 'function');
+  assert.equal(typeof api.updateCompetitionSessionMetrics, 'function');
+  assert.equal(typeof api.getCompetitionWinner, 'function');
 
-  const participants = api.normalizeParticipants([
-    { id: 'a', name: '第一组' },
-    { id: 'b', name: '第二组' },
-    { id: 'c', name: '第三组' },
-    { id: 'd', name: '第四组' },
-    { id: 'e', name: '第五组' },
-    { id: 'f', name: '第六组' },
-  ]);
-  const metrics = api.createParticipantMetrics(participants);
+  api.STATE.activeMode = api.APP_MODES.COMPETITION;
+  const config = api.normalizeCompetitionConfig({
+    groupCount: 3,
+    groups: [
+      { id: 'a', name: '第一组' },
+      { id: 'b', name: '第二组' },
+      { id: 'c', name: '第三组' },
+      { id: 'd', name: '第四组' },
+      { id: 'e', name: '第五组' },
+      { id: 'f', name: '第六组' },
+    ],
+  });
+  const session = api.createCompetitionSession(config);
 
-  api.updateParticipantBranchMetrics(metrics, 'b', {
+  api.updateCompetitionSessionMetrics(session, 'b', {
     currentDB: 86,
     deltaSeconds: 8,
+    isAboveReadingThreshold: true,
     isReadingLoudly: true,
   });
+  api.updateCompetitionSessionMetrics(session, 'a', {
+    currentDB: 92,
+    deltaSeconds: 4,
+    isAboveReadingThreshold: true,
+    isReadingLoudly: false,
+  });
 
-  assert.equal(participants.length, 5);
-  assert.equal(metrics.b.readingSeconds, 8);
-  assert.equal(metrics.b.peakDb, 86);
-  assert.equal(metrics.b.energyScore > metrics.a.energyScore, true);
-  assert.equal(metrics.a.readingSeconds, 0);
+  assert.equal(config.groupCount, 3);
+  assert.equal(config.groups.length, 5);
+  assert.equal(session.groups.length, 3);
+  assert.equal(session.groups.find(group => group.id === 'b').readingSeconds, 8);
+  assert.equal(session.groups.find(group => group.id === 'b').peakDb, 86);
+  assert.equal(session.groups.find(group => group.id === 'a').peakDb, 92);
+  assert.equal(api.getCompetitionWinner(session).id, 'a');
+});
+
+runTest('competition mode report stores the end-of-session winner and rankings', () => {
+  const { api } = loadMorningTree();
+  const startedAt = new Date(Date.now() - 12_000).toISOString();
+
+  assert.equal(typeof api.buildCompetitionReportPayload, 'function');
+
+  api.STATE.activeMode = api.APP_MODES.COMPETITION;
+  api.STATE.sessionStartedAt = startedAt;
+  api.STATE.curveBuffer = [48, 74, 88, 83];
+  api.STATE.energyCurveBuffer = [0, 20, 40, 58];
+  api.STATE.energy = 58;
+  api.STATE.reportEffectiveReadingSeconds = 8;
+  api.STATE.reportPeakEnergy = 58;
+  api.STATE.competitionSession = {
+    startedAt,
+    groups: [
+      { id: 'a', name: '第一组', peakDb: 82, readingSeconds: 4 },
+      { id: 'b', name: '第二组', peakDb: 91, readingSeconds: 3 },
+      { id: 'c', name: '第三组', peakDb: 79, readingSeconds: 2 },
+    ],
+  };
+
+  api.finalizeReportSession();
+
+  const [report] = api.loadStoredReports();
+  assert.equal(report.competition.winnerName, '第二组');
+  assert.equal(report.competition.winnerPeakDb, 91);
+  assert.equal(report.competition.rankings[0].name, '第二组');
+  assert.equal(api.STATE.competitionLastResult.winnerId, 'b');
 });
 
 runTest('finalized reports create a local forest day snapshot', () => {
@@ -670,15 +730,21 @@ runTest('finalized reports create a local forest day snapshot', () => {
   assert.equal(forest[0].rewards.waterCount, 2);
 });
 
-runTest('forest map and participant controls are present in the classroom UI', () => {
+runTest('mode picker and competition controls are present while student branch controls are removed', () => {
   const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
 
+  assert.match(html, /id="mode-picker"/);
+  assert.match(html, /data-mode-choice="class"/);
+  assert.match(html, /data-mode-choice="competition"/);
+  assert.match(html, /id="competition-panel"/);
+  assert.match(html, /id="competition-group-count"/);
+  assert.match(html, /id="competition-list"/);
   assert.match(html, /id="forest-trigger-btn"/);
   assert.match(html, /id="forest-modal"/);
   assert.match(html, /id="forest-body"/);
   assert.match(html, /id="forest-map-grid"/);
-  assert.match(html, /id="participant-panel"/);
-  assert.match(html, /id="participant-list"/);
+  assert.doesNotMatch(html, /id="participant-panel"/);
+  assert.doesNotMatch(html, /学生枝干/);
 });
 
 runTest('forest modal uses a full-width map and resets scroll when opened', () => {
@@ -697,25 +763,23 @@ runTest('forest modal uses a full-width map and resets scroll when opened', () =
   assert.equal(elements.get('forest-body').scrollTop, 0);
 });
 
-runTest('student branch panel explains teacher-selected local branches', () => {
+runTest('competition mode copy replaces the removed student branch feature', () => {
   const html = fs.readFileSync('public/morning-energy-tree/index.html', 'utf8');
   const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
   const zh = JSON.parse(fs.readFileSync('public/locales/zh-CN.json', 'utf8'));
   const en = JSON.parse(fs.readFileSync('public/locales/en.json', 'utf8'));
 
-  assert.match(html, /id="participant-help-btn"/);
-  assert.match(html, /aria-controls="participant-help-popover"/);
-  assert.match(html, /data-i18n-aria-label="morningTree\.participants\.helpTitle"/);
-  assert.match(html, /id="participant-help-popover"/);
-  assert.match(html, /data-i18n="morningTree\.participants\.helpTitle"/);
-  assert.match(script, /participantHelpBtn/);
-  assert.match(script, /participantHelpPopover/);
-  assert.match(script, /data-i18n-aria-label/);
-  assert.match(script, /aria-expanded/);
-  assert.equal(zh.morningTree.participants.helpTitle, '学生枝干说明');
-  assert.match(zh.morningTree.participants.helpBody, /不是自动声纹识别/);
-  assert.match(zh.morningTree.participants.helpBody, /老师手动选择/);
-  assert.match(en.morningTree.participants.helpBody, /not automatic voiceprint recognition/i);
+  assert.match(html, /data-i18n="morningTree\.mode\.title"/);
+  assert.match(html, /data-i18n="morningTree\.competition\.title"/);
+  assert.match(script, /APP_MODES/);
+  assert.match(script, /createCompetitionSession/);
+  assert.match(script, /winnerPeakDb/);
+  assert.equal(zh.morningTree.mode.classTitle, '全班早读模式');
+  assert.equal(zh.morningTree.competition.title, '小组竞赛');
+  assert.match(zh.morningTree.competition.winnerToast, /本场冠军/);
+  assert.match(en.morningTree.competition.winnerToast, /Winner/);
+  assert.equal(zh.morningTree.participants, undefined);
+  assert.equal(en.morningTree.participants, undefined);
 });
 
 runTest('left classroom stack uses a custom polished scrollbar', () => {

@@ -14,11 +14,12 @@ const LICENSE_PREFIX = 'ZD';
 const REPORT_STORAGE_KEY = 'morning_tree_weekly_reports_v1';
 const TASK_STORAGE_KEY = 'morning_tree_weekly_tasks_v1';
 const FOREST_STORAGE_KEY = 'morning_tree_daily_forest_v1';
-const PARTICIPANT_STORAGE_KEY = 'morning_tree_participants_v1';
+const COMPETITION_STORAGE_KEY = 'morning_tree_competition_config_v1';
 const MAX_STORED_REPORTS = 100;
 const MAX_STORED_FOREST_DAYS = 180;
 const MAX_TASK_SLOTS = 6;
-const MAX_PARTICIPANTS = 5;
+const MIN_COMPETITION_GROUPS = 3;
+const MAX_COMPETITION_GROUPS = 5;
 const REPORT_WEEKDAYS = [
     { key: 'mon', offset: 0 },
     { key: 'tue', offset: 1 },
@@ -44,6 +45,10 @@ const TREE_LIFECYCLE_STAGES = [
     { key: 'fruit', minEnergy: 86 },
     { key: 'final', minEnergy: 100 }
 ];
+const APP_MODES = {
+    CLASS: 'class',
+    COMPETITION: 'competition'
+};
 
 const STATE = {
     isListening: false,
@@ -78,7 +83,11 @@ const STATE = {
     reportEffectiveReadingSeconds: 0,
     reportPeakEnergy: 0,
     rewardState: null,
-    participantMetrics: null,
+    activeMode: null,
+    competitionConfig: null,
+    competitionSession: null,
+    competitionLastResult: null,
+    activeCompetitionGroupId: null,
     reportActiveDay: null,
     reportActiveSession: 0,
     forestActiveDateKey: null,
@@ -87,9 +96,7 @@ const STATE = {
     taskActiveDay: null,
     taskDrafts: null,
     taskStripPreviewDay: null,
-    participants: null,
-    activeParticipantId: null,
-    participantLastRenderAt: 0,
+    competitionLastRenderAt: 0,
     rewardLastRenderAt: 0,
     activeRewardHelp: null,
     frameNow: 0
@@ -215,6 +222,10 @@ const gatekeeper = $('gatekeeper-screen');
 const appContainer = $('app-container');
 const canvas = $('tree-canvas');
 const ctx = canvas.getContext('2d');
+const modePicker = $('mode-picker');
+const modeChoiceButtons = document.querySelectorAll('[data-mode-choice]');
+const currentModeBadge = $('current-mode-badge');
+const modeSwitchBtn = $('mode-switch-btn');
 const energyFill = $('energy-fill');
 const rewardEnergyFloat = $('reward-energy-float');
 const micBtn = $('mic-toggle-btn');
@@ -261,14 +272,15 @@ const forestWeekLabel = $('forest-week-label');
 const forestMapGrid = $('forest-map-grid');
 const forestDetail = $('forest-detail');
 const forestBody = $('forest-body');
-const participantPanel = $('participant-panel');
-const participantList = $('participant-list');
-const participantManageBtn = $('participant-manage-btn');
-const participantEditor = $('participant-editor');
-const participantFields = $('participant-fields');
-const participantSaveBtn = $('participant-save-btn');
-const participantHelpBtn = $('participant-help-btn');
-const participantHelpPopover = $('participant-help-popover');
+const competitionPanel = $('competition-panel');
+const competitionGroupCount = $('competition-group-count');
+const competitionList = $('competition-list');
+const competitionEditBtn = $('competition-edit-btn');
+const competitionEditor = $('competition-editor');
+const competitionFields = $('competition-fields');
+const competitionSaveBtn = $('competition-save-btn');
+const competitionResetBtn = $('competition-reset-btn');
+const competitionSummary = $('competition-summary');
 const rewardPanel = $('reward-panel');
 const rewardLivePanel = $('reward-live-panel');
 
@@ -676,36 +688,36 @@ function initRewardUI() {
     });
 }
 
-function createDefaultParticipants() {
-    return Array.from({ length: MAX_PARTICIPANTS }, (_, index) => ({
+function createDefaultCompetitionGroups() {
+    return Array.from({ length: MAX_COMPETITION_GROUPS }, (_, index) => ({
         id: `group-${index + 1}`,
         name: `第${index + 1}组`
     }));
 }
 
-function normalizeParticipants(rawParticipants) {
-    const source = Array.isArray(rawParticipants) && rawParticipants.length
-        ? rawParticipants
-        : createDefaultParticipants();
+function normalizeCompetitionGroups(rawGroups) {
+    const source = Array.isArray(rawGroups) && rawGroups.length
+        ? rawGroups
+        : createDefaultCompetitionGroups();
     const normalized = [];
     const usedIds = new Set();
 
-    source.slice(0, MAX_PARTICIPANTS).forEach((participant, index) => {
+    source.slice(0, MAX_COMPETITION_GROUPS).forEach((group, index) => {
         const fallbackId = `group-${index + 1}`;
-        const rawId = typeof participant?.id === 'string' && participant.id.trim()
-            ? participant.id.trim()
+        const rawId = typeof group?.id === 'string' && group.id.trim()
+            ? group.id.trim()
             : fallbackId;
         const id = usedIds.has(rawId) ? fallbackId : rawId;
         usedIds.add(id);
         normalized.push({
             id,
-            name: typeof participant?.name === 'string' && participant.name.trim()
-                ? participant.name.trim().slice(0, 12)
+            name: typeof group?.name === 'string' && group.name.trim()
+                ? group.name.trim().slice(0, 12)
                 : `第${index + 1}组`
         });
     });
 
-    while (normalized.length < MAX_PARTICIPANTS) {
+    while (normalized.length < MAX_COMPETITION_GROUPS) {
         const index = normalized.length;
         normalized.push({
             id: `group-${index + 1}`,
@@ -713,54 +725,130 @@ function normalizeParticipants(rawParticipants) {
         });
     }
 
-    return normalized.slice(0, MAX_PARTICIPANTS);
+    return normalized.slice(0, MAX_COMPETITION_GROUPS);
 }
 
-function loadStoredParticipants() {
+function normalizeCompetitionConfig(rawConfig = {}) {
+    const groups = normalizeCompetitionGroups(rawConfig.groups);
+    const groupCount = clamp(
+        Number.parseInt(rawConfig.groupCount ?? MIN_COMPETITION_GROUPS, 10) || MIN_COMPETITION_GROUPS,
+        MIN_COMPETITION_GROUPS,
+        MAX_COMPETITION_GROUPS
+    );
+
+    return {
+        groupCount,
+        groups
+    };
+}
+
+function loadCompetitionConfig() {
     try {
-        const raw = localStorage.getItem(PARTICIPANT_STORAGE_KEY);
-        if (!raw) return normalizeParticipants();
-        return normalizeParticipants(JSON.parse(raw));
+        const raw = localStorage.getItem(COMPETITION_STORAGE_KEY);
+        if (!raw) return normalizeCompetitionConfig();
+        return normalizeCompetitionConfig(JSON.parse(raw));
     } catch (error) {
-        console.error('Failed to load morning tree participants:', error);
-        return normalizeParticipants();
+        console.error('Failed to load morning tree competition config:', error);
+        return normalizeCompetitionConfig();
     }
 }
 
-function persistParticipants(participants) {
-    localStorage.setItem(PARTICIPANT_STORAGE_KEY, JSON.stringify(normalizeParticipants(participants)));
+function persistCompetitionConfig(config) {
+    const normalized = normalizeCompetitionConfig(config);
+    localStorage.setItem(COMPETITION_STORAGE_KEY, JSON.stringify(normalized));
+    return normalized;
 }
 
-function createParticipantMetrics(participants = normalizeParticipants()) {
-    return participants.reduce((acc, participant) => {
-        acc[participant.id] = {
-            id: participant.id,
-            name: participant.name,
-            readingSeconds: 0,
-            peakDb: 0,
-            energyScore: 0,
-            branchStage: getTreeLifecycleStage({ finalEnergy: 0 })
-        };
-        return acc;
-    }, {});
+function getActiveCompetitionGroups(config = STATE.competitionConfig || loadCompetitionConfig()) {
+    const normalized = normalizeCompetitionConfig(config);
+    return normalized.groups.slice(0, normalized.groupCount);
 }
 
-function updateParticipantBranchMetrics(metrics, activeParticipantId, options = {}) {
-    if (!metrics || !activeParticipantId || !metrics[activeParticipantId]) return metrics;
-    const current = metrics[activeParticipantId];
+function createCompetitionSession(config = STATE.competitionConfig || loadCompetitionConfig()) {
+    const startedAt = new Date().toISOString();
+    const groups = getActiveCompetitionGroups(config).map(group => ({
+        id: group.id,
+        name: group.name,
+        peakDb: 0,
+        readingSeconds: 0,
+        triggeredSeconds: 0,
+        attempts: 0,
+        lastPeakAt: null
+    }));
+
+    return {
+        startedAt,
+        groups
+    };
+}
+
+function getCompetitionRankings(sessionLike) {
+    const groups = Array.isArray(sessionLike?.groups) ? sessionLike.groups : [];
+    return groups
+        .map(group => ({
+            id: group.id,
+            name: group.name,
+            peakDb: Math.max(0, Math.round(Number(group.peakDb) || 0)),
+            readingSeconds: Math.max(0, Math.round(Number(group.readingSeconds) || 0)),
+            triggeredSeconds: Math.max(0, Math.round(Number(group.triggeredSeconds) || 0)),
+            attempts: Math.max(0, Math.round(Number(group.attempts) || 0)),
+            lastPeakAt: group.lastPeakAt || null
+        }))
+        .sort((a, b) => (
+            (b.peakDb - a.peakDb)
+            || (b.readingSeconds - a.readingSeconds)
+            || a.name.localeCompare(b.name)
+        ));
+}
+
+function getCompetitionWinner(sessionLike) {
+    const [winner] = getCompetitionRankings(sessionLike);
+    return winner && winner.peakDb > 0 ? winner : null;
+}
+
+function buildCompetitionReportPayload(sessionLike, mode = STATE.activeMode) {
+    if (mode !== APP_MODES.COMPETITION || !sessionLike) return null;
+    const rankings = getCompetitionRankings(sessionLike);
+    const winner = rankings.find(group => group.peakDb > 0) || null;
+
+    return {
+        mode: APP_MODES.COMPETITION,
+        groupCount: rankings.length,
+        winnerId: winner?.id || null,
+        winnerName: winner?.name || null,
+        winnerPeakDb: winner?.peakDb || 0,
+        rankings,
+        startedAt: sessionLike.startedAt || null,
+        endedAt: new Date().toISOString()
+    };
+}
+
+function updateCompetitionSessionMetrics(session, activeGroupId, options = {}) {
+    if (!session || !activeGroupId || STATE.activeMode !== APP_MODES.COMPETITION) return session;
+    const group = session.groups?.find(item => item.id === activeGroupId);
+    if (!group) return session;
+
     const deltaSeconds = normalizeDeltaSeconds(options.deltaSeconds);
     const currentDB = Number.isFinite(options.currentDB) ? options.currentDB : 30;
+    const isAboveReadingThreshold = Boolean(options.isAboveReadingThreshold);
     const isReadingLoudly = Boolean(options.isReadingLoudly);
+    const shouldScorePeak = isAboveReadingThreshold || isReadingLoudly;
 
-    current.peakDb = Math.max(current.peakDb || 0, Math.round(currentDB));
-    if (isReadingLoudly) {
-        current.readingSeconds = Math.max(0, (current.readingSeconds || 0) + deltaSeconds);
-        const dbBonus = clamp((currentDB - READING_THRESHOLD) / 30, 0, 1.2);
-        current.energyScore = clampEnergy((current.energyScore || 0) + deltaSeconds * (1.25 + dbBonus));
-        current.branchStage = getTreeLifecycleStage({ finalEnergy: current.energyScore });
+    if (shouldScorePeak) {
+        group.triggeredSeconds = Math.max(0, (group.triggeredSeconds || 0) + deltaSeconds);
+        group.attempts = Math.max(1, Math.round(Number(group.attempts) || 0));
+        const roundedDb = Math.round(currentDB);
+        if (roundedDb > (group.peakDb || 0)) {
+            group.peakDb = roundedDb;
+            group.lastPeakAt = new Date().toISOString();
+        }
     }
 
-    return metrics;
+    if (isReadingLoudly) {
+        group.readingSeconds = Math.max(0, (group.readingSeconds || 0) + deltaSeconds);
+    }
+
+    return session;
 }
 
 function loadStoredForest() {
@@ -780,9 +868,9 @@ function loadStoredForest() {
                     fertilizerCount: Math.max(0, Math.round(Number(item.rewards?.fertilizerCount) || 0)),
                     overLoudCount: Math.max(0, Math.round(Number(item.rewards?.overLoudCount) || 0))
                 },
-                participantMetrics: item.participantMetrics && typeof item.participantMetrics === 'object'
-                    ? item.participantMetrics
-                    : {}
+                competition: item.competition && typeof item.competition === 'object'
+                    ? item.competition
+                    : null
             }));
     } catch (error) {
         console.error('Failed to load morning tree forest:', error);
@@ -829,9 +917,9 @@ function getTreeSnapshotFromReport(report) {
             fertilizerCount: Math.max(0, Math.round(Number(report.rewards?.fertilizerCount) || 0)),
             overLoudCount: Math.max(0, Math.round(Number(report.rewards?.overLoudCount) || 0))
         },
-        participantMetrics: report.participantMetrics && typeof report.participantMetrics === 'object'
-            ? report.participantMetrics
-            : {}
+        competition: report.competition && typeof report.competition === 'object'
+            ? report.competition
+            : null
     };
 }
 
@@ -840,20 +928,6 @@ function mergeForestSnapshots(existing, incoming) {
     const finalEnergy = Math.max(existing.finalEnergy || 0, incoming.finalEnergy || 0);
     const peakEnergy = Math.max(existing.peakEnergy || 0, incoming.peakEnergy || 0);
     const manifested = Boolean(existing.manifested || incoming.manifested);
-    const participantMetrics = { ...(existing.participantMetrics || {}) };
-
-    Object.entries(incoming.participantMetrics || {}).forEach(([id, metric]) => {
-        const previous = participantMetrics[id] || { readingSeconds: 0, peakDb: 0, energyScore: 0 };
-        const energyScore = Math.max(previous.energyScore || 0, metric.energyScore || 0);
-        participantMetrics[id] = {
-            ...previous,
-            ...metric,
-            readingSeconds: Math.round((previous.readingSeconds || 0) + (metric.readingSeconds || 0)),
-            peakDb: Math.max(previous.peakDb || 0, metric.peakDb || 0),
-            energyScore,
-            branchStage: getTreeLifecycleStage({ finalEnergy: energyScore })
-        };
-    });
 
     return {
         ...existing,
@@ -876,7 +950,7 @@ function mergeForestSnapshots(existing, incoming) {
             fertilizerCount: (existing.rewards?.fertilizerCount || 0) + (incoming.rewards?.fertilizerCount || 0),
             overLoudCount: (existing.rewards?.overLoudCount || 0) + (incoming.rewards?.overLoudCount || 0)
         },
-        participantMetrics
+        competition: incoming.competition || existing.competition || null
     };
 }
 
@@ -1345,12 +1419,17 @@ function startReportSession() {
     STATE.reportEffectiveReadingSeconds = 0;
     STATE.reportPeakEnergy = Math.round(clampEnergy(STATE.energy));
     STATE.rewardState = createSessionRewardState();
-    STATE.participants = normalizeParticipants(STATE.participants || loadStoredParticipants());
-    if (!STATE.activeParticipantId || !STATE.participants.some(participant => participant.id === STATE.activeParticipantId)) {
-        STATE.activeParticipantId = STATE.participants[0]?.id || null;
+    if (STATE.activeMode === APP_MODES.COMPETITION) {
+        STATE.competitionConfig = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
+        STATE.competitionSession = createCompetitionSession(STATE.competitionConfig);
+        if (!STATE.activeCompetitionGroupId || !STATE.competitionSession.groups.some(group => group.id === STATE.activeCompetitionGroupId)) {
+            STATE.activeCompetitionGroupId = STATE.competitionSession.groups[0]?.id || null;
+        }
+        STATE.competitionLastResult = null;
+    } else {
+        STATE.competitionSession = null;
     }
-    STATE.participantMetrics = createParticipantMetrics(STATE.participants);
-    renderParticipantPanel();
+    renderCompetitionPanel();
     renderRewardPanel();
 }
 
@@ -1388,7 +1467,7 @@ function finalizeReportSession() {
         ? Math.max(0, Math.round(STATE.manifestedElapsedSeconds))
         : null;
     const rewardState = STATE.rewardState || createSessionRewardState();
-    const participantMetrics = STATE.participantMetrics || createParticipantMetrics(STATE.participants || loadStoredParticipants());
+    const competition = buildCompetitionReportPayload(STATE.competitionSession, STATE.activeMode);
     const treeStage = getTreeLifecycleStage({
         finalEnergy: Math.max(finalEnergy, peakEnergy),
         manifested: Boolean(STATE.hasManifested)
@@ -1402,8 +1481,10 @@ function finalizeReportSession() {
     STATE.manifestedAt = null;
     STATE.manifestedElapsedSeconds = null;
     STATE.rewardState = createSessionRewardState();
-    STATE.participantMetrics = null;
+    STATE.competitionLastResult = competition;
+    STATE.competitionSession = null;
     renderRewardPanel();
+    renderCompetitionPanel();
 
     if (durationSeconds < 5) return;
 
@@ -1427,7 +1508,7 @@ function finalizeReportSession() {
             fertilizerCount: Math.max(0, Math.round(rewardState.fertilizerCount || 0)),
             overLoudCount: Math.max(0, Math.round(rewardState.overLoudCount || 0))
         },
-        participantMetrics,
+        competition,
         treeStage,
         manifestedAt,
         manifestedElapsedSeconds,
@@ -1443,6 +1524,7 @@ function finalizeReportSession() {
 
     persistReports(nextReports);
     upsertForestDayRecord(nextRecord);
+    announceCompetitionResult(competition);
     renderWeeklyReport();
     renderForestMap();
 }
@@ -1502,6 +1584,34 @@ function renderReportDaySidebar(dayGroups, selectedKey) {
     });
 }
 
+function buildCompetitionReportSection(competition) {
+    if (!competition || !Array.isArray(competition.rankings) || !competition.rankings.length) return '';
+    const rankings = getCompetitionRankings({ groups: competition.rankings });
+    const winner = rankings.find(group => group.peakDb > 0) || null;
+
+    return `
+        <section class="report-competition-panel">
+            <div class="report-competition-head">
+                <div>
+                    <span>${t('morningTree.competition.reportTitle') || '小组竞赛结果'}</span>
+                    <strong>${winner ? `${escapeHtml(winner.name)} · ${winner.peakDb} dB` : (t('morningTree.competition.noWinner') || '暂无冠军')}</strong>
+                </div>
+                <em>${t('morningTree.competition.highestDbRule') || '按最高分贝排名'}</em>
+            </div>
+            <div class="report-competition-ranks">
+                ${rankings.map((group, index) => `
+                    <div class="report-competition-row ${index === 0 && group.peakDb > 0 ? 'leader' : ''}">
+                        <span>${index + 1}</span>
+                        <strong>${escapeHtml(group.name)}</strong>
+                        <em>${group.peakDb ? `${group.peakDb} dB` : '--'}</em>
+                        <small>${formatDuration(group.readingSeconds || 0)}</small>
+                    </div>
+                `).join('')}
+            </div>
+        </section>
+    `;
+}
+
 function renderReportFocus(selectedDay) {
     if (!reportDayList) return;
 
@@ -1553,6 +1663,7 @@ function renderReportFocus(selectedDay) {
     const overLoudCount = Math.max(0, Math.round(Number(rewards.overLoudCount) || 0));
     const waterCount = Math.max(0, Math.round(Number(rewards.waterCount) || 0));
     const fertilizerCount = Math.max(0, Math.round(Number(rewards.fertilizerCount) || 0));
+    const competitionSection = buildCompetitionReportSection(selectedReport.competition);
 
     reportDayList.innerHTML = `
         <div class="report-day-header">
@@ -1612,6 +1723,8 @@ function renderReportFocus(selectedDay) {
                     <small>${t('morningTree.forest.localOnly') || '记录保存在本机'}</small>
                 </div>
             </div>
+
+            ${competitionSection}
 
             <div class="report-curve-panel">
                 <div class="report-curve-head">
@@ -1799,18 +1912,16 @@ function renderForestDetail(selectedGroup) {
     }
 
     const manifestedDisplay = getManifestedDisplay(record);
-    const branchEntries = Object.values(record.participantMetrics || {})
-        .sort((a, b) => (b.energyScore || 0) - (a.energyScore || 0))
-        .slice(0, MAX_PARTICIPANTS);
-    const branchHtml = branchEntries.length
-        ? branchEntries.map(metric => `
-            <div class="forest-branch-row">
-                <span>${escapeHtml(metric.name || metric.id)}</span>
-                <strong>${Math.round(metric.energyScore || 0)}%</strong>
-                <small>${formatDuration(Math.round(metric.readingSeconds || 0))} / ${Math.round(metric.peakDb || 0)} dB</small>
+    const competition = record.competition || null;
+    const competitionWinner = competition ? getCompetitionWinner({ groups: competition.rankings || competition.groups }) : null;
+    const competitionHtml = competition
+        ? `
+            <div class="forest-competition-row">
+                <span>${t('morningTree.competition.reportTitle') || '小组竞赛结果'}</span>
+                <strong>${competitionWinner ? `${escapeHtml(competitionWinner.name)} · ${competitionWinner.peakDb} dB` : (t('morningTree.competition.noWinner') || '暂无冠军')}</strong>
             </div>
-        `).join('')
-        : `<div class="forest-branch-empty">${t('morningTree.forest.noBranches') || '暂无学生枝干数据'}</div>`;
+        `
+        : `<div class="forest-competition-empty">${t('morningTree.forest.noCompetition') || '这一天没有竞赛记录'}</div>`;
 
     forestDetail.innerHTML = `
         <div class="forest-detail-head">
@@ -1831,9 +1942,8 @@ function renderForestDetail(selectedGroup) {
             <span>${t('morningTree.rewards.fertilizer') || '施肥'} ${record.rewards?.fertilizerCount || 0}</span>
             <span>${t('morningTree.rewards.overLoud') || '过响'} ${record.rewards?.overLoudCount || 0}</span>
         </div>
-        <div class="forest-branch-list">
-            <div class="forest-branch-title">${t('morningTree.participants.branchTitle') || '学生枝干'}</div>
-            ${branchHtml}
+        <div class="forest-competition-list">
+            ${competitionHtml}
         </div>
     `;
 }
@@ -1904,103 +2014,221 @@ function initForestUI() {
     renderForestMap();
 }
 
-function getActiveParticipantMetrics() {
-    if (!STATE.participantMetrics || !STATE.activeParticipantId) return null;
-    return STATE.participantMetrics[STATE.activeParticipantId] || null;
+function getCurrentCompetitionSource() {
+    return STATE.competitionSession || STATE.competitionLastResult || null;
 }
 
-function renderParticipantEditor() {
-    if (!participantFields) return;
-    const participants = normalizeParticipants(STATE.participants || loadStoredParticipants());
-    participantFields.innerHTML = participants.map((participant, index) => `
-        <label class="participant-field">
-            <span>${t('morningTree.participants.slotLabel') || '枝干'} ${index + 1}</span>
-            <input type="text" value="${escapeHtml(participant.name)}" data-participant-index="${index}" maxlength="12">
+function renderCompetitionEditor() {
+    if (!competitionFields) return;
+    const config = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
+    competitionFields.innerHTML = config.groups.map((group, index) => `
+        <label class="competition-field ${index >= config.groupCount ? 'muted' : ''}">
+            <span>${t('morningTree.competition.groupLabel') || '小组'} ${index + 1}</span>
+            <input type="text" value="${escapeHtml(group.name)}" data-competition-index="${index}" maxlength="12">
         </label>
     `).join('');
 }
 
-function renderParticipantPanel() {
-    if (!participantPanel || !participantList) return;
-
-    STATE.participants = normalizeParticipants(STATE.participants || loadStoredParticipants());
-    if (!STATE.activeParticipantId || !STATE.participants.some(participant => participant.id === STATE.activeParticipantId)) {
-        STATE.activeParticipantId = STATE.participants[0]?.id || null;
+function renderCompetitionSummary(source = getCurrentCompetitionSource()) {
+    if (!competitionSummary) return;
+    if (STATE.activeMode !== APP_MODES.COMPETITION) {
+        competitionSummary.innerHTML = '';
+        return;
     }
 
-    participantList.innerHTML = STATE.participants.map(participant => {
-        const metric = STATE.participantMetrics?.[participant.id] || null;
-        const stage = metric?.branchStage || getTreeLifecycleStage({ finalEnergy: metric?.energyScore || 0 });
+    const rankings = getCompetitionRankings(source);
+    const winner = rankings.find(group => group.peakDb > 0) || null;
+    const emptyText = t('morningTree.competition.noScore') || '选中小组后开始朗读，进入朗读区的最高分贝会记录在这里。';
+
+    if (!rankings.length || !winner) {
+        competitionSummary.innerHTML = `<div class="competition-empty">${emptyText}</div>`;
+        return;
+    }
+
+    competitionSummary.innerHTML = `
+        <div class="competition-winner">
+            <span>${t('morningTree.competition.currentWinner') || '当前领先'}</span>
+            <strong>${escapeHtml(winner.name)} · ${winner.peakDb} dB</strong>
+        </div>
+        <div class="competition-ranking">
+            ${rankings.map((group, index) => `
+                <div class="competition-rank-row ${index === 0 ? 'leader' : ''}">
+                    <span>${index + 1}</span>
+                    <strong>${escapeHtml(group.name)}</strong>
+                    <em>${group.peakDb ? `${group.peakDb} dB` : '--'}</em>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderCompetitionPanel() {
+    if (!competitionPanel || !competitionList) return;
+    const isCompetitionMode = STATE.activeMode === APP_MODES.COMPETITION;
+    competitionPanel.classList.toggle('hidden', !isCompetitionMode);
+
+    if (!isCompetitionMode) {
+        competitionList.innerHTML = '';
+        if (competitionSummary) competitionSummary.innerHTML = '';
+        return;
+    }
+
+    STATE.competitionConfig = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
+    const config = STATE.competitionConfig;
+    const activeGroups = getActiveCompetitionGroups(config);
+    const source = getCurrentCompetitionSource();
+    const sourceGroups = Array.isArray(source?.groups) ? source.groups : [];
+    if (!STATE.activeCompetitionGroupId || !activeGroups.some(group => group.id === STATE.activeCompetitionGroupId)) {
+        STATE.activeCompetitionGroupId = activeGroups[0]?.id || null;
+    }
+
+    if (competitionGroupCount) {
+        competitionGroupCount.value = String(config.groupCount);
+        competitionGroupCount.disabled = STATE.isListening;
+    }
+
+    competitionList.innerHTML = activeGroups.map(group => {
+        const metric = sourceGroups.find(item => item.id === group.id) || {};
+        const peakDb = Math.round(Number(metric.peakDb) || 0);
+        const readingSeconds = Math.round(Number(metric.readingSeconds) || 0);
         return `
-            <button type="button" class="participant-chip ${participant.id === STATE.activeParticipantId ? 'selected' : ''} is-${stage.key}" data-participant-id="${participant.id}">
-                <span>${escapeHtml(participant.name)}</span>
-                <strong>${Math.round(metric?.energyScore || 0)}%</strong>
+            <button type="button" class="competition-chip ${group.id === STATE.activeCompetitionGroupId ? 'selected' : ''}" data-competition-group-id="${group.id}">
+                <span>${escapeHtml(group.name)}</span>
+                <strong>${peakDb ? `${peakDb} dB` : '--'}</strong>
+                <small>${formatDuration(readingSeconds)}</small>
             </button>
         `;
     }).join('');
 
-    participantList.querySelectorAll('[data-participant-id]').forEach(button => {
+    competitionList.querySelectorAll('[data-competition-group-id]').forEach(button => {
         button.onpointerdown = (event) => {
             event.preventDefault();
-            STATE.activeParticipantId = button.getAttribute('data-participant-id');
-            renderParticipantPanel();
+            STATE.activeCompetitionGroupId = button.getAttribute('data-competition-group-id');
+            renderCompetitionPanel();
         };
     });
 
-    const activeMetric = getActiveParticipantMetrics();
-    participantPanel.style.setProperty('--active-branch-energy', `${Math.round(activeMetric?.energyScore || 0)}%`);
-    renderParticipantEditor();
+    renderCompetitionEditor();
+    renderCompetitionSummary(source);
 }
 
-function initParticipantUI() {
-    if (!participantPanel) return;
+function selectAppMode(mode) {
+    const nextMode = mode === APP_MODES.COMPETITION ? APP_MODES.COMPETITION : APP_MODES.CLASS;
+    if (STATE.isListening) stopMic();
+    STATE.activeMode = nextMode;
+    STATE.competitionConfig = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
+    if (nextMode === APP_MODES.COMPETITION && !STATE.activeCompetitionGroupId) {
+        STATE.activeCompetitionGroupId = getActiveCompetitionGroups(STATE.competitionConfig)[0]?.id || null;
+    }
+    resetGame();
+    modePicker?.classList.add('hidden');
+    appContainer?.classList.remove('mode-selection-active');
+    updateModeUI();
+    renderCompetitionPanel();
+}
 
-    STATE.participants = loadStoredParticipants();
-    STATE.activeParticipantId = STATE.participants[0]?.id || null;
-    renderParticipantPanel();
+function showModePicker() {
+    if (STATE.isListening) stopMic();
+    STATE.activeMode = null;
+    modePicker?.classList.remove('hidden');
+    appContainer?.classList.add('mode-selection-active');
+    updateModeUI();
+    renderCompetitionPanel();
+}
 
-    if (participantHelpBtn && participantHelpPopover) {
-        participantHelpBtn.onclick = (event) => {
-            event.stopPropagation();
-            const isOpen = participantHelpPopover.classList.toggle('hidden') === false;
-            participantHelpBtn.setAttribute('aria-expanded', String(isOpen));
-        };
-        participantHelpPopover.onclick = (event) => event.stopPropagation();
-        document.addEventListener('click', () => {
-            participantHelpPopover.classList.add('hidden');
-            participantHelpBtn.setAttribute('aria-expanded', 'false');
-        });
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                participantHelpPopover.classList.add('hidden');
-                participantHelpBtn.setAttribute('aria-expanded', 'false');
+function updateModeUI() {
+    const isCompetitionMode = STATE.activeMode === APP_MODES.COMPETITION;
+    const isClassMode = STATE.activeMode === APP_MODES.CLASS;
+    const modeLabel = isCompetitionMode
+        ? (t('morningTree.mode.competitionShort') || '小组竞赛')
+        : isClassMode
+            ? (t('morningTree.mode.classShort') || '全班早读')
+            : (t('morningTree.mode.unselected') || '未选择模式');
+
+    if (currentModeBadge) currentModeBadge.textContent = modeLabel;
+    if (micBtn) {
+        micBtn.textContent = isCompetitionMode
+            ? (t('morningTree.controls.startCompetition') || '开始竞赛')
+            : (t('morningTree.controls.startClass') || '开始早读');
+    }
+    if (document.body?.dataset) {
+        document.body.dataset.morningTreeMode = STATE.activeMode || 'none';
+    }
+}
+
+function announceCompetitionResult(competition) {
+    if (!competition || STATE.activeMode !== APP_MODES.COMPETITION) return;
+    if (!competition.winnerName || !competition.winnerPeakDb) {
+        showToast(t('morningTree.competition.noWinnerToast') || '本场竞赛未产生有效分贝记录');
+        return;
+    }
+
+    const template = t('morningTree.competition.winnerToast') || '本场冠军：{name}，最高 {db} dB';
+    showToast(template
+        .replace('{name}', competition.winnerName)
+        .replace('{db}', String(competition.winnerPeakDb)));
+}
+
+function initCompetitionUI() {
+    STATE.competitionConfig = loadCompetitionConfig();
+    renderCompetitionPanel();
+
+    modeChoiceButtons.forEach(button => {
+        button.onclick = () => selectAppMode(button.getAttribute('data-mode-choice'));
+    });
+
+    if (modeSwitchBtn) {
+        modeSwitchBtn.onclick = showModePicker;
+    }
+
+    if (competitionGroupCount) {
+        competitionGroupCount.onchange = (event) => {
+            if (STATE.isListening) return;
+            STATE.competitionConfig = persistCompetitionConfig({
+                ...normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig()),
+                groupCount: event.target.value
+            });
+            const activeGroups = getActiveCompetitionGroups(STATE.competitionConfig);
+            if (!activeGroups.some(group => group.id === STATE.activeCompetitionGroupId)) {
+                STATE.activeCompetitionGroupId = activeGroups[0]?.id || null;
             }
-        });
-    }
-
-    if (participantManageBtn && participantEditor) {
-        participantManageBtn.onclick = () => {
-            participantEditor.classList.toggle('hidden');
-            renderParticipantEditor();
+            STATE.competitionLastResult = null;
+            renderCompetitionPanel();
         };
     }
 
-    if (participantSaveBtn) {
-        participantSaveBtn.onclick = () => {
-            const nextParticipants = normalizeParticipants(STATE.participants).map((participant, index) => {
-                const input = participantFields?.querySelector(`[data-participant-index="${index}"]`);
+    if (competitionEditBtn && competitionEditor) {
+        competitionEditBtn.onclick = () => {
+            competitionEditor.classList.toggle('hidden');
+            renderCompetitionEditor();
+        };
+    }
+
+    if (competitionSaveBtn) {
+        competitionSaveBtn.onclick = () => {
+            const current = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
+            const nextGroups = current.groups.map((group, index) => {
+                const input = competitionFields?.querySelector(`[data-competition-index="${index}"]`);
                 return {
-                    ...participant,
-                    name: input?.value?.trim() || participant.name
+                    ...group,
+                    name: input?.value?.trim() || group.name
                 };
             });
-            STATE.participants = normalizeParticipants(nextParticipants);
-            persistParticipants(STATE.participants);
-            if (!STATE.activeParticipantId || !STATE.participants.some(participant => participant.id === STATE.activeParticipantId)) {
-                STATE.activeParticipantId = STATE.participants[0]?.id || null;
-            }
-            if (participantEditor) participantEditor.classList.add('hidden');
-            renderParticipantPanel();
+            STATE.competitionConfig = persistCompetitionConfig({
+                ...current,
+                groups: nextGroups
+            });
+            if (competitionEditor) competitionEditor.classList.add('hidden');
+            renderCompetitionPanel();
+        };
+    }
+
+    if (competitionResetBtn) {
+        competitionResetBtn.onclick = () => {
+            if (STATE.isListening) return;
+            STATE.competitionLastResult = null;
+            STATE.competitionSession = null;
+            renderCompetitionPanel();
         };
     }
 }
@@ -2473,6 +2701,7 @@ function showApp() {
         initTimer();
         initEnvironment();
         updateTaskStrip();
+        showModePicker();
     }, 500);
 }
 
@@ -2538,6 +2767,11 @@ function updateTimerDisplay() {
 let audioCtx, analyser, dataArray, source, audioStream;
 
 async function toggleMic() {
+    if (!STATE.activeMode) {
+        showModePicker();
+        return;
+    }
+
     if (STATE.isListening) {
         stopMic();
     } else {
@@ -2568,7 +2802,7 @@ async function startMic() {
         STATE.isListening = true;
         STATE.readingHoldSeconds = 0;
         STATE.lastFrameAt = Date.now();
-        micBtn.textContent = '暂停早读';
+        micBtn.textContent = t('morningTree.controls.pause') || '暂停早读';
         micBtn.classList.add('active');
         dbDisplay.classList.add('active');
 
@@ -2600,7 +2834,7 @@ function stopMic() {
     STATE.isListening = false;
     STATE.readingHoldSeconds = 0;
     STATE.lastFrameAt = null;
-    micBtn.textContent = '开始早读';
+    updateModeUI();
     micBtn.classList.remove('active');
     dbDisplay.classList.remove('active');
     dbValue.textContent = '--';
@@ -2620,7 +2854,8 @@ function resetGame() {
     STATE.reportEffectiveReadingSeconds = 0;
     STATE.reportPeakEnergy = 0;
     STATE.rewardState = createSessionRewardState();
-    STATE.participantMetrics = null;
+    STATE.competitionSession = null;
+    STATE.competitionLastResult = null;
     STATE.energy = 0;
     STATE.readingHoldSeconds = 0;
     STATE.lastFrameAt = null;
@@ -2639,6 +2874,7 @@ function resetGame() {
     soilTransfers.length = 0;
     resetMeadowPlants();
     renderRewardPanel();
+    renderCompetitionPanel();
 }
 
 function calculateDB() {
@@ -2692,9 +2928,10 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
     });
     const rewardEnergyBonus = getRewardEnergyBonus(previousRewardCounts, STATE.rewardState);
     announceRewardChanges(previousRewardCounts, STATE.rewardState);
-    updateParticipantBranchMetrics(STATE.participantMetrics, STATE.activeParticipantId, {
+    updateCompetitionSessionMetrics(STATE.competitionSession, STATE.activeCompetitionGroupId, {
         currentDB: STATE.currentDB,
         deltaSeconds: frameSeconds,
+        isAboveReadingThreshold,
         isReadingLoudly
     });
     const renderNow = Date.now();
@@ -2702,9 +2939,9 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         STATE.rewardLastRenderAt = renderNow;
         renderRewardPanel();
     }
-    if (participantPanel && STATE.isListening && renderNow - (STATE.participantLastRenderAt || 0) > 1000) {
-        STATE.participantLastRenderAt = renderNow;
-        renderParticipantPanel();
+    if (competitionPanel && STATE.activeMode === APP_MODES.COMPETITION && renderNow - (STATE.competitionLastRenderAt || 0) > 350) {
+        STATE.competitionLastRenderAt = renderNow;
+        renderCompetitionPanel();
     }
 
     if (audioActivation.overLoud) {
@@ -3416,45 +3653,6 @@ function drawLifecycleAccents(treeSize, stage, renderMode) {
     }
 }
 
-function drawParticipantBranches(treeSize, stage, renderMode) {
-    if (!STATE.participants?.length || !STATE.participantMetrics || stage.index < 2) return;
-    const baseX = canvas.width / 2;
-    const baseY = canvas.height - 76;
-    const branchPalette = ['#8cf7d9', '#ffe082', '#ff9bd6', '#9be15d', '#a7c7ff'];
-    const entries = STATE.participants.slice(0, MAX_PARTICIPANTS);
-
-    ctx.save();
-    ctx.lineCap = 'round';
-    entries.forEach((participant, index) => {
-        const metric = STATE.participantMetrics[participant.id] || { energyScore: 0 };
-        const score = clampEnergy(metric.energyScore || 0);
-        const side = index % 2 === 0 ? -1 : 1;
-        const lane = Math.floor(index / 2);
-        const y = baseY - (lane * 30) - (score * 0.28);
-        const len = 34 + (score * 0.58);
-        const endX = baseX + side * len;
-        const endY = y - 22 - score * 0.08;
-        const color = branchPalette[index % branchPalette.length];
-
-        ctx.strokeStyle = participant.id === STATE.activeParticipantId ? color : 'rgba(255,255,255,0.45)';
-        ctx.lineWidth = participant.id === STATE.activeParticipantId ? 4 : 2.6;
-        ctx.beginPath();
-        ctx.moveTo(baseX, y);
-        ctx.quadraticCurveTo(baseX + side * len * 0.45, y - 26, endX, endY);
-        ctx.stroke();
-
-        if (score > 8 && !renderMode.ultraLowPower) {
-            ctx.fillStyle = color;
-            ctx.globalAlpha = participant.id === STATE.activeParticipantId ? 0.9 : 0.58;
-            ctx.beginPath();
-            ctx.ellipse(endX, endY, 7 + score * 0.04, 4 + score * 0.03, side * 0.55, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        }
-    });
-    ctx.restore();
-}
-
 function drawFlowerPlant(plant, sway, lowPowerMode = false) {
     const growth = plant.growth;
     const stemHeight = plant.stemHeight * growth;
@@ -3828,7 +4026,6 @@ function loop() {
 
     if (lifecycleStage.index >= 2 && treeSize > 60) {
         drawEnhancedTree(canvas.width / 2, canvas.height - 20, treeSize, 0, treeSize / 9, 0, renderMode);
-        drawParticipantBranches(treeSize, lifecycleStage, renderMode);
         drawLifecycleAccents(treeSize, lifecycleStage, renderMode);
     } else {
         const startX = canvas.width / 2;
@@ -3909,7 +4106,8 @@ function translateUI() {
     updateTaskStrip();
     renderWeeklyReport();
     renderForestMap();
-    renderParticipantPanel();
+    updateModeUI();
+    renderCompetitionPanel();
     if (taskModal?.classList.contains('open')) renderTaskBoard();
 }
 
@@ -3944,13 +4142,14 @@ function updateSensitivityControl(value = STATE.sensitivity) {
 // Init
 initLocalization().then(() => {
     initGatekeeper();
-    initParticipantUI();
+    initCompetitionUI();
     initTaskUI();
     initReportUI();
     initForestUI();
     initRewardUI();
     renderRewardPanel();
     updateSensitivityControl();
+    updateModeUI();
 });
 micBtn.onclick = toggleMic;
 if ($('reset-btn')) $('reset-btn').onclick = resetGame;

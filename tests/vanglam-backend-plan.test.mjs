@@ -36,7 +36,7 @@ runTest('backend plan page contains the confirmed customer-facing scope', () => 
     '客户正式内容整理、上传和录入执行',
     '按月维护',
     '按功能维护',
-    '总览思维导图',
+    '七大主题思维导图',
     '首页顶部固定七个主题',
     '/vanglam/color-system',
     '/vanglam/library-tools',
@@ -63,6 +63,7 @@ runTest('backend plan uses a development document layout, not a decorative flow 
     '.vanglam-doc-meta-grid',
     '.vanglam-doc-toc',
     '.vanglam-doc-section',
+    '.vanglam-doc-mindmap-section',
     '.vanglam-doc-mindmap',
     '.vanglam-doc-mindmap-grid',
     '.vanglam-doc-workload-grid',
@@ -72,6 +73,10 @@ runTest('backend plan uses a development document layout, not a decorative flow 
   }
   assert.doesNotMatch(planSource, /\.md/);
   assert.doesNotMatch(planSource, /mapLines|vanglam-flow|flow-blue|node-source/);
+});
+
+runTest('backend plan shows the mind map before the main document layout', () => {
+  assert.ok(planSource.indexOf('{renderMindMap()}') < planSource.indexOf('className="vanglam-doc-layout"'));
 });
 
 runTest('backend plan avoids internal uncertainty language', () => {

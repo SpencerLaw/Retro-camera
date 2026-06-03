@@ -1412,6 +1412,11 @@
   border-bottom: 1px solid rgba(40, 40, 40, 0.12);
 }
 
+.vanglam-doc-mindmap-section {
+  padding: 48px 90px;
+  background: #fffdf8;
+}
+
 .vanglam-doc-section h2 {
   margin: 0 0 20px;
   color: var(--vanglam-ink);

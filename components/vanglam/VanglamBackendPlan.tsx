@@ -254,6 +254,44 @@ const renderList = (items: string[]) => (
   </ul>
 );
 
+const renderMindMap = () => (
+  <section id="mind-map" className="vanglam-doc-section vanglam-doc-mindmap-section">
+    <h2>七大主题思维导图</h2>
+    <p>
+      思维导图按照官网首页顶部固定七个主题拆分。每个主题都对应一个前台跳转地址、一个后台维护入口、一组数据库关联、一组图片视频资料上传入口，并预留给后续小程序共用。
+    </p>
+    <div className="vanglam-doc-mindmap" aria-label="后台建设思维导图">
+      <div className="vanglam-doc-mindmap-root">
+        <span>总入口</span>
+        <strong>齐力纸业梵澜官网后台</strong>
+        <p>一个主业务数据库 / 三十二张核心表 / 开发周期六到八周 / 第一期费用人民币三万元</p>
+      </div>
+      <div className="vanglam-doc-mindmap-grid">
+        {mindMapRows.map((topic, index) => (
+          <article key={topic.name}>
+            <div>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <h3>{topic.name}</h3>
+              <strong>{topic.route}</strong>
+            </div>
+            <ul>
+              {topic.branches.map((branch) => (
+                <li key={branch}>{branch}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <div className="vanglam-doc-mindmap-footer">
+        <strong>公共关联</strong>
+        <p>
+          七个主题共用页面基础表、页面模块表、按钮链接表、媒体资源表、样品申请表、客户线索表、操作日志表和小程序显示字段。官网前台、后台管理端和后续小程序端读取同一套数据。
+        </p>
+      </div>
+    </div>
+  </section>
+);
+
 export const VanglamBackendPlanPage: React.FC = () => {
   return (
     <div className="vanglam-v1-page vanglam-backend-doc-page">
@@ -272,9 +310,11 @@ export const VanglamBackendPlanPage: React.FC = () => {
           </div>
         </section>
 
+        {renderMindMap()}
+
         <div className="vanglam-doc-layout">
           <aside className="vanglam-doc-toc" aria-label="文档目录">
-            <a href="#mind-map">总览思维导图</a>
+            <a href="#mind-map">七大主题思维导图</a>
             <a href="#goal">一、建设目标</a>
             <a href="#scope">二、开发边界</a>
             <a href="#workload">三、工作量拆解</a>
@@ -287,42 +327,6 @@ export const VanglamBackendPlanPage: React.FC = () => {
           </aside>
 
           <div className="vanglam-doc-content">
-            <section id="mind-map" className="vanglam-doc-section">
-              <h2>总览思维导图</h2>
-              <p>
-                思维导图按照官网首页顶部固定七个主题拆分。每个主题都对应一个前台跳转地址、一个后台维护入口、一组数据库关联、一组图片视频资料上传入口，并预留给后续小程序共用。
-              </p>
-              <div className="vanglam-doc-mindmap" aria-label="后台建设思维导图">
-                <div className="vanglam-doc-mindmap-root">
-                  <span>总入口</span>
-                  <strong>齐力纸业梵澜官网后台</strong>
-                  <p>一个主业务数据库 / 三十二张核心表 / 开发周期六到八周 / 第一期费用人民币三万元</p>
-                </div>
-                <div className="vanglam-doc-mindmap-grid">
-                  {mindMapRows.map((topic, index) => (
-                    <article key={topic.name}>
-                      <div>
-                        <span>{String(index + 1).padStart(2, '0')}</span>
-                        <h3>{topic.name}</h3>
-                        <strong>{topic.route}</strong>
-                      </div>
-                      <ul>
-                        {topic.branches.map((branch) => (
-                          <li key={branch}>{branch}</li>
-                        ))}
-                      </ul>
-                    </article>
-                  ))}
-                </div>
-                <div className="vanglam-doc-mindmap-footer">
-                  <strong>公共关联</strong>
-                  <p>
-                    七个主题共用页面基础表、页面模块表、按钮链接表、媒体资源表、样品申请表、客户线索表、操作日志表和小程序显示字段。官网前台、后台管理端和后续小程序端读取同一套数据。
-                  </p>
-                </div>
-              </div>
-            </section>
-
             <section id="goal" className="vanglam-doc-section">
               <h2>一、建设目标</h2>
               <p>

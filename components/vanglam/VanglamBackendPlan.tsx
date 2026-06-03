@@ -23,6 +23,86 @@ const topicRows = [
   ['资料与工具', '/vanglam/library-tools', '资料分类、资料文件、下载按钮、关联关系', '点击顶部“资料与工具”进入'],
 ];
 
+const mindMapRows = [
+  {
+    name: '色彩系统',
+    route: '/vanglam/color-system',
+    branches: [
+      '前台点击：顶部导航“色彩系统”进入色彩系统页。',
+      '后台入口：色系管理、颜色管理、标志色管理、色彩与产品关联。',
+      '数据库关联：色系表、颜色表、标志色表、颜色产品关联表、媒体资源表。',
+      '资源上传：色卡图、色彩封面图、颜色样张、色彩说明文案。',
+      '关联方向：关联产品系列、资料与工具、小程序色彩展示。',
+    ],
+  },
+  {
+    name: '产品系列',
+    route: '/vanglam/collections',
+    branches: [
+      '前台点击：顶部导航“产品系列”进入产品系列页。',
+      '后台入口：系列管理、规格管理、产品图片、推荐产品关系。',
+      '数据库关联：产品系列表、产品规格表、颜色产品关联表、产品工艺关联表、媒体资源表。',
+      '资源上传：系列封面、产品样张、规格参数、产品视频。',
+      '关联方向：关联色彩系统、表面工艺、应用场景、资料与工具、小程序产品展示。',
+    ],
+  },
+  {
+    name: '表面工艺',
+    route: '/vanglam/surfaces',
+    branches: [
+      '前台点击：顶部导航“表面工艺”进入表面工艺页。',
+      '后台入口：工艺分类、纹理库、工艺图片、工艺兼容关系。',
+      '数据库关联：表面工艺表、纹理库表、产品工艺关联表、媒体资源表。',
+      '资源上传：工艺封面、纹理细节图、工艺视频、工艺说明。',
+      '关联方向：关联产品系列、应用场景、资料与工具、小程序工艺展示。',
+    ],
+  },
+  {
+    name: '应用场景',
+    route: '/vanglam/applications',
+    branches: [
+      '前台点击：顶部导航“应用场景”进入应用场景页。',
+      '后台入口：场景分类、场景方案、推荐材料、场景图片。',
+      '数据库关联：应用场景表、场景方案表、场景推荐关联表、媒体资源表。',
+      '资源上传：场景封面、案例图片、方案说明、应用视频。',
+      '关联方向：关联产品系列、表面工艺、艺术卡实验室、小程序场景展示。',
+    ],
+  },
+  {
+    name: '艺术卡实验室',
+    route: '/vanglam/artcard-lab',
+    branches: [
+      '前台点击：顶部导航“艺术卡实验室”进入艺术卡实验室页。',
+      '后台入口：作品分类、作品条目、作品图片、定制入口。',
+      '数据库关联：艺术卡分类表、艺术卡作品表、资料关联表、媒体资源表。',
+      '资源上传：作品封面、作品详情图、制作视频、定制说明。',
+      '关联方向：关联应用场景、产品系列、资料与工具、小程序作品展示。',
+    ],
+  },
+  {
+    name: '纸艺工坊',
+    route: '/vanglam/atelier',
+    branches: [
+      '前台点击：顶部导航“纸艺工坊”进入纸艺工坊页。',
+      '后台入口：工坊栏目、生产制造、样品制作、品质控制、材料理念。',
+      '数据库关联：纸艺工坊内容表、页面模块表、媒体资源表。',
+      '资源上传：工坊图片、生产过程视频、团队或设备图片、栏目文案。',
+      '关联方向：关联样品申请、品牌内容、资料与工具、小程序工坊展示。',
+    ],
+  },
+  {
+    name: '资料与工具',
+    route: '/vanglam/library-tools',
+    branches: [
+      '前台点击：顶部导航“资料与工具”进入资料与工具页。',
+      '后台入口：资料分类、资料文件、下载按钮、资料与主题关联。',
+      '数据库关联：资料分类表、资料文件表、资料关联表、按钮链接表、媒体资源表。',
+      '资源上传：样册、PDF、技术资料、防伪资料、定制资料、工具封面。',
+      '关联方向：关联色彩系统、产品系列、表面工艺、应用场景、小程序资料下载。',
+    ],
+  },
+];
+
 const databaseRows = [
   ['01', '管理员表、角色表、权限表', '后台账号、角色和操作权限'],
   ['02', '品牌信息表、导航表、按钮链接表', '公司信息、顶部七大主题、全站按钮和跳转地址'],
@@ -115,6 +195,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
 
         <div className="vanglam-doc-layout">
           <aside className="vanglam-doc-toc" aria-label="文档目录">
+            <a href="#mind-map">总览思维导图</a>
             <a href="#goal">一、建设目标</a>
             <a href="#scope">二、开发边界</a>
             <a href="#topics">三、七大主题</a>
@@ -126,6 +207,42 @@ export const VanglamBackendPlanPage: React.FC = () => {
           </aside>
 
           <div className="vanglam-doc-content">
+            <section id="mind-map" className="vanglam-doc-section">
+              <h2>总览思维导图</h2>
+              <p>
+                思维导图按照官网首页顶部固定七个主题拆分。每个主题都对应一个前台跳转地址、一个后台维护入口、一组数据库关联、一组图片视频资料上传入口，并预留给后续小程序共用。
+              </p>
+              <div className="vanglam-doc-mindmap" aria-label="后台建设思维导图">
+                <div className="vanglam-doc-mindmap-root">
+                  <span>总入口</span>
+                  <strong>齐力纸业梵澜官网后台</strong>
+                  <p>一个主业务数据库 / 三十二张核心表 / 开发周期六到八周 / 第一期费用人民币三万元</p>
+                </div>
+                <div className="vanglam-doc-mindmap-grid">
+                  {mindMapRows.map((topic, index) => (
+                    <article key={topic.name}>
+                      <div>
+                        <span>{String(index + 1).padStart(2, '0')}</span>
+                        <h3>{topic.name}</h3>
+                        <strong>{topic.route}</strong>
+                      </div>
+                      <ul>
+                        {topic.branches.map((branch) => (
+                          <li key={branch}>{branch}</li>
+                        ))}
+                      </ul>
+                    </article>
+                  ))}
+                </div>
+                <div className="vanglam-doc-mindmap-footer">
+                  <strong>公共关联</strong>
+                  <p>
+                    七个主题共用页面基础表、页面模块表、按钮链接表、媒体资源表、样品申请表、客户线索表、操作日志表和小程序显示字段。官网前台、后台管理端和后续小程序端读取同一套数据。
+                  </p>
+                </div>
+              </div>
+            </section>
+
             <section id="goal" className="vanglam-doc-section">
               <h2>一、建设目标</h2>
               <p>

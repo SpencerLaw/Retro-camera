@@ -1462,6 +1462,91 @@
   line-height: 1.48;
 }
 
+.vanglam-doc-mindmap {
+  display: grid;
+  gap: 14px;
+}
+
+.vanglam-doc-mindmap-root {
+  padding: 18px 20px;
+  border: 1px solid rgba(40, 40, 40, 0.14);
+  background: #f3f0e8;
+}
+
+.vanglam-doc-mindmap-root span,
+.vanglam-doc-mindmap-grid article span,
+.vanglam-doc-mindmap-footer strong {
+  color: var(--vanglam-gold);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.vanglam-doc-mindmap-root strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--vanglam-ink);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.vanglam-doc-mindmap-root p,
+.vanglam-doc-mindmap-footer p {
+  max-width: none;
+  margin: 8px 0 0;
+}
+
+.vanglam-doc-mindmap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid rgba(40, 40, 40, 0.14);
+  background: rgba(40, 40, 40, 0.14);
+}
+
+.vanglam-doc-mindmap-grid article {
+  min-width: 0;
+  padding: 20px;
+  background: #fff;
+}
+
+.vanglam-doc-mindmap-grid article:last-child {
+  grid-column: 1 / -1;
+}
+
+.vanglam-doc-mindmap-grid article > div {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.vanglam-doc-mindmap-grid article h3 {
+  margin: 0;
+}
+
+.vanglam-doc-mindmap-grid article strong {
+  color: #6a6258;
+  font-size: 12px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.vanglam-doc-mindmap-grid article ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: #4e4943;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.vanglam-doc-mindmap-footer {
+  padding: 18px 20px;
+  border: 1px solid rgba(40, 40, 40, 0.14);
+  background: #fffdf8;
+}
+
 .vanglam-doc-table {
   width: 100%;
   border-collapse: collapse;
@@ -1604,7 +1689,8 @@
     border-bottom: 1px solid rgba(40, 40, 40, 0.12);
   }
 
-  .vanglam-doc-scope-grid {
+  .vanglam-doc-scope-grid,
+  .vanglam-doc-mindmap-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1796,6 +1882,12 @@
 
   .vanglam-doc-table {
     font-size: 12px;
+  }
+
+  .vanglam-doc-mindmap-root,
+  .vanglam-doc-mindmap-grid article,
+  .vanglam-doc-mindmap-footer {
+    padding: 16px;
   }
 
   .vanglam-doc-table th,

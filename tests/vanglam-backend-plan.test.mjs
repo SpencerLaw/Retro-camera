@@ -36,6 +36,12 @@ runTest('backend plan page contains the confirmed customer-facing scope', () => 
     '客户正式内容整理、上传和录入执行',
     '按月维护',
     '按功能维护',
+    '总览思维导图',
+    '首页顶部固定七个主题',
+    '/vanglam/color-system',
+    '/vanglam/library-tools',
+    '公共关联',
+    '官网前台、后台管理端和后续小程序端',
   ]) {
     assert.match(planSource, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
@@ -48,6 +54,8 @@ runTest('backend plan uses a development document layout, not a decorative flow 
     '.vanglam-doc-meta-grid',
     '.vanglam-doc-toc',
     '.vanglam-doc-section',
+    '.vanglam-doc-mindmap',
+    '.vanglam-doc-mindmap-grid',
     '.vanglam-doc-table',
   ]) {
     assert.match(cssSource, new RegExp(className.replace('.', '\\.')));

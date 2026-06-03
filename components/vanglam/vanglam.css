@@ -1429,6 +1429,10 @@
   font-weight: 900;
 }
 
+.vanglam-doc-section > h3:not(:first-child) {
+  margin-top: 30px;
+}
+
 .vanglam-doc-section p {
   max-width: 820px;
   margin: 0 0 14px;
@@ -1449,6 +1453,21 @@
 .vanglam-doc-scope-grid article {
   padding: 24px;
   background: #fffdf8;
+}
+
+.vanglam-doc-workload-grid {
+  margin: 22px 0 28px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid rgba(40, 40, 40, 0.14);
+  background: rgba(40, 40, 40, 0.14);
+}
+
+.vanglam-doc-workload-grid article {
+  min-width: 0;
+  padding: 24px;
+  background: #fff;
 }
 
 .vanglam-doc-list {
@@ -1690,6 +1709,7 @@
   }
 
   .vanglam-doc-scope-grid,
+  .vanglam-doc-workload-grid,
   .vanglam-doc-mindmap-grid {
     grid-template-columns: 1fr;
   }

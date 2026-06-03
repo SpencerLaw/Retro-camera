@@ -151,6 +151,85 @@ const excludedScope = [
   '第三方业务系统对接。',
 ];
 
+const workloadGroups = [
+  {
+    title: '服务端基础框架',
+    items: [
+      '搭建后台服务运行框架、接口路由、基础配置和部署结构。',
+      '建立后台登录、管理员账号、角色权限和接口鉴权。',
+      '处理前台官网、后台管理端、后续小程序共用同一套接口的基础结构。',
+      '处理接口返回格式、错误提示、基础校验和异常兜底。',
+    ],
+  },
+  {
+    title: '后台管理端',
+    items: [
+      '搭建后台登录入口、管理首页、左侧菜单和七大主题管理入口。',
+      '为页面栏目、按钮、文字、图片、视频、资料文件建立新增、编辑、删除、排序和显示开关。',
+      '为客户线索、样品申请、跟进记录建立查看、处理和记录入口。',
+      '为媒体资源库建立上传、选择、替换、删除和引用入口。',
+    ],
+  },
+  {
+    title: '数据库与数据关系',
+    items: [
+      '按三十二张核心表建立管理员、角色、权限、页面、模块、媒体、产品、工艺、场景、资料、线索等结构。',
+      '建立颜色与产品、产品与工艺、场景与产品、资料与主题之间的关联关系。',
+      '为首页和七大主题保留排序、显示状态、封面图、简介、详情内容和小程序展示字段。',
+      '处理后台保存后前台读取的数据字段对应关系。',
+    ],
+  },
+  {
+    title: '文件上传与资源管理',
+    items: [
+      '支持图片、视频、PDF、样册、技术资料、防伪资料和定制资料上传。',
+      '建立资源标题、分类、用途、关联页面、排序和显示状态。',
+      '让同一张图片、同一个视频、同一份资料可以被多个页面或主题引用。',
+      '处理上传文件在官网和后续小程序中的统一读取方式。',
+    ],
+  },
+  {
+    title: '前台页面数据化',
+    items: [
+      '把官网首页和七大主题页面中展示出来的文字、栏目、按钮、图片和资料入口接入后台数据。',
+      '处理前台页面读取后台内容后的展示顺序、显示隐藏、链接跳转和资源显示。',
+      '保留现有官网视觉效果，同时把静态内容改成可维护内容。',
+      '确保客户后续上传新内容后，官网页面可以按后台数据更新。',
+    ],
+  },
+  {
+    title: '小程序预留',
+    items: [
+      '在数据表中增加小程序显示开关、小程序排序、小程序封面、小程序简介和分享信息。',
+      '接口结构按官网和小程序共用方式设计，后续小程序不需要重新搭一套后台。',
+      '样品申请、资料读取、产品展示、工艺展示、场景展示可以共用当前后台数据。',
+      '后续开发小程序时，直接接入同一套服务端、数据库和媒体资源库。',
+    ],
+  },
+];
+
+const editableRows = [
+  ['首页', '品牌文字、主视觉图片、栏目标题、栏目排序、主题入口、按钮文字、按钮链接、推荐内容、样品申请入口。'],
+  ['色彩系统', '色系名称、颜色名称、色值、色卡图片、标志色、颜色说明、关联产品、排序和显示状态。'],
+  ['产品系列', '系列名称、系列介绍、产品图片、规格参数、克重厚度、推荐工艺、推荐场景、资料关联。'],
+  ['表面工艺', '工艺分类、工艺名称、纹理图片、工艺视频、工艺说明、适配产品、排序和显示状态。'],
+  ['应用场景', '场景分类、场景名称、方案说明、案例图片、推荐产品、推荐工艺、跳转按钮。'],
+  ['艺术卡实验室', '作品分类、作品名称、作品图片、作品说明、定制入口、关联产品和关联场景。'],
+  ['纸艺工坊', '工坊栏目、生产制造内容、样品制作内容、品质控制内容、材料理念、图片和视频。'],
+  ['资料与工具', '资料分类、资料标题、资料封面、PDF 文件、下载按钮、资料说明、关联主题。'],
+  ['客户线索', '样品申请表单、客户姓名、联系方式、需求内容、来源页面、处理状态、跟进记录。'],
+  ['全站公共内容', '顶部导航、底部信息、按钮链接、页面标题、SEO 描述、媒体资源、操作日志。'],
+];
+
+const deliveryRows = [
+  ['后台入口建设', '登录、菜单、七大主题入口、首页入口、资料入口、线索入口、媒体库入口。'],
+  ['增删改查能力', '主要内容支持新增、编辑、删除、排序、显示隐藏、保存后前台读取。'],
+  ['上传能力', '图片、视频、PDF、样册和技术资料上传，并能关联到对应页面或栏目。'],
+  ['接口能力', '官网首页、七大主题页面、样品申请、资料读取、小程序预留接口结构。'],
+  ['权限能力', '管理员账号、角色权限、后台登录鉴权、关键操作日志。'],
+  ['交付能力', '完成开发、联调、基础测试、上线部署配合和后台使用说明。'],
+];
+
 const maintenanceRows = [
   ['按月维护', '每月固定维护费', '基础技术支持、简单问题修复、服务器检查、备份检查、上传异常处理、表单异常处理、后台登录异常处理。'],
   ['按功能维护', '按单次功能报价', '新增页面、新增功能、新增接口、小程序能力扩展、复杂筛选、资料留资、统计报表和第三方系统对接。'],
@@ -198,12 +277,13 @@ export const VanglamBackendPlanPage: React.FC = () => {
             <a href="#mind-map">总览思维导图</a>
             <a href="#goal">一、建设目标</a>
             <a href="#scope">二、开发边界</a>
-            <a href="#topics">三、七大主题</a>
-            <a href="#database">四、数据库</a>
-            <a href="#mini-program">五、小程序关联</a>
-            <a href="#price">六、费用周期</a>
-            <a href="#maintenance">七、后续维护</a>
-            <a href="#acceptance">八、验收标准</a>
+            <a href="#workload">三、工作量拆解</a>
+            <a href="#topics">四、七大主题</a>
+            <a href="#database">五、数据库</a>
+            <a href="#mini-program">六、小程序关联</a>
+            <a href="#price">七、费用周期</a>
+            <a href="#maintenance">八、后续维护</a>
+            <a href="#acceptance">九、验收标准</a>
           </aside>
 
           <div className="vanglam-doc-content">
@@ -272,8 +352,62 @@ export const VanglamBackendPlanPage: React.FC = () => {
               </div>
             </section>
 
+            <section id="workload" className="vanglam-doc-section">
+              <h2>三、工作量拆解</h2>
+              <p>
+                第一期人民币三万元对应的是官网后台和服务端基础能力建设，不是单独制作一个资料页面。交付内容覆盖后台管理端、服务端接口、数据库结构、文件上传、前台读取、小程序预留、权限日志和基础部署联调。
+              </p>
+              <div className="vanglam-doc-workload-grid">
+                {workloadGroups.map((group) => (
+                  <article key={group.title}>
+                    <h3>{group.title}</h3>
+                    {renderList(group.items)}
+                  </article>
+                ))}
+              </div>
+
+              <h3>可编辑范围</h3>
+              <p>
+                官网当前展示出来的每个页面、每个栏目、每个按钮、每张图片、每个视频和每份资料文件，都按后台可维护的方向处理。客户后续负责正式内容整理和录入，开发方负责让这些入口可用、可保存、可读取。
+              </p>
+              <table className="vanglam-doc-table">
+                <thead>
+                  <tr>
+                    <th>范围</th>
+                    <th>后台可维护内容</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {editableRows.map(([scope, content]) => (
+                    <tr key={scope}>
+                      <td>{scope}</td>
+                      <td>{content}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <h3>交付能力</h3>
+              <table className="vanglam-doc-table">
+                <thead>
+                  <tr>
+                    <th>交付项</th>
+                    <th>对应工作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deliveryRows.map(([item, work]) => (
+                    <tr key={item}>
+                      <td>{item}</td>
+                      <td>{work}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+
             <section id="topics" className="vanglam-doc-section">
-              <h2>三、七大主题与后台模块</h2>
+              <h2>四、七大主题与后台模块</h2>
               <table className="vanglam-doc-table">
                 <thead>
                   <tr>
@@ -297,7 +431,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="database" className="vanglam-doc-section">
-              <h2>四、数据库建设清单</h2>
+              <h2>五、数据库建设清单</h2>
               <p>第一期按一个主业务数据库建设，核心结构按三十二张核心表规划，官网和后续小程序共用同一套内容数据。</p>
               <table className="vanglam-doc-table">
                 <thead>
@@ -320,7 +454,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="mini-program" className="vanglam-doc-section">
-              <h2>五、小程序关联方式</h2>
+              <h2>六、小程序关联方式</h2>
               <p>
                 后续小程序直接复用官网后台、服务端、数据库、媒体资源库和客户线索库，不再单独开发一套小程序后台。
               </p>
@@ -333,7 +467,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="price" className="vanglam-doc-section">
-              <h2>六、费用与开发周期</h2>
+              <h2>七、费用与开发周期</h2>
               <table className="vanglam-doc-table">
                 <tbody>
                   <tr>
@@ -346,7 +480,11 @@ export const VanglamBackendPlanPage: React.FC = () => {
                   </tr>
                   <tr>
                     <th>费用包含</th>
-                    <td>服务端框架、后台入口、上传入口、数据库、接口、前台读取、基础操作日志、小程序字段和接口方向预留。</td>
+                    <td>服务端框架、后台入口、上传入口、数据库、接口、前台读取、权限角色、基础操作日志、小程序字段和接口方向预留。</td>
+                  </tr>
+                  <tr>
+                    <th>费用对应工作</th>
+                    <td>完成官网现有页面内容的数据化改造，建立七大主题后台入口，打通图片、视频、PDF、按钮、栏目、客户线索和资料文件的上传、保存、读取和展示关系。</td>
                   </tr>
                   <tr>
                     <th>费用不包含</th>
@@ -357,7 +495,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="maintenance" className="vanglam-doc-section">
-              <h2>七、后续维护方式</h2>
+              <h2>八、后续维护方式</h2>
               <p>后续维护费用不包含在三万元开发费用内。项目交付后维护分为按月维护和按功能维护两种方式。</p>
               <table className="vanglam-doc-table">
                 <thead>
@@ -380,7 +518,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="acceptance" className="vanglam-doc-section">
-              <h2>八、验收标准</h2>
+              <h2>九、验收标准</h2>
               <p>
                 技术验收看服务端框架、后台入口、上传能力、保存能力和前台读取是否完成，不以客户是否已经完成正式内容整理、上传和录入作为验收前提。
               </p>

@@ -182,7 +182,6 @@ function loadMorningTree() {
       getMeadowEnvironmentSummary: typeof getMeadowEnvironmentSummary === 'function' ? getMeadowEnvironmentSummary : undefined,
       drawMeadowCritters: typeof drawMeadowCritters === 'function' ? drawMeadowCritters : undefined,
       drawMeadowPlants: typeof drawMeadowPlants === 'function' ? drawMeadowPlants : undefined,
-      getBloomingMeadowFlowers: typeof getBloomingMeadowFlowers === 'function' ? getBloomingMeadowFlowers : undefined,
       updateRenderPerformance: typeof updateRenderPerformance === 'function' ? updateRenderPerformance : undefined,
       getRenderMode: typeof getRenderMode === 'function' ? getRenderMode : undefined,
       getFxLimit: typeof getFxLimit === 'function' ? getFxLimit : undefined,
@@ -192,7 +191,6 @@ function loadMorningTree() {
       Frog: typeof Frog === 'function' ? Frog : undefined,
       Dragonfly: typeof Dragonfly === 'function' ? Dragonfly : undefined,
       Ladybug: typeof Ladybug === 'function' ? Ladybug : undefined,
-      Bee: typeof Bee === 'function' ? Bee : undefined,
       resetGame: typeof resetGame === 'function' ? resetGame : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
       APP_MODES: typeof APP_MODES !== 'undefined' ? APP_MODES : undefined,
@@ -882,7 +880,6 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.equal(typeof api.getMeadowEnvironmentSummary, 'function');
   assert.equal(typeof api.drawMeadowCritters, 'function');
   assert.equal(typeof api.drawMeadowPlants, 'function');
-  assert.equal(typeof api.getBloomingMeadowFlowers, 'function');
   assert.equal(typeof api.updateRenderPerformance, 'function');
   assert.equal(typeof api.getRenderMode, 'function');
   assert.equal(typeof api.getFxLimit, 'function');
@@ -891,7 +888,6 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.equal(typeof api.Frog, 'function');
   assert.equal(typeof api.Dragonfly, 'function');
   assert.equal(typeof api.Ladybug, 'function');
-  assert.equal(typeof api.Bee, 'function');
 
   api.initEnvironment();
   const summary = api.getMeadowEnvironmentSummary();
@@ -919,13 +915,12 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.equal(summary.frogCount, 5);
   assert.equal(summary.dragonflyCount, 4);
   assert.equal(summary.beetleCount, 5);
-  assert.equal(summary.beeCount, 6);
+  assert.equal('beeCount' in summary, false);
   assert.match(script, /protectSapling/);
   assert.match(script, /updateRenderPerformance\(rawDeltaSeconds\)/);
   assert.match(script, /trimVisualEffectQueues\(treeSize\)/);
   assert.match(script, /drawMeadowPlants\(renderMode\);\s+if \(lifecycleStage\.index >= 2/s);
   assert.match(script, /function shouldDrawMeadowAura/);
-  assert.match(script, /function getBloomingMeadowFlowers/);
   assert.match(script, /RENDER_QUALITY_SCALE/);
   assert.match(script, /class Frog/);
   assert.match(script, /jumpState/);
@@ -939,10 +934,9 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.match(script, /class Ladybug/);
   assert.match(script, /shellColor/);
   assert.match(script, /spotCount/);
-  assert.match(script, /class Bee/);
-  assert.match(script, /chooseFlower\(\)/);
-  assert.match(script, /nectarFrames/);
-  assert.match(script, /pollenLoad/);
+  assert.doesNotMatch(script, /class Bee/);
+  assert.doesNotMatch(script, /new Bee/);
+  assert.doesNotMatch(script, /beeCount/);
   assert.match(script, /drawMeadowCritters\(renderMode\)/);
 
   const frog = new api.Frog(0);
@@ -967,20 +961,6 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   beetle.update();
   assert.notEqual(beetle.x, beetleStartX);
   assert.ok(beetle.spotCount >= 5);
-
-  const bee = new api.Bee(0);
-  for (let i = 0; i < 80; i += 1) api.drawMeadowPlants();
-  const openFlowers = api.getBloomingMeadowFlowers();
-  assert.ok(openFlowers.length > 0);
-  const beeTarget = bee.chooseFlower();
-  assert.ok(beeTarget);
-  assert.equal(bee.mode, 'forage');
-  bee.x = bee.getFlowerPoint(beeTarget).x;
-  bee.y = bee.getFlowerPoint(beeTarget).y - 16;
-  for (let i = 0; i < 4; i += 1) bee.update();
-  assert.equal(bee.mode, 'nectar');
-  assert.ok(bee.nectarFrames > 0);
-  assert.ok(bee.pollenLoad > 0);
 
   for (let i = 0; i < 12; i += 1) api.updateRenderPerformance(0.06);
   assert.equal(api.STATE.renderQuality, 'ultra');

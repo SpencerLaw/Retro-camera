@@ -3572,12 +3572,6 @@ const soilTransfers = [];
 const rewardEffects = [];
 const meadowPlants = [];
 const meadowCritters = [];
-const meadowCache = {
-    version: 0,
-    bloomingFlowersFrame: -1,
-    bloomingFlowersVersion: -1,
-    bloomingFlowers: []
-};
 
 function pushLimitedEffect(queue, item, maxSize) {
     if (!item) return;
@@ -3590,31 +3584,6 @@ function pushLimitedEffect(queue, item, maxSize) {
 function spawnSparkle(x, y, color = '#fff') {
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     pushLimitedEffect(sparkles, new Sparkle(x, y, color), getFxLimit('sparkles'));
-}
-
-function invalidateMeadowFlowerCache() {
-    meadowCache.version += 1;
-    meadowCache.bloomingFlowersFrame = -1;
-}
-
-function getBloomingMeadowFlowers() {
-    const frameId = STATE.renderFrameId || 0;
-    if (
-        meadowCache.bloomingFlowersFrame === frameId
-        && meadowCache.bloomingFlowersVersion === meadowCache.version
-    ) {
-        return meadowCache.bloomingFlowers;
-    }
-
-    meadowCache.bloomingFlowersFrame = frameId;
-    meadowCache.bloomingFlowersVersion = meadowCache.version;
-    meadowCache.bloomingFlowers = meadowPlants.filter(plant => (
-        plant.kind === 'flower'
-        && !plant.protectSapling
-        && (Number(plant.bloomOpen) || 0) > 0.32
-        && (Number(plant.growth) || 0) > 0.42
-    ));
-    return meadowCache.bloomingFlowers;
 }
 
 function getFxLoad() {
@@ -4172,208 +4141,6 @@ class Ladybug {
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(17, -3.2, 1.4, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-    }
-}
-
-class Bee {
-    constructor(index = 0) {
-        this.index = index;
-        this.reset();
-    }
-
-    reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height * (0.5 + Math.random() * 0.18);
-        this.size = 0.52 + Math.random() * 0.2;
-        this.phase = Math.random() * Math.PI * 2;
-        this.wingBeat = Math.random() * Math.PI * 2;
-        this.speed = 1.25 + Math.random() * 0.6;
-        this.direction = Math.random() < 0.5 ? -1 : 1;
-        this.targetFlower = null;
-        this.nectarFrames = 0;
-        this.mode = 'patrol';
-        this.pollenLoad = 0;
-    }
-
-    getBloomingFlowers() {
-        return getBloomingMeadowFlowers();
-    }
-
-    getFlowerPoint(plant = this.targetFlower) {
-        if (!plant) return null;
-        const stemHeight = (Number(plant.stemHeight) || 0) * (Number(plant.growth) || 0);
-        const flowerSway = Math.sin((STATE.frameNow || Date.now()) / 950 + plant.swayPhase + this.index) * 3.2;
-        return {
-            x: plant.x + flowerSway,
-            y: plant.baseY - stemHeight - 4
-        };
-    }
-
-    chooseFlower() {
-        const flowers = this.getBloomingFlowers();
-        if (!flowers.length) {
-            this.targetFlower = null;
-            this.mode = 'patrol';
-            return null;
-        }
-
-        const sampleCount = Math.min(flowers.length, STATE.renderQuality === 'high' ? 8 : 5);
-        let bestPlant = flowers[Math.floor(Math.random() * flowers.length)] || flowers[0];
-        let bestDistance = Infinity;
-        for (let i = 0; i < sampleCount; i++) {
-            const plant = flowers[(Math.floor(Math.random() * flowers.length) + i) % flowers.length];
-            const point = this.getFlowerPoint(plant);
-            const dist = Math.abs(plant.x - this.x) + Math.abs(point.y - this.y) * 0.35;
-            if (dist < bestDistance) {
-                bestDistance = dist;
-                bestPlant = plant;
-            }
-        }
-        const pick = bestPlant || flowers[0];
-        this.targetFlower = pick;
-        this.mode = 'forage';
-        this.nectarFrames = 0;
-        return pick;
-    }
-
-    update() {
-        this.phase += 0.1;
-        this.wingBeat += 0.86;
-
-        if (!this.targetFlower || this.targetFlower.kind !== 'flower' || Math.random() < 0.006) {
-            this.chooseFlower();
-        }
-
-        const flowerPoint = this.getFlowerPoint();
-        if (!flowerPoint) {
-            this.x += this.speed * this.direction;
-            this.y += Math.sin(this.phase + this.index) * 1.3;
-            if (this.x < -40 || this.x > canvas.width + 40) {
-                this.direction *= -1;
-                this.x = clamp(this.x, -32, canvas.width + 32);
-                this.y = canvas.height * (0.48 + Math.random() * 0.2);
-            }
-            return;
-        }
-
-        const hoverX = flowerPoint.x + Math.sin(this.phase * 1.7) * 10;
-        const hoverY = flowerPoint.y - 16 + Math.cos(this.phase * 2.1) * 4;
-        const dx = hoverX - this.x;
-        const dy = hoverY - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        this.direction = dx >= 0 ? 1 : -1;
-
-        if (dist > 9) {
-            const step = Math.min(this.speed * 1.7, dist);
-            this.x += (dx / dist) * step;
-            this.y += (dy / dist) * step;
-            this.mode = 'forage';
-        } else {
-            this.mode = 'nectar';
-            this.nectarFrames += 1;
-            this.x += dx * 0.1 + Math.sin(this.phase * 3) * 0.34;
-            this.y += dy * 0.1 + Math.cos(this.phase * 2.4) * 0.28;
-            this.pollenLoad = Math.min(1, this.pollenLoad + 0.006);
-            this.targetFlower.pulse = Math.min(1, (this.targetFlower.pulse || 0) + 0.035);
-            if (this.nectarFrames > 150 + this.index * 9) this.chooseFlower();
-        }
-    }
-
-    draw(renderMode = null) {
-        const simplified = renderMode?.ultraLowPower || STATE.renderQuality === 'ultra';
-        const wingScale = 0.74 + Math.abs(Math.sin(this.wingBeat)) * 0.34;
-        const flowerPoint = this.mode === 'nectar' ? this.getFlowerPoint() : null;
-
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.scale(this.direction * this.size, this.size);
-        ctx.rotate(Math.sin(this.phase * 1.2) * 0.12);
-
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.fillStyle = 'rgba(236, 252, 255, 0.48)';
-        ctx.strokeStyle = 'rgba(255,255,255,0.56)';
-        ctx.lineWidth = 1.1;
-        ctx.beginPath();
-        ctx.ellipse(-5, -8, 13, 5.6 * wingScale, -0.52, 0, Math.PI * 2);
-        ctx.ellipse(5, -8, 13, 5.6 * wingScale, 0.52, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#3d2a16';
-        ctx.lineWidth = 1.7;
-        if (!simplified) {
-            for (let i = 0; i < 3; i++) {
-                const legX = -4 + i * 5;
-                ctx.beginPath();
-                ctx.moveTo(legX, 5);
-                ctx.quadraticCurveTo(legX - 2, 12, legX - 7, 15 + Math.sin(this.phase + i) * 2);
-                ctx.moveTo(legX + 2, 5);
-                ctx.quadraticCurveTo(legX + 4, 12, legX + 8, 14 + Math.cos(this.phase + i) * 2);
-                ctx.stroke();
-            }
-        }
-
-        ctx.fillStyle = '#f6c441';
-        ctx.strokeStyle = '#3a2815';
-        ctx.lineWidth = 1.7;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 17, 9.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.strokeStyle = '#3a2815';
-        ctx.lineWidth = 3;
-        [-7, 0, 7].forEach(stripeX => {
-            ctx.beginPath();
-            ctx.moveTo(stripeX, -8);
-            ctx.quadraticCurveTo(stripeX + 1.4, 0, stripeX, 8);
-            ctx.stroke();
-        });
-
-        ctx.fillStyle = '#3a2815';
-        ctx.beginPath();
-        ctx.ellipse(17, 0, 6.5, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (!simplified) {
-            ctx.strokeStyle = '#3a2815';
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.moveTo(20, -4);
-            ctx.quadraticCurveTo(25, -9, 28, -13);
-            ctx.moveTo(20, 4);
-            ctx.quadraticCurveTo(25, 9, 28, 13);
-            ctx.stroke();
-        }
-
-        if (this.pollenLoad > 0.08) {
-            ctx.fillStyle = '#ffd95a';
-            ctx.beginPath();
-            ctx.arc(-10, 11, 2.2 + this.pollenLoad * 2.2, 0, Math.PI * 2);
-            ctx.arc(8, 11, 2 + this.pollenLoad * 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        if (flowerPoint && !simplified) {
-            const localX = (flowerPoint.x - this.x) * this.direction / this.size;
-            const localY = (flowerPoint.y - this.y) / this.size;
-            ctx.strokeStyle = 'rgba(78, 42, 20, 0.78)';
-            ctx.lineWidth = 1.3;
-            ctx.beginPath();
-            ctx.moveTo(22, 2);
-            ctx.quadraticCurveTo(24, 8, localX, localY);
-            ctx.stroke();
-        }
-
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(18.8, -2.5, 1.1, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();
@@ -5551,7 +5318,6 @@ function unlockMeadowFlower(plant, petalPalette = MEADOW_PETAL_COLORS) {
     plant.bloomSize = plant.baseBloomSize || plant.bloomSize || 6;
     plant.bloomCount = plant.baseBloomCount || plant.bloomCount || 1;
     plant.petalColor = plant.petalColor || petalPalette[Math.floor(Math.random() * petalPalette.length)];
-    invalidateMeadowFlowerCache();
     return true;
 }
 
@@ -5641,7 +5407,6 @@ function createMeadowPlant(x, layer, index, petalPalette) {
 
 function initMeadowPlants() {
     meadowPlants.length = 0;
-    invalidateMeadowFlowerCache();
     const layerCounts = [
         Math.round(clamp(canvas.width / 30, 32, 54)),
         Math.round(clamp(canvas.width / 24, 42, 70)),
@@ -5658,7 +5423,6 @@ function initMeadowPlants() {
     });
 
     meadowPlants.sort((a, b) => a.baseY - b.baseY);
-    invalidateMeadowFlowerCache();
 }
 
 function initMeadowCritters() {
@@ -5666,7 +5430,6 @@ function initMeadowCritters() {
     for (let i = 0; i < 5; i++) meadowCritters.push(new Frog(i));
     for (let i = 0; i < 4; i++) meadowCritters.push(new Dragonfly(i));
     for (let i = 0; i < 5; i++) meadowCritters.push(new Ladybug(i));
-    for (let i = 0; i < 6; i++) meadowCritters.push(new Bee(i));
 }
 
 function getMeadowEnvironmentSummary() {
@@ -5678,8 +5441,7 @@ function getMeadowEnvironmentSummary() {
         bloomPotentialCount: meadowPlants.filter(plant => !plant.protectSapling).length,
         frogCount: meadowCritters.filter(critter => critter instanceof Frog).length,
         dragonflyCount: meadowCritters.filter(critter => critter instanceof Dragonfly).length,
-        beetleCount: meadowCritters.filter(critter => critter instanceof Ladybug).length,
-        beeCount: meadowCritters.filter(critter => critter instanceof Bee).length
+        beetleCount: meadowCritters.filter(critter => critter instanceof Ladybug).length
     };
 }
 
@@ -6492,7 +6254,6 @@ function drawMeadowPlants(renderMode = getRenderMode(80 + (STATE.energy * 1.6)))
     const passiveGrowth = STATE.isListening ? Math.max(0, (STATE.currentDB - 56) / 14000) : 0;
     const time = (STATE.frameNow || Date.now()) / 950;
     const lowPowerMode = renderMode.lowPower;
-    let flowerCacheDirty = false;
 
     meadowPlants.forEach((plant, index) => {
         const baseGrowth = Number.isFinite(plant.growth) ? plant.growth : 0;
@@ -6523,9 +6284,7 @@ function drawMeadowPlants(renderMode = getRenderMode(80 + (STATE.energy * 1.6)))
         ctx.globalAlpha = clamp(layerAlpha + plant.pulse * 0.16, 0.52, 1);
         ctx.lineCap = 'round';
         if (plant.kind === 'flower') {
-            const nextBloomOpen = Math.min(1, (Number(plant.bloomOpen) || 0) + 0.006 + plant.pulse * 0.018 + passiveGrowth * 0.18);
-            if (nextBloomOpen !== plant.bloomOpen) flowerCacheDirty = true;
-            plant.bloomOpen = nextBloomOpen;
+            plant.bloomOpen = Math.min(1, (Number(plant.bloomOpen) || 0) + 0.006 + plant.pulse * 0.018 + passiveGrowth * 0.18);
             drawFlowerPlant(plant, sway, renderMode);
         } else {
             drawGrassBlade(plant, sway, 1);
@@ -6545,7 +6304,6 @@ function drawMeadowPlants(renderMode = getRenderMode(80 + (STATE.energy * 1.6)))
         ctx.restore();
     });
 
-    if (flowerCacheDirty) invalidateMeadowFlowerCache();
 }
 
 function drawMeadowCritters(renderMode = getRenderMode()) {
@@ -6553,7 +6311,7 @@ function drawMeadowCritters(renderMode = getRenderMode()) {
     const frameId = STATE.renderFrameId || 0;
 
     meadowCritters.forEach(critter => {
-        const canStaggerUpdate = renderMode.ultraLowPower && !(critter instanceof Frog) && !(critter instanceof Bee && critter.mode === 'nectar');
+        const canStaggerUpdate = renderMode.ultraLowPower && !(critter instanceof Frog);
         if (!canStaggerUpdate || (frameId + (critter.index || 0)) % 2 === 0) {
             critter.update?.();
         }

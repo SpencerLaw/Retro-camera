@@ -142,6 +142,8 @@ function loadMorningTree() {
       loadStoredReports: typeof loadStoredReports === 'function' ? loadStoredReports : undefined,
       renderReportFocus: typeof renderReportFocus === 'function' ? renderReportFocus : undefined,
       getNextEnergy: typeof getNextEnergy === 'function' ? getNextEnergy : undefined,
+      getSessionGrowthRate: typeof getSessionGrowthRate === 'function' ? getSessionGrowthRate : undefined,
+      syncSessionGrowthRate: typeof syncSessionGrowthRate === 'function' ? syncSessionGrowthRate : undefined,
       getNextVisualEnergy: typeof getNextVisualEnergy === 'function' ? getNextVisualEnergy : undefined,
       updateVisualEnergy: typeof updateVisualEnergy === 'function' ? updateVisualEnergy : undefined,
       getTreeDisplayEnergy: typeof getTreeDisplayEnergy === 'function' ? getTreeDisplayEnergy : undefined,
@@ -160,6 +162,7 @@ function loadMorningTree() {
       drawBloomingEnergyTree: typeof drawBloomingEnergyTree === 'function' ? drawBloomingEnergyTree : undefined,
       getAudioActivation: typeof getAudioActivation === 'function' ? getAudioActivation : undefined,
       getFinalTreeVisualState: typeof getFinalTreeVisualState === 'function' ? getFinalTreeVisualState : undefined,
+      updateFinalEnergyVisuals: typeof updateFinalEnergyVisuals === 'function' ? updateFinalEnergyVisuals : undefined,
       createSessionRewardState: typeof createSessionRewardState === 'function' ? createSessionRewardState : undefined,
       updateSessionRewards: typeof updateSessionRewards === 'function' ? updateSessionRewards : undefined,
       getRewardEnergyBonus: typeof getRewardEnergyBonus === 'function' ? getRewardEnergyBonus : undefined,
@@ -242,9 +245,10 @@ runTest('final energy tree holds its full form after manifesting', () => {
 });
 
 runTest('final tree dims while quiet and glows when reading is strong', () => {
-  const { api } = loadMorningTree();
+  const { api, elements } = loadMorningTree();
 
   assert.equal(typeof api.getFinalTreeVisualState, 'function');
+  assert.equal(typeof api.updateFinalEnergyVisuals, 'function');
 
   const quiet = api.getFinalTreeVisualState({
     manifested: true,
@@ -263,6 +267,17 @@ runTest('final tree dims while quiet and glows when reading is strong', () => {
   assert.ok(quiet.canopyAlpha < loud.canopyAlpha);
   assert.ok(quiet.glowAlpha < loud.glowAlpha);
   assert.equal(quiet.quiet, true);
+
+  api.STATE.hasManifested = true;
+  api.STATE.currentDB = 38;
+  api.STATE.readingHoldSeconds = 0;
+  assert.equal(api.updateFinalEnergyVisuals(), 'quiet');
+  assert.equal(elements.get('app-container').dataset.finalVoice, 'quiet');
+
+  api.STATE.currentDB = 88;
+  api.STATE.readingHoldSeconds = 2;
+  assert.equal(api.updateFinalEnergyVisuals(), 'glow');
+  assert.equal(elements.get('app-container').dataset.finalVoice, 'glow');
 });
 
 runTest('final tree visual growth eases instead of jumping to mature form', () => {
@@ -398,6 +413,24 @@ runTest('energy growth is proportional to elapsed seconds instead of frame count
   assert.ok(fullSecond > halfSecond);
   assert.ok(fullSecond < 0.75);
   assert.ok(Math.abs(fullSecond - (halfSecond * 2)) < 0.02);
+});
+
+runTest('base growth speed syncs with the selected morning reading duration', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getSessionGrowthRate, 'function');
+  assert.equal(typeof api.syncSessionGrowthRate, 'function');
+
+  const tenMinutes = api.getSessionGrowthRate(10);
+  const thirtyMinutes = api.getSessionGrowthRate(30);
+  const sixtyMinutes = api.getSessionGrowthRate(60);
+
+  assert.ok(tenMinutes > thirtyMinutes);
+  assert.ok(thirtyMinutes > sixtyMinutes);
+
+  api.STATE.sessionDuration = 45;
+  assert.equal(api.syncSessionGrowthRate(), api.getSessionGrowthRate(45));
+  assert.equal(api.STATE.baseGrowthRate, api.getSessionGrowthRate(45));
 });
 
 runTest('short sound spikes do not grow the tree before the sustain gate opens', () => {
@@ -569,19 +602,21 @@ runTest('stable reading earns water and fertilizer while unsafe spikes only warn
   const stable = api.createSessionRewardState();
   api.updateSessionRewards(stable, {
     currentDB: 82,
-    deltaSeconds: 8,
+    deltaSeconds: 30,
     isReadingLoudly: true,
-    effectiveReadingSeconds: 8,
+    effectiveReadingSeconds: 30,
   });
   api.updateSessionRewards(stable, {
     currentDB: 84,
-    deltaSeconds: 64,
+    deltaSeconds: 330,
     isReadingLoudly: true,
-    effectiveReadingSeconds: 72,
+    effectiveReadingSeconds: 360,
   });
 
-  assert.equal(stable.waterCount, 4);
-  assert.equal(stable.fertilizerCount, 3);
+  assert.equal(stable.waterCount, 12);
+  assert.equal(stable.fertilizerCount, 4);
+  assert.equal(stable.nextWaterAt, 390);
+  assert.equal(stable.nextFertilizerAt, 450);
   assert.equal(stable.overLoudCount, 0);
 
   const unsafe = api.createSessionRewardState();
@@ -597,6 +632,29 @@ runTest('stable reading earns water and fertilizer while unsafe spikes only warn
   assert.equal(unsafe.overLoudCount, 1);
 });
 
+runTest('watering and fertilizer rewards keep cycling without a count cap', () => {
+  const { api } = loadMorningTree();
+  const rewardState = api.createSessionRewardState();
+
+  api.updateSessionRewards(rewardState, {
+    currentDB: 86,
+    deltaSeconds: 1800,
+    isReadingLoudly: true,
+    effectiveReadingSeconds: 1800,
+  });
+
+  assert.equal(rewardState.waterCount, 60);
+  assert.equal(rewardState.fertilizerCount, 20);
+  assert.equal(rewardState.nextWaterAt, 1830);
+  assert.equal(rewardState.nextFertilizerAt, 1890);
+
+  const progress = api.getRewardProgress(rewardState, 1800);
+  assert.equal(progress.waterComplete, false);
+  assert.equal(progress.fertilizerComplete, false);
+  assert.equal(progress.waterTargetSeconds, 1830);
+  assert.equal(progress.fertilizerTargetSeconds, 1890);
+});
+
 runTest('water and fertilizer bonuses directly grow the top energy progress once', () => {
   const { api } = loadMorningTree();
 
@@ -607,25 +665,25 @@ runTest('water and fertilizer bonuses directly grow the top energy progress once
     { waterCount: 0, fertilizerCount: 0 },
     { waterCount: 1, fertilizerCount: 0 }
   );
-  assert.equal(waterOnly.totalBonus, 1);
-  assert.equal(waterOnly.waterBonus, 1);
+  assert.equal(waterOnly.totalBonus, 0.25);
+  assert.equal(waterOnly.waterBonus, 0.25);
   assert.equal(waterOnly.fertilizerBonus, 0);
-  assert.equal(api.applyRewardEnergyBonus(40, waterOnly), 41);
+  assert.equal(api.applyRewardEnergyBonus(40, waterOnly), 40.25);
 
   const bothRewards = api.getRewardEnergyBonus(
     { waterCount: 0, fertilizerCount: 0 },
     { waterCount: 1, fertilizerCount: 1 }
   );
-  assert.equal(bothRewards.totalBonus, 3);
-  assert.equal(api.applyRewardEnergyBonus(96, bothRewards), 99);
+  assert.ok(Math.abs(bothRewards.totalBonus - 0.85) < 0.001);
+  assert.ok(Math.abs(api.applyRewardEnergyBonus(96, bothRewards) - 96.85) < 0.001);
 
   const multipleRewards = api.getRewardEnergyBonus(
     { waterCount: 1, fertilizerCount: 1 },
     { waterCount: 3, fertilizerCount: 2 }
   );
-  assert.equal(multipleRewards.totalBonus, 4);
-  assert.equal(multipleRewards.waterBonus, 2);
-  assert.equal(multipleRewards.fertilizerBonus, 2);
+  assert.ok(Math.abs(multipleRewards.totalBonus - 1.1) < 0.001);
+  assert.equal(multipleRewards.waterBonus, 0.5);
+  assert.equal(multipleRewards.fertilizerBonus, 0.6);
 
   const alreadyCounted = api.getRewardEnergyBonus(
     { waterCount: 1, fertilizerCount: 1 },
@@ -649,32 +707,32 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.equal(typeof api.renderRewardPanel, 'function');
 
   const rewardState = api.createSessionRewardState();
-  rewardState.stableReadingSeconds = 6;
+  rewardState.stableReadingSeconds = 18;
   rewardState.overLoudCount = 2;
-  const progress = api.getRewardProgress(rewardState, 12);
-  assert.equal(progress.waterTargetSeconds, 8);
-  assert.equal(progress.fertilizerTargetSeconds, 24);
-  assert.equal(progress.waterRemainingSeconds, 2);
-  assert.equal(progress.fertilizerRemainingSeconds, 12);
+  const progress = api.getRewardProgress(rewardState, 45);
+  assert.equal(progress.waterTargetSeconds, 30);
+  assert.equal(progress.fertilizerTargetSeconds, 90);
+  assert.equal(progress.waterRemainingSeconds, 12);
+  assert.equal(progress.fertilizerRemainingSeconds, 45);
 
   api.STATE.rewardState = rewardState;
-  api.STATE.reportEffectiveReadingSeconds = 12;
+  api.STATE.reportEffectiveReadingSeconds = 45;
   api.renderRewardPanel();
 
   const panelHtml = elements.get('reward-live-panel').innerHTML;
   assert.match(panelHtml, /id="reward-water-count"/);
   assert.match(panelHtml, /id="reward-fertilizer-count"/);
-  assert.match(panelHtml, /8s/);
-  assert.match(panelHtml, /24s/);
+  assert.match(panelHtml, /30s/);
+  assert.match(panelHtml, /90s/);
   assert.match(panelHtml, /2/);
   assert.equal(zh.morningTree.energyLabel, '🌳 能量树成长进度');
   assert.match(zh.morningTree.rewards.liveSub, /不需要老师手动点/);
-  assert.match(zh.morningTree.rewards.waterRule, /8 秒/);
-  assert.match(zh.morningTree.rewards.waterRule, /最多 4 次/);
-  assert.match(zh.morningTree.rewards.waterRule, /\+1%/);
-  assert.match(zh.morningTree.rewards.fertilizerRule, /24 秒/);
-  assert.match(zh.morningTree.rewards.fertilizerRule, /最多 3 次/);
-  assert.match(zh.morningTree.rewards.fertilizerRule, /\+2%/);
+  assert.match(zh.morningTree.rewards.waterRule, /30 秒/);
+  assert.match(zh.morningTree.rewards.waterRule, /不设上限/);
+  assert.match(zh.morningTree.rewards.waterRule, /\+0\.25%/);
+  assert.match(zh.morningTree.rewards.fertilizerRule, /90 秒/);
+  assert.match(zh.morningTree.rewards.fertilizerRule, /不设上限/);
+  assert.match(zh.morningTree.rewards.fertilizerRule, /\+0\.6%/);
   assert.match(zh.morningTree.rewards.overLoudRule, /不浇水、不施肥/);
 });
 
@@ -691,10 +749,12 @@ runTest('reward cards are clickable and reveal trigger explanations', () => {
   const waterHelp = api.getRewardHelpContent('water');
   const fertilizerHelp = api.getRewardHelpContent('fertilizer');
   const overLoudHelp = api.getRewardHelpContent('overLoud');
-  assert.match(waterHelp.condition, /8 秒/);
-  assert.match(waterHelp.effect, /\+1%/);
-  assert.match(fertilizerHelp.condition, /24 秒/);
-  assert.match(fertilizerHelp.effect, /\+2%/);
+  assert.match(waterHelp.condition, /30 秒/);
+  assert.match(waterHelp.condition, /不设上限/);
+  assert.match(waterHelp.effect, /\+0\.25%/);
+  assert.match(fertilizerHelp.condition, /90 秒/);
+  assert.match(fertilizerHelp.condition, /不设上限/);
+  assert.match(fertilizerHelp.effect, /\+0\.6%/);
   assert.match(overLoudHelp.effect, /不浇水、不施肥/);
 
   api.renderRewardPanel();
@@ -703,7 +763,7 @@ runTest('reward cards are clickable and reveal trigger explanations', () => {
   assert.match(panelHtml, /button[^>]+data-reward-help="fertilizer"/);
   assert.match(panelHtml, /button[^>]+data-reward-help="overLoud"/);
   assert.match(panelHtml, /reward-help-mark/);
-  assert.match(panelHtml, /奖励 \+1%/);
+  assert.match(panelHtml, /奖励 \+0\.25%/);
   assert.doesNotMatch(panelHtml, /id="reward-help-water"/);
 
   api.setActiveRewardHelp('water');

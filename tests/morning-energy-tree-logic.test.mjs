@@ -181,6 +181,8 @@ function loadMorningTree() {
       initEnvironment: typeof initEnvironment === 'function' ? initEnvironment : undefined,
       getMeadowEnvironmentSummary: typeof getMeadowEnvironmentSummary === 'function' ? getMeadowEnvironmentSummary : undefined,
       drawMeadowCritters: typeof drawMeadowCritters === 'function' ? drawMeadowCritters : undefined,
+      Frog: typeof Frog === 'function' ? Frog : undefined,
+      Dragonfly: typeof Dragonfly === 'function' ? Dragonfly : undefined,
       resetGame: typeof resetGame === 'function' ? resetGame : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
       APP_MODES: typeof APP_MODES !== 'undefined' ? APP_MODES : undefined,
@@ -869,6 +871,8 @@ runTest('meadow fills the ground with flowers grass frogs and dragonflies', () =
   assert.equal(typeof api.initEnvironment, 'function');
   assert.equal(typeof api.getMeadowEnvironmentSummary, 'function');
   assert.equal(typeof api.drawMeadowCritters, 'function');
+  assert.equal(typeof api.Frog, 'function');
+  assert.equal(typeof api.Dragonfly, 'function');
 
   api.initEnvironment();
   const summary = api.getMeadowEnvironmentSummary();
@@ -879,8 +883,30 @@ runTest('meadow fills the ground with flowers grass frogs and dragonflies', () =
   assert.equal(summary.frogCount, 2);
   assert.equal(summary.dragonflyCount, 4);
   assert.match(script, /class Frog/);
+  assert.match(script, /jumpState/);
+  assert.match(script, /startJump\(\)/);
+  assert.match(script, /Math\.sin\(Math\.PI \* t\) \* this\.jumpHeight/);
   assert.match(script, /class Dragonfly/);
+  assert.match(script, /drawDragonflyWing/);
+  assert.match(script, /wingBeat/);
+  assert.match(script, /rgba\(220, 252, 255, 0\.3\)/);
   assert.match(script, /drawMeadowCritters\(\)/);
+
+  const frog = new api.Frog(0);
+  frog.jumpCooldown = 0;
+  frog.update();
+  assert.equal(frog.jumpState, 'jump');
+  const jumpStartY = frog.y;
+  for (let i = 0; i < 12; i += 1) frog.update();
+  assert.ok(frog.jumpProgress > 0);
+  assert.ok(frog.y <= frog.groundY);
+  assert.notEqual(frog.y, jumpStartY);
+
+  const dragonfly = new api.Dragonfly(0);
+  const startingWingBeat = dragonfly.wingBeat;
+  dragonfly.update();
+  assert.ok(dragonfly.wingBeat > startingWingBeat);
+  assert.equal(typeof dragonfly.drawDragonflyWing, 'function');
 });
 
 runTest('watering and fertilizer rewards spawn visible tree animations', () => {

@@ -3633,78 +3633,186 @@ class Frog {
         const side = this.index % 2 === 0 ? -1 : 1;
         const lane = 0.16 + Math.random() * 0.2;
         this.x = canvas.width * (side < 0 ? lane : 1 - lane);
-        this.y = getMeadowGroundY(this.x) + 18 + Math.random() * 12;
-        this.size = 0.72 + Math.random() * 0.28;
+        this.footOffset = 22 + Math.random() * 14;
+        this.groundY = getMeadowGroundY(this.x) + this.footOffset;
+        this.y = this.groundY;
+        this.size = 0.78 + Math.random() * 0.3;
+        this.direction = side < 0 ? 1 : -1;
         this.phase = Math.random() * Math.PI * 2;
         this.blinkOffset = Math.random() * 3;
+        this.jumpState = 'rest';
+        this.jumpProgress = 0;
+        this.jumpCooldown = 42 + Math.floor(Math.random() * 86);
+        this.jumpDuration = 34 + Math.floor(Math.random() * 14);
+        this.landFrames = 0;
+        this.jumpDistance = 72 + Math.random() * 84;
+        this.jumpHeight = 34 + Math.random() * 28;
+        this.startX = this.x;
+        this.targetX = this.x;
+    }
+
+    startJump() {
+        if (this.x < 92) this.direction = 1;
+        if (this.x > canvas.width - 92) this.direction = -1;
+        if (Math.random() < 0.18) this.direction *= -1;
+
+        this.jumpState = 'jump';
+        this.jumpProgress = 0;
+        this.startX = this.x;
+        this.jumpDistance = 68 + Math.random() * 92;
+        this.jumpHeight = 32 + Math.random() * 36;
+        this.jumpDuration = 34 + Math.floor(Math.random() * 18);
+        this.targetX = clamp(this.startX + this.direction * this.jumpDistance, 42, canvas.width - 42);
     }
 
     update() {
-        this.phase += 0.035;
-        if (this.x < 20 || this.x > canvas.width - 20 || this.y > canvas.height + 12) {
+        this.phase += 0.08;
+
+        if (this.jumpState === 'rest') {
+            this.jumpCooldown -= 1;
+            this.groundY = getMeadowGroundY(this.x) + this.footOffset;
+            this.y = this.groundY;
+            if (this.jumpCooldown <= 0) this.startJump();
+        } else if (this.jumpState === 'jump') {
+            this.jumpProgress = Math.min(1, this.jumpProgress + (1 / this.jumpDuration));
+            const t = this.jumpProgress;
+            const easeX = t * t * (3 - 2 * t);
+            this.x = this.startX + ((this.targetX - this.startX) * easeX);
+            this.groundY = getMeadowGroundY(this.x) + this.footOffset;
+            this.y = this.groundY - Math.sin(Math.PI * t) * this.jumpHeight;
+
+            if (t >= 1) {
+                this.jumpState = 'land';
+                this.landFrames = 12 + Math.floor(Math.random() * 8);
+                this.jumpCooldown = 48 + Math.floor(Math.random() * 104);
+                this.y = this.groundY;
+            }
+        } else if (this.jumpState === 'land') {
+            this.landFrames -= 1;
+            this.groundY = getMeadowGroundY(this.x) + this.footOffset;
+            this.y = this.groundY;
+            if (this.landFrames <= 0) this.jumpState = 'rest';
+        }
+
+        if (this.x < -40 || this.x > canvas.width + 40 || this.y > canvas.height + 34) {
             this.reset();
         }
     }
 
     draw() {
-        const bounce = Math.sin(this.phase) * 1.2;
+        const crouch = this.jumpState === 'rest'
+            ? clamp(1 - this.jumpCooldown / 24, 0, 1) * 0.22
+            : this.jumpState === 'land'
+                ? clamp(this.landFrames / 18, 0, 1) * 0.26
+                : 0;
+        const flight = this.jumpState === 'jump' ? Math.sin(Math.PI * this.jumpProgress) : 0;
+        const bodySquash = 1 - crouch * 0.16 + flight * 0.08;
+        const bodyStretch = 1 + crouch * 0.22 - flight * 0.05;
+        const bodyTilt = (this.jumpState === 'jump' ? -0.16 + this.jumpProgress * 0.26 : crouch * 0.08) * this.direction;
         const blink = Math.sin(this.phase * 0.7 + this.blinkOffset) > 0.94;
 
         ctx.save();
-        ctx.translate(this.x, this.y + bounce);
-        ctx.scale(this.size, this.size);
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.direction * this.size, this.size);
+        ctx.rotate(bodyTilt);
 
         ctx.fillStyle = 'rgba(41, 133, 64, 0.34)';
         ctx.beginPath();
-        ctx.ellipse(0, 9, 30, 8, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, Math.max(12, (this.groundY - this.y) / this.size + 13), 30 + flight * 4, 7 - flight * 1.6, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = '#52b955';
-        ctx.strokeStyle = '#27753f';
-        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#23683a';
+        ctx.lineWidth = 4.2;
         ctx.beginPath();
-        ctx.ellipse(0, 0, 22, 13, 0, 0, Math.PI * 2);
+        if (this.jumpState === 'jump') {
+            ctx.moveTo(-15, 5);
+            ctx.quadraticCurveTo(-34 - flight * 9, 3 + flight * 8, -48 - flight * 10, 16 - flight * 4);
+            ctx.moveTo(13, 6);
+            ctx.quadraticCurveTo(-2, 15 + flight * 4, -18, 19);
+        } else {
+            ctx.moveTo(-15, 6);
+            ctx.quadraticCurveTo(-30, 11 + crouch * 6, -38, 4 + crouch * 4);
+            ctx.moveTo(14, 7);
+            ctx.quadraticCurveTo(26, 14 + crouch * 5, 37, 8 + crouch * 2);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#6ed36f';
+        ctx.lineWidth = 2.1;
+        ctx.beginPath();
+        ctx.moveTo(-48 - flight * 8, 16 - flight * 4);
+        ctx.lineTo(-55 - flight * 10, 18 - flight * 2);
+        ctx.moveTo(37, 8 + crouch * 2);
+        ctx.lineTo(45, 9 + crouch * 2);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.scale(bodySquash, bodyStretch);
+        ctx.fillStyle = '#4fb45a';
+        ctx.strokeStyle = '#23683a';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.ellipse(-1, 0, 24, 14, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#76d36c';
+        ctx.fillStyle = '#89dc72';
         ctx.beginPath();
-        ctx.ellipse(-10, -8, 8, 7, 0, 0, Math.PI * 2);
-        ctx.ellipse(10, -8, 8, 7, 0, 0, Math.PI * 2);
+        ctx.ellipse(4, 2, 13, 8, -0.08, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = '#67c85e';
+        ctx.strokeStyle = '#23683a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(-9, -11, 8.6, 8, -0.08, 0, Math.PI * 2);
+        ctx.ellipse(9, -11, 8.6, 8, 0.08, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
 
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(-10, -9, 3.2, 0, Math.PI * 2);
-        ctx.arc(10, -9, 3.2, 0, Math.PI * 2);
+        ctx.arc(-9, -12, 3.8, 0, Math.PI * 2);
+        ctx.arc(9, -12, 3.8, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = '#1d5130';
-        ctx.lineWidth = blink ? 1.8 : 0;
         if (blink) {
+            ctx.strokeStyle = '#173f27';
+            ctx.lineWidth = 1.9;
             ctx.beginPath();
-            ctx.moveTo(-13, -9);
-            ctx.lineTo(-7, -9);
-            ctx.moveTo(7, -9);
-            ctx.lineTo(13, -9);
+            ctx.moveTo(-13, -12);
+            ctx.lineTo(-5, -12);
+            ctx.moveTo(5, -12);
+            ctx.lineTo(13, -12);
             ctx.stroke();
         } else {
-            ctx.fillStyle = '#1d5130';
+            ctx.fillStyle = '#173f27';
             ctx.beginPath();
-            ctx.arc(-10, -9, 1.5, 0, Math.PI * 2);
-            ctx.arc(10, -9, 1.5, 0, Math.PI * 2);
+            ctx.arc(-8.2, -12.2, 1.7, 0, Math.PI * 2);
+            ctx.arc(9.8, -12.2, 1.7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.72)';
+            ctx.beginPath();
+            ctx.arc(-8.8, -13, 0.55, 0, Math.PI * 2);
+            ctx.arc(9.2, -13, 0.55, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        ctx.strokeStyle = '#27753f';
-        ctx.lineWidth = 2.2;
-        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#1c5a34';
+        ctx.lineWidth = 1.7;
         ctx.beginPath();
-        ctx.moveTo(-15, 5);
-        ctx.quadraticCurveTo(-25, 9, -30, 2);
-        ctx.moveTo(15, 5);
-        ctx.quadraticCurveTo(25, 9, 30, 2);
+        ctx.moveTo(-7, -2);
+        ctx.quadraticCurveTo(0, 2.5 + crouch * 3, 8, -2);
         ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255, 214, 214, 0.34)';
+        ctx.beginPath();
+        ctx.arc(-15, -3, 2.6, 0, Math.PI * 2);
+        ctx.arc(15, -3, 2.6, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.restore();
     }
@@ -3718,61 +3826,115 @@ class Dragonfly {
 
     reset() {
         this.x = Math.random() * canvas.width;
-        this.baseY = canvas.height * (0.54 + Math.random() * 0.18);
-        this.speed = 0.55 + Math.random() * 0.45;
-        this.size = 0.56 + Math.random() * 0.28;
+        this.baseY = canvas.height * (0.48 + Math.random() * 0.2);
+        this.speed = 0.72 + Math.random() * 0.62;
+        this.size = 0.62 + Math.random() * 0.32;
         this.phase = Math.random() * Math.PI * 2;
-        this.hue = Math.random() < 0.5 ? '#7df9ff' : '#d8ff66';
+        this.hue = ['#7df9ff', '#d8ff66', '#9ee7ff', '#ffe082'][Math.floor(Math.random() * 4)];
+        this.eyeColor = Math.random() < 0.5 ? '#57d1c9' : '#86e66a';
         this.direction = Math.random() < 0.5 ? -1 : 1;
+        this.hoverRadius = 20 + Math.random() * 22;
+        this.wingBeat = 0;
     }
 
     update() {
         this.x += this.speed * this.direction;
-        this.phase += 0.16;
-        this.y = this.baseY + Math.sin(this.phase * 0.9) * 18 + Math.sin(this.x / 70) * 10;
+        this.phase += 0.11;
+        this.wingBeat += 0.54;
+        this.y = this.baseY
+            + Math.sin(this.phase * 1.12 + this.index) * this.hoverRadius
+            + Math.sin(this.x / 64 + this.index) * 8;
 
         if (this.direction > 0 && this.x > canvas.width + 50) {
             this.x = -50;
-            this.baseY = canvas.height * (0.54 + Math.random() * 0.18);
+            this.baseY = canvas.height * (0.48 + Math.random() * 0.2);
         } else if (this.direction < 0 && this.x < -50) {
             this.x = canvas.width + 50;
-            this.baseY = canvas.height * (0.54 + Math.random() * 0.18);
+            this.baseY = canvas.height * (0.48 + Math.random() * 0.2);
         }
     }
 
+    drawDragonflyWing(anchorX, anchorY, length, width, angle, beat, color) {
+        ctx.save();
+        ctx.translate(anchorX, anchorY);
+        ctx.rotate(angle + beat * 0.16);
+        ctx.fillStyle = 'rgba(220, 252, 255, 0.3)';
+        ctx.strokeStyle = 'rgba(151, 239, 255, 0.58)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.ellipse(length * 0.42, 0, length * 0.48, width * (0.82 + Math.abs(beat) * 0.18), 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = 0.52;
+        ctx.lineWidth = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(length * 0.82, 0);
+        ctx.moveTo(length * 0.25, -width * 0.52);
+        ctx.quadraticCurveTo(length * 0.42, 0, length * 0.72, width * 0.4);
+        ctx.moveTo(length * 0.3, width * 0.48);
+        ctx.quadraticCurveTo(length * 0.48, 0, length * 0.76, -width * 0.34);
+        ctx.stroke();
+        ctx.restore();
+    }
+
     draw() {
-        const wing = 0.62 + Math.sin(this.phase * 2.4) * 0.18;
+        const frontWingBeat = Math.sin(this.wingBeat);
+        const rearWingBeat = Math.sin(this.wingBeat + Math.PI * 0.62);
+        const bodyTilt = Math.sin(this.phase * 1.3) * 0.08;
 
         ctx.save();
         ctx.translate(this.x, this.y);
+        ctx.rotate(bodyTilt);
         ctx.scale(this.direction * this.size, this.size);
-        ctx.globalCompositeOperation = 'screen';
 
-        ctx.fillStyle = 'rgba(255,255,255,0.46)';
-        ctx.beginPath();
-        ctx.ellipse(-7, -3, 13, 4.2 * wing, -0.45, 0, Math.PI * 2);
-        ctx.ellipse(7, -3, 13, 4.2 * wing, 0.45, 0, Math.PI * 2);
-        ctx.ellipse(-6, 3, 11, 3.6 * wing, 0.35, 0, Math.PI * 2);
-        ctx.ellipse(6, 3, 11, 3.6 * wing, -0.35, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        this.drawDragonflyWing(-2, -2, 34, 8, -0.52, frontWingBeat, 'rgba(125, 249, 255, 0.7)');
+        this.drawDragonflyWing(-4, 3, 30, 7, 0.5, rearWingBeat, 'rgba(216, 255, 102, 0.62)');
+        this.drawDragonflyWing(5, -2, 34, 8, -2.62, -rearWingBeat, 'rgba(125, 249, 255, 0.64)');
+        this.drawDragonflyWing(3, 3, 30, 7, 2.58, -frontWingBeat, 'rgba(216, 255, 102, 0.58)');
+        ctx.restore();
 
         ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = '#246f7a';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(21, 92, 106, 0.72)';
+        ctx.lineWidth = 2.2;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(-14, 0);
-        ctx.lineTo(15, 0);
+        ctx.moveTo(-30, 0);
+        ctx.quadraticCurveTo(-10, Math.sin(this.phase) * 2, 13, 0);
         ctx.stroke();
 
-        ctx.fillStyle = this.hue;
+        for (let i = 0; i < 8; i++) {
+            const t = i / 7;
+            const x = -29 + t * 34;
+            const radius = 3.2 - t * 1.4;
+            ctx.fillStyle = i % 2 === 0 ? this.hue : '#49b8a7';
+            ctx.beginPath();
+            ctx.ellipse(x, Math.sin(this.phase + i) * 0.45, radius + 1.4, radius, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.fillStyle = '#50bfae';
+        ctx.strokeStyle = 'rgba(21, 92, 106, 0.74)';
+        ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.arc(17, 0, 3.8, 0, Math.PI * 2);
+        ctx.ellipse(9, 0, 8, 5.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = this.eyeColor;
+        ctx.beginPath();
+        ctx.ellipse(19, -3.1, 5.2, 4.8, 0.12, 0, Math.PI * 2);
+        ctx.ellipse(19, 3.1, 5.2, 4.8, -0.12, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = 'rgba(255,255,255,0.86)';
         ctx.beginPath();
-        ctx.arc(19, -1.4, 1.1, 0, Math.PI * 2);
+        ctx.arc(21, -4.1, 1.05, 0, Math.PI * 2);
+        ctx.arc(21, 2.1, 1.05, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();

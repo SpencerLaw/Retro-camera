@@ -176,6 +176,7 @@ function loadMorningTree() {
       spawnRewardAnimation: typeof spawnRewardAnimation === 'function' ? spawnRewardAnimation : undefined,
       drawRewardEffects: typeof drawRewardEffects === 'function' ? drawRewardEffects : undefined,
       getRewardEffectCount: typeof getRewardEffectCount === 'function' ? getRewardEffectCount : undefined,
+      getGravityWaterPoint: typeof getGravityWaterPoint === 'function' ? getGravityWaterPoint : undefined,
       resetGame: typeof resetGame === 'function' ? resetGame : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
       APP_MODES: typeof APP_MODES !== 'undefined' ? APP_MODES : undefined,
@@ -792,6 +793,28 @@ runTest('reward boost creates a visible growth bonus label', () => {
   assert.equal(api.getRewardBonusLabel({ waterBonus: 2, fertilizerBonus: 0, totalBonus: 2 }), '浇水 +2%');
   assert.equal(api.getRewardBonusLabel({ waterBonus: 0, fertilizerBonus: 5, totalBonus: 5 }), '施肥 +5%');
   assert.equal(api.getRewardBonusLabel({ waterBonus: 2, fertilizerBonus: 5, totalBonus: 7 }), '浇水 +2% · 施肥 +5%');
+});
+
+runTest('watering can stream falls downward under gravity', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getGravityWaterPoint, 'function');
+
+  const spout = { x: 240, y: 120 };
+  const target = { x: 180, y: 260 };
+  const points = [0, 0.15, 0.35, 0.55, 0.75, 1].map(progress =>
+    api.getGravityWaterPoint(spout, target, progress, 6)
+  );
+
+  for (let i = 1; i < points.length; i += 1) {
+    assert.ok(points[i].y >= points[i - 1].y);
+  }
+
+  assert.ok(points[points.length - 1].y > spout.y);
+  assert.ok(points[points.length - 1].y >= target.y);
+
+  const uphillTarget = api.getGravityWaterPoint({ x: 0, y: 100 }, { x: 80, y: 70 }, 1, 0);
+  assert.ok(uphillTarget.y > 100);
 });
 
 runTest('watering and fertilizer rewards spawn visible tree animations', () => {

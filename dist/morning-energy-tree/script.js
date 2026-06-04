@@ -3980,6 +3980,26 @@ class SoilTransfer {
     }
 }
 
+function getGravityWaterPoint(spout, target, progress, lateralOffset = 0) {
+    const t = clamp(Number(progress) || 0, 0, 1);
+    const start = {
+        x: Number.isFinite(spout?.x) ? spout.x : 0,
+        y: Number.isFinite(spout?.y) ? spout.y : 0
+    };
+    const landing = {
+        x: (Number.isFinite(target?.x) ? target.x : start.x) + (lateralOffset * 0.72),
+        y: Math.max(Number.isFinite(target?.y) ? target.y : start.y + 36, start.y + 36)
+    };
+    const xProgress = 1 - Math.pow(1 - t, 1.18);
+    const yProgress = Math.pow(t, 1.38);
+    const sway = Math.sin(t * Math.PI) * lateralOffset * 0.18;
+
+    return {
+        x: start.x + ((landing.x - start.x) * xProgress) + sway,
+        y: start.y + ((landing.y - start.y) * yProgress)
+    };
+}
+
 class RewardWateringCan {
     constructor(targetX, targetY, side = -1, strength = 1) {
         const safeSide = side === 1 ? 1 : -1;
@@ -4039,21 +4059,16 @@ class RewardWateringCan {
 
         for (let i = 0; i < lineCount; i++) {
             const offset = (i - 1) * 7;
-            const control = {
-                x: spout.x + (this.target.x - spout.x) * (0.42 + i * 0.04) + this.side * (14 - i * 6),
-                y: spout.y + (this.target.y - spout.y) * 0.44 + 20 + i * 3
-            };
+            const startPoint = getGravityWaterPoint(spout, this.target, 0, offset);
             ctx.globalAlpha = this.life * pourAmount * (0.38 + i * 0.16);
             ctx.strokeStyle = i === 1 ? '#c9f8ff' : '#5bd6ff';
             ctx.lineWidth = i === 1 ? 4.2 : 2.4;
             ctx.beginPath();
-            ctx.moveTo(spout.x, spout.y + offset * 0.16);
-            ctx.quadraticCurveTo(
-                control.x,
-                control.y + offset,
-                this.target.x + offset * 0.7,
-                this.target.y + Math.abs(offset) * 0.3
-            );
+            ctx.moveTo(startPoint.x, startPoint.y);
+            for (let step = 1; step <= 12; step++) {
+                const point = getGravityWaterPoint(spout, this.target, step / 12, offset);
+                ctx.lineTo(point.x, point.y);
+            }
             ctx.stroke();
         }
 
@@ -4061,11 +4076,8 @@ class RewardWateringCan {
         for (let i = 0; i < dropCount; i++) {
             const seed = i * 0.137 + this.phase;
             const travel = (this.t * 2.6 + seed) % 1;
-            const control = {
-                x: spout.x + (this.target.x - spout.x) * 0.48 + this.side * 8,
-                y: spout.y + (this.target.y - spout.y) * 0.44 + 26
-            };
-            const point = pointOnQuadratic(spout, control, this.target, travel);
+            const offset = (seededUnit(seed + 7) - 0.5) * 14;
+            const point = getGravityWaterPoint(spout, this.target, travel, offset);
             const size = 2.1 + seededUnit(seed + 2) * 2.4;
             ctx.globalAlpha = this.life * pourAmount * (0.42 + travel * 0.54);
             ctx.fillStyle = seededUnit(seed + 4) > 0.44 ? '#8deeff' : '#ffffff';

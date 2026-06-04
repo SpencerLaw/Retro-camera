@@ -4216,6 +4216,208 @@ class RewardFertilizerNutrient {
     }
 }
 
+class RewardFertilizerPour {
+    constructor(targetX, targetY, side = 1, strength = 1) {
+        const safeSide = side === -1 ? -1 : 1;
+        const safeStrength = Number.isFinite(strength) ? strength : 1;
+        this.type = 'fertilizer';
+        this.side = safeSide;
+        this.target = { x: targetX, y: targetY };
+        this.start = {
+            x: targetX + safeSide * Math.min(340, Math.max(210, canvas.width * 0.2)),
+            y: Math.max(92, targetY - Math.min(190, Math.max(128, canvas.height * 0.2)))
+        };
+        this.end = {
+            x: targetX + safeSide * Math.min(178, Math.max(118, canvas.width * 0.09)),
+            y: Math.max(86, targetY - Math.min(142, Math.max(94, canvas.height * 0.16)))
+        };
+        this.t = 0;
+        this.speed = 0.006 + safeStrength * 0.001;
+        this.life = 1;
+        this.strength = safeStrength;
+        this.phase = Math.random() * Math.PI * 2;
+        this.x = this.start.x;
+        this.y = this.start.y;
+        this.pellets = Array.from({ length: 24 }, (_, index) => ({
+            seed: this.phase + index * 0.217,
+            size: 2.2 + Math.random() * 3.4,
+            delay: Math.random() * 0.26
+        }));
+    }
+
+    getPourAmount() {
+        if (this.t < 0.2 || this.t > 0.86) return 0;
+        const local = (this.t - 0.2) / 0.66;
+        return Math.sin(local * Math.PI);
+    }
+
+    update() {
+        this.t += this.speed;
+        const travel = easeInOutSine(Math.min(1, this.t / 0.3));
+        const hover = Math.sin((STATE.frameNow || Date.now()) / 210 + this.phase) * 2.5;
+        this.x = this.start.x + (this.end.x - this.start.x) * travel;
+        this.y = this.start.y + (this.end.y - this.start.y) * travel + hover;
+        this.life = this.t > 0.86 ? Math.max(0, 1 - ((this.t - 0.86) / 0.24)) : 1;
+
+        if (this.getPourAmount() > 0.64 && Math.random() < 0.22) {
+            feedMeadowGrowth(
+                this.target.x + ((Math.random() - 0.5) * 34),
+                this.strength * 0.48,
+                REWARD_FERTILIZER_COLORS[Math.floor(Math.random() * REWARD_FERTILIZER_COLORS.length)]
+            );
+        }
+
+        return this.t < 1.1;
+    }
+
+    drawPelletStream(mouth, pourAmount) {
+        if (pourAmount <= 0) return;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+
+        this.pellets.forEach((pellet, index) => {
+            const rawTravel = ((this.t * 2.1) + pellet.seed + pellet.delay) % 1;
+            const trailWindow = pourAmount > 0.18 ? 1 : pourAmount * 5;
+            if (rawTravel > trailWindow) return;
+
+            const control = {
+                x: mouth.x + (this.target.x - mouth.x) * (0.36 + seededUnit(pellet.seed + 1) * 0.18) - this.side * (8 + seededUnit(pellet.seed + 2) * 22),
+                y: mouth.y + (this.target.y - mouth.y) * 0.45 + 28 + seededUnit(pellet.seed + 3) * 24
+            };
+            const point = pointOnQuadratic(
+                mouth,
+                control,
+                {
+                    x: this.target.x + (seededUnit(pellet.seed + 4) - 0.5) * 44,
+                    y: this.target.y + seededUnit(pellet.seed + 5) * 14
+                },
+                rawTravel
+            );
+            const color = REWARD_FERTILIZER_COLORS[(index + Math.floor(seededUnit(pellet.seed + 6) * 3)) % REWARD_FERTILIZER_COLORS.length];
+            const size = pellet.size * (0.72 + rawTravel * 0.34);
+
+            ctx.globalAlpha = this.life * pourAmount * (0.36 + rawTravel * 0.56);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (index % 4 === 0) {
+                ctx.globalAlpha = this.life * pourAmount * 0.32;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(point.x - size * 0.22, point.y - size * 0.22, size * 0.32, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+
+        ctx.globalAlpha = this.life * pourAmount * 0.32;
+        const soilGlow = ctx.createRadialGradient(this.target.x, this.target.y, 0, this.target.x, this.target.y, 64);
+        soilGlow.addColorStop(0, 'rgba(255, 241, 118, 0.76)');
+        soilGlow.addColorStop(0.42, 'rgba(155, 225, 93, 0.28)');
+        soilGlow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = soilGlow;
+        ctx.beginPath();
+        ctx.ellipse(this.target.x, this.target.y + 8, 58, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    drawBagBody(pourAmount) {
+        const facing = this.side === 1 ? -1 : 1;
+        const tilt = 0.48 * pourAmount;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(facing, 1);
+        ctx.rotate(tilt);
+        ctx.globalAlpha = this.life;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = this.life * 0.2;
+        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, 86);
+        glow.addColorStop(0, 'rgba(255, 241, 118, 0.64)');
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, 86, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = '#f4c25f';
+        ctx.strokeStyle = '#8a5b24';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-34, -34);
+        ctx.quadraticCurveTo(4, -44, 42, -30);
+        ctx.lineTo(36, 32);
+        ctx.quadraticCurveTo(0, 44, -42, 28);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffe7a3';
+        ctx.beginPath();
+        ctx.moveTo(-26, -27);
+        ctx.quadraticCurveTo(4, -34, 32, -24);
+        ctx.lineTo(27, -12);
+        ctx.quadraticCurveTo(4, -19, -23, -13);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#6aba45';
+        ctx.strokeStyle = 'rgba(90, 57, 27, 0.36)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.roundRect?.(-22, -4, 42, 24, 8);
+        if (!ctx.roundRect) {
+            ctx.rect(-22, -4, 42, 24);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#f7ff9c';
+        ctx.beginPath();
+        ctx.ellipse(-2, 8, 13, 6, -0.32, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#3f8f35';
+        ctx.beginPath();
+        ctx.moveTo(-3, 7);
+        ctx.quadraticCurveTo(4, 0, 13, 2);
+        ctx.quadraticCurveTo(6, 10, -3, 7);
+        ctx.fill();
+
+        ctx.fillStyle = '#8a5b24';
+        ctx.beginPath();
+        ctx.moveTo(34, -19);
+        ctx.quadraticCurveTo(56, -10, 69, 1);
+        ctx.lineTo(64, 12);
+        ctx.quadraticCurveTo(48, 7, 31, 3);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#fff1b8';
+        ctx.beginPath();
+        ctx.ellipse(66, 6, 11, 5, 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    draw() {
+        const pourAmount = this.getPourAmount();
+        const mouth = {
+            x: this.x - this.side * (68 + pourAmount * 8),
+            y: this.y + 6 + pourAmount * 16
+        };
+
+        this.drawPelletStream(mouth, pourAmount);
+        this.drawBagBody(pourAmount);
+    }
+}
+
 class RewardSoilPulse {
     constructor(x, y, strength = 1) {
         this.type = 'fertilizer';
@@ -4312,6 +4514,17 @@ function spawnRewardAnimation(type, triggerCount = 1) {
 
         return spawned;
     }
+
+    const pourTarget = {
+        x: anchors.trunkBase.x,
+        y: anchors.trunkBase.y + 16
+    };
+    pushLimitedEffect(
+        rewardEffects,
+        new RewardFertilizerPour(pourTarget.x, pourTarget.y, Math.random() < 0.5 ? -1 : 1, burstScale),
+        effectLimit
+    );
+    spawned += 1;
 
     const pulseCount = Math.min(spawnCount, Math.max(2, safeTriggerCount * 2));
     for (let i = 0; i < pulseCount; i++) {

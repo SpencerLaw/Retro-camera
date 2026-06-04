@@ -680,12 +680,15 @@ runTest('watering and fertilizer rewards spawn visible tree animations', () => {
   api.flashRewardEnergyBonus({ waterBonus: 1, fertilizerBonus: 2, totalBonus: 3 });
   assert.ok(api.getRewardEffectCount('water') > waterSpawned);
   assert.ok(api.getRewardEffectCount('fertilizer') > fertilizerSpawned);
+  api.drawRewardEffects(api.getTreeRenderSize(80, { width: 1280, height: 720 }));
 
   api.resetGame();
   assert.equal(api.getRewardEffectCount(), 0);
   assert.match(script, /class RewardWateringCan/);
   assert.match(script, /new RewardWateringCan/);
   assert.match(script, /class RewardWaterDrop/);
+  assert.match(script, /class RewardFertilizerPour/);
+  assert.match(script, /new RewardFertilizerPour/);
   assert.match(script, /class RewardFertilizerNutrient/);
   assert.match(script, /class RewardSoilPulse/);
   assert.match(script, /drawRewardEffects\(treeSize\)/);

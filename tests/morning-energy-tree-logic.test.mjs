@@ -222,6 +222,7 @@ runTest('morning energy keeps the final tree manifested after quiet moments', ()
   const { api, elements } = loadMorningTree();
   api.STATE.isListening = true;
   api.STATE.energy = 100;
+  api.STATE.visualEnergy = 100;
   api.STATE.currentDB = 38;
   api.STATE.hasManifested = true;
   api.STATE.isSuperMode = false;
@@ -239,14 +240,35 @@ runTest('final energy tree holds its full form after manifesting', () => {
 
   api.STATE.isListening = true;
   api.STATE.energy = 100;
+  api.STATE.visualEnergy = 100;
   api.STATE.currentDB = 60;
   api.triggerSuperMode();
+  api.STATE.visualEnergy = 100;
   api.STATE.finalHoldUntil = Date.now() - 1000;
   api.updateState(1);
 
   assert.equal(api.STATE.energy, 100);
   assert.equal(api.STATE.hasManifested, true);
   assert.equal(elements.get('energy-fill').style.width, '100%');
+});
+
+runTest('top energy bar follows displayed tree growth instead of raw full energy', () => {
+  const { api, elements } = loadMorningTree();
+
+  api.STATE.isListening = true;
+  api.STATE.energy = 100;
+  api.STATE.visualEnergy = 82;
+  api.STATE.currentDB = 80;
+  api.STATE.hasManifested = true;
+
+  api.updateState(1);
+
+  const displayedWidth = Number.parseFloat(elements.get('energy-fill').style.width);
+  assert.equal(api.STATE.energy, 100);
+  assert.ok(api.STATE.visualEnergy > 82);
+  assert.ok(api.STATE.visualEnergy < 90);
+  assert.ok(displayedWidth > 82);
+  assert.ok(displayedWidth < 90);
 });
 
 runTest('final tree dims while quiet and glows when reading is strong', () => {

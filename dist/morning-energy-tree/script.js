@@ -3448,8 +3448,8 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
     STATE.reportPeakEnergy = Math.max(STATE.reportPeakEnergy || 0, Math.round(clampEnergy(STATE.energy)));
 
     if (STATE.energy >= 100 && !STATE.isSuperMode && !STATE.hasManifested) triggerSuperMode();
-    updateVisualEnergy(frameSeconds);
-    energyFill.style.width = STATE.energy + '%';
+    const displayedEnergy = updateVisualEnergy(frameSeconds);
+    energyFill.style.width = `${clampEnergy(displayedEnergy)}%`;
     updateFinalEnergyVisuals();
 }
 

@@ -750,6 +750,59 @@ runTest('competition mode waits for every group before declaring a winner', () =
   assert.equal(api.getNextPendingCompetitionGroup(session).id, 'b');
 });
 
+runTest('class reading mode keeps the group competition panel and supports group rounds', () => {
+  const { api, elements } = loadMorningTree();
+
+  api.STATE.activeMode = api.APP_MODES.CLASS;
+  api.STATE.competitionConfig = api.normalizeCompetitionConfig({
+    groupCount: 3,
+    groups: [
+      { id: 'a', name: '第一组' },
+      { id: 'b', name: '第二组' },
+      { id: 'c', name: '第三组' },
+    ],
+  });
+  api.STATE.activeCompetitionGroupId = 'a';
+  api.renderCompetitionPanel();
+
+  assert.equal(elements.get('competition-panel').classList.contains('hidden'), false);
+  assert.match(elements.get('competition-list').innerHTML, /第一组/);
+  assert.match(elements.get('competition-list').innerHTML, /点击开始/);
+
+  api.startReportSession({ competitionRound: false });
+  assert.equal(api.STATE.competitionRoundActive, false);
+  assert.equal(api.STATE.competitionSession, null);
+  api.finalizeReportSession();
+
+  api.STATE.activeMode = api.APP_MODES.CLASS;
+  api.STATE.competitionConfig = api.normalizeCompetitionConfig({
+    groupCount: 3,
+    groups: [
+      { id: 'a', name: '第一组' },
+      { id: 'b', name: '第二组' },
+      { id: 'c', name: '第三组' },
+    ],
+  });
+  api.STATE.activeCompetitionGroupId = 'a';
+  api.startReportSession({ competitionRound: true });
+  api.STATE.sessionStartedAt = new Date(Date.now() - 12_000).toISOString();
+  api.STATE.curveBuffer = [48, 76, 89, 84];
+  api.STATE.energyCurveBuffer = [0, 18, 32, 45];
+  api.updateCompetitionSessionMetrics(api.STATE.competitionSession, 'a', {
+    currentDB: 89,
+    deltaSeconds: 5,
+    isAboveReadingThreshold: true,
+    isReadingLoudly: true,
+  });
+  api.finalizeReportSession();
+
+  assert.equal(api.STATE.activeMode, api.APP_MODES.CLASS);
+  assert.equal(api.STATE.competitionLastResult.isComplete, false);
+  assert.equal(api.STATE.competitionLastResult.completedCount, 1);
+  assert.equal(api.STATE.competitionLastResult.winnerName, null);
+  assert.equal(api.STATE.activeCompetitionGroupId, 'b');
+});
+
 runTest('finalized reports create a local forest day snapshot', () => {
   const { api } = loadMorningTree();
   const startedAt = new Date('2026-05-30T07:30:00+08:00').toISOString();

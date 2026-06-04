@@ -464,6 +464,8 @@ runTest('tree lifecycle stages are fine grained from seed to final energy tree',
 
   const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
   assert.match(script, /BLOOM_TREE_FINAL_COLORS/);
+  assert.match(script, /const isFinalTree = stage\?\.key === 'final'/);
+  assert.match(script, /densityBoost = stage\?\.key === 'final' \? 1\.55/);
   assert.match(script, /drawBloomingEnergyTree\(canvas\.width \/ 2, canvas\.height - 20, treeSize, lifecycleStage, renderMode\)/);
 });
 

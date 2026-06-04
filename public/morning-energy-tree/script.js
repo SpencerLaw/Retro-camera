@@ -125,7 +125,7 @@ const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
 const REWARD_WATER_COLORS = ['#8deeff', '#5bd6ff', '#c9f8ff', '#7df9ff'];
 const REWARD_FERTILIZER_COLORS = ['#fff176', '#d8ff66', '#9be15d', '#ffcc80'];
 const BLOOM_TREE_LEAF_COLORS = ['#4caf50', '#66bb6a', '#81c784', '#a5d6a7', '#7ed957'];
-const BLOOM_TREE_FINAL_COLORS = ['#48b86a', '#6edb76', '#99e17f', '#f7e98d', '#ffe7a3'];
+const BLOOM_TREE_FINAL_COLORS = ['#2fbf5f', '#43c96a', '#5ed979', '#7ee08b', '#a8ed90'];
 const BLOOM_TREE_FLOWER_COLORS = ['#ffd1f5', '#ffb7dc', '#fff3a3', '#ffcc80', '#ffffff'];
 const FX_LIMITS = {
     sparkles: 88,
@@ -4830,8 +4830,10 @@ function drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, la
     if (!cluster) return;
     const stageIndex = Math.max(0, Number(stage?.index) || 0);
     const bloomStrength = clamp((stageIndex - 2) / 4, 0.28, 1);
-    const alpha = (layer === 'back' ? 0.78 : 0.92) * bloomStrength;
-    const blobCountBase = layer === 'back' ? 12 : 10;
+    const densityBoost = stage?.key === 'final' ? 1.55 : stage?.key === 'fruit' ? 1.18 : 1;
+    const sizeBoost = stage?.key === 'final' ? 1.18 : 1;
+    const alpha = Math.min(0.98, (layer === 'back' ? 0.82 : 0.94) * bloomStrength * (stage?.key === 'final' ? 1.08 : 1));
+    const blobCountBase = Math.round((layer === 'back' ? 14 : 12) * densityBoost);
     const blobCount = renderMode.ultraLowPower
         ? Math.ceil(blobCountBase * 0.42)
         : renderMode.lowPower
@@ -4848,8 +4850,8 @@ function drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, la
         const ring = 0.18 + seededUnit(seed + 2.4) * 0.82;
         const x = cluster.x + Math.cos(angle) * cluster.rx * ring;
         const y = cluster.y + Math.sin(angle) * cluster.ry * ring + Math.sin(frameTime * 0.8 + seed) * (layer === 'back' ? 1.2 : 2.2);
-        const w = cluster.rx * (0.34 + seededUnit(seed + 4.1) * 0.32);
-        const h = cluster.ry * (0.32 + seededUnit(seed + 5.7) * 0.34);
+        const w = cluster.rx * sizeBoost * (0.34 + seededUnit(seed + 4.1) * 0.32);
+        const h = cluster.ry * sizeBoost * (0.32 + seededUnit(seed + 5.7) * 0.34);
         const color = palette[Math.floor(seededUnit(seed + 8.9) * palette.length)] || palette[0];
 
         ctx.fillStyle = color;
@@ -4939,17 +4941,21 @@ function drawBloomTreeFruit(cluster, stage, renderMode, frameTime) {
 function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { lowPower: false, ultraLowPower: false }) {
     const frameTime = (STATE.frameNow || Date.now()) / 1000;
     const stageIndex = Math.max(2, Number(stage?.index) || 2);
-    const heightBoost = stage?.key === 'final' ? 0.18 : 0;
+    const isFinalTree = stage?.key === 'final';
+    const heightBoost = isFinalTree ? 0.46 : 0;
     const treeHeight = Math.min(
-        canvas.height * 0.67,
+        canvas.height * (isFinalTree ? 0.74 : 0.67),
         Math.max(118, treeSize * (2.15 + stageIndex * 0.13 + heightBoost))
     );
-    const spread = Math.min(canvas.width * 0.34, Math.max(treeSize * 0.95, treeHeight * 0.58));
-    const trunkBaseWidth = Math.max(11, treeSize * 0.11);
+    const spread = Math.min(
+        canvas.width * (isFinalTree ? 0.43 : 0.34),
+        Math.max(treeSize * (isFinalTree ? 1.24 : 0.95), treeHeight * (isFinalTree ? 0.78 : 0.58))
+    );
+    const trunkBaseWidth = Math.max(isFinalTree ? 17 : 11, treeSize * (isFinalTree ? 0.15 : 0.11));
     const sway = Math.sin(frameTime * 0.72) * (STATE.isListening ? Math.min(8, Math.max(1.5, (STATE.currentDB - 58) * 0.12)) : 1.6);
     const palette = getBloomTreePalette(stage);
 
-    const branchColor = stage?.key === 'final'
+    const branchColor = isFinalTree
         ? { dark: '#44312a', mid: '#6f4b3a', light: '#9b7045' }
         : { dark: '#3f2b25', mid: '#6d4c41', light: '#8d6e63' };
     const trunkTop = { x: sway * 0.28 - spread * 0.02, y: -treeHeight * 0.72 };
@@ -4960,18 +4966,33 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
         { s: { x: spread * 0.01, y: -treeHeight * 0.5 }, c: { x: spread * 0.2 + sway * 0.15, y: -treeHeight * 0.68 }, e: { x: spread * 0.4 + sway * 0.3, y: -treeHeight * 0.84 }, sw: 0.32, ew: 0.11 },
         { s: { x: trunkTop.x, y: trunkTop.y + treeHeight * 0.08 }, c: { x: -spread * 0.08 + sway * 0.15, y: -treeHeight * 0.88 }, e: { x: -spread * 0.02 + sway * 0.24, y: -treeHeight * 0.99 }, sw: 0.28, ew: 0.1 },
         { s: { x: -spread * 0.24, y: -treeHeight * 0.7 }, c: { x: -spread * 0.55 + sway * 0.18, y: -treeHeight * 0.76 }, e: { x: -spread * 0.66 + sway * 0.25, y: -treeHeight * 0.68 }, sw: 0.18, ew: 0.08 },
-        { s: { x: spread * 0.25, y: -treeHeight * 0.7 }, c: { x: spread * 0.52 + sway * 0.18, y: -treeHeight * 0.75 }, e: { x: spread * 0.68 + sway * 0.25, y: -treeHeight * 0.66 }, sw: 0.18, ew: 0.08 }
+        { s: { x: spread * 0.25, y: -treeHeight * 0.7 }, c: { x: spread * 0.52 + sway * 0.18, y: -treeHeight * 0.75 }, e: { x: spread * 0.68 + sway * 0.25, y: -treeHeight * 0.66 }, sw: 0.18, ew: 0.08 },
+        { s: { x: -spread * 0.04, y: -treeHeight * 0.58 }, c: { x: -spread * 0.34 + sway * 0.18, y: -treeHeight * 0.72 }, e: { x: -spread * 0.58 + sway * 0.28, y: -treeHeight * 0.88 }, sw: 0.22, ew: 0.08 },
+        { s: { x: spread * 0.05, y: -treeHeight * 0.58 }, c: { x: spread * 0.34 + sway * 0.18, y: -treeHeight * 0.72 }, e: { x: spread * 0.58 + sway * 0.28, y: -treeHeight * 0.88 }, sw: 0.22, ew: 0.08 }
     ];
     const clusters = [
-        { x: -spread * 0.54 + sway * 0.24, y: -treeHeight * 0.58, rx: spread * 0.2, ry: treeHeight * 0.105, seed: 1.1 },
-        { x: spread * 0.56 + sway * 0.2, y: -treeHeight * 0.6, rx: spread * 0.22, ry: treeHeight * 0.11, seed: 2.6 },
-        { x: -spread * 0.34 + sway * 0.2, y: -treeHeight * 0.84, rx: spread * 0.2, ry: treeHeight * 0.12, seed: 4.2 },
-        { x: spread * 0.34 + sway * 0.2, y: -treeHeight * 0.84, rx: spread * 0.2, ry: treeHeight * 0.12, seed: 5.7 },
-        { x: -spread * 0.02 + sway * 0.16, y: -treeHeight * 0.98, rx: spread * 0.22, ry: treeHeight * 0.13, seed: 7.5 },
-        { x: -spread * 0.05 + sway * 0.1, y: -treeHeight * 0.68, rx: spread * 0.17, ry: treeHeight * 0.095, seed: 9.9 },
-        { x: spread * 0.1 + sway * 0.08, y: -treeHeight * 0.72, rx: spread * 0.16, ry: treeHeight * 0.09, seed: 11.4 }
+        { x: -spread * 0.62 + sway * 0.24, y: -treeHeight * 0.57, rx: spread * 0.24, ry: treeHeight * 0.13, seed: 1.1 },
+        { x: spread * 0.64 + sway * 0.2, y: -treeHeight * 0.59, rx: spread * 0.25, ry: treeHeight * 0.13, seed: 2.6 },
+        { x: -spread * 0.42 + sway * 0.2, y: -treeHeight * 0.82, rx: spread * 0.25, ry: treeHeight * 0.15, seed: 4.2 },
+        { x: spread * 0.42 + sway * 0.2, y: -treeHeight * 0.82, rx: spread * 0.25, ry: treeHeight * 0.15, seed: 5.7 },
+        { x: -spread * 0.02 + sway * 0.16, y: -treeHeight * 0.99, rx: spread * 0.3, ry: treeHeight * 0.17, seed: 7.5 },
+        { x: -spread * 0.08 + sway * 0.1, y: -treeHeight * 0.67, rx: spread * 0.24, ry: treeHeight * 0.13, seed: 9.9 },
+        { x: spread * 0.12 + sway * 0.08, y: -treeHeight * 0.7, rx: spread * 0.22, ry: treeHeight * 0.12, seed: 11.4 },
+        { x: -spread * 0.72 + sway * 0.2, y: -treeHeight * 0.42, rx: spread * 0.18, ry: treeHeight * 0.095, seed: 13.2 },
+        { x: spread * 0.74 + sway * 0.18, y: -treeHeight * 0.43, rx: spread * 0.18, ry: treeHeight * 0.095, seed: 15.4 },
+        { x: -spread * 0.22 + sway * 0.12, y: -treeHeight * 0.52, rx: spread * 0.2, ry: treeHeight * 0.11, seed: 17.6 },
+        { x: spread * 0.28 + sway * 0.1, y: -treeHeight * 0.52, rx: spread * 0.2, ry: treeHeight * 0.11, seed: 19.8 }
     ];
-    const visibleClusters = stageIndex >= 5 ? clusters : stageIndex >= 4 ? clusters.slice(0, 6) : stageIndex >= 3 ? clusters.slice(0, 5) : [];
+    const visibleBranches = isFinalTree ? branchDefs : branchDefs.slice(0, 7);
+    const visibleClusters = isFinalTree
+        ? clusters
+        : stageIndex >= 5
+            ? clusters.slice(0, 8)
+            : stageIndex >= 4
+                ? clusters.slice(0, 6)
+                : stageIndex >= 3
+                    ? clusters.slice(0, 5)
+                    : [];
 
     ctx.save();
     ctx.translate(startX, startY);
@@ -4995,7 +5016,7 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
         branchColor
     );
 
-    branchDefs.forEach((branch, index) => {
+    visibleBranches.forEach((branch, index) => {
         const widthScale = index > 4 ? 0.72 : 1;
         drawTaperedBranch(
             branch.s,

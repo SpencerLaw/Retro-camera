@@ -116,7 +116,10 @@ const STATE = {
     competitionLastRenderAt: 0,
     rewardLastRenderAt: 0,
     activeRewardHelp: null,
-    frameNow: 0
+    frameNow: 0,
+    renderFrameId: 0,
+    renderFrameMs: 16.7,
+    renderQuality: 'high'
 };
 
 // Aesthetic Config
@@ -137,11 +140,22 @@ const TREE_SOIL_COLORS = {
     root: '#d0ad72'
 };
 const FX_LIMITS = {
-    sparkles: 88,
-    energyParticles: 22,
-    trunkTransfers: 16,
-    soilTransfers: 18,
-    rewardEffects: 120
+    sparkles: 64,
+    energyParticles: 16,
+    trunkTransfers: 10,
+    soilTransfers: 12,
+    rewardEffects: 140
+};
+const RENDER_QUALITY_SCALE = {
+    high: 1,
+    balanced: 0.82,
+    low: 0.62,
+    ultra: 0.44
+};
+const RENDER_FRAME_THRESHOLDS_MS = {
+    high: 19,
+    balanced: 25,
+    low: 36
 };
 const MEADOW_PETAL_COLORS = ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71', '#9ff4ff', '#ffc5df', '#ffffff', '#f8a9ff'];
 const MEADOW_GRASS_COLORS = ['#6fcf61', '#78d870', '#92df72', '#50b96a'];
@@ -194,6 +208,52 @@ function getFrameDeltaSeconds(now = Date.now()) {
     if (!STATE.lastFrameAt) return FRAME_DELTA_FALLBACK_SECONDS;
     const elapsedSeconds = normalizeDeltaSeconds((now - STATE.lastFrameAt) / 1000);
     return Math.min(elapsedSeconds, MAX_FRAME_DELTA_SECONDS);
+}
+
+function getHardwareRenderPressure() {
+    const cores = typeof navigator !== 'undefined' ? Number(navigator.hardwareConcurrency) : NaN;
+    const memory = typeof navigator !== 'undefined' ? Number(navigator.deviceMemory) : NaN;
+    const viewportPixels = typeof window !== 'undefined'
+        ? (Number(window.innerWidth) || 0) * (Number(window.innerHeight) || 0)
+        : 0;
+
+    let pressure = 0;
+    if (Number.isFinite(cores) && cores > 0 && cores <= 4) pressure += 10;
+    if (Number.isFinite(memory) && memory > 0 && memory <= 4) pressure += 8;
+    if (viewportPixels > 1_800_000) pressure += 4;
+    return pressure;
+}
+
+function updateRenderPerformance(rawDeltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
+    const rawMs = clamp(normalizeDeltaSeconds(rawDeltaSeconds) * 1000, 8, 120);
+    const previous = Number.isFinite(STATE.renderFrameMs) ? STATE.renderFrameMs : 16.7;
+    const frameMs = (previous * 0.88) + (rawMs * 0.12);
+    const hardwarePressure = getHardwareRenderPressure();
+
+    STATE.renderFrameMs = frameMs;
+    STATE.renderFrameId = (STATE.renderFrameId || 0) + 1;
+
+    if (frameMs + hardwarePressure >= RENDER_FRAME_THRESHOLDS_MS.low) {
+        STATE.renderQuality = 'ultra';
+    } else if (frameMs + hardwarePressure >= RENDER_FRAME_THRESHOLDS_MS.balanced) {
+        STATE.renderQuality = 'low';
+    } else if (frameMs + hardwarePressure >= RENDER_FRAME_THRESHOLDS_MS.high) {
+        STATE.renderQuality = 'balanced';
+    } else {
+        STATE.renderQuality = 'high';
+    }
+
+    return STATE.renderQuality;
+}
+
+function getRenderQualityScale(quality = STATE.renderQuality) {
+    return RENDER_QUALITY_SCALE[quality] || RENDER_QUALITY_SCALE.high;
+}
+
+function getRenderPerformancePenalty() {
+    const frameMs = Number.isFinite(STATE.renderFrameMs) ? STATE.renderFrameMs : 16.7;
+    const framePressure = Math.max(0, frameMs - 18) * 1.25;
+    return framePressure + getHardwareRenderPressure();
 }
 
 function getNextEnergy(currentEnergy, currentDB, baseGrowthRate, options = {}) {
@@ -3512,6 +3572,12 @@ const soilTransfers = [];
 const rewardEffects = [];
 const meadowPlants = [];
 const meadowCritters = [];
+const meadowCache = {
+    version: 0,
+    bloomingFlowersFrame: -1,
+    bloomingFlowersVersion: -1,
+    bloomingFlowers: []
+};
 
 function pushLimitedEffect(queue, item, maxSize) {
     if (!item) return;
@@ -3526,6 +3592,31 @@ function spawnSparkle(x, y, color = '#fff') {
     pushLimitedEffect(sparkles, new Sparkle(x, y, color), getFxLimit('sparkles'));
 }
 
+function invalidateMeadowFlowerCache() {
+    meadowCache.version += 1;
+    meadowCache.bloomingFlowersFrame = -1;
+}
+
+function getBloomingMeadowFlowers() {
+    const frameId = STATE.renderFrameId || 0;
+    if (
+        meadowCache.bloomingFlowersFrame === frameId
+        && meadowCache.bloomingFlowersVersion === meadowCache.version
+    ) {
+        return meadowCache.bloomingFlowers;
+    }
+
+    meadowCache.bloomingFlowersFrame = frameId;
+    meadowCache.bloomingFlowersVersion = meadowCache.version;
+    meadowCache.bloomingFlowers = meadowPlants.filter(plant => (
+        plant.kind === 'flower'
+        && !plant.protectSapling
+        && (Number(plant.bloomOpen) || 0) > 0.32
+        && (Number(plant.growth) || 0) > 0.42
+    ));
+    return meadowCache.bloomingFlowers;
+}
+
 function getFxLoad() {
     return energyParticles.length + trunkTransfers.length + soilTransfers.length + (rewardEffects.length * 0.65) + (sparkles.length * 0.3);
 }
@@ -3534,13 +3625,19 @@ function getRenderMode(treeSize = 0) {
     const fxLoad = getFxLoad();
     const energyPressure = Math.max(0, STATE.energy - 72) * 0.24;
     const treePressure = Math.max(0, treeSize - 188) / 13;
-    const totalPressure = fxLoad + energyPressure + treePressure;
+    const performancePenalty = getRenderPerformancePenalty();
+    const quality = STATE.renderQuality || 'high';
+    const qualityScale = getRenderQualityScale(quality);
+    const totalPressure = fxLoad + energyPressure + treePressure + performancePenalty;
 
     return {
         fxLoad,
+        performancePenalty,
         totalPressure,
-        lowPower: totalPressure > 48,
-        ultraLowPower: totalPressure > 64
+        quality,
+        qualityScale,
+        lowPower: totalPressure > 44 || quality === 'low' || quality === 'ultra',
+        ultraLowPower: totalPressure > 58 || quality === 'ultra'
     };
 }
 
@@ -3548,9 +3645,27 @@ function getFxLimit(type, treeSize = 0) {
     const renderMode = getRenderMode(treeSize);
     const baseLimit = FX_LIMITS[type];
     if (!baseLimit) return 0;
-    if (renderMode.ultraLowPower) return Math.max(8, Math.round(baseLimit * 0.72));
-    if (renderMode.lowPower) return Math.max(10, Math.round(baseLimit * 0.9));
-    return baseLimit;
+    if (type === 'rewardEffects') {
+        if (renderMode.ultraLowPower) return Math.max(118, Math.round(baseLimit * 0.84));
+        if (renderMode.lowPower) return Math.max(124, Math.round(baseLimit * 0.9));
+        return baseLimit;
+    }
+    if (renderMode.ultraLowPower) return Math.max(5, Math.round(baseLimit * 0.42));
+    if (renderMode.lowPower) return Math.max(7, Math.round(baseLimit * 0.68));
+    return Math.max(8, Math.round(baseLimit * renderMode.qualityScale));
+}
+
+function trimEffectQueue(queue, maxSize) {
+    if (!queue || !Number.isFinite(maxSize) || queue.length <= maxSize) return;
+    queue.splice(0, queue.length - maxSize);
+}
+
+function trimVisualEffectQueues(treeSize = 0) {
+    trimEffectQueue(sparkles, getFxLimit('sparkles', treeSize));
+    trimEffectQueue(energyParticles, getFxLimit('energyParticles', treeSize));
+    trimEffectQueue(trunkTransfers, getFxLimit('trunkTransfers', treeSize));
+    trimEffectQueue(soilTransfers, getFxLimit('soilTransfers', treeSize));
+    trimEffectQueue(rewardEffects, getFxLimit('rewardEffects', treeSize));
 }
 
 function shouldRenderCanopyCluster(depth, len, angle, renderMode) {
@@ -3858,6 +3973,7 @@ class Dragonfly {
     }
 
     drawDragonflyWing(anchorX, anchorY, length, width, angle, beat, color) {
+        const simplified = STATE.renderQuality === 'ultra';
         ctx.save();
         ctx.translate(anchorX, anchorY);
         ctx.rotate(angle + beat * 0.16);
@@ -3868,6 +3984,11 @@ class Dragonfly {
         ctx.ellipse(length * 0.42, 0, length * 0.48, width * (0.82 + Math.abs(beat) * 0.18), 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
+
+        if (simplified) {
+            ctx.restore();
+            return;
+        }
 
         ctx.strokeStyle = color;
         ctx.globalAlpha = 0.52;
@@ -3883,7 +4004,8 @@ class Dragonfly {
         ctx.restore();
     }
 
-    draw() {
+    draw(renderMode = null) {
+        const simplified = renderMode?.ultraLowPower || STATE.renderQuality === 'ultra';
         const frontWingBeat = Math.sin(this.wingBeat);
         const rearWingBeat = Math.sin(this.wingBeat + Math.PI * 0.62);
         const bodyTilt = Math.sin(this.phase * 1.3) * 0.08;
@@ -3910,8 +4032,9 @@ class Dragonfly {
         ctx.quadraticCurveTo(-10, Math.sin(this.phase) * 2, 13, 0);
         ctx.stroke();
 
-        for (let i = 0; i < 8; i++) {
-            const t = i / 7;
+        const bodySegments = simplified ? 5 : 8;
+        for (let i = 0; i < bodySegments; i++) {
+            const t = bodySegments <= 1 ? 0 : i / (bodySegments - 1);
             const x = -29 + t * 34;
             const radius = 3.2 - t * 1.4;
             ctx.fillStyle = i % 2 === 0 ? this.hue : '#49b8a7';
@@ -4076,12 +4199,7 @@ class Bee {
     }
 
     getBloomingFlowers() {
-        return meadowPlants.filter(plant => (
-            plant.kind === 'flower'
-            && !plant.protectSapling
-            && (Number(plant.bloomOpen) || 0) > 0.32
-            && (Number(plant.growth) || 0) > 0.42
-        ));
+        return getBloomingMeadowFlowers();
     }
 
     getFlowerPoint(plant = this.targetFlower) {
@@ -4102,11 +4220,19 @@ class Bee {
             return null;
         }
 
-        const nearby = flowers
-            .map(plant => ({ plant, dist: Math.abs(plant.x - this.x) + Math.abs(this.getFlowerPoint(plant).y - this.y) * 0.35 }))
-            .sort((a, b) => a.dist - b.dist)
-            .slice(0, 8);
-        const pick = nearby[Math.floor(Math.random() * nearby.length)]?.plant || flowers[0];
+        const sampleCount = Math.min(flowers.length, STATE.renderQuality === 'high' ? 8 : 5);
+        let bestPlant = flowers[Math.floor(Math.random() * flowers.length)] || flowers[0];
+        let bestDistance = Infinity;
+        for (let i = 0; i < sampleCount; i++) {
+            const plant = flowers[(Math.floor(Math.random() * flowers.length) + i) % flowers.length];
+            const point = this.getFlowerPoint(plant);
+            const dist = Math.abs(plant.x - this.x) + Math.abs(point.y - this.y) * 0.35;
+            if (dist < bestDistance) {
+                bestDistance = dist;
+                bestPlant = plant;
+            }
+        }
+        const pick = bestPlant || flowers[0];
         this.targetFlower = pick;
         this.mode = 'forage';
         this.nectarFrames = 0;
@@ -4156,7 +4282,8 @@ class Bee {
         }
     }
 
-    draw() {
+    draw(renderMode = null) {
+        const simplified = renderMode?.ultraLowPower || STATE.renderQuality === 'ultra';
         const wingScale = 0.74 + Math.abs(Math.sin(this.wingBeat)) * 0.34;
         const flowerPoint = this.mode === 'nectar' ? this.getFlowerPoint() : null;
 
@@ -4180,14 +4307,16 @@ class Bee {
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#3d2a16';
         ctx.lineWidth = 1.7;
-        for (let i = 0; i < 3; i++) {
-            const legX = -4 + i * 5;
-            ctx.beginPath();
-            ctx.moveTo(legX, 5);
-            ctx.quadraticCurveTo(legX - 2, 12, legX - 7, 15 + Math.sin(this.phase + i) * 2);
-            ctx.moveTo(legX + 2, 5);
-            ctx.quadraticCurveTo(legX + 4, 12, legX + 8, 14 + Math.cos(this.phase + i) * 2);
-            ctx.stroke();
+        if (!simplified) {
+            for (let i = 0; i < 3; i++) {
+                const legX = -4 + i * 5;
+                ctx.beginPath();
+                ctx.moveTo(legX, 5);
+                ctx.quadraticCurveTo(legX - 2, 12, legX - 7, 15 + Math.sin(this.phase + i) * 2);
+                ctx.moveTo(legX + 2, 5);
+                ctx.quadraticCurveTo(legX + 4, 12, legX + 8, 14 + Math.cos(this.phase + i) * 2);
+                ctx.stroke();
+            }
         }
 
         ctx.fillStyle = '#f6c441';
@@ -4212,14 +4341,16 @@ class Bee {
         ctx.ellipse(17, 0, 6.5, 6, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = '#3a2815';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(20, -4);
-        ctx.quadraticCurveTo(25, -9, 28, -13);
-        ctx.moveTo(20, 4);
-        ctx.quadraticCurveTo(25, 9, 28, 13);
-        ctx.stroke();
+        if (!simplified) {
+            ctx.strokeStyle = '#3a2815';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(20, -4);
+            ctx.quadraticCurveTo(25, -9, 28, -13);
+            ctx.moveTo(20, 4);
+            ctx.quadraticCurveTo(25, 9, 28, 13);
+            ctx.stroke();
+        }
 
         if (this.pollenLoad > 0.08) {
             ctx.fillStyle = '#ffd95a';
@@ -4229,7 +4360,7 @@ class Bee {
             ctx.fill();
         }
 
-        if (flowerPoint) {
+        if (flowerPoint && !simplified) {
             const localX = (flowerPoint.x - this.x) * this.direction / this.size;
             const localY = (flowerPoint.y - this.y) / this.size;
             ctx.strokeStyle = 'rgba(78, 42, 20, 0.78)';
@@ -4311,8 +4442,23 @@ function drawEnergyAura(x, y, radius, color, alpha = 0.2) {
     if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(radius) || radius <= 0) return;
 
     const safeAlpha = Number.isFinite(alpha) ? Math.max(0, alpha) : 0.2;
+    const quality = STATE.renderQuality || 'high';
+    if (quality === 'ultra' && radius < 8 && safeAlpha < 0.08) return;
+
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
+
+    if (quality === 'low' || quality === 'ultra') {
+        const qualityScale = quality === 'ultra' ? 1.35 : 1.75;
+        ctx.globalAlpha = safeAlpha * (quality === 'ultra' ? 0.72 : 0.86);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, radius * qualityScale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        return;
+    }
+
     ctx.globalAlpha = safeAlpha;
 
     const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 2.6);
@@ -4328,8 +4474,8 @@ function drawEnergyAura(x, y, radius, color, alpha = 0.2) {
 
 function drawParticleTrail(points, color, baseSize, alpha = 0.7) {
     if (points.length < 2) return;
-    const renderMode = getRenderMode();
-    const step = renderMode.ultraLowPower ? 2 : 1;
+    const quality = STATE.renderQuality || 'high';
+    const step = quality === 'ultra' ? 3 : quality === 'low' ? 2 : 1;
 
     for (let i = 0; i < points.length; i += step) {
         const point = points[i];
@@ -4400,6 +4546,25 @@ class SkyEnergy {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
         drawParticleTrail(this.history, this.hue, this.size, Math.max(0.18, this.life * 0.68));
+
+        const quality = STATE.renderQuality || 'high';
+        if (quality === 'low' || quality === 'ultra') {
+            ctx.globalAlpha = Math.max(0.28, this.life * 0.7);
+            ctx.fillStyle = this.hue;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * (quality === 'ultra' ? 1.25 : 1.7), 0, Math.PI * 2);
+            ctx.fill();
+
+            if (quality !== 'ultra') {
+                ctx.globalAlpha = Math.min(0.9, this.life + 0.1);
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, Math.max(1, this.size * 0.38), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+            return;
+        }
 
         ctx.globalAlpha = Math.max(0.22, this.life * 0.78);
         const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 5.2);
@@ -4486,6 +4651,17 @@ class TrunkTransfer {
         ctx.globalCompositeOperation = 'screen';
         drawParticleTrail(this.history, this.color, this.size * 0.9, this.life * 0.76);
 
+        const quality = STATE.renderQuality || 'high';
+        if (quality === 'low' || quality === 'ultra') {
+            ctx.globalAlpha = Math.min(1, this.life + 0.08);
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(head.x, head.y, this.size * (quality === 'ultra' ? 0.9 : 1.15), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            return;
+        }
+
         ctx.globalAlpha = this.life;
         const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, this.size * 4.6);
         glow.addColorStop(0, '#ffffff');
@@ -4548,6 +4724,17 @@ class SoilTransfer {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
         drawParticleTrail(this.history, this.color, this.size * 0.82, this.life * 0.64);
+
+        const quality = STATE.renderQuality || 'high';
+        if (quality === 'low' || quality === 'ultra') {
+            ctx.globalAlpha = this.life * 0.86;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(head.x, head.y, this.size * (quality === 'ultra' ? 0.9 : 1.1), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            return;
+        }
 
         ctx.globalAlpha = this.life * 0.82;
         const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, this.size * 3.8);
@@ -5364,6 +5551,7 @@ function unlockMeadowFlower(plant, petalPalette = MEADOW_PETAL_COLORS) {
     plant.bloomSize = plant.baseBloomSize || plant.bloomSize || 6;
     plant.bloomCount = plant.baseBloomCount || plant.bloomCount || 1;
     plant.petalColor = plant.petalColor || petalPalette[Math.floor(Math.random() * petalPalette.length)];
+    invalidateMeadowFlowerCache();
     return true;
 }
 
@@ -5453,6 +5641,7 @@ function createMeadowPlant(x, layer, index, petalPalette) {
 
 function initMeadowPlants() {
     meadowPlants.length = 0;
+    invalidateMeadowFlowerCache();
     const layerCounts = [
         Math.round(clamp(canvas.width / 30, 32, 54)),
         Math.round(clamp(canvas.width / 24, 42, 70)),
@@ -5469,6 +5658,7 @@ function initMeadowPlants() {
     });
 
     meadowPlants.sort((a, b) => a.baseY - b.baseY);
+    invalidateMeadowFlowerCache();
 }
 
 function initMeadowCritters() {
@@ -6215,7 +6405,16 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     ctx.restore();
 }
 
-function drawFlowerPlant(plant, sway, lowPowerMode = false) {
+function shouldDrawMeadowAura(renderMode, plant, index) {
+    const pulse = Number(plant?.pulse) || 0;
+    if (!renderMode?.lowPower) return true;
+    if (pulse > 0.22 || plant?.kind === 'flower') return true;
+    if (renderMode.ultraLowPower) return index % 5 === 0;
+    return index % 3 === 0;
+}
+
+function drawFlowerPlant(plant, sway, renderMode = { lowPower: false, ultraLowPower: false }) {
+    const lowPowerMode = Boolean(renderMode?.lowPower);
     const growth = plant.growth;
     const bloomOpen = clamp(Number(plant.bloomOpen) || 0, 0, 1);
     const stemHeight = plant.stemHeight * growth;
@@ -6252,7 +6451,15 @@ function drawFlowerPlant(plant, sway, lowPowerMode = false) {
     if (growth < 0.42 || bloomOpen <= 0.02) return;
 
     const blossomSize = plant.bloomSize * growth * (0.24 + bloomOpen * 0.76);
-    drawEnergyAura(bloomX, bloomY, 4 + bloomOpen * 4 + plant.pulse * 6, plant.energyColor, 0.03 + bloomOpen * 0.04 + plant.pulse * 0.07);
+    if (!renderMode.ultraLowPower || plant.pulse > 0.16 || bloomOpen > 0.6) {
+        drawEnergyAura(
+            bloomX,
+            bloomY,
+            (renderMode.ultraLowPower ? 3.5 : 4) + bloomOpen * 4 + plant.pulse * 5,
+            plant.energyColor,
+            (renderMode.ultraLowPower ? 0.018 : 0.03) + bloomOpen * 0.035 + plant.pulse * 0.055
+        );
+    }
 
     if (bloomOpen < 0.18) {
         ctx.save();
@@ -6281,10 +6488,11 @@ function drawFlowerPlant(plant, sway, lowPowerMode = false) {
     }
 }
 
-function drawMeadowPlants() {
+function drawMeadowPlants(renderMode = getRenderMode(80 + (STATE.energy * 1.6))) {
     const passiveGrowth = STATE.isListening ? Math.max(0, (STATE.currentDB - 56) / 14000) : 0;
-    const time = Date.now() / 950;
-    const lowPowerMode = getRenderMode(80 + (STATE.energy * 1.6)).lowPower;
+    const time = (STATE.frameNow || Date.now()) / 950;
+    const lowPowerMode = renderMode.lowPower;
+    let flowerCacheDirty = false;
 
     meadowPlants.forEach((plant, index) => {
         const baseGrowth = Number.isFinite(plant.growth) ? plant.growth : 0;
@@ -6297,26 +6505,36 @@ function drawMeadowPlants() {
         if (plant.growth < 0.03) return;
 
         const layer = Number.isFinite(plant.layer) ? plant.layer : 1;
+        if (renderMode.ultraLowPower && plant.kind === 'grass' && plant.pulse < 0.08 && layer === 0 && index % 2 === 1) return;
+
         const layerAlpha = lowPowerMode ? 0.72 : 0.66 + layer * 0.14;
         const sway = Math.sin(time + plant.swayPhase + index * 0.18) * (lowPowerMode ? 2.4 : 2.2 + layer * 1.1 + plant.growth * 3.4);
-        drawEnergyAura(
-            plant.x,
-            plant.baseY - 4,
-            (lowPowerMode ? 3.6 : 5) + plant.pulse * (lowPowerMode ? 4.2 : 7),
-            plant.energyColor,
-            (lowPowerMode ? 0.025 : 0.04) + plant.pulse * (lowPowerMode ? 0.03 : 0.06)
-        );
+        if (shouldDrawMeadowAura(renderMode, plant, index)) {
+            drawEnergyAura(
+                plant.x,
+                plant.baseY - 4,
+                (lowPowerMode ? 3.6 : 5) + plant.pulse * (lowPowerMode ? 4.2 : 7),
+                plant.energyColor,
+                (lowPowerMode ? 0.018 : 0.04) + plant.pulse * (lowPowerMode ? 0.026 : 0.06)
+            );
+        }
 
         ctx.save();
         ctx.globalAlpha = clamp(layerAlpha + plant.pulse * 0.16, 0.52, 1);
         ctx.lineCap = 'round';
         if (plant.kind === 'flower') {
-            plant.bloomOpen = Math.min(1, (Number(plant.bloomOpen) || 0) + 0.006 + plant.pulse * 0.018 + passiveGrowth * 0.18);
-            drawFlowerPlant(plant, sway, lowPowerMode);
+            const nextBloomOpen = Math.min(1, (Number(plant.bloomOpen) || 0) + 0.006 + plant.pulse * 0.018 + passiveGrowth * 0.18);
+            if (nextBloomOpen !== plant.bloomOpen) flowerCacheDirty = true;
+            plant.bloomOpen = nextBloomOpen;
+            drawFlowerPlant(plant, sway, renderMode);
         } else {
             drawGrassBlade(plant, sway, 1);
-            drawGrassBlade(plant, sway * 0.72 - 6, 0.82);
-            drawGrassBlade(plant, sway * 0.65 + 5, 0.74);
+            if (!renderMode.ultraLowPower || plant.pulse > 0.16 || layer >= 1) {
+                drawGrassBlade(plant, sway * 0.72 - 6, 0.82);
+            }
+            if (!renderMode.lowPower || plant.pulse > 0.22 || layer >= 2) {
+                drawGrassBlade(plant, sway * 0.65 + 5, 0.74);
+            }
             if (!lowPowerMode && (plant.growth > 0.42 || plant.pulse > 0.24 || layer >= 2)) {
                 drawGrassBlade(plant, sway * 0.38 + 8, 0.62);
             }
@@ -6326,14 +6544,20 @@ function drawMeadowPlants() {
         }
         ctx.restore();
     });
+
+    if (flowerCacheDirty) invalidateMeadowFlowerCache();
 }
 
-function drawMeadowCritters() {
+function drawMeadowCritters(renderMode = getRenderMode()) {
     if (!meadowCritters.length) return;
+    const frameId = STATE.renderFrameId || 0;
 
     meadowCritters.forEach(critter => {
-        critter.update?.();
-        critter.draw?.();
+        const canStaggerUpdate = renderMode.ultraLowPower && !(critter instanceof Frog) && !(critter instanceof Bee && critter.mode === 'nectar');
+        if (!canStaggerUpdate || (frameId + (critter.index || 0)) % 2 === 0) {
+            critter.update?.();
+        }
+        critter.draw?.(renderMode);
     });
 }
 
@@ -6347,7 +6571,7 @@ function spawnSkyEnergy(treeSize, anchors) {
     if (energyParticles.length >= particleLimit) return;
 
     const backlogRatio = energyParticles.length / particleLimit;
-    const spawnFactor = renderMode.ultraLowPower ? 0.72 : renderMode.lowPower ? 0.94 : 1.2;
+    const spawnFactor = renderMode.ultraLowPower ? 0.42 : renderMode.lowPower ? 0.68 : renderMode.quality === 'balanced' ? 0.9 : 1.08;
     const shouldSpawn = Math.random() < Math.min(
         0.92,
         ((0.22 + activation * 0.34) * (1 - backlogRatio * 0.45)) * spawnFactor
@@ -6356,13 +6580,14 @@ function spawnSkyEnergy(treeSize, anchors) {
 
     const availableSlots = Math.max(0, particleLimit - energyParticles.length);
     if (!availableSlots) return;
-    let spawnCount = Math.max(1, Math.min(activationMeta.orbCount, 3));
+    let spawnCount = Math.max(1, Math.min(activationMeta.orbCount, renderMode.lowPower ? 2 : 3));
     if (!renderMode.ultraLowPower && Math.random() < (0.2 + activation * 0.24)) {
         spawnCount += 1;
     }
     if (!renderMode.lowPower && activation > 0.48 && Math.random() < 0.26) {
         spawnCount += 1;
     }
+    if (renderMode.ultraLowPower && Math.random() < 0.45) spawnCount = 1;
     spawnCount = Math.min(availableSlots, spawnCount);
     for (let i = 0; i < spawnCount; i++) {
         const targetX = anchors.canopy.x + ((Math.random() - 0.5) * treeSize * 0.16);
@@ -6560,10 +6785,14 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
 
 function loop() {
     const now = Date.now();
-    const deltaSeconds = getFrameDeltaSeconds(now);
+    const rawDeltaSeconds = STATE.lastFrameAt
+        ? normalizeDeltaSeconds((now - STATE.lastFrameAt) / 1000)
+        : FRAME_DELTA_FALLBACK_SECONDS;
+    const deltaSeconds = Math.min(rawDeltaSeconds, MAX_FRAME_DELTA_SECONDS);
     STATE.lastFrameAt = now;
-    updateState(deltaSeconds);
     STATE.frameNow = now;
+    updateRenderPerformance(rawDeltaSeconds);
+    updateState(deltaSeconds);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -6607,6 +6836,7 @@ function loop() {
     const visualEnergy = getTreeDisplayEnergy();
     const treeSize = getTreeRenderSize(visualEnergy, { width: canvas.width, height: canvas.height });
     const renderMode = getRenderMode(treeSize);
+    trimVisualEffectQueues(treeSize);
     const lifecycleStage = getTreeDisplayLifecycleStage(visualEnergy);
     maybeAnnounceFinalTree(lifecycleStage);
 
@@ -6616,7 +6846,7 @@ function loop() {
     ctx.fillStyle = '#66bb6a';
     ctx.fill();
 
-    drawMeadowPlants();
+    drawMeadowPlants(renderMode);
 
     if (lifecycleStage.index >= 2 && treeSize > 60) {
         drawBloomingEnergyTree(canvas.width / 2, canvas.height - 20, treeSize, lifecycleStage, renderMode);
@@ -6628,7 +6858,7 @@ function loop() {
 
     drawEnergyFlow(treeSize);
     drawRewardEffects(treeSize);
-    drawMeadowCritters();
+    drawMeadowCritters(renderMode);
 
     const superSparkleChance = renderMode.ultraLowPower ? 0.06 : renderMode.lowPower ? 0.12 : 0.22;
     if (STATE.isSuperMode && Math.random() < superSparkleChance) {

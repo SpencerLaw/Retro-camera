@@ -5427,7 +5427,7 @@ function initMeadowPlants() {
 
 function initMeadowCritters() {
     meadowCritters.length = 0;
-    for (let i = 0; i < 5; i++) meadowCritters.push(new Frog(i));
+    meadowCritters.push(new Frog(0));
     for (let i = 0; i < 4; i++) meadowCritters.push(new Dragonfly(i));
     for (let i = 0; i < 5; i++) meadowCritters.push(new Ladybug(i));
 }

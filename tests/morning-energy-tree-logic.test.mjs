@@ -912,7 +912,7 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.ok(sunlitSummary.flowerCount >= energizedSummary.flowerCount);
   assert.equal(sunlitSummary.saplingProtectedFlowerCount, 0);
 
-  assert.equal(summary.frogCount, 5);
+  assert.equal(summary.frogCount, 1);
   assert.equal(summary.dragonflyCount, 4);
   assert.equal(summary.beetleCount, 5);
   assert.equal('beeCount' in summary, false);
@@ -923,6 +923,7 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.match(script, /function shouldDrawMeadowAura/);
   assert.match(script, /RENDER_QUALITY_SCALE/);
   assert.match(script, /class Frog/);
+  assert.match(script, /meadowCritters\.push\(new Frog\(0\)\)/);
   assert.match(script, /jumpState/);
   assert.match(script, /startJump\(\)/);
   assert.match(script, /Math\.sin\(Math\.PI \* t\) \* this\.jumpHeight/);

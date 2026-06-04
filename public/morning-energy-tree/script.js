@@ -124,9 +124,15 @@ const ENERGY_TECH_COLORS = ['#7df9ff', '#8cf7d9', '#d2ff72', '#f7ff9c'];
 const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
 const REWARD_WATER_COLORS = ['#8deeff', '#5bd6ff', '#c9f8ff', '#7df9ff'];
 const REWARD_FERTILIZER_COLORS = ['#fff176', '#d8ff66', '#9be15d', '#ffcc80'];
-const BLOOM_TREE_LEAF_COLORS = ['#4caf50', '#66bb6a', '#81c784', '#a5d6a7', '#7ed957'];
-const BLOOM_TREE_FINAL_COLORS = ['#2fbf5f', '#43c96a', '#5ed979', '#7ee08b', '#a8ed90'];
+const BLOOM_TREE_LEAF_COLORS = ['#2f8a4b', '#43a85b', '#61bd68', '#86cc72', '#b7dc7a'];
+const BLOOM_TREE_FINAL_COLORS = ['#1f6f3a', '#2f8848', '#42a45a', '#65bb67', '#94cc72'];
 const BLOOM_TREE_FLOWER_COLORS = ['#ffd1f5', '#ffb7dc', '#fff3a3', '#ffcc80', '#ffffff'];
+const TREE_SOIL_COLORS = {
+    dark: '#5b3a2a',
+    mid: '#7a4b32',
+    light: '#a3693b',
+    root: '#d0ad72'
+};
 const FX_LIMITS = {
     sparkles: 88,
     energyParticles: 22,
@@ -4734,42 +4740,128 @@ function drawFlowerCluster(x, y, blossomSize, petalColor) {
     ctx.restore();
 }
 
+function drawSeedRoots(rootGrowth) {
+    if (rootGrowth <= 0.04) return;
+
+    const rootLines = [
+        { c: { x: -5, y: 14 }, e: { x: -26, y: 24 }, width: 2.4, start: 0.08 },
+        { c: { x: 5, y: 13 }, e: { x: 28, y: 22 }, width: 2.2, start: 0.18 },
+        { c: { x: -1, y: 16 }, e: { x: -4, y: 35 }, width: 2.8, start: 0.02 },
+        { c: { x: -10, y: 24 }, e: { x: -34, y: 39 }, width: 1.6, start: 0.42 },
+        { c: { x: 8, y: 24 }, e: { x: 35, y: 37 }, width: 1.6, start: 0.48 }
+    ];
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    rootLines.forEach((root, index) => {
+        const reveal = clamp((rootGrowth - root.start) / Math.max(0.1, 1 - root.start), 0, 1);
+        if (reveal <= 0) return;
+
+        const end = {
+            x: root.e.x * reveal,
+            y: root.e.y * reveal
+        };
+        const control = {
+            x: root.c.x * reveal + Math.sin((STATE.frameNow || Date.now()) / 900 + index) * 0.6,
+            y: root.c.y * reveal
+        };
+
+        ctx.globalAlpha = 0.32 + reveal * 0.44;
+        ctx.strokeStyle = TREE_SOIL_COLORS.root;
+        ctx.lineWidth = root.width * (0.55 + reveal * 0.45);
+        ctx.beginPath();
+        ctx.moveTo(0, 6);
+        ctx.quadraticCurveTo(control.x, control.y, end.x, end.y);
+        ctx.stroke();
+    });
+    ctx.restore();
+}
+
 function drawSeedAndSprout(startX, startY, stage) {
     const energy = clampEnergy(STATE.energy);
-    const sproutGrowth = clamp(energy / 24, 0, 1);
+    const stageProgress = clamp(Number(stage?.progress) || 0, 0, 1);
+    const rootGrowth = clamp(energy / 16, 0, 1);
+    const sproutGrowth = stage?.key === 'seed'
+        ? clamp(stageProgress * 0.36, 0, 0.36)
+        : clamp((energy - 8) / 22, 0.18, 1);
+    const soilPulse = 1 + Math.sin(((STATE.frameNow || Date.now()) / 1000) * 1.1) * 0.025;
 
     ctx.save();
     ctx.translate(startX, startY);
-    ctx.fillStyle = '#6d4c41';
+
+    ctx.save();
+    ctx.scale(soilPulse, 1);
+    ctx.fillStyle = TREE_SOIL_COLORS.dark;
     ctx.beginPath();
-    ctx.ellipse(0, 4, 18, 9, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 9, 39, 13, 0, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = TREE_SOIL_COLORS.mid;
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 31, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(190, 133, 70, 0.34)';
+    ctx.beginPath();
+    ctx.ellipse(-9, 0, 12, 4.5, -0.16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    drawSeedRoots(rootGrowth);
 
     if (stage.key === 'seed') {
-        drawEnergyAura(0, 0, 10 + sproutGrowth * 8, '#d8ff66', 0.08 + sproutGrowth * 0.08);
-        ctx.fillStyle = '#8d6e63';
+        drawEnergyAura(0, -1, 10 + rootGrowth * 9, '#d8ff66', 0.06 + rootGrowth * 0.1);
+        ctx.save();
+        ctx.rotate(-0.24);
+        ctx.fillStyle = '#8a623e';
         ctx.beginPath();
-        ctx.ellipse(0, -2, 7, 10, -0.2, 0, Math.PI * 2);
+        ctx.ellipse(0, -2, 8, 11, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = 'rgba(255, 220, 144, 0.44)';
+        ctx.beginPath();
+        ctx.ellipse(-2, -5, 2.2, 4.3, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        if (sproutGrowth > 0.08) {
+            ctx.strokeStyle = '#79c45b';
+            ctx.lineWidth = 2.8;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(0, -9);
+            ctx.quadraticCurveTo(-2, -15 * sproutGrowth, -1, -26 * sproutGrowth);
+            ctx.stroke();
+        }
         ctx.restore();
         return;
     }
 
-    ctx.strokeStyle = '#5abf59';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#4f9f4c';
+    ctx.lineWidth = 3.6 + sproutGrowth * 1.4;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(-5, -18 * sproutGrowth, -2, -42 * sproutGrowth);
+    ctx.moveTo(0, 2);
+    ctx.quadraticCurveTo(-5, -20 * sproutGrowth, -2, -48 * sproutGrowth);
     ctx.stroke();
 
-    ctx.fillStyle = '#7fd36d';
+    ctx.fillStyle = '#79cc63';
     ctx.beginPath();
-    ctx.ellipse(-12 * sproutGrowth, -28 * sproutGrowth, 12 * sproutGrowth, 5 * sproutGrowth, -0.5, 0, Math.PI * 2);
+    ctx.ellipse(-13 * sproutGrowth, -30 * sproutGrowth, 13 * sproutGrowth, 5.4 * sproutGrowth, -0.52, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = '#a5d76d';
     ctx.beginPath();
-    ctx.ellipse(11 * sproutGrowth, -36 * sproutGrowth, 11 * sproutGrowth, 5 * sproutGrowth, 0.48, 0, Math.PI * 2);
+    ctx.ellipse(12 * sproutGrowth, -39 * sproutGrowth, 12 * sproutGrowth, 5.2 * sproutGrowth, 0.48, 0, Math.PI * 2);
     ctx.fill();
+
+    if (sproutGrowth > 0.62) {
+        const secondLeafScale = (sproutGrowth - 0.62) / 0.38;
+        ctx.fillStyle = '#5fbd58';
+        ctx.beginPath();
+        ctx.ellipse(-8 * secondLeafScale, -47 * sproutGrowth, 7 * secondLeafScale, 3.4 * secondLeafScale, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#b7dc7a';
+        ctx.beginPath();
+        ctx.ellipse(8 * secondLeafScale, -50 * sproutGrowth, 6.6 * secondLeafScale, 3.2 * secondLeafScale, 0.36, 0, Math.PI * 2);
+        ctx.fill();
+    }
     ctx.restore();
 }
 
@@ -4899,6 +4991,83 @@ function drawTaperedBranch(start, control, end, startWidth, endWidth, colors = {
     ctx.restore();
 }
 
+function getVisibleBranchCount(stageIndex, stageProgress, branchTotal, isFinalTree) {
+    if (isFinalTree) return branchTotal;
+    if (stageIndex <= 2) return Math.min(branchTotal, 3 + Math.round(stageProgress * 3));
+    if (stageIndex === 3) return Math.min(branchTotal, 6 + Math.round(stageProgress * 2));
+    if (stageIndex === 4) return Math.min(branchTotal, 8);
+    return Math.min(branchTotal, 9);
+}
+
+function drawSurfaceRoots(spread, trunkBaseWidth, branchColor, stageIndex, stageProgress) {
+    const reveal = clamp((stageIndex - 2 + stageProgress) / 2.4, 0, 1);
+    if (reveal <= 0.02) return;
+
+    const roots = [
+        { x: -spread * 0.24, c: -spread * 0.12, y: 15, width: 0.34 },
+        { x: spread * 0.24, c: spread * 0.12, y: 14, width: 0.32 },
+        { x: -spread * 0.14, c: -spread * 0.05, y: 24, width: 0.24 },
+        { x: spread * 0.16, c: spread * 0.06, y: 23, width: 0.24 }
+    ];
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = 0.5 + reveal * 0.36;
+    roots.forEach((root, index) => {
+        const rootReveal = clamp(reveal * 1.28 - index * 0.12, 0, 1);
+        if (rootReveal <= 0) return;
+
+        ctx.strokeStyle = index < 2 ? branchColor.mid : branchColor.dark;
+        ctx.lineWidth = Math.max(2, trunkBaseWidth * root.width * rootReveal);
+        ctx.beginPath();
+        ctx.moveTo(0, 3);
+        ctx.quadraticCurveTo(root.c * rootReveal, root.y * 0.42, root.x * rootReveal, root.y);
+        ctx.stroke();
+    });
+    ctx.restore();
+}
+
+function drawNaturalTwigCluster(branch, branchIndex, trunkBaseWidth, branchColor, stageIndex, stageProgress, renderMode) {
+    const twigReveal = clamp((stageIndex - 2.15 + stageProgress) / 2.6, 0, 1);
+    if (twigReveal <= 0.02 || renderMode.ultraLowPower) return;
+
+    const twigCount = renderMode.lowPower
+        ? Math.max(1, Math.round(1 + twigReveal))
+        : Math.max(1, Math.round(2 + twigReveal * 2));
+    const branchDirection = branch.e.x >= branch.s.x ? 1 : -1;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = 0.42 + twigReveal * 0.36;
+    ctx.strokeStyle = branchColor.light;
+    for (let i = 0; i < twigCount; i++) {
+        const seed = branchIndex * 4.73 + i * 1.91;
+        const t = 0.64 + seededUnit(seed) * 0.26;
+        const base = getQuadraticPoint(branch.s, branch.c, branch.e, t);
+        const length = (16 + seededUnit(seed + 0.9) * 22) * twigReveal;
+        const side = i % 2 === 0 ? 1 : -1;
+        const end = {
+            x: base.x + branchDirection * side * length * (0.42 + seededUnit(seed + 1.4) * 0.5),
+            y: base.y - length * (0.28 + seededUnit(seed + 2.2) * 0.54)
+        };
+        const control = {
+            x: (base.x + end.x) / 2 + branchDirection * side * 6,
+            y: (base.y + end.y) / 2 - 4
+        };
+
+        ctx.lineWidth = Math.max(1, trunkBaseWidth * (0.035 + twigReveal * 0.035));
+        ctx.beginPath();
+        ctx.moveTo(base.x, base.y);
+        ctx.quadraticCurveTo(control.x, control.y, end.x, end.y);
+        ctx.stroke();
+
+        if (stageIndex <= 2) {
+            drawBranchBud(end.x, end.y, Math.max(2.2, trunkBaseWidth * 0.08), '#9bdc65');
+        }
+    }
+    ctx.restore();
+}
+
 function drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, layer = 'front') {
     if (!cluster) return;
     const stageIndex = Math.max(0, Number(stage?.index) || 0);
@@ -4907,7 +5076,7 @@ function drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, la
     const finalCanopyAlpha = finalVisualState?.canopyAlpha ?? 1;
     const densityBoost = stage?.key === 'final' ? 1.55 : stage?.key === 'fruit' ? 1.18 : 1;
     const sizeBoost = stage?.key === 'final' ? 1.18 : 1;
-    const alpha = Math.min(0.98, (layer === 'back' ? 0.82 : 0.94) * bloomStrength * (stage?.key === 'final' ? 1.08 : 1) * finalCanopyAlpha);
+    const alpha = Math.min(0.98, (layer === 'back' ? 0.84 : 0.95) * bloomStrength * (stage?.key === 'final' ? 1.08 : 1) * finalCanopyAlpha);
     const blobCountBase = Math.round((layer === 'back' ? 14 : 12) * densityBoost);
     const blobCount = renderMode.ultraLowPower
         ? Math.ceil(blobCountBase * 0.42)
@@ -4935,6 +5104,35 @@ function drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, la
         ctx.fill();
     }
 
+    if (layer === 'front' && stageIndex >= 3) {
+        const detailBase = stage?.key === 'final' ? 18 : stageIndex >= 5 ? 9 : 6;
+        const detailCount = renderMode.ultraLowPower
+            ? Math.ceil(detailBase * 0.35)
+            : renderMode.lowPower
+                ? Math.ceil(detailBase * 0.58)
+                : detailBase;
+        ctx.globalAlpha = Math.min(0.95, (0.42 + bloomStrength * 0.28) * finalCanopyAlpha);
+        for (let i = 0; i < detailCount; i++) {
+            const seed = cluster.seed * 5.17 + i * 2.43;
+            const angle = seededUnit(seed) * Math.PI * 2;
+            const ring = 0.18 + seededUnit(seed + 0.7) * 0.76;
+            const x = cluster.x + Math.cos(angle) * cluster.rx * ring;
+            const y = cluster.y + Math.sin(angle) * cluster.ry * ring + Math.sin(frameTime * 1.1 + seed) * 1.6;
+            const leafWidth = Math.max(2.2, cluster.rx * (0.035 + seededUnit(seed + 1.3) * 0.025));
+            const leafHeight = Math.max(3.2, cluster.ry * (0.05 + seededUnit(seed + 2.6) * 0.025));
+            const color = palette[Math.floor(seededUnit(seed + 3.9) * palette.length)] || palette[0];
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle + Math.sin(frameTime + seed) * 0.18);
+            ctx.fillStyle = getFinalTreeDisplayColor(color, finalVisualState);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, leafWidth, leafHeight, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
     if (layer === 'front' && !renderMode.lowPower) {
         ctx.globalAlpha = 0.22 * bloomStrength * finalCanopyAlpha;
         ctx.fillStyle = '#ffffff';
@@ -4960,7 +5158,7 @@ function drawBranchBud(x, y, size, color = '#9be15d') {
 
 function drawBloomTreeFlowers(cluster, stage, renderMode, frameTime) {
     if (!cluster || !stage || stage.index < 4) return;
-    const baseCount = stage.key === 'flowers' ? 7 : stage.key === 'fruit' ? 8 : 11;
+    const baseCount = stage.key === 'final' ? 5 : stage.key === 'flowers' ? 7 : stage.key === 'fruit' ? 8 : 11;
     const finalVisualState = stage.key === 'final' ? getFinalTreeVisualState({ stage }) : null;
     const finalFlowerAlpha = finalVisualState?.flowerAlpha ?? 1;
     const count = renderMode.ultraLowPower
@@ -4987,7 +5185,7 @@ function drawBloomTreeFlowers(cluster, stage, renderMode, frameTime) {
 
 function drawBloomTreeFruit(cluster, stage, renderMode, frameTime) {
     if (!cluster || !stage || stage.index < 5) return;
-    const baseCount = stage.key === 'final' ? 5 : 3;
+    const baseCount = stage.key === 'final' ? 2 : 3;
     const finalVisualState = stage.key === 'final' ? getFinalTreeVisualState({ stage }) : null;
     const finalFruitAlpha = finalVisualState?.flowerAlpha ?? 1;
     const count = renderMode.ultraLowPower
@@ -5025,6 +5223,7 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     const frameTime = (STATE.frameNow || Date.now()) / 1000;
     const stageIndex = Math.max(2, Number(stage?.index) || 2);
     const isFinalTree = stage?.key === 'final';
+    const stageProgress = isFinalTree ? 1 : clamp(Number(stage?.progress) || 0, 0, 1);
     const finalVisualState = isFinalTree ? getFinalTreeVisualState({ stage }) : null;
     const heightBoost = isFinalTree ? 0.46 : 0;
     const treeHeight = Math.min(
@@ -5067,15 +5266,24 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
         { x: -spread * 0.22 + sway * 0.12, y: -treeHeight * 0.52, rx: spread * 0.2, ry: treeHeight * 0.11, seed: 17.6 },
         { x: spread * 0.28 + sway * 0.1, y: -treeHeight * 0.52, rx: spread * 0.2, ry: treeHeight * 0.11, seed: 19.8 }
     ];
-    const visibleBranches = isFinalTree ? branchDefs : branchDefs.slice(0, 7);
+    const finalCrownClusters = [
+        { x: -spread * 0.46 + sway * 0.16, y: -treeHeight * 0.71, rx: spread * 0.25, ry: treeHeight * 0.18, seed: 21.2 },
+        { x: spread * 0.48 + sway * 0.14, y: -treeHeight * 0.72, rx: spread * 0.25, ry: treeHeight * 0.18, seed: 22.8 },
+        { x: -spread * 0.18 + sway * 0.12, y: -treeHeight * 0.84, rx: spread * 0.27, ry: treeHeight * 0.18, seed: 24.1 },
+        { x: spread * 0.18 + sway * 0.1, y: -treeHeight * 0.84, rx: spread * 0.27, ry: treeHeight * 0.18, seed: 25.9 },
+        { x: -spread * 0.02 + sway * 0.1, y: -treeHeight * 0.62, rx: spread * 0.28, ry: treeHeight * 0.16, seed: 27.4 },
+        { x: -spread * 0.02 + sway * 0.1, y: -treeHeight * 0.76, rx: spread * 0.31, ry: treeHeight * 0.19, seed: 29.7 }
+    ];
+    const naturalClusters = isFinalTree ? clusters.concat(finalCrownClusters) : clusters;
+    const visibleBranches = branchDefs.slice(0, getVisibleBranchCount(stageIndex, stageProgress, branchDefs.length, isFinalTree));
     const visibleClusters = isFinalTree
-        ? clusters
+        ? naturalClusters
         : stageIndex >= 5
-            ? clusters.slice(0, 8)
+            ? naturalClusters.slice(0, 8)
             : stageIndex >= 4
-                ? clusters.slice(0, 6)
+                ? naturalClusters.slice(0, 6)
                 : stageIndex >= 3
-                    ? clusters.slice(0, 5)
+                    ? naturalClusters.slice(0, 5)
                     : [];
 
     ctx.save();
@@ -5089,7 +5297,17 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     ctx.fill();
     ctx.restore();
 
+    drawSurfaceRoots(spread, trunkBaseWidth, branchColor, stageIndex, stageProgress);
+
     if (isFinalTree) {
+        ctx.save();
+        ctx.globalAlpha = 0.16 * (finalVisualState?.canopyAlpha ?? 1);
+        ctx.fillStyle = getFinalTreeDisplayColor('#2f8848', finalVisualState);
+        ctx.beginPath();
+        ctx.ellipse(sway * 0.08, -treeHeight * 0.76, spread * 0.52, treeHeight * 0.33, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
         drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.24, '#baff82', finalVisualState.glowAlpha);
@@ -5122,6 +5340,7 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
             Math.max(1.2, trunkBaseWidth * branch.ew * widthScale),
             branchColor
         );
+        drawNaturalTwigCluster(branch, index, trunkBaseWidth, branchColor, stageIndex, stageProgress, renderMode);
 
         if (stageIndex === 2) {
             drawBranchBud(branch.e.x, branch.e.y, Math.max(3.2, trunkBaseWidth * 0.12), '#9be15d');

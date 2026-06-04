@@ -496,6 +496,19 @@ runTest('tree lifecycle stages are fine grained from seed to final energy tree',
   assert.match(script, /drawBloomingEnergyTree\(canvas\.width \/ 2, canvas\.height - 20, treeSize, lifecycleStage, renderMode\)/);
 });
 
+runTest('tree growth visuals include seed roots twigs and a natural final crown', () => {
+  const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+
+  assert.match(script, /const TREE_SOIL_COLORS/);
+  assert.match(script, /function drawSeedRoots/);
+  assert.match(script, /function drawSurfaceRoots/);
+  assert.match(script, /function drawNaturalTwigCluster/);
+  assert.match(script, /function getVisibleBranchCount/);
+  assert.match(script, /const finalCrownClusters = \[/);
+  assert.match(script, /detailBase = stage\?\.key === 'final' \? 18/);
+  assert.match(script, /naturalClusters = isFinalTree \? clusters\.concat\(finalCrownClusters\) : clusters/);
+});
+
 runTest('audio activation makes light orbs clearly correlated with decibels', () => {
   const { api } = loadMorningTree();
   const profile = api.getSensitivityProfile(50);

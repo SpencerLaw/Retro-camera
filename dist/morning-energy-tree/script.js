@@ -1597,21 +1597,22 @@ function buildSmoothCurvePath(points) {
 }
 
 function buildCurveBadge(point, label, tone, position, bounds) {
-    const badgeWidth = clamp((label.length * 7.4) + 20, 74, 138);
-    const badgeHeight = 24;
+    const badgeFontSize = 14;
+    const badgeWidth = clamp((label.length * 9.2) + 28, 98, 178);
+    const badgeHeight = 32;
     const isRightSide = point.x > bounds.midX;
     const badgeX = clamp(
-        point.x + (isRightSide ? -badgeWidth - 12 : 12),
+        point.x + (isRightSide ? -badgeWidth - 16 : 16),
         bounds.left,
         bounds.right - badgeWidth
     );
     const badgeY = clamp(
-        point.y + (position === 'top' ? -badgeHeight - 14 : 14),
+        point.y + (position === 'top' ? -badgeHeight - 18 : 18),
         bounds.top,
         bounds.bottom - badgeHeight
     );
     const connectorX = clamp(
-        point.x + (isRightSide ? -6 : 6),
+        point.x + (isRightSide ? -8 : 8),
         bounds.left,
         bounds.right
     );
@@ -1620,8 +1621,8 @@ function buildCurveBadge(point, label, tone, position, bounds) {
     return `
         <g>
             <path d="M ${point.x} ${point.y} L ${connectorX} ${connectorY}" stroke="${tone}" stroke-opacity="0.58" stroke-width="1.4" />
-            <rect x="${badgeX}" y="${badgeY}" width="${badgeWidth}" height="${badgeHeight}" rx="12" fill="rgba(17, 28, 61, 0.84)" stroke="${tone}" stroke-opacity="0.36" />
-            <text x="${badgeX + (badgeWidth / 2)}" y="${badgeY + 16}" fill="${tone}" font-size="11" font-weight="800" text-anchor="middle">${label}</text>
+            <rect x="${badgeX}" y="${badgeY}" width="${badgeWidth}" height="${badgeHeight}" rx="16" fill="rgba(17, 28, 61, 0.84)" stroke="${tone}" stroke-opacity="0.36" />
+            <text x="${badgeX + (badgeWidth / 2)}" y="${badgeY + 21}" fill="${tone}" font-size="${badgeFontSize}" font-weight="900" text-anchor="middle">${label}</text>
         </g>
     `;
 }
@@ -1630,12 +1631,15 @@ function buildCurveSVG(report) {
     const stats = getCurveStats(report);
     const sourceValues = stats.values.length === 1 ? [stats.values[0], stats.values[0]] : stats.values;
     const values = sourceValues.map(value => Math.round(value));
-    const width = 720;
-    const height = 242;
-    const paddingLeft = 78;
-    const paddingRight = 58;
-    const paddingTop = 34;
-    const paddingBottom = 74;
+    const width = 780;
+    const height = 292;
+    const paddingLeft = 96;
+    const paddingRight = 74;
+    const paddingTop = 56;
+    const paddingBottom = 92;
+    const axisFontSize = 14;
+    const tickFontSize = 14;
+    const manifestFontSize = 14;
     const plotLeft = paddingLeft;
     const plotRight = width - paddingRight;
     const plotTop = paddingTop;
@@ -1671,8 +1675,8 @@ function buildCurveSVG(report) {
     const chartBounds = {
         left: plotLeft + 6,
         right: plotRight - 6,
-        top: plotTop + 2,
-        bottom: baselineY - 28,
+        top: plotTop + 4,
+        bottom: baselineY - 40,
         midX: plotLeft + (graphWidth / 2)
     };
 
@@ -1682,7 +1686,7 @@ function buildCurveSVG(report) {
         const labelValue = Math.round(paddedMax - (range * ratio));
         return `
             <line x1="${plotLeft}" y1="${y}" x2="${plotRight}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
-            <text x="${plotLeft - 12}" y="${y + 4}" fill="rgba(255,255,255,0.46)" font-size="11" text-anchor="end">${labelValue}</text>
+            <text x="${plotLeft - 16}" y="${y + 5}" fill="rgba(255,255,255,0.56)" font-size="${axisFontSize}" font-weight="800" text-anchor="end">${labelValue}</text>
         `;
     }).join('');
 
@@ -1692,7 +1696,7 @@ function buildCurveSVG(report) {
         const anchor = index === 0 ? 'start' : index === tickRatios.length - 1 ? 'end' : 'middle';
         return `
             <line x1="${x}" y1="${plotTop}" x2="${x}" y2="${baselineY}" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="3 7" />
-            <text x="${x}" y="${height - 18}" fill="rgba(255,255,255,0.6)" font-size="10.5" text-anchor="${anchor}">${formatCurveTickLabel(report, ratio)}</text>
+            <text x="${x}" y="${height - 26}" fill="rgba(255,255,255,0.68)" font-size="${tickFontSize}" font-weight="800" text-anchor="${anchor}">${formatCurveTickLabel(report, ratio)}</text>
         `;
     }).join('');
 
@@ -1700,9 +1704,9 @@ function buildCurveSVG(report) {
     const lowBadge = buildCurveBadge(lowPoint, `${lowLabel} ${stats.lowValue} dB`, '#8cf7d9', 'bottom', chartBounds);
     const manifestedMarker = manifestedX === null ? '' : `
         <g>
-            <line x1="${manifestedX}" y1="${plotTop - 6}" x2="${manifestedX}" y2="${baselineY + 10}" stroke="#ffe082" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" />
-            <rect x="${clamp(manifestedX - 34, plotLeft, plotRight - 68)}" y="${plotTop - 28}" width="68" height="22" rx="11" fill="rgba(66, 45, 10, 0.82)" stroke="rgba(255, 224, 130, 0.58)" />
-            <text x="${clamp(manifestedX, plotLeft + 34, plotRight - 34)}" y="${plotTop - 13}" fill="#ffe082" font-size="10.5" font-weight="900" text-anchor="middle">${t('morningTree.report.manifestPoint') || '长成'}</text>
+            <line x1="${manifestedX}" y1="${plotTop - 10}" x2="${manifestedX}" y2="${baselineY + 14}" stroke="#ffe082" stroke-width="2.4" stroke-dasharray="5 6" stroke-linecap="round" />
+            <rect x="${clamp(manifestedX - 44, plotLeft, plotRight - 88)}" y="${plotTop - 42}" width="88" height="30" rx="15" fill="rgba(66, 45, 10, 0.84)" stroke="rgba(255, 224, 130, 0.62)" />
+            <text x="${clamp(manifestedX, plotLeft + 44, plotRight - 44)}" y="${plotTop - 22}" fill="#ffe082" font-size="${manifestFontSize}" font-weight="950" text-anchor="middle">${t('morningTree.report.manifestPoint') || '长成'}</text>
         </g>
     `;
 
@@ -1733,10 +1737,10 @@ function buildCurveSVG(report) {
             <path d="${areaPath}" fill="url(#${areaId})" stroke="none"></path>
             <path d="${linePath}" fill="none" stroke="rgba(125,249,255,0.18)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" filter="url(#${glowId})"></path>
             <path d="${linePath}" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="6.5" fill="#ff9bd6" stroke="#ffffff" stroke-width="2.4" />
-            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="6.5" fill="#8cf7d9" stroke="#ffffff" stroke-width="2.4" />
-            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="11" fill="none" stroke="rgba(255, 155, 214, 0.24)" stroke-width="2" />
-            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="11" fill="none" stroke="rgba(140, 247, 217, 0.24)" stroke-width="2" />
+            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="7.5" fill="#ff9bd6" stroke="#ffffff" stroke-width="2.6" />
+            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="7.5" fill="#8cf7d9" stroke="#ffffff" stroke-width="2.6" />
+            <circle cx="${peakPoint.x}" cy="${peakPoint.y}" r="13" fill="none" stroke="rgba(255, 155, 214, 0.24)" stroke-width="2.2" />
+            <circle cx="${lowPoint.x}" cy="${lowPoint.y}" r="13" fill="none" stroke="rgba(140, 247, 217, 0.24)" stroke-width="2.2" />
             ${peakBadge}
             ${lowBadge}
             ${manifestedMarker}

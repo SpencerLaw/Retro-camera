@@ -523,6 +523,15 @@ runTest('weekly report renders enhanced metrics with legacy mature-time fallback
   assert.match(html, /旧记录未保存具体时间/);
   assert.match(html, /最终能量/);
   assert.match(html, /有效朗读/);
+
+  const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  const style = fs.readFileSync('public/morning-energy-tree/style.css', 'utf8');
+  assert.match(script, /const axisFontSize = 14/);
+  assert.match(script, /const tickFontSize = 14/);
+  assert.match(script, /const manifestFontSize = 14/);
+  assert.match(script, /const badgeFontSize = 14/);
+  assert.match(style, /\.report-curve-svg\s*\{[\s\S]*height: 236px;/);
+  assert.match(style, /\.report-curve-label\s*\{[\s\S]*font-size: 1\.05rem;/);
 });
 
 runTest('sensitivity control uses a slider instead of fixed three-level buttons', () => {

@@ -143,6 +143,8 @@ const FX_LIMITS = {
     soilTransfers: 18,
     rewardEffects: 120
 };
+const MEADOW_PETAL_COLORS = ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71', '#9ff4ff', '#ffc5df', '#ffffff', '#f8a9ff'];
+const MEADOW_GRASS_COLORS = ['#6fcf61', '#78d870', '#92df72', '#50b96a'];
 const READING_THRESHOLD = 70;
 const QUIET_ENERGY_DECAY_RATE = 0.05;
 const SAPLING_TREE_SIZE = 38;
@@ -3373,6 +3375,7 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         STATE.reportEffectiveReadingSeconds += frameSeconds;
     }
     const audioActivation = getAudioActivation(STATE.currentDB, sensitivityProfile, STATE.readingHoldSeconds);
+    spreadMeadowSunlight(frameSeconds, audioActivation.intensity);
     const previousRewardState = STATE.rewardState || createSessionRewardState();
     const previousRewardCounts = {
         waterCount: previousRewardState.waterCount || 0,
@@ -5039,39 +5042,112 @@ function getMeadowGroundY(x) {
     return canvas.height - (160 * t * (1 - t));
 }
 
+function getSaplingMeadowClearRadius(layer = 0) {
+    const layerBoost = Math.max(0, Number(layer) || 0) * 18;
+    return clamp(canvas.width * 0.08 + layerBoost, 92, 178);
+}
+
+function isInsideSaplingMeadowClearance(x, layer = 0) {
+    if (!canvas || !canvas.width) return false;
+    return Math.abs((Number(x) || 0) - canvas.width / 2) <= getSaplingMeadowClearRadius(layer);
+}
+
+function unlockMeadowFlower(plant, petalPalette = MEADOW_PETAL_COLORS) {
+    if (!plant || plant.kind === 'flower' || plant.protectSapling) return false;
+    plant.kind = 'flower';
+    plant.bloomOpen = Math.max(0.08, Number(plant.bloomOpen) || 0);
+    plant.bloomSize = plant.baseBloomSize || plant.bloomSize || 6;
+    plant.bloomCount = plant.baseBloomCount || plant.bloomCount || 1;
+    plant.petalColor = plant.petalColor || petalPalette[Math.floor(Math.random() * petalPalette.length)];
+    return true;
+}
+
+function energizeMeadowPlant(plant, amount, color, petalPalette = MEADOW_PETAL_COLORS) {
+    if (!plant || !Number.isFinite(amount) || amount <= 0) return false;
+
+    plant.energyColor = color || plant.energyColor;
+    plant.bloomEnergy = Math.min(2.4, (Number(plant.bloomEnergy) || 0) + amount);
+    plant.pulse = Math.min(1, (Number(plant.pulse) || 0) + 0.24 + amount * 0.42);
+    plant.growth = Math.min(1, (Number(plant.growth) || 0) + amount * 0.16);
+
+    if (!plant.protectSapling && plant.kind !== 'flower' && plant.bloomEnergy >= plant.bloomThreshold) {
+        return unlockMeadowFlower(plant, petalPalette);
+    }
+
+    return false;
+}
+
+function spreadMeadowSunlight(deltaSeconds, activation = 0) {
+    if (!STATE.isListening || !meadowPlants.length) return 0;
+
+    const safeActivation = clamp(Number(activation) || 0, 0, 1.35);
+    if (safeActivation <= 0.05) return 0;
+
+    const frameSeconds = normalizeDeltaSeconds(deltaSeconds);
+    const visualRatio = getTreeDisplayEnergy() / 100;
+    const centerX = canvas.width / 2;
+    const bloomRadius = canvas.width * (0.18 + visualRatio * 0.44);
+    const wave = Math.sin((STATE.frameNow || Date.now()) / 820) * canvas.width * 0.045;
+    let unlockedCount = 0;
+
+    meadowPlants.forEach((plant, index) => {
+        if (!plant || plant.protectSapling || plant.kind === 'flower') return;
+        const dist = Math.abs(plant.x - centerX + wave);
+        const layerFactor = 0.74 + (Math.max(0, Number(plant.layer) || 0) * 0.16);
+        const reach = clamp(1 - dist / Math.max(1, bloomRadius), 0, 1);
+        const sparkle = seededUnit(index * 3.17 + Math.round((STATE.frameNow || Date.now()) / 480));
+        if (reach <= 0.04 && sparkle > 0.08) return;
+
+        const amount = frameSeconds * safeActivation * layerFactor * (0.12 + reach * 0.34);
+        if (energizeMeadowPlant(plant, amount, null, MEADOW_PETAL_COLORS)) {
+            unlockedCount += 1;
+        }
+    });
+
+    return unlockedCount;
+}
+
 function createMeadowPlant(x, layer, index, petalPalette) {
     const layerScale = layer === 0 ? 0.58 : layer === 1 ? 0.78 : 1;
     const pattern = (index + layer * 2) % 6;
-    const kind = pattern <= (layer === 0 ? 1 : layer === 1 ? 2 : 3) ? 'flower' : 'grass';
-    const baseGrowth = kind === 'flower'
-        ? 0.58 + Math.random() * 0.34
-        : 0.44 + Math.random() * 0.34;
+    const protectSapling = isInsideSaplingMeadowClearance(x, layer);
+    const baseGrowth = protectSapling
+        ? 0.12 + Math.random() * 0.16
+        : 0.18 + Math.random() * 0.2;
     const groundY = getMeadowGroundY(x);
     const footOffset = 5 + layer * 11 + Math.random() * (8 + layer * 4);
+    const bloomThreshold = protectSapling
+        ? Number.POSITIVE_INFINITY
+        : 0.62 + layer * 0.18 + (pattern * 0.08) + Math.random() * 0.34;
 
     return {
         side: x < canvas.width / 2 ? -1 : 1,
         layer,
-        kind,
+        kind: 'grass',
+        protectSapling,
         x,
         baseY: Math.min(canvas.height - 3, groundY + footOffset),
         growth: baseGrowth,
         baseGrowth,
         stemHeight: (14 + Math.random() * 28) * layerScale,
         bloomSize: (5.2 + Math.random() * 6.8) * layerScale,
-        bloomCount: 1 + (Math.random() < 0.54 ? 1 : 0) + (Math.random() < 0.24 ? 1 : 0),
+        baseBloomSize: (5.2 + Math.random() * 6.8) * layerScale,
+        bloomCount: 1,
+        baseBloomCount: 1 + (Math.random() < 0.54 ? 1 : 0) + (Math.random() < 0.24 ? 1 : 0),
+        bloomEnergy: 0,
+        bloomThreshold,
+        bloomOpen: 0,
         swayPhase: Math.random() * Math.PI * 2 + index * 0.21,
         pulse: 0,
         bladeWidth: 1.4 + layer * 0.42 + Math.random() * 0.45,
         energyColor: SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)],
-        grassColor: ['#6fcf61', '#78d870', '#92df72', '#50b96a'][Math.floor(Math.random() * 4)],
+        grassColor: MEADOW_GRASS_COLORS[Math.floor(Math.random() * MEADOW_GRASS_COLORS.length)],
         petalColor: petalPalette[Math.floor(Math.random() * petalPalette.length)]
     };
 }
 
 function initMeadowPlants() {
     meadowPlants.length = 0;
-    const petalPalette = ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71', '#9ff4ff', '#ffc5df', '#ffffff', '#f8a9ff'];
     const layerCounts = [
         Math.round(clamp(canvas.width / 30, 32, 54)),
         Math.round(clamp(canvas.width / 24, 42, 70)),
@@ -5083,7 +5159,7 @@ function initMeadowPlants() {
             const step = canvas.width / Math.max(1, count - 1);
             const jitter = (Math.random() - 0.5) * step * 0.78;
             const x = clamp((i * step) + jitter, 6, canvas.width - 6);
-            meadowPlants.push(createMeadowPlant(x, layer, i, petalPalette));
+            meadowPlants.push(createMeadowPlant(x, layer, i, MEADOW_PETAL_COLORS));
         }
     });
 
@@ -5101,6 +5177,8 @@ function getMeadowEnvironmentSummary() {
         plantCount: meadowPlants.length,
         flowerCount: meadowPlants.filter(plant => plant.kind === 'flower').length,
         grassCount: meadowPlants.filter(plant => plant.kind === 'grass').length,
+        saplingProtectedFlowerCount: meadowPlants.filter(plant => plant.kind === 'flower' && plant.protectSapling).length,
+        bloomPotentialCount: meadowPlants.filter(plant => !plant.protectSapling).length,
         frogCount: meadowCritters.filter(critter => critter instanceof Frog).length,
         dragonflyCount: meadowCritters.filter(critter => critter instanceof Dragonfly).length
     };
@@ -5108,7 +5186,10 @@ function getMeadowEnvironmentSummary() {
 
 function resetMeadowPlants() {
     meadowPlants.forEach(plant => {
-        plant.growth = Math.max(0.36, Number(plant.baseGrowth) || 0.48);
+        plant.kind = 'grass';
+        plant.growth = Math.max(0.08, Number(plant.baseGrowth) || 0.18);
+        plant.bloomEnergy = 0;
+        plant.bloomOpen = 0;
         plant.pulse = 0;
         plant.energyColor = SOIL_FLOW_COLORS[Math.floor(Math.random() * SOIL_FLOW_COLORS.length)];
     });
@@ -5119,28 +5200,22 @@ function feedMeadowGrowth(sourceX, strength, color) {
     if (!Number.isFinite(sourceX) || !meadowPlants.length) return;
 
     const safeStrength = Number.isFinite(strength) ? strength : 0;
-    const petalPalette = ['#ffe082', '#ffcc80', '#ffd1f5', '#d0ff71', '#9ff4ff', '#ffc5df'];
     const nearby = meadowPlants
         .map(plant => ({ plant, dist: Math.abs(plant.x - sourceX) }))
         .sort((a, b) => a.dist - b.dist)
-        .slice(0, 14);
+        .slice(0, 18);
 
     nearby.forEach(({ plant, dist }) => {
         const distanceFactor = Math.max(0.22, 1 - (dist / 140));
         const currentGrowth = Number.isFinite(plant.growth) ? plant.growth : 0;
-        const currentPulse = Number.isFinite(plant.pulse) ? plant.pulse : 0;
         plant.growth = Math.min(1, currentGrowth + distanceFactor * (0.08 + safeStrength * 0.12));
-        plant.pulse = Math.min(1, currentPulse + 0.45 + safeStrength * 0.34);
-        plant.energyColor = color || plant.energyColor;
-
-        if (plant.kind === 'grass' && safeStrength > 0.22 && currentGrowth > 0.2 && dist < 180) {
-            const bloomChance = 0.14 + safeStrength * 0.14;
-            if (Math.random() < bloomChance) {
-                plant.kind = 'flower';
-                plant.bloomSize = 6 + Math.random() * 6;
-                plant.bloomCount = 1 + (Math.random() < 0.64 ? 1 : 0) + (Math.random() < 0.28 ? 1 : 0);
-                plant.petalColor = petalPalette[Math.floor(Math.random() * petalPalette.length)];
-            }
+        if (safeStrength > 0.08 && dist < 220) {
+            energizeMeadowPlant(
+                plant,
+                distanceFactor * (0.16 + safeStrength * 0.42),
+                color,
+                MEADOW_PETAL_COLORS
+            );
         }
     });
 }
@@ -5833,6 +5908,7 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
 
 function drawFlowerPlant(plant, sway, lowPowerMode = false) {
     const growth = plant.growth;
+    const bloomOpen = clamp(Number(plant.bloomOpen) || 0, 0, 1);
     const stemHeight = plant.stemHeight * growth;
     if (stemHeight <= 1) return;
 
@@ -5864,19 +5940,32 @@ function drawFlowerPlant(plant, sway, lowPowerMode = false) {
     ctx.fill();
     ctx.restore();
 
-    if (growth < 0.55) return;
+    if (growth < 0.42 || bloomOpen <= 0.02) return;
 
-    const blossomSize = plant.bloomSize * growth;
-    drawEnergyAura(bloomX, bloomY, 5 + plant.pulse * 7, plant.energyColor, 0.05 + plant.pulse * 0.08);
+    const blossomSize = plant.bloomSize * growth * (0.24 + bloomOpen * 0.76);
+    drawEnergyAura(bloomX, bloomY, 4 + bloomOpen * 4 + plant.pulse * 6, plant.energyColor, 0.03 + bloomOpen * 0.04 + plant.pulse * 0.07);
+
+    if (bloomOpen < 0.18) {
+        ctx.save();
+        ctx.fillStyle = plant.petalColor;
+        ctx.strokeStyle = 'rgba(65, 112, 42, 0.36)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.ellipse(bloomX, bloomY, blossomSize * 0.52, blossomSize * 0.72, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+        return;
+    }
 
     drawFlowerCluster(bloomX, bloomY, blossomSize, plant.petalColor);
 
-    const bloomCount = lowPowerMode ? 1 : Math.max(1, plant.bloomCount || 1);
+    const bloomCount = lowPowerMode ? 1 : Math.max(1, Math.round((plant.bloomCount || 1) * (0.44 + bloomOpen * 0.56)));
     for (let i = 1; i < bloomCount; i++) {
         const direction = i % 2 === 0 ? 1 : -1;
         const offsetX = direction * (6 + i * 4 + plant.pulse * 2);
         const offsetY = 4 + i * 3;
-        const miniSize = blossomSize * (0.5 - i * 0.07 + plant.pulse * 0.04);
+        const miniSize = blossomSize * (0.5 - i * 0.07 + plant.pulse * 0.04) * bloomOpen;
         if (miniSize <= 1.6) continue;
 
         drawFlowerCluster(bloomX + offsetX, bloomY + offsetY, miniSize, plant.petalColor);
@@ -5884,7 +5973,7 @@ function drawFlowerPlant(plant, sway, lowPowerMode = false) {
 }
 
 function drawMeadowPlants() {
-    const passiveGrowth = Math.max(0, (STATE.currentDB - 56) / 12000);
+    const passiveGrowth = STATE.isListening ? Math.max(0, (STATE.currentDB - 56) / 14000) : 0;
     const time = Date.now() / 950;
     const lowPowerMode = getRenderMode(80 + (STATE.energy * 1.6)).lowPower;
 
@@ -5913,6 +6002,7 @@ function drawMeadowPlants() {
         ctx.globalAlpha = clamp(layerAlpha + plant.pulse * 0.16, 0.52, 1);
         ctx.lineCap = 'round';
         if (plant.kind === 'flower') {
+            plant.bloomOpen = Math.min(1, (Number(plant.bloomOpen) || 0) + 0.006 + plant.pulse * 0.018 + passiveGrowth * 0.18);
             drawFlowerPlant(plant, sway, lowPowerMode);
         } else {
             drawGrassBlade(plant, sway, 1);
@@ -6217,6 +6307,8 @@ function loop() {
     ctx.fillStyle = '#66bb6a';
     ctx.fill();
 
+    drawMeadowPlants();
+
     if (lifecycleStage.index >= 2 && treeSize > 60) {
         drawBloomingEnergyTree(canvas.width / 2, canvas.height - 20, treeSize, lifecycleStage, renderMode);
     } else {
@@ -6227,7 +6319,6 @@ function loop() {
 
     drawEnergyFlow(treeSize);
     drawRewardEffects(treeSize);
-    drawMeadowPlants();
     drawMeadowCritters();
 
     const superSparkleChance = renderMode.ultraLowPower ? 0.06 : renderMode.lowPower ? 0.12 : 0.22;

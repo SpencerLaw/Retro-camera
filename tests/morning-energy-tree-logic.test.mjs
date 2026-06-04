@@ -181,6 +181,8 @@ function loadMorningTree() {
       initEnvironment: typeof initEnvironment === 'function' ? initEnvironment : undefined,
       getMeadowEnvironmentSummary: typeof getMeadowEnvironmentSummary === 'function' ? getMeadowEnvironmentSummary : undefined,
       drawMeadowCritters: typeof drawMeadowCritters === 'function' ? drawMeadowCritters : undefined,
+      feedMeadowGrowth: typeof feedMeadowGrowth === 'function' ? feedMeadowGrowth : undefined,
+      spreadMeadowSunlight: typeof spreadMeadowSunlight === 'function' ? spreadMeadowSunlight : undefined,
       Frog: typeof Frog === 'function' ? Frog : undefined,
       Dragonfly: typeof Dragonfly === 'function' ? Dragonfly : undefined,
       resetGame: typeof resetGame === 'function' ? resetGame : undefined,
@@ -864,13 +866,15 @@ runTest('watering can stream falls downward under gravity', () => {
   assert.ok(uphillTarget.y > 100);
 });
 
-runTest('meadow fills the ground with flowers grass frogs and dragonflies', () => {
+runTest('meadow starts grassy then grows flowers from reading energy without covering the sapling', () => {
   const { api } = loadMorningTree();
   const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
 
   assert.equal(typeof api.initEnvironment, 'function');
   assert.equal(typeof api.getMeadowEnvironmentSummary, 'function');
   assert.equal(typeof api.drawMeadowCritters, 'function');
+  assert.equal(typeof api.feedMeadowGrowth, 'function');
+  assert.equal(typeof api.spreadMeadowSunlight, 'function');
   assert.equal(typeof api.Frog, 'function');
   assert.equal(typeof api.Dragonfly, 'function');
 
@@ -878,10 +882,29 @@ runTest('meadow fills the ground with flowers grass frogs and dragonflies', () =
   const summary = api.getMeadowEnvironmentSummary();
 
   assert.ok(summary.plantCount >= 120);
-  assert.ok(summary.flowerCount >= 36);
-  assert.ok(summary.grassCount >= 36);
+  assert.equal(summary.flowerCount, 0);
+  assert.ok(summary.grassCount >= 120);
+  assert.ok(summary.bloomPotentialCount > 80);
+  assert.equal(summary.saplingProtectedFlowerCount, 0);
+
+  for (let i = 0; i < 4; i += 1) {
+    api.feedMeadowGrowth(160, 2.2, '#ffe082');
+  }
+  const energizedSummary = api.getMeadowEnvironmentSummary();
+  assert.ok(energizedSummary.flowerCount > 0);
+  assert.equal(energizedSummary.saplingProtectedFlowerCount, 0);
+
+  api.STATE.isListening = true;
+  api.STATE.visualEnergy = 72;
+  api.spreadMeadowSunlight(10, 1.2);
+  const sunlitSummary = api.getMeadowEnvironmentSummary();
+  assert.ok(sunlitSummary.flowerCount >= energizedSummary.flowerCount);
+  assert.equal(sunlitSummary.saplingProtectedFlowerCount, 0);
+
   assert.equal(summary.frogCount, 2);
   assert.equal(summary.dragonflyCount, 4);
+  assert.match(script, /protectSapling/);
+  assert.match(script, /drawMeadowPlants\(\);\s+if \(lifecycleStage\.index >= 2/s);
   assert.match(script, /class Frog/);
   assert.match(script, /jumpState/);
   assert.match(script, /startJump\(\)/);

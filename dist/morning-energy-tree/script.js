@@ -122,11 +122,14 @@ const GOLDEN_COLORS = ['#ffd700', '#ffecb3', '#fff9c4', '#fff59d'];
 const ENERGY_SKY_COLORS = ['#fff176', '#ffe082', '#fff59d', '#ffecb3'];
 const ENERGY_TECH_COLORS = ['#7df9ff', '#8cf7d9', '#d2ff72', '#f7ff9c'];
 const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
+const REWARD_WATER_COLORS = ['#8deeff', '#5bd6ff', '#c9f8ff', '#7df9ff'];
+const REWARD_FERTILIZER_COLORS = ['#fff176', '#d8ff66', '#9be15d', '#ffcc80'];
 const FX_LIMITS = {
     sparkles: 88,
     energyParticles: 22,
     trunkTransfers: 16,
-    soilTransfers: 18
+    soilTransfers: 18,
+    rewardEffects: 72
 };
 const READING_THRESHOLD = 70;
 const QUIET_ENERGY_DECAY_RATE = 0.05;
@@ -504,7 +507,23 @@ function getRewardBonusLabel(rewardBonus = {}) {
 }
 
 function flashRewardEnergyBonus(rewardBonus = {}) {
-    if (!energyFill || !(rewardBonus.totalBonus > 0)) return;
+    if (!(rewardBonus.totalBonus > 0)) return;
+
+    const waterTriggerCount = rewardBonus.waterBonus > 0
+        ? Math.max(1, Math.round(rewardBonus.waterBonus / WATER_ENERGY_BONUS))
+        : 0;
+    const fertilizerTriggerCount = rewardBonus.fertilizerBonus > 0
+        ? Math.max(1, Math.round(rewardBonus.fertilizerBonus / FERTILIZER_ENERGY_BONUS))
+        : 0;
+
+    if (waterTriggerCount > 0) {
+        spawnRewardAnimation('water', waterTriggerCount);
+    }
+    if (fertilizerTriggerCount > 0) {
+        spawnRewardAnimation('fertilizer', fertilizerTriggerCount);
+    }
+
+    if (!energyFill) return;
 
     energyFill.classList.remove('reward-boost');
     // Restart the short flash even if water and fertilizer trigger close together.
@@ -3179,6 +3198,7 @@ function resetGame() {
     energyParticles.length = 0;
     trunkTransfers.length = 0;
     soilTransfers.length = 0;
+    rewardEffects.length = 0;
     resetMeadowPlants();
     renderRewardPanel();
     renderCompetitionPanel();
@@ -3357,6 +3377,7 @@ const sparkles = [];
 const energyParticles = [];
 const trunkTransfers = [];
 const soilTransfers = [];
+const rewardEffects = [];
 const meadowPlants = [];
 
 function pushLimitedEffect(queue, item, maxSize) {
@@ -3373,7 +3394,7 @@ function spawnSparkle(x, y, color = '#fff') {
 }
 
 function getFxLoad() {
-    return energyParticles.length + trunkTransfers.length + soilTransfers.length + (sparkles.length * 0.3);
+    return energyParticles.length + trunkTransfers.length + soilTransfers.length + (rewardEffects.length * 0.65) + (sparkles.length * 0.3);
 }
 
 function getRenderMode(treeSize = 0) {
@@ -3791,6 +3812,341 @@ class SoilTransfer {
     }
 }
 
+class RewardWaterDrop {
+    constructor(startX, startY, targetX, targetY, strength = 1) {
+        this.type = 'water';
+        this.start = { x: startX, y: startY };
+        this.target = { x: targetX, y: targetY };
+        this.control = {
+            x: ((startX + targetX) / 2) + ((Math.random() - 0.5) * 56),
+            y: startY + ((targetY - startY) * (0.46 + Math.random() * 0.18))
+        };
+        this.t = Math.random() * 0.08;
+        this.speed = 0.018 + Math.random() * 0.014 + (strength * 0.004);
+        this.size = 2.8 + Math.random() * 3.8;
+        this.life = 1;
+        this.splashLife = 0;
+        this.isSplashing = false;
+        this.phase = Math.random() * Math.PI * 2;
+        this.color = REWARD_WATER_COLORS[Math.floor(Math.random() * REWARD_WATER_COLORS.length)];
+        this.history = [];
+        this.splashSeeds = Array.from({ length: 5 }, () => ({
+            angle: (-Math.PI * 0.88) + (Math.random() * Math.PI * 0.76),
+            distance: 10 + Math.random() * 22,
+            lift: 8 + Math.random() * 12,
+            size: 1 + Math.random() * 1.5
+        }));
+        this.x = startX;
+        this.y = startY;
+    }
+
+    update() {
+        if (!this.isSplashing) {
+            this.t += this.speed;
+            const rawT = Math.min(1, this.t);
+            const eased = rawT * rawT * (3 - (2 * rawT));
+            const point = pointOnQuadratic(this.start, this.control, this.target, eased);
+            const wobble = Math.sin(this.phase + this.t * 9) * 5.5 * (1 - eased);
+            this.x = point.x + wobble;
+            this.y = point.y;
+            this.history.push({ x: this.x, y: this.y });
+            if (this.history.length > 6) this.history.shift();
+
+            if (this.t >= 1) {
+                this.isSplashing = true;
+                this.splashLife = 1;
+                this.history.length = 0;
+                spawnSparkle(this.target.x, this.target.y, '#c9f8ff');
+            }
+            return true;
+        }
+
+        this.splashLife -= 0.045;
+        return this.splashLife > 0;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+
+        if (!this.isSplashing) {
+            drawParticleTrail(this.history, this.color, this.size * 0.55, 0.46);
+
+            ctx.translate(this.x, this.y);
+            ctx.rotate(-0.18 + Math.sin(this.phase + this.t * 6) * 0.08);
+            ctx.globalAlpha = 0.86;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.moveTo(0, -this.size * 1.9);
+            ctx.bezierCurveTo(this.size * 1.15, -this.size * 0.72, this.size * 1.02, this.size * 1.25, 0, this.size * 1.68);
+            ctx.bezierCurveTo(-this.size * 1.02, this.size * 1.25, -this.size * 1.15, -this.size * 0.72, 0, -this.size * 1.9);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.globalAlpha = 0.72;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(-this.size * 0.28, -this.size * 0.45, Math.max(0.8, this.size * 0.22), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            return;
+        }
+
+        const spread = 1 - this.splashLife;
+        ctx.globalAlpha = this.splashLife * 0.72;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(this.target.x, this.target.y + 2, 8 + spread * 24, 3 + spread * 8, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        this.splashSeeds.forEach(seed => {
+            const x = this.target.x + Math.cos(seed.angle) * seed.distance * spread;
+            const y = this.target.y + Math.sin(seed.angle) * seed.lift * spread + (spread * spread * 20);
+            ctx.globalAlpha = this.splashLife * 0.82;
+            ctx.fillStyle = seed.size > 1.9 ? '#ffffff' : this.color;
+            ctx.beginPath();
+            ctx.arc(x, y, seed.size * this.splashLife, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.restore();
+    }
+}
+
+class RewardFertilizerNutrient {
+    constructor(startX, startY, targetX, targetY, strength = 1) {
+        this.type = 'fertilizer';
+        this.start = { x: startX, y: startY };
+        this.target = { x: targetX, y: targetY };
+        this.control = {
+            x: ((startX + targetX) / 2) + ((Math.random() - 0.5) * 82),
+            y: targetY + ((startY - targetY) * (0.28 + Math.random() * 0.24))
+        };
+        this.t = Math.random() * 0.06;
+        this.speed = 0.012 + Math.random() * 0.012 + (strength * 0.004);
+        this.size = 2.4 + Math.random() * 3.6;
+        this.life = 1;
+        this.strength = Number.isFinite(strength) ? strength : 1;
+        this.phase = Math.random() * Math.PI * 2;
+        this.color = REWARD_FERTILIZER_COLORS[Math.floor(Math.random() * REWARD_FERTILIZER_COLORS.length)];
+        this.history = [];
+        this.x = startX;
+        this.y = startY;
+    }
+
+    update() {
+        this.phase += 0.11;
+        this.t += this.speed;
+        const eased = easeInOutSine(Math.min(1, this.t));
+        const point = pointOnQuadratic(this.start, this.control, this.target, eased);
+        const tangent = tangentOnQuadratic(this.start, this.control, this.target, eased);
+        const tangentLength = Math.sqrt(tangent.x * tangent.x + tangent.y * tangent.y) || 1;
+        const normalX = -tangent.y / tangentLength;
+        const normalY = tangent.x / tangentLength;
+        const wobble = Math.sin(this.phase) * (12 + this.strength * 6) * (1 - eased * 0.72);
+
+        this.x = point.x + normalX * wobble;
+        this.y = point.y + normalY * wobble;
+        this.history.push({ x: this.x, y: this.y });
+        if (this.history.length > 9) this.history.shift();
+
+        if (this.t >= 1) {
+            spawnSparkle(this.target.x, this.target.y, '#fff59d');
+            feedMeadowGrowth(this.start.x, this.strength * 0.9, this.color);
+            return false;
+        }
+
+        this.life = Math.max(0.22, 1 - this.t * 0.38);
+        return true;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        drawParticleTrail(this.history, this.color, this.size * 0.86, this.life * 0.76);
+
+        ctx.globalAlpha = this.life * 0.9;
+        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 6.2);
+        glow.addColorStop(0, '#ffffff');
+        glow.addColorStop(0.28, this.color);
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 6.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.phase * 0.8);
+        ctx.globalAlpha = Math.min(1, this.life + 0.12);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.moveTo(0, -this.size * 1.7);
+        ctx.quadraticCurveTo(this.size * 1.7, 0, 0, this.size * 1.7);
+        ctx.quadraticCurveTo(-this.size * 1.7, 0, 0, -this.size * 1.7);
+        ctx.fill();
+
+        ctx.globalAlpha = 0.86;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.max(0.9, this.size * 0.34), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class RewardSoilPulse {
+    constructor(x, y, strength = 1) {
+        this.type = 'fertilizer';
+        this.x = x;
+        this.y = y;
+        this.life = 1;
+        this.strength = Number.isFinite(strength) ? strength : 1;
+        this.radius = 20 + Math.random() * 18 + this.strength * 8;
+        this.color = REWARD_FERTILIZER_COLORS[Math.floor(Math.random() * REWARD_FERTILIZER_COLORS.length)];
+    }
+
+    update() {
+        this.life -= 0.035;
+        return this.life > 0;
+    }
+
+    draw() {
+        const spread = 1 - this.life;
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = this.life * 0.4;
+        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * (1.2 + spread));
+        glow.addColorStop(0, this.color);
+        glow.addColorStop(0.45, 'rgba(255, 241, 118, 0.38)');
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.ellipse(this.x, this.y, this.radius * (1.35 + spread), this.radius * (0.34 + spread * 0.18), 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = this.life * 0.76;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.ellipse(this.x, this.y, this.radius * (0.52 + spread), this.radius * (0.16 + spread * 0.12), 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+function getRewardEffectCount(type = null) {
+    if (!type) return rewardEffects.length;
+    return rewardEffects.filter(effect => effect.type === type).length;
+}
+
+function spawnRewardAnimation(type, triggerCount = 1) {
+    if (!canvas || !canvas.width || !canvas.height) return 0;
+
+    const normalizedType = type === 'fertilizer' ? 'fertilizer' : type === 'water' ? 'water' : null;
+    if (!normalizedType) return 0;
+
+    const safeTriggerCount = Math.max(1, Math.min(5, Math.round(Number(triggerCount) || 1)));
+    const treeSize = getTreeRenderSize(STATE.energy, { width: canvas.width, height: canvas.height });
+    const anchors = getEnergyAnchors(treeSize);
+    const renderMode = getRenderMode(treeSize);
+    const effectLimit = getFxLimit('rewardEffects', treeSize);
+    if (!effectLimit) return 0;
+
+    const burstScale = renderMode.ultraLowPower ? 0.58 : renderMode.lowPower ? 0.78 : 1;
+    const baseCount = normalizedType === 'water' ? 14 : 12;
+    const spawnCount = Math.max(5, Math.min(effectLimit, Math.round(baseCount * safeTriggerCount * burstScale)));
+    let spawned = 0;
+
+    if (normalizedType === 'water') {
+        const canopySpread = Math.max(92, treeSize * 0.68);
+        const targetMinY = anchors.canopy.y + Math.max(12, treeSize * 0.08);
+        const targetMaxY = Math.min(canvas.height - 32, anchors.trunkBase.y - 8);
+
+        for (let i = 0; i < spawnCount; i++) {
+            const targetX = anchors.canopy.x + ((Math.random() - 0.5) * canopySpread);
+            const targetY = Math.min(
+                canvas.height - 32,
+                targetMinY + (Math.random() * Math.max(24, targetMaxY - targetMinY))
+            );
+            const startX = targetX + ((Math.random() - 0.5) * 112) - 18;
+            const startY = Math.max(34, targetMinY - Math.max(118, treeSize * 0.54) - Math.random() * 92);
+            pushLimitedEffect(
+                rewardEffects,
+                new RewardWaterDrop(startX, startY, targetX, targetY, burstScale),
+                effectLimit
+            );
+            spawned += 1;
+        }
+
+        return spawned;
+    }
+
+    const pulseCount = Math.min(spawnCount, Math.max(2, safeTriggerCount * 2));
+    for (let i = 0; i < pulseCount; i++) {
+        const offset = (i % 2 === 0 ? -1 : 1) * (18 + Math.random() * 46);
+        pushLimitedEffect(
+            rewardEffects,
+            new RewardSoilPulse(anchors.trunkBase.x + offset, anchors.trunkBase.y + 24 + Math.random() * 8, burstScale),
+            effectLimit
+        );
+        spawned += 1;
+    }
+
+    const nutrientCount = Math.max(0, spawnCount - spawned);
+    for (let i = 0; i < nutrientCount; i++) {
+        const side = i % 2 === 0 ? -1 : 1;
+        const startX = anchors.trunkBase.x + side * (22 + Math.random() * Math.max(34, treeSize * 0.2));
+        const startY = anchors.trunkBase.y + 24 + Math.random() * 22;
+        const targetX = anchors.canopy.x + ((Math.random() - 0.5) * Math.max(64, treeSize * 0.42));
+        const targetY = anchors.canopy.y + Math.random() * Math.max(28, treeSize * 0.18);
+        pushLimitedEffect(
+            rewardEffects,
+            new RewardFertilizerNutrient(startX, startY, targetX, targetY, burstScale),
+            effectLimit
+        );
+        spawned += 1;
+    }
+
+    return spawned;
+}
+
+function drawRewardEffects(treeSize) {
+    if (!rewardEffects.length) return;
+
+    const anchors = getEnergyAnchors(treeSize);
+    const waterCount = getRewardEffectCount('water');
+    const fertilizerCount = getRewardEffectCount('fertilizer');
+
+    if (waterCount > 0) {
+        drawEnergyAura(
+            anchors.canopy.x,
+            anchors.canopy.y + Math.max(18, treeSize * 0.16),
+            18 + Math.min(20, waterCount * 0.42),
+            '#7df9ff',
+            0.12
+        );
+    }
+
+    if (fertilizerCount > 0) {
+        drawEnergyAura(
+            anchors.trunkBase.x,
+            anchors.trunkBase.y + 18,
+            18 + Math.min(26, fertilizerCount * 0.5),
+            '#d8ff66',
+            0.12
+        );
+    }
+
+    for (let i = rewardEffects.length - 1; i >= 0; i--) {
+        if (!rewardEffects[i].update()) {
+            rewardEffects.splice(i, 1);
+        } else {
+            rewardEffects[i].draw();
+        }
+    }
+}
+
 function initMeadowPlants() {
     meadowPlants.length = 0;
     const centerX = canvas.width / 2;
@@ -4183,6 +4539,7 @@ function initEnvironment() {
     energyParticles.length = 0;
     trunkTransfers.length = 0;
     soilTransfers.length = 0;
+    rewardEffects.length = 0;
     initMeadowPlants();
     for (let i = 0; i < 5; i++) clouds.push(new Cloud());
     for (let i = 0; i < 3; i++) birds.push(new Bird());
@@ -4350,6 +4707,7 @@ function loop() {
     }
 
     drawEnergyFlow(treeSize);
+    drawRewardEffects(treeSize);
     drawMeadowPlants();
 
     const superSparkleChance = renderMode.ultraLowPower ? 0.06 : renderMode.lowPower ? 0.12 : 0.22;

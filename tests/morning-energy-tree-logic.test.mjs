@@ -163,6 +163,11 @@ function loadMorningTree() {
       setActiveRewardHelp: typeof setActiveRewardHelp === 'function' ? setActiveRewardHelp : undefined,
       getRewardHelpContent: typeof getRewardHelpContent === 'function' ? getRewardHelpContent : undefined,
       getRewardBonusLabel: typeof getRewardBonusLabel === 'function' ? getRewardBonusLabel : undefined,
+      flashRewardEnergyBonus: typeof flashRewardEnergyBonus === 'function' ? flashRewardEnergyBonus : undefined,
+      spawnRewardAnimation: typeof spawnRewardAnimation === 'function' ? spawnRewardAnimation : undefined,
+      drawRewardEffects: typeof drawRewardEffects === 'function' ? drawRewardEffects : undefined,
+      getRewardEffectCount: typeof getRewardEffectCount === 'function' ? getRewardEffectCount : undefined,
+      resetGame: typeof resetGame === 'function' ? resetGame : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
       APP_MODES: typeof APP_MODES !== 'undefined' ? APP_MODES : undefined,
       selectAppMode: typeof selectAppMode === 'function' ? selectAppMode : undefined,
@@ -646,6 +651,36 @@ runTest('reward boost creates a visible growth bonus label', () => {
   assert.equal(api.getRewardBonusLabel({ waterBonus: 2, fertilizerBonus: 0, totalBonus: 2 }), '浇水 +2%');
   assert.equal(api.getRewardBonusLabel({ waterBonus: 0, fertilizerBonus: 5, totalBonus: 5 }), '施肥 +5%');
   assert.equal(api.getRewardBonusLabel({ waterBonus: 2, fertilizerBonus: 5, totalBonus: 7 }), '浇水 +2% · 施肥 +5%');
+});
+
+runTest('watering and fertilizer rewards spawn visible tree animations', () => {
+  const { api } = loadMorningTree();
+  const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+
+  assert.equal(typeof api.spawnRewardAnimation, 'function');
+  assert.equal(typeof api.getRewardEffectCount, 'function');
+  assert.equal(typeof api.flashRewardEnergyBonus, 'function');
+  assert.equal(typeof api.drawRewardEffects, 'function');
+  assert.equal(api.getRewardEffectCount(), 0);
+
+  const waterSpawned = api.spawnRewardAnimation('water', 1);
+  assert.ok(waterSpawned >= 5);
+  assert.ok(api.getRewardEffectCount('water') >= 5);
+
+  const fertilizerSpawned = api.spawnRewardAnimation('fertilizer', 1);
+  assert.ok(fertilizerSpawned >= 5);
+  assert.ok(api.getRewardEffectCount('fertilizer') >= 5);
+
+  api.flashRewardEnergyBonus({ waterBonus: 1, fertilizerBonus: 2, totalBonus: 3 });
+  assert.ok(api.getRewardEffectCount('water') > waterSpawned);
+  assert.ok(api.getRewardEffectCount('fertilizer') > fertilizerSpawned);
+
+  api.resetGame();
+  assert.equal(api.getRewardEffectCount(), 0);
+  assert.match(script, /class RewardWaterDrop/);
+  assert.match(script, /class RewardFertilizerNutrient/);
+  assert.match(script, /class RewardSoilPulse/);
+  assert.match(script, /drawRewardEffects\(treeSize\)/);
 });
 
 runTest('competition metrics update only the selected group and rank by highest decibel', () => {

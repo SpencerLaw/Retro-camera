@@ -247,6 +247,14 @@ function getFinalRevealProgress(visualEnergy = getTreeDisplayEnergy()) {
     );
 }
 
+function getFinalTreeMorphProgress(stageOrReveal = 0) {
+    const rawProgress = typeof stageOrReveal === 'number'
+        ? stageOrReveal
+        : Number(stageOrReveal?.finalReveal) || 0;
+    const progress = clamp(rawProgress, 0, 1);
+    return progress * progress * (3 - (2 * progress));
+}
+
 function getTreeDisplayLifecycleStage(visualEnergy = getTreeDisplayEnergy()) {
     const displayEnergy = clampEnergy(visualEnergy);
     const displayManifested = STATE.hasManifested && displayEnergy >= VISUAL_FINAL_STAGE_START;
@@ -5208,7 +5216,12 @@ function getFinalTreeDisplayColor(color, visualState) {
 }
 
 function getBloomTreePalette(stage) {
-    return stage?.key === 'final' ? BLOOM_TREE_FINAL_COLORS : BLOOM_TREE_LEAF_COLORS;
+    if (stage?.key !== 'final') return BLOOM_TREE_LEAF_COLORS;
+    const finalMorph = getFinalTreeMorphProgress(stage);
+    return BLOOM_TREE_LEAF_COLORS.map((color, index) => {
+        const target = BLOOM_TREE_FINAL_COLORS[index % BLOOM_TREE_FINAL_COLORS.length];
+        return mixHexColor(color, target, finalMorph);
+    });
 }
 
 function getQuadraticPoint(start, control, end, t) {
@@ -5428,7 +5441,7 @@ function drawBranchBud(x, y, size, color = '#9be15d') {
 function drawBloomTreeFlowers(cluster, stage, renderMode, frameTime) {
     if (!cluster || !stage || stage.index < 4) return;
     const finalReveal = stage.key === 'final' ? clamp(Number(stage.finalReveal) || 0, 0, 1) : 0;
-    const baseCount = stage.key === 'final' ? Math.round(3 + finalReveal * 2) : stage.key === 'flowers' ? 7 : stage.key === 'fruit' ? 8 : 11;
+    const baseCount = stage.key === 'final' ? Math.round(8 + finalReveal * 3) : stage.key === 'flowers' ? 7 : stage.key === 'fruit' ? 8 : 11;
     const finalVisualState = stage.key === 'final' ? getFinalTreeVisualState({ stage }) : null;
     const finalFlowerAlpha = finalVisualState?.flowerAlpha ?? 1;
     const count = renderMode.ultraLowPower
@@ -5456,7 +5469,7 @@ function drawBloomTreeFlowers(cluster, stage, renderMode, frameTime) {
 function drawBloomTreeFruit(cluster, stage, renderMode, frameTime) {
     if (!cluster || !stage || stage.index < 5) return;
     const finalReveal = stage.key === 'final' ? clamp(Number(stage.finalReveal) || 0, 0, 1) : 0;
-    const baseCount = stage.key === 'final' ? Math.round(1 + finalReveal) : 3;
+    const baseCount = stage.key === 'final' ? Math.round(3 + finalReveal * 2) : 3;
     const finalVisualState = stage.key === 'final' ? getFinalTreeVisualState({ stage }) : null;
     const finalFruitAlpha = finalVisualState?.flowerAlpha ?? 1;
     const count = renderMode.ultraLowPower
@@ -5495,23 +5508,26 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     const stageIndex = Math.max(2, Number(stage?.index) || 2);
     const isFinalTree = stage?.key === 'final';
     const finalReveal = isFinalTree ? clamp(Number(stage?.finalReveal) || 0, 0, 1) : 0;
-    const stageProgress = isFinalTree ? 1 : clamp(Number(stage?.progress) || 0, 0, 1);
-    const finalVisualState = isFinalTree ? getFinalTreeVisualState({ stage }) : null;
-    const heightBoost = isFinalTree ? 0.12 + finalReveal * 0.34 : 0;
+    const finalMorph = isFinalTree ? getFinalTreeMorphProgress(finalReveal) : 0;
+    const stageProgress = isFinalTree ? finalMorph : clamp(Number(stage?.progress) || 0, 0, 1);
+    const renderStageIndex = isFinalTree ? 5 + finalMorph : stageIndex;
+    const renderStage = isFinalTree ? { ...stage, index: renderStageIndex, progress: stageProgress, finalReveal: finalMorph } : stage;
+    const finalVisualState = isFinalTree ? getFinalTreeVisualState({ stage: renderStage }) : null;
+    const heightBoost = isFinalTree ? finalMorph * 0.46 : 0;
     const treeHeight = Math.min(
-        canvas.height * (isFinalTree ? 0.67 + finalReveal * 0.07 : 0.67),
-        Math.max(118, treeSize * (2.15 + stageIndex * 0.13 + heightBoost))
+        canvas.height * (isFinalTree ? 0.67 + finalMorph * 0.07 : 0.67),
+        Math.max(118, treeSize * (2.15 + renderStageIndex * 0.13 + heightBoost))
     );
     const spread = Math.min(
-        canvas.width * (isFinalTree ? 0.34 + finalReveal * 0.09 : 0.34),
+        canvas.width * (isFinalTree ? 0.34 + finalMorph * 0.09 : 0.34),
         Math.max(
-            treeSize * (isFinalTree ? 0.95 + finalReveal * 0.29 : 0.95),
-            treeHeight * (isFinalTree ? 0.58 + finalReveal * 0.2 : 0.58)
+            treeSize * (isFinalTree ? 0.95 + finalMorph * 0.29 : 0.95),
+            treeHeight * (isFinalTree ? 0.58 + finalMorph * 0.2 : 0.58)
         )
     );
     const trunkBaseWidth = Math.max(
-        isFinalTree ? 11 + finalReveal * 6 : 11,
-        treeSize * (isFinalTree ? 0.11 + finalReveal * 0.04 : 0.11)
+        isFinalTree ? 11 + finalMorph * 6 : 11,
+        treeSize * (isFinalTree ? 0.11 + finalMorph * 0.04 : 0.11)
     );
     const sway = Math.sin(frameTime * 0.72) * (STATE.isListening ? Math.min(8, Math.max(1.5, (STATE.currentDB - 58) * 0.12)) : 1.6);
     const palette = getBloomTreePalette(stage);
@@ -5552,9 +5568,12 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
         { x: -spread * 0.02 + sway * 0.1, y: -treeHeight * 0.62, rx: spread * 0.28, ry: treeHeight * 0.16, seed: 27.4 },
         { x: -spread * 0.02 + sway * 0.1, y: -treeHeight * 0.76, rx: spread * 0.31, ry: treeHeight * 0.19, seed: 29.7 }
     ];
-    const finalClusterCount = isFinalTree ? Math.ceil(finalCrownClusters.length * finalReveal) : 0;
-    const naturalClusters = isFinalTree ? clusters.concat(finalCrownClusters.slice(0, finalClusterCount)) : clusters;
-    const visibleBranches = branchDefs.slice(0, getVisibleBranchCount(stageIndex, stageProgress, branchDefs.length, isFinalTree));
+    const finalBaseClusterCount = isFinalTree ? 8 + Math.round((clusters.length - 8) * finalMorph) : clusters.length;
+    const finalClusterCount = isFinalTree ? Math.floor(finalCrownClusters.length * finalMorph) : 0;
+    const naturalClusters = isFinalTree
+        ? clusters.slice(0, finalBaseClusterCount).concat(finalCrownClusters.slice(0, finalClusterCount))
+        : clusters;
+    const visibleBranches = branchDefs.slice(0, getVisibleBranchCount(renderStageIndex, stageProgress, branchDefs.length, isFinalTree));
     const visibleClusters = isFinalTree
         ? naturalClusters
         : stageIndex >= 5
@@ -5576,11 +5595,11 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     ctx.fill();
     ctx.restore();
 
-    drawSurfaceRoots(spread, trunkBaseWidth, branchColor, stageIndex, stageProgress);
+    drawSurfaceRoots(spread, trunkBaseWidth, branchColor, renderStageIndex, stageProgress);
 
     if (isFinalTree) {
         ctx.save();
-        ctx.globalAlpha = 0.16 * finalReveal * (finalVisualState?.canopyAlpha ?? 1);
+        ctx.globalAlpha = 0.16 * finalMorph * (finalVisualState?.canopyAlpha ?? 1);
         ctx.fillStyle = getFinalTreeDisplayColor('#2f8848', finalVisualState);
         ctx.beginPath();
         ctx.ellipse(sway * 0.08, -treeHeight * 0.76, spread * 0.52, treeHeight * 0.33, 0, 0, Math.PI * 2);
@@ -5589,14 +5608,14 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.24, '#baff82', finalVisualState.glowAlpha * (0.25 + finalReveal * 0.75));
+        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.24, '#baff82', finalVisualState.glowAlpha * (0.25 + finalMorph * 0.75));
         if (!finalVisualState.quiet) {
-            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.2, '#fff3a3', finalVisualState.glowAlpha * 0.82 * finalReveal);
+            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.2, '#fff3a3', finalVisualState.glowAlpha * 0.82 * finalMorph);
         }
         ctx.restore();
     }
 
-    visibleClusters.forEach(cluster => drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, 'back'));
+    visibleClusters.forEach(cluster => drawBloomLeafCluster(cluster, palette, renderStage, renderMode, frameTime, 'back'));
 
     ctx.save();
     ctx.globalAlpha = finalVisualState?.branchAlpha ?? 1;
@@ -5619,26 +5638,26 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
             Math.max(1.2, trunkBaseWidth * branch.ew * widthScale),
             branchColor
         );
-        drawNaturalTwigCluster(branch, index, trunkBaseWidth, branchColor, stageIndex, stageProgress, renderMode);
+        drawNaturalTwigCluster(branch, index, trunkBaseWidth, branchColor, renderStageIndex, stageProgress, renderMode);
 
-        if (stageIndex === 2) {
+        if (renderStageIndex === 2) {
             drawBranchBud(branch.e.x, branch.e.y, Math.max(3.2, trunkBaseWidth * 0.12), '#9be15d');
         }
     });
     ctx.restore();
 
     visibleClusters.forEach(cluster => {
-        drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, 'front');
-        drawBloomTreeFlowers(cluster, stage, renderMode, frameTime);
-        drawBloomTreeFruit(cluster, stage, renderMode, frameTime);
+        drawBloomLeafCluster(cluster, palette, renderStage, renderMode, frameTime, 'front');
+        drawBloomTreeFlowers(cluster, renderStage, renderMode, frameTime);
+        drawBloomTreeFruit(cluster, renderStage, renderMode, frameTime);
     });
 
     if (stage?.key === 'final') {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.22, '#ffe082', finalVisualState.glowAlpha * 0.7 * (0.25 + finalReveal * 0.75));
+        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.22, '#ffe082', finalVisualState.glowAlpha * 0.7 * (0.25 + finalMorph * 0.75));
         if (!finalVisualState.quiet) {
-            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.18, '#fff3a3', finalVisualState.glowAlpha * 0.58 * finalReveal);
+            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.18, '#fff3a3', finalVisualState.glowAlpha * 0.58 * finalMorph);
         }
         ctx.restore();
     }

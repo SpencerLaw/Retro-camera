@@ -148,6 +148,7 @@ function loadMorningTree() {
       updateVisualEnergy: typeof updateVisualEnergy === 'function' ? updateVisualEnergy : undefined,
       getTreeDisplayEnergy: typeof getTreeDisplayEnergy === 'function' ? getTreeDisplayEnergy : undefined,
       getTreeDisplayLifecycleStage: typeof getTreeDisplayLifecycleStage === 'function' ? getTreeDisplayLifecycleStage : undefined,
+      getFinalTreeMorphProgress: typeof getFinalTreeMorphProgress === 'function' ? getFinalTreeMorphProgress : undefined,
       getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined,
       getTreeRenderSize: typeof getTreeRenderSize === 'function' ? getTreeRenderSize : undefined,
       applySensitivityToDb: typeof applySensitivityToDb === 'function' ? applySensitivityToDb : undefined,
@@ -290,6 +291,7 @@ runTest('final tree visual growth eases instead of jumping to mature form', () =
   assert.equal(typeof api.getNextVisualEnergy, 'function');
   assert.equal(typeof api.updateVisualEnergy, 'function');
   assert.equal(typeof api.getTreeDisplayLifecycleStage, 'function');
+  assert.equal(typeof api.getFinalTreeMorphProgress, 'function');
 
   api.STATE.energy = 82;
   api.STATE.visualEnergy = 82;
@@ -311,6 +313,16 @@ runTest('final tree visual growth eases instead of jumping to mature form', () =
   assert.equal(finalStage.key, 'final');
   assert.ok(finalStage.finalReveal > 0.95);
   assert.ok(api.getTreeDisplayEnergy() >= 99.4);
+});
+
+runTest('final tree morph progress starts slowly before the crown fills in', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(api.getFinalTreeMorphProgress({ key: 'final', finalReveal: 0 }), 0);
+  assert.ok(api.getFinalTreeMorphProgress({ key: 'final', finalReveal: 0.08 }) < 0.02);
+  assert.ok(api.getFinalTreeMorphProgress({ key: 'final', finalReveal: 0.25 }) < 0.16);
+  assert.ok(api.getFinalTreeMorphProgress({ key: 'final', finalReveal: 0.5 }) >= 0.49);
+  assert.equal(api.getFinalTreeMorphProgress({ key: 'final', finalReveal: 1 }), 1);
 });
 
 runTest('morning tree size returns to sapling range at low energy', () => {
@@ -562,6 +574,7 @@ runTest('tree lifecycle stages are fine grained from seed to final energy tree',
   const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
   assert.match(script, /BLOOM_TREE_FINAL_COLORS/);
   assert.match(script, /const isFinalTree = stage\?\.key === 'final'/);
+  assert.match(script, /const finalMorph = isFinalTree \? getFinalTreeMorphProgress\(finalReveal\) : 0/);
   assert.match(script, /densityBoost = stage\?\.key === 'final' \? 1\.18 \+ finalReveal \* 0\.37/);
   assert.match(script, /drawBloomingEnergyTree\(canvas\.width \/ 2, canvas\.height - 20, treeSize, lifecycleStage, renderMode\)/);
 });
@@ -576,7 +589,7 @@ runTest('tree growth visuals include seed roots twigs and a natural final crown'
   assert.match(script, /function getVisibleBranchCount/);
   assert.match(script, /const finalCrownClusters = \[/);
   assert.match(script, /detailBase = stage\?\.key === 'final' \? Math\.round\(9 \+ finalReveal \* 9\)/);
-  assert.match(script, /naturalClusters = isFinalTree \? clusters\.concat\(finalCrownClusters\.slice\(0, finalClusterCount\)\) : clusters/);
+  assert.match(script, /clusters\.slice\(0, finalBaseClusterCount\)\.concat\(finalCrownClusters\.slice\(0, finalClusterCount\)\)/);
 });
 
 runTest('audio activation makes light orbs clearly correlated with decibels', () => {

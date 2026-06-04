@@ -40,8 +40,6 @@ const FERTILIZER_READING_SECONDS = 90;
 const WATER_ENERGY_BONUS = 0.25;
 const FERTILIZER_ENERGY_BONUS = 0.6;
 const FINAL_TREE_HOLD_MS = 30_000;
-const HEALTHY_READING_DB_MAX = 96;
-const OVER_LOUD_DB = 100;
 const TREE_LIFECYCLE_STAGES = [
     { key: 'seed', minEnergy: 0 },
     { key: 'sprout', minEnergy: 14 },
@@ -484,7 +482,6 @@ function getAudioActivation(currentDB, profile = getSensitivityProfile(STATE.sen
     const threshold = Number.isFinite(profile?.readingThreshold) ? profile.readingThreshold : READING_THRESHOLD;
     const holdSeconds = Number.isFinite(readingHoldSeconds) ? Math.max(0, readingHoldSeconds) : 0;
     const minimumHold = Number.isFinite(profile?.minimumReadingSeconds) ? Math.max(0.1, profile.minimumReadingSeconds) : 0.45;
-    const overLoud = safeDb >= OVER_LOUD_DB;
     const dbRatio = clamp((safeDb - (threshold - 8)) / 36, 0, 1.35);
     const holdRatio = clamp(holdSeconds / (minimumHold + 0.8), 0, 1);
     const stabilityBoost = 0.58 + (holdRatio * 0.42);
@@ -494,7 +491,6 @@ function getAudioActivation(currentDB, profile = getSensitivityProfile(STATE.sen
         intensity,
         dbRatio,
         holdRatio,
-        overLoud,
         orbCount: Math.max(0, Math.round(1 + (intensity * 5))),
         glow: clamp(0.14 + (intensity * 0.68), 0.14, 1),
         speed: clamp(0.8 + (intensity * 1.1), 0.8, 2.4)
@@ -572,10 +568,7 @@ function createSessionRewardState() {
     return {
         waterCount: 0,
         fertilizerCount: 0,
-        overLoudCount: 0,
         stableReadingSeconds: 0,
-        overLoudSeconds: 0,
-        overLoudCooldownSeconds: 0,
         nextWaterAt: WATER_STABLE_SECONDS,
         nextFertilizerAt: FERTILIZER_READING_SECONDS
     };
@@ -589,24 +582,12 @@ function getNextRewardTarget(count, intervalSeconds) {
 function updateSessionRewards(rewardState, options = {}) {
     const state = rewardState || createSessionRewardState();
     const deltaSeconds = normalizeDeltaSeconds(options.deltaSeconds);
-    const currentDB = Number.isFinite(options.currentDB) ? options.currentDB : 30;
     const effectiveReadingSeconds = Number.isFinite(options.effectiveReadingSeconds)
         ? Math.max(0, options.effectiveReadingSeconds)
         : 0;
     const isReadingLoudly = Boolean(options.isReadingLoudly);
-    const isOverLoud = currentDB >= OVER_LOUD_DB;
-    const isHealthyStableReading = isReadingLoudly && currentDB < OVER_LOUD_DB && currentDB <= HEALTHY_READING_DB_MAX;
 
-    state.overLoudCooldownSeconds = Math.max(0, (state.overLoudCooldownSeconds || 0) - deltaSeconds);
-    if (isOverLoud) {
-        state.overLoudSeconds = (state.overLoudSeconds || 0) + deltaSeconds;
-        if (state.overLoudCooldownSeconds <= 0) {
-            state.overLoudCount = (state.overLoudCount || 0) + 1;
-            state.overLoudCooldownSeconds = 2;
-        }
-    }
-
-    if (isHealthyStableReading) {
+    if (isReadingLoudly) {
         state.stableReadingSeconds = (state.stableReadingSeconds || 0) + deltaSeconds;
         while (
             state.stableReadingSeconds >= (state.nextWaterAt || WATER_STABLE_SECONDS)
@@ -618,7 +599,7 @@ function updateSessionRewards(rewardState, options = {}) {
         state.stableReadingSeconds = Math.max(0, (state.stableReadingSeconds || 0) - (deltaSeconds * 0.5));
     }
 
-    if (!isOverLoud && isReadingLoudly) {
+    if (isReadingLoudly) {
         while (
             effectiveReadingSeconds >= (state.nextFertilizerAt || FERTILIZER_READING_SECONDS)
         ) {
@@ -706,7 +687,6 @@ function getRewardProgress(rewardState = createSessionRewardState(), effectiveRe
     const readingSeconds = Math.max(0, Number(effectiveReadingSeconds) || 0);
     const waterCount = Math.max(0, Math.round(Number(state.waterCount) || 0));
     const fertilizerCount = Math.max(0, Math.round(Number(state.fertilizerCount) || 0));
-    const overLoudCount = Math.max(0, Math.round(Number(state.overLoudCount) || 0));
     const waterTargetSeconds = Math.max(
         WATER_STABLE_SECONDS,
         Number.isFinite(state.nextWaterAt)
@@ -725,7 +705,6 @@ function getRewardProgress(rewardState = createSessionRewardState(), effectiveRe
     return {
         waterCount,
         fertilizerCount,
-        overLoudCount,
         stableReadingSeconds,
         effectiveReadingSeconds: readingSeconds,
         waterTargetSeconds,
@@ -758,22 +737,16 @@ function getRewardHelpContent(type) {
             title: '浇水触发条件',
             condition: `声音进入稳定朗读区后每连续保持 ${WATER_STABLE_SECONDS} 秒触发一次，不设上限。`,
             effect: `每次自动浇水，并让成长进度 +${WATER_ENERGY_BONUS}%。`,
-            blocker: '如果没有触发，多半是声音断续、不够稳定，或刚才超过 100dB。'
+            blocker: '如果没有触发，多半是声音断续，或还没有连续保持在朗读区。'
         },
         fertilizer: {
             title: '施肥触发条件',
-            condition: `本场有效朗读每累计 ${FERTILIZER_READING_SECONDS} 秒触发一次，不设上限，触发时低于 ${OVER_LOUD_DB}dB。`,
+            condition: `本场有效朗读每累计 ${FERTILIZER_READING_SECONDS} 秒触发一次，不设上限。`,
             effect: `每次自动施肥，并让成长进度 +${FERTILIZER_ENERGY_BONUS}%。`,
-            blocker: '如果已经很响但没有触发，请看是否超过 100dB，过响不会奖励。'
-        },
-        overLoud: {
-            title: '过响提醒规则',
-            condition: `声音达到 ${OVER_LOUD_DB}dB 以上会记录一次过响提醒。`,
-            effect: '不浇水、不施肥，只记录提醒，避免喊叫刷成长。',
-            blocker: '提醒学生回到清晰、稳定、不过喊的朗读状态。'
+            blocker: '如果已经很响但没有触发，请看是否还没有累计到下一次施肥时间。'
         }
     };
-    const key = type === 'overLoud' ? 'overLoud' : type;
+    const key = type === 'fertilizer' ? 'fertilizer' : 'water';
     const copy = fallback[key] || fallback.water;
     return {
         title: t(`morningTree.rewards.${key}HelpTitle`) || copy.title,
@@ -784,11 +757,11 @@ function getRewardHelpContent(type) {
 }
 
 function getRewardHelpId(type) {
-    return type === 'overLoud' ? 'reward-help-over-loud' : `reward-help-${type}`;
+    return `reward-help-${type === 'fertilizer' ? 'fertilizer' : 'water'}`;
 }
 
 function isRewardHelpType(type) {
-    return type === 'water' || type === 'fertilizer' || type === 'overLoud';
+    return type === 'water' || type === 'fertilizer';
 }
 
 function setActiveRewardHelp(type) {
@@ -849,9 +822,6 @@ function renderRewardPanel() {
     const timesSuffix = t('morningTree.rewards.timesSuffix') || '次';
     const waterStatus = `${formatRewardSeconds(progress.stableReadingSeconds)} / ${formatRewardSeconds(progress.waterTargetSeconds)}`;
     const fertilizerStatus = `${formatRewardSeconds(progress.effectiveReadingSeconds)} / ${formatRewardSeconds(progress.fertilizerTargetSeconds)}`;
-    const overLoudStatus = progress.overLoudCount
-        ? `${progress.overLoudCount}${timesSuffix}`
-        : (t('morningTree.rewards.noOverLoud') || '暂无');
 
     rewardLivePanel.innerHTML = [
         renderRewardCard('water', {
@@ -871,14 +841,6 @@ function renderRewardPanel() {
             status: fertilizerStatus,
             progressRatio: progress.fertilizerProgressRatio,
             bonusText: `${t('morningTree.rewards.bonusLabel') || '奖励'} +${FERTILIZER_ENERGY_BONUS}%/${t('morningTree.rewards.eachSuffix') || '次'}`
-        }),
-        renderRewardCard('overLoud', {
-            symbol: '!',
-            title: t('morningTree.rewards.overLoud') || '过响提醒',
-            countId: 'reward-over-loud-count',
-            countText: `${progress.overLoudCount}`,
-            status: overLoudStatus,
-            progressRatio: progress.overLoudCount ? 1 : 0
         })
     ].join('');
 }
@@ -1232,8 +1194,7 @@ function loadStoredForest() {
                 treeStage: item.treeStage?.key ? item.treeStage : getTreeLifecycleStage(item),
                 rewards: {
                     waterCount: Math.max(0, Math.round(Number(item.rewards?.waterCount) || 0)),
-                    fertilizerCount: Math.max(0, Math.round(Number(item.rewards?.fertilizerCount) || 0)),
-                    overLoudCount: Math.max(0, Math.round(Number(item.rewards?.overLoudCount) || 0))
+                    fertilizerCount: Math.max(0, Math.round(Number(item.rewards?.fertilizerCount) || 0))
                 },
                 competition: item.competition && typeof item.competition === 'object'
                     ? item.competition
@@ -1281,8 +1242,7 @@ function getTreeSnapshotFromReport(report) {
         treeStage,
         rewards: {
             waterCount: Math.max(0, Math.round(Number(report.rewards?.waterCount) || 0)),
-            fertilizerCount: Math.max(0, Math.round(Number(report.rewards?.fertilizerCount) || 0)),
-            overLoudCount: Math.max(0, Math.round(Number(report.rewards?.overLoudCount) || 0))
+            fertilizerCount: Math.max(0, Math.round(Number(report.rewards?.fertilizerCount) || 0))
         },
         competition: report.competition && typeof report.competition === 'object'
             ? report.competition
@@ -1314,8 +1274,7 @@ function mergeForestSnapshots(existing, incoming) {
         treeStage: getTreeLifecycleStage({ finalEnergy: Math.max(finalEnergy, peakEnergy), manifested }),
         rewards: {
             waterCount: (existing.rewards?.waterCount || 0) + (incoming.rewards?.waterCount || 0),
-            fertilizerCount: (existing.rewards?.fertilizerCount || 0) + (incoming.rewards?.fertilizerCount || 0),
-            overLoudCount: (existing.rewards?.overLoudCount || 0) + (incoming.rewards?.overLoudCount || 0)
+            fertilizerCount: (existing.rewards?.fertilizerCount || 0) + (incoming.rewards?.fertilizerCount || 0)
         },
         competition: incoming.competition || existing.competition || null
     };
@@ -1909,8 +1868,7 @@ function finalizeReportSession() {
         sensitivity: clampSensitivity(STATE.sensitivity),
         rewards: {
             waterCount: Math.max(0, Math.round(rewardState.waterCount || 0)),
-            fertilizerCount: Math.max(0, Math.round(rewardState.fertilizerCount || 0)),
-            overLoudCount: Math.max(0, Math.round(rewardState.overLoudCount || 0))
+            fertilizerCount: Math.max(0, Math.round(rewardState.fertilizerCount || 0))
         },
         competition,
         treeStage,
@@ -2067,7 +2025,6 @@ function renderReportFocus(selectedDay) {
             manifested: selectedReport.manifested
         });
     const rewards = selectedReport.rewards || {};
-    const overLoudCount = Math.max(0, Math.round(Number(rewards.overLoudCount) || 0));
     const waterCount = Math.max(0, Math.round(Number(rewards.waterCount) || 0));
     const fertilizerCount = Math.max(0, Math.round(Number(rewards.fertilizerCount) || 0));
     const competitionSection = buildCompetitionReportSection(selectedReport.competition);
@@ -2179,10 +2136,6 @@ function renderReportFocus(selectedDay) {
                 <div class="report-metric-card energy">
                     <span>${t('morningTree.rewards.fertilizer') || '施肥'}</span>
                     <strong>${fertilizerCount}</strong>
-                </div>
-                <div class="report-metric-card ${overLoudCount ? 'peak' : ''}">
-                    <span>${t('morningTree.rewards.overLoud') || '过响提醒'}</span>
-                    <strong>${overLoudCount}</strong>
                 </div>
             </div>
         </article>
@@ -2352,7 +2305,6 @@ function renderForestDetail(selectedGroup) {
         <div class="forest-reward-row">
             <span>${t('morningTree.rewards.water') || '浇水'} ${record.rewards?.waterCount || 0}</span>
             <span>${t('morningTree.rewards.fertilizer') || '施肥'} ${record.rewards?.fertilizerCount || 0}</span>
-            <span>${t('morningTree.rewards.overLoud') || '过响'} ${record.rewards?.overLoudCount || 0}</span>
         </div>
         <div class="forest-competition-list">
             ${competitionHtml}
@@ -3438,14 +3390,14 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         renderCompetitionPanel();
     }
 
-    if (audioActivation.overLoud) {
-        dbValue.style.color = '#ff6b6b';
-        dbDisplay.style.borderColor = 'rgba(255, 107, 107, 0.8)';
-        if (dbStatus) { dbStatus.textContent = '超过100dB'; dbStatus.style.color = '#ff6b6b'; }
+    if (STATE.currentDB > 96) {
+        dbValue.style.color = '#d8ff66';
+        dbDisplay.style.borderColor = 'rgba(216, 255, 102, 0.82)';
+        if (dbStatus) { dbStatus.textContent = '声音很有劲'; dbStatus.style.color = '#d8ff66'; }
     } else if (STATE.currentDB > 88) {
         dbValue.style.color = '#ffd166';
         dbDisplay.style.borderColor = 'rgba(255, 209, 102, 0.78)';
-        if (dbStatus) { dbStatus.textContent = '声音偏强'; dbStatus.style.color = '#ffd166'; }
+        if (dbStatus) { dbStatus.textContent = '声音很棒'; dbStatus.style.color = '#ffd166'; }
     } else if (isReadingLoudly) {
         dbValue.style.color = '#4caf50';
         dbDisplay.style.borderColor = 'rgba(76, 175, 80, 0.8)';
@@ -3482,9 +3434,6 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         STATE.energy = 100;
     }
     STATE.reportPeakEnergy = Math.max(STATE.reportPeakEnergy || 0, Math.round(clampEnergy(STATE.energy)));
-
-    // FIX: Reduced shake threshold and diverted to canvas only
-    if (isReadingLoudly && STATE.currentDB > OVER_LOUD_DB) shakeCanvas(2);
 
     if (STATE.energy >= 100 && !STATE.isSuperMode && !STATE.hasManifested) triggerSuperMode();
     updateVisualEnergy(frameSeconds);

@@ -951,12 +951,6 @@ canvas {
     background: linear-gradient(135deg, rgba(255, 224, 130, 0.2), rgba(125, 249, 255, 0.08));
 }
 
-.reward-stat-card.alert,
-.reward-stat-card.overLoud {
-    border-color: rgba(255, 107, 107, 0.18);
-    background: rgba(255, 107, 107, 0.08);
-}
-
 .reward-stat-top {
     display: grid;
     grid-template-columns: 28px minmax(0, 1fr) auto 24px;

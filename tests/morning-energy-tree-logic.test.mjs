@@ -588,16 +588,16 @@ runTest('audio activation makes light orbs clearly correlated with decibels', ()
   const quiet = api.getAudioActivation(62, profile, 0.2);
   const medium = api.getAudioActivation(78, profile, 1.2);
   const loud = api.getAudioActivation(92, profile, 2.5);
-  const overLoud = api.getAudioActivation(104, profile, 2.5);
+  const veryLoud = api.getAudioActivation(104, profile, 2.5);
 
   assert.ok(medium.intensity > quiet.intensity);
   assert.ok(loud.intensity > medium.intensity);
-  assert.ok(overLoud.intensity >= loud.intensity);
-  assert.equal(overLoud.overLoud, true);
+  assert.ok(veryLoud.intensity >= loud.intensity);
+  assert.equal(Object.hasOwn(veryLoud, 'overLoud'), false);
   assert.ok(loud.orbCount > quiet.orbCount);
 });
 
-runTest('stable reading earns water and fertilizer while unsafe spikes only warn', () => {
+runTest('loud reading earns water and fertilizer without over-loud warnings', () => {
   const { api } = loadMorningTree();
 
   assert.equal(typeof api.createSessionRewardState, 'function');
@@ -621,19 +621,19 @@ runTest('stable reading earns water and fertilizer while unsafe spikes only warn
   assert.equal(stable.fertilizerCount, 4);
   assert.equal(stable.nextWaterAt, 390);
   assert.equal(stable.nextFertilizerAt, 450);
-  assert.equal(stable.overLoudCount, 0);
+  assert.equal(Object.hasOwn(stable, 'overLoudCount'), false);
 
-  const unsafe = api.createSessionRewardState();
-  api.updateSessionRewards(unsafe, {
+  const veryLoud = api.createSessionRewardState();
+  api.updateSessionRewards(veryLoud, {
     currentDB: 106,
-    deltaSeconds: 8,
+    deltaSeconds: 90,
     isReadingLoudly: true,
-    effectiveReadingSeconds: 8,
+    effectiveReadingSeconds: 90,
   });
 
-  assert.equal(unsafe.waterCount, 0);
-  assert.equal(unsafe.fertilizerCount, 0);
-  assert.equal(unsafe.overLoudCount, 1);
+  assert.equal(veryLoud.waterCount, 3);
+  assert.equal(veryLoud.fertilizerCount, 1);
+  assert.equal(Object.hasOwn(veryLoud, 'overLoudCount'), false);
 });
 
 runTest('watering and fertilizer rewards keep cycling without a count cap', () => {
@@ -706,13 +706,12 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.match(html, /id="reward-live-panel"/);
   assert.match(html, /data-i18n="morningTree\.rewards\.waterRule"/);
   assert.match(html, /data-i18n="morningTree\.rewards\.fertilizerRule"/);
-  assert.match(html, /data-i18n="morningTree\.rewards\.overLoudRule"/);
+  assert.doesNotMatch(html, /data-i18n="morningTree\.rewards\.overLoudRule"/);
   assert.equal(typeof api.getRewardProgress, 'function');
   assert.equal(typeof api.renderRewardPanel, 'function');
 
   const rewardState = api.createSessionRewardState();
   rewardState.stableReadingSeconds = 18;
-  rewardState.overLoudCount = 2;
   const progress = api.getRewardProgress(rewardState, 45);
   assert.equal(progress.waterTargetSeconds, 30);
   assert.equal(progress.fertilizerTargetSeconds, 90);
@@ -728,7 +727,8 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.match(panelHtml, /id="reward-fertilizer-count"/);
   assert.match(panelHtml, /30s/);
   assert.match(panelHtml, /90s/);
-  assert.match(panelHtml, /2/);
+  assert.doesNotMatch(panelHtml, /过响/);
+  assert.doesNotMatch(panelHtml, /overLoud/);
   assert.equal(zh.morningTree.energyLabel, '🌳 能量树成长进度');
   assert.match(zh.morningTree.rewards.liveSub, /不需要老师手动点/);
   assert.match(zh.morningTree.rewards.waterRule, /30 秒/);
@@ -737,7 +737,7 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.match(zh.morningTree.rewards.fertilizerRule, /90 秒/);
   assert.match(zh.morningTree.rewards.fertilizerRule, /不设上限/);
   assert.match(zh.morningTree.rewards.fertilizerRule, /\+0\.6%/);
-  assert.match(zh.morningTree.rewards.overLoudRule, /不浇水、不施肥/);
+  assert.equal(Object.hasOwn(zh.morningTree.rewards, 'overLoudRule'), false);
 });
 
 runTest('reward cards are clickable and reveal trigger explanations', () => {
@@ -752,20 +752,18 @@ runTest('reward cards are clickable and reveal trigger explanations', () => {
 
   const waterHelp = api.getRewardHelpContent('water');
   const fertilizerHelp = api.getRewardHelpContent('fertilizer');
-  const overLoudHelp = api.getRewardHelpContent('overLoud');
   assert.match(waterHelp.condition, /30 秒/);
   assert.match(waterHelp.condition, /不设上限/);
   assert.match(waterHelp.effect, /\+0\.25%/);
   assert.match(fertilizerHelp.condition, /90 秒/);
   assert.match(fertilizerHelp.condition, /不设上限/);
   assert.match(fertilizerHelp.effect, /\+0\.6%/);
-  assert.match(overLoudHelp.effect, /不浇水、不施肥/);
 
   api.renderRewardPanel();
   let panelHtml = elements.get('reward-live-panel').innerHTML;
   assert.match(panelHtml, /button[^>]+data-reward-help="water"/);
   assert.match(panelHtml, /button[^>]+data-reward-help="fertilizer"/);
-  assert.match(panelHtml, /button[^>]+data-reward-help="overLoud"/);
+  assert.doesNotMatch(panelHtml, /button[^>]+data-reward-help="overLoud"/);
   assert.match(panelHtml, /reward-help-mark/);
   assert.match(panelHtml, /奖励 \+0\.25%/);
   assert.doesNotMatch(panelHtml, /id="reward-help-water"/);
@@ -1080,7 +1078,6 @@ runTest('finalized reports create a local forest day snapshot', () => {
   api.STATE.rewardState = {
     waterCount: 2,
     fertilizerCount: 1,
-    overLoudCount: 0,
     stableReadingSeconds: 0,
     nextWaterAt: 12,
     nextFertilizerAt: 60,

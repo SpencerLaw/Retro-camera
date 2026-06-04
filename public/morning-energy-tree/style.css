@@ -3154,21 +3154,29 @@ input[type="range"] {
 /* --- Notifications --- */
 #toast-container {
     position: absolute;
-    top: 43%;
+    top: 16%;
     left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
     text-align: center;
-    width: min(72vw, 860px);
+    width: min(58vw, 560px);
     z-index: 20;
 }
 
 .achievement-text {
-    font-size: clamp(2rem, 4vw, 3.25rem);
-    font-weight: bold;
+    display: inline-block;
+    max-width: 100%;
+    padding: 9px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 999px;
+    background: rgba(23, 91, 113, 0.34);
+    box-shadow: 0 12px 28px rgba(19, 73, 95, 0.22);
+    backdrop-filter: blur(8px);
+    font-size: clamp(0.95rem, 1.45vw, 1.32rem);
+    font-weight: 800;
     color: #fff;
-    text-shadow: 0 0 20px gold;
-    line-height: 1.18;
+    text-shadow: 0 2px 12px rgba(255, 229, 122, 0.5);
+    line-height: 1.26;
     overflow-wrap: anywhere;
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -3387,6 +3395,6 @@ input[type="range"] {
     }
 
     .achievement-text {
-        font-size: 2.5rem;
+        font-size: 1rem;
     }
 }

@@ -155,6 +155,7 @@ function loadMorningTree() {
       getTreeLifecycleStage: typeof getTreeLifecycleStage === 'function' ? getTreeLifecycleStage : undefined,
       drawBloomingEnergyTree: typeof drawBloomingEnergyTree === 'function' ? drawBloomingEnergyTree : undefined,
       getAudioActivation: typeof getAudioActivation === 'function' ? getAudioActivation : undefined,
+      getFinalTreeVisualState: typeof getFinalTreeVisualState === 'function' ? getFinalTreeVisualState : undefined,
       createSessionRewardState: typeof createSessionRewardState === 'function' ? createSessionRewardState : undefined,
       updateSessionRewards: typeof updateSessionRewards === 'function' ? updateSessionRewards : undefined,
       getRewardEnergyBonus: typeof getRewardEnergyBonus === 'function' ? getRewardEnergyBonus : undefined,
@@ -205,33 +206,59 @@ function runTest(name, fn) {
   }
 }
 
-runTest('morning energy can decrease after the tree has manifested', () => {
+runTest('morning energy keeps the final tree manifested after quiet moments', () => {
   const { api, elements } = loadMorningTree();
   api.STATE.isListening = true;
   api.STATE.energy = 100;
-  api.STATE.currentDB = 60;
+  api.STATE.currentDB = 38;
   api.STATE.hasManifested = true;
   api.STATE.isSuperMode = false;
+  api.STATE.finalHoldUntil = Date.now() - 1000;
 
-  api.updateState();
+  api.updateState(3);
 
-  assert.ok(api.STATE.energy < 100);
+  assert.equal(api.STATE.energy, 100);
   assert.equal(api.STATE.hasManifested, true);
-  assert.notEqual(elements.get('energy-fill').style.width, '100%');
+  assert.equal(elements.get('energy-fill').style.width, '100%');
 });
 
-runTest('final energy tree holds its full form briefly after manifesting', () => {
+runTest('final energy tree holds its full form after manifesting', () => {
   const { api, elements } = loadMorningTree();
 
   api.STATE.isListening = true;
   api.STATE.energy = 100;
   api.STATE.currentDB = 60;
   api.triggerSuperMode();
+  api.STATE.finalHoldUntil = Date.now() - 1000;
   api.updateState(1);
 
   assert.equal(api.STATE.energy, 100);
   assert.equal(api.STATE.hasManifested, true);
   assert.equal(elements.get('energy-fill').style.width, '100%');
+});
+
+runTest('final tree dims while quiet and glows when reading is strong', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getFinalTreeVisualState, 'function');
+
+  const quiet = api.getFinalTreeVisualState({
+    manifested: true,
+    currentDB: 38,
+    readingHoldSeconds: 0
+  });
+  const loud = api.getFinalTreeVisualState({
+    manifested: true,
+    currentDB: 88,
+    readingHoldSeconds: 2
+  });
+
+  assert.equal(quiet.active, true);
+  assert.equal(loud.active, true);
+  assert.ok(quiet.brightness < loud.brightness);
+  assert.ok(quiet.canopyAlpha < loud.canopyAlpha);
+  assert.ok(quiet.glowAlpha < loud.glowAlpha);
+  assert.equal(quiet.quiet, true);
 });
 
 runTest('morning tree size returns to sapling range at low energy', () => {

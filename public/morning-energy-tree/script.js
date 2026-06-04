@@ -64,6 +64,7 @@ function isCompetitionRoundActive() {
 const STATE = {
     isListening: false,
     energy: 0,
+    visualEnergy: 0,
     sensitivity: 50,
     currentDB: 30,
     readingHoldSeconds: 0,
@@ -71,6 +72,7 @@ const STATE = {
     treeColor: '#4caf50',
     isSuperMode: false,
     hasManifested: false,
+    finalVisualReady: false,
     superModeTimer: null,
     finalHoldUntil: null,
 
@@ -144,6 +146,11 @@ const READING_THRESHOLD = 70;
 const QUIET_ENERGY_DECAY_RATE = 0.05;
 const SAPLING_TREE_SIZE = 38;
 const MATURE_TREE_SIZE = 240;
+const VISUAL_ENERGY_GROWTH_RATE = 3.8;
+const VISUAL_ENERGY_CATCHUP_RATE = 0.055;
+const VISUAL_ENERGY_DECAY_RATE = 8;
+const VISUAL_FINAL_STAGE_START = 92;
+const VISUAL_FINAL_COMPLETE_ENERGY = 99.4;
 const SENSITIVITY_MIN = 35;
 const SENSITIVITY_MAX = 85;
 const SENSITIVITY_DEFAULT = 50;
@@ -182,6 +189,66 @@ function getNextEnergy(currentEnergy, currentDB, baseGrowthRate, options = {}) {
     }
 
     return clampEnergy(currentEnergy - (QUIET_ENERGY_DECAY_RATE * profile.quietDecayMultiplier * deltaSeconds));
+}
+
+function getNextVisualEnergy(currentEnergy, targetEnergy, deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
+    const current = clampEnergy(Number.isFinite(currentEnergy) ? currentEnergy : targetEnergy);
+    const target = clampEnergy(targetEnergy);
+    const diff = target - current;
+    const distance = Math.abs(diff);
+    if (distance <= 0.03) return target;
+
+    const frameSeconds = normalizeDeltaSeconds(deltaSeconds);
+    const rate = diff > 0
+        ? VISUAL_ENERGY_GROWTH_RATE + (distance * VISUAL_ENERGY_CATCHUP_RATE)
+        : VISUAL_ENERGY_DECAY_RATE;
+    const step = Math.min(distance, rate * frameSeconds);
+
+    return clampEnergy(current + Math.sign(diff) * step);
+}
+
+function getTreeDisplayEnergy() {
+    const visualEnergy = Number.isFinite(STATE.visualEnergy) ? STATE.visualEnergy : STATE.energy;
+    return clampEnergy(visualEnergy);
+}
+
+function updateVisualEnergy(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
+    const targetEnergy = STATE.hasManifested ? 100 : STATE.energy;
+    STATE.visualEnergy = getNextVisualEnergy(getTreeDisplayEnergy(), targetEnergy, deltaSeconds);
+    return STATE.visualEnergy;
+}
+
+function getFinalRevealProgress(visualEnergy = getTreeDisplayEnergy()) {
+    return clamp(
+        (clampEnergy(visualEnergy) - VISUAL_FINAL_STAGE_START) /
+        Math.max(1, 100 - VISUAL_FINAL_STAGE_START),
+        0,
+        1
+    );
+}
+
+function getTreeDisplayLifecycleStage(visualEnergy = getTreeDisplayEnergy()) {
+    const displayEnergy = clampEnergy(visualEnergy);
+    const displayManifested = STATE.hasManifested && displayEnergy >= VISUAL_FINAL_STAGE_START;
+    const lifecycleStage = getTreeLifecycleStage({
+        finalEnergy: displayEnergy,
+        manifested: displayManifested
+    });
+
+    if (lifecycleStage.key !== 'final') return lifecycleStage;
+
+    return {
+        ...lifecycleStage,
+        finalReveal: getFinalRevealProgress(displayEnergy)
+    };
+}
+
+function maybeAnnounceFinalTree(lifecycleStage) {
+    if (!STATE.hasManifested || STATE.finalVisualReady) return;
+    if (getTreeDisplayEnergy() < VISUAL_FINAL_COMPLETE_ENERGY || lifecycleStage?.key !== 'final') return;
+
+    STATE.finalVisualReady = true;
+    showToast(t('morningTree.superModeToast') || "🎉 能量树显灵了！全班棒棒哒！ 🎉");
 }
 
 function getTreeSizeForEnergy(energy) {
@@ -3247,10 +3314,12 @@ function resetGame() {
     STATE.lastCompletedCompetitionGroupId = null;
     STATE.competitionRoundActive = false;
     STATE.energy = 0;
+    STATE.visualEnergy = 0;
     STATE.readingHoldSeconds = 0;
     STATE.lastFrameAt = null;
     STATE.isSuperMode = false;
     STATE.hasManifested = false;
+    STATE.finalVisualReady = false;
     STATE.treeColor = '#4caf50';
     STATE.finalHoldUntil = null;
     if (STATE.superModeTimer) {
@@ -3383,9 +3452,9 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
     // FIX: Reduced shake threshold and diverted to canvas only
     if (isReadingLoudly && STATE.currentDB > OVER_LOUD_DB) shakeCanvas(2);
 
-    energyFill.style.width = STATE.energy + '%';
-
     if (STATE.energy >= 100 && !STATE.isSuperMode && !STATE.hasManifested) triggerSuperMode();
+    updateVisualEnergy(frameSeconds);
+    energyFill.style.width = STATE.energy + '%';
 }
 
 function triggerSuperMode() {
@@ -3406,7 +3475,7 @@ function triggerSuperMode() {
     }
     STATE.energy = 100;
     STATE.treeColor = '#ffd700';
-    showToast(t('morningTree.superModeToast') || "🎉 能量树显灵了！全班棒棒哒！ 🎉");
+    STATE.finalVisualReady = false;
 
     STATE.superModeTimer = setTimeout(() => {
         STATE.isSuperMode = false;
@@ -4515,7 +4584,7 @@ function spawnRewardAnimation(type, triggerCount = 1) {
     if (!normalizedType) return 0;
 
     const safeTriggerCount = Math.max(1, Math.min(5, Math.round(Number(triggerCount) || 1)));
-    const treeSize = getTreeRenderSize(STATE.energy, { width: canvas.width, height: canvas.height });
+    const treeSize = getTreeRenderSize(getTreeDisplayEnergy(), { width: canvas.width, height: canvas.height });
     const anchors = getEnergyAnchors(treeSize);
     const renderMode = getRenderMode(treeSize);
     const effectLimit = getFxLimit('rewardEffects', treeSize);
@@ -5073,9 +5142,10 @@ function drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, la
     const stageIndex = Math.max(0, Number(stage?.index) || 0);
     const bloomStrength = clamp((stageIndex - 2) / 4, 0.28, 1);
     const finalVisualState = stage?.key === 'final' ? getFinalTreeVisualState({ stage }) : null;
+    const finalReveal = stage?.key === 'final' ? clamp(Number(stage.finalReveal) || 0, 0, 1) : 0;
     const finalCanopyAlpha = finalVisualState?.canopyAlpha ?? 1;
-    const densityBoost = stage?.key === 'final' ? 1.55 : stage?.key === 'fruit' ? 1.18 : 1;
-    const sizeBoost = stage?.key === 'final' ? 1.18 : 1;
+    const densityBoost = stage?.key === 'final' ? 1.18 + finalReveal * 0.37 : stage?.key === 'fruit' ? 1.18 : 1;
+    const sizeBoost = stage?.key === 'final' ? 1.04 + finalReveal * 0.14 : 1;
     const alpha = Math.min(0.98, (layer === 'back' ? 0.84 : 0.95) * bloomStrength * (stage?.key === 'final' ? 1.08 : 1) * finalCanopyAlpha);
     const blobCountBase = Math.round((layer === 'back' ? 14 : 12) * densityBoost);
     const blobCount = renderMode.ultraLowPower
@@ -5105,7 +5175,7 @@ function drawBloomLeafCluster(cluster, palette, stage, renderMode, frameTime, la
     }
 
     if (layer === 'front' && stageIndex >= 3) {
-        const detailBase = stage?.key === 'final' ? 18 : stageIndex >= 5 ? 9 : 6;
+        const detailBase = stage?.key === 'final' ? Math.round(9 + finalReveal * 9) : stageIndex >= 5 ? 9 : 6;
         const detailCount = renderMode.ultraLowPower
             ? Math.ceil(detailBase * 0.35)
             : renderMode.lowPower
@@ -5158,7 +5228,8 @@ function drawBranchBud(x, y, size, color = '#9be15d') {
 
 function drawBloomTreeFlowers(cluster, stage, renderMode, frameTime) {
     if (!cluster || !stage || stage.index < 4) return;
-    const baseCount = stage.key === 'final' ? 5 : stage.key === 'flowers' ? 7 : stage.key === 'fruit' ? 8 : 11;
+    const finalReveal = stage.key === 'final' ? clamp(Number(stage.finalReveal) || 0, 0, 1) : 0;
+    const baseCount = stage.key === 'final' ? Math.round(3 + finalReveal * 2) : stage.key === 'flowers' ? 7 : stage.key === 'fruit' ? 8 : 11;
     const finalVisualState = stage.key === 'final' ? getFinalTreeVisualState({ stage }) : null;
     const finalFlowerAlpha = finalVisualState?.flowerAlpha ?? 1;
     const count = renderMode.ultraLowPower
@@ -5185,7 +5256,8 @@ function drawBloomTreeFlowers(cluster, stage, renderMode, frameTime) {
 
 function drawBloomTreeFruit(cluster, stage, renderMode, frameTime) {
     if (!cluster || !stage || stage.index < 5) return;
-    const baseCount = stage.key === 'final' ? 2 : 3;
+    const finalReveal = stage.key === 'final' ? clamp(Number(stage.finalReveal) || 0, 0, 1) : 0;
+    const baseCount = stage.key === 'final' ? Math.round(1 + finalReveal) : 3;
     const finalVisualState = stage.key === 'final' ? getFinalTreeVisualState({ stage }) : null;
     const finalFruitAlpha = finalVisualState?.flowerAlpha ?? 1;
     const count = renderMode.ultraLowPower
@@ -5223,18 +5295,25 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     const frameTime = (STATE.frameNow || Date.now()) / 1000;
     const stageIndex = Math.max(2, Number(stage?.index) || 2);
     const isFinalTree = stage?.key === 'final';
+    const finalReveal = isFinalTree ? clamp(Number(stage?.finalReveal) || 0, 0, 1) : 0;
     const stageProgress = isFinalTree ? 1 : clamp(Number(stage?.progress) || 0, 0, 1);
     const finalVisualState = isFinalTree ? getFinalTreeVisualState({ stage }) : null;
-    const heightBoost = isFinalTree ? 0.46 : 0;
+    const heightBoost = isFinalTree ? 0.12 + finalReveal * 0.34 : 0;
     const treeHeight = Math.min(
-        canvas.height * (isFinalTree ? 0.74 : 0.67),
+        canvas.height * (isFinalTree ? 0.67 + finalReveal * 0.07 : 0.67),
         Math.max(118, treeSize * (2.15 + stageIndex * 0.13 + heightBoost))
     );
     const spread = Math.min(
-        canvas.width * (isFinalTree ? 0.43 : 0.34),
-        Math.max(treeSize * (isFinalTree ? 1.24 : 0.95), treeHeight * (isFinalTree ? 0.78 : 0.58))
+        canvas.width * (isFinalTree ? 0.34 + finalReveal * 0.09 : 0.34),
+        Math.max(
+            treeSize * (isFinalTree ? 0.95 + finalReveal * 0.29 : 0.95),
+            treeHeight * (isFinalTree ? 0.58 + finalReveal * 0.2 : 0.58)
+        )
     );
-    const trunkBaseWidth = Math.max(isFinalTree ? 17 : 11, treeSize * (isFinalTree ? 0.15 : 0.11));
+    const trunkBaseWidth = Math.max(
+        isFinalTree ? 11 + finalReveal * 6 : 11,
+        treeSize * (isFinalTree ? 0.11 + finalReveal * 0.04 : 0.11)
+    );
     const sway = Math.sin(frameTime * 0.72) * (STATE.isListening ? Math.min(8, Math.max(1.5, (STATE.currentDB - 58) * 0.12)) : 1.6);
     const palette = getBloomTreePalette(stage);
 
@@ -5274,7 +5353,8 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
         { x: -spread * 0.02 + sway * 0.1, y: -treeHeight * 0.62, rx: spread * 0.28, ry: treeHeight * 0.16, seed: 27.4 },
         { x: -spread * 0.02 + sway * 0.1, y: -treeHeight * 0.76, rx: spread * 0.31, ry: treeHeight * 0.19, seed: 29.7 }
     ];
-    const naturalClusters = isFinalTree ? clusters.concat(finalCrownClusters) : clusters;
+    const finalClusterCount = isFinalTree ? Math.ceil(finalCrownClusters.length * finalReveal) : 0;
+    const naturalClusters = isFinalTree ? clusters.concat(finalCrownClusters.slice(0, finalClusterCount)) : clusters;
     const visibleBranches = branchDefs.slice(0, getVisibleBranchCount(stageIndex, stageProgress, branchDefs.length, isFinalTree));
     const visibleClusters = isFinalTree
         ? naturalClusters
@@ -5301,7 +5381,7 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
 
     if (isFinalTree) {
         ctx.save();
-        ctx.globalAlpha = 0.16 * (finalVisualState?.canopyAlpha ?? 1);
+        ctx.globalAlpha = 0.16 * finalReveal * (finalVisualState?.canopyAlpha ?? 1);
         ctx.fillStyle = getFinalTreeDisplayColor('#2f8848', finalVisualState);
         ctx.beginPath();
         ctx.ellipse(sway * 0.08, -treeHeight * 0.76, spread * 0.52, treeHeight * 0.33, 0, 0, Math.PI * 2);
@@ -5310,9 +5390,9 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.24, '#baff82', finalVisualState.glowAlpha);
+        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.24, '#baff82', finalVisualState.glowAlpha * (0.25 + finalReveal * 0.75));
         if (!finalVisualState.quiet) {
-            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.2, '#fff3a3', finalVisualState.glowAlpha * 0.82);
+            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.2, '#fff3a3', finalVisualState.glowAlpha * 0.82 * finalReveal);
         }
         ctx.restore();
     }
@@ -5357,9 +5437,9 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     if (stage?.key === 'final') {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.22, '#ffe082', finalVisualState.glowAlpha * 0.7);
+        drawEnergyAura(sway * 0.12, -treeHeight * 0.72, spread * 0.22, '#ffe082', finalVisualState.glowAlpha * 0.7 * (0.25 + finalReveal * 0.75));
         if (!finalVisualState.quiet) {
-            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.18, '#fff3a3', finalVisualState.glowAlpha * 0.58);
+            drawEnergyAura(-spread * 0.05, -treeHeight * 0.98, spread * 0.18, '#fff3a3', finalVisualState.glowAlpha * 0.58 * finalReveal);
         }
         ctx.restore();
     }
@@ -5592,11 +5672,8 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
     ctx.beginPath();
     ctx.save();
     const frameTime = (STATE.frameNow || Date.now()) / 1000;
-    const visualEnergy = STATE.hasManifested ? 100 : STATE.energy;
-    const lifecycleStage = getTreeLifecycleStage({
-        finalEnergy: visualEnergy,
-        manifested: STATE.hasManifested
-    });
+    const visualEnergy = getTreeDisplayEnergy();
+    const lifecycleStage = getTreeDisplayLifecycleStage(visualEnergy);
 
     ctx.lineCap = 'round';
     ctx.lineWidth = branchWidth;
@@ -5727,13 +5804,11 @@ function loop() {
         bird.draw();
     });
 
-    const visualEnergy = STATE.hasManifested ? 100 : STATE.energy;
+    const visualEnergy = getTreeDisplayEnergy();
     const treeSize = getTreeRenderSize(visualEnergy, { width: canvas.width, height: canvas.height });
     const renderMode = getRenderMode(treeSize);
-    const lifecycleStage = getTreeLifecycleStage({
-        finalEnergy: visualEnergy,
-        manifested: STATE.hasManifested
-    });
+    const lifecycleStage = getTreeDisplayLifecycleStage(visualEnergy);
+    maybeAnnounceFinalTree(lifecycleStage);
 
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);

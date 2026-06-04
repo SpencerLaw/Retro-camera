@@ -818,6 +818,7 @@ runTest('competition mode waits for every group before declaring a winner', () =
 
 runTest('class reading mode keeps the group competition panel and supports group rounds', () => {
   const { api, elements } = loadMorningTree();
+  const css = fs.readFileSync('public/morning-energy-tree/style.css', 'utf8');
 
   api.STATE.activeMode = api.APP_MODES.CLASS;
   api.STATE.competitionConfig = api.normalizeCompetitionConfig({
@@ -834,6 +835,9 @@ runTest('class reading mode keeps the group competition panel and supports group
   assert.equal(elements.get('competition-panel').classList.contains('hidden'), false);
   assert.match(elements.get('competition-list').innerHTML, /第一组/);
   assert.match(elements.get('competition-list').innerHTML, /点击开始/);
+  assert.match(elements.get('competition-list').innerHTML, /competition-chip-action ready/);
+  assert.match(elements.get('competition-list').innerHTML, /aria-label="第一组，点击开始"/);
+  assert.match(css, /\.competition-chip-action\.ready::before/);
 
   api.startReportSession({ competitionRound: false });
   assert.equal(api.STATE.competitionRoundActive, false);

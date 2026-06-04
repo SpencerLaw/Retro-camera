@@ -2380,10 +2380,26 @@ function renderCompetitionPanel() {
         const lockedText = isCompetitionRoundActive()
             ? (t('morningTree.competition.groupLocked') || '先结束当前组')
             : (t('morningTree.competition.classReadingLocked') || '先结束当前早读');
+        const actionState = isLocked ? 'locked' : isRunning ? 'running' : isComplete ? 'complete' : 'ready';
+        const actionLabel = isLocked
+            ? lockedText
+            : isRunning
+                ? statusText
+                : isComplete
+                    ? statusText
+                    : `${statusText} ${group.name}`;
+        const ariaLabel = isLocked
+            ? `${group.name}，${lockedText}`
+            : isRunning
+                ? `${group.name}，${statusText}`
+                : isComplete
+                    ? `${group.name}，${statusText}${peakDb ? `，最高 ${peakDb} dB` : ''}`
+                    : `${group.name}，${statusText}`;
         return `
-            <button type="button" class="competition-chip ${group.id === STATE.activeCompetitionGroupId ? 'selected' : ''} ${isRunning ? 'running' : ''} ${isComplete ? 'complete' : ''}" data-competition-group-id="${group.id}" ${isLocked ? 'disabled' : ''}>
-                <span>${escapeHtml(group.name)}</span>
+            <button type="button" class="competition-chip ${group.id === STATE.activeCompetitionGroupId ? 'selected' : ''} ${isRunning ? 'running' : ''} ${isComplete ? 'complete' : ''}" data-competition-group-id="${group.id}" aria-label="${escapeHtml(ariaLabel)}" ${isLocked ? 'disabled' : ''}>
+                <span class="competition-chip-name">${escapeHtml(group.name)}</span>
                 <strong>${peakDb ? `${peakDb} dB` : '--'}</strong>
+                <span class="competition-chip-action ${actionState}" aria-hidden="true" title="${escapeHtml(actionLabel)}"></span>
                 <small>${isLocked ? lockedText : `${statusText} · ${formatDuration(challengeSeconds)}`}</small>
             </button>
         `;

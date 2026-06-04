@@ -153,6 +153,7 @@ function loadMorningTree() {
       getWeeklyDayGroups: typeof getWeeklyDayGroups === 'function' ? getWeeklyDayGroups : undefined,
       getTaskDayGroups: typeof getTaskDayGroups === 'function' ? getTaskDayGroups : undefined,
       getTreeLifecycleStage: typeof getTreeLifecycleStage === 'function' ? getTreeLifecycleStage : undefined,
+      drawBloomingEnergyTree: typeof drawBloomingEnergyTree === 'function' ? drawBloomingEnergyTree : undefined,
       getAudioActivation: typeof getAudioActivation === 'function' ? getAudioActivation : undefined,
       createSessionRewardState: typeof createSessionRewardState === 'function' ? createSessionRewardState : undefined,
       updateSessionRewards: typeof updateSessionRewards === 'function' ? updateSessionRewards : undefined,
@@ -452,6 +453,7 @@ runTest('tree lifecycle stages are fine grained from seed to final energy tree',
   const { api } = loadMorningTree();
 
   assert.equal(typeof api.getTreeLifecycleStage, 'function');
+  assert.equal(typeof api.drawBloomingEnergyTree, 'function');
   assert.equal(api.getTreeLifecycleStage({ finalEnergy: 2 }).key, 'seed');
   assert.equal(api.getTreeLifecycleStage({ finalEnergy: 18 }).key, 'sprout');
   assert.equal(api.getTreeLifecycleStage({ finalEnergy: 35 }).key, 'branches');
@@ -459,6 +461,10 @@ runTest('tree lifecycle stages are fine grained from seed to final energy tree',
   assert.equal(api.getTreeLifecycleStage({ finalEnergy: 76 }).key, 'flowers');
   assert.equal(api.getTreeLifecycleStage({ finalEnergy: 91 }).key, 'fruit');
   assert.equal(api.getTreeLifecycleStage({ finalEnergy: 100, manifested: true }).key, 'final');
+
+  const script = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  assert.match(script, /BLOOM_TREE_FINAL_COLORS/);
+  assert.match(script, /drawBloomingEnergyTree\(canvas\.width \/ 2, canvas\.height - 20, treeSize, lifecycleStage, renderMode\)/);
 });
 
 runTest('audio activation makes light orbs clearly correlated with decibels', () => {
